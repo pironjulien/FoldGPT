@@ -26,6 +26,8 @@ Installation terminée (`VM_CLIENT_INSTALLED`, version 26.901.41600). Le lanceme
 
 Observation de performances : remettre Termux au premier plan a coïncidé avec une accélération importante de la préparation des paquets. Cela devra être mesuré formellement avant de choisir l'architecture finale. L'installation et le premier lancement TCG prennent plusieurs minutes.
 
+19:58 : création du trousseau autorisée par Julien avec mot de passe aléatoire conservé exclusivement dans NexusSecure/projects/ChatgptFold/linux-keyring-password.txt. Contrôle NexusSecure vert. Fenêtre officielle « Sign in to ChatGPT » affichée et vérifiée visuellement sur le Fold. Connexion au compte pas encore validée.
+
 Sources :
 - https://source.android.com/docs/core/virtualization
 - https://android.googlesource.com/platform/packages/modules/Virtualization/+/refs/heads/android17-release/docs/custom_vm.md
