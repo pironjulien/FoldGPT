@@ -11,3 +11,4 @@
 - Ajout des scripts reproductibles et accès SSH par clé limité au loopback via ADB USB.
 - Tests AVF/Gunyah : Microdroid protégé démarre sans root hôte, mais son noyau minimal ne fournit pas les namespaces recherchés.
 - Prototype QEMU Debian ARM64 complet : démarrage, cloud-init et namespaces utilisateur vérifiés. Installation graphique en cours, résultat non encore utilisable.
+- Client officiel installé dans la VM, lancement au-delà du blocage PRoot, fenêtre de création du trousseau sécurisé affichée. Authentification et usage restent à vérifier.

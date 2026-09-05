@@ -22,6 +22,10 @@ La preuve recherchée est le lancement réel de ChatGPT avec sandbox, puis une m
 
 Résultat intermédiaire : Debian démarre, cloud-init termine, accès SSH par clé vérifié. Noyau `6.12.107+deb13-arm64`. `unshare --user --map-root-user id` fonctionne depuis l'utilisateur invité julien : l'isolation utilisateur manquante sous PRoot existe ici. Le uid 0 affiché concerne ce namespace invité, pas un root du téléphone. Installation du client officiel en cours. Premier démarrage de plusieurs minutes, performances interactives non encore validées.
 
+Installation terminée (`VM_CLIENT_INSTALLED`, version 26.901.41600). Le lancement via SSH X11 depuis Termux dépasse le SIGTRAP de PRoot : processus principal et zygotes Chromium présents. Fenêtre ChatGPT créée (1280×820), puis demande graphique de création du trousseau gnome-keyring affichée sur le Fold. En attente de saisie personnelle du mot de passe du trousseau ; aucun secret OpenAI ni mot de passe saisi par l'agent. Ne pas considérer cela comme un test de connexion réussi.
+
+Observation de performances : remettre Termux au premier plan a coïncidé avec une accélération importante de la préparation des paquets. Cela devra être mesuré formellement avant de choisir l'architecture finale. L'installation et le premier lancement TCG prennent plusieurs minutes.
+
 Sources :
 - https://source.android.com/docs/core/virtualization
 - https://android.googlesource.com/platform/packages/modules/Virtualization/+/refs/heads/android17-release/docs/custom_vm.md
