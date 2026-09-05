@@ -1,0 +1,11 @@
+# Changelog
+
+## 2026-09-05
+
+- Création du projet pour ChatGPT graphique Linux ARM64 sur Fold.
+- Vérification de la documentation officielle OpenAI et Termux:X11.
+- Téléchargement du DEB officiel et vérification des empreintes des APK officiels.
+- Installation de Termux Google Play compatible Android 17 et de Termux:X11 sans désactiver Play Protect.
+- Installation et démarrage vérifiés de Debian 13.6 ARM64 et XFCE.
+- Installation du paquet ChatGPT 26.901.41600 ; échec au démarrage SIGTRAP dans un contrôle de namespace utilisateur.
+- Ajout des scripts reproductibles et accès SSH par clé limité au loopback via ADB USB.
