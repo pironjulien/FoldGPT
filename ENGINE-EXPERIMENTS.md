@@ -1,0 +1,28 @@
+# Essais moteur — 5 septembre 2026
+
+## Contraintes
+
+Client ChatGPT officiel non modifié, mises à jour officielles, aucun root du téléphone ni déverrouillage. Interface Linux seulement sur écran intérieur ; tâches actives après repliage jusqu'à arrêt explicite. L'application Android officielle et Remote sont conservés.
+
+## AVF / Gunyah
+
+`vm info` : seules les VM protégées sont prises en charge, hyperviseur Gunyah, aucun /dev/kvm, OS fourni : microdroid. L'application Terminal système est présente mais ses activités ne sont pas disponibles au lancement normal.
+
+Deux essais avec `vm run-microdroid --protected --ephemeral` ont atteint `payload is ready`, avec et sans débogage invité. Aucun root hôte utilisé. Le mode de débogage invité est une option officielle du moteur ; SELinux reste Enforcing.
+
+Le noyau invité Microdroid 6.6.118 ne présente pas les namespaces user/pid dans `/proc/self/ns`. Ce résultat ne suffit pas à choisir Microdroid pour Chromium. Le lancement brut du JSON Microdroid sans ramdisk échoue pour métadonnées invalides ; ce test incomplet ne démontre pas une interdiction générale des OS personnalisés. Les deux VM de test ont été arrêtées.
+
+## QEMU
+
+Test d'un noyau Debian complet en émulation ARM64 TCG multithread : image officielle Debian 13 generic ARM64 du 31 août 2026, SHA512 comparé au manifeste officiel. Disque extensible 16 Gio, mémoire invitée 4 Gio, 4 vCPU. Ce sont des paramètres de banc d'essai, pas une allocation finale optimisée.
+
+Cloud-init crée un utilisateur julien avec accès SSH par clé seulement. Les ports de maintenance écoutent sur loopback et passent par ADB USB. Aucun compte ChatGPT ni mot de passe utilisateur n'est injecté dans l'image.
+
+La preuve recherchée est le lancement réel de ChatGPT avec sandbox, puis une mesure des performances. Une VM démarrée ne constitue pas une version fonctionnelle du produit.
+
+Résultat intermédiaire : Debian démarre, cloud-init termine, accès SSH par clé vérifié. Noyau `6.12.107+deb13-arm64`. `unshare --user --map-root-user id` fonctionne depuis l'utilisateur invité julien : l'isolation utilisateur manquante sous PRoot existe ici. Le uid 0 affiché concerne ce namespace invité, pas un root du téléphone. Installation du client officiel en cours. Premier démarrage de plusieurs minutes, performances interactives non encore validées.
+
+Sources :
+- https://source.android.com/docs/core/virtualization
+- https://android.googlesource.com/platform/packages/modules/Virtualization/+/refs/heads/android17-release/docs/custom_vm.md
+- https://cloud.debian.org/images/cloud/trixie/latest/

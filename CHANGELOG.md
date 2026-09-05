@@ -9,3 +9,5 @@
 - Installation et démarrage vérifiés de Debian 13.6 ARM64 et XFCE.
 - Installation du paquet ChatGPT 26.901.41600 ; échec au démarrage SIGTRAP dans un contrôle de namespace utilisateur.
 - Ajout des scripts reproductibles et accès SSH par clé limité au loopback via ADB USB.
+- Tests AVF/Gunyah : Microdroid protégé démarre sans root hôte, mais son noyau minimal ne fournit pas les namespaces recherchés.
+- Prototype QEMU Debian ARM64 complet : démarrage, cloud-init et namespaces utilisateur vérifiés. Installation graphique en cours, résultat non encore utilisable.

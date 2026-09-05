@@ -12,7 +12,7 @@ Architecture envisagée : Termux officiel, Termux:X11, Debian 13 ARM64 via PRoot
 
 ## État
 
-Les trois paquets sont téléchargés dans `downloads/` (non versionnés). Les SHA256 des APK Termux et X11 correspondent aux sommes publiées. Aucun environnement Linux n'est encore installé.
+Les trois paquets sont téléchargés dans `downloads/` (non versionnés). Les SHA256 des APK Termux et X11 correspondent aux sommes publiées.
 
 L'APK stable GitHub a été refusé par Play Protect pour cible Android ancienne. La branche officielle Google Play `googleplay.2026.06.21`, targetSdk 37, est installée à la place, sans désactivation des protections. Termux:X11 officiel et son paquet compagnon sont installés.
 
