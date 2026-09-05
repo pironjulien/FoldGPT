@@ -1,0 +1,5 @@
+pluginManagement { repositories { google(); mavenCentral(); gradlePluginPortal() } }
+rootProject.name = 'FoldGPT'
+include ':app', ':lorie', ':shell-loader:stub'
+project(':lorie').projectDir = file('../vendor/termux-x11/lorie')
+project(':shell-loader:stub').projectDir = file('../vendor/termux-x11/shell-loader/stub')

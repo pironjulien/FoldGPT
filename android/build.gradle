@@ -1,0 +1,19 @@
+buildscript {
+    repositories { google(); mavenCentral() }
+    dependencies { classpath 'com.android.tools.build:gradle:9.3.1' }
+}
+allprojects { repositories { google(); mavenCentral(); maven { url 'https://jitpack.io' } } }
+// Use the verified upstream APK's native library on Windows. Its sources remain pinned
+// in vendor/termux-x11; -PbuildX11FromSource enables the upstream NDK build on Linux.
+subprojects { p ->
+    afterEvaluate {
+        if (p.name == 'stub') p.android.compileSdk = 37
+        if (p.name == 'lorie') {
+            p.android.compileSdk = 37
+            if (!rootProject.hasProperty('buildX11FromSource')) {
+                p.android.externalNativeBuild.cmake.path = null
+                p.android.sourceSets.main.jniLibs.srcDirs = [rootProject.file('native/x11')]
+            }
+        }
+    }
+}

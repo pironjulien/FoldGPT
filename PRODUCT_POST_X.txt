@@ -1,0 +1,15 @@
+Draft for manual publication after the source repository is accessible.
+
+ChatGPT Desktop + Codex UI running locally on my Galaxy Z Fold.
+
+Native Linux ARM64, inside FoldGPT's own Android host. No root or bootloader unlock used.
+
+The desktop interface fills the inner screen. Touch opens the Samsung keyboard; tapping outside closes it. Automatic refocus keeps it closed until the next touch.
+
+Prototype source: https://github.com/pironjulien/FoldGPT
+
+Local Codex tools are currently blocked. Remote, folding/background behavior and performance remain unverified. The current sandbox compatibility shim is experimental and does not provide equivalent Linux isolation.
+
+Source only, not a one-click installer or a beta release. Independent project, not affiliated with OpenAI or Samsung.
+
+@thsottiaux @ChatGPT @sama @gdb @ajambrosino @OpenAIDevs

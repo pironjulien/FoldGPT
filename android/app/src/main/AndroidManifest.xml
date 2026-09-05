@@ -1,0 +1,18 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools">
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <application android:label="FoldGPT" android:icon="@drawable/foldgpt_icon" android:roundIcon="@drawable/foldgpt_icon" android:allowBackup="false" android:extractNativeLibs="true" tools:replace="android:label,android:icon,android:roundIcon">
+        <activity android:name="com.termux.x11.MainActivity" tools:node="remove" />
+        <activity android:name="app.foldgpt.FoldActivity" android:exported="true" android:launchMode="singleTask" android:theme="@style/Theme.AppCompat.DayNight.NoActionBar"
+            android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|keyboard|keyboardHidden|density|uiMode"
+            android:resizeableActivity="true" android:windowSoftInputMode="stateHidden|adjustNothing">
+            <intent-filter><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LAUNCHER" /></intent-filter>
+        </activity>
+        <service android:name="com.termux.x11.FoldRuntimeService" android:process=":runtime" android:exported="false" android:foregroundServiceType="specialUse">
+            <property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE" android:value="Local Linux desktop workspace and active user tasks" />
+        </service>
+    </application>
+</manifest>
