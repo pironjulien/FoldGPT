@@ -1,51 +1,28 @@
-# Legal Compliance & Intellectual Property Notice: FoldGPT
+# Licensing and attribution
 
-## 1. Overview & Nature of the Project
-**FoldGPT** is an independent, open-source orchestration wrapper and display compatibility layer designed exclusively for Android foldable devices (such as the Samsung Galaxy Z Fold series). 
+FoldGPT is an independent interoperability experiment. ChatGPT and OpenAI are marks of OpenAI; Samsung, Galaxy and Knox are marks of Samsung. This project is not endorsed or certified by either company.
 
-The project aims solely to provide **hardware interoperability and display adaptation** between standard Linux applications and the unique dual-screen form factor of foldable Android devices, without altering any proprietary application binaries or bypassing system security mechanisms.
+## Source and dependencies
 
----
+The FoldGPT wrapper code is offered under GPL-3.0-or-later. Termux:X11 and PRoot retain their upstream licenses and copyright notices. Other runtime dependencies, including talloc and Android shared-memory support, have their own license terms.
 
-## 2. Open Source Licensing & Upstream Attribution
-- **Wrapper Architecture**: FoldGPT's host orchestration scripts, launcher interface, and container scaffolding are distributed under the **GNU General Public License v3.0 (GPL-3.0)** or compatible open-source licenses.
-- **Termux & PRoot Components**: Termux, PRoot, and Termux:X11 are copyright of their respective authors and are used in accordance with their respective open-source licenses (GPLv3).
-- **Compliance Guarantee**: No proprietary code has been introduced into any GPL-licensed components, and full source code for any modified build of open-source utilities will be made publicly accessible under the terms of the GPL-3.0.
+The `vendor/termux-x11` and `vendor/proot` submodules pin upstream source. Preserve their notices and nested source dependencies. PRoot and its matching loaders have been compiled from the pinned source for the integrated prototype. The development build still collects other native libraries from installed official packages.
 
----
+| Source component | Pinned revision | Upstream license |
+| --- | --- | --- |
+| [Termux:X11](https://github.com/termux/termux-x11) | `9df8b767645aa0d0a2f2576767449df55b41962f` | GPL v3, with dependency-specific notices |
+| [PRoot](https://github.com/termux/proot) | `7266fb3e8516535682f5a9c8f3a7e70f6506eddb` | GPL v2 or later; see its source headers and `COPYING` |
 
-## 3. Strict Proprietary Binary Policy (No Bundling, No Cracking, No Modification)
-- **Zero Redistribution**: FoldGPT **does NOT distribute, host, mirror, or repackage** any proprietary binaries, assets, or software owned by OpenAI, Inc.
-- **Unmodified Upstream Source**: The official ChatGPT desktop Linux application (`.deb` / ARM64 package) is downloaded **directly by the end-user's device** from OpenAI's official Debian package repository (`https://learn.chatgpt.com/docs/linux/linux-app`).
-- **Binary Integrity**: The application binary is executed in its **100% authentic, unmodified state**. FoldGPT does not patch binary files, alter symbol tables, bypass licensing checks, or tamper with signature verification (`dpkg -V` verified).
-- **Environment Compatibility Layer**: Interoperability is achieved purely via user-space environment emulation (standard glibc dynamic linker redirection via `LD_PRELOAD` in userspace), which bridges kernel system call interfaces without modifying the target application code.
+This publication distributes source, without APKs, runtime libraries or Linux images. A future binary release must inventory dependencies and provide corresponding source and notices as required by their licenses. Collected binary hashes and a general GPL notice alone do not establish reproducibility or complete compliance.
 
----
+## Proprietary client and private data
 
-## 4. International Legal Framework for Interoperability
+OpenAI's application is not licensed by this repository. Users must obtain it from the official source under the applicable OpenAI terms. This project does not grant redistribution rights to OpenAI binaries, icons or other assets. Account data, proprietary installers and preconfigured Linux images are excluded from the source publication and must remain outside future releases.
 
-### European Union (EU)
-- **Directive 2009/24/EC (Legal Protection of Computer Programs)**:
-  - **Article 5(3)**: The person having a right to use a copy of a computer program shall be entitled, without the authorization of the rightholder, to observe, study or test the functioning of the program in order to determine the ideas and principles which underlie any element of the program.
-  - **Article 6 (Decompilation for Interoperability)**: Reproduction of the code and translation of its form are explicitly permitted where indispensable to obtain the information necessary to achieve the interoperability of an independently created computer program with other programs, provided the information is not used for purposes other than achieving interoperability.
+The experimental shim leaves packaged OpenAI files unchanged but modifies behavior at runtime, including sandbox checks. It does not provide equivalent Linux namespace isolation. The keyboard bridge also attaches through the client's local debugger and installs DOM event listeners.
 
-### United States (US)
-- **17 U.S.C. § 1201(f) (DMCA Reverse Engineering Exception)**:
-  - Permits reverse engineering and circumvention solely for the purpose of identifying and analyzing elements of the program that are necessary to achieve interoperability of an independently created computer program with other programs.
-- **Fair Use Doctrine (17 U.S.C. § 107)**:
-  - Research, technical testing, educational demonstration, and hardware compatibility across computing architectures constitute transformative fair use.
+## Limits of this notice
 
----
+This document is an attribution and distribution policy, not a legal clearance. Interoperability exceptions depend on jurisdiction and facts; this project has not obtained a legal determination that all proposed distribution or reverse-engineering activities qualify.
 
-## 5. Device Security & Integrity (Samsung Knox & Android Compatibility)
-- **Knox Warranty Bit Intact (0x0)**: FoldGPT requires **zero root privileges** (`su`), zero kernel modifications, and zero bootloader unlocking. The device warranty bit remains pristine at `0x0`.
-- **SELinux Enforcing**: FoldGPT operates entirely within standard Android user-space sandboxes (`PRoot`). Android SELinux policies remain strictly in `Enforcing` mode.
-- **Zero Exploits**: No vulnerability, privilege escalation, or security vulnerability is utilized or required.
-
----
-
-## 6. Trademarks & Brand Disclaimer
-- **"ChatGPT"**, **"OpenAI"**, and associated logos are registered trademarks of OpenAI, Inc.
-- **"Samsung"**, **"Galaxy Z Fold"**, and **"One UI"** are registered trademarks of Samsung Electronics Co., Ltd.
-- **"Google"**, **"Gemini"**, and **"Android"** are registered trademarks of Google LLC.
-- FoldGPT is an independent research project and is **not** endorsed, sponsored, affiliated with, or certified by OpenAI, Samsung, or Google.
+Observed bootloader, verified-boot, SELinux and Knox states are recorded in [PUBLICATION.md](PUBLICATION.md). They do not guarantee Samsung Care+, payment-app compatibility, future firmware behavior, OpenAI update compatibility or suitability for sensitive data.

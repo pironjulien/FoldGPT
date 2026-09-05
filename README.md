@@ -1,82 +1,59 @@
-# FoldGPT: Native ChatGPT Desktop on Samsung Galaxy Z Fold
+# FoldGPT
 
-> **Status: 100% OPERATIONAL & VERIFIED ON HARDWARE (Snapdragon / Adreno / One UI / Knox 0x0)**
+Experimental Android host for the official ChatGPT Linux ARM64 desktop client on a Galaxy Z Fold.
 
-FoldGPT enables the **official, unmodified Linux ARM64 desktop client of ChatGPT** (with full Codex, Projects, and native desktop features) to run seamlessly on the **Samsung Galaxy Z Fold** foldable display, completely in user space with **zero root**, **Knox 0x0 preserved**, and **100% legal compliance**.
+**Status: working desktop interface in a development prototype; not a public beta.** The integrated `app.foldgpt` APK now runs the client and Codex interface in its own Android app storage and UID. Local Codex commands are blocked, and Remote, fold routing, updates and background reliability remain unverified. See [PUBLICATION.md](PUBLICATION.md) for the tested scope.
 
----
+## What works
 
-## 🚀 The Technical Breakthrough (Antigravity vs Astra Ultra)
+- Termux:X11 is embedded in the FoldGPT display Activity. A separate foreground service owns the native ARM64 Linux runtime; Termux is no longer the running application's host.
+- PRoot is built from pinned source in `vendor/proot`. Matching loaders fix the previous Termux-specific loader paths. Shared-memory mapping and `xfwm4` provide the working X11 session.
+- The client fills the tested inner display at 2448 × 1848. XRandR reports a 119.98 Hz display mode; application frame rate has not been measured.
+- Actual touch opens the Samsung keyboard in an editable field and touching outside closes it. The V5 bridge opens only on deliberate pointer input: automatic refocus leaves the dismissed keyboard closed. This was reproduced on-device without a model request; a new touch reopened it. Tapping Samsung keys entered `aet` in the official editor.
 
-Prior attempts by OpenAI's GPT-6 Astra Ultra concluded that running the official desktop ChatGPT on Android was impossible without:
-1. Complete QEMU kernel-level virtualization with immense CPU overhead.
-2. Rooting the device or unlocking the bootloader (voiding Samsung Knox and banking apps).
+`foldgpt_ime.py` and `keyboard-focus.js` observe editable-field focus through a local Chromium debugging connection. They send visibility requests, without field contents, to an Android Unix socket that checks the peer UID. The bridge installs runtime DOM listeners; packaged OpenAI files are not patched.
 
-### The Root Cause Discovered by Antigravity:
-ChatGPT desktop on Linux uses Chromium's security sandbox. During startup, Chromium verifies user namespace capabilities via `clone(CLONE_NEWUSER)` and checks `/proc/self/ns/user`. Under standard Android PRoot environments, these calls fail with `EINVAL` / `EPERM`, triggering a fatal `SIGTRAP` (exit code 133).
+## Security and compatibility boundary
 
-### The Antigravity Resolution:
-Instead of modifying OpenAI's proprietary binary or resorting to sluggish VM emulation, Antigravity engineered `fake_userns.so`: a high-performance, user-space glibc dynamic linker shim (`LD_PRELOAD`).
-- **Precision Interception**: Intercepts `clone()`, `unshare()`, and `/proc/self/ns/user` access before Chromium's sandbox assertion executes.
-- **Binary Integrity**: The official OpenAI `.deb` binary remains **100% byte-for-byte unmodified** (`dpkg -V` verified).
-- **Native Execution**: Runs bare-metal on the device's Snapdragon ARM64 cores with direct Adreno GPU rendering.
+The current experiment uses `fake_userns.c`, which suppresses namespace requests and simulates successful isolation calls. It is a sandbox compatibility bypass, **not a Linux namespace implementation or a security boundary**. Android app isolation and SELinux remain separate mechanisms. The reproduced confinement failure is documented in [NATIVE-AUDIT.md](NATIVE-AUDIT.md).
 
----
+On the inspected phone, the bootloader was locked, verified boot was green, SELinux was enforcing and the Knox warranty bit was zero. These observations do not guarantee future compatibility with firmware, banking apps or contractual warranty coverage.
 
-## 📱 Hardware & Display Specifications (Galaxy Z Fold)
+The development APK is debuggable. Keep its Chromium debugging endpoint on loopback; do not expose it over Wi-Fi. Credentials, browser profiles, keyrings and Linux images are excluded from the source publication.
 
-- **Inner Display Resolution**: 2176 × 1812 (unfolded)
-- **Target Desktop Geometry**: `2448 × 1768` (1.618 Golden Ratio / 4:3 ergonomic view)
-- **Scale Factor**: `2.40` (perfect desktop readability on foldable AMOLED)
-- **Framerate**: Up to 120 Hz smooth scrolling with Turnip Vulkan acceleration
-- **Security**: Samsung Knox `0x0` (intact), SELinux `Enforcing`
+## Development build
 
----
+Requirements: JDK 21, Android SDK 37, Gradle 9.7.1, Python, ADB and an authorized ARM64 Termux development environment with the runtime libraries and compiler tools. These scripts currently use a device-specific SSH connection through localhost port 18022. Review their device/user settings before use.
 
-## ⌨️ Universal Text Focus & IME Architecture
+Clone with submodules and configure the SDK path in ignored `android/local.properties`:
 
-Unlike naive implementations that use fixed coordinate zones (e.g. `y > 1500`)—which break across different UI areas—FoldGPT employs a **Universal DOM & Input Focus Listener**:
-
-ChatGPT desktop contains editable text inputs across numerous interfaces:
-1. **Prompt Textarea**: Main input at bottom ("Do anything").
-2. **Command Palette & Search**: `Ctrl+K` or magnifying glass at top.
-3. **Sidebar Chat Renaming**: Inline `<input>` elements in conversation history.
-4. **Message Editing**: Full-width editing blocks in prior messages.
-5. **Project / Custom GPT Modals**: Name, description, and instruction fields.
-6. **Authentication & 2FA**: Login and verification code inputs.
-
-### The Universal Bridge:
-Via Chrome Remote Debugging (`--remote-debugging-port`) or X11 XIM Focus protocol, FoldGPT listens to universal `focusin` and `focusout` events on all `input`, `textarea`, and `[contenteditable]` elements:
-```javascript
-window.addEventListener('focusin', (e) => {
-    if (['INPUT', 'TEXTAREA'].includes(e.target.tagName) || e.target.isContentEditable) {
-        // Broadcast intent to Android InputMethodManager: Show Soft Keyboard
-        notifyAndroidIME(true);
-    }
-}, true);
-
-window.addEventListener('focusout', () => {
-    // Broadcast intent to Android InputMethodManager: Hide Soft Keyboard
-    notifyAndroidIME(false);
-}, true);
+```powershell
+git clone --recurse-submodules https://github.com/pironjulien/FoldGPT.git
+cd FoldGPT
+python tools/prepare-device-runtime.py
+python tools/build-proot-on-device.py
+gradle -p android :app:assembleDebug
 ```
-This guarantees immediate, automatic keyboard deployment wherever the user touches to write, and auto-dismissal when tapping away.
 
----
+Run the preparation scripts in that order: the second builds PRoot and matching loaders from the pinned source. The Windows build currently collects X11, talloc and Android shared-memory libraries from the installed official packages. Hashes are recorded under ignored `android/native/`. The optional `-PbuildX11FromSource` path has not yet been verified for FoldGPT.
 
-## 📦 Unified Single-APK Architecture (`FoldGPT.apk`)
+An APK build does not install Linux. `tools/migrate-device-runtime.py` copies an existing on-device development installation into an empty FoldGPT destination and refuses existing data. It is not a fresh installer. `install.sh` exits explicitly because its historical workflow is unvalidated.
 
-Rather than exposing multiple confusing icons (Termux, Termux:X11, terminals), the standalone FoldGPT application packages:
-- **Display Engine**: Embedded `LorieView` surface view.
-- **Orchestration Service**: Foreground Android Service managing the PRoot rootfs and process lifecycle.
-- **Unified Branding**: A single golden FoldGPT icon on Samsung One UI.
+For an already initialized debug installation, these tools update FoldGPT's guest scripts or run a diagnostic command:
 
----
+```powershell
+python tools/deploy-session.py --serial YOUR_ADB_SERIAL
+python tools/device-shell.py --serial YOUR_ADB_SERIAL /usr/bin/uname -m
+```
 
-## ⚖️ Legal & Intellectual Property Notice
+The guest session requires Debian's `python3-websockets`, `dbus-x11`, `xfwm4` and `wmctrl`, in addition to the client dependencies. Obtain OpenAI's client from its official source; no OpenAI binaries are supplied here.
 
-FoldGPT adheres strictly to international copyright, open source, and interoperability laws:
-- **No Proprietary Redistribution**: OpenAI binaries are downloaded directly by the user from official OpenAI repositories.
-- **EU Directive 2009/24/EC (Articles 5 & 6)**: Interoperability reverse engineering is explicitly protected under European law.
-- **US DMCA § 1201(f)**: Exemption for software interoperability research.
-- Full details in [LEGAL.md](LEGAL.md).
+## Next validation gates
+
+- Resolve local Codex execution. One reproduced blocker is Debian `bwrap` 0.12.0 failing even `--help` because access to `/proc/sys/kernel/overflowuid` is denied.
+- Broaden keyboard verification to field switching, Unicode, Samsung composition and dictation.
+- Test native Remote, folding, background operation and clean shutdown.
+- Provide a fresh installer and verify signed APK/client updates preserve state.
+- Establish the production isolation model, dependency provenance and measured performance.
+
+This independent project is not affiliated with or endorsed by OpenAI or Samsung. See [LEGAL.md](LEGAL.md), [PRODUCT.md](PRODUCT.md) and [CHANGELOG.md](CHANGELOG.md).
