@@ -1,5 +1,7 @@
 # Changelog
 
+- Audit de la piste native externe : affichage PRoot et bibliothèque chargée confirmés ; diagnostic de chroot établissant un succès simulé sans confinement du fichier témoin. Indicateurs de sécurité Android vérifiés, limites consignées dans NATIVE-AUDIT.md.
+
 ## 2026-09-05
 
 - Création du projet pour ChatGPT graphique Linux ARM64 sur Fold.
