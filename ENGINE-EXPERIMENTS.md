@@ -32,3 +32,9 @@ Sources :
 - https://source.android.com/docs/core/virtualization
 - https://android.googlesource.com/platform/packages/modules/Virtualization/+/refs/heads/android17-release/docs/custom_vm.md
 - https://cloud.debian.org/images/cloud/trixie/latest/
+
+20:18 : authentification OAuth officielle réussie pour api.skynet@gmail.com. Utilisation du bouton Copy sign-in link et du navigateur intégré, avec tunnel SSH loopback Windows1455 vers VM1455 pour le callback. Le navigateur affiche Connexion réussie et le journal du client confirme authenticatedAccountPresent=true, authMethod=chatgpt, result=succeeded. Chargement de l'interface en cours ; aucune tâche encore validée.
+
+
+20:30 : test fonctionnel après connexion. Le parcours d'accueil a créé /home/julien/Desktop/Note from ChatGPT.txt, contenu relu par SSH. Le répertoire Desktop manquait dans l'image minimale : création du dossier puis permission accordée via UI. Ce test d'accueil ne prouve pas l'exécution agentique. Consigne personnalisée envoyée vers 20:26 : créer fold-smoke-test/result.txt avec marqueur et uname. À 20:30, fichier absent et interface Task creation is not yet confirmed. Journaux : délais de démarrage outils, timeout plugin/list, manifeste primary runtime HTTP404. Causalité exacte non établie. Remote non testé faute de tâche confirmée. Verdict : prototype TCG non validé pour usage réel, aucune désactivation de sandbox ou root hôte. Capture logs/smoke-task-unconfirmed.png (ignorée par Git).
+
