@@ -4,7 +4,7 @@ Brouillon uniquement ; aucune publication effectuée.
 
 ## Aperçu publiable du prototype
 
-> FoldGPT : le client officiel ChatGPT/Codex tourne sur mon Fold sans root, en ARM64 avec GPU Adreno. Les artefacts des paramètres sont corrigés ; navigation intégrée et RPC fichiers natifs ont passé leurs tests ciblés. Prototype : l’APK autonome reste à terminer.
+> FoldGPT : le client officiel ChatGPT/Codex tourne sur mon Fold sans root, en ARM64 avec GPU Adreno. Menus corrigés et navigation de base testée. 17 tests de commandes natives passent. Prototype : tâches protégées et installation autonome restent à terminer.
 
 Les preuves qualifient le téléphone testé : [foldgpt5](verification-gpu-renderpasses-2026-09-06.md)
 passe 24 cas pixels et le parcours des 20 paramètres ; le [navigateur intégré](../tools/browser/README.md)
@@ -13,8 +13,18 @@ la [fixture RPC Android](../tools/executor/native-files-android-rpc.md) passe
 34 réponses et 12 groupes avec collecte indépendante. Un [pont privé ultérieur](../tools/executor/private-exec-android.md)
 relie le client de test GNU au broker Android : 53 réponses sur deux sessions,
 dont parcours des dossiers, copie/suppression, refus d’accès et lecture par blocs
-d’un fichier de 37 Mio, vérifiés par une collecte indépendante. Ces
-fixtures de diagnostic ne raccordent pas encore une tâche modèle normale.
+d’un fichier de 37 Mio, vérifiés par une collecte indépendante.
+
+La [suite d’acquisition native](../tools/executor/native-managed-android.md) passe
+ensuite 17 tests et 46 observations de processus réels, avec l’interface graphique
+active : exécution statique ARM64, règles d’accès aux fichiers, exceptions de
+métadonnées, mutations des pointeurs après copie, flags des descripteurs,
+expiration, annulation et nettoyage des descendants. La collecte indépendante
+lie les événements au véritable APK, à 30 bibliothèques et huit sources exécutées.
+Le comptage des tâches UID corrige l’échec initial de fork sans arrêter l’interface
+ni relever les plafonds hérités. Ces diagnostics ne raccordent pas encore une
+tâche modèle normale ou le cycle complet des RPC de processus ; le shell,
+stdin/TTY, le réseau et le routage Desktop restent à intégrer et vérifier.
 
 Le diagnostic du runtime officiel Linux ARM64 retourne encore HTTP 404. La
 préparation complète v2 Debian/compte/client/coffre a passé deux appels sur

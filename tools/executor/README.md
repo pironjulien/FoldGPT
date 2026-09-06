@@ -1,16 +1,30 @@
 # Native executor integration: verified seam and policy handoff
 
 This directory contains the audited stdio execution-server transport, immutable
-policy handoff, a bounded native process backend and the first real file RPC
-backend. These components are not yet a complete protected Android executor.
+policy handoff, native process enforcement increments and real file/streaming RPC
+backends. These components are not yet a complete protected Android executor.
 The default server refuses process/file operations until a backend is supplied.
 See [native filesystem integration](native-files.md) for the actual tests,
 official-client handshake and remaining admission limits.
-The file backend now implements policy-bearing read, write and recursive or
-nonrecursive directory creation. Its directory operation validates every missing
-ancestor before mutation and is verified through an actual stdio server and
-native helper on Linux. This does not yet complete the filesystem API needed by
-ordinary model patches or admit arbitrary managed processes.
+The native file backend implements nine methods, including metadata,
+canonicalization, directory listing/walking, copy and remove; its streaming
+subclass adds open/readBlock/close with session-bound descriptors. The
+[Android RPC fixture](native-files-android-rpc.md) passes 34 responses, and the
+[GNU guest-to-Android bridge](private-exec-android.md) passes 53 responses across
+two sessions, including a 37 MiB file and descriptor/lease cleanup. Independent
+collection verifies the real bytes, policies and packaged execution inputs.
+
+The [native managed-acquisition suite](native-managed-android.md) now passes
+**17 Android tests and 46 process observations** with the graphical client
+running. A fixed static ARM64 executable uses real Landlock/seccomp notification
+and FD injection for admitted reads/writes/creation, denials and metadata
+exceptions. Native cases verify copied-pointer mutation, exact FD flags,
+timeout, cancellation and forked descendant cleanup. UID task accounting
+includes the GUI's existing threads within the inherited ceilings. The
+independent collector binds the full events to the tested APK, 30 installed
+libraries and eight executed sources. This profile has no general shell,
+command stdin, TTY, networking or official process RPC lifecycle; it is not yet
+connected to normal model work or production Desktop routing.
 
 Separate native experiments now verify [exact-file A/B/C/A rights](native-abc-proof.md)
 and [exec startup plus three concurrent peer-access checks](native-exec-peer-proof.md)
@@ -38,8 +52,10 @@ native policy requirements are `tools/policy/managed-policy-contract.md`.
 | Desktop launch adapter using observed `CODEX_CLI_PATH` | The earlier distributed-client inspection found this executable override. It can preserve the packaged binary and mediate app-server transport. | It may select environments and implement separate host RPC integration; it cannot intercept internal model tool calls by forwarding stdin/stdout alone. |
 
 The preferred route remains an environment executor with a real native
-supervisor outside PRoot. PRoot supplies path/ABI compatibility inside each
-worker. It is not the enforcement layer. A read-only global Landlock grant plus
+supervisor outside PRoot. The verified static workers also run outside PRoot;
+admission of the required GNU runtime and shell compatibility remains separate
+work. PRoot supplies path/ABI compatibility and is not the enforcement layer.
+A read-only global Landlock grant plus
 a write broker cannot implement deny-read exceptions or the complete policy.
 
 ## Agent operations and Desktop host operations are different APIs
@@ -128,10 +144,13 @@ protocol requires managed networking to fail closed when its enforcement
 context is missing or unsupported. Unsupported operations must return explicit
 errors before mutation rather than a successful placeholder.
 
-Next credible integration evidence is an unauthenticated isolated environment
-handshake plus native process/file conformance tests, followed by one normal
-Desktop command and one normal `apply_patch` through that environment. None of
-those integration or device tests is claimed by this directory.
+The official environment handshake and bounded native process/file conformance
+fixtures now have their recorded evidence above. The next integration must
+implement the actual start/read/write/signal/terminate lifecycle, admit the
+required runtime and shell under their complete policy, and connect Desktop
+routing for normal and resumed tasks. One normal protected model command and
+one normal `apply_patch` through that environment remain required; the diagnostic
+passes do not establish those production paths.
 
 ## Checked source references
 
