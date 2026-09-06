@@ -34,12 +34,14 @@ javac -cp "$deps/*" -d "$work/classes" "$work/sources/RootfsExtractor.java" \
   "$work/sources/RootfsTransaction.java" "$work/sources/RootfsTransactionTest.java" \
   "$work/sources/ProotHardlinkStorage.java" \
   "$work/sources/GuestIdentity.java" "$work/sources/GuestIdentityTest.java" \
+  "$work/sources/GuestAccountProvisioner.java" "$work/sources/GuestAccountProvisionerTest.java" \
+  "$work/sources/GuestAccountRealArchiveCheck.java" \
   "$work/sources/RootfsRealArchiveCheck.java"
 if [ "$(id -u)" = 0 ]; then
   runuser -u nobody -- java -cp "$work/classes:$deps/*" org.junit.runner.JUnitCore \
-    app.foldgpt.install.RootfsTransactionTest app.foldgpt.install.GuestIdentityTest | tee "$work/junit-result.txt"
+    app.foldgpt.install.RootfsTransactionTest app.foldgpt.install.GuestIdentityTest app.foldgpt.install.GuestAccountProvisionerTest | tee "$work/junit-result.txt"
 else
-  java -cp "$work/classes:$deps/*" org.junit.runner.JUnitCore app.foldgpt.install.RootfsTransactionTest app.foldgpt.install.GuestIdentityTest | tee "$work/junit-result.txt"
+  java -cp "$work/classes:$deps/*" org.junit.runner.JUnitCore app.foldgpt.install.RootfsTransactionTest app.foldgpt.install.GuestIdentityTest app.foldgpt.install.GuestAccountProvisionerTest | tee "$work/junit-result.txt"
 fi
 (cd "$work" && sha256sum sources/* > SHA256SUMS)
 sha256sum "$deps/"*.jar > "$work/dependency-sha256.txt"

@@ -1,5 +1,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application>
+        <service android:name="app.foldgpt.install.GuestAccountProbeService" android:process=":accountProbe"
+            android:exported="true" android:permission="android.permission.DUMP" android:foregroundServiceType="specialUse">
+            <property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="ADB-only inactive Debian account provisioning and actual guest identity check" />
+        </service>
         <service android:name="app.foldgpt.install.ProotStorageProbeService" android:process=":storageProbe"
             android:exported="true" android:permission="android.permission.DUMP"
             android:foregroundServiceType="specialUse">

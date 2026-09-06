@@ -2,6 +2,9 @@
 
 ## Unreleased — 2026-09-06
 
+- Connected the audited execution-server transport to real native read/write RPCs in a private host workspace, retaining per-request policy and explicit metadata exceptions. Twenty-six transport/native checks pass. The unchanged official Codex 0.153.4 also completes the environment handshake on the Fold with a fresh profile. Android Zygote tests verify the file helper's real reads/writes and refused aliases/incomplete inputs. Arbitrary-command policy enforcement and the production Android bridge remain unfinished.
+- Integrated fresh guest account provisioning with the leased Debian transaction. Real Android testing revealed umask-filtered file modes; exact staged modes and journal-bound recovery correct the cause. The original failed stage then resumes and executes its new guest identity under Zygote, without activation. Twenty-nine host tests pass, including 24 actual JVM deaths. No binary release is claimed.
+
 - Replaced the runtime service's development username/UID with an explicit guest account selection validated against passwd, group and real home directories before X11 starts. XDG_RUNTIME_DIR follows the guest UID. Twenty JVM/POSIX tests pass; the updated debug APK starts the existing official client with Adreno rendering. Fresh account provisioning and the complete installer remain pending.
 
 - Integrated the independently cross-compiled PRoot/loaders/talloc/android-shmem set into the development APK and verified all five installed hashes. A new real SysV shared-memory test exposed lost errno propagation in PRoot's helper; the source patch preserves the actual error and the same Android regression now passes. Five Zygote storage/execution checks pass, the existing desktop restarts, and CDP still confirms Adreno GPU composition/rasterization. Both APK variants compile and their diagnostic separation passes. This does not complete the installer or managed executor.

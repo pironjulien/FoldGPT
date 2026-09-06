@@ -52,6 +52,13 @@ public final class NativeRunnerProbeService extends Service {
                 }
                 if (process.exitValue() != 0) throw new IOException("Native runner diagnostic exit=" + process.exitValue());
                 Log.i("FoldGPT-RunnerProbe", "Fixed native runner fixture passed; evidence=" + log.getAbsolutePath());
+                File filesLog = new File(getCacheDir(), "native-files-probe.log");
+                process = new ProcessBuilder(directory + "/libfoldgpt-native-files-test.so",
+                    getCacheDir().getCanonicalPath(), new File(directory).getCanonicalPath())
+                    .redirectErrorStream(true).redirectOutput(filesLog).start();
+                if (!process.waitFor(30, TimeUnit.SECONDS) || process.exitValue() != 0)
+                    throw new IOException("Native file RPC fixture failed; evidence=" + filesLog.getAbsolutePath());
+                Log.i("FoldGPT-RunnerProbe", "Native file RPC fixture passed; evidence=" + filesLog.getAbsolutePath());
             } catch (Exception error) {
                 Log.e("FoldGPT-RunnerProbe", "Native runner diagnostic failed", error);
             } finally {
