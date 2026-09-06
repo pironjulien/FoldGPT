@@ -54,7 +54,8 @@ public final class ProotStorageProbeService extends Service {
                 if (line.startsWith("Seccomp:") || line.startsWith("NoNewPrivs:"))
                     report.put(line.split(":")[0],line.split(":")[1].trim());
             Path nativeDir = Path.of(getApplicationInfo().nativeLibraryDir);
-            for (String library : List.of("libproot.so","libproot-loader.so","libproot-loader32.so","libfoldgpt-l2s-fixture.so"))
+            for (String library : List.of("libproot.so","libproot-loader.so","libproot-loader32.so",
+                    "libtalloc.so","libandroid-shmem.so","libfoldgpt-l2s-fixture.so"))
                 report.put(library,hash(nativeDir.resolve(library)));
             Path isolatedFiles = getFilesDir().toPath().toRealPath().resolve(".rootfs-proot-install-probe/files");
             ContextWrapper isolated = new ContextWrapper(this) {
@@ -69,6 +70,7 @@ public final class ProotStorageProbeService extends Service {
                 Path data = Files.createDirectory(work.resolve("data"));
                 run(work,root,data,"inspect",List.of("/probe","inspect-archive"),checks);
                 run(work,root,data,"debian-exec",List.of("/usr/bin/perl","-e","print qq(PASS pristine Debian Perl execution\\n)"),checks);
+                run(work,root,data,"shared-memory",List.of("/probe","shared-memory"),checks);
                 run(work,root,data,"generated",List.of("/probe","create"),checks);
                 requireEmpty(data);
                 // The exact production Java converter provisions this group.
@@ -124,7 +126,8 @@ public final class ProotStorageProbeService extends Service {
         env.put("LD_LIBRARY_PATH",aliases+":"+nativeDir);
         env.put("PROOT_LOADER",nativeDir.resolve("libproot-loader.so").toString());
         env.put("PROOT_LOADER_32",nativeDir.resolve("libproot-loader32.so").toString());
-        env.put("PROOT_TMP_DIR",scratch.toString()); env.remove("PROOT_L2S_DIR"); env.remove("LD_PRELOAD");
+        env.put("PROOT_TMP_DIR",scratch.toString()); env.put("TMPDIR",scratch.toString());
+        env.remove("PROOT_L2S_DIR"); env.remove("LD_PRELOAD");
         Path output=work.resolve(name+".log");
         child=builder.redirectErrorStream(true).redirectOutput(output.toFile()).start();
         try {

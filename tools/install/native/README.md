@@ -57,10 +57,14 @@ replace review of the complete APK's distribution obligations. In particular,
 retain corresponding sources, modifications and build materials with any binary
 distribution and preserve the applicable LGPL replacement/relinking rights.
 
-Two local source fixes are applied only to extracted snapshots:
+Three local source fixes are applied only to extracted snapshots:
 
 - `proot-string-header.patch` includes `<string.h>` for existing `strcmp` and
   `memset` calls. No compiler diagnostics are disabled.
+- `proot-shmat-errno.patch` propagates the real `libandroid_shmat_fd` errno
+  through the helper protocol. Previously its libc `-1` return became guest
+  `EPERM` regardless of the error. The Fold's stale-segment regression failed
+  with `EPERM` before the patch and passes with the actual `EINVAL` afterwards.
 - `android-shmem-tmpdir.patch` replaces Termux's unavailable `_PATH_TMP` macro
   with the process's absolute private `TMPDIR`. It checks path length and returns
   filesystem errors rather than looping on errors other than `EEXIST`. The
@@ -115,7 +119,31 @@ under `build/`. This manifest inventories a local build; it is not a signed
 release descriptor and does not establish runtime behavior or bit-for-bit
 reproducibility.
 
-Before adopting these files, execute the Android startup, loader, shared-memory
+Before adopting a new build, execute the Android startup, loader, shared-memory
 and guest command checks on the supported device and repeat the existing
 runtime acceptance tests. Static ELF verification cannot prove compatibility
 with Samsung's kernel, the guest filesystem, Landlock, GPU or Codex execution.
+
+## Android adoption on 6 September 2026
+
+The independent build with the three patches above is now packaged in the
+development APK. Under the actual Android Zygote application UID, five checks
+pass: two pristine Debian hardlink groups, execution of pristine Debian Perl,
+SysV shared memory across fork and a second attach, guest-created hardlinks,
+and Java-provisioned PRoot hardlinks. The shared-memory check also verifies
+detach, removal and refusal of a stale identifier. It does not claim complete
+SysV IPC compatibility or an IPC security boundary. ARM32's loader is packaged
+and statically checked; the device execution checks use ARM64.
+
+The installed APK SHA-256 is
+`d8b7b9b8d453cdf1db28e504c496a217f04c618a8485a891eb907c852c286dcc`.
+Its real installed five-library hashes match the build manifest. The existing
+client restarts and its CDP GPU report still selects Adreno 840 through
+ANGLE/Zink/Turnip, with composition and rasterization enabled. This is not a
+fresh install, a repeat of all GPU tests, or a complete protected executor.
+Local evidence is retained in the ignored directory
+`downloads/install/native/android-adoption-6928768071979500215`; sources,
+notices and recipe accompany `foldgpt-native-P5tRdGlG` in the same native
+artifact directory. Debug/release compilation and release vital lint pass;
+independent APK-content checks find 17 debug libraries and exactly 7 release
+libraries. No binary release has been published.
