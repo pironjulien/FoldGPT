@@ -66,8 +66,11 @@ is deliberately small:
 | `foldgpt_keyring.py` | `payload/usr/local/lib/foldgpt/foldgpt_keyring.py` | 0644 |
 | `foldgpt_ime.py` | `payload/usr/local/lib/foldgpt/foldgpt_ime.py` | 0644 |
 | `keyboard-focus.js` | `payload/usr/local/lib/foldgpt/keyboard-focus.js` | 0644 |
+| `tools/browser/foldgpt-open.py` | `payload/usr/local/bin/xdg-open` | 0755 |
+| `tools/install/initialize_keyring.py` | `payload/usr/local/lib/foldgpt/install/initialize_keyring.py` | 0644 |
+| `tools/install/supervise_keyring.py` | `payload/usr/local/lib/foldgpt/install/supervise_keyring.py` | 0644 |
 
-The builder reads only those five regular UTF-8 text files, rejects NUL bytes,
+The builder reads only those eight regular UTF-8 text files, rejects NUL bytes,
 normalizes CRLF to LF and never enumerates a user profile, rootfs or dependency
 directory. Source contents still need normal review before release; an allowlist
 is not a secret scanner. The package includes no binary provenance claim.
@@ -137,10 +140,11 @@ No Android install or first launch is implied by those results.
    runtime bindings. `xkb-data` must already
    be present and readable at `usr/share/X11/xkb` before starting Xlorie. The
    current service checks these base inputs and the existing vault before X11.
-3. **The guest contract.** The service currently specifies `/home/julien`,
-   `USER=julien` and guest UID:GID `10410:10410`. Fresh `/etc/passwd`, groups and
-   ownership must agree with that contract or the service contract must be
-   changed deliberately. The Android IME UID remains a separate dynamic value.
+3. **The guest contract.** The service validates and selects an explicit account
+   from the real guest passwd/group/home. Fresh preparation creates `foldgpt`
+   with the actual Android UID/GID; the development account remains supported
+   without becoming a universal installation default. Android IME and URL
+   endpoints receive the actual application UID separately.
    The scripts directly need `python3`, `python3-websockets`,
    `python3-secretstorage`, `dbus-run-session`, `gnome-keyring` and its D-Bus
    activation files, `xfwm4`, `wmctrl`, `xkb-data`, fonts, coreutils and `awk`.
@@ -155,12 +159,14 @@ No Android install or first launch is implied by those results.
    bundle does not silently select an untested driver.
 5. **A new encrypted keyring.** Routine launches still require an existing vault
    and default GNOME collection. The new [first-install preparation components](keyring.md)
-   generate and verify a fresh credential and collection; their integration in
-   an Android install transaction remains unfinished. No account or existing
+   generate and verify a fresh credential and collection. The
+   [inactive coordinator](inactive-preparation.md) now passes the real Android
+   flow and recovery while holding the rootfs transaction lease; connection to
+   the complete installer remains unfinished. No account or existing
    collection belongs in a distributable rootfs.
 6. **Official client and activation.** Obtain the unmodified OpenAI client from
-   its official source under its applicable terms. Then install the four guest
-   scripts, validate all required components and activate a completed rootfs
+   its official source under its applicable terms. Then install the guest
+   integration bundle, validate all required components and activate a completed rootfs
    before launching X11. The current migration omits `foldgpt_keyring.py`, while
    `deploy-session.py` and this bundle include it. There is no fresh-install UI
    or release-mode provisioning path yet; `run-as` is development tooling.

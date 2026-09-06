@@ -37,6 +37,7 @@ class BundleTests(unittest.TestCase):
         self.root = Path(self.temporary.name)
         # Deliberate fixture sources; no host profile or existing rootfs is copied.
         for name in BUNDLE.SOURCES:
+            (self.root / name).parent.mkdir(parents=True, exist_ok=True)
             (self.root / name).write_bytes(("fixture for " + name + "\r\n").encode())
         self.data = BUNDLE.build(self.root)
         self.sha = hashlib.sha256(self.data).hexdigest()
@@ -52,10 +53,10 @@ class BundleTests(unittest.TestCase):
             path.write_bytes(path.read_bytes().replace(b"\r\n", b"\n"))
         self.assertEqual(self.data, BUNDLE.build(self.root))
         files = BUNDLE.verify(self.data, self.sha)
-        self.assertEqual(len(files), 6)
+        self.assertEqual(len(files), 9)
         manifest = json.loads(files["manifest.json"])
         self.assertEqual(manifest["format"], "foldgpt.guest-integration.v1")
-        self.assertEqual(len(manifest["files"]), 5)
+        self.assertEqual(len(manifest["files"]), 8)
 
     def test_never_sweeps_private_or_binary_inputs(self):
         (self.root / "auth.json").write_text("private account fixture")

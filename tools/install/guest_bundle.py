@@ -31,6 +31,9 @@ SOURCES = {
     "foldgpt_keyring.py": ("payload/usr/local/lib/foldgpt/foldgpt_keyring.py", 0o644),
     "foldgpt_ime.py": ("payload/usr/local/lib/foldgpt/foldgpt_ime.py", 0o644),
     "keyboard-focus.js": ("payload/usr/local/lib/foldgpt/keyboard-focus.js", 0o644),
+    "tools/browser/foldgpt-open.py": ("payload/usr/local/bin/xdg-open", 0o755),
+    "tools/install/initialize_keyring.py": ("payload/usr/local/lib/foldgpt/install/initialize_keyring.py", 0o644),
+    "tools/install/supervise_keyring.py": ("payload/usr/local/lib/foldgpt/install/supervise_keyring.py", 0o644),
 }
 MODES = {name: mode for name, mode in SOURCES.values()}
 
@@ -266,7 +269,7 @@ def prepare(data, expected_sha256, destination):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     commands = parser.add_subparsers(dest="command", required=True)
-    pack = commands.add_parser("build", help="Assemble the five named source files only")
+    pack = commands.add_parser("build", help="Assemble the explicitly named integration sources only")
     pack.add_argument("--output", type=Path, required=True)
     for name in ("verify", "prepare"):
         operation = commands.add_parser(name)
