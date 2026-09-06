@@ -115,6 +115,7 @@ public final class FoldRuntimeService extends Service {
                 "/usr/bin/env", "-i", "HOME=" + identity.home, "USER=" + identity.user, "LOGNAME=" + identity.user,
                 "LANG=C.UTF-8", "PATH=/usr/local/bin:/usr/bin:/bin",
                 "DISPLAY=:2", "FOLDGPT_IME_UID=" + android.os.Process.myUid(),
+                "FOLDGPT_URL_UID=" + android.os.Process.myUid(),
                 "FOLDGPT_SCALE=" + getResources().getDisplayMetrics().density,
                 "/bin/bash", "/usr/local/bin/foldgpt-session"));
             ProcessBuilder builder = new ProcessBuilder(args);

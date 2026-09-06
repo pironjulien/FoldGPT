@@ -17,6 +17,7 @@ import com.termux.x11.FoldDisplayActivity;
 public final class FoldActivity extends FoldDisplayActivity {
     private volatile boolean resumed;
     private final FoldImeBridge imeBridge = FoldImeBridge.get();
+    private final FoldUrlBridge urlBridge = FoldUrlBridge.get();
     private FoldPostureController posture;
     private boolean innerDisplay;
     private boolean redirecting;
@@ -36,6 +37,7 @@ public final class FoldActivity extends FoldDisplayActivity {
             getPreferences(MODE_PRIVATE).edit().putBoolean("configured", true).apply();
         }
         imeBridge.attach(this);
+        urlBridge.attach(this);
         // Gate the containing view, since the X11 view manages its own visibility
         // when the server reconnects. Keep Linux private until inner-display proof.
         findViewById(android.R.id.content).setVisibility(View.INVISIBLE);
@@ -46,6 +48,7 @@ public final class FoldActivity extends FoldDisplayActivity {
         super.onResume();
         resumed = true;
         imeBridge.resume(this);
+        urlBridge.resume(this);
         if (posture != null) {
             posture.refreshDisplay();
             onPostureChanged(posture.getState());
@@ -54,6 +57,7 @@ public final class FoldActivity extends FoldDisplayActivity {
     @Override public void onPause() {
         resumed = false;
         imeBridge.pause(this);
+        urlBridge.pause(this);
         super.onPause();
     }
     @Override public void onConfigurationChanged(Configuration configuration) {
@@ -116,6 +120,7 @@ public final class FoldActivity extends FoldDisplayActivity {
         resumed = false;
         if (posture != null) posture.close();
         imeBridge.detach(this);
+        urlBridge.detach(this);
         super.onDestroy();
     }
     boolean applyImeVisibility(boolean show) {
