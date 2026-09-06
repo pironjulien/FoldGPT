@@ -7,6 +7,16 @@ restart. Driver installation is not yet part of the Android runtime installer.
 
 ## Current checkpoint
 
+The installed session now selects `mesa-26.2.2-foldgpt4` and Xlorie SHA-256
+`94b09f06b8f9508be587266f5400d5a360fc787c69788310a2fa2b411783369b`.
+Vulkan/timestamps, GLX/Present/pixmap tests and a visible File-menu check passed
+on 6 September. The targeted calibrated-timestamp and GLX refresh errors are
+absent in the new session log. The memfd helper uses positive tmpfs/ashmem
+identification; ENOTTY is no longer treated as proof of ordinary memory.
+See [the device evidence and limits](docs/verification-2026-09-06.md).
+
+## Earlier checkpoints and diagnosis
+
 The installed session selects `mesa-26.2.2-foldgpt3`. On 6 September 2026 at
 02:05 UTC, the official client's local GPU report identified:
 

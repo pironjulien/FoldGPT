@@ -11,10 +11,10 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 import com.termux.x11.FoldRuntimeService;
-import com.termux.x11.MainActivity;
+import com.termux.x11.FoldDisplayActivity;
 
 /** Display host with a peer-credential checked IME endpoint. No text crosses this bridge. */
-public final class FoldActivity extends MainActivity {
+public final class FoldActivity extends FoldDisplayActivity {
     private volatile boolean resumed;
     private final FoldImeBridge imeBridge = FoldImeBridge.get();
     private FoldPostureController posture;

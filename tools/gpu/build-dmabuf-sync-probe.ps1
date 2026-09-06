@@ -26,7 +26,26 @@ if ($syncLines.Count -ne [int]$syncHunk.Groups[1].Value -or ($syncLines | Where-
 $syncHeaderText = (($syncLines | ForEach-Object { $_.Substring(1) }) -join "`n") + "`n"
 $syncHeaderPath = Join-Path $syncHeaderDirectory 'dmabuf_sync.h'
 [IO.File]::WriteAllText($syncHeaderPath, $syncHeaderText, [Text.UTF8Encoding]::new($false))
-Get-FileHash -Algorithm SHA256 -LiteralPath $syncPatchPath, $syncHeaderPath |
+$syncMemfdPatchPath = Join-Path $PSScriptRoot 'termux-x11-dmabuf-memfd.patch'
+# Apply the same incremental correction as the X11 build, without touching the
+# submodule. Stop Git repository discovery: a nested git apply would otherwise
+# silently skip paths outside this directory relative to the repository root.
+$syncPreviousCeiling = $env:GIT_CEILING_DIRECTORIES
+try {
+    $env:GIT_CEILING_DIRECTORIES = Split-Path -Parent $syncHeaderDirectory
+    & git -C $syncHeaderDirectory apply --no-index -p6 --check $syncMemfdPatchPath
+    if ($LASTEXITCODE -ne 0) { throw 'DMA-BUF memfd patch does not match the extracted header' }
+    & git -C $syncHeaderDirectory apply --no-index -p6 $syncMemfdPatchPath
+    if ($LASTEXITCODE -ne 0) { throw 'DMA-BUF memfd patch application failed' }
+    & git -C $syncHeaderDirectory apply --no-index -p6 -R --check $syncMemfdPatchPath
+    if ($LASTEXITCODE -ne 0) { throw 'DMA-BUF memfd patch verification failed' }
+} finally {
+    $env:GIT_CEILING_DIRECTORIES = $syncPreviousCeiling
+}
+if ([IO.File]::ReadAllText($syncHeaderPath).Replace("`r`n", "`n") -eq $syncHeaderText) {
+    throw 'DMA-BUF memfd patch was unexpectedly skipped'
+}
+Get-FileHash -Algorithm SHA256 -LiteralPath $syncPatchPath, $syncMemfdPatchPath, $syncHeaderPath |
     ConvertTo-Json | Set-Content -LiteralPath (Join-Path $syncHeaderDirectory 'provenance.json') -Encoding utf8
 & $syncCompiler -O2 -Wall -Wextra -Werror `
     -I $syncHeaderDirectory `

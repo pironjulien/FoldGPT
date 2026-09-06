@@ -99,11 +99,21 @@ printf '%s\n' "$archive_sha256" > "$artifact/ndk-archive.sha256"
 # patch, or verify it is already present, only in our normalized source copy.
 cp "$repo/tools/gpu/termux-x11-dmabuf-sync.patch" "$artifact/foldgpt-source.patch"
 sha256sum "$artifact/foldgpt-source.patch" > "$artifact/foldgpt-source.patch.sha256"
+cp "$repo/tools/gpu/termux-x11-dmabuf-memfd.patch" "$artifact/foldgpt-memfd.patch"
+sha256sum "$artifact/foldgpt-memfd.patch" > "$artifact/foldgpt-memfd.patch.sha256"
+# Normalize a snapshot that already has the incremental correction back to the
+# base before verifying its complete new-file hunk. The vendor stays untouched.
+if patch --fuzz=0 -p5 -R --dry-run -d "$work/source" -i "$artifact/foldgpt-memfd.patch" >/dev/null 2>&1; then
+    patch --fuzz=0 -p5 -R -d "$work/source" -i "$artifact/foldgpt-memfd.patch"
+fi
 if ! patch -p5 -R --dry-run -d "$work/source" -i "$artifact/foldgpt-source.patch" >/dev/null 2>&1; then
     patch -p5 --dry-run -d "$work/source" -i "$artifact/foldgpt-source.patch" >/dev/null
     patch -p5 -d "$work/source" -i "$artifact/foldgpt-source.patch"
 fi
 patch -p5 -R --dry-run -d "$work/source" -i "$artifact/foldgpt-source.patch" >/dev/null
+patch --fuzz=0 -p5 --dry-run -d "$work/source" -i "$artifact/foldgpt-memfd.patch" >/dev/null
+patch --fuzz=0 -p5 -d "$work/source" -i "$artifact/foldgpt-memfd.patch"
+patch --fuzz=0 -p5 -R --dry-run -d "$work/source" -i "$artifact/foldgpt-memfd.patch" >/dev/null
 
 # Native source compilation also needs POSIX case semantics: on NTFS, Bionic's
 # <xlocale.h> incorrectly resolves to libX11's Xlocale.h through its -I path.
@@ -184,6 +194,7 @@ manifest = {
     'ndkVersion': sys.argv[4], 'upstreamCommit': (artifact / 'upstream-commit.txt').read_text().strip(),
     'loadPageAlignment': 16384, 'jniEntryPoint': 'JNI_OnLoad',
     'foldgptPatchSha256': hashlib.sha256((artifact / 'foldgpt-source.patch').read_bytes()).hexdigest(),
+    'foldgptMemfdPatchSha256': hashlib.sha256((artifact / 'foldgpt-memfd.patch').read_bytes()).hexdigest(),
     'sourceInputSha256': hashlib.sha256((artifact / 'source-input.json').read_bytes()).hexdigest(),
     'sourceDateEpoch': int(subprocess.check_output(['git', '-C', str(repo / 'vendor/termux-x11'),
                                                  'show', '-s', '--format=%ct', 'HEAD'])),
