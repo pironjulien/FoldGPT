@@ -6,6 +6,11 @@ backend. These components are not yet a complete protected Android executor.
 The default server refuses process/file operations until a backend is supplied.
 See [native filesystem integration](native-files.md) for the actual tests,
 official-client handshake and remaining admission limits.
+The file backend now implements policy-bearing read, write and recursive or
+nonrecursive directory creation. Its directory operation validates every missing
+ancestor before mutation and is verified through an actual stdio server and
+native helper on Linux. This does not yet complete the filesystem API needed by
+ordinary model patches or admit arbitrary managed processes.
 
 Separate native experiments now verify [exact-file A/B/C/A rights](native-abc-proof.md)
 and [exec startup plus three concurrent peer-access checks](native-exec-peer-proof.md)
