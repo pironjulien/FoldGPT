@@ -155,7 +155,8 @@ public final class InactiveIntegrationInstaller {
                 }
             }
             verifyXkb(); verifyInstalledTree(true);
-            StringBuilder evidence=new StringBuilder("foldgpt.inactive-integration-report.v1\n")
+            boolean context=bundle.format.equals(InactiveIntegrationBundle.FORMAT_WITH_CONTEXT);
+            StringBuilder evidence=new StringBuilder(context?"foldgpt.inactive-integration-report.v2\n":"foldgpt.inactive-integration-report.v1\n")
                 .append("scope\tscripts-gpu-files-native-xkb-and-declared-launch-inputs\n")
                 .append("activation\tnot-performed\n").append("gpuExecution\tnot-performed\n")
                 .append("installationId\t").append(installationId).append('\n')
@@ -163,6 +164,8 @@ public final class InactiveIntegrationInstaller {
                 .append("bundleSha256\t").append(bundle.sha256).append('\n')
                 .append("manifestSha256\t").append(bundle.manifestSha256).append('\n')
                 .append("account\t").append(account.user).append(':').append(account.prootIds()).append(':').append(account.home).append('\n');
+            if(context) evidence.append("bundleFormat\t").append(bundle.format).append('\n')
+                .append("agentContext\tfiles-installed-only\n").append("modelDelivery\tnot-verified\n");
             for(InactiveIntegrationBundle.Entry entry:bundle.entries.values()) {
                 verify(entry);
                 evidence.append(entry.path).append('\t').append(entry.kind).append('\t')

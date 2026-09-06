@@ -15,7 +15,8 @@ import tarfile
 
 import guest_bundle
 
-FORMAT = "foldgpt.inactive-integration.v1"
+LEGACY_FORMAT = "foldgpt.inactive-integration.v1"
+FORMAT = "foldgpt.inactive-integration.v2"
 MAGIC = (FORMAT + "\n").encode("ascii")
 GPU_PREFIX = "opt/foldgpt-gpu/mesa-26.2.2-foldgpt5"
 GPU_SHA = "e02091631e5f16efbc3678373b2c048ebf81b10d551caf210d61b1954b7671d4"
@@ -36,8 +37,11 @@ GPU_LINKS = {
     "lib/libGLESv1_CM.so.1": "libGLESv1_CM.so.1.1.0", "lib/libGLESv2.so": "libGLESv2.so.2",
     "lib/libGLESv2.so.2": "libGLESv2.so.2.0.0",
 }
-CONTRACT_PATH = "usr/local/share/foldgpt/launch-contract.v1"
-CONTRACT = ("foldgpt.launch-contract.v1\n"
+LEGACY_CONTRACT_PATH = "usr/local/share/foldgpt/launch-contract.v1"
+CONTEXT_HELPER = "usr/local/lib/foldgpt/foldgpt_agent_context.py"
+CONTEXT_MANIFEST = "usr/local/share/foldgpt/agent-environment.v1.json"
+CONTRACT_PATH = "usr/local/share/foldgpt/launch-contract.v2"
+LEGACY_CONTRACT = ("foldgpt.launch-contract.v1\n"
             "scope=declared-launch-inputs-only\n"
             "guest=/usr/local/bin/foldgpt-session\n"
             "guest-shell=/bin/bash\n"
@@ -52,6 +56,10 @@ CONTRACT = ("foldgpt.launch-contract.v1\n"
             "bridges=android-process-uid\n"
             "android-root=not-required\n"
             "activation=separate-validator-required\n").encode("ascii")
+CONTRACT = LEGACY_CONTRACT.replace(b"foldgpt.launch-contract.v1\n", b"foldgpt.launch-contract.v2\n") + (
+    "agent-context-generator=/" + CONTEXT_HELPER + "\nagent-context-manifest=/" + CONTEXT_MANIFEST + "\n"
+    "agent-context-consumer=local-codex-global-agents-md\nagent-context-selection=first-nonempty-override-then-agents\n"
+    "agent-context-delivery=separate-runtime-observation-required\n").encode("ascii")
 
 
 def digest(data):

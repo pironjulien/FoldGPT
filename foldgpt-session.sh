@@ -7,6 +7,14 @@ export FOLDGPT_CDP_PORT=9223
 export XDG_RUNTIME_DIR="/tmp/runtime-$(id -u)"
 mkdir -p "$XDG_RUNTIME_DIR" "$HOME/.local/state"
 chmod 700 "$XDG_RUNTIME_DIR"
+# Synchronize only FoldGPT's descriptive global AGENTS block before the client
+# starts. The helper resolves the selected guest account and preserves user
+# instructions; it neither alters Codex config nor claims model delivery.
+context_args=(--guest-root / --manifest /usr/local/share/foldgpt/agent-environment.v1.json)
+if [[ -n "${CODEX_HOME:-}" ]]; then
+    context_args+=(--codex-home "$CODEX_HOME")
+fi
+python3 -B /usr/local/lib/foldgpt/foldgpt_agent_context.py "${context_args[@]}"
 timeout 20s python3 /usr/local/lib/foldgpt/foldgpt_keyring.py
 # Keep our driver separate from both Debian Mesa and the official client. This
 # selects libraries; inspect-gpu.py must still verify the client's actual use.

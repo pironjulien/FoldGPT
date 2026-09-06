@@ -10,6 +10,7 @@ import java.util.*;
  * read from this container or calculated from an untrusted download. */
 public final class InactiveIntegrationBundle {
     public static final String FORMAT="foldgpt.inactive-integration.v1";
+    public static final String FORMAT_WITH_CONTEXT="foldgpt.inactive-integration.v2";
     public static final String GPU_PREFIX="opt/foldgpt-gpu/mesa-26.2.2-foldgpt5";
     public static final String GPU_SHA="e02091631e5f16efbc3678373b2c048ebf81b10d551caf210d61b1954b7671d4";
     public static final String XKB="usr/share/X11/xkb";
@@ -20,8 +21,16 @@ public final class InactiveIntegrationBundle {
         +"gpu-prefix=/"+GPU_PREFIX+"\ngpu-driver=zink\nvulkan-icd=/"+GPU_PREFIX+"/share/vulkan/icd.d/freedreno_icd.aarch64.json\n"
         +"cdp-loopback=127.0.0.1:9223\nscale=android-display-density\nbridges=android-process-uid\n"
         +"android-root=not-required\nactivation=separate-validator-required\n";
+    static final String CONTEXT_HELPER="usr/local/lib/foldgpt/foldgpt_agent_context.py";
+    static final String CONTEXT_MANIFEST="usr/local/share/foldgpt/agent-environment.v1.json";
+    static final String CONTEXT_CONTRACT_PATH="usr/local/share/foldgpt/launch-contract.v2";
+    static final String CONTEXT_CONTRACT=CONTRACT.replace("foldgpt.launch-contract.v1\n","foldgpt.launch-contract.v2\n")
+        +"agent-context-generator=/"+CONTEXT_HELPER+"\nagent-context-manifest=/"+CONTEXT_MANIFEST+"\n"
+        +"agent-context-consumer=local-codex-global-agents-md\nagent-context-selection=first-nonempty-override-then-agents\n"
+        +"agent-context-delivery=separate-runtime-observation-required\n";
     public static final int MAX_BYTES=64*1024*1024;
     static final Map<String,Integer> FILES;
+    static final Map<String,Integer> FILES_WITH_CONTEXT;
     static final Map<String,String> LINKS;
     static {
         Map<String,Integer> files=new TreeMap<>();
@@ -34,6 +43,10 @@ public final class InactiveIntegrationBundle {
         for(String name:List.of("share/drirc.d/00-mesa-defaults.conf","share/drirc.d/00-turnip-defaults.conf","share/drirc.d/00-zink-defaults.conf",
                 "share/vulkan/icd.d/freedreno_icd.aarch64.json")) files.put(GPU_PREFIX+"/"+name,0644);
         FILES=Collections.unmodifiableMap(files);
+        Map<String,Integer> contextFiles=new TreeMap<>(files);
+        contextFiles.remove(CONTRACT_PATH);
+        for(String path:List.of(CONTEXT_HELPER,CONTEXT_MANIFEST,CONTEXT_CONTRACT_PATH)) contextFiles.put(path,0644);
+        FILES_WITH_CONTEXT=Collections.unmodifiableMap(contextFiles);
         Map<String,String> links=new TreeMap<>();
         links.put("lib/dri/zink_dri.so","libdril_dri.so"); links.put("lib/libEGL.so","libEGL.so.1"); links.put("lib/libEGL.so.1","libEGL.so.1.0.0");
         links.put("lib/libGL.so","libGL.so.1"); links.put("lib/libGL.so.1","libGL.so.1.2.0");
@@ -59,9 +72,9 @@ public final class InactiveIntegrationBundle {
     }
     final byte[] bytes;
     final NavigableMap<String,Entry> entries;
-    public final String sha256,baseSha256,guestSha256,manifestSha256;
-    private InactiveIntegrationBundle(byte[] data,String sha,String base,String guest,String manifest,NavigableMap<String,Entry> entries) {
-        bytes=data; sha256=sha; baseSha256=base; guestSha256=guest; manifestSha256=manifest; this.entries=entries;
+    public final String format,sha256,baseSha256,guestSha256,manifestSha256;
+    private InactiveIntegrationBundle(byte[] data,String format,String sha,String base,String guest,String manifest,NavigableMap<String,Entry> entries) {
+        bytes=data; this.format=format; sha256=sha; baseSha256=base; guestSha256=guest; manifestSha256=manifest; this.entries=entries;
     }
     public static InactiveIntegrationBundle read(InputStream input,String trustedSha256,long trustedBytes) throws IOException {
         if(trustedSha256==null || !trustedSha256.matches("[0-9a-f]{64}") || trustedBytes<=0 || trustedBytes>MAX_BYTES)
@@ -69,15 +82,19 @@ public final class InactiveIntegrationBundle {
         byte[] bytes=input.readNBytes((int)trustedBytes+1);
         if(bytes.length!=trustedBytes || !hash(bytes).equals(trustedSha256)) throw new IOException("Integration container authentication failed");
         DataInputStream stream=new DataInputStream(new ByteArrayInputStream(bytes));
-        byte[] magic=(FORMAT+"\n").getBytes(StandardCharsets.US_ASCII);
-        if(!Arrays.equals(magic,stream.readNBytes(magic.length))) throw new IOException("Invalid integration framing");
+        byte[] magic=stream.readNBytes((FORMAT+"\n").length());
+        String framing=new String(magic,StandardCharsets.US_ASCII);
+        if(!framing.equals(FORMAT+"\n") && !framing.equals(FORMAT_WITH_CONTEXT+"\n")) throw new IOException("Invalid integration framing");
+        String format=framing.substring(0,framing.length()-1);
+        boolean context=format.equals(FORMAT_WITH_CONTEXT);
+        Map<String,Integer> allowedFiles=context?FILES_WITH_CONTEXT:FILES;
         int length=stream.readInt();
         if(length<=0 || length>512*1024) throw new IOException("Integration manifest exceeds bound");
         byte[] encoded=stream.readNBytes(length);
         if(encoded.length!=length) throw new IOException("Truncated integration manifest");
         for(byte value:encoded) if(value<0 || value==0 || value=='\r') throw new IOException("Integration manifest must be canonical ASCII");
         String[] lines=new String(encoded,StandardCharsets.US_ASCII).split("\n",-1);
-        if(lines.length<8 || !lines[0].equals(FORMAT) || !lines[lines.length-1].isEmpty()) throw new IOException("Invalid integration manifest header");
+        if(lines.length<8 || !lines[0].equals(format) || !lines[lines.length-1].isEmpty()) throw new IOException("Invalid integration manifest header");
         String base=binding(lines[1],"base"),guest=binding(lines[2],"guest"),gpu=binding(lines[3],"gpu");
         if(!gpu.equals(GPU_SHA)) throw new IOException("Only the reviewed foldgpt5 GPU artifact is accepted");
         NavigableMap<String,Entry> entries=new TreeMap<>(); String previous="";
@@ -90,7 +107,7 @@ public final class InactiveIntegrationBundle {
             if(entry.path.compareTo(previous)<=0) throw new IOException("Integration entries must be unique and sorted"); previous=entry.path;
             if(entry.scope.equals("I")) {
                 if(entry.kind.equals("F")) {
-                    if(!Objects.equals(FILES.get(entry.path),entry.mode) || entry.size==0) throw new IOException("Unexpected installed integration file or mode");
+                    if(!Objects.equals(allowedFiles.get(entry.path),entry.mode) || entry.size==0) throw new IOException("Unexpected installed integration file or mode");
                     files.add(entry.path); entry.offset=offset;
                     if((long)offset+entry.size>bytes.length || !hash(bytes,offset,entry.size).equals(entry.sha)) throw new IOException("Integration payload hash or length differs");
                     offset+=entry.size;
@@ -102,7 +119,7 @@ public final class InactiveIntegrationBundle {
             }
             entries.put(entry.path,entry);
         }
-        if(!files.equals(FILES.keySet()) || !links.equals(LINKS.keySet()) || offset!=bytes.length) throw new IOException("Missing payload or trailing integration bytes");
+        if(!files.equals(allowedFiles.keySet()) || !links.equals(LINKS.keySet()) || offset!=bytes.length) throw new IOException("Missing payload or trailing integration bytes");
         for(String path:List.of(XKB,XKB+"/rules/base",XKB+"/rules/evdev")) {
             Entry entry=entries.get(path);
             if(entry==null || !entry.scope.equals("V") || !entry.kind.equals(path.equals(XKB)?"D":"F")) throw new IOException("Required XKB record absent");
@@ -117,9 +134,9 @@ public final class InactiveIntegrationBundle {
                 if(target==null || !target.kind.equals("F")) throw new IOException("XKB native link target is not an inventoried file");
             }
         }
-        Entry contract=entries.get(CONTRACT_PATH);
-        if(!hash(CONTRACT.getBytes(StandardCharsets.US_ASCII)).equals(contract.sha)) throw new IOException("Launch contract differs from runtime integration contract");
-        return new InactiveIntegrationBundle(bytes,trustedSha256,base,guest,hash(encoded),entries);
+        Entry contract=entries.get(context?CONTEXT_CONTRACT_PATH:CONTRACT_PATH);
+        if(!hash((context?CONTEXT_CONTRACT:CONTRACT).getBytes(StandardCharsets.US_ASCII)).equals(contract.sha)) throw new IOException("Launch contract differs from runtime integration contract");
+        return new InactiveIntegrationBundle(bytes,format,trustedSha256,base,guest,hash(encoded),entries);
     }
     static String path(String value) throws IOException {
         if(!value.matches("[A-Za-z0-9_+./-]{1,256}") || value.startsWith("/") || value.endsWith("/")) throw new IOException("Invalid integration path");

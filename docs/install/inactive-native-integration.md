@@ -1,5 +1,12 @@
 # Inactive native integration: scripts, Mesa and XKB
 
+This document retains the **v1 container and v3 combined-preparation evidence**.
+The current assembly tool emits an explicit v2 container with agent-context
+files. Its separate contract, host checks and remaining Android scope are in
+[Inactive agent-context revision](inactive-agent-context.md). Existing v1
+containers remain accepted unchanged; they are never relabeled or upgraded in
+place.
+
 This increment installs the missing guest integration into the **existing leased,
 inactive Debian stage**. It uses native Android Java/filesystem APIs. Neither
 PRoot nor a guest Python process performs the installation or the XKB checks.

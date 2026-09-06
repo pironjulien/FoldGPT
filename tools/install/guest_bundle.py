@@ -31,6 +31,8 @@ SOURCES = {
     "foldgpt_keyring.py": ("payload/usr/local/lib/foldgpt/foldgpt_keyring.py", 0o644),
     "foldgpt_ime.py": ("payload/usr/local/lib/foldgpt/foldgpt_ime.py", 0o644),
     "keyboard-focus.js": ("payload/usr/local/lib/foldgpt/keyboard-focus.js", 0o644),
+    "tools/context/foldgpt_agent_context.py": ("payload/usr/local/lib/foldgpt/foldgpt_agent_context.py", 0o644),
+    "config/agent-context/foldgpt.v1.json": ("payload/usr/local/share/foldgpt/agent-environment.v1.json", 0o644),
     "tools/browser/foldgpt-open.py": ("payload/usr/local/bin/xdg-open", 0o755),
     "tools/install/initialize_keyring.py": ("payload/usr/local/lib/foldgpt/install/initialize_keyring.py", 0o644),
     "tools/install/supervise_keyring.py": ("payload/usr/local/lib/foldgpt/install/supervise_keyring.py", 0o644),

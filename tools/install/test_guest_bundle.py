@@ -53,10 +53,22 @@ class BundleTests(unittest.TestCase):
             path.write_bytes(path.read_bytes().replace(b"\r\n", b"\n"))
         self.assertEqual(self.data, BUNDLE.build(self.root))
         files = BUNDLE.verify(self.data, self.sha)
-        self.assertEqual(len(files), 9)
+        self.assertEqual(len(files), len(BUNDLE.SOURCES) + 1)
         manifest = json.loads(files["manifest.json"])
         self.assertEqual(manifest["format"], "foldgpt.guest-integration.v1")
-        self.assertEqual(len(manifest["files"]), 8)
+        self.assertEqual(len(manifest["files"]), len(BUNDLE.SOURCES))
+
+    def test_real_bundle_retains_context_generator_manifest_and_startup_hook(self):
+        data = BUNDLE.build()
+        files = BUNDLE.verify(data, hashlib.sha256(data).hexdigest())
+        context = json.loads(files["payload/usr/local/share/foldgpt/agent-environment.v1.json"])
+        self.assertEqual(context["schema"], "foldgpt.agent-environment.v1")
+        self.assertFalse(context["clientHost"]["androidRoot"])
+        session = files["payload/usr/local/bin/foldgpt-session"]
+        self.assertIn(b"/usr/local/lib/foldgpt/foldgpt_agent_context.py", session)
+        self.assertLess(session.index(b"foldgpt_agent_context.py"), session.index(b"chatgpt --ozone"))
+        self.assertIn("payload/usr/local/lib/foldgpt/foldgpt_agent_context.py", files)
+        self.assertNotIn("payload/home/julien/.codex/AGENTS.md", files)
 
     def test_never_sweeps_private_or_binary_inputs(self):
         (self.root / "auth.json").write_text("private account fixture")

@@ -2,6 +2,8 @@
 
 ## Unreleased — 2026-09-06
 
+- Deployed the Android host/capability map through the official global AGENTS mechanism and verified its exact loading and answers in two real Fold Desktop tasks with 5.6 Luna. The current map is independent of model choice, preserves user instructions and accurately limits Android APIs. The earlier rejected Astra CLI request remains a separate failure.
+- Added the versioned inactive integration v2 contract for context sources while preserving v1 archives and retry identities. Fifteen JVM tests, eight Python archive tests and two real Linux stage preparations/reopens passed; Android v2 preparation and activation remain unqualified.
 - Verified the native static process lifecycle on Android/Bionic: 20 tests, 104 observations and independent collection of exact APK/source/native identities. The real libc memfd binding fixes the unavailable CPython Android API while preserving kernel seals. This is backend conformance, not normal model task routing.
 - Verified native HTTPS acquisition of the independently authenticated official client 26.901.51231, private cache reuse and unchanged Android cache parent. The new client has not been installed or qualified as an update. Added an explicit French publication readiness plan and recorded remaining live runtime-log errors.
 

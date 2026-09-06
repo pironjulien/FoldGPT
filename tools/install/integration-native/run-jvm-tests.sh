@@ -19,7 +19,7 @@ mkdir "$work/classes" "$work/sources"
 for name in RootfsExtractor RootfsTransaction ProotHardlinkStorage GuestIdentity GuestAccountProvisioner InactiveIntegrationBundle InactiveIntegrationInstaller; do
   cp "$repo/android/app/src/main/java/app/foldgpt/install/$name.java" "$work/sources/"
 done
-for name in RootfsTransactionTest InactiveIntegrationInstallerTest InactiveIntegrationRealArchiveCheck; do
+for name in RootfsTransactionTest InactiveIntegrationInstallerTest InactiveIntegrationRevisionTest InactiveIntegrationRealArchiveCheck; do
   cp "$repo/android/app/src/test/java/app/foldgpt/install/$name.java" "$work/sources/"
 done
 cp "$repo/tools/install/inactive_integration_bundle.py" "$repo/tools/install/integration-native/run-jvm-tests.sh" "$work/sources/"
@@ -27,9 +27,11 @@ javac -cp "$deps/*" -d "$work/classes" "$work/sources/"*.java
 java -version 2> "$work/java-version.txt"
 uname -a > "$work/kernel.txt"
 if [ "$(id -u)" = 0 ]; then
-  /usr/sbin/runuser -u nobody -- java -cp "$work/classes:$deps/*" org.junit.runner.JUnitCore app.foldgpt.install.InactiveIntegrationInstallerTest | tee "$work/junit-result.txt"
+  /usr/sbin/runuser -u nobody -- id > "$work/identity.txt"
+  /usr/sbin/runuser -u nobody -- java -cp "$work/classes:$deps/*" org.junit.runner.JUnitCore app.foldgpt.install.InactiveIntegrationInstallerTest app.foldgpt.install.InactiveIntegrationRevisionTest | tee "$work/junit-result.txt"
 else
-  java -cp "$work/classes:$deps/*" org.junit.runner.JUnitCore app.foldgpt.install.InactiveIntegrationInstallerTest | tee "$work/junit-result.txt"
+  id > "$work/identity.txt"
+  java -cp "$work/classes:$deps/*" org.junit.runner.JUnitCore app.foldgpt.install.InactiveIntegrationInstallerTest app.foldgpt.install.InactiveIntegrationRevisionTest | tee "$work/junit-result.txt"
 fi
 (cd "$work" && sha256sum sources/* > SHA256SUMS)
 destination="$repo/downloads/install/integration-native/$(basename "$work")"

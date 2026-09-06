@@ -1,0 +1,91 @@
+{
+  "schema": "foldgpt.agent-environment.v1",
+  "revision": "2026-09-06.2",
+  "clientHost": {
+    "applicationId": "app.foldgpt",
+    "platform": "Android",
+    "referenceDevice": "Samsung SM-F971B (Fold)",
+    "referenceApi": 37,
+    "architecture": "arm64-v8a",
+    "androidRoot": false,
+    "bootloaderModification": false,
+    "evidence": "docs/verification-2026-09-06.md"
+  },
+  "guest": {
+    "platform": "Debian GNU/Linux ARM64",
+    "mechanism": "PRoot dans le même noyau Android ; pas de machine virtuelle PC",
+    "identitySource": "/etc/foldgpt-user + /etc/passwd + /etc/group",
+    "rootLocation": "Context.getFilesDir()/debian, stockage privé de app.foldgpt",
+    "shell": "/bin/bash",
+    "session": "/usr/local/bin/foldgpt-session",
+    "client": "/usr/lib/chatgpt/ChatGPT",
+    "codex": "/usr/lib/chatgpt/resources/codex",
+    "evidence": "docs/install/guest-identity.md"
+  },
+  "compute": {
+    "cpu": "Les exécutables ARM64 locaux utilisent le CPU du téléphone ; PRoot traduit des chemins et des appels système, sans émuler un CPU x86.",
+    "gpu": "Le rendu local vérifié utilise Adreno 840 via ANGLE, Zink et Turnip, Mesa 26.2.2 foldgpt5. Cela ne prouve pas chaque fonction GPU ni une inférence locale.",
+    "model": "Le modèle sélectionné dans le client est servi à distance par le service configuré. Le rendu et les outils locaux ne signifient pas que ses poids ou son inférence tournent sur le téléphone. Cette carte ne fixe pas de modèle : utiliser l'identité réellement fournie par la tâche et ne pas se présenter comme Astra sur cette seule description.",
+    "gpuPrefix": "/opt/foldgpt-gpu/mesa-26.2.2-foldgpt5",
+    "evidence": "docs/verification-gpu-renderpasses-2026-09-06.md"
+  },
+  "capabilities": [
+    {
+      "id": "display-keyboard-lifecycle",
+      "status": "verified-bounded",
+      "description": "Le service Android FoldRuntimeService lance PRoot et Xlorie ; DISPLAY=:2, xfwm4 gère les fenêtres. /usr/local/bin/foldgpt-session sélectionne les bibliothèques GPU et lance le client officiel. /usr/local/lib/foldgpt/foldgpt_ime.py et keyboard-focus.js raccordent le clavier Samsung aux champs. Un pliage puis retour à une session inactive a été vérifié ; les tâches actives longues, la dictée et tous les dialogues ne sont pas qualifiés.",
+      "evidence": "PUBLICATION.md"
+    },
+    {
+      "id": "keyring",
+      "status": "verified-bounded",
+      "description": "Le pont /usr/local/lib/foldgpt/foldgpt_keyring.py déverrouille la collection GNOME existante au lancement. Son secret est protégé par Android Keystore ; le lancement demande Android déverrouillé. Ne pas recréer une collection existante ni exporter un mot de passe ou un profil pour diagnostiquer le contexte.",
+      "evidence": "docs/install/end-to-end-architecture.md"
+    },
+    {
+      "id": "integrated-browser",
+      "status": "verified-bounded",
+      "description": "Le navigateur intégré de Codex a été piloté par mcp__cua_repl.js sur le Fold : création iab, lecture, clic et retour. N'utiliser cet outil que s'il est réellement exposé dans la tâche ; téléchargements, téléversements et authentification ne sont pas certifiés par ce test.",
+      "evidence": "tools/browser/README.md"
+    },
+    {
+      "id": "external-http-links",
+      "status": "verified-bounded",
+      "description": "Le xdg-open invité transmet HTTP(S) au navigateur Android via le pont natif, lorsque FoldGPT est visible et déverrouillé. Ce pont ouvre un lien ; il ne permet pas de piloter le navigateur Android. Respecter la préférence de Julien : navigateur intégré pour la navigation, externe uniquement sur demande explicite.",
+      "evidence": "tools/browser/README.md"
+    },
+    {
+      "id": "native-files-processes",
+      "status": "diagnostic-only",
+      "description": "Des backends natifs de fichiers, flux et processus statiques ont leurs diagnostics. Leur présence dans les sources ne les rend pas disponibles dans cette tâche et ne qualifie pas un shell arbitraire, un TTY ou tout le sandbox. Utiliser seulement les outils exposés et leur contrat effectif.",
+      "evidence": "tools/executor/native-process-lifecycle.md"
+    },
+    {
+      "id": "installation-updates",
+      "status": "diagnostic-only",
+      "description": "Une installation Debian/client/GPU/coffre inactive est préparée et vérifiée, sans activation. Le téléchargement authentifié du client officiel 26.901.51231 passe ; il ne constitue pas une mise à jour du client actif. Le dépôt APT officiel signé est identifié. L'installation autonome et les mises à jour conservant compte, projets et coffre ne sont pas qualifiées. Les données du prototype restent dans son rootfs : ne pas le traiter comme jetable.",
+      "evidence": "docs/publication-readiness-fr.md"
+    },
+    {
+      "id": "diagnostics",
+      "status": "verified-bounded",
+      "description": "Le diagnostic Configuration signale encore un manifeste primary-runtime HTTP 404 pour Linux ARM64. Python Bionic appartient au superviseur natif de diagnostic ; il ne répare pas le runtime officiel. Les journaux du prototype comprennent HOME/.local/state/foldgpt-ime.log et foldgpt-wm.log dans l'invité, et Context.getFilesDir()/runtime.log côté Android. Les erreurs récentes incluent ps incapable de lire l'heure de démarrage système ; aucun état sans erreur n'est revendiqué.",
+      "evidence": "docs/publication-readiness-fr.md"
+    },
+    {
+      "id": "android-private-apis",
+      "status": "unavailable",
+      "description": "Aucun outil FoldGPT pour SMS, contacts, journal d'appels, notifications privées, localisation, caméra, microphone ou capteurs n'est fourni par ce manifeste. Une future intégration devra être implémentée, exposée, vérifiée et autorisée avant emploi. Ne pas lire ces données ni demander de nouvelles permissions pour établir ce contexte.",
+      "evidence": "docs/agent-environment.md"
+    }
+  ],
+  "rules": [
+    "Distinguer l'hôte Android de l'interface, l'invité Linux et l'environnement effectivement ciblé par chaque outil. Un projet ou un outil distant peut s'exécuter sur un autre hôte.",
+    "Un uname Linux ou un chemin /home ne suffit pas à conclure que l'interface s'exécute sur PC. Inversement, cette description Android ne transforme pas les chemins Windows du poste de développement en chemins du téléphone.",
+    "Les droits root éventuellement simulés par PRoot ne sont pas des droits root Android. Ne jamais rooter le téléphone, déverrouiller son bootloader ou affaiblir ses protections.",
+    "Les chemins /system, /proc et /sys visibles dans l'invité ne prouvent ni une permission Android ni l'existence d'un outil pour les modifier.",
+    "Cette carte est un contexte descriptif versionné, pas une autorisation et pas une déclaration d'outils. Les outils exposés, leurs résultats et les instructions applicables déterminent les actions possibles.",
+    "Les preuves datées décrivent le développement observé le 6 septembre 2026. Revalider les faits susceptibles de changer ; ne pas annoncer ce contexte reçu par le modèle sans preuve de chargement dans la tâche.",
+    "Le raccordement AGENTS.md concerne une session Codex qui charge ce profil local. Il ne prouve pas que les conversations ChatGPT cloud de l'application reçoivent ce texte."
+  ]
+}

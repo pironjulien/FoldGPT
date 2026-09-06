@@ -13,6 +13,10 @@ public final class InactiveIntegrationRealArchiveCheck {
             327673156,958101116,977131520,20240);
         int uid=Integer.parseInt(args[5]),gid=Integer.parseInt(args[6]);
         long started=System.nanoTime();
+        String format;
+        try(InputStream input=Files.newInputStream(archive)) {
+            format=InactiveIntegrationBundle.read(input,args[3],Long.parseLong(args[4])).format;
+        }
         String id="28d0a1490b1e2913c219687f601a312386344597140276d379aab553f775b2fa";
         InactiveIntegrationInstaller.Result first;
         try(RootfsTransaction transaction=RootfsTransaction.open(files,spec,RootfsTransactionTest.POSIX)) {
@@ -38,6 +42,7 @@ public final class InactiveIntegrationRealArchiveCheck {
         System.out.println("ROOT_IDENTITY="+first.rootIdentity);
         System.out.println("REPORT="+first.report);
         System.out.println("REPORT_SHA256="+first.reportSha256);
+        System.out.println("BUNDLE_FORMAT="+format);
         System.out.println("SECONDS="+(System.nanoTime()-started)/1_000_000_000.0);
         System.out.println("PASS: real authenticated Debian, scripts and Mesa files installed and reopened; native XKB exact tree verified; no ARM/GPU execution, client/vault initialization or activation");
     }

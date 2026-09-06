@@ -6,6 +6,7 @@ import struct
 import tarfile
 import tempfile
 import unittest
+from unittest.mock import patch
 
 import inactive_integration_bundle as bundle
 
@@ -51,6 +52,40 @@ def gpu_entries():
 
 
 class InactiveBundleTests(unittest.TestCase):
+    def test_current_guest_sources_build_versioned_context_without_legacy_contract(self):
+        # Only Debian/GPU are tiny archive fixtures; the guest sources and full
+        # builder are real. Fixture pins still pass through authentication.
+        guest = bundle.guest_bundle.build()
+        guest_sha = bundle.digest(guest)
+        sources = bundle.guest_bundle.verify(guest, guest_sha)
+        gpu = archive(gpu_entries())
+        base = archive(xkb_entries())
+        with tempfile.TemporaryDirectory() as work:
+            root = Path(work)
+            for name, data in (("guest", guest), ("gpu", gpu), ("base", base)):
+                (root / name).write_bytes(data)
+            with patch.object(bundle, "BASE_SHA", bundle.digest(base)), patch.object(bundle, "GPU_SHA", bundle.digest(gpu)):
+                data, manifest = bundle.build(root / "guest", guest_sha, root / "gpu", root / "base")
+        self.assertEqual(data[:len(bundle.MAGIC)], b"foldgpt.inactive-integration.v2\n")
+        self.assertEqual(manifest.splitlines()[0], b"foldgpt.inactive-integration.v2")
+        self.assertNotIn(bundle.LEGACY_CONTRACT_PATH.encode(), manifest)
+        installed = {}
+        cursor = len(bundle.MAGIC) + 4 + len(manifest)
+        for line in manifest.decode("ascii").splitlines()[4:]:
+            scope, kind, mode, size, sha, path, _ = line.split("\t")
+            if scope == "I" and kind == "F":
+                payload = data[cursor:cursor + int(size)]
+                self.assertEqual(bundle.digest(payload), sha)
+                installed[path] = (mode, payload)
+                cursor += int(size)
+        self.assertEqual(cursor, len(data))
+        self.assertEqual(len(installed), 22)
+        for path in (bundle.CONTEXT_HELPER, bundle.CONTEXT_MANIFEST):
+            self.assertEqual(installed[path], ("0644", sources["payload/" + path]))
+        self.assertEqual(installed[bundle.CONTRACT_PATH], ("0644", bundle.CONTRACT))
+        self.assertTrue(installed[bundle.CONTRACT_PATH][1].startswith(b"foldgpt.launch-contract.v2\n"))
+        self.assertIn(b"agent-context-delivery=separate-runtime-observation-required\n", installed[bundle.CONTRACT_PATH][1])
+
     def test_xkb_exact_inventory_contains_native_relative_links(self):
         entries = xkb_entries()
         records = bundle.inventory_xkb(archive(entries))
