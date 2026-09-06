@@ -1,7 +1,7 @@
 """Collect an experimental Mesa artifact, corresponding inputs and ELF needs.
 
 Run in WSL/Linux after package-build.sh. This never installs or publishes a
-driver. Its manifest explicitly preserves the pending device-validation status.
+driver. Its manifest limits validation to the recorded development-device probes.
 The upstream archive, FoldGPT patches and build/probe sources accompany the
 binary archive; no Debian/Ubuntu or OpenAI binary is added to the bundle.
 """
@@ -21,21 +21,23 @@ import tempfile
 ROOT = Path(__file__).resolve().parents[2]
 VERSION = "26.2.2"
 SOURCE_SHA256 = "eeb29ca7e56cfaa8e8a79538dcf834e3b18e501c31bef5145e959ea437cc4216"
-# This collector is for the reviewed foldgpt4 candidate only. A new build needs
+# This collector is for the reviewed foldgpt5 candidate only. A new build needs
 # independent review and an updated digest; never package an arbitrary prefix
 # just because its archive paths happen to be safe to extract.
-DRIVER_SHA256 = "7c2f870fbcda62b92fd561d07e02f02a73b7f64c54bc10919fd5fab8945f995b"
-PREFIX = "opt/foldgpt-gpu/mesa-26.2.2-foldgpt4"
+DRIVER_SHA256 = "e02091631e5f16efbc3678373b2c048ebf81b10d551caf210d61b1954b7671d4"
+PREFIX = "opt/foldgpt-gpu/mesa-26.2.2-foldgpt5"
 PATCHES = (
     "mesa-pseudodrm-dri3.patch", "mesa-pseudodrm-wsi.patch",
     "mesa-kopper-pixmap-import.patch", "mesa-glx-randr-rate.patch",
     "mesa-kgsl-calibrated-timestamps.patch",
+    "mesa-tc-renderpass-transition.patch", "mesa-zink-render-area.patch",
 )
 SOURCES = (
     "prepare-build.sh", "build-mesa.sh", "package-build.sh",
     "build-timestamp-probe.sh", "build-present-probe.sh",
     "vulkan-clear-probe.c", "vulkan-timestamp-probe.c", "glx-clear-probe.c",
     "glx-present-probe.c", "glx-tfp-probe.c", "package-review-bundle.py",
+    "zink-partial-resolve-probe.c",
     "deploy-test-prefix.py",
 )
 
@@ -105,7 +107,7 @@ def collect():
     provided = {name for item in elf for name in item["soname"]}
     manifest = {
         "schemaVersion": 1,
-        "status": "experimental candidate; device validation pending",
+        "status": "selected development driver; bounded device probes passed",
         "mesaVersion": VERSION, "prefix": "/" + PREFIX,
         "reviewedBinarySha256": DRIVER_SHA256,
         "upstream": {"url": f"https://archive.mesa3d.org/mesa-{VERSION}.tar.xz",
@@ -121,8 +123,8 @@ def collect():
     }
     files["manifest.json"] = (json.dumps(manifest, indent=2, sort_keys=True) + "\n").encode()
     files["README.txt"] = (
-        "FoldGPT Mesa review bundle — experimental candidate\n\n"
-        "This is not an installable FoldGPT release or a validated driver release.\n"
+        "FoldGPT Mesa review bundle — selected development driver\n\n"
+        "Bounded Adreno device regressions pass; this is not an installable FoldGPT release.\n"
         "The untouched upstream source archive, ordered patches, FoldGPT build\n"
         "scripts/probes and licenses accompany the exact candidate binary archive.\n"
         "The manifest lists ELF dependencies and symbol versions. Resolve them\n"
