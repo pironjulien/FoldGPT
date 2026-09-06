@@ -9,5 +9,11 @@
             <property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
                 android:value="ADB-only fixed offline Codex confinement diagnostic" />
         </service>
+        <service android:name="app.foldgpt.NativeRunnerProbeService" android:process=":nativeRunnerProbe"
+            android:exported="true" android:permission="android.permission.DUMP"
+            android:foregroundServiceType="specialUse">
+            <property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="ADB-only fixed native runner confinement diagnostic" />
+        </service>
     </application>
 </manifest>

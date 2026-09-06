@@ -2,6 +2,8 @@
 
 ## Unreleased — 2026-09-06
 
+- Implemented the native landlock-basic-data-v1 process backend and strict streaming client. Actual Linux shell, security and client tests pass. Eight native executable cases also pass under the Fold's real Zygote context, including denied access, failed exec, allocation/virtual-address limits, cancellation and descendant cleanup. Android Scudo remains enabled with its measured address reservation accounted for. This is not the complete managed Codex executor.
+
 - Verified FoldGPT restart with both old Termux applications disabled, then removed those packages for user 0 while preserving their private data and verified original APK backups. FoldGPT starts without them. Replaced the integrated display notification, disconnected screen and help with application-owned FoldGPT UI; Android confirms a silent low-importance display channel.
 - Passed a real offline official Codex 0.153.4 command/exec fixture under Landlock/seccomp on the Fold, with four permitted opens, denied protected-file writes and independent native verification. Added bounded scratch fchmod and the observed private Rust spawn channel. This does not complete the production executor; an intermittent PRoot temporary-directory startup failure remains documented.
 - Corrected memfd/ashmem detection before DMA-BUF synchronization without swallowing exporter failures. Rebuilt and installed Xlorie, selected the tested Mesa foldgpt4 revision, and verified GPU composition, GLX/Present/pixmap tests and the visible File menu. No application frame-rate claim is made. See `docs/verification-2026-09-06.md`.
