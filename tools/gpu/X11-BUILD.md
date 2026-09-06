@@ -14,7 +14,11 @@ upstream's patch helper does not propagate patch failures.
 
 The versioned `termux-x11-dmabuf-sync.patch` is applied or verified in the source
 copy with `-p5`. A clean public clone therefore does not depend on dirty vendor
-files. UTF-8 text line endings are normalized in the copy, with original hashes
+files. The incremental `termux-x11-dmabuf-memfd.patch` is then applied and verified
+with zero context fuzz. A snapshot already containing it is first reverted to
+the base for verification, then updated again; the vendor checkout is untouched.
+Both patches and their SHA-256 hashes are retained in the build artifacts.
+UTF-8 text line endings are normalized in the copy, with original hashes
 preserved. NTFS snapshot I/O uses Windows Python when available under WSL, then a
 tar transfer moves the prepared sources to ext4 for compilation.
 
@@ -64,11 +68,13 @@ patch/source hashes, library dependencies, Android page alignment, JNI exports
 and which library the APK actually packages, then test rendering on the Fold.
 
 The separate Windows `build-dmabuf-sync-probe.ps1` extracts its helper header
-directly from the complete new-file hunk in the same tracked patch. It validates
-the hunk and records header/patch hashes; it does not require a patched vendor
-checkout. Its output was also compiled from a minimal tree without `vendor`.
+directly from the complete new-file hunk in the base tracked patch, then applies
+and reverse-checks the same memfd correction using Git without repository
+discovery. It validates the hunk and records the final header and both patch
+hashes; it does not require a patched vendor checkout. The base probe previously
+compiled from a minimal tree without `vendor`.
 
-## Verified candidate, 2026-09-06
+## Earlier candidate, superseded 2026-09-06
 
 The candidate built from upstream commit
 `9df8b767645aa0d0a2f2576767449df55b41962f` and FoldGPT patch SHA-256
@@ -97,3 +103,47 @@ reviewed correction files exactly after text line-ending normalization.
 
 These checks qualify a native build candidate. Device rendering, DMA-BUF runtime
 behavior and performance still require validation on the Fold.
+
+The subsequent real-device probe found that this earlier helper rejected memfd
+buffers: Android returned `EACCES` for `DMA_BUF_IOCTL_SYNC`, rather than the
+`ENOTTY` the original classification expected. It is superseded by the candidate
+below.
+
+## Memfd correction and real-device cache API test, 2026-09-06
+
+The incremental patch identifies ordinary shared memory positively: a regular
+file on tmpfs for memfd, or the ashmem character device's `ASHMEM_GET_SIZE` API
+for legacy Android shared memory. An unknown descriptor must pass the real
+DMA-BUF sync ioctl. Neither `EACCES` nor `ENOTTY` is converted into success.
+Some Android policies also deny `fstatfs` on a DMA-BUF; missing metadata never
+classifies it as ordinary memory and does not prevent its real sync operation.
+
+The Fold probe ran as the app's UID through `run-as`, with the measured SELinux
+domain `runas_app`. It verified 16 write/read cycles using duplicated mappings
+for each of `ASharedMemory`, `memfd` and a buffer allocated from the system DMA
+heap. An invalid descriptor and `/dev/null` were rejected. The real DMA-BUF
+exporter's `EINVAL` for invalid sync flags was preserved both before and after
+descriptor identification. This is a CPU/cache API test in that measured
+domain, not yet a Zygote app-service or GPU presentation test.
+
+```text
+downloads/gpu/dmabuf-sync-probe
+SHA256 40049dee0bc665d0e2297ac4c4588de04f853884b4363d029d8ff41114b1e099
+downloads/gpu/dmabuf-sync-header/device-probe.log
+```
+
+The full X11 build completed all 535 steps and its verification directly:
+
+```text
+downloads/gpu/x11/build-fw8VYyeF/artifact/libXlorie.so
+SHA256 94b09f06b8f9508be587266f5400d5a360fc787c69788310a2fa2b411783369b
+Incremental patch SHA256 bd78484d92e88e49964d1f8a5783cb4d40e94b4f216745bc3d0d1deec04ec385
+```
+
+It retains the base patch and upstream revision above, all 1,986 exported
+symbols and the same eight Android dependencies. AArch64, `JNI_OnLoad` and
+16 KiB load alignment passed. Clean upstream sources plus both patches produced
+the same helper bytes as the device probe; reversing/reapplying the incremental
+patch restored the exact reviewed source hashes. The vendor checkout and APK
+were not changed by this build. The candidate still needs installation and
+GLX/Present/texture-from-pixmap and desktop rendering tests before release.

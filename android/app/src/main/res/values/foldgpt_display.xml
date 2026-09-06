@@ -1,0 +1,30 @@
+<resources>
+    <string name="foldgpt_name" translatable="false">FoldGPT</string>
+    <string name="lorie_app_name" translatable="false">FoldGPT</string>
+    <string name="foldgpt_display_channel">Affichage du bureau</string>
+    <string name="foldgpt_display_notification">Commandes de l’affichage du bureau</string>
+    <string name="foldgpt_display_help_title">Le bureau FoldGPT</string>
+    <string name="foldgpt_display_help">Cette fenêtre affiche le bureau sur l’écran intérieur. Si « Bureau non connecté » reste affiché, la connexion au moteur n’est pas établie.\n\n« Fermer le bureau » ferme uniquement cette fenêtre. La commande « Arrêter » de la notification « Espace Linux actif » arrête Linux et ses tâches.\n\nLes réglages du clavier, du tactile et de l’affichage restent accessibles dans « Réglages de l’affichage ». Le moteur d’affichage est intégré à FoldGPT.</string>
+    <string name="not_connected">Bureau non connecté</string>
+    <string name="preferences_button_text">Réglages de l’affichage</string>
+    <string name="help_button_text">Aide</string>
+    <string name="exit_button_text">Fermer le bureau</string>
+    <string name="lorie_notification_content_text">Commandes de l’affichage du bureau</string>
+    <string name="lorie_notification_open_preferences">Réglages</string>
+    <string name="lorie_notification_exit">Fermer le bureau</string>
+    <string name="lorie_notification_restart_activity">Rouvrir le bureau</string>
+    <string name="lorie_notification_toggle_soft_keyboard">Afficher / masquer le clavier</string>
+    <string name="lorie_notification_toggle_additional_key_bar">Touches supplémentaires</string>
+    <string name="lorie_notification_release_pointer_and_keyboard_capture">Libérer clavier et pointeur</string>
+    <string name="lorie_notification_toggle_fullscreen">Plein écran</string>
+    <string name="lorie_pref_main">Réglages de l’affichage FoldGPT</string>
+    <string name="lorie_pref_output">Affichage</string>
+    <string name="lorie_pref_pointer">Pointeur</string>
+    <string name="lorie_pref_kbd">Clavier</string>
+    <string name="lorie_pref_other">Autres réglages</string>
+    <string name="lorie_pref_version">Moteur d’affichage — version</string>
+    <string name="lorie_pref_ekbar">Touches supplémentaires</string>
+    <string name="lorie_pref_userActions">Gestes et commandes</string>
+    <string name="foldgpt_key_interceptor">FoldGPT — raccourcis clavier</string>
+    <string name="extra_keys_config_desc">Configurez la rangée de touches supplémentaires avec un tableau JSON.\n\nMETA : touche Meta\nKEYBOARD : afficher ou masquer le clavier\nPREFERENCES : ouvrir les réglages\nMOUSE_HELPER : commandes du pointeur\nSTYLUS_HELPER : commandes du stylet\nZOOM_IN, ZOOM_OUT, ZOOM_RESET : zoom\nEXIT : fermer la fenêtre du bureau.\n\nExemple : [[\"ESC\", \"TAB\", \"CTRL\", \"ALT\", \"KEYBOARD\"]]</string>
+</resources>

@@ -282,24 +282,29 @@ static int notification_filter(void) {
         ALLOW_SYSCALL(TIOCGWINSZ),
         BPF_STMT(BPF_RET | BPF_K, SECCOMP_RET_USER_NOTIF),
         BPF_STMT(BPF_LD | BPF_W | BPF_ABS, offsetof(struct seccomp_data, nr)),
-        /* Tokio's signal self-pipe is an unnamed Unix socket pair. It cannot
-         * connect to a host service; socket/connect/bind remain refused. */
-        BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, SYS_socketpair, 0, 9),
+        /* Tokio's signal self-pipe and Rust's process-spawn error channel are
+         * unnamed Unix pairs (STREAM and SEQPACKET respectively). These only
+         * create private endpoints; socket/connect/bind remain refused. */
+        BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, SYS_socketpair, 0, 13),
         BPF_STMT(BPF_LD | BPF_W | BPF_ABS, offsetof(struct seccomp_data, args[0])),
         BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, AF_UNIX, 1, 0),
-        BPF_STMT(BPF_RET | BPF_K, SECCOMP_RET_ERRNO | EPERM),
+        BPF_STMT(BPF_RET | BPF_K, SECCOMP_RET_USER_NOTIF),
         BPF_STMT(BPF_LD | BPF_W | BPF_ABS, offsetof(struct seccomp_data, args[1])),
         BPF_STMT(BPF_ALU | BPF_AND | BPF_K, ~(SOCK_CLOEXEC | SOCK_NONBLOCK)),
-        BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, SOCK_STREAM, 0, 1),
+        BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, SOCK_STREAM, 2, 0),
+        BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, SOCK_SEQPACKET, 1, 0),
+        BPF_STMT(BPF_RET | BPF_K, SECCOMP_RET_USER_NOTIF),
+        BPF_STMT(BPF_LD | BPF_W | BPF_ABS, offsetof(struct seccomp_data, args[2])),
+        BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, 0, 0, 1),
         BPF_STMT(BPF_RET | BPF_K, SECCOMP_RET_ALLOW),
-        BPF_STMT(BPF_RET | BPF_K, SECCOMP_RET_ERRNO | EPERM),
+        BPF_STMT(BPF_RET | BPF_K, SECCOMP_RET_USER_NOTIF),
         BPF_STMT(BPF_LD | BPF_W | BPF_ABS, offsetof(struct seccomp_data, nr)),
         /* Only the calling process's limits; never another PID's limits. */
         BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, SYS_prlimit64, 0, 5),
         BPF_STMT(BPF_LD | BPF_W | BPF_ABS, offsetof(struct seccomp_data, args[0])),
         BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, 0, 0, 1),
         BPF_STMT(BPF_RET | BPF_K, SECCOMP_RET_ALLOW),
-        BPF_STMT(BPF_RET | BPF_K, SECCOMP_RET_ERRNO | EPERM),
+        BPF_STMT(BPF_RET | BPF_K, SECCOMP_RET_USER_NOTIF),
         BPF_STMT(BPF_LD | BPF_W | BPF_ABS, offsetof(struct seccomp_data, nr)),
         BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, SYS_fchmodat, 0, 1),
         BPF_STMT(BPF_RET | BPF_K, SECCOMP_RET_USER_NOTIF),
@@ -336,6 +341,9 @@ static int notification_filter(void) {
         ALLOW_SYSCALL(SYS_writev),
         ALLOW_SYSCALL(SYS_close),
         ALLOW_SYSCALL(SYS_sendmsg),
+        /* send()/recv() use sendto/recvfrom on ARM64. Only the unnamed
+         * socketpairs above are available; external sockets remain denied. */
+        ALLOW_SYSCALL(SYS_sendto),
         ALLOW_SYSCALL(SYS_recvfrom),
         ALLOW_SYSCALL(SYS_execve),
         ALLOW_SYSCALL(SYS_exit),
@@ -576,12 +584,22 @@ static void child_probe(int channel, int workspace, int base, int outside, pid_t
     errno = 0;
     int mode_result = syscall(SYS_fchmodat, AT_FDCWD, protected_mode_path, 0777);
     worker_check("workspace_chmod_denied", mode_result < 0 && errno == EPERM, errno);
+    int mode_fd = open(protected_mode_path, O_RDONLY | O_CLOEXEC);
+    worker_check("workspace_mode_fd_open", mode_fd >= 0, errno);
+    mode_result = syscall(SYS_fchmod, mode_fd, 0777);
+    worker_check("workspace_fchmod_denied", mode_result < 0 && errno == EPERM, errno);
+    close(mode_fd);
     mode_path_length = snprintf(protected_mode_path, sizeof(protected_mode_path),
                                 "%s/victim.txt", outside_path);
     if (mode_path_length < 0 || mode_path_length >= (int)sizeof(protected_mode_path)) _exit(1);
     errno = 0;
     mode_result = syscall(SYS_fchmodat, AT_FDCWD, protected_mode_path, 0777);
     worker_check("outside_chmod_denied", mode_result < 0 && errno == EPERM, errno);
+    mode_fd = open(protected_mode_path, O_RDONLY | O_CLOEXEC);
+    worker_check("outside_mode_fd_open", mode_fd >= 0, errno);
+    mode_result = syscall(SYS_fchmod, mode_fd, 0777);
+    worker_check("outside_fchmod_denied", mode_result < 0 && errno == EPERM, errno);
+    close(mode_fd);
 
     errno = 0;
     denied = (int)syscall(SYS_openat2, AT_FDCWD, "unbrokered.txt", &direct, sizeof(direct));
@@ -688,6 +706,52 @@ static void scratch_chmod(int listener, const struct seccomp_notif *request) {
     else ++broker_denials;
 }
 
+/* The official server changes permissions through an already open descriptor.
+ * Reopen that object once, then match its pinned inode against an independently
+ * resolved path below this probe's private scratch. Operate on our descriptor;
+ * never CONTINUE the tracee's mutable FD table. This fixture excludes external
+ * scratch writers and does not advertise arbitrary-workspace chmod mediation.
+ */
+static void scratch_fchmod(int listener, const struct seccomp_notif *request) {
+    uint64_t number = request->data.args[0], mode = request->data.args[1];
+    if (number > INT_MAX || (mode & ~0777ULL)) { deny_request(listener, request->id, EPERM); return; }
+    if (!notification_valid(listener, request->id)) return;
+    char proc_path[128], pinned_path[128], path[PATH_MAX];
+    snprintf(proc_path, sizeof(proc_path), "/proc/%u/fd/%d", request->pid, (int)number);
+    int fd = open(proc_path, O_RDONLY | O_NONBLOCK | O_CLOEXEC);
+    if (fd < 0) { deny_request(listener, request->id, errno); return; }
+    snprintf(pinned_path, sizeof(pinned_path), "/proc/self/fd/%d", fd);
+    ssize_t length = readlink(pinned_path, path, sizeof(path) - 1);
+    struct stat object, confirmed;
+    int error = 0, proof = -1;
+    if (length < 0 || length >= (ssize_t)sizeof(path) - 1 || fstat(fd, &object) < 0) error = EPERM;
+    else {
+        path[length] = 0;
+        const char *relative = below_root(path, scratch_path);
+        if (!relative || !valid_relative_path(relative) || object.st_uid != getuid()
+                || !(S_ISREG(object.st_mode) || S_ISDIR(object.st_mode))
+                || (S_ISREG(object.st_mode) && object.st_nlink != 1)) error = EPERM;
+        else {
+            struct open_how how = {.flags = O_PATH | O_CLOEXEC,
+                .resolve = RESOLVE_BENEATH | RESOLVE_NO_SYMLINKS | RESOLVE_NO_XDEV};
+            proof = syscall(SYS_openat2, scratch_directory, relative, &how, sizeof(how));
+            if (proof < 0 || fstat(proof, &confirmed) < 0
+                    || object.st_dev != confirmed.st_dev || object.st_ino != confirmed.st_ino
+                    || object.st_mode != confirmed.st_mode) error = EPERM;
+        }
+    }
+    if (proof >= 0) close(proof);
+    if (!error && notification_valid(listener, request->id)) {
+        if (fchmod(fd, (mode_t)mode) < 0) error = errno;
+    } else if (!error) { close(fd); return; }
+    close(fd);
+    struct seccomp_notif_resp response = {.id = request->id, .val = 0, .error = -error};
+    if (ioctl(listener, SECCOMP_IOCTL_NOTIF_SEND, &response) < 0 && errno != ENOENT)
+        fail("return bounded scratch fchmod result");
+    if (!error) ++scratch_mode_changes;
+    else ++broker_denials;
+}
+
 static void handle_notification(int listener, int workspace, pid_t child,
                                 const struct seccomp_notif *request) {
     /* Copy scalar arguments from the received kernel snapshot, never from
@@ -706,6 +770,10 @@ static void handle_notification(int listener, int workspace, pid_t child,
         deny_request(listener, id, EPERM);
         return;
     }
+    if (request->data.nr == SYS_fchmod) {
+        scratch_fchmod(listener, request);
+        return;
+    }
     if (request->data.nr == SYS_fchmodat
 #ifdef SYS_chmod
             || request->data.nr == SYS_chmod
@@ -716,6 +784,11 @@ static void handle_notification(int listener, int workspace, pid_t child,
     }
     if (request->data.nr != SYS_openat) {
         int number = request->data.nr;
+        if (number == SYS_socketpair || number == SYS_prlimit64)
+            fprintf(stderr, "scalar_request_denied=%d args=%llu,%llu,%llu\n", number,
+                    (unsigned long long)request->data.args[0],
+                    (unsigned long long)request->data.args[1],
+                    (unsigned long long)request->data.args[2]);
         if ((number < 0 && !reported_negative_syscall)
                 || (number >= 0 && number < (int)sizeof(reported_syscalls)
                     && !reported_syscalls[number]))
