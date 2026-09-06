@@ -5,7 +5,7 @@ repo=$(cd "$(dirname "$0")/../.." && pwd)
 bash "$repo/tools/gpu/prepare-build.sh"
 work="$repo/downloads/gpu"
 version=26.2.2
-prefix="/opt/foldgpt-gpu/mesa-$version-foldgpt4"
+prefix="/opt/foldgpt-gpu/mesa-$version-foldgpt5"
 build="$work/build-$version"
 # APT's unprivileged downloader needs real POSIX chmod semantics. Its cache stays
 # on WSL's Linux filesystem; source, sysroot and deliverables stay in C:\Dev.

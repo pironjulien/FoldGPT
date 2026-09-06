@@ -13,7 +13,7 @@ import sys
 import uuid
 
 ROOT = Path(__file__).resolve().parents[2]
-PREFIX = "/opt/foldgpt-gpu/mesa-26.2.2-foldgpt4"
+PREFIX = "/opt/foldgpt-gpu/mesa-26.2.2-foldgpt5"
 
 
 def main():

@@ -10,7 +10,7 @@ chmod 700 "$XDG_RUNTIME_DIR"
 timeout 20s python3 /usr/local/lib/foldgpt/foldgpt_keyring.py
 # Keep our driver separate from both Debian Mesa and the official client. This
 # selects libraries; inspect-gpu.py must still verify the client's actual use.
-gpu_prefix=/opt/foldgpt-gpu/mesa-26.2.2-foldgpt4
+gpu_prefix=/opt/foldgpt-gpu/mesa-26.2.2-foldgpt5
 if [[ -d "$gpu_prefix" ]]; then
     for required in lib/libGL.so.1 lib/libEGL.so.1 lib/libvulkan_freedreno.so share/vulkan/icd.d/freedreno_icd.aarch64.json; do
         if [[ ! -r "$gpu_prefix/$required" ]]; then

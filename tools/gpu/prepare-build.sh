@@ -42,12 +42,12 @@ if [ ! -d "$work/src/mesa-$version" ]; then
 fi
 # Query the server's real DRI3 capabilities on KGSL's pseudo-DRM GLX path too.
 # Upstream guards that query by kernel DRM, which leaves the value false on KGSL.
-for mesa_patch in "$repo/tools/gpu/mesa-pseudodrm-dri3.patch" "$repo/tools/gpu/mesa-pseudodrm-wsi.patch" "$repo/tools/gpu/mesa-kopper-pixmap-import.patch" "$repo/tools/gpu/mesa-glx-randr-rate.patch" "$repo/tools/gpu/mesa-kgsl-calibrated-timestamps.patch"; do
-if patch --directory="$work/src/mesa-$version" -p1 --dry-run --forward < "$mesa_patch" >/dev/null 2>&1; then
-    patch --directory="$work/src/mesa-$version" -p1 --forward < "$mesa_patch"
+for mesa_patch in "$repo/tools/gpu/mesa-pseudodrm-dri3.patch" "$repo/tools/gpu/mesa-pseudodrm-wsi.patch" "$repo/tools/gpu/mesa-kopper-pixmap-import.patch" "$repo/tools/gpu/mesa-glx-randr-rate.patch" "$repo/tools/gpu/mesa-kgsl-calibrated-timestamps.patch" "$repo/tools/gpu/mesa-tc-renderpass-transition.patch" "$repo/tools/gpu/mesa-zink-render-area.patch"; do
+if patch --fuzz=0 --directory="$work/src/mesa-$version" -p1 --dry-run --forward < "$mesa_patch" >/dev/null 2>&1; then
+    patch --fuzz=0 --directory="$work/src/mesa-$version" -p1 --forward < "$mesa_patch"
 else
     # Already-applied is the only accepted alternative, not an unknown conflict.
-    patch --directory="$work/src/mesa-$version" -p1 --dry-run --reverse < "$mesa_patch" >/dev/null
+    patch --fuzz=0 --directory="$work/src/mesa-$version" -p1 --dry-run --reverse < "$mesa_patch" >/dev/null
 fi
 done
 if [ ! -x "$work/build-venv/bin/python" ]; then
