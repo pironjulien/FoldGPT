@@ -67,3 +67,23 @@ Example Domain. A second request while FoldGPT was behind Chrome failed with
 `invalid_url`. The APK installed on the phone matched the locally built hash.
 The official client's internal browser separately displayed Example Domain;
 that manual navigation does not establish browser automation by a Codex task.
+
+The later 2026-09-06 test used the existing local Codex test conversation on the
+Fold. Two genuine model turns invoked `mcp__cua_repl.js`: first
+`cua.createBrowserTab("iab", "https://example.com/", { visible: true })`, then
+`tab.getAXState()`, an actual `tab.click(4)` on the observed Learn more link, and
+`tab.back()`. Tool results observed **Example Domains** at
+`https://www.iana.org/help/example-domains`, followed by **Example Domain** at
+`https://example.com/`. An independent CDP read of the resulting page confirmed
+its URL, title, heading and link destination. This establishes integrated-browser
+creation, page reading, real link interaction and history navigation by Codex
+on the Fold; the model used no shell or direct HTTP fetch for these actions.
+
+Private evidence: `downloads/browser/task-proof-20260906/` contains the selected
+tool-call/result transcript, final browser image, independent page metadata and
+runtime log. The official client initially logged an unavailable route, then
+recovered and attached the browser guest. It also logged a failed PiP metadata
+upsert; these test results do not certify PiP or all browser features. Downloads,
+uploads, authentication, local development sites and external-browser automation
+were not exercised by these two read-only turns. The external Android opener
+above remains a separate path.
