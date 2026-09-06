@@ -111,6 +111,24 @@ static void require(int condition, const char *message) {
     if (!condition) fail(message);
 }
 
+static struct timespec deadline_after_seconds(unsigned int seconds) {
+    struct timespec deadline;
+    require(clock_gettime(CLOCK_MONOTONIC, &deadline) == 0, "read monotonic deadline clock");
+    deadline.tv_sec += seconds;
+    return deadline;
+}
+
+static int milliseconds_until(const struct timespec *deadline) {
+    struct timespec now;
+    require(clock_gettime(CLOCK_MONOTONIC, &now) == 0, "read monotonic remaining time");
+    int64_t remaining = ((int64_t)deadline->tv_sec - now.tv_sec) * 1000000000LL
+                      + deadline->tv_nsec - now.tv_nsec;
+    if (remaining <= 0) return 0;
+    // Round up so poll cannot expire before the absolute deadline.
+    int64_t milliseconds = (remaining + 999999) / 1000000;
+    return milliseconds > INT_MAX ? INT_MAX : (int)milliseconds;
+}
+
 static int write_all(int fd, const void *data, size_t size) {
     const unsigned char *cursor = data;
     while (size) {
@@ -165,7 +183,7 @@ static int send_fd(int socket_fd, int fd) {
     return syscall(SYS_sendmsg, socket_fd, &message, MSG_NOSIGNAL) == 1 ? 0 : -1;
 }
 
-static int receive_fd(int socket_fd) {
+static int receive_fd(int socket_fd, const struct timespec *deadline) {
     char payload;
     union { struct cmsghdr alignment; char bytes[CMSG_SPACE(sizeof(int))]; } control;
     memset(&control, 0, sizeof(control));
@@ -173,8 +191,28 @@ static int receive_fd(int socket_fd) {
     struct msghdr message = {.msg_iov = &vector, .msg_iovlen = 1,
                             .msg_control = control.bytes, .msg_controllen = sizeof(control.bytes)};
     ssize_t received;
-    do { received = recvmsg(socket_fd, &message, MSG_CMSG_CLOEXEC); }
-    while (received < 0 && errno == EINTR);
+    for (;;) {
+        int remaining = milliseconds_until(deadline);
+        if (!remaining) { errno = ETIMEDOUT; return -1; }
+        struct pollfd event = {.fd = socket_fd, .events = POLLIN};
+        int ready = poll(&event, 1, remaining);
+        if (ready < 0) {
+            if (errno == EINTR) continue;
+            return -1;
+        }
+        if (!ready) continue;
+        if (event.revents & POLLNVAL) { errno = EBADF; return -1; }
+        message.msg_controllen = sizeof(control.bytes);
+        message.msg_flags = 0;
+        // Never block between readiness notification and receipt. A signal or
+        // transient readiness change must not restart the absolute deadline.
+        received = recvmsg(socket_fd, &message, MSG_CMSG_CLOEXEC | MSG_DONTWAIT);
+        if (received < 0) {
+            if (errno == EINTR || errno == EAGAIN || errno == EWOULDBLOCK) continue;
+            return -1;
+        }
+        break;
+    }
     if (received != 1 || payload != 'L' || (message.msg_flags & (MSG_CTRUNC | MSG_TRUNC))) {
         errno = EPROTO;
         return -1;
@@ -767,20 +805,21 @@ static void handle_notification(int listener, int workspace, pid_t child,
     }
 }
 
-static int broker_loop(int listener, int workspace, pid_t child) {
+static int broker_loop(int listener, int workspace, pid_t child,
+                       const struct timespec *deadline) {
     struct seccomp_notif_sizes sizes;
     require(syscall(SYS_seccomp, SECCOMP_GET_NOTIF_SIZES, 0, &sizes) == 0,
             "read seccomp notification sizes");
     require(sizes.seccomp_notif >= sizeof(struct seccomp_notif), "notification ABI size");
     struct seccomp_notif *request = calloc(1, sizes.seccomp_notif);
     require(request != NULL, "allocate notification");
-    const time_t deadline = time(NULL) + PROBE_TIMEOUT_SECONDS;
     int status = 0;
     for (;;) {
         pid_t waited = waitpid(child, &status, WNOHANG);
         if (waited == child) break;
         if (waited < 0 && errno != EINTR) fail("wait for probe worker");
-        if (time(NULL) >= deadline) {
+        int remaining = milliseconds_until(deadline);
+        if (!remaining) {
             kill(-child, SIGKILL);
             kill(child, SIGKILL);
             while (waitpid(child, &status, 0) < 0 && errno == EINTR) {}
@@ -789,7 +828,7 @@ static int broker_loop(int listener, int workspace, pid_t child) {
             return 1;
         }
         struct pollfd event = {.fd = listener, .events = POLLIN};
-        int ready = poll(&event, 1, 250);
+        int ready = poll(&event, 1, remaining < 250 ? remaining : 250);
         if (ready < 0 && errno == EINTR) continue;
         require(ready >= 0, "poll broker listener");
         if (!ready || !(event.revents & POLLIN)) continue;
@@ -812,7 +851,7 @@ static int broker_loop(int listener, int workspace, pid_t child) {
  * reused, and no other thread/signal handler here can reap it between the check
  * and signal. Never trust mutable /proc ancestry to authorize a kill. */
 static int reap_owned_descendants(void) {
-    const time_t deadline = time(NULL) + 5;
+    const struct timespec deadline = deadline_after_seconds(5);
     unsigned int terminated = 0;
     for (;;) {
         int status;
@@ -842,7 +881,7 @@ static int reap_owned_descendants(void) {
             else require(errno == ESRCH, "terminate owned probe descendant");
         }
         closedir(processes);
-        if (time(NULL) >= deadline) {
+        if (!milliseconds_until(&deadline)) {
             fprintf(stderr, "owned descendant cleanup timed out\n");
             return 1;
         }
@@ -858,6 +897,8 @@ static void path_join(char out[PATH_MAX], const char *base, const char *suffix) 
 
 int main(int argc, char **argv) {
     setbuf(stdout, NULL);
+    // Startup/listener receipt and broker execution share one native budget.
+    const struct timespec deadline = deadline_after_seconds(PROBE_TIMEOUT_SECONDS);
 #ifdef __ANDROID__
     const int expected_args = 3;
     const char *usage = "APP_DATA_DIR APK_NATIVE_DIR";
@@ -947,7 +988,7 @@ int main(int argc, char **argv) {
         _exit(1);
     }
     close(channels[1]);
-    int listener = receive_fd(channels[0]);
+    int listener = receive_fd(channels[0], &deadline);
     close(channels[0]);
     if (listener < 0) {
         int saved = errno;
@@ -958,7 +999,7 @@ int main(int argc, char **argv) {
         errno = saved;
         fail("receive worker notification listener");
     }
-    int failed = broker_loop(listener, workspace, child);
+    int failed = broker_loop(listener, workspace, child, &deadline);
     close(listener);
     failed |= reap_owned_descendants();
     printf("workspace_grants=%u descendant_workspace_grants=%u scratch_grants=%u broker_denials=%u\n",

@@ -2,6 +2,7 @@
 
 ## Unreleased — 2026-09-06
 
+- Serialized debug Codex probe completion with Android service starts and bound listener receipt, execution and cleanup to monotonic deadlines. These lifecycle changes still need their Android runtime test.
 - Built the complete corrected Xlorie library with official Linux NDK r29, preserving case-sensitive header lookup on ext4. Its 1,986 exports match the baseline and LOAD alignment is 16 KiB. The candidate APK builds and contains the verified library hash; Android runtime validation is pending reconnection.
 - Implemented a pure, strict resolver for a documented subset of Codex 0.153.4 managed filesystem policies. All 23 tests pass, including independent A/B/C policies on the same path, metadata exceptions and URI boundaries. This validates lexical decisions only; native enforcement remains a separate implementation step.
 - Fixed GPU archive validation/transfer races by transferring the same validated byte snapshot and comparing its precomputed digest. Six host regressions pass, including concurrent replacement, remote tampering and real Linux extraction/retry after truncation. Existing revisions remain intact. The revised Android deployment run is pending.
