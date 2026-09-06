@@ -2,6 +2,7 @@
 
 ## Unreleased — 2026-09-06
 
+- Combined the native broker and PRoot experiments: a real Debian shell created and appended permitted files while eight protected/outside redirections and two mode changes were refused. The parent independently verified contents, absent files and modes. Scratch chmod is mediated explicitly; this fixed-script proof does not implement arbitrary Codex policy or read confidentiality.
 - Fixed IME endpoint lifetime across display Activity recreation: one process-owned endpoint, serialized shutdown and rebinding, and the currently resumed Activity receives requests. Repeated transitions no longer produced `Address already in use`; peer UID and inner-display checks remain enforced.
 - Added private, read-only log and GPU diagnostics. The official client's current CDP report identifies ANGLE on llvmpipe with GPU composition disabled; Android's EGL presentation alone does not demonstrate accelerated client rendering.
 - Added debug-only native Landlock experiments under the actual application UID and inherited Zygote seccomp filter. Real writes outside the granted directory and symlink escapes are refused. A broker experiment preserves protected project metadata with four granted opens and nine expected denials, independently verified from the parent.

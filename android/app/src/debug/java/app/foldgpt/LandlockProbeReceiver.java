@@ -19,11 +19,12 @@ public final class LandlockProbeReceiver extends BroadcastReceiver {
                 boolean broker = "app.foldgpt.PROBE_BROKER".equals(intent.getAction());
                 boolean proot = "app.foldgpt.PROBE_PROOT".equals(intent.getAction());
                 boolean shell = "app.foldgpt.PROBE_SHELL".equals(intent.getAction());
-                String name = proot ? "proot" : shell ? "shell" : broker ? "broker" : "landlock";
+                boolean linuxShell = "app.foldgpt.PROBE_LINUX_SHELL".equals(intent.getAction());
+                String name = linuxShell ? "linux-shell" : proot ? "proot" : shell ? "shell" : broker ? "broker" : "landlock";
                 File output = new File(context.getCacheDir(), name + "-probe.log");
                 String nativeDir = context.getApplicationInfo().nativeLibraryDir;
-                ProcessBuilder diagnostic = proot
-                    ? new ProcessBuilder(nativeDir + "/libfoldgpt-proot-probe.so", context.getDataDir().getAbsolutePath(), nativeDir)
+                ProcessBuilder diagnostic = proot || linuxShell
+                    ? new ProcessBuilder(nativeDir + "/libfoldgpt-" + name + "-probe.so", context.getDataDir().getAbsolutePath(), nativeDir)
                     : new ProcessBuilder(nativeDir + "/libfoldgpt-" + name + "-probe.so", context.getCacheDir().getAbsolutePath());
                 process = diagnostic
                     .redirectErrorStream(true).redirectOutput(output).start();
