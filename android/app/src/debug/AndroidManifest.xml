@@ -1,0 +1,7 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application>
+        <!-- ADB-only diagnostics; absent from release builds. No arbitrary command input. -->
+        <receiver android:name="app.foldgpt.LandlockProbeReceiver"
+            android:exported="true" android:permission="android.permission.DUMP" />
+    </application>
+</manifest>

@@ -13,6 +13,7 @@ android {
     compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
     packaging { jniLibs { useLegacyPackaging true } }
     sourceSets.main.jniLibs.srcDirs = ['../native/runtime']
+    sourceSets.debug.jniLibs.srcDirs = ['../native/debug']
     buildTypes { debug { debuggable true } }
 }
 dependencies {

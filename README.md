@@ -9,7 +9,9 @@ Experimental Android host for the official ChatGPT Linux ARM64 desktop client on
 - Termux:X11 is embedded in the FoldGPT display Activity. A separate foreground service owns the native ARM64 Linux runtime; Termux is no longer the running application's host.
 - PRoot is built from pinned source in `vendor/proot`. Matching loaders fix the previous Termux-specific loader paths. Shared-memory mapping and `xfwm4` provide the working X11 session.
 - The client fills the tested inner display at 2448 × 1848. XRandR reports a 119.98 Hz display mode; application frame rate has not been measured.
+- The current official-client GPU diagnostic reports ANGLE on llvmpipe and software composition. Android EGL presents the Linux surface, but accelerated client rendering has not been established.
 - Actual touch opens the Samsung keyboard in an editable field and touching outside closes it. The V5 bridge opens only on deliberate pointer input: automatic refocus leaves the dismissed keyboard closed. This was reproduced on-device without a model request; a new touch reopened it. Tapping Samsung keys entered `aet` in the official editor.
+- A process-owned IME endpoint survives display Activity replacement. Serialized shutdown fixes the reproduced socket conflict after reopening the display; requests still require the app's UID and a resumed inner-display Activity.
 - Android Keystore protects the Linux keyring password with a device-bound AES-GCM key. The service sends it through a private stdin pipe; the helper unlocks the existing GNOME collection over an encrypted Secret Service session. Two cold launches succeeded without a Linux prompt. Android must already be unlocked at startup; this does not change Android's screen lock.
 - Display-area folding features gate the Linux surface and keyboard. A real fold/reopen launched official ChatGPT Android and kept the same Linux runtime process; opening FoldGPT again restored its interface. The monitor uses public Jetpack WindowManager APIs independently of Activity window size.
 
@@ -46,6 +48,8 @@ For an already initialized debug installation, these tools update FoldGPT's gues
 ```powershell
 python tools/deploy-session.py --serial YOUR_ADB_SERIAL
 python tools/device-shell.py --serial YOUR_ADB_SERIAL /usr/bin/uname -m
+python tools/inspect-gpu.py --serial YOUR_ADB_SERIAL
+python tools/audit-device-logs.py --serial YOUR_ADB_SERIAL
 ```
 
 The guest session requires Debian's `python3-websockets`, `python3-secretstorage`, `dbus-x11`, `xfwm4` and `wmctrl`, in addition to the client dependencies. The current development migration also requires provisioning the existing keyring password once with `tools/provision-keyring.py --serial YOUR_ADB_SERIAL --secret-file PRIVATE_SECRET_PATH`. It refuses to overwrite existing credentials and does not print the secret. Provisioning a new user's keyring during a fresh installation is not implemented. Obtain OpenAI's client from its official source; no OpenAI binaries are supplied here.
@@ -57,5 +61,11 @@ The guest session requires Debian's `python3-websockets`, `python3-secretstorage
 - Test native Remote, active-task continuity, locking, sustained background operation, inner split-screen and clean shutdown. One physical fold/reopen of the idle desktop session has passed.
 - Provide a fresh installer and verify signed APK/client updates preserve state.
 - Establish the production isolation model, dependency provenance and measured performance.
+
+Native experiments now prove that the phone enforces Landlock, that a fixed
+broker can preserve project metadata while granting individual write handles,
+and that a Debian shell can run with filesystem restrictions installed outside
+PRoot. These are bounded tests, not the missing Codex executor. Reproduction and
+limits are recorded in [NATIVE-AUDIT.md](NATIVE-AUDIT.md).
 
 This independent project is not affiliated with or endorsed by OpenAI or Samsung. See [LEGAL.md](LEGAL.md), [PRODUCT.md](PRODUCT.md) and [CHANGELOG.md](CHANGELOG.md).

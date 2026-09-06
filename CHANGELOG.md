@@ -2,6 +2,11 @@
 
 ## Unreleased — 2026-09-06
 
+- Fixed IME endpoint lifetime across display Activity recreation: one process-owned endpoint, serialized shutdown and rebinding, and the currently resumed Activity receives requests. Repeated transitions no longer produced `Address already in use`; peer UID and inner-display checks remain enforced.
+- Added private, read-only log and GPU diagnostics. The official client's current CDP report identifies ANGLE on llvmpipe with GPU composition disabled; Android's EGL presentation alone does not demonstrate accelerated client rendering.
+- Added debug-only native Landlock experiments under the actual application UID and inherited Zygote seccomp filter. Real writes outside the granted directory and symlink escapes are refused. A broker experiment preserves protected project metadata with four granted opens and nine expected denials, independently verified from the parent.
+- Verified a fixed Debian shell under a Landlock policy installed before PRoot starts: the shell executes and an attempted workspace write is refused. The experiments are not a production sandbox or an integrated Codex executor.
+- Updated the visible-Activity handoff to ChatGPT Android to use the current explicit PendingIntent launch delegation on API 36+. Automatic reopening on unfold is still not implemented.
 - Added Android Keystore AES-GCM protection and private stdin delivery for the existing encrypted GNOME keyring. Two cold launches unlocked it without a Linux prompt; the one-time plaintext import was removed. Cold startup requires Android to be unlocked.
 - Added inner-display gating using Jetpack WindowManager's display-area folding features. During a real user fold/reopen, the Linux display closed, the official Android client was launched, and the runtime PID remained unchanged. Reopening FoldGPT restored the existing Linux interface. This does not yet validate an active Codex task or Remote.
 - Added native Android isolation probes outside PRoot. On the test device, Landlock ABI 6 and seccomp notification are available; user namespace creation returns EINVAL and mount namespace creation EPERM. The official Codex 0.153.4 legacy Landlock route rejects the tested workspace policies; local commands remain blocked.
