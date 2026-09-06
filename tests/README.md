@@ -1,4 +1,24 @@
-# Focus bridge checks
+# Development checks
+
+## Filesystem policy and GPU deployment
+
+```powershell
+python -m unittest discover -s tests -p 'test_managed_policy.py' -v
+python -m unittest discover -s tests -p 'test_gpu_archive.py' -v
+```
+
+The 23 policy tests validate the preparatory resolver's immutable lexical
+decisions and explicit rejection of unsupported input. They do not enforce
+native filesystem permissions; see `tools/policy/README.md`.
+
+GPU deployment tests use an ADB stand-in to reproduce archive replacement and
+transfer tampering, without touching a device. On Linux, a sixth test also runs
+the real extraction shell with a truncated archive, retries successfully and
+checks that an existing revision is preserved. That test is skipped on Windows;
+run it with Python inside WSL to obtain all six results. These host tests do not
+replace GPU pixel tests or Android deployment verification.
+
+## Focus bridge
 
 Run from the repository root:
 

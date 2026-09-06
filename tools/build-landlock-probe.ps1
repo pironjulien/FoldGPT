@@ -14,4 +14,5 @@ if ($LASTEXITCODE -ne 0) { throw 'Landlock PRoot probe compilation failed' }
 if ($LASTEXITCODE -ne 0) { throw 'Landlock shell probe compilation failed' }
 & $probeCompiler -O2 -Wall -Wextra -Werror (Join-Path $PSScriptRoot 'probe-landlock-linux-shell.c') -o (Join-Path $probeOutput 'libfoldgpt-linux-shell-probe.so')
 if ($LASTEXITCODE -ne 0) { throw 'Landlock Linux shell probe compilation failed' }
+& (Join-Path $PSScriptRoot 'build-codex-offline-probe.ps1') -Ndk $Ndk -OutputDirectory $probeOutput
 Write-Output 'Built debug-only ARM64 Landlock experiment. Rebuild the debug APK to deploy.'

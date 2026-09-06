@@ -15,6 +15,13 @@ PATTERNS = {
     "runtime": {
         "keyring_unlocked": r"^FoldGPT keyring unlocked$",
         "keyring_unlock_failed": r"^FoldGPT keyring unlock failed",
+        "gpu_driver_selected": r"^FoldGPT GPU driver selected:",
+        "gpu_driver_not_installed": r"^FoldGPT GPU driver not installed;",
+        "gpu_driver_incomplete": r"^FoldGPT GPU installation incomplete:",
+        "gpu_process_crashed": r"GPU process exited unexpectedly:",
+        "gpu_calibrated_timestamp_failed": r"vkGetCalibratedTimestamps(?:EXT|KHR) failed",
+        "gpu_refresh_rate_failed": r"glXGetMscRateOML failed",
+        "gpu_dmabuf_sync_failed": r"DMA-BUF renderer CPU access(?: completion)? failed:",
         "local_app_server_connected": r"app_server_connection.state_changed .*next=connected",
         "primary_runtime_manifest_404": r"Failed to download primary runtime manifest \(404",
         "process_sampler_boot_time_unavailable": r"Failed to collect child process snapshot.*Unable to get system boot time",

@@ -1,0 +1,16 @@
+diff --git a/src/glx/glxext.c b/src/glx/glxext.c
+--- a/src/glx/glxext.c
++++ b/src/glx/glxext.c
+@@ -1004,9 +1004,11 @@ __glXInitialize(Display * dpy)
+     ** Note: This _must_ be done before calling any other DRI routines
+     ** (e.g., those called in AllocAndFetchScreenConfigs).
+     */
+-#if defined(GLX_USE_DRM)
++#if defined(HAVE_X11_DRM)
+    if (glx_direct && glx_accel)
+       dpyPriv->has_multibuffer = x11_dri3_has_multibuffer(XGetXCBConnection(dpy));
++#endif
++#if defined(GLX_USE_DRM)
+    if (glx_direct && glx_accel &&
+        (!(glx_driver & GLX_DRIVER_ZINK_YES) || !kopper)) {
+       /* dri3 is tried as long as this doesn't error; whether modifiers work is not relevant */

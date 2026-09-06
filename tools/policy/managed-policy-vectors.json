@@ -1,0 +1,200 @@
+{
+  "schema": "foldgpt-managed-policy-conformance-v1",
+  "status": "expected inputs and outcomes; not executed kernel results",
+  "official_tag": "rust-v0.153.4",
+  "official_commit": "042fb41b7c813ac7999105e886b2b7aa715b5081",
+  "context": {
+    "cwd": "file:///workspace/src",
+    "workspaceRoots": ["file:///workspace", "file:///second"],
+    "userHomeDir": "file:///home/fixture",
+    "temporaryDirectories": ["file:///tmp/private-a", "file:///tmp/private-b"],
+    "windowsSandboxLevel": "disabled",
+    "windowsSandboxPrivateDesktop": false,
+    "useLegacyLandlock": false
+  },
+  "profile_envelope": {
+    "type": "managed",
+    "file_system": {"type": "restricted", "entries": []},
+    "network": "restricted"
+  },
+  "resolution_cases": [
+    {
+      "id": "root-read-workspace-write-component-boundaries",
+      "entries": [
+        {"path": {"type": "path", "path": "file:///"}, "access": "read"},
+        {"path": {"type": "path", "path": "file:///workspace"}, "access": "write"}
+      ],
+      "queries": [
+        {"path": "/workspace/value.txt", "access": "write", "can_write": true},
+        {"path": "/workspace-other/value.txt", "access": "read", "can_write": false},
+        {"path": "/outside/value.txt", "access": "read", "can_write": false},
+        {"path": "/workspace/.git/config", "access": "write", "can_write": false}
+      ]
+    },
+    {
+      "id": "no-matching-entry-denies",
+      "entries": [
+        {"path": {"type": "path", "path": "file:///workspace"}, "access": "read"}
+      ],
+      "queries": [
+        {"path": "/workspace/value.txt", "access": "read", "can_write": false},
+        {"path": "/outside/value.txt", "access": "deny", "can_write": false}
+      ]
+    },
+    {
+      "id": "narrow-read-carveout",
+      "entries": [
+        {"path": {"type": "path", "path": "file:///workspace"}, "access": "write"},
+        {"path": {"type": "path", "path": "file:///workspace/value.txt"}, "access": "read"}
+      ],
+      "queries": [
+        {"path": "/workspace/value.txt", "access": "read", "can_write": false},
+        {"path": "/workspace/value.txt-other", "access": "write", "can_write": true}
+      ]
+    },
+    {
+      "id": "narrow-deny-carveout",
+      "entries": [
+        {"path": {"type": "path", "path": "file:///"}, "access": "read"},
+        {"path": {"type": "path", "path": "file:///workspace"}, "access": "write"},
+        {"path": {"type": "path", "path": "file:///workspace/private"}, "access": "deny"}
+      ],
+      "queries": [
+        {"path": "/workspace/private/value.txt", "access": "deny", "can_write": false},
+        {"path": "/workspace/private-other/value.txt", "access": "write", "can_write": true}
+      ]
+    },
+    {
+      "id": "more-specific-write-over-broader-deny",
+      "entries": [
+        {"path": {"type": "path", "path": "file:///workspace"}, "access": "deny"},
+        {"path": {"type": "path", "path": "file:///workspace/public"}, "access": "write"}
+      ],
+      "queries": [
+        {"path": "/workspace/private/value.txt", "access": "deny", "can_write": false},
+        {"path": "/workspace/public/value.txt", "access": "write", "can_write": true}
+      ]
+    },
+    {
+      "id": "equal-depth-write-beats-read-independent-of-order",
+      "check_all_entry_permutations": true,
+      "entries": [
+        {"path": {"type": "path", "path": "file:///workspace"}, "access": "write"},
+        {"path": {"type": "path", "path": "file:///workspace"}, "access": "read"}
+      ],
+      "queries": [
+        {"path": "/workspace/value.txt", "access": "write", "can_write": true}
+      ]
+    },
+    {
+      "id": "equal-depth-deny-beats-write-independent-of-order",
+      "check_all_entry_permutations": true,
+      "entries": [
+        {"path": {"type": "path", "path": "file:///workspace"}, "access": "deny"},
+        {"path": {"type": "path", "path": "file:///workspace"}, "access": "write"},
+        {"path": {"type": "path", "path": "file:///workspace"}, "access": "read"}
+      ],
+      "queries": [
+        {"path": "/workspace/value.txt", "access": "deny", "can_write": false}
+      ]
+    },
+    {
+      "id": "symbolic-metadata-is-not-every-name-component",
+      "entries": [
+        {"path": {"type": "path", "path": "file:///workspace"}, "access": "write"}
+      ],
+      "queries": [
+        {"path": "/workspace/.git/config", "access": "write", "can_write": false},
+        {"path": "/workspace/.codex/config.toml", "access": "write", "can_write": false},
+        {"path": "/workspace/.agents/config", "access": "write", "can_write": false},
+        {"path": "/workspace/src/.git/config", "access": "write", "can_write": true}
+      ]
+    },
+    {
+      "id": "narrower-writable-root-adds-its-own-metadata-protection",
+      "entries": [
+        {"path": {"type": "path", "path": "file:///workspace"}, "access": "write"},
+        {"path": {"type": "path", "path": "file:///workspace/src"}, "access": "write"}
+      ],
+      "queries": [
+        {"path": "/workspace/src/.git/config", "access": "write", "can_write": false},
+        {"path": "/workspace/src/value.txt", "access": "write", "can_write": true}
+      ]
+    },
+    {
+      "id": "explicit-metadata-file-write-exception",
+      "entries": [
+        {"path": {"type": "path", "path": "file:///workspace"}, "access": "write"},
+        {"path": {"type": "path", "path": "file:///workspace/.git/config"}, "access": "write"}
+      ],
+      "queries": [
+        {"path": "/workspace/.git/config", "access": "write", "can_write": true},
+        {"path": "/workspace/.git/HEAD", "access": "write", "can_write": false}
+      ]
+    },
+    {
+      "id": "project-roots-uses-context-roots-not-only-cwd",
+      "entries": [
+        {"path": {"type": "special", "value": {"kind": "project_roots"}}, "access": "write"}
+      ],
+      "queries": [
+        {"path": "/workspace/value.txt", "access": "write", "can_write": true},
+        {"path": "/second/value.txt", "access": "write", "can_write": true},
+        {"path": "/outside/value.txt", "access": "deny", "can_write": false}
+      ]
+    },
+    {
+      "id": "project-roots-subpath",
+      "entries": [
+        {"path": {"type": "special", "value": {"kind": "project_roots", "subpath": "src"}}, "access": "write"}
+      ],
+      "queries": [
+        {"path": "/workspace/src/value.txt", "access": "write", "can_write": true},
+        {"path": "/second/src/value.txt", "access": "write", "can_write": true},
+        {"path": "/workspace/value.txt", "access": "deny", "can_write": false}
+      ]
+    },
+    {
+      "id": "tmpdir-resolves-only-executor-context-directories",
+      "entries": [
+        {"path": {"type": "special", "value": {"kind": "root"}}, "access": "read"},
+        {"path": {"type": "special", "value": {"kind": "tmpdir"}}, "access": "write"}
+      ],
+      "queries": [
+        {"path": "/tmp/private-a/value.txt", "access": "write", "can_write": true},
+        {"path": "/tmp/private-b/value.txt", "access": "write", "can_write": true},
+        {"path": "/tmp/other/value.txt", "access": "read", "can_write": false}
+      ]
+    },
+    {
+      "id": "slash-tmp-is-distinct-from-tmpdir",
+      "entries": [
+        {"path": {"type": "special", "value": {"kind": "slash_tmp"}}, "access": "write"}
+      ],
+      "queries": [
+        {"path": "/tmp/other/value.txt", "access": "write", "can_write": true},
+        {"path": "/tmp-other/value.txt", "access": "deny", "can_write": false}
+      ]
+    }
+  ],
+  "native_cases": [
+    {"id": "A-positive", "operation": "same file read and overwrite in a new worker", "required": "both allowed and independently verified"},
+    {"id": "B-read-only", "operation": "same file read and attempted write in another worker", "required": "read allowed, write EACCES or EPERM, unchanged bytes"},
+    {"id": "C-deny-read", "operation": "same file attempted read/write while unrelated work succeeds", "required": "both denied; program bootstrap succeeded"},
+    {"id": "A-restored-positive", "operation": "same file read after C", "required": "allowed and original authorized bytes present"},
+    {"id": "cross-worker-fds", "operation": "A holds descriptor while C tries proc-fd, pidfd and SCM_RIGHTS acquisition", "required": "C gains no content or writable authority"},
+    {"id": "descriptor-inheritance", "operation": "enumerate inherited descriptors and attempt writes", "required": "only assigned streams; no broker, account or external log descriptor"},
+    {"id": "metadata", "operation": "stat, statx, readlink, canonicalize and list under each policy", "required": "documented policy behavior enforced without broader content access"},
+    {"id": "gitdir-pointer", "operation": "write through worktree gitdir target and alternate alias", "required": "protected unless explicit applicable exception"},
+    {"id": "hardlink-alias", "operation": "write through allowed name of a protected or outside inode", "required": "no unauthorized alias mutation, including concurrent link creation"},
+    {"id": "cwd-dirfd-race", "operation": "change cwd or dirfd while broker resolves an open", "required": "operation stays within the pinned authorized object; no CONTINUE"},
+    {"id": "policy-root-rename", "operation": "rename or replace a pinned writable root during a request", "required": "no authority follows it outside the policy contract"},
+    {"id": "mutations", "operation": "rename, unlink, chmod, truncate, xattr, time and link changes", "required": "authorized source and destination semantics or explicit unsupported error"},
+    {"id": "process-isolation", "operation": "ptrace, process_vm, prlimit, signals and descriptor access against broker/siblings", "required": "no broker or cross-policy authority, while legitimate PRoot children work"},
+    {"id": "cancel-and-descendants", "operation": "cancel with active descendants and pending broker request", "required": "bounded cleanup and independent final-state check; no false rollback claim"},
+    {"id": "filesystem-rpc-parity", "operation": "repeat A/B/C through fs/readFile and fs/writeFile", "required": "same decisions as commands, including per-request policy changes"},
+    {"id": "stream-handle-scope", "operation": "reuse file stream handle across connection or narrower policy", "required": "rejected; no capability leak"},
+    {"id": "unsupported-input", "operation": "unimplemented glob, special path, field or network requirement", "required": "explicit error before side effects; no external or disabled fallback"},
+    {"id": "bootstrap-failure-control", "operation": "make helper initialization fail in a fresh fixture", "required": "overall failed stage, never classified as permission denial"}
+  ]
+}

@@ -231,12 +231,55 @@ les outils passent par notre futur moteur. Aucun fichier `environments.toml` du
 compte n'a été changé. La preuve de commande protégée exécutée par Codex reste à
 obtenir.
 
+## Sonde Codex officielle hors ligne en préparation
+
+`tools/probe-landlock-codex.c` et `tools/probe-codex-offline.py` prolongent le
+script fixe avec le vrai binaire Codex 0.153.4, contrôlé par son SHA-256. Le
+parent applique Landlock/seccomp avant PRoot et crée un profil temporaire sans
+identifiants. Le protocole émet seulement `initialize` et `command/exec` ; aucun
+thread, tour modèle ni connexion au compte n'est nécessaire. La déclaration
+`externalSandbox` décrit uniquement les restrictions extérieures réelles de ce
+test, avec lectures globales et écritures sélectives dans ses témoins.
+
+Le service `CodexProbeService` est limité à la variante debug et protégé par
+`android.permission.DUMP`. Il permet un diagnostic borné de 90 secondes dans
+un processus issu du Zygote Android. Les essais `run-as` ont une provenance
+seccomp différente et ne peuvent pas remplacer cette validation finale.
+
+Le binaire officiel a démarré dans le service, puis le test a révélé des besoins
+précis de SQLite et des pipes Rust. Le filtre conserve les refus de création de
+socket réseau, de connexion, de montage et de namespaces ; il autorise seulement
+les paires de flux Unix anonymes et les opérations nécessaires sur les FDs déjà
+accordés. Les opérations ioctl permises sont nommées, pas accordées globalement.
+Les dernières corrections compilent, mais la liaison USB s'est interrompue avant
+une réponse réussie complète de `initialize` puis `command/exec`. **Cette nouvelle
+preuve reste à obtenir.** Le client et son profil existants n'ont pas été changés.
+
+Après installation coordonnée de l'APK debug compilé :
+
+```powershell
+adb -s YOUR_ADB_SERIAL shell am start-foreground-service -n app.foldgpt/.CodexProbeService
+adb -s YOUR_ADB_SERIAL shell run-as app.foldgpt cat cache/codex-probe.log
+```
+
+La seule création du service n'est pas une réussite. Exiger les marqueurs de
+vérification du binaire, d'initialisation, de réponse `command/exec` et de
+vérification indépendante des fichiers par le parent. Les limitations de cette
+sonde restent celles d'un arbre neuf contrôlé, pas d'une politique générale.
+
 ## Rendu graphique mesuré
 
 `tools/inspect-gpu.py` interroge uniquement `SystemInfo.getInfo` sur le endpoint
-local du client, sans lire de page ni de conversation. Le relevé actuel indique
+local du client, sans lire de page ni de conversation. Le premier relevé indiquait
 ANGLE sur `llvmpipe (LLVM 19.1.7)` avec Mesa 25.0.7, composition et rasterisation
-logicielles. L'initialisation EGL d'Xlorie côté Android ne contredit pas ce relevé :
-elle concerne la présentation de la surface. L'accès à `/dev/kgsl-3d0` existe,
-mais ni une faible charge CPU au repos ni le mode d'écran à 119,98 Hz ne prouvent
-que le client utilise le GPU ou produit 120 images par seconde.
+logicielles. Le relevé du 6 septembre à 02:05 UTC confirme désormais ANGLE sur
+Zink/Turnip, `Adreno (TM) 840`, Mesa 26.2.2, avec composition et rasterisation GPU
+activées dans le client officiel. Les sondes Vulkan, GLX, présentation X11 et
+texture-from-pixmap passent également. Le compositeur `xfwm4` est conservé.
+
+Le test visuel reste incomplet : l'écran initial est propre, mais les transitions
+de menus produisent des corruptions intermittentes. L'horloge GPU et la requête
+de fréquence GLX ont encore des erreurs. Les corrections suivantes sont
+préparées séparément ; la déconnexion USB a interrompu leur validation.
+Voir [GPU-PROBE.md](GPU-PROBE.md). Ni une faible charge CPU au repos ni les modes
+d'écran observés à 59,95 ou 119,98 Hz ne mesurent les images réellement rendues.

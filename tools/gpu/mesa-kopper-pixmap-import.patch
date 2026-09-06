@@ -1,0 +1,16 @@
+diff --git a/src/gallium/frontends/dri/kopper.c b/src/gallium/frontends/dri/kopper.c
+--- a/src/gallium/frontends/dri/kopper.c
++++ b/src/gallium/frontends/dri/kopper.c
+@@ -450,9 +450,11 @@ kopper_update_tex_buffer(struct dri_drawable *drawable,
+                          struct dri_context *ctx,
+                          struct pipe_resource *res)
+ {
+-   struct dri_screen *screen = drawable->screen;
+-   if (screen->has_dmabuf || drawable->is_window || drawable->info.bos.sType != VK_STRUCTURE_TYPE_XCB_SURFACE_CREATE_INFO_KHR)
++   /* A DMA-BUF-capable GPU does not imply that this X server exported the
++    * pixmap successfully. A locally allocated texture still needs its pixels.
++    */
++   if (drawable->image || drawable->is_window || drawable->info.bos.sType != VK_STRUCTURE_TYPE_XCB_SURFACE_CREATE_INFO_KHR)
+       return;
+    drisw_update_tex_buffer(drawable, ctx, res);
+ }

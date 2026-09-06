@@ -8,8 +8,8 @@ Experimental Android host for the official ChatGPT Linux ARM64 desktop client on
 
 - Termux:X11 is embedded in the FoldGPT display Activity. A separate foreground service owns the native ARM64 Linux runtime; Termux is no longer the running application's host.
 - PRoot is built from pinned source in `vendor/proot`. Matching loaders fix the previous Termux-specific loader paths. Shared-memory mapping and `xfwm4` provide the working X11 session.
-- The client fills the tested inner display at 2448 × 1848. XRandR reports a 119.98 Hz display mode; application frame rate has not been measured.
-- The current official-client GPU diagnostic reports ANGLE on llvmpipe and software composition. Android EGL presents the Linux surface, but accelerated client rendering has not been established.
+- The client fills the tested inner display at 2448 × 1848. XRandR mode reports have ranged from 59.95 to 119.98 Hz; application frame rate has not been measured.
+- The official client now reports ANGLE on Zink/Turnip and the actual Adreno 840, with GPU composition and rasterization enabled. Mesa corrections also restore compositor textures. Menu transitions still expose intermittent presentation corruption, so GPU integration is not yet reliable. See [GPU-PROBE.md](GPU-PROBE.md) for the pixel tests, remaining defects and the distinction between installed and candidate builds.
 - Actual touch opens the Samsung keyboard in an editable field and touching outside closes it. The V5 bridge opens only on deliberate pointer input: automatic refocus leaves the dismissed keyboard closed. This was reproduced on-device without a model request; a new touch reopened it. Tapping Samsung keys entered `aet` in the official editor.
 - A process-owned IME endpoint survives display Activity replacement. Serialized shutdown fixes the reproduced socket conflict after reopening the display; requests still require the app's UID and a resumed inner-display Activity.
 - Android Keystore protects the Linux keyring password with a device-bound AES-GCM key. The service sends it through a private stdin pipe; the helper unlocks the existing GNOME collection over an encrypted Secret Service session. Two cold launches succeeded without a Linux prompt. Android must already be unlocked at startup; this does not change Android's screen lock.
@@ -40,6 +40,11 @@ gradle -p android :app:assembleDebug
 ```
 
 Run the preparation scripts in that order: the second builds PRoot and matching loaders from the pinned source. The Windows build currently collects X11, talloc and Android shared-memory libraries from the installed official packages. Hashes are recorded under ignored `android/native/`. The optional `-PbuildX11FromSource` path has not yet been verified for FoldGPT.
+
+The separate [native X11 build](tools/gpu/X11-BUILD.md) now compiles a corrected
+library and the candidate APK packages it successfully. This is build evidence;
+that candidate still awaits on-device validation. The build records source and
+patch hashes and preserves Linux filename case in its ext4 build directory.
 
 An APK build does not install Linux. `tools/migrate-device-runtime.py` copies an existing on-device development installation into an empty FoldGPT destination and refuses existing data. It is not a fresh installer. `install.sh` exits explicitly because its historical workflow is unvalidated.
 
