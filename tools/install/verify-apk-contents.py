@@ -15,6 +15,8 @@ DEBUG_CLASSES = (b"RootfsProbeService", b"ProotStorageProbeService", b"NativeRun
                  b"NativeFilesRpcProbeService",
                  b"NativePrivateExecProbeService",
                  b"NativeManagedProcessProbeService", b"NativeProbeFiles",
+                 b"NativeHttpsAcquisitionProbeService",
+                 b"NativeProcessRpcProbeService",
                  b"CombinedPreparationProbeService", b"CombinedPreparationFixture",
                  b"CodexProbeService", b"LandlockProbeReceiver")
 
@@ -66,6 +68,18 @@ def verify(apk, debug):
             for name in ('libfoldgpt-native-managed-runner.so', 'libfoldgpt-native-managed-fixture.so'):
                 if ('lib/arm64-v8a/' + name in libraries) != debug:
                     raise ValueError('Wrong managed process diagnostic native separation')
+            process_assets = {name for name in names if name.startswith('assets/process-rpc-probe/') and not name.endswith('/')}
+            expected_process = {'assets/process-rpc-probe/' + name for name in (
+                'tools/executor/exec_server.py', 'tools/executor/native_files.py',
+                'tools/executor/policy_intent.py', 'tools/policy/managed_policy.py',
+                'tools/executor/native_files_rpc_fixture.py', 'tools/executor/native_process_policy.py',
+                'tools/executor/native_processes.py', 'tools/executor/test_native_processes_live.py',
+                'tools/executor/native_processes_android_fixture.py')}
+            if process_assets != (expected_process if debug else set()):
+                raise ValueError('Wrong native process lifecycle probe asset separation')
+            for name in ('libfoldgpt-native-process-runner.so', 'libfoldgpt-native-process-fixture.so'):
+                if ('lib/arm64-v8a/' + name in libraries) != debug:
+                    raise ValueError('Wrong native process lifecycle diagnostic separation')
             android_python = {name for name in names if name.startswith("assets/native-python/") and not name.endswith("/")}
             python_notices = {name for name in names if name.startswith("assets/native-python-notices/") and not name.endswith("/")}
             python_libs = {"lib/arm64-v8a/" + name for name in (

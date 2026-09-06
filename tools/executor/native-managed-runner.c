@@ -16,6 +16,26 @@ static char mg_root_path[PATH_MAX];
 static uint64_t mg_grants, mg_denials;
 static int64_t mg_deadline;
 static uint64_t mg_uid_tasks,mg_uid_budget,mg_nproc_soft,mg_nproc_hard,mg_nproc_limit;
+static int mg_process_mode,mg_input=-1,mg_command=-1,mg_leader=-1,mg_started,mg_reaped,mg_reporting;
+
+/* A separate trusted control socket never competes with an open decision.
+ * The single-threaded supervisor signals only while it still owns the leader
+ * PID. No process-group signal is issued after waitpid can release that PID.
+ */
+static int mg_commands(void) {
+    if(mg_command<0||mg_reporting)return 0;
+    for(int i=0;i<128;i++) {
+        char command[2];struct iovec vec={.iov_base=command,.iov_len=sizeof(command)};
+        struct msghdr msg={.msg_iov=&vec,.msg_iovlen=1};
+        ssize_t n=recvmsg(mg_command,&msg,MSG_DONTWAIT|MSG_CMSG_CLOEXEC);
+        if(n<0){if(errno==EAGAIN||errno==EWOULDBLOCK)return 0;if(errno==EINTR)continue;return -1;}
+        if(!n){cancelled=SIGTERM;return 0;}
+        if(n!=1||(msg.msg_flags&(MSG_TRUNC|MSG_CTRUNC))||(command[0]!='I'&&command[0]!='T')){errno=EPROTO;return -1;}
+        if(command[0]=='T')cancelled=SIGTERM;
+        else if(mg_started&&!mg_reaped&&mg_leader>0&&kill(-mg_leader,SIGINT)<0&&errno!=ESRCH)return -1;
+    }
+    return 0;
+}
 
 /* Linux RLIMIT_NPROC counts tasks for the real UID, including the GUI and
  * trusted supervisor. This is a contemporaneous procfs snapshot, not an atomic
@@ -66,6 +86,7 @@ static int mg_uid_limit(uint64_t budget) {
 
 static int mg_packet(int fd,const void *data,size_t size) {
     for(;;) {
+        if(mg_commands()<0)return -1;
         if(cancelled||now_ms()>=mg_deadline) { errno=ECANCELED; return -1; }
         ssize_t n=send(fd,data,size,MSG_NOSIGNAL|MSG_DONTWAIT);
         if(n==(ssize_t)size) return 0;
@@ -77,6 +98,7 @@ static int mg_packet(int fd,const void *data,size_t size) {
 }
 static int mg_receive(int fd,char *data,size_t capacity) {
     for(;;) {
+        if(mg_commands()<0)return -1;
         if(cancelled||now_ms()>=mg_deadline) { errno=ECANCELED; return -1; }
         struct iovec vec={.iov_base=data,.iov_len=capacity};
         struct msghdr msg={.msg_iov=&vec,.msg_iovlen=1};
@@ -106,6 +128,7 @@ static int mg_send_listener(int channel,int listener) {
 static int mg_receive_listener(int channel) {
     struct pollfd p={.fd=channel,.events=POLLIN};
     for(;;) {
+        if(mg_commands()<0)return -1;
         if(cancelled||now_ms()>=mg_deadline) {errno=ECANCELED; return -1;}
         int ready=poll(&p,1,20);
         if(ready<0&&errno!=EINTR) return -1;
@@ -318,9 +341,11 @@ static int mg_supervise(struct config *c) {
        pipe2(setup,O_CLOEXEC)<0||socketpair(AF_UNIX,SOCK_SEQPACKET|SOCK_CLOEXEC,0,bootstrap)<0||
        prctl(PR_SET_CHILD_SUBREAPER,1,0,0,0)<0)return fail("managed-pipes");
     pid_t supervisor=getpid(),pid=fork();
-    if(!pid)mg_launch(c,input[0],output[1],error[1],setup[1],bootstrap[1],supervisor);
+    if(!pid)mg_launch(c,mg_process_mode?mg_input:input[0],output[1],error[1],setup[1],bootstrap[1],supervisor);
     close(input[0]);close(input[1]);close(output[1]);close(error[1]);close(setup[1]);close(bootstrap[1]);
+    if(mg_input>=0){close(mg_input);mg_input=-1;}
     if(pid<0)return fail("managed-fork");
+    mg_leader=pid;
     int listener=-1,traced=0,started=0,leader_observed=0,leader_reaped=0,alive=1,terminating=0;
     int leader_status=0,eof[3]={0,0,0},saved_error=0,stage=0;int64_t cleanup_end=0;
     uint64_t bytes[2]={0,0};size_t setup_size=0;struct setup_error failure={0};
@@ -333,6 +358,7 @@ static int mg_supervise(struct config *c) {
     if(terminating){outcome="setup_error";cleanup_end=now_ms()+5000;}
     while(alive||!eof[0]||!eof[1]||!eof[2]) {
         int64_t now=now_ms();
+        if(!terminating&&mg_commands()<0)goto runtime_failed;
         if(!terminating&&(cancelled||now>=mg_deadline)){outcome=cancelled?"cancelled":"timeout";terminating=1;cleanup_end=now+5000;}
         if(!started&&!leader_observed&&!terminating) {
             siginfo_t observed={0};
@@ -348,7 +374,8 @@ static int mg_supervise(struct config *c) {
                         if(listener<0)goto startup_failed;
                     } else if(traced&&((unsigned)status>>16)==PTRACE_EVENT_EXEC) {
                         if(ptrace(PTRACE_DETACH,pid,NULL,NULL)<0)goto startup_failed;
-                        char message[512];int n=snprintf(message,sizeof(message),"{\"type\":\"started\",\"pid\":%d,\"profile\":\"managed-acquisition-v1\",\"uidTasksObserved\":%"PRIu64",\"uidTaskBudget\":%"PRIu64",\"uidNprocLimit\":%"PRIu64",\"inheritedNprocSoft\":%"PRIu64",\"inheritedNprocHard\":%"PRIu64"}",pid,mg_uid_tasks,mg_uid_budget,mg_nproc_limit,mg_nproc_soft,mg_nproc_hard);
+                        mg_started=1;
+                        char message[512];int n=snprintf(message,sizeof(message),"{\"type\":\"started\",\"pid\":%d,\"profile\":\"%s\",\"uidTasksObserved\":%"PRIu64",\"uidTaskBudget\":%"PRIu64",\"uidNprocLimit\":%"PRIu64",\"inheritedNprocSoft\":%"PRIu64",\"inheritedNprocHard\":%"PRIu64"}",pid,mg_process_mode?"managed-process-v1":"managed-acquisition-v1",mg_uid_tasks,mg_uid_budget,mg_nproc_limit,mg_nproc_soft,mg_nproc_hard);
                         if(mg_packet(mg_channel,message,(size_t)n)<0)goto startup_failed;
                         started=1;
                     } else if(ptrace(PTRACE_CONT,pid,NULL,(void *)(uintptr_t)WSTOPSIG(status))<0)goto startup_failed;
@@ -377,7 +404,17 @@ static int mg_supervise(struct config *c) {
                     if(setup_size==sizeof(failure)){errno=failure.error;stage=failure.stage;goto startup_failed;}
                 } else {
                     uint64_t remaining=c->output-bytes[0]-bytes[1];size_t accepted=(uint64_t)n<remaining?(size_t)n:(size_t)remaining;
-                    if(accepted&&all_write(i+1,buffer,accepted,mg_deadline,&bytes[i])<0)goto runtime_failed;
+                    size_t offset=0;
+                    while(offset<accepted) {
+                        if(mg_commands()<0||cancelled||now_ms()>=mg_deadline){errno=ECANCELED;goto runtime_failed;}
+                        ssize_t sent=write(i+1,buffer+offset,accepted-offset);
+                        if(sent>0){offset+=(size_t)sent;bytes[i]+=(uint64_t)sent;continue;}
+                        if(sent<0&&(errno==EAGAIN||errno==EWOULDBLOCK||errno==EINTR)) {
+                            struct pollfd ready={.fd=i+1,.events=POLLOUT};
+                            if(poll(&ready,1,20)>=0||errno==EINTR)continue;
+                        }
+                        goto runtime_failed;
+                    }
                     if(accepted<(size_t)n){outcome="output_limit";terminating=1;cleanup_end=now_ms()+5000;}
                 }
             } else if(errno!=EAGAIN&&errno!=EINTR)goto runtime_failed;
@@ -389,9 +426,20 @@ static int mg_supervise(struct config *c) {
                 leader_observed=1;
                 if(!terminating){terminating=1;cleanup_end=now_ms()+5000;}
                 (void)kill(-pid,SIGKILL);
+                if(mg_process_mode&&started) {
+                    char message[128];int code=info.si_code==CLD_EXITED?info.si_status:-1;
+                    int sig=info.si_code==CLD_EXITED?0:info.si_status;
+                    int length=snprintf(message,sizeof(message),"{\"type\":\"exited\",\"exitCode\":%d,\"signal\":%d}",code,sig);
+                    /* Cancellation stops work, not truthful terminal reporting. */
+                    sig_atomic_t previous=cancelled;int64_t deadline=mg_deadline;
+                    cancelled=0;mg_deadline=cleanup_end;mg_reporting=1;
+                    int sent=mg_packet(mg_channel,message,(size_t)length);
+                    cancelled=previous;mg_deadline=deadline;mg_reporting=0;
+                    if(sent<0){outcome="broker_error";saved_error=errno?errno:EIO;}
+                }
             }
         }
-        if(leader_observed&&!leader_reaped&&waitpid(pid,&leader_status,WNOHANG)==pid)leader_reaped=1;
+        if(leader_observed&&!leader_reaped){mg_reaped=1;if(waitpid(pid,&leader_status,WNOHANG)==pid)leader_reaped=1;}
         if(leader_reaped)for(;;){int status;pid_t child=waitpid(-1,&status,WNOHANG|__WALL);if(child>0)continue;if(child<0&&errno==ECHILD)alive=0;break;}
         continue;
 startup_failed:
@@ -407,13 +455,26 @@ runtime_failed:
     int code=leader_reaped&&WIFEXITED(leader_status)?WEXITSTATUS(leader_status):-1;
     int sig=leader_reaped&&WIFSIGNALED(leader_status)?WTERMSIG(leader_status):0;
     char result[512];int length=snprintf(result,sizeof(result),"{\"type\":\"result\",\"outcome\":\"%s\",\"exitCode\":%d,\"signal\":%d,\"cleanupComplete\":%s,\"started\":%s,\"grants\":%"PRIu64",\"denials\":%"PRIu64",\"stdoutBytes\":%"PRIu64",\"stderrBytes\":%"PRIu64",\"stage\":%d,\"errno\":%d}",outcome,code,sig,complete?"true":"false",started?"true":"false",mg_grants,mg_denials,bytes[0],bytes[1],stage,saved_error);
+    if(mg_command>=0){close(mg_command);mg_command=-1;}
     cancelled=0;mg_deadline=now_ms()+1000;
     if(mg_packet(mg_channel,result,(size_t)length)<0)return 1;
     return !strcmp(outcome,"exited")?0:1;
 }
 int main(int argc,char **argv) {
     /* All roots and native FD numbers are supplied by the trusted parent. */
-    if(argc<10||strcmp(argv[8],"--")){fprintf(stderr,"usage: managed ROOT_FD CONTROL_FD STATIC_ELF WALL_MS ADDRESS_BYTES OUTPUT_BYTES UID_TASK_BUDGET -- ARGV...\n");return 2;}
+    if(argc<10){fprintf(stderr,"usage: managed ROOT_FD CONTROL_FD STATIC_ELF WALL_MS ADDRESS_BYTES OUTPUT_BYTES UID_TASK_BUDGET [--process-v1 STDIN_FD COMMAND_FD ENV_FD] -- ARGV...\n");return 2;}
+    int arg_start=9,env_fd=-1;
+    if(!strcmp(argv[8],"--process-v1")) {
+        if(argc<14||strcmp(argv[12],"--"))return 2;
+        int *fields[]={&mg_input,&mg_command,&env_fd};
+        for(int i=0;i<3;i++) {
+            char *end=NULL;errno=0;unsigned long value=strtoul(argv[9+i],&end,10);
+            if(errno||!argv[9+i][0]||*end||value<3||value>INT_MAX)return 2;
+            *fields[i]=(int)value;
+        }
+        if(mg_input==mg_command||mg_input==env_fd||mg_command==env_fd)return 2;
+        mg_process_mode=1;arg_start=13;
+    }else if(strcmp(argv[8],"--"))return 2;
     uint64_t root,control,wall,memory,output,budget;
     char *end=NULL;
     errno=0;root=strtoull(argv[1],&end,10);if(errno||!*argv[1]||*end||root<3||root>INT_MAX)return 2;
@@ -425,6 +486,7 @@ int main(int argc,char **argv) {
     if(!no_privilege()||syscall(SYS_landlock_create_ruleset,NULL,0,1U)<6)return fail("managed-admission");
     if(mg_uid_limit(budget)<0)return fail("managed-uid-task-budget");
     mg_root=(int)root;mg_channel=(int)control;
+    if(mg_process_mode&&(mg_input==mg_root||mg_input==mg_channel||mg_command==mg_root||mg_command==mg_channel||env_fd==mg_root||env_fd==mg_channel))return fail("managed-process-fds");
     struct stat root_info;unsigned objects=0;
     if(fstat(mg_root,&root_info)<0||!S_ISDIR(root_info.st_mode)||scan_workspace(mg_root,&objects,0)<0)return fail("managed-root");
     char procpath[64];snprintf(procpath,sizeof(procpath),"/proc/self/fd/%d",mg_root);
@@ -437,16 +499,42 @@ int main(int argc,char **argv) {
     if(getsockname(mg_channel,(struct sockaddr *)&address,&address_length)<0||address.sun_family!=AF_UNIX||
        getsockopt(mg_channel,SOL_SOCKET,SO_TYPE,&type,&type_length)<0||type!=SOCK_SEQPACKET||
        getsockopt(mg_channel,SOL_SOCKET,SO_PEERCRED,&peer,&peer_length)<0||peer_length!=sizeof(peer)||peer.uid!=getuid()||peer.pid!=getppid())return fail("managed-channel");
+    if(mg_process_mode) {
+        address_length=sizeof(address);type_length=sizeof(type);peer_length=sizeof(peer);
+        if(getsockname(mg_command,(struct sockaddr *)&address,&address_length)<0||address.sun_family!=AF_UNIX||
+           getsockopt(mg_command,SOL_SOCKET,SO_TYPE,&type,&type_length)<0||type!=SOCK_SEQPACKET||
+           getsockopt(mg_command,SOL_SOCKET,SO_PEERCRED,&peer,&peer_length)<0||peer_length!=sizeof(peer)||peer.uid!=getuid()||peer.pid!=getppid())return fail("managed-command-channel");
+        struct stat input_info;
+        int flags=fcntl(mg_input,F_GETFL);
+        if(flags<0||(flags&O_ACCMODE)!=O_RDONLY||fstat(mg_input,&input_info)<0||!S_ISFIFO(input_info.st_mode)||input_info.st_uid!=getuid())return fail("managed-input-pipe");
+    }
     mg_exec=open(argv[3],O_RDONLY|O_CLOEXEC|O_NOFOLLOW);struct stat executable;
     if(mg_exec<0||fstat(mg_exec,&executable)<0||!S_ISREG(executable.st_mode)||(executable.st_mode&07000)||
        !ordinary_filesystem(mg_exec)||mg_static_elf(mg_exec)<0)return fail("managed-static-executable");
     struct config c={.wall=wall,.memory=memory,.output=output,.file=16777216,.fds=128,.processes=mg_nproc_limit,.count=1};
     c.grants[0]=(struct grant){.fd=mg_exec,.rights=LL_EXECUTE|LL_READ_FILE};
-    if(argc-9>MAX_ARGS)return 2;
-    for(int i=9;i<argc;i++)c.argv[i-9]=argv[i];
+    char *environment=NULL;
+    if(mg_process_mode) {
+        struct stat env_info;int seals=fcntl(env_fd,F_GET_SEALS);
+        int required=F_SEAL_WRITE|F_SEAL_GROW|F_SEAL_SHRINK|F_SEAL_SEAL;
+        if(seals<0||(seals&required)!=required||fstat(env_fd,&env_info)<0||!S_ISREG(env_info.st_mode)||env_info.st_uid!=getuid()||env_info.st_size<0||env_info.st_size>65536)return fail("managed-environment-seals");
+        size_t size=(size_t)env_info.st_size;environment=calloc(1,size+1);
+        if(!environment)return fail("managed-environment-allocation");
+        if(pread(env_fd,environment,size,0)!=(ssize_t)size)return fail("managed-environment-read");
+        close(env_fd);env_fd=-1;
+        unsigned count=0;size_t offset=0;
+        while(offset<size) {
+            char *entry=environment+offset,*end=memchr(entry,0,size-offset),*equal=end?memchr(entry,'=',(size_t)(end-entry)):NULL;
+            if(!end||!equal||equal==entry||count==MAX_ENV)return fail("managed-environment-shape");
+            for(unsigned i=0;i<count;i++)if(!strncmp(c.env[i],entry,(size_t)(equal-entry))&&c.env[i][equal-entry]=='=')return fail("managed-environment-duplicate");
+            c.env[count++]=entry;offset=(size_t)(end-environment)+1;
+        }
+    }
+    if(argc-arg_start>MAX_ARGS)return 2;
+    for(int i=arg_start;i<argc;i++)c.argv[i-arg_start]=argv[i];
     struct sigaction action={.sa_handler=cancel_signal};sigemptyset(&action.sa_mask);
     if(sigaction(SIGTERM,&action,NULL)<0||sigaction(SIGINT,&action,NULL)<0)return fail("managed-signals");
     signal(SIGPIPE,SIG_IGN);umask(0077);(void)set_nonblock(1);(void)set_nonblock(2);
     mg_deadline=now_ms()+(int64_t)wall;
-    int result=mg_supervise(&c);close(mg_exec);close(mg_root);close(mg_channel);return result;
+    int result=mg_supervise(&c);free(environment);close(mg_exec);close(mg_root);close(mg_channel);return result;
 }

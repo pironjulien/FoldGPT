@@ -1,5 +1,15 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application>
+        <service android:name="app.foldgpt.NativeProcessRpcProbeService" android:process=":processRpcProbe"
+            android:exported="true" android:permission="android.permission.DUMP" android:foregroundServiceType="specialUse">
+            <property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="ADB-only fixed actual native process lifecycle backend conformance in private disposable workspaces" />
+        </service>
+        <service android:name="app.foldgpt.NativeHttpsAcquisitionProbeService" android:process=":httpsAcquisitionProbe"
+            android:exported="true" android:permission="android.permission.DUMP" android:foregroundServiceType="specialUse">
+            <property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="ADB-only fixed official HTTPS artifact acquisition and private verified-cache reuse diagnostic" />
+        </service>
         <service android:name="app.foldgpt.NativeManagedProcessProbeService" android:process=":managedProcessProbe"
             android:exported="true" android:permission="android.permission.DUMP" android:foregroundServiceType="specialUse">
             <property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"

@@ -36,19 +36,23 @@ def strict_json(data):
 
 class NativeProcessPolicy:
     def __init__(self, helper, workspace, context, *, session_id="private-session", request_id="private-process",
-                 guest_workspace="/workspace"):
+                 guest_workspace="/workspace", backend=None):
         self.intent = prepare_policy_intent(context, session_id=session_id, request_id=request_id,
                                             method="process/start")
         self.policy = parse_context(self.intent.context_json)
-        self.backend = NativeFilesBackend(helper, workspace, guest_workspace=guest_workspace)
+        # A composed executor lends its already pinned/leased filesystem backend
+        # while holding that backend's mutation lock for the process lifetime.
+        self.owns_backend = backend is None
+        self.backend = backend if backend is not None else NativeFilesBackend(helper, workspace, guest_workspace=guest_workspace)
         self.decisions = []
         try:
             if self.policy.cwd != self.backend.mount:
                 raise ValueError("The initial native process profile requires its pinned workspace cwd")
             self.backend._inspect(self.policy)
         except BaseException:
-            os.close(self.backend.root)
-            self.backend.closed = True
+            if self.owns_backend:
+                os.close(self.backend.root)
+                self.backend.closed = True
             raise
 
     @property
@@ -95,7 +99,7 @@ class NativeProcessPolicy:
         return response
 
     def close(self):
-        if not self.backend.closed:
+        if self.owns_backend and not self.backend.closed:
             self.backend.closed = True
             os.close(self.backend.root)
 

@@ -81,6 +81,23 @@ androidComponents.onVariants(androidComponents.selector().withBuildType('debug')
     variant.sources.assets.addGeneratedSourceDirectory(syncManagedProcessProbeAssets) { it.outputDir }
 }
 
+def processRpcProbeAssets = layout.buildDirectory.dir('generated/processRpcProbeAssets')
+def syncProcessRpcProbeAssets = tasks.register('syncProcessRpcProbeAssets', NativeFilesRpcAssets) {
+    from(rootProject.file('..')) {
+        include 'tools/executor/exec_server.py', 'tools/executor/native_files.py',
+                'tools/executor/policy_intent.py', 'tools/policy/managed_policy.py',
+                'tools/executor/native_files_rpc_fixture.py', 'tools/executor/native_process_policy.py',
+                'tools/executor/native_processes.py', 'tools/executor/test_native_processes_live.py',
+                'tools/executor/native_processes_android_fixture.py'
+        into 'process-rpc-probe'
+    }
+    outputDir.set(processRpcProbeAssets)
+    into outputDir
+}
+androidComponents.onVariants(androidComponents.selector().withBuildType('debug')) { variant ->
+    variant.sources.assets.addGeneratedSourceDirectory(syncProcessRpcProbeAssets) { it.outputDir }
+}
+
 // Local native outputs are ignored by Git. A stale diagnostic must never enter
 // production merely because it was left in the runtime build directory.
 tasks.register('verifyRuntimeLibraries') {
