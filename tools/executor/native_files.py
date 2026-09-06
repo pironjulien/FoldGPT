@@ -7,7 +7,9 @@ execution, symlink/gitdir handling and process isolation remain integration work
 import asyncio
 import base64
 import binascii
+import errno
 import fcntl
+import json
 import os
 from pathlib import Path
 import stat
@@ -17,6 +19,43 @@ from tools.executor.policy_intent import prepare_policy_intent
 from tools.policy.managed_policy import GuestPath, PolicyError, parse_context
 
 MAX_DATA = 16 * 1024 * 1024
+
+
+def _native_failure(diagnostic):
+    """Translate only a validated native error record into official RPC codes.
+
+    In particular, Codex's RemoteFileSystem recognizes -32004 as NotFound.
+    Policy rejection never passes through this mapper and cannot become a
+    misleading absence. Malformed diagnostics remain internal backend failures.
+    """
+    stages = {"invocation", "root-fd", "length", "root-ownership", "allocation",
+              "input", "input-length", "open", "file-kind", "write",
+              "directory-sync", "read", "read-bound", "output", "close"}
+
+    def unique(pairs):
+        result = {}
+        for key, value in pairs:
+            if key in result:
+                raise ValueError("Duplicate native error field")
+            result[key] = value
+        return result
+
+    try:
+        if type(diagnostic) is not bytes or len(diagnostic) > 1024:
+            raise ValueError("Invalid native diagnostic length")
+        value = json.loads(diagnostic.decode("ascii"), object_pairs_hook=unique)
+        if (type(value) is not dict or set(value) != {"stage", "errno"}
+                or type(value["stage"]) is not str or value["stage"] not in stages
+                or type(value["errno"]) is not int or not 1 <= value["errno"] <= 4095):
+            raise ValueError("Invalid native error record")
+    except (ValueError, UnicodeError, TypeError, RecursionError):
+        return RpcError(-32603, "Native filesystem error violates its contract")
+    number = value["errno"]
+    if value["stage"] == "open" and number == errno.ENOENT:
+        return RpcError(-32004, "Requested file or its parent does not exist")
+    if number in {errno.EACCES, errno.EPERM, errno.EINVAL}:
+        return RpcError(-32600, "Native filesystem request was refused", value)
+    return RpcError(-32603, "Native filesystem operation failed", value)
 
 
 class NativeFilesBackend:
@@ -122,6 +161,11 @@ class NativeFilesBackend:
                     raise PermissionError("The supplied filesystem policy denies this operation")
                 metadata = self._inspect(policy)
                 if writing:
+                    # A successful write must not introduce a file kind that
+                    # invalidates every subsequent workspace operation. This
+                    # admission limit also applies to explicit policy grants.
+                    if path.parts[-1] == ".git":
+                        raise ValueError("Creating gitdir files requires the native alias resolver")
                     for protected in metadata:
                         if protected.contains(path) and not any(
                                 entry.access.value == "write" and protected.contains(entry.path) and entry.path.contains(path)
@@ -146,7 +190,7 @@ class NativeFilesBackend:
             try:
                 output, diagnostic = await asyncio.wait_for(asyncio.shield(communicate), 30)
                 if self.process.returncode != 0:
-                    raise RpcError(-32000, "Native filesystem operation failed", {"diagnostic": diagnostic.decode("ascii", errors="replace")})
+                    raise _native_failure(diagnostic)
                 if diagnostic or (writing and output) or len(output) > MAX_DATA:
                     raise RpcError(-32000, "Native filesystem response violates its contract")
                 return {} if writing else {"dataBase64": base64.b64encode(output).decode("ascii")}

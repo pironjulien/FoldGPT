@@ -32,6 +32,7 @@ import uuid
 OFFICIAL_COMMIT = "042fb41b7c813ac7999105e886b2b7aa715b5081"
 MAX_MESSAGE_BYTES = 64 * 1024 * 1024  # Official stdio transport ceiling.
 MAX_VALUE_NODES = 256 * 1024  # Official RPC complexity ceiling.
+STDIO_TERMINATION_GRACE_SECONDS = 2  # Official stdio response-drain grace.
 CAPABILITIES = frozenset({
     "networkProxyLaunch", "capabilityDiscoverySandbox", "environmentConfigRead",
     "httpHeaderEnvVars", "sandboxedFileStreaming", "shellSnapshotV2",
@@ -487,30 +488,59 @@ async def _read_frame(reader, limit):
 
 
 async def serve_stdio(server, reader=None, writer=None, *, max_message_bytes=MAX_MESSAGE_BYTES):
-    """NDJSON framing; stdout carries only protocol, never diagnostics or output."""
+    """NDJSON with independent, bounded output and immediate disconnect cleanup.
+
+    Enqueuing a response never waits for the peer to consume stdout, including
+    handshake/admission/parse errors emitted from the receive loop. A single
+    writer preserves ordering. Queue saturation closes the session explicitly;
+    it cannot indefinitely defer EOF, native cancellation, or cleanup controls.
+    """
     reader = reader if reader is not None else sys.stdin.buffer
     writer = writer if writer is not None else sys.stdout.buffer
-    write_lock = asyncio.Lock()
     failure = asyncio.Event()
+    outgoing = asyncio.Queue(maxsize=128)  # Official transport channel capacity.
+    outstanding_bytes = 0
 
     async def emit(message):
+        nonlocal outstanding_bytes
         try:
+            if failure.is_set():
+                raise ProtocolClosed("Output channel is closed")
             data = encode_message(message)
             if len(data) > max_message_bytes:
                 raise ProtocolClosed("Outbound message exceeds stdio size limit")
-
-            def write():
-                writer.write(data + b"\n")
-                writer.flush()
-
-            async with write_lock:
-                if failure.is_set():
-                    raise ProtocolClosed("Output channel is closed")
-                await _pipe_io(write)
+            data += b"\n"
+            if outstanding_bytes + len(data) > max_message_bytes + 1:
+                raise ProtocolClosed("Outbound queued bytes exceed transport budget")
+            outgoing.put_nowait(data)
+            outstanding_bytes += len(data)
         except Exception as error:
             failure.set()
             raise ProtocolClosed("Output channel failed") from error
 
+    async def write_responses():
+        nonlocal outstanding_bytes
+        try:
+            while True:
+                data = await outgoing.get()
+                try:
+                    def write():
+                        remaining = memoryview(data)
+                        while remaining:
+                            size = writer.write(remaining)
+                            if type(size) is not int or not 0 < size <= len(remaining):
+                                raise OSError("Incomplete stdio write")
+                            remaining = remaining[size:]
+                        writer.flush()
+
+                    await _pipe_io(write)
+                finally:
+                    outstanding_bytes -= len(data)
+                    outgoing.task_done()
+        except Exception:
+            failure.set()
+
+    writer_task = asyncio.create_task(write_responses())
     try:
         while not failure.is_set():
             # One byte beyond the payload catches oversized unterminated input.
@@ -538,7 +568,18 @@ async def serve_stdio(server, reader=None, writer=None, *, max_message_bytes=MAX
             await server.accept(message, emit)
     finally:
         # EOF is a disconnect, not a request to leave background native work alive.
-        await server.close()
+        # Clean native work BEFORE draining output: a stalled reader must never
+        # retain running workers or the workspace lease through the drain grace.
+        try:
+            await server.close()
+            if not failure.is_set() and not asyncio.current_task().cancelling():
+                try:
+                    await asyncio.wait_for(outgoing.join(), STDIO_TERMINATION_GRACE_SECONDS)
+                except asyncio.TimeoutError:
+                    pass  # Disconnected peer; native cleanup already completed.
+        finally:
+            writer_task.cancel()
+            await asyncio.gather(writer_task, return_exceptions=True)
 
 
 def main():
