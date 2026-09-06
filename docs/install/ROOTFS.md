@@ -111,11 +111,13 @@ The output directory contains:
 
 The builder refuses to proceed if an installed package lacks its matching
 downloaded-package provenance. The provenance contains Debian binary packages
-and authenticated indexes, **not their corresponding upstream source packages**.
-Keeping binary packages and copyright notices
-does not, by itself, satisfy every corresponding-source requirement for public
-binary redistribution. This development output is not a published binary
-release; source acquisition and license review remain part of release work.
+and authenticated indexes. A separate [exact source collection](ROOTFS-SOURCES.md)
+now preserves all 185 source-package versions named by these 289 binaries,
+with 605 authenticated source components and their installed notices.
+It remains separate from the original provenance archive. Exact sources for
+statically embedded build dependencies and their notices still need review;
+the source-package mapping alone does not establish that closure. This
+development output is not a published binary release.
 
 ## Verification and privacy
 
