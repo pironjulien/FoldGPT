@@ -54,6 +54,24 @@ integration coverage limits, not claims of universal support.
 
 ## Android kernel experiments
 
+The offline Codex probe also has a native host test for its listener deadline.
+First generate the embedded script/header and Android binary from PowerShell:
+
+```powershell
+./tools/build-codex-offline-probe.ps1 -OutputDirectory downloads/codex-offline-deadline-check
+```
+
+Then, from the repository root in WSL/Linux:
+
+```sh
+gcc -O2 -Wall -Wextra -Werror -I downloads/codex-offline-deadline-check tools/test-codex-probe-deadline.c -o downloads/codex-offline-deadline-check/test-codex-probe-deadline
+timeout 5s downloads/codex-offline-deadline-check/test-codex-probe-deadline
+```
+
+This uses real local sockets to check timeout with a silent peer, an expired
+deadline, descriptor transfer and peer closure. It does not start Codex, PRoot
+or the Android service, nor exercise kernel isolation.
+
 Build the fixed experiments with Android NDK 29, then rebuild/install the debug
 APK. They are excluded from release builds. Open FoldGPT before broadcasting so
 Android's stopped-package handling cannot skip the receiver.
