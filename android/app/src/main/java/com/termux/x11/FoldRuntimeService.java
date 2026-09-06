@@ -9,6 +9,7 @@ import android.system.OsConstants;
 import android.util.Log;
 import app.foldgpt.FoldActivity;
 import app.foldgpt.KeyringVault;
+import app.foldgpt.install.GuestIdentity;
 import java.io.*;
 import java.util.*;
 
@@ -69,6 +70,7 @@ public final class FoldRuntimeService extends Service {
         byte[] keyringPassword = null;
         try {
             File root = new File(getFilesDir(), "debian");
+            GuestIdentity identity = GuestIdentity.load(root.toPath());
             requireReadableFile(root, "usr/bin/env");
             requireReadableFile(root, "usr/local/bin/foldgpt-session");
             requireReadableFile(root, "usr/local/lib/foldgpt/foldgpt_keyring.py");
@@ -104,14 +106,14 @@ public final class FoldRuntimeService extends Service {
             File aliases = new File(getFilesDir(), "native"); aliases.mkdirs();
             File alias = new File(aliases, "libtalloc.so.2");
             refreshLibraryAlias(alias, getApplicationInfo().nativeLibraryDir + "/libtalloc.so");
-            File home = new File(root, "home/julien"); home.mkdirs();
             List<String> args = new ArrayList<>(Arrays.asList(
                 getApplicationInfo().nativeLibraryDir + "/libproot.so", "--kill-on-exit", "--link2symlink", "--sysvipc",
-                "-r", root.getAbsolutePath(), "-i", "10410:10410", "-w", "/home/julien",
+                "-r", root.getAbsolutePath(), "-i", identity.prootIds(), "-w", identity.home,
                 "-b", "/dev", "-b", "/proc", "-b", "/sys", "-b", "/system", "-b", "/apex",
                 "-b", temp.getAbsolutePath() + ":/tmp",
                 "-b", sharedMemory.getAbsolutePath() + ":/dev/shm",
-                "/usr/bin/env", "-i", "HOME=/home/julien", "USER=julien", "LANG=C.UTF-8", "PATH=/usr/local/bin:/usr/bin:/bin",
+                "/usr/bin/env", "-i", "HOME=" + identity.home, "USER=" + identity.user, "LOGNAME=" + identity.user,
+                "LANG=C.UTF-8", "PATH=/usr/local/bin:/usr/bin:/bin",
                 "DISPLAY=:2", "FOLDGPT_IME_UID=" + android.os.Process.myUid(),
                 "FOLDGPT_SCALE=" + getResources().getDisplayMetrics().density,
                 "/bin/bash", "/usr/local/bin/foldgpt-session"));

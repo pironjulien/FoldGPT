@@ -4,7 +4,7 @@ if [[ -z "${DBUS_SESSION_BUS_ADDRESS:-}" ]]; then
     exec dbus-run-session -- "$0"
 fi
 export FOLDGPT_CDP_PORT=9223
-export XDG_RUNTIME_DIR=/tmp/runtime-julien
+export XDG_RUNTIME_DIR="/tmp/runtime-$(id -u)"
 mkdir -p "$XDG_RUNTIME_DIR" "$HOME/.local/state"
 chmod 700 "$XDG_RUNTIME_DIR"
 timeout 20s python3 /usr/local/lib/foldgpt/foldgpt_keyring.py
