@@ -12,6 +12,7 @@ The `vendor/termux-x11` and `vendor/proot` submodules pin upstream source. Prese
 | --- | --- | --- |
 | [Termux:X11](https://github.com/termux/termux-x11) | `9df8b767645aa0d0a2f2576767449df55b41962f` | GPL v3, with dependency-specific notices |
 | [PRoot](https://github.com/termux/proot) | `7266fb3e8516535682f5a9c8f3a7e70f6506eddb` | GPL v2 or later; see its source headers and `COPYING` |
+| Apache Commons Compress (installer), with Commons IO/Codec/Lang dependencies | `1.28.0`; see Gradle dependency resolution and pinned host-test inputs | Apache License 2.0; retain component LICENSE/NOTICE files for binary distribution |
 
 This publication distributes source, without APKs, runtime libraries or Linux images. A future binary release must inventory dependencies and provide corresponding source and notices as required by their licenses. Collected binary hashes and a general GPL notice alone do not establish reproducibility or complete compliance.
 
