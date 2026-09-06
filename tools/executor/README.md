@@ -1,9 +1,11 @@
 # Native executor integration: verified seam and policy handoff
 
-This directory contains **policy intent data and an integration audit**, not an
-execution server or a native sandbox. No configuration, official executable,
-phone state, account, or conversation is changed. It advertises no executor
-capability and produces no process/filesystem success responses.
+This directory contains the audited stdio execution-server transport, immutable
+policy handoff, a bounded native process backend and the first real file RPC
+backend. These components are not yet a complete protected Android executor.
+The default server refuses process/file operations until a backend is supplied.
+See [native filesystem integration](native-files.md) for the actual tests,
+official-client handshake and remaining admission limits.
 
 Separate native experiments now verify [exact-file A/B/C/A rights](native-abc-proof.md)
 and [exec startup plus three concurrent peer-access checks](native-exec-peer-proof.md)
@@ -91,7 +93,7 @@ The UTF-8 handoff object has these exact fields:
 
 Canonical context encoding is UTF-8 JSON with sorted object keys, compact
 separators, literal Unicode, and no non-finite numbers. Array order is unchanged.
-The decoder and enforcement engine are not implemented here. A native consumer
+The complete command enforcement engine is not implemented here. A native consumer
 must validate this control message and schema itself; a digest matching an
 untrusted message establishes no authority.
 
