@@ -17,8 +17,10 @@ import java.util.*;
 import org.json.JSONObject;
 
 /** Concrete, deliberately INACTIVE coordinator: authenticated base -> local
- * account -> Android vault -> supervised GNOME collection. No activation,
- * display, official client or model call is performed. A result is not runtime
+ * account -> intact official client installation -> Android vault -> supervised
+ * GNOME collection. No activation, display, client launch or model call occurs.
+ * The explicitly named keyring-only diagnostic retains its earlier scope.
+ * A result is not runtime
  * readiness. Keep the private data until the complete installer is implemented.
  */
 public final class AndroidInactivePreparation {
@@ -27,9 +29,35 @@ public final class AndroidInactivePreparation {
         public final Path root;
         public final GuestIdentity account;
         public final String installationId,collectionInstallationId;
-        private Result(Path root,GuestIdentity account,InactivePreparationJournal journal) {
+        /** Present only for prepare(..., ClientInput); never inferred from keyring-only evidence. */
+        public final AndroidInactiveClientInstaller.Result client;
+        private Result(Path root,GuestIdentity account,InactivePreparationJournal journal,AndroidInactiveClientInstaller.Result client) {
             this.root=root; this.account=account; installationId=journal.value("installationId");
             collectionInstallationId=journal.value("collectionInstallationId");
+            this.client=client;
+        }
+    }
+    /** Independently authenticated package/helper inputs. A null package path
+     * means source-free recovery from this exact staged installation's ledger. */
+    public static final class ClientInput {
+        public final AndroidInactiveClientInstaller.Descriptor descriptor;
+        public final Path packageSource,verifierSource,installerSource;
+        public final String verifierSha256,installerSha256;
+        public final long timeoutMillis;
+        public ClientInput(AndroidInactiveClientInstaller.Descriptor descriptor,Path packageSource,
+                Path verifierSource,String verifierSha256,Path installerSource,String installerSha256,long timeoutMillis) throws IOException {
+            this.descriptor=Objects.requireNonNull(descriptor); this.packageSource=packageSource;
+            this.verifierSource=Objects.requireNonNull(verifierSource); this.installerSource=Objects.requireNonNull(installerSource);
+            if(verifierSha256==null || !verifierSha256.matches("[0-9a-f]{64}") || installerSha256==null
+                    || !installerSha256.matches("[0-9a-f]{64}") || timeoutMillis<=0 || timeoutMillis>Integer.MAX_VALUE)
+                throw new IOException("Authenticated client helpers and bounded deadline are required");
+            this.verifierSha256=verifierSha256; this.installerSha256=installerSha256; this.timeoutMillis=timeoutMillis;
+        }
+        private String descriptorSha256() {
+            String canonical="foldgpt.inactive-client-binding.v1\npackage=chatgpt\narchitecture=arm64\nversion="+descriptor.version
+                +"\nsha256="+descriptor.sha256+"\nbytes="+descriptor.bytes+"\nmaxTarBytes="+descriptor.maxTarBytes
+                +"\nmaxMembers="+descriptor.maxMembers+"\n";
+            return InactivePreparationJournal.sha256(canonical.getBytes(StandardCharsets.US_ASCII));
         }
     }
     /** Source SHA values must come from the authenticated installer/package,
@@ -40,10 +68,25 @@ public final class AndroidInactivePreparation {
      * reads, replaces or deletes the production vault ciphertext or AES key.
      */
     public static Result prepare(Context context,RootfsExtractor.Spec spec,RootfsTransaction.ArchiveSource archive,
+            Path initializerSource,String initializerSha256,Path supervisorSource,String supervisorSha256,ClientInput client) throws Exception {
+        return prepareBound(context,spec,archive,initializerSource,initializerSha256,supervisorSource,supervisorSha256,
+            Objects.requireNonNull(client,"Client-enabled preparation requires authenticated inputs"));
+    }
+    /** Retains the already tested v1 diagnostic and never installs a package.
+     * It cannot resume or downgrade a journal made by the client-enabled path. */
+    public static Result prepareKeyringOnly(Context context,RootfsExtractor.Spec spec,RootfsTransaction.ArchiveSource archive,
             Path initializerSource,String initializerSha256,Path supervisorSource,String supervisorSha256) throws Exception {
+        return prepareBound(context,spec,archive,initializerSource,initializerSha256,supervisorSource,supervisorSha256,null);
+    }
+    private static Result prepareBound(Context context,RootfsExtractor.Spec spec,RootfsTransaction.ArchiveSource archive,
+            Path initializerSource,String initializerSha256,Path supervisorSource,String supervisorSha256,ClientInput clientInput) throws Exception {
         Objects.requireNonNull(context); Objects.requireNonNull(spec); Objects.requireNonNull(archive);
         byte[] initializer=verifiedScript(initializerSource,initializerSha256);
         byte[] supervisor=verifiedScript(supervisorSource,supervisorSha256);
+        if(clientInput!=null) {
+            verifiedScript(clientInput.verifierSource,clientInput.verifierSha256);
+            verifiedScript(clientInput.installerSource,clientInput.installerSha256);
+        }
         Path files=context.getFilesDir().toPath(),noBackup=context.getNoBackupFilesDir().toPath();
         Storage storage=new Storage(); storage.managedDirectory(files); storage.managedDirectory(noBackup);
         Path nativeDirectory=Path.of(context.getApplicationInfo().nativeLibraryDir);
@@ -55,6 +98,8 @@ public final class AndroidInactivePreparation {
             RootfsTransaction.Prepared prepared=transaction.prepare(archive);
             if(prepared.state!=RootfsTransaction.State.PREPARED) throw new IOException("Inactive preparation refuses an activated transaction");
             Path root=prepared.root;
+            // Retain one authoritative pathname. Different scope/schema cannot
+            // evade the earlier intent by creating a second coordinator file.
             Path journalFile=files.resolve(".foldgpt-install/fresh/inactive-preparation.v1");
             Path data=root.resolve("home/foldgpt/.local/share");
             if(!InactivePreparationJournal.exists(journalFile)
@@ -67,7 +112,12 @@ public final class AndroidInactivePreparation {
             bindings.put("initializer",initializerSha256); bindings.put("supervisor",supervisorSha256); bindings.put("native",nativeDigest);
             bindings.put("vaultParent",storage.identity(noBackup)); bindings.put("uid",Integer.toString(android.os.Process.myUid()));
             bindings.put("gid",Integer.toString(Os.getgid()));
-            InactivePreparationJournal journal=InactivePreparationJournal.open(journalFile,bindings,storage);
+            if(clientInput!=null) {
+                bindings.put("client",clientInput.descriptorSha256()); bindings.put("clientVerifier",clientInput.verifierSha256);
+                bindings.put("clientInstaller",clientInput.installerSha256);
+            }
+            InactivePreparationJournal journal=clientInput==null?InactivePreparationJournal.open(journalFile,bindings,storage)
+                :InactivePreparationJournal.openWithClient(journalFile,bindings,storage);
             GuestIdentity account;
             if(journal.step()==InactivePreparationJournal.Step.ROOT_PREPARED) {
                 account=AndroidGuestAccountProvisioner.prepare(transaction); journal.accountPrepared();
@@ -75,6 +125,20 @@ public final class AndroidInactivePreparation {
                 account=GuestIdentity.load(root);
                 if(!account.user.equals("foldgpt") || account.uid!=android.os.Process.myUid() || account.gid!=Os.getgid())
                     throw new IOException("Inactive coordinator guest identity changed");
+            }
+            AndroidInactiveClientInstaller.Result client=null;
+            if(clientInput!=null) {
+                // The package step always executes its real verification, even
+                // after a completed journal step. Failure prevents vault use.
+                client=AndroidInactiveClientInstaller.install(context,transaction,journal.value("installationId"),
+                    clientInput.descriptor,clientInput.packageSource,clientInput.verifierSource,clientInput.verifierSha256,
+                    clientInput.installerSource,clientInput.installerSha256,clientInput.timeoutMillis);
+                if(!client.root.equals(root) || !client.rootIdentity.equals(bindings.get("root"))
+                        || !client.packageSha256.equals(clientInput.descriptor.sha256))
+                    throw new IOException("Inactive client evidence differs from coordinator inputs");
+                if(journal.step()==InactivePreparationJournal.Step.ACCOUNT_PREPARED) journal.clientPrepared(client.reportSha256);
+                else if(!client.reportSha256.equals(journal.value("clientReportSha256")))
+                    throw new IOException("Resumed client report differs from coordinator evidence");
             }
             Path scripts=directoryChain(root,"usr/local/lib/foldgpt/install",storage);
             installScript(scripts.resolve("initialize_keyring.py"),initializer,initializerSha256,storage);
@@ -85,7 +149,8 @@ public final class AndroidInactivePreparation {
                 throw new IOException("Collection preparation data exists but its Android credential is missing");
             credential=KeyringVault.prepareFreshPassword(context);
             String vaultHash=hashFile(encrypted,storage,8256,true);
-            if(journal.step()==InactivePreparationJournal.Step.ACCOUNT_PREPARED) journal.vaultPrepared(vaultHash);
+            if(journal.step()==(clientInput==null?InactivePreparationJournal.Step.ACCOUNT_PREPARED:InactivePreparationJournal.Step.CLIENT_PREPARED))
+                journal.vaultPrepared(vaultHash);
             else if(!vaultHash.equals(journal.value("vaultSha256"))) throw new IOException("Inactive vault ciphertext changed");
             if(journal.step()==InactivePreparationJournal.Step.COLLECTION_PREPARED) verifyCollectionFiles(data,journal,storage);
             ProcessBuilder process=guestProcess(context,root,account,nativeDirectory,storage);
@@ -111,7 +176,7 @@ public final class AndroidInactivePreparation {
                 throw new IOException("Resumed collection differs from coordinator identity");
             if(transaction.state()!=RootfsTransaction.State.PREPARED || InactivePreparationJournal.exists(files.resolve("debian")))
                 throw new IOException("Inactive preparation encountered unexpected activation");
-            return new Result(root,account,journal);
+            return new Result(root,account,journal,client);
         } finally { if(credential!=null) Arrays.fill(credential,(byte)0); }
     }
     private static JSONObject receipt(String output) throws Exception {

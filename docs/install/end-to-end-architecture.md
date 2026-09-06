@@ -31,6 +31,19 @@ markers would create competing authorities over the same root. Keep all actual
 readiness decisions in one Android coordinator and use the guest tools only
 for their bounded provisioning work.
 
+The current client-enabled `AndroidInactivePreparation.prepare(..., ClientInput)`
+joins the actual package installer after guest-account provisioning and before
+vault/collection preparation under that same lease. Its v2 journal binds the
+client descriptor and helper hashes, records the verified package report, and
+requires real package revalidation on every retry. The separately named
+`prepareKeyringOnly` diagnostic preserves the earlier v1 scope; the coordinator
+refuses implicit conversion between the two. The combined path now passes on
+the actual Fold twice, including source-free recovery with the same account,
+client, vault and collection. See [the device evidence](combined-preparation-probe.md).
+Input acquisition,
+complete integration/graphics setup, runtime validation and publication remain
+unimplemented parts of the complete flow below.
+
 ## One durable installation identity
 
 The coordinator acquires the global installation lease before reading or
@@ -100,12 +113,12 @@ modify permissions only on its own abandoned inactive stage so it can reclaim
 that stage. It must never walk or clean a live root, user-data tree or symlink
 target outside its owned staging boundary.
 
-The first actual Android probe exposed a platform difference at symlink mtime:
+The first Android probe exposed a platform difference at symlink mtime:
 Java's `BasicFileAttributeView.setTimes(..., NOFOLLOW_LINKS)` failed at `root/bin`.
-The coordinator is implementing the native no-follow timestamp operation.
-Do not call the extraction ready on Android until the exact archive passes
-again and the independent inventory confirms metadata and content. Host JVM
-success did not cover this Android API difference.
+The native no-follow timestamp operation now passes actual Android extraction;
+the independent inventory checked every logical member and physical entry.
+The combined client/vault run also prepares and recovers that authenticated base.
+These extraction results do not establish the complete runtime's readiness.
 
 The production activation flush expects the root to be readable/traversable
 by the app UID. If future provisioning introduces inaccessible content, fail

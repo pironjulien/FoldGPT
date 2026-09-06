@@ -20,8 +20,10 @@ link. The helper does not fetch `latest`, substitute a mirror or manufacture a
 signature result. A newer package requires a newly authenticated descriptor;
 the existing version/hash binding must not silently change when that URL moves.
 The descriptor itself must be delivered through the trusted component mechanism
-chosen by the Android coordinator. No general-purpose descriptor downloader or
-APK-integrated client installer is provided here yet.
+chosen by the Android coordinator. There is no general-purpose descriptor
+downloader here. The separate [inactive package installer](inactive-client-install.md)
+is now called by the client-enabled Android coordinator under its existing
+lease; this generic input helper alone still performs no installation.
 
 `prepare` receives an existing private directory created by the installation
 coordinator under its global lease. It adds a per-input `flock`, records the

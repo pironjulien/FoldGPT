@@ -12,6 +12,7 @@ import zipfile
 RUNTIME = {"libXlorie.so", "libandroid-shmem.so", "libfoldgpt-install.so",
            "libproot-loader.so", "libproot-loader32.so", "libproot.so", "libtalloc.so"}
 DEBUG_CLASSES = (b"RootfsProbeService", b"ProotStorageProbeService", b"NativeRunnerProbeService", b"GuestAccountProbeService", b"InactivePreparationProbeService",
+                 b"CombinedPreparationProbeService", b"CombinedPreparationFixture",
                  b"CodexProbeService", b"LandlockProbeReceiver")
 
 
