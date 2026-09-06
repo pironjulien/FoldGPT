@@ -13,6 +13,7 @@ import static app.foldgpt.install.RootfsTransactionTest.*;
 /** Filesystem journal tests only; fixture hashes do not simulate Android crypto or GNOME. */
 public class InactivePreparationJournalTest {
     private static final String DIGEST="1234567890abcdef".repeat(4);
+    private static final String DIFFERENT_DIGEST="abcdef0123456789".repeat(4);
     private static final String COLLECTION="/org/freedesktop/secrets/collection/FoldGPT_fixture";
     private static final GuestAccountProvisioner.Storage STORAGE=new GuestAccountProvisioner.Storage() {
         public String identity(Path path) throws IOException { return POSIX.identity(path); }
@@ -27,6 +28,11 @@ public class InactivePreparationJournalTest {
     @After public void cleanup() throws IOException { for(Path path:owned) removeFixture(path); }
     private static Map<String,String> bindings(Path root) throws IOException {
         return Map.of("root",STORAGE.identity(root),"base",DIGEST,"initializer",DIGEST,"supervisor",DIGEST,"vaultParent",STORAGE.identity(root));
+    }
+    private static Map<String,String> clientBindings(Path root) throws IOException {
+        Map<String,String> result=new TreeMap<>(bindings(root));
+        result.put("client",DIGEST); result.put("clientVerifier",DIGEST); result.put("clientInstaller",DIGEST);
+        return result;
     }
     private static void advance(InactivePreparationJournal journal) throws IOException {
         if(journal.step()==InactivePreparationJournal.Step.ROOT_PREPARED) journal.accountPrepared();
@@ -45,7 +51,7 @@ public class InactivePreparationJournalTest {
         assertEquals(InactivePreparationJournal.Step.COLLECTION_PREPARED,resumed.step());
         assertEquals(id,resumed.value("installationId"));
         assertEquals(DIGEST,resumed.value("vaultSha256")); assertEquals(COLLECTION,resumed.value("collectionPath"));
-        assertEquals(4,InactivePreparationJournal.Step.values().length);
+        assertEquals(5,InactivePreparationJournal.Step.values().length);
         assertFalse(Files.exists(root.resolve("debian"),LinkOption.NOFOLLOW_LINKS));
     }
     @Test public void resumesAfterRealProcessDeathOnBothSidesOfEveryPublication() throws Exception {
@@ -65,9 +71,72 @@ public class InactivePreparationJournalTest {
     }
     public static void main(String[] args) throws Exception {
         Path root=Path.of(args[0]);
-        InactivePreparationJournal journal=InactivePreparationJournal.open(root.resolve("coordinator.v1"),bindings(root),STORAGE,
-            point -> { if(point.equals(args[1])) Runtime.getRuntime().halt(71); });
-        advance(journal); throw new AssertionError("Requested real process-death point was not reached");
+        boolean client=args.length==3 && args[2].equals("client");
+        InactivePreparationJournal.Checkpoint death=point -> { if(point.equals(args[1])) Runtime.getRuntime().halt(71); };
+        InactivePreparationJournal journal=client
+            ?InactivePreparationJournal.openWithClient(root.resolve("coordinator.v1"),clientBindings(root),STORAGE,death)
+            :InactivePreparationJournal.open(root.resolve("coordinator.v1"),bindings(root),STORAGE,death);
+        if(client) advanceClient(journal); else advance(journal);
+        throw new AssertionError("Requested real process-death point was not reached");
+    }
+    private static void advanceClient(InactivePreparationJournal journal) throws IOException {
+        if(journal.step()==InactivePreparationJournal.Step.ROOT_PREPARED) journal.accountPrepared();
+        if(journal.step()==InactivePreparationJournal.Step.ACCOUNT_PREPARED) journal.clientPrepared(DIGEST);
+        if(journal.step()==InactivePreparationJournal.Step.CLIENT_PREPARED) journal.vaultPrepared(DIGEST);
+        if(journal.step()==InactivePreparationJournal.Step.VAULT_PREPARED) journal.collectionPrepared(DIGEST,DIGEST,COLLECTION,"1:2");
+    }
+    @Test public void clientScopeRequiresBoundPackageAndReceiptBeforeVault() throws Exception {
+        Path root=temporary(),file=root.resolve("coordinator.v1");
+        fails(() -> InactivePreparationJournal.openWithClient(file,bindings(root),STORAGE));
+        assertFalse(Files.exists(file));
+        Map<String,String> inputs=clientBindings(root);
+        InactivePreparationJournal journal=InactivePreparationJournal.openWithClient(file,inputs,STORAGE);
+        String id=journal.value("installationId");
+        fails(() -> journal.clientPrepared(DIGEST)); journal.accountPrepared();
+        fails(() -> journal.vaultPrepared(DIGEST)); fails(() -> journal.clientPrepared("-"));
+        journal.clientPrepared(DIGEST);
+        assertEquals(InactivePreparationJournal.Step.CLIENT_PREPARED,journal.step());
+        assertEquals("-",journal.value("vaultSha256"));
+        InactivePreparationJournal resumed=InactivePreparationJournal.openWithClient(file,inputs,STORAGE);
+        assertEquals(id,resumed.value("installationId")); assertEquals(DIGEST,resumed.value("clientReportSha256"));
+        advanceClient(resumed);
+        fails(() -> resumed.clientPrepared(DIGEST));
+        assertEquals(InactivePreparationJournal.Step.COLLECTION_PREPARED,resumed.step());
+        assertFalse(Files.exists(root.resolve("debian"),LinkOption.NOFOLLOW_LINKS));
+    }
+    @Test public void clientAndKeyringOnlyScopesRefuseImplicitMigrationOrDowngrade() throws Exception {
+        Path legacy=temporary(),legacyFile=legacy.resolve("coordinator.v1");
+        InactivePreparationJournal old=InactivePreparationJournal.open(legacyFile,bindings(legacy),STORAGE); advance(old);
+        byte[] before=Files.readAllBytes(legacyFile);
+        fails(() -> InactivePreparationJournal.openWithClient(legacyFile,clientBindings(legacy),STORAGE));
+        assertArrayEquals(before,Files.readAllBytes(legacyFile));
+        Path root=temporary(),file=root.resolve("coordinator.v1");
+        InactivePreparationJournal current=InactivePreparationJournal.openWithClient(file,clientBindings(root),STORAGE); advanceClient(current);
+        byte[] complete=Files.readAllBytes(file);
+        fails(() -> InactivePreparationJournal.open(file,bindings(root),STORAGE));
+        fails(() -> InactivePreparationJournal.open(file,clientBindings(root),STORAGE));
+        for(String key:List.of("client","clientVerifier","clientInstaller")) {
+            Map<String,String> changed=new TreeMap<>(clientBindings(root)); changed.put(key,DIFFERENT_DIGEST);
+            fails(() -> InactivePreparationJournal.openWithClient(file,changed,STORAGE));
+            changed.remove(key); fails(() -> InactivePreparationJournal.openWithClient(file,changed,STORAGE));
+            assertArrayEquals(complete,Files.readAllBytes(file));
+        }
+    }
+    @Test public void resumesClientScopeAcrossRealDeathsBeforeAndAfterEveryPublication() throws Exception {
+        for(String step:List.of("ROOT_PREPARED","ACCOUNT_PREPARED","CLIENT_PREPARED","VAULT_PREPARED","COLLECTION_PREPARED"))
+            for(String point:List.of("ready-","written-")) {
+                Path root=temporary(),file=root.resolve("coordinator.v1");
+                Process child=new ProcessBuilder(Path.of(System.getProperty("java.home"),"bin/java").toString(),"-cp",System.getProperty("java.class.path"),
+                    InactivePreparationJournalTest.class.getName(),root.toString(),point+step,"client").redirectErrorStream(true).start();
+                if(!child.waitFor(30,TimeUnit.SECONDS)) { child.destroyForcibly(); fail("Client journal child timed out"); }
+                assertEquals(new String(child.getInputStream().readAllBytes(),java.nio.charset.StandardCharsets.UTF_8),71,child.exitValue());
+                InactivePreparationJournal resumed=InactivePreparationJournal.openWithClient(file,clientBindings(root),STORAGE);
+                String id=resumed.value("installationId"); advanceClient(resumed);
+                InactivePreparationJournal verified=InactivePreparationJournal.openWithClient(file,clientBindings(root),STORAGE);
+                assertEquals(id,verified.value("installationId")); assertEquals(DIGEST,verified.value("clientReportSha256"));
+                assertEquals(InactivePreparationJournal.Step.COLLECTION_PREPARED,verified.step());
+                assertFalse(Files.exists(file.resolveSibling("coordinator.v1.next")));
+            }
     }
     @Test public void refusesChangedRootComponentsChecksumAndUnsafeLinks() throws Exception {
         Path root=temporary(),file=root.resolve("coordinator.v1");

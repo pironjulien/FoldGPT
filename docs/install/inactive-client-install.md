@@ -9,11 +9,28 @@ actual package managers in that exact staged root and returns package-specific
 evidence. It does not alter the account/keyring journals, open an independent
 rootfs transaction, activate a root or launch the official client.
 
-The method is an integration entry point. `AndroidInactivePreparation` and
-runtime startup have not yet been changed to invoke it. Its intended call site
-is under the same coordinator lease after guest-account preparation and before
-vault/collection preparation. Retain the existing installation identity when
-resuming; do not generate another one for this package step.
+`AndroidInactivePreparation.prepare(..., ClientInput)` now invokes this step
+under its existing transaction lease after guest-account preparation and before
+vault/collection preparation. The required `ClientInput` supplies the descriptor,
+package path, two helper paths/hashes and bounded package-step deadline. A null
+package path requests recovery from the retained package; a null `ClientInput`
+is refused. The call does not acquire/download these authenticated inputs or
+start the runtime.
+
+The coordinator's v2 journal binds the exact descriptor digest and both helper
+hashes in addition to its existing root, base, native-runtime and keyring inputs.
+It records `CLIENT_PREPARED` with the actual verified report hash before it can
+prepare the vault. Every retry reruns the package step's actual verification and
+compares that report hash, including retries after collection preparation. A
+package failure or drift therefore stops the flow before credential use. The
+same coordinator installation ID is passed to the package ledger on every run.
+
+The existing diagnostic is explicitly named `prepareKeyringOnly` and retains
+its v1 journal and original package-free scope. The two entry points use the same
+journal pathname and refuse each other's schemas/bindings; neither silently
+migrates an existing keyring installation or downgrades a client-enabled one.
+The existing debug keyring probe calls only `prepareKeyringOnly`. Its earlier
+Android evidence remains keyring evidence, not client installation evidence.
 
 ## Required inputs and actual execution
 
@@ -23,6 +40,21 @@ AndroidInactiveClientInstaller.Result result = AndroidInactiveClientInstaller.in
     trustedClientDescriptor, downloadedPackageOrNullForResume,
     verifiedInventoryScript, trustedInventoryScriptSha256,
     verifiedInstallScript, trustedInstallScriptSha256, totalDeadlineMillis);
+```
+
+For the enclosing inactive flow, pass the same authenticated package/helper
+inputs with the base and keyring helper inputs:
+
+```java
+AndroidInactivePreparation.ClientInput client = new AndroidInactivePreparation.ClientInput(
+    trustedClientDescriptor, downloadedPackageOrNullForResume,
+    verifiedInventoryScript, trustedInventoryScriptSha256,
+    verifiedInstallScript, trustedInstallScriptSha256, packageDeadlineMillis);
+AndroidInactivePreparation.Result prepared = AndroidInactivePreparation.prepare(
+    context, trustedBaseSpec, baseArchiveSource,
+    verifiedKeyringInitializer, trustedInitializerSha256,
+    verifiedKeyringSupervisor, trustedSupervisorSha256, client);
+// prepared.client contains the actual package report; prepared.root stays PREPARED.
 ```
 
 `Descriptor` binds `chatgpt`, ARM64, exact version, archive SHA-256/size and
@@ -114,13 +146,32 @@ lifecycle and activation validation still belong to the coordinator.
 
 ## Validation scope
 
+The coordinator integration passes 43 JVM/POSIX tests under nonroot Linux,
+including three new client-journal tests. They exercise the mandatory client
+step before vault progression, refusal of changed package/helper bindings and
+implicit scope migration, and ten actual JVM deaths immediately before/after
+the five durable publications followed by recovery of the same coordinator ID.
+These are journal/filesystem tests; their fixture hashes do not simulate a
+package installation or claim Android keyring success. Evidence is
+`downloads/install/transaction-check/foldgpt-install-java-TcfevgTg`.
+The complete installation Java sources, `KeyringVault` and the retained debug
+keyring probe compile against the actual Android API 37.0 SDK, with evidence in
+`downloads/install/coordinator-client-compile-afb1bbacdcfd45fcabc76a16f3ee9aa5`.
+The combined coordinator now runs on Android and installs the actual package
+through this entry point. The first complete call and source-free retry both
+pass with matching root/package inodes, client report, vault and collection.
+Details are in [combined-preparation-probe.md](combined-preparation-probe.md).
+Its result remains inactive provisioning evidence;
+GPU/integration installation, protected commands, lifecycle and activation
+validation are still outside this increment.
+
 Four JVM tests execute real child processes as a nonroot Linux user and cover
 the precise PRoot bindings/environment, refusal of ambiguous paths, input EOF,
 private failure evidence, excessive output, deadlines and interruption. Seven
 Python tests cover APT plan refusal, baseline/version checks, root mismatch and
 real subprocess status/deadline/output handling. The new Android adapter and
-its dependencies compile against Android API 37; no APK was built or installed
-by this component's validation.
+its dependencies compile against Android API 37. The subsequent real Gradle
+debug/release builds and APK separation checks pass; the debug build is installed.
 
 A separate live fixture uses the authentic Debian 13 ARM64 base and official
 `chatgpt` 26.901.41600 package, with the same PRoot source revision
@@ -143,8 +194,8 @@ excluded from interruption evidence.
 After the cancellation integration, four JVM tests passed again, the real
 Gradle debug/release builds and release vital lint passed, and the debug APK
 was installed preserving its application UID and existing data. The package
-step itself has not been invoked on Android; installation of the containing
-APK does not establish that result.
+step is now invoked on Android by the separately recorded combined probe;
+installation of the containing APK alone was not used as that evidence.
 
 The old Ubuntu PRoot 5.1 initially failed dpkg's database access check despite
 the fixture directory being writable. The same fixture completed with the

@@ -154,7 +154,7 @@ public final class InactivePreparationProbeService extends Service {
                     return Files.newInputStream(archive,StandardOpenOption.READ,LinkOption.NOFOLLOW_LINKS);
                 };
                 phase="first-preparation"; report.put("phase",phase); writeReport(evidence,report);
-                AndroidInactivePreparation.Result first=AndroidInactivePreparation.prepare(isolated,SPEC,source,
+                AndroidInactivePreparation.Result first=AndroidInactivePreparation.prepareKeyringOnly(isolated,SPEC,source,
                     initializer,INITIALIZER_SHA,supervisor,SUPERVISOR_SHA);
                 checkCancelled();
                 assertPrepared(isolated,root);
@@ -166,7 +166,7 @@ public final class InactivePreparationProbeService extends Service {
                     .put("firstState","PREPARED").put("isolatedCiphertextSha256",vaultHash)
                     .put("coordinatorJournalSha256",journalHash).put("guestUid",first.account.uid).put("guestGid",first.account.gid);
                 phase="second-preparation"; report.put("phase",phase); writeReport(evidence,report);
-                AndroidInactivePreparation.Result second=AndroidInactivePreparation.prepare(isolated,SPEC,source,
+                AndroidInactivePreparation.Result second=AndroidInactivePreparation.prepareKeyringOnly(isolated,SPEC,source,
                     initializer,INITIALIZER_SHA,supervisor,SUPERVISOR_SHA);
                 checkCancelled();
                 assertPrepared(isolated,root);
