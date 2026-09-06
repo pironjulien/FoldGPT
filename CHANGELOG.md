@@ -2,6 +2,8 @@
 
 ## Unreleased — 2026-09-06
 
+- Replaced the runtime service's development username/UID with an explicit guest account selection validated against passwd, group and real home directories before X11 starts. XDG_RUNTIME_DIR follows the guest UID. Twenty JVM/POSIX tests pass; the updated debug APK starts the existing official client with Adreno rendering. Fresh account provisioning and the complete installer remain pending.
+
 - Integrated the independently cross-compiled PRoot/loaders/talloc/android-shmem set into the development APK and verified all five installed hashes. A new real SysV shared-memory test exposed lost errno propagation in PRoot's helper; the source patch preserves the actual error and the same Android regression now passes. Five Zygote storage/execution checks pass, the existing desktop restarts, and CDP still confirms Adreno GPU composition/rasterization. Both APK variants compile and their diagnostic separation passes. This does not complete the installer or managed executor.
 
 - Identified and removed the separate legacy `com.openai.chatgpt.launcher`, which was also labelled FoldGPT and only opened Termux:X11. Its installed APK was backed up and hash-verified before user-0 removal with data retained. The installed application list now contains only `app.foldgpt` and the official `com.openai.chatgpt` for this setup.
