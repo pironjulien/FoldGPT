@@ -120,6 +120,9 @@ public final class FoldRuntimeService extends Service {
             builder.environment().put("PROOT_LOADER", getApplicationInfo().nativeLibraryDir + "/libproot-loader.so");
             builder.environment().put("PROOT_LOADER_32", getApplicationInfo().nativeLibraryDir + "/libproot-loader32.so");
             builder.environment().put("PROOT_TMP_DIR", temp.getAbsolutePath());
+            // Os.setenv above configures Xlorie in this process. Give the child
+            // an explicit private directory too; ProcessBuilder owns its env map.
+            builder.environment().put("TMPDIR", temp.getAbsolutePath());
             builder.redirectErrorStream(true).redirectOutput(new File(getFilesDir(), "runtime.log"));
             synchronized (lifecycleLock) {
                 if (stopping || destroyed) throw new InterruptedException("Workspace stopped");

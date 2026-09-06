@@ -1,0 +1,10 @@
+--- a/src/extension/sysvipc/sysvipc_shm.c
++++ b/src/extension/sysvipc/sysvipc_shm.c
+@@ -910,6 +910,7 @@
+ 		{
+ 			struct SysVIpcShmHelperShmatResponse response = {};
+ 			response.fd = libandroid_shmat_fd(request.key, &response.size);
++			if (response.fd == -1) response.fd = -errno;
+ 			write(1, &response, sizeof(response));
+ 			break;
+ 		}

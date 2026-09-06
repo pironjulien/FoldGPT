@@ -119,11 +119,12 @@ No Android install or first launch is implied by those results.
 
 ## Remaining dependencies for an autonomous APK
 
-1. **Native runtime supply.** The APK currently contains the earlier libraries.
+1. **Native runtime supply.** The development APK now contains independently built libraries.
    An [independent NDK build](../../tools/install/native/README.md) now compiles
    PRoot, both matching loaders, talloc and android-shmem without Termux and
    verifies five ELF outputs, with corresponding sources, notices and provenance.
-   These candidates need Android execution tests and deliberate APK integration.
+   The five-library set is integrated and passes real Android startup, storage
+   and shared-memory checks; see the native build notes for exact evidence.
    The independent Xlorie build also exists; the final package still needs a
    signed APK update identity. See
    [the native build notes](../../tools/gpu/X11-BUILD.md) and
@@ -134,8 +135,8 @@ No Android install or first launch is implied by those results.
    an existing installation; the new base has not been activated on Android.
    Activation must preserve guest symlinks and provision DNS, guest identity and
    runtime bindings. `xkb-data` must already
-   be present and readable at `usr/share/X11/xkb` before starting Xlorie: the
-   current service initializes X11 before checking `/usr/bin/env`.
+   be present and readable at `usr/share/X11/xkb` before starting Xlorie. The
+   current service checks these base inputs and the existing vault before X11.
 3. **The guest contract.** The service currently specifies `/home/julien`,
    `USER=julien` and guest UID:GID `10410:10410`. Fresh `/etc/passwd`, groups and
    ownership must agree with that contract or the service contract must be
@@ -149,7 +150,7 @@ No Android install or first launch is implied by those results.
    `libfake_userns.so` and `/etc/ld.so.preload`; no clean installer builds that
    state. This compatibility shim simulates isolation calls and is not the
    production isolation model. The tested Adreno driver at
-   `/opt/foldgpt-gpu/mesa-26.2.2-foldgpt3` is also inherited. It needs its own
+   `/opt/foldgpt-gpu/mesa-26.2.2-foldgpt4` is also inherited. It needs its own
    verified component contract and source/provenance companion; the integration
    bundle does not silently select an untested driver.
 5. **A new encrypted keyring.** Routine launches still require an existing vault

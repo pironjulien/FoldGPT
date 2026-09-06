@@ -5,6 +5,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <sys/ipc.h>
+#include <sys/shm.h>
+#include <sys/wait.h>
 #include <unistd.h>
 
 #define REQUIRE(x) do { if (!(x)) { fprintf(stderr,"FAIL line=%d errno=%d\n",__LINE__,errno); return 1; } } while(0)
@@ -29,11 +32,44 @@ static int inspect_pair(const char *left, const char *right) {
     return 0;
 }
 
+static int shared_memory(void) {
+    /* Real glibc SysV calls exercise PRoot's native shared-memory backend.
+     * Synchronization is through waitpid, not an unbounded polling loop. */
+    const size_t bytes = 16384;
+    int id = shmget(IPC_PRIVATE, bytes, IPC_CREAT | 0600);
+    REQUIRE(id >= 0);
+    char *memory = shmat(id, NULL, 0);
+    REQUIRE(memory != (void *)-1);
+    memcpy(memory, "parent", 7);
+    pid_t child = fork();
+    REQUIRE(child >= 0);
+    if (!child) {
+        if (memcmp(memory, "parent", 7)) _exit(2);
+        /* Attach again: inherited memory alone would only test fork/mmap. */
+        char *attached = shmat(id, NULL, 0);
+        if (attached == (void *)-1) _exit(3);
+        if (memcmp(attached, "parent", 7)) _exit(4);
+        memcpy(attached + bytes - 6, "child", 6);
+        if (shmdt(attached) || shmdt(memory)) _exit(5);
+        _exit(0);
+    }
+    int status;
+    REQUIRE(waitpid(child, &status, 0) == child && WIFEXITED(status) && WEXITSTATUS(status) == 0);
+    REQUIRE(!memcmp(memory + bytes - 6, "child", 6));
+    REQUIRE(shmdt(memory) == 0 && shmctl(id, IPC_RMID, NULL) == 0);
+    errno = 0;
+    REQUIRE(shmat(id, NULL, 0) == (void *)-1);
+    REQUIRE(errno == EINVAL || errno == EIDRM);
+    puts("PASS SysV IPC: private segment, fork, second attach, shared bytes, detach, remove and stale id rejected");
+    return 0;
+}
+
 /* Static host or ARM64 guest fixture; no model calls, account or networking. */
 int main(int argc, char **argv) {
     struct stat a,b;
     const char *left="/data/a", *right="/data/b", *survivor="/data/c";
     REQUIRE(argc==2);
+    if (!strcmp(argv[1],"shared-memory")) return shared_memory();
     if (!strcmp(argv[1],"inspect-archive")) {
         REQUIRE(inspect_pair("/usr/bin/perl","/usr/bin/perl5.40.1")==0);
         REQUIRE(inspect_pair("/usr/bin/perlbug","/usr/bin/perlthanks")==0);
