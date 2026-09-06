@@ -57,7 +57,7 @@ replace review of the complete APK's distribution obligations. In particular,
 retain corresponding sources, modifications and build materials with any binary
 distribution and preserve the applicable LGPL replacement/relinking rights.
 
-Three local source fixes are applied only to extracted snapshots:
+Four local source fixes are applied only to extracted snapshots:
 
 - `proot-string-header.patch` includes `<string.h>` for existing `strcmp` and
   `memset` calls. No compiler diagnostics are disabled.
@@ -65,6 +65,18 @@ Three local source fixes are applied only to extracted snapshots:
   through the helper protocol. Previously its libc `-1` return became guest
   `EPERM` regardless of the error. The Fold's stale-segment regression failed
   with `EPERM` before the patch and passes with the actual `EINVAL` afterwards.
+- `proot-kill-on-exit-sigterm.patch` lets a launcher cancel a PRoot session
+  started with `--kill-on-exit` using SIGTERM. It uses the existing SIGQUIT
+  tracee-termination path and lets the event loop reap the tracees before the
+  tracer exits. SIGTERM is blocked across the initial tracee fork until its PID
+  and the handler exist; the guest receives the launcher's original signal mask.
+  Children whose automatic ptrace attachment was still queued during cancellation
+  are also killed before resuming guest work. Sessions without `--kill-on-exit`
+  keep upstream's SIGTERM-ignore behavior. This permits Android's public
+  `Process.destroy()` followed by actual process completion, without reflecting
+  a PID or forcibly killing the tracer. Guest processes receive SIGKILL, as in
+  upstream's existing `--kill-on-exit` cleanup: cancellation is not a filesystem
+  rollback or graceful completion of a package installation.
 - `android-shmem-tmpdir.patch` replaces Termux's unavailable `_PATH_TMP` macro
   with the process's absolute private `TMPDIR`. It checks path length and returns
   filesystem errors rather than looping on errors other than `EEXIST`. The
@@ -126,7 +138,7 @@ with Samsung's kernel, the guest filesystem, Landlock, GPU or Codex execution.
 
 ## Android adoption on 6 September 2026
 
-The independent build with the three patches above is now packaged in the
+The independent build with the original header, shmat-errno and tmpdir fixes is packaged in the
 development APK. Under the actual Android Zygote application UID, five checks
 pass: two pristine Debian hardlink groups, execution of pristine Debian Perl,
 SysV shared memory across fork and a second attach, guest-created hardlinks,
@@ -147,3 +159,49 @@ notices and recipe accompany `foldgpt-native-P5tRdGlG` in the same native
 artifact directory. Debug/release compilation and release vital lint pass;
 independent APK-content checks find 17 debug libraries and exactly 7 release
 libraries. No binary release has been published.
+
+## SIGTERM cancellation regression on 6 September 2026
+
+Run `test-proot-sigterm.sh` as an actual nonroot Linux x86_64 user with the
+host C toolchain, talloc development headers/library, Python 3, Git and Make.
+It archives the same pinned PRoot commit into two isolated directories, applies
+the two existing PRoot fixes to both and the SIGTERM fix only to the second,
+then builds and runs the actual native binaries. Source, recipe snapshots,
+compiler output, both executables, fixture output and hashes remain in the new
+`/var/tmp/foldgpt-proot-sigterm-XXXXXXXX` directory. No Android files change.
+
+All 22 cases passed under WSL UID 65534 in
+`downloads/install/native/foldgpt-proot-sigterm-14h51rar`. They verify the
+baseline refusal to terminate on SIGTERM, preservation of that behavior without
+the option, SIGQUIT compatibility, SIGTERM with both default seccomp and
+`PROOT_NO_SECCOMP`, and the normal command exit code. Real guest trees contain
+background children, a session-detached grandchild and a great-grandchild that
+ignore SIGTERM. Eight cases cancel while the native guest is forking further
+children. Independent host `/proc` observations, subreaper waits and unchanged
+heartbeat files establish that the observed descendants stop and are reaped.
+
+Eight additional cases use a test-only preload to queue SIGTERM after the first
+tracee fork, before the call returns its PID to PRoot. The injection targets the
+blocked launch interval, not PRoot's earlier F2FS capability-probe fork. The
+tests require the real cancellation-handler diagnostic and verify that guest
+work never starts. This preload is only a host test fixture and is not packaged.
+
+The tested patched host executable SHA-256 is
+`a2cd97a9e1f6e6be2dc70c1357401335cfc89367aada635ac3d7788e48c9ce6c`;
+the patch SHA-256 is
+`a3e0726af6924d5fe4b5b4b54141afcfe224a670ca23481f6304e74e73a530f1`.
+The subsequent canonical Android build is `foldgpt-native-5WtDOy0s`.
+`ProotStorageProbeService` ran its original five storage/execution/shared-memory
+checks plus public `Process.destroy()` against a real Debian shell, a detached
+shell and its sleep child. All passed under Zygote UID 10412, `untrusted_app`,
+inherited seccomp 2. Independent `/proc` start-identity checks found none of the
+three descendants after tracer completion; the actual SIGTERM handler ran.
+The new PRoot SHA-256 is
+`7507fc16a7a1fa06e4c1baf0d54c8b17b3225ba128eae8eca4d316e5645f381c`.
+The tested APK SHA-256 is
+`7d5d376d90cf8ea56bcd1d69400410b5df20ae8e010613f125f71e100c8ef145`;
+private evidence is in `downloads/install/native/android-sigterm-20260906`.
+The client package's separate interrupted same-root recovery passed on the
+host, as documented in `docs/install/inactive-client-install.md`. Android
+installation recovery still needs its own integrated test. None of these
+checks establishes a sandbox or covers unrelated untraced runtime helpers.

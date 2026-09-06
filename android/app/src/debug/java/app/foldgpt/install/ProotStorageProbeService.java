@@ -96,6 +96,7 @@ public final class ProotStorageProbeService extends Service {
                 report.put("provisionedHostLayout",physical); write(work,report);
                 run(work,root,data,"provisioned",List.of("/probe","verify"),checks);
                 requireEmpty(data);
+                cancelGuest(work,root,data,checks);
                 if (Files.exists(isolatedFiles.resolve("debian"),LinkOption.NOFOLLOW_LINKS))
                     throw new IOException("Unexpected activation pointer");
             }
@@ -144,6 +145,56 @@ public final class ProotStorageProbeService extends Service {
     }
     private static void requireEmpty(Path data) throws IOException {
         try(var paths=Files.list(data)) { if(paths.findAny().isPresent()) throw new IOException("Final guest unlink left backing files"); }
+    }
+    private void cancelGuest(Path work,Path root,Path data,JSONArray checks) throws Exception {
+        Path nativeDir=Path.of(getApplicationInfo().nativeLibraryDir);
+        String script="set -eu; trap '' TERM; echo $$ > /data/main; "
+            +"/usr/bin/setsid /bin/sh -c 'set -eu; trap \"\" TERM; echo $$ > /data/detached; "
+            +"/bin/sleep 30 & echo $! > /data/sleeper; touch /data/ready; wait' & wait";
+        List<String> args=new ArrayList<>(List.of(nativeDir.resolve("libproot.so").toString(),
+            "--kill-on-exit","--link2symlink","--sysvipc","-r",root.toString(),"-i","10410:10410","-w","/",
+            "-b","/dev","-b","/proc","-b","/sys","-b","/system","-b","/apex","-b",data+":/data",
+            "/usr/bin/env","-i","PATH=/usr/bin:/bin","/bin/sh","-c",script));
+        ProcessBuilder builder=new ProcessBuilder(args);
+        Map<String,String> env=builder.environment(); env.clear();
+        env.put("LD_LIBRARY_PATH",work.resolve("native")+":"+nativeDir);
+        env.put("PROOT_LOADER",nativeDir.resolve("libproot-loader.so").toString());
+        env.put("PROOT_LOADER_32",nativeDir.resolve("libproot-loader32.so").toString());
+        env.put("PROOT_TMP_DIR",work.resolve("scratch").toString()); env.put("TMPDIR",work.resolve("scratch").toString());
+        Path output=work.resolve("cancellation.log");
+        child=builder.redirectErrorStream(true).redirectOutput(output.toFile()).start();
+        try {
+            child.getOutputStream().close();
+            long readyDeadline=System.nanoTime()+TimeUnit.SECONDS.toNanos(10);
+            while(!Files.exists(data.resolve("ready")) && child.isAlive() && System.nanoTime()<readyDeadline) Thread.sleep(10);
+            if(!Files.exists(data.resolve("ready")) || !child.isAlive()) throw new IOException("Cancellation guest not ready");
+            Map<String,String> before=new LinkedHashMap<>();
+            for(String role:List.of("main","detached","sleeper")) {
+                String pid=Files.readString(data.resolve(role)).trim();
+                if(!pid.matches("[1-9][0-9]*")) throw new IOException("Invalid fixture PID");
+                String stat=Files.readString(Path.of("/proc",pid,"stat"));
+                String[] fields=stat.substring(stat.lastIndexOf(')')+2).split(" ");
+                if(fields[0].equals("Z")) throw new IOException("Fixture descendant already exited");
+                before.put(pid,fields[19]);
+            }
+            long start=System.nanoTime(); child.destroy();
+            if(!child.waitFor(5,TimeUnit.SECONDS)) throw new IOException("PRoot SIGTERM did not finish");
+            for(Map.Entry<String,String> record:before.entrySet()) {
+                try {
+                    String stat=Files.readString(Path.of("/proc",record.getKey(),"stat"));
+                    if(stat.substring(stat.lastIndexOf(')')+2).split(" ")[19].equals(record.getValue()))
+                        throw new IOException("Fixture descendant remains after tracer exit");
+                } catch(NoSuchFileException gone) { /* The kernel reaped this actual process. */ }
+            }
+            String log=Files.readString(output);
+            if(!log.contains("signal 15 received")) throw new IOException("PRoot cancellation handler not observed");
+            checks.put(new JSONObject().put("name","public-Process.destroy-cancellation")
+                .put("descendantsReaped",before.size()).put("elapsedNanos",System.nanoTime()-start)
+                .put("exit",child.exitValue()).put("output",log));
+        } finally {
+            if(child.isAlive()) { child.destroy(); if(!child.waitFor(5,TimeUnit.SECONDS)) throw new IOException("Cancellation fixture cleanup failed"); }
+            child=null;
+        }
     }
     private static void write(Path work,JSONObject report) throws Exception {
         Files.writeString(work.resolve("report.json"),report.toString(2));
