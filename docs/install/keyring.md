@@ -1,9 +1,12 @@
 # Fresh keyring preparation
 
 The migrated FoldGPT runtime already loads an existing Android-encrypted
-credential and unlocks the guest's default GNOME collection. The new components
-here prepare the missing **fresh-install** path; they are not yet wired into an
-Android installer or invoked by the running service.
+credential and unlocks the guest's default GNOME collection. The fresh-install
+components are now joined to the client-enabled inactive Android coordinator.
+That combined preparation passes twice on the Fold, including source-free
+recovery with the same vault and collection; see
+[the combined device evidence](combined-preparation-probe.md). Routine service
+launch and complete runtime activation remain separate from that inactive path.
 
 `KeyringVault.prepareFreshPassword` refuses an existing `files/debian` rootfs or
 pending migration import. Before rootfs activation, it generates 256 random bits,
@@ -15,7 +18,8 @@ Retrying an
 interrupted preparation reuses the committed encrypted credential. A missing
 Keystore key for an existing ciphertext remains an error, never a regeneration.
 The caller owns and must erase the returned byte array after its private pipe
-transfer. This API compiled with SDK 37 but its fresh-device behavior is untested.
+transfer. Its real Android creation and recovery now pass through the combined
+inactive coordinator; this does not activate or replace the existing runtime.
 
 `tools/install/initialize_keyring.py` consumes that password on stdin within the
 new guest's private D-Bus session. It requires `--expected-daemon-pid` containing

@@ -2,9 +2,9 @@
 
 This is the implementation contract for joining the existing installation
 components. It is a design note, not a declaration that the fresh installer
-already works. The current developer runtime, the authenticated Debian base,
-the graphics candidates and the isolated Android extraction probe are distinct
-states. No step below authorizes replacing the existing private `files/debian`.
+already works. The running development runtime with foldgpt5 and the inactive
+Android v2 and v3 preparations are distinct states. No step below authorizes
+replacing the existing private `files/debian`.
 
 ## Product behavior and component ownership
 
@@ -37,12 +37,19 @@ vault/collection preparation under that same lease. Its v2 journal binds the
 client descriptor and helper hashes, records the verified package report, and
 requires real package revalidation on every retry. The separately named
 `prepareKeyringOnly` diagnostic preserves the earlier v1 scope; the coordinator
-refuses implicit conversion between the two. The combined path now passes on
+refuses implicit conversion between scopes. The v2 combined path now passes on
 the actual Fold twice, including source-free recovery with the same account,
 client, vault and collection. See [the device evidence](combined-preparation-probe.md).
-Input acquisition,
-complete integration/graphics setup, runtime validation and publication remain
-unimplemented parts of the complete flow below.
+The newer v3 overload adds authenticated GPU and guest-integration preparation
+between account and client setup. Its Android combined probe now passes two
+complete calls after recovering a real shared-state permission conflict, with
+the same root, integration report, client and vault. Independent native
+collection also matches all 345 manifest entries, their recorded identities and
+the absence of activation. See
+[the v3 scope and evidence](inactive-native-integration.md).
+Input acquisition, complete runtime validation, activation and the first-launch
+flow remain unfinished. Neither inactive preparation result establishes those
+later steps.
 
 ## One durable installation identity
 
@@ -195,23 +202,47 @@ and an authenticated update channel. Do not label source publication as a
 one-click installer, a validated beta, guaranteed warranty compatibility or
 120 FPS merely because the renderer uses Adreno.
 
-Several top-level publication passages describe the earlier `foldgpt3` GPU and
-Codex execution blocker. Reconcile those with the coordinating agent's latest
-on-device evidence before publishing another snapshot; do not replace them
-with predictions from a compiled candidate. This note intentionally leaves
-the shared publication, runtime and transaction sources to their current owners.
+The dated evidence available on 6 September 2026 establishes these separate
+milestones:
 
-Concrete documentation reconciliation points:
+- [foldgpt5 on the existing runtime](../verification-gpu-renderpasses-2026-09-06.md):
+  24 independent GLES pixel cases, Vulkan/GLX probes and all 20 settings sections
+  pass, including real repeated Plugins/Browser taps. This fixes the reproduced
+  menu corruption without certifying every GPU operation or application FPS.
+- [Integrated browser on the Fold](../../tools/browser/README.md): two real
+  Codex turns open/read a page, click to IANA and navigate back. File transfers,
+  authentication, local development pages and PiP remain unverified.
+- [Native filesystem RPC on Android](../../tools/executor/native-files-android-rpc.md):
+  34 actual responses and 12 grouped checks pass under the real Zygote context,
+  with independent file/inode/refusal and executable-hash verification. The
+  Android/Bionic supervisor has no PRoot or isolation-shim mappings. This debug
+  fixture does not establish live Desktop routing, arbitrary managed processes
+  or a normal protected model task.
+- [Private guest bridge](../../tools/executor/private-exec-android.md): a separate
+  GNU bridge under PRoot reaches the native Android/Bionic broker over a private
+  Unix socket. Its latest 53 responses across two sessions include directory
+  listing/walking, copy/remove, protected mutation refusals, block reads above
+  the whole-file limit and real descriptor/lease release. The full transcript,
+  physical bytes, packaged sources, native libraries and tested APK match the
+  independent collector's checks.
+  App-UID authentication does not identify a particular program within that UID.
+  Production task/policy routing and the process executor remain unfinished.
+- [Inactive Android v2 preparation](combined-preparation-probe.md): two calls
+  retain the same authenticated root, guest account, intact client, vault and
+  collection. No activation or desktop launch occurs. The [v3 route](inactive-native-integration.md)
+  has its own successful inactive Android preparation/recovery plus independent
+  checks of 29 integration and 316 XKB entries. The two calls and original
+  collection used APK `f6f5...`; inspection under `b47b...` later verified the
+  same retained stage/report without rerunning preparation. The v3 report records
+  the full APK hashes and each collection's scope.
 
-- `docs/install/README.md` still describes a future transaction and says X11
-  starts before the base preflight. Link the real transaction and its latest
-  Android result, and recheck that ordering against the current service.
-- `PUBLICATION.md` describes the installed driver as revision 3 and lists the
-  earlier local command failure. Preserve those as dated observations until
-  the newer device runs establish the replacement facts.
-- `docs/install/keyring.md` correctly separates host creation tests from routine
-  unlocking on the migrated phone. Do not relabel either as a fresh Android
-  keyring installation without running that flow.
-- The transaction's earlier host extraction result and 13-test mode correction
-  remain host evidence. Add the successful or failing Android timestamp result
-  explicitly, rather than silently merging the two platforms' observations.
+The official workspace-runtime diagnostic remains unresolved: the recorded
+configuration has no Linux ARM64 entry and manifest retrieval returns HTTP 404.
+The Bionic interpreter above serves the native supervisor fixture; it does not
+repair that upstream dependency supply.
+
+Use these scoped reports when reconciling older build notes and publication
+text. Historical host-only results remain historical evidence even when a later
+increment passes on Android. In particular, routine unlocking on the migrated
+runtime, new collection preparation in the inactive v2/v3 stages and a first launch
+from a fully activated fresh installation are three different acceptance claims.
