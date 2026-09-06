@@ -17,42 +17,60 @@ import java.util.*;
  * Bindings are the coordinator's independently verified component descriptors.
  */
 public final class InactivePreparationJournal {
-    public enum Step { ROOT_PREPARED, ACCOUNT_PREPARED, CLIENT_PREPARED, VAULT_PREPARED, COLLECTION_PREPARED }
+    public enum Step { ROOT_PREPARED, ACCOUNT_PREPARED, INTEGRATION_PREPARED, CLIENT_PREPARED, VAULT_PREPARED, COLLECTION_PREPARED }
     interface Checkpoint { void at(String name) throws IOException; }
     private static final String SCHEMA="foldgpt.inactive-preparation.v1";
     private static final String CLIENT_SCHEMA="foldgpt.inactive-preparation.v2";
+    private static final String INTEGRATION_SCHEMA="foldgpt.inactive-preparation.v3";
     private final Path file;
     private final GuestAccountProvisioner.Storage storage;
     private final UserPrincipal owner;
     private final Checkpoint checkpoint;
-    private final boolean requiresClient;
+    private final boolean requiresClient,requiresIntegration;
     private Map<String,String> values;
 
     public static InactivePreparationJournal open(Path file,Map<String,String> bindings,GuestAccountProvisioner.Storage storage) throws IOException {
         return open(file,bindings,storage,name -> {});
     }
     static InactivePreparationJournal open(Path file,Map<String,String> bindings,GuestAccountProvisioner.Storage storage,Checkpoint checkpoint) throws IOException {
-        return new InactivePreparationJournal(file,bindings,storage,checkpoint,false);
+        return new InactivePreparationJournal(file,bindings,storage,checkpoint,false,false);
     }
     /** Client-enabled preparation cannot adopt a legacy keyring-only journal. */
     public static InactivePreparationJournal openWithClient(Path file,Map<String,String> bindings,GuestAccountProvisioner.Storage storage) throws IOException {
         return openWithClient(file,bindings,storage,name -> {});
     }
     static InactivePreparationJournal openWithClient(Path file,Map<String,String> bindings,GuestAccountProvisioner.Storage storage,Checkpoint checkpoint) throws IOException {
-        return new InactivePreparationJournal(file,bindings,storage,checkpoint,true);
+        return new InactivePreparationJournal(file,bindings,storage,checkpoint,true,false);
     }
-    private InactivePreparationJournal(Path file,Map<String,String> bindings,GuestAccountProvisioner.Storage storage,Checkpoint checkpoint,boolean requiresClient) throws IOException {
-        this.file=file; this.storage=storage; this.checkpoint=checkpoint; this.requiresClient=requiresClient;
+    /** Complete input scope cannot adopt either earlier diagnostic journal. */
+    public static InactivePreparationJournal openWithIntegration(Path file,Map<String,String> bindings,GuestAccountProvisioner.Storage storage) throws IOException {
+        return openWithIntegration(file,bindings,storage,name -> {});
+    }
+    static InactivePreparationJournal openWithIntegration(Path file,Map<String,String> bindings,GuestAccountProvisioner.Storage storage,Checkpoint checkpoint) throws IOException {
+        return new InactivePreparationJournal(file,bindings,storage,checkpoint,true,true);
+    }
+    private InactivePreparationJournal(Path file,Map<String,String> bindings,GuestAccountProvisioner.Storage storage,Checkpoint checkpoint,
+            boolean requiresClient,boolean requiresIntegration) throws IOException {
+        this.file=file; this.storage=storage; this.checkpoint=checkpoint; this.requiresClient=requiresClient; this.requiresIntegration=requiresIntegration;
         for(String key:Set.of("client","clientVerifier","clientInstaller")) {
             if(requiresClient ? !digest(bindings.get(key)) : bindings.containsKey(key))
                 throw new IOException("Inactive preparation client bindings differ from its required scope");
         }
+        for(String key:Set.of("integration","integrationManifest")) {
+            if(requiresIntegration ? !digest(bindings.get(key)) : bindings.containsKey(key))
+                throw new IOException("Inactive integration binding differs from its required scope");
+        }
+        String integrationBytes=bindings.get("integrationBytes");
+        if(requiresIntegration) {
+            if(integrationBytes==null || !integrationBytes.matches("[1-9][0-9]{0,7}") || Long.parseLong(integrationBytes)>64*1024*1024)
+                throw new IOException("Inactive integration needs an authenticated bounded byte count");
+        } else if(bindings.containsKey("integrationBytes")) throw new IOException("Diagnostic scope cannot contain integration byte binding");
         if(!Files.isDirectory(file.getParent(),LinkOption.NOFOLLOW_LINKS)
                 || !Files.getPosixFilePermissions(file.getParent(),LinkOption.NOFOLLOW_LINKS).equals(PosixFilePermissions.fromString("rwx------")))
             throw new IOException("Inactive preparation journal needs a real private directory");
         owner=Files.getOwner(file.getParent(),LinkOption.NOFOLLOW_LINKS);
         Map<String,String> expected=new TreeMap<>();
-        expected.put("schema",requiresClient?CLIENT_SCHEMA:SCHEMA);
+        expected.put("schema",requiresIntegration?INTEGRATION_SCHEMA:requiresClient?CLIENT_SCHEMA:SCHEMA);
         for(Map.Entry<String,String> item:bindings.entrySet()) {
             if(!item.getKey().matches("[a-z][a-zA-Z0-9]{0,31}") || !safe(item.getValue())) throw new IOException("Invalid inactive preparation binding");
             expected.put("bind."+item.getKey(),item.getValue());
@@ -82,6 +100,7 @@ public final class InactivePreparationJournal {
             Set<String> keys=new HashSet<>(expected.keySet());
             keys.addAll(Set.of("installationId","step","vaultSha256","collectionIntentSha256","collectionInstallationId","collectionPath","dataIdentity"));
             if(requiresClient) keys.add("clientReportSha256");
+            if(requiresIntegration) keys.add("integrationReportSha256");
             if(!values.keySet().equals(keys) || !values.get("installationId").matches("[0-9a-f]{64}"))
                 throw new IOException("Unknown inactive preparation journal fields");
             validateState(values);
@@ -92,6 +111,7 @@ public final class InactivePreparationJournal {
             values.put("installationId",hex(random)); values.put("step",Step.ROOT_PREPARED.name());
             for(String key:Set.of("vaultSha256","collectionIntentSha256","collectionInstallationId","collectionPath","dataIdentity")) values.put(key,"-");
             if(requiresClient) values.put("clientReportSha256","-");
+            if(requiresIntegration) values.put("integrationReportSha256","-");
             write(values);
         }
     }
@@ -110,10 +130,16 @@ public final class InactivePreparationJournal {
         Map<String,String> next=new TreeMap<>(values); next.put("step",Step.VAULT_PREPARED.name()); next.put("vaultSha256",ciphertextSha256); write(next);
     }
     public void clientPrepared(String reportSha256) throws IOException {
-        if(!requiresClient || step()!=Step.ACCOUNT_PREPARED || !digest(reportSha256))
+        if(!requiresClient || step()!=(requiresIntegration?Step.INTEGRATION_PREPARED:Step.ACCOUNT_PREPARED) || !digest(reportSha256))
             throw new IOException("Inactive client step is out of order or unverified");
         Map<String,String> next=new TreeMap<>(values); next.put("step",Step.CLIENT_PREPARED.name());
         next.put("clientReportSha256",reportSha256); write(next);
+    }
+    public void integrationPrepared(String reportSha256) throws IOException {
+        if(!requiresIntegration || step()!=Step.ACCOUNT_PREPARED || !digest(reportSha256))
+            throw new IOException("Inactive integration step is out of order or unverified");
+        Map<String,String> next=new TreeMap<>(values); next.put("step",Step.INTEGRATION_PREPARED.name());
+        next.put("integrationReportSha256",reportSha256); write(next);
     }
     public void collectionPrepared(String intentSha256,String installationId,String path,String dataIdentity) throws IOException {
         if(step()!=Step.VAULT_PREPARED) throw new IOException("Inactive collection step is out of order");
@@ -145,6 +171,11 @@ public final class InactivePreparationJournal {
         Step step;
         try { step=Step.valueOf(values.get("step")); }
         catch(RuntimeException invalid) { throw new IOException("Invalid inactive preparation step",invalid); }
+        if(requiresIntegration) {
+            if(step.ordinal()>=Step.INTEGRATION_PREPARED.ordinal() ? !digest(values.get("integrationReportSha256")) : !"-".equals(values.get("integrationReportSha256")))
+                throw new IOException("Inactive preparation integration evidence differs");
+        } else if(step==Step.INTEGRATION_PREPARED || values.containsKey("integrationReportSha256"))
+            throw new IOException("Earlier diagnostic scopes cannot contain integration evidence");
         if(requiresClient) {
             if(step.ordinal()>=Step.CLIENT_PREPARED.ordinal() ? !digest(values.get("clientReportSha256")) : !"-".equals(values.get("clientReportSha256")))
                 throw new IOException("Inactive preparation client evidence differs");

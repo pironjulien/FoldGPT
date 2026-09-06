@@ -11,6 +11,12 @@ final class CombinedPreparationFixture {
     static final Set<String> KEYS=Set.of("schema","fixture","archiveSha256","archiveBytes","archivePayloadBytes",
         "archiveTarBytes","archiveMembers","clientVersion","clientSha256","clientBytes","clientTarBytes","clientMembers",
         "initializerSha256","supervisorSha256","verifierSha256","installerSha256","packageDeadlineMillis","totalDeadlineMillis");
+    static final Set<String> INTEGRATION_KEYS;
+    static {
+        Set<String> keys=new HashSet<>(KEYS);
+        keys.addAll(Set.of("integrationSha256","integrationBytes","integrationManifestSha256"));
+        INTEGRATION_KEYS=Collections.unmodifiableSet(keys);
+    }
     private final Map<String,String> values;
     private CombinedPreparationFixture(Map<String,String> values) { this.values=Map.copyOf(values); }
     static boolean validId(String value) { return value!=null && value.matches("[0-9a-f]{32}"); }
@@ -25,11 +31,13 @@ final class CombinedPreparationFixture {
             if(at<=0 || at==line.length()-1 || values.put(line.substring(0,at),line.substring(at+1))!=null)
                 throw new IOException("Invalid fixture fields");
         }
-        if(!values.keySet().equals(KEYS) || !values.get("schema").equals("foldgpt.combined-preparation-fixture.v1")
+        boolean integration="foldgpt.combined-preparation-fixture.v2".equals(values.get("schema"));
+        Set<String> keys=integration?INTEGRATION_KEYS:KEYS;
+        if(!values.keySet().equals(keys) || !(integration || "foldgpt.combined-preparation-fixture.v1".equals(values.get("schema")))
                 || !values.get("fixture").equals(expectedId) || !values.get("clientVersion").matches("[0-9][A-Za-z0-9.+:~\\-]*"))
             throw new IOException("Unsupported combined fixture");
         CombinedPreparationFixture fixture=new CombinedPreparationFixture(values);
-        for(String key:KEYS) if(key.endsWith("Sha256") && !fixture.get(key).matches("[0-9a-f]{64}"))
+        for(String key:keys) if(key.endsWith("Sha256") && !fixture.get(key).matches("[0-9a-f]{64}"))
             throw new IOException("Invalid fixture digest");
         for(String key:List.of("archiveBytes","archivePayloadBytes","archiveTarBytes","archiveMembers",
                 "clientBytes","clientTarBytes","clientMembers","packageDeadlineMillis","totalDeadlineMillis")) fixture.number(key);
@@ -37,8 +45,11 @@ final class CombinedPreparationFixture {
                 || fixture.number("packageDeadlineMillis")>Integer.MAX_VALUE || fixture.number("totalDeadlineMillis")>43200000L
                 || fixture.number("totalDeadlineMillis")<2*fixture.number("packageDeadlineMillis")+120000L)
             throw new IOException("Unbounded fixture deadline or member count");
+        if(integration && fixture.number("integrationBytes")>64L*1024*1024)
+            throw new IOException("Integration fixture exceeds the release container bound");
         return fixture;
     }
+    boolean hasIntegration() { return values.get("schema").equals("foldgpt.combined-preparation-fixture.v2"); }
     String get(String key) { return values.get(key); }
     long number(String key) throws IOException {
         String value=values.get(key);

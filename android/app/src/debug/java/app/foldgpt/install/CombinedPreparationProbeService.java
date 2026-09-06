@@ -25,6 +25,7 @@ public final class CombinedPreparationProbeService extends Service {
     private final Handler main=new Handler(Looper.getMainLooper());
     private final AtomicBoolean cancelled=new AtomicBoolean();
     private final AtomicInteger archiveOpens=new AtomicInteger();
+    private final AtomicInteger integrationOpens=new AtomicInteger();
     private volatile Thread worker;
     private volatile String reason="-";
     private PowerManager.WakeLock wake;
@@ -43,7 +44,7 @@ public final class CombinedPreparationProbeService extends Service {
         manager.createNotificationChannel(new NotificationChannel(CHANNEL,"Diagnostic installation complète inactive",NotificationManager.IMPORTANCE_LOW));
         startForeground(NOTIFICATION,new Notification.Builder(this,CHANNEL).setSmallIcon(android.R.drawable.ic_menu_info_details)
             .setContentTitle("FoldGPT — préparation inactive").setContentText("Client officiel et coffre isolé, sans activation").setOngoing(true).build());
-        cancelled.set(false); reason="-"; archiveOpens.set(0);
+        cancelled.set(false); reason="-"; archiveOpens.set(0); integrationOpens.set(0);
         worker=new Thread(() -> runFixture(fixture,digest),"FoldGPT-combined-probe"); worker.start();
         return START_NOT_STICKY;
     }
@@ -65,6 +66,11 @@ public final class CombinedPreparationProbeService extends Service {
             Path inputs=inputParent.resolve(fixtureId); directory(inputs);
             byte[] descriptor=read(inputs.resolve("fixture.properties"),16384);
             input=CombinedPreparationFixture.parse(descriptor,descriptorHash,fixtureId);
+            if(input.hasIntegration()) report.put("schema","foldgpt.combined-preparation-probe.v2")
+                .put("coordinatorSchema","foldgpt.inactive-preparation.v3")
+                .put("integrationBundleSha256",input.get("integrationSha256"))
+                .put("integrationManifestSha256",input.get("integrationManifestSha256"))
+                .put("gpuExecutionAttempted",false);
             long total=input.number("totalDeadlineMillis");
             wake=getSystemService(PowerManager.class).newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,"FoldGPT:CombinedProbe");
             wake.acquire(total+30000L); main.postDelayed(deadline,total);
@@ -115,25 +121,37 @@ public final class CombinedPreparationProbeService extends Service {
             Path packageFile=inputs.resolve("package.deb");
             if(Files.exists(packageFile,LinkOption.NOFOLLOW_LINKS)) regular(packageFile,input.number("clientBytes")); else packageFile=null;
             AndroidInactivePreparation.ClientInput client=clientInput(input,inputs,clientDescriptor,packageFile);
+            AndroidInactivePreparation.IntegrationInput integration=integrationInput(input,inputs);
             checkCancelled();
-            AndroidInactivePreparation.Result first=AndroidInactivePreparation.prepare(isolated,spec,source,
-                inputs.resolve("initialize_keyring.py"),input.get("initializerSha256"),inputs.resolve("supervise_keyring.py"),input.get("supervisorSha256"),client);
+            int integrationBeforeFirst=integrationOpens.get();
+            AndroidInactivePreparation.Result first=prepare(isolated,spec,source,input,inputs,client,integration);
+            if(input.hasIntegration() && integrationOpens.get()!=integrationBeforeFirst+1)
+                throw new IOException("First combined preparation must authenticate exactly one integration input");
             checkCancelled();
             JSONObject firstSnapshot=snapshot(isolated,spec,first,input);
             report.put("first",firstSnapshot).put("successfulPrepareCalls",1); writeJson(evidence,report);
             int opensBeforeResume=archiveOpens.get();
-            phase="combined-source-free-retry"; report.put("phase",phase); writeJson(evidence,report);
-            AndroidInactivePreparation.Result second=AndroidInactivePreparation.prepare(isolated,spec,
+            phase=input.hasIntegration()?"combined-revalidate-integration-retry":"combined-source-free-retry";
+            report.put("phase",phase); writeJson(evidence,report);
+            int integrationBeforeResume=integrationOpens.get();
+            AndroidInactivePreparation.Result second=prepare(isolated,spec,
                 () -> { throw new IOException("Second combined call must not open any base source"); },
-                inputs.resolve("initialize_keyring.py"),input.get("initializerSha256"),inputs.resolve("supervise_keyring.py"),input.get("supervisorSha256"),
-                clientInput(input,inputs,clientDescriptor,null));
+                input,inputs,clientInput(input,inputs,clientDescriptor,null),integration);
             checkCancelled();
             JSONObject secondSnapshot=snapshot(isolated,spec,second,input);
             for(String key:List.of("root","rootIdentity","installationId","collectionInstallationId","clientReportSha256",
                     "packageIdentity","coordinatorSha256","ciphertextSha256","collectionIntentSha256","guestUser","guestUid","guestGid"))
                 if(!firstSnapshot.get(key).equals(secondSnapshot.get(key))) throw new IOException("Combined retry changed durable evidence: "+key);
             if(archiveOpens.get()!=opensBeforeResume) throw new IOException("Combined retry reopened base input");
-            report.put("second",secondSnapshot).put("successfulPrepareCalls",2).put("sourceFreeRetry",true)
+            if(input.hasIntegration()) {
+                if(integrationOpens.get()!=integrationBeforeResume+1) throw new IOException("Combined retry did not reauthenticate integration input");
+                for(String key:List.of("integrationReportSha256","integrationReportIdentity","integrationManifestSha256",
+                        "integrationBundleSha256","integrationEntryCount","xkbEntryCount","installedIntegrationEntryCount"))
+                    if(!firstSnapshot.get(key).equals(secondSnapshot.get(key))) throw new IOException("Integration retry changed durable evidence: "+key);
+                report.put("baseAndPackageSourceFreeRetry",true).put("integrationRevalidationCalls",2)
+                    .put("integrationInputOpens",integrationOpens.get()).put("sameRootAccountIntegrationClientVaultCollection",true);
+            }
+            report.put("second",secondSnapshot).put("successfulPrepareCalls",2).put("sourceFreeRetry",!input.hasIntegration())
                 .put("sameRootAccountClientVaultCollection",true).put("status","PASS").put("phase","verified")
                 .put("archiveOpens",archiveOpens.get()).put("elapsedMillis",SystemClock.elapsedRealtime()-started);
             writeJson(evidence,report); Log.i(TAG,"PASS fixture="+fixtureId+" evidence="+evidence);
@@ -145,9 +163,14 @@ public final class CombinedPreparationProbeService extends Service {
                 report.put("status",cancelled.get() || failure instanceof InterruptedException?"CANCELLED":locked?"WAITING_FOR_ANDROID_UNLOCK":"FAIL")
                     .put("phase",phase).put("errorType",failure.getClass().getName()).put("cancellationReason",reason)
                     .put("archiveOpens",archiveOpens.get()).put("elapsedMillis",SystemClock.elapsedRealtime()-started);
+                if(input!=null && input.hasIntegration()) report.put("integrationInputOpens",integrationOpens.get());
                 if(isolated!=null && spec!=null && input!=null) {
                     try { report.put("observedInactiveClient",clientEvidence(isolated,spec,input,null)); }
                     catch(Exception absent) { report.put("clientEvidenceUnavailable",absent.getClass().getName()); }
+                    if(input.hasIntegration()) {
+                        try { report.put("observedInactiveIntegration",integrationEvidence(isolated,spec,input,null)); }
+                        catch(Exception absent) { report.put("integrationEvidenceUnavailable",absent.getClass().getName()); }
+                    }
                 }
                 JSONArray frames=new JSONArray();
                 for(StackTraceElement frame:failure.getStackTrace()) { if(frames.length()==8) break; frames.put(frame.getClassName()+"."+frame.getMethodName()+":"+frame.getLineNumber()); }
@@ -169,9 +192,34 @@ public final class CombinedPreparationProbeService extends Service {
         return new AndroidInactivePreparation.ClientInput(descriptor,source,inputs.resolve("official_client_package.py"),input.get("verifierSha256"),
             inputs.resolve("install_official_client.py"),input.get("installerSha256"),input.number("packageDeadlineMillis"));
     }
+    private AndroidInactivePreparation.IntegrationInput integrationInput(CombinedPreparationFixture input,Path inputs) throws Exception {
+        if(!input.hasIntegration()) return null;
+        Path container=inputs.resolve("integration.fgi"); long bytes=input.number("integrationBytes");
+        return new AndroidInactivePreparation.IntegrationInput(() -> {
+            if(cancelled.get() || Thread.currentThread().isInterrupted()) throw new IOException("Fixture integration cancelled");
+            try { regular(container,bytes); if(Files.size(container)!=bytes) throw new IOException("Fixture integration size differs"); }
+            catch(Exception error) { throw new IOException("Fixture integration input rejected",error); }
+            integrationOpens.incrementAndGet();
+            return Files.newInputStream(container,StandardOpenOption.READ,LinkOption.NOFOLLOW_LINKS);
+        },input.get("integrationSha256"),bytes,input.get("integrationManifestSha256"));
+    }
+    private static AndroidInactivePreparation.Result prepare(Context context,RootfsExtractor.Spec spec,RootfsTransaction.ArchiveSource archive,
+            CombinedPreparationFixture input,Path inputs,AndroidInactivePreparation.ClientInput client,
+            AndroidInactivePreparation.IntegrationInput integration) throws Exception {
+        if(input.hasIntegration()) return AndroidInactivePreparation.prepare(context,spec,archive,
+            inputs.resolve("initialize_keyring.py"),input.get("initializerSha256"),inputs.resolve("supervise_keyring.py"),input.get("supervisorSha256"),client,
+            Objects.requireNonNull(integration));
+        if(integration!=null) throw new IOException("Legacy combined fixture cannot adopt integration inputs");
+        return AndroidInactivePreparation.prepare(context,spec,archive,
+            inputs.resolve("initialize_keyring.py"),input.get("initializerSha256"),inputs.resolve("supervise_keyring.py"),input.get("supervisorSha256"),client);
+    }
     private static JSONObject snapshot(Context isolated,RootfsExtractor.Spec spec,AndroidInactivePreparation.Result result,CombinedPreparationFixture input) throws Exception {
         if(result.client==null) throw new IOException("Combined coordinator returned no client evidence");
         JSONObject evidence=clientEvidence(isolated,spec,input,result);
+        if(input.hasIntegration()) {
+            JSONObject integration=integrationEvidence(isolated,spec,input,result);
+            for(Iterator<String> keys=integration.keys();keys.hasNext();) { String key=keys.next(); evidence.put(key,integration.get(key)); }
+        } else if(result.integration!=null) throw new IOException("Legacy combined fixture returned unexpected integration evidence");
         if(!evidence.getString("coordinatorStep").equals("COLLECTION_PREPARED")) throw new IOException("Combined collection step incomplete");
         Path root=result.root,journal=isolated.getFilesDir().toPath().resolve(".foldgpt-install/fresh/inactive-preparation.v1");
         Map<String,String> fields=journal(journal);
@@ -196,7 +244,7 @@ public final class CombinedPreparationProbeService extends Service {
         }
         Path journalFile=files.resolve(".foldgpt-install/fresh/inactive-preparation.v1");
         Map<String,String> fields=journal(journalFile);
-        if(!fields.getOrDefault("schema","").equals("foldgpt.inactive-preparation.v2")
+        if(!fields.getOrDefault("schema","").equals(input.hasIntegration()?"foldgpt.inactive-preparation.v3":"foldgpt.inactive-preparation.v2")
                 || !Set.of("CLIENT_PREPARED","VAULT_PREPARED","COLLECTION_PREPARED").contains(fields.get("step"))
                 || !identity(root).equals(fields.get("bind.root"))) throw new IOException("No completed bound client coordinator step");
         Path client=root.resolve("var/lib/foldgpt/client-install"),packageFile=client.resolve("input/package.deb");
@@ -215,6 +263,68 @@ public final class CombinedPreparationProbeService extends Service {
             .put("coordinatorStep",fields.get("step")).put("installationId",fields.get("installationId"))
             .put("clientReportSha256",reportHash).put("coordinatorSha256",hash(journalFile,8192))
             .put("packageIdentity",Long.toUnsignedString(packageStat.st_dev)+":"+Long.toUnsignedString(packageStat.st_ino));
+    }
+    private static JSONObject integrationEvidence(Context isolated,RootfsExtractor.Spec spec,CombinedPreparationFixture input,
+            AndroidInactivePreparation.Result expected) throws Exception {
+        Path files=isolated.getFilesDir().toPath();
+        if(!input.hasIntegration() || Files.exists(files.resolve("debian"),LinkOption.NOFOLLOW_LINKS)) throw new IOException("No inactive integration fixture");
+        Path root;
+        try(RootfsTransaction transaction=AndroidRootfsTransaction.open(isolated,spec)) {
+            if(transaction.state()!=RootfsTransaction.State.PREPARED) throw new IOException("Integration fixture root is not PREPARED");
+            root=transaction.prepare(() -> { throw new IOException("Integration evidence cannot extract a base"); }).root;
+        }
+        Map<String,String> fields=journal(files.resolve(".foldgpt-install/fresh/inactive-preparation.v1"));
+        if(!fields.getOrDefault("schema","").equals("foldgpt.inactive-preparation.v3")
+                || !Set.of("INTEGRATION_PREPARED","CLIENT_PREPARED","VAULT_PREPARED","COLLECTION_PREPARED").contains(fields.get("step"))
+                || !input.get("integrationSha256").equals(fields.get("bind.integration"))
+                || !input.get("integrationBytes").equals(fields.get("bind.integrationBytes"))
+                || !input.get("integrationManifestSha256").equals(fields.get("bind.integrationManifest"))
+                || !identity(root).equals(fields.get("bind.root"))) throw new IOException("No completed bound native integration step");
+        Path path=root.resolve("var/lib/foldgpt/integration-install/report.v1");
+        byte[] data=read(path,262144); String sha=InactivePreparationJournal.sha256(data);
+        if(!sha.equals(fields.get("integrationReportSha256"))) throw new IOException("Native integration report differs from coordinator");
+        String[] lines=new String(data,StandardCharsets.US_ASCII).split("\n",-1);
+        if(lines.length<10 || !lines[0].equals("foldgpt.inactive-integration-report.v1") || !lines[lines.length-1].isEmpty())
+            throw new IOException("Invalid native integration report framing");
+        Map<String,String> metadata=new HashMap<>();
+        for(int index=1;index<9;index++) {
+            String[] parts=lines[index].split("\t",-1);
+            if(parts.length!=2 || metadata.put(parts[0],parts[1])!=null) throw new IOException("Native integration report fields differ");
+        }
+        GuestIdentity account=GuestIdentity.load(root);
+        if(!metadata.keySet().equals(Set.of("scope","activation","gpuExecution","installationId","rootIdentity","bundleSha256","manifestSha256","account"))
+                || !"scripts-gpu-files-native-xkb-and-declared-launch-inputs".equals(metadata.get("scope"))
+                || !"not-performed".equals(metadata.get("activation")) || !"not-performed".equals(metadata.get("gpuExecution"))
+                || !fields.get("installationId").equals(metadata.get("installationId"))
+                || !identity(root).equals(metadata.get("rootIdentity"))
+                || !input.get("integrationSha256").equals(metadata.get("bundleSha256"))
+                || !input.get("integrationManifestSha256").equals(metadata.get("manifestSha256"))
+                || !(account.user+":"+account.prootIds()+":"+account.home).equals(metadata.get("account")))
+            throw new IOException("Native integration report bindings differ");
+        int installed=0,xkb=0; String previous="";
+        for(int index=9;index<lines.length-1;index++) {
+            String[] parts=lines[index].split("\t",-1);
+            if(parts.length!=6 || !Set.of("F","D","L").contains(parts[1]) || !parts[2].matches("0[0-7]{3}")
+                    || !parts[3].matches("[0-9]+:[0-9]+") || parts[0].compareTo(previous)<=0)
+                throw new IOException("Native integration report entry differs");
+            previous=InactiveIntegrationBundle.path(parts[0]);
+            if(parts[0].equals(InactiveIntegrationBundle.XKB) || parts[0].startsWith(InactiveIntegrationBundle.XKB+"/")) xkb++;
+            else if(InactiveIntegrationBundle.FILES.containsKey(parts[0]) || InactiveIntegrationBundle.LINKS.containsKey(parts[0])) installed++;
+            else throw new IOException("Unknown native integration report target");
+        }
+        if(installed!=InactiveIntegrationBundle.FILES.size()+InactiveIntegrationBundle.LINKS.size() || xkb==0)
+            throw new IOException("Incomplete native integration report inventory");
+        if(expected!=null && (expected.integration==null || !expected.root.equals(root)
+                || !expected.integration.report.equals(path) || !expected.integration.reportSha256.equals(sha)
+                || !expected.integration.bundleSha256.equals(input.get("integrationSha256"))
+                || !expected.integration.manifestSha256.equals(input.get("integrationManifestSha256"))))
+            throw new IOException("Coordinator native integration result differs");
+        StructStat stat=Os.lstat(path.toString());
+        return new JSONObject().put("integrationReportSha256",sha)
+            .put("integrationReportIdentity",Long.toUnsignedString(stat.st_dev)+":"+Long.toUnsignedString(stat.st_ino))
+            .put("integrationBundleSha256",input.get("integrationSha256")).put("integrationManifestSha256",input.get("integrationManifestSha256"))
+            .put("integrationEntryCount",installed+xkb).put("xkbEntryCount",xkb).put("installedIntegrationEntryCount",installed)
+            .put("integrationEvidenceScope",expected==null?"observed-bound-report":"returned-by-real-coordinator-native-verification");
     }
     private static Map<String,String> journal(Path file) throws Exception {
         String text=new String(read(file,8192),StandardCharsets.US_ASCII); int at=text.lastIndexOf("checksum=");

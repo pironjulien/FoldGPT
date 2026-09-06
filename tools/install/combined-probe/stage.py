@@ -15,28 +15,38 @@ import subprocess
 
 NAMES = {"fixture.properties", "base.tar.gz", "package.deb", "initialize_keyring.py",
          "supervise_keyring.py", "official_client_package.py", "install_official_client.py"}
+INTEGRATION_NAMES = NAMES | {"integration.fgi"}
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--plan", type=Path, required=True)
-    parser.add_argument("--serial", required=True)
+    parser.add_argument("--serial")
     parser.add_argument("--adb", default="adb")
     parser.add_argument("--start", action="store_true")
+    parser.add_argument("--validate-only", action="store_true", help="Verify every local input and print the bound launch inventory; never opens ADB")
     args = parser.parse_args()
+    if args.validate_only and args.start:
+        parser.error("--validate-only cannot start a device service")
+    if not args.validate_only and not args.serial:
+        parser.error("--serial is required for an actual ADB operation")
     plan = json.loads(args.plan.read_text(encoding="utf-8"))
     fixture, descriptor_hash = plan["fixture"], plan["descriptorSha256"]
-    if plan.get("schema") != "foldgpt.combined-probe-staging.v1" or not re.fullmatch("[0-9a-f]{32}", fixture):
+    integration = plan.get("schema") == "foldgpt.combined-probe-staging.v2"
+    names = INTEGRATION_NAMES if integration else NAMES
+    if plan.get("schema") not in {"foldgpt.combined-probe-staging.v1", "foldgpt.combined-probe-staging.v2"} or not re.fullmatch("[0-9a-f]{32}", fixture):
         raise ValueError("Not a generated combined fixture plan")
     if not re.fullmatch("[0-9a-f]{64}", descriptor_hash):
         raise ValueError("Fixture descriptor digest missing")
+    if integration and plan.get("coordinatorSchema") != "foldgpt.inactive-preparation.v3":
+        raise ValueError("Integration fixture must select the v3 coordinator scope")
     remote = "cache/combined-input/" + fixture
-    if plan["inputDirectory"] != remote or len(plan["files"]) != len(NAMES):
+    if plan["inputDirectory"] != remote or len(plan["files"]) != len(names):
         raise ValueError("Unexpected fixture input directory/set")
     observed = set()
     for item in plan["files"]:
         name = item["target"].removeprefix(remote + "/")
-        if name not in NAMES or name in observed or item["target"] != remote + "/" + name:
+        if name not in names or name in observed or item["target"] != remote + "/" + name:
             raise ValueError("Unexpected or duplicate staging target")
         observed.add(name)
         path = Path(item["source"]).resolve(strict=True)
@@ -45,6 +55,19 @@ def main():
                 raise ValueError("Local input no longer matches its generated plan")
         if name == "fixture.properties" and item["sha256"] != descriptor_hash:
             raise ValueError("Descriptor and launch digest differ")
+        if name == "fixture.properties":
+            descriptor = path.read_text(encoding="ascii")
+            expected_schema = "foldgpt.combined-preparation-fixture.v2" if integration else "foldgpt.combined-preparation-fixture.v1"
+            if descriptor.splitlines().count("schema=" + expected_schema) != 1:
+                raise ValueError("Staging and fixture descriptor scopes differ")
+    if args.validate_only:
+        print(json.dumps({"fixture": fixture, "validatedLocalInputs": len(observed), "adbOpened": False,
+                          "coordinatorSchema": "foldgpt.inactive-preparation.v3" if integration else "foldgpt.inactive-preparation.v2",
+                          "startArguments": ["shell", "am", "start-foreground-service", "-n",
+                                             "app.foldgpt/app.foldgpt.install.CombinedPreparationProbeService",
+                                             "--es", "fixture", fixture, "--es", "descriptorSha256", descriptor_hash],
+                          "report": "files/.combined-probes/" + fixture + "/report.json"}, indent=2))
+        return
     adb = [args.adb, "-s", args.serial]
 
     def shell(script):

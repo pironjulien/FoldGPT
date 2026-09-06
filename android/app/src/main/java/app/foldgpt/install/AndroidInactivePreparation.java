@@ -17,7 +17,7 @@ import java.util.*;
 import org.json.JSONObject;
 
 /** Concrete, deliberately INACTIVE coordinator: authenticated base -> local
- * account -> intact official client installation -> Android vault -> supervised
+ * account -> native integration -> intact official client installation -> Android vault -> supervised
  * GNOME collection. No activation, display, client launch or model call occurs.
  * The explicitly named keyring-only diagnostic retains its earlier scope.
  * A result is not runtime
@@ -31,10 +31,27 @@ public final class AndroidInactivePreparation {
         public final String installationId,collectionInstallationId;
         /** Present only for prepare(..., ClientInput); never inferred from keyring-only evidence. */
         public final AndroidInactiveClientInstaller.Result client;
-        private Result(Path root,GuestIdentity account,InactivePreparationJournal journal,AndroidInactiveClientInstaller.Result client) {
+        /** Present only for the v3 route with mandatory integration input. */
+        public final InactiveIntegrationInstaller.Result integration;
+        private Result(Path root,GuestIdentity account,InactivePreparationJournal journal,AndroidInactiveClientInstaller.Result client,
+                InactiveIntegrationInstaller.Result integration) {
             this.root=root; this.account=account; installationId=journal.value("installationId");
             collectionInstallationId=journal.value("collectionInstallationId");
             this.client=client;
+            this.integration=integration;
+        }
+    }
+    /** Independent release input. The source must open the same authenticated
+     * container on every call; retries always revalidate native installed files. */
+    public static final class IntegrationInput {
+        public final RootfsTransaction.ArchiveSource source;
+        public final String sha256,manifestSha256;
+        public final long bytes;
+        public IntegrationInput(RootfsTransaction.ArchiveSource source,String sha256,long bytes,String manifestSha256) throws IOException {
+            this.source=Objects.requireNonNull(source);
+            if(sha256==null || !sha256.matches("[0-9a-f]{64}") || manifestSha256==null || !manifestSha256.matches("[0-9a-f]{64}")
+                    || bytes<=0 || bytes>InactiveIntegrationBundle.MAX_BYTES) throw new IOException("Authenticated native integration descriptor is required");
+            this.sha256=sha256; this.bytes=bytes; this.manifestSha256=manifestSha256;
         }
     }
     /** Independently authenticated package/helper inputs. A null package path
@@ -68,24 +85,49 @@ public final class AndroidInactivePreparation {
      * reads, replaces or deletes the production vault ciphertext or AES key.
      */
     public static Result prepare(Context context,RootfsExtractor.Spec spec,RootfsTransaction.ArchiveSource archive,
+            Path initializerSource,String initializerSha256,Path supervisorSource,String supervisorSha256,ClientInput client,
+            IntegrationInput integration) throws Exception {
+        return prepareBound(context,spec,archive,initializerSource,initializerSha256,supervisorSource,supervisorSha256,
+            Objects.requireNonNull(client,"Native integration preparation requires authenticated client inputs"),
+            Objects.requireNonNull(integration,"Native integration preparation requires authenticated release inputs"));
+    }
+    /** Explicitly retains the existing v2 client/keyring diagnostic. It cannot
+     * adopt or downgrade the v3 native-integration journal. */
+    public static Result prepare(Context context,RootfsExtractor.Spec spec,RootfsTransaction.ArchiveSource archive,
             Path initializerSource,String initializerSha256,Path supervisorSource,String supervisorSha256,ClientInput client) throws Exception {
         return prepareBound(context,spec,archive,initializerSource,initializerSha256,supervisorSource,supervisorSha256,
-            Objects.requireNonNull(client,"Client-enabled preparation requires authenticated inputs"));
+            Objects.requireNonNull(client,"Client-enabled preparation requires authenticated inputs"),null);
     }
     /** Retains the already tested v1 diagnostic and never installs a package.
      * It cannot resume or downgrade a journal made by the client-enabled path. */
     public static Result prepareKeyringOnly(Context context,RootfsExtractor.Spec spec,RootfsTransaction.ArchiveSource archive,
             Path initializerSource,String initializerSha256,Path supervisorSource,String supervisorSha256) throws Exception {
-        return prepareBound(context,spec,archive,initializerSource,initializerSha256,supervisorSource,supervisorSha256,null);
+        return prepareBound(context,spec,archive,initializerSource,initializerSha256,supervisorSource,supervisorSha256,null,null);
     }
     private static Result prepareBound(Context context,RootfsExtractor.Spec spec,RootfsTransaction.ArchiveSource archive,
-            Path initializerSource,String initializerSha256,Path supervisorSource,String supervisorSha256,ClientInput clientInput) throws Exception {
+            Path initializerSource,String initializerSha256,Path supervisorSource,String supervisorSha256,ClientInput clientInput,
+            IntegrationInput integrationInput) throws Exception {
         Objects.requireNonNull(context); Objects.requireNonNull(spec); Objects.requireNonNull(archive);
         byte[] initializer=verifiedScript(initializerSource,initializerSha256);
         byte[] supervisor=verifiedScript(supervisorSource,supervisorSha256);
         if(clientInput!=null) {
             verifiedScript(clientInput.verifierSource,clientInput.verifierSha256);
             verifiedScript(clientInput.installerSource,clientInput.installerSha256);
+        }
+        InactiveIntegrationBundle integrationBundle=null;
+        if(integrationInput!=null) {
+            try(InputStream input=integrationInput.source.open()) {
+                if(input==null) throw new IOException("Native integration source returned no stream");
+                integrationBundle=InactiveIntegrationBundle.read(input,integrationInput.sha256,integrationInput.bytes);
+            }
+            if(!integrationBundle.manifestSha256.equals(integrationInput.manifestSha256) || !integrationBundle.baseSha256.equals(spec.sha256))
+                throw new IOException("Native integration descriptor differs from the coordinator base or manifest");
+            for(String name:List.of("initialize_keyring.py","supervise_keyring.py")) {
+                InactiveIntegrationBundle.Entry entry=integrationBundle.entries.get("usr/local/lib/foldgpt/install/"+name);
+                String expected=name.equals("initialize_keyring.py")?initializerSha256:supervisorSha256;
+                if(entry==null || entry.mode!=0600 || !entry.sha.equals(expected))
+                    throw new IOException("Native integration keyring helper differs from the bound coordinator source");
+            }
         }
         Path files=context.getFilesDir().toPath(),noBackup=context.getNoBackupFilesDir().toPath();
         Storage storage=new Storage(); storage.managedDirectory(files); storage.managedDirectory(noBackup);
@@ -116,8 +158,12 @@ public final class AndroidInactivePreparation {
                 bindings.put("client",clientInput.descriptorSha256()); bindings.put("clientVerifier",clientInput.verifierSha256);
                 bindings.put("clientInstaller",clientInput.installerSha256);
             }
-            InactivePreparationJournal journal=clientInput==null?InactivePreparationJournal.open(journalFile,bindings,storage)
-                :InactivePreparationJournal.openWithClient(journalFile,bindings,storage);
+            if(integrationInput!=null) {
+                bindings.put("integration",integrationInput.sha256); bindings.put("integrationBytes",Long.toString(integrationInput.bytes));
+                bindings.put("integrationManifest",integrationInput.manifestSha256);
+            }
+            InactivePreparationJournal journal=integrationInput!=null?InactivePreparationJournal.openWithIntegration(journalFile,bindings,storage)
+                :clientInput==null?InactivePreparationJournal.open(journalFile,bindings,storage):InactivePreparationJournal.openWithClient(journalFile,bindings,storage);
             GuestIdentity account;
             if(journal.step()==InactivePreparationJournal.Step.ROOT_PREPARED) {
                 account=AndroidGuestAccountProvisioner.prepare(transaction); journal.accountPrepared();
@@ -125,6 +171,18 @@ public final class AndroidInactivePreparation {
                 account=GuestIdentity.load(root);
                 if(!account.user.equals("foldgpt") || account.uid!=android.os.Process.myUid() || account.gid!=Os.getgid())
                     throw new IOException("Inactive coordinator guest identity changed");
+            }
+            InactiveIntegrationInstaller.Result integration=null;
+            if(integrationInput!=null) {
+                // Revalidate actual scripts, GPU files and native XKB on every
+                // retry before running any client package or using the vault.
+                integration=AndroidInactiveIntegrationInstaller.installVerified(transaction,journal.value("installationId"),integrationBundle);
+                if(!integration.root.equals(root) || !integration.rootIdentity.equals(bindings.get("root"))
+                        || !integration.bundleSha256.equals(integrationInput.sha256) || !integration.manifestSha256.equals(integrationInput.manifestSha256))
+                    throw new IOException("Inactive integration evidence differs from coordinator inputs");
+                if(journal.step()==InactivePreparationJournal.Step.ACCOUNT_PREPARED) journal.integrationPrepared(integration.reportSha256);
+                else if(!integration.reportSha256.equals(journal.value("integrationReportSha256")))
+                    throw new IOException("Resumed integration report differs from coordinator evidence");
             }
             AndroidInactiveClientInstaller.Result client=null;
             if(clientInput!=null) {
@@ -136,7 +194,7 @@ public final class AndroidInactivePreparation {
                 if(!client.root.equals(root) || !client.rootIdentity.equals(bindings.get("root"))
                         || !client.packageSha256.equals(clientInput.descriptor.sha256))
                     throw new IOException("Inactive client evidence differs from coordinator inputs");
-                if(journal.step()==InactivePreparationJournal.Step.ACCOUNT_PREPARED) journal.clientPrepared(client.reportSha256);
+                if(journal.step()==(integrationInput==null?InactivePreparationJournal.Step.ACCOUNT_PREPARED:InactivePreparationJournal.Step.INTEGRATION_PREPARED)) journal.clientPrepared(client.reportSha256);
                 else if(!client.reportSha256.equals(journal.value("clientReportSha256")))
                     throw new IOException("Resumed client report differs from coordinator evidence");
             }
@@ -176,7 +234,7 @@ public final class AndroidInactivePreparation {
                 throw new IOException("Resumed collection differs from coordinator identity");
             if(transaction.state()!=RootfsTransaction.State.PREPARED || InactivePreparationJournal.exists(files.resolve("debian")))
                 throw new IOException("Inactive preparation encountered unexpected activation");
-            return new Result(root,account,journal,client);
+            return new Result(root,account,journal,client,integration);
         } finally { if(credential!=null) Arrays.fill(credential,(byte)0); }
     }
     private static JSONObject receipt(String output) throws Exception {

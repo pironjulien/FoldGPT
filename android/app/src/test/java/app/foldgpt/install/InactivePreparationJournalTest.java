@@ -34,6 +34,11 @@ public class InactivePreparationJournalTest {
         result.put("client",DIGEST); result.put("clientVerifier",DIGEST); result.put("clientInstaller",DIGEST);
         return result;
     }
+    private static Map<String,String> integrationBindings(Path root) throws IOException {
+        Map<String,String> result=new TreeMap<>(clientBindings(root));
+        result.put("integration",DIGEST); result.put("integrationBytes","41116761"); result.put("integrationManifest",DIFFERENT_DIGEST);
+        return result;
+    }
     private static void advance(InactivePreparationJournal journal) throws IOException {
         if(journal.step()==InactivePreparationJournal.Step.ROOT_PREPARED) journal.accountPrepared();
         if(journal.step()==InactivePreparationJournal.Step.ACCOUNT_PREPARED) journal.vaultPrepared(DIGEST);
@@ -51,7 +56,7 @@ public class InactivePreparationJournalTest {
         assertEquals(InactivePreparationJournal.Step.COLLECTION_PREPARED,resumed.step());
         assertEquals(id,resumed.value("installationId"));
         assertEquals(DIGEST,resumed.value("vaultSha256")); assertEquals(COLLECTION,resumed.value("collectionPath"));
-        assertEquals(5,InactivePreparationJournal.Step.values().length);
+        assertEquals(6,InactivePreparationJournal.Step.values().length);
         assertFalse(Files.exists(root.resolve("debian"),LinkOption.NOFOLLOW_LINKS));
     }
     @Test public void resumesAfterRealProcessDeathOnBothSidesOfEveryPublication() throws Exception {
@@ -72,11 +77,13 @@ public class InactivePreparationJournalTest {
     public static void main(String[] args) throws Exception {
         Path root=Path.of(args[0]);
         boolean client=args.length==3 && args[2].equals("client");
+        boolean integration=args.length==3 && args[2].equals("integration");
         InactivePreparationJournal.Checkpoint death=point -> { if(point.equals(args[1])) Runtime.getRuntime().halt(71); };
-        InactivePreparationJournal journal=client
+        InactivePreparationJournal journal=integration
+            ?InactivePreparationJournal.openWithIntegration(root.resolve("coordinator.v1"),integrationBindings(root),STORAGE,death):client
             ?InactivePreparationJournal.openWithClient(root.resolve("coordinator.v1"),clientBindings(root),STORAGE,death)
             :InactivePreparationJournal.open(root.resolve("coordinator.v1"),bindings(root),STORAGE,death);
-        if(client) advanceClient(journal); else advance(journal);
+        if(integration) advanceIntegration(journal); else if(client) advanceClient(journal); else advance(journal);
         throw new AssertionError("Requested real process-death point was not reached");
     }
     private static void advanceClient(InactivePreparationJournal journal) throws IOException {
@@ -84,6 +91,71 @@ public class InactivePreparationJournalTest {
         if(journal.step()==InactivePreparationJournal.Step.ACCOUNT_PREPARED) journal.clientPrepared(DIGEST);
         if(journal.step()==InactivePreparationJournal.Step.CLIENT_PREPARED) journal.vaultPrepared(DIGEST);
         if(journal.step()==InactivePreparationJournal.Step.VAULT_PREPARED) journal.collectionPrepared(DIGEST,DIGEST,COLLECTION,"1:2");
+    }
+    private static void advanceIntegration(InactivePreparationJournal journal) throws IOException {
+        if(journal.step()==InactivePreparationJournal.Step.ROOT_PREPARED) journal.accountPrepared();
+        if(journal.step()==InactivePreparationJournal.Step.ACCOUNT_PREPARED) journal.integrationPrepared(DIFFERENT_DIGEST);
+        if(journal.step()==InactivePreparationJournal.Step.INTEGRATION_PREPARED) journal.clientPrepared(DIGEST);
+        if(journal.step()==InactivePreparationJournal.Step.CLIENT_PREPARED) journal.vaultPrepared(DIGEST);
+        if(journal.step()==InactivePreparationJournal.Step.VAULT_PREPARED) journal.collectionPrepared(DIGEST,DIGEST,COLLECTION,"1:2");
+    }
+    @Test public void integrationScopeRequiresReceiptBeforeClientAndBindsItsReleaseDescriptor() throws Exception {
+        Path root=temporary(),file=root.resolve("coordinator.v1");
+        fails(() -> InactivePreparationJournal.openWithIntegration(file,clientBindings(root),STORAGE));
+        assertFalse(Files.exists(file));
+        InactivePreparationJournal journal=InactivePreparationJournal.openWithIntegration(file,integrationBindings(root),STORAGE);
+        String id=journal.value("installationId");
+        fails(() -> journal.integrationPrepared(DIFFERENT_DIGEST)); journal.accountPrepared();
+        fails(() -> journal.clientPrepared(DIGEST)); fails(() -> journal.vaultPrepared(DIGEST)); fails(() -> journal.integrationPrepared("-"));
+        journal.integrationPrepared(DIFFERENT_DIGEST);
+        assertEquals(InactivePreparationJournal.Step.INTEGRATION_PREPARED,journal.step());
+        assertEquals("-",journal.value("clientReportSha256")); assertEquals("-",journal.value("vaultSha256"));
+        InactivePreparationJournal resumed=InactivePreparationJournal.openWithIntegration(file,integrationBindings(root),STORAGE);
+        assertEquals(id,resumed.value("installationId")); assertEquals(DIFFERENT_DIGEST,resumed.value("integrationReportSha256"));
+        advanceIntegration(resumed); fails(() -> resumed.integrationPrepared(DIFFERENT_DIGEST));
+        assertEquals(InactivePreparationJournal.Step.COLLECTION_PREPARED,resumed.step());
+        assertTrue(Files.readString(file).contains("schema=foldgpt.inactive-preparation.v3\n"));
+        assertFalse(Files.exists(root.resolve("debian")));
+    }
+    @Test public void allEarlierScopesRefuseMigrationAndNewScopeRefusesDowngradeOrChangedBindings() throws Exception {
+        for(String scope:List.of("keyring","client","integration")) {
+            Path root=temporary(),file=root.resolve("coordinator.v1");
+            if(scope.equals("keyring")) advance(InactivePreparationJournal.open(file,bindings(root),STORAGE));
+            else if(scope.equals("client")) advanceClient(InactivePreparationJournal.openWithClient(file,clientBindings(root),STORAGE));
+            else advanceIntegration(InactivePreparationJournal.openWithIntegration(file,integrationBindings(root),STORAGE));
+            byte[] original=Files.readAllBytes(file);
+            if(!scope.equals("keyring")) fails(() -> InactivePreparationJournal.open(file,bindings(root),STORAGE));
+            if(!scope.equals("client")) fails(() -> InactivePreparationJournal.openWithClient(file,clientBindings(root),STORAGE));
+            if(!scope.equals("integration")) fails(() -> InactivePreparationJournal.openWithIntegration(file,integrationBindings(root),STORAGE));
+            assertArrayEquals(original,Files.readAllBytes(file));
+            for(String key:List.of("integration","integrationManifest","integrationBytes")) {
+                Map<String,String> changed=new TreeMap<>(integrationBindings(root)); changed.put(key,key.equals("integrationBytes")?"41116762":"0".repeat(64));
+                fails(() -> InactivePreparationJournal.openWithIntegration(file,changed,STORAGE));
+                changed.remove(key); fails(() -> InactivePreparationJournal.openWithIntegration(file,changed,STORAGE));
+                assertArrayEquals(original,Files.readAllBytes(file));
+            }
+        }
+        for(String bytes:List.of("0","-1","067","67108865","10000000000000000000")) {
+            Path root=temporary(); Map<String,String> inputs=integrationBindings(root); inputs.put("integrationBytes",bytes);
+            fails(() -> InactivePreparationJournal.openWithIntegration(root.resolve("coordinator.v1"),inputs,STORAGE));
+            assertFalse(Files.exists(root.resolve("coordinator.v1")));
+        }
+    }
+    @Test public void integrationScopeSurvivesTwelveRealDeathsAroundEveryJournalPublication() throws Exception {
+        for(String step:List.of("ROOT_PREPARED","ACCOUNT_PREPARED","INTEGRATION_PREPARED","CLIENT_PREPARED","VAULT_PREPARED","COLLECTION_PREPARED"))
+            for(String point:List.of("ready-","written-")) {
+                Path root=temporary(),file=root.resolve("coordinator.v1");
+                Process child=new ProcessBuilder(Path.of(System.getProperty("java.home"),"bin/java").toString(),"-cp",System.getProperty("java.class.path"),
+                    InactivePreparationJournalTest.class.getName(),root.toString(),point+step,"integration").redirectErrorStream(true).start();
+                if(!child.waitFor(30,TimeUnit.SECONDS)) { child.destroyForcibly(); fail("Integration journal child timed out"); }
+                assertEquals(new String(child.getInputStream().readAllBytes(),java.nio.charset.StandardCharsets.UTF_8),71,child.exitValue());
+                InactivePreparationJournal resumed=InactivePreparationJournal.openWithIntegration(file,integrationBindings(root),STORAGE);
+                String id=resumed.value("installationId"); advanceIntegration(resumed);
+                InactivePreparationJournal verified=InactivePreparationJournal.openWithIntegration(file,integrationBindings(root),STORAGE);
+                assertEquals(id,verified.value("installationId")); assertEquals(DIFFERENT_DIGEST,verified.value("integrationReportSha256"));
+                assertEquals(DIGEST,verified.value("clientReportSha256")); assertEquals(InactivePreparationJournal.Step.COLLECTION_PREPARED,verified.step());
+                assertFalse(Files.exists(file.resolveSibling("coordinator.v1.next")));
+            }
     }
     @Test public void clientScopeRequiresBoundPackageAndReceiptBeforeVault() throws Exception {
         Path root=temporary(),file=root.resolve("coordinator.v1");
