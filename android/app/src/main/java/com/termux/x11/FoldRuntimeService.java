@@ -8,6 +8,7 @@ import android.system.ErrnoException;
 import android.system.OsConstants;
 import android.util.Log;
 import app.foldgpt.FoldActivity;
+import app.foldgpt.KeyringVault;
 import java.io.*;
 import java.util.*;
 
@@ -65,6 +66,7 @@ public final class FoldRuntimeService extends Service {
     }
     private void startWorkspace() {
         java.lang.Process started = null;
+        byte[] keyringPassword = null;
         try {
             File temp = new File(getCacheDir(), "x11"); temp.mkdirs();
             File sharedMemory = new File(getCacheDir(), "shm");
@@ -107,12 +109,19 @@ public final class FoldRuntimeService extends Service {
             builder.environment().put("PROOT_LOADER_32", getApplicationInfo().nativeLibraryDir + "/libproot-loader32.so");
             builder.environment().put("PROOT_TMP_DIR", temp.getAbsolutePath());
             builder.redirectErrorStream(true).redirectOutput(new File(getFilesDir(), "runtime.log"));
+            keyringPassword = KeyringVault.loadPassword(this);
             synchronized (lifecycleLock) {
                 if (stopping || destroyed) throw new InterruptedException("Workspace stopped");
                 started = builder.start();
                 linux = started;
                 wakeLock = getSystemService(PowerManager.class).newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "FoldGPT:workspace");
                 wakeLock.acquire();
+            }
+            try (OutputStream input = started.getOutputStream()) {
+                input.write(keyringPassword);
+            } finally {
+                Arrays.fill(keyringPassword, (byte) 0);
+                keyringPassword = null;
             }
             int exit = started.waitFor();
             Log.i("FoldGPT", "Linux exited with " + exit);
@@ -122,6 +131,7 @@ public final class FoldRuntimeService extends Service {
         } catch (Exception | LinkageError e) {
             Log.e("FoldGPT", "Workspace failed", e);
         } finally {
+            if (keyringPassword != null) Arrays.fill(keyringPassword, (byte) 0);
             stopLinux(started);
             synchronized (lifecycleLock) {
                 if (linux == started) linux = null;

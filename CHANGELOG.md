@@ -2,6 +2,9 @@
 
 ## Unreleased — 2026-09-06
 
+- Added Android Keystore AES-GCM protection and private stdin delivery for the existing encrypted GNOME keyring. Two cold launches unlocked it without a Linux prompt; the one-time plaintext import was removed. Cold startup requires Android to be unlocked.
+- Added inner-display gating using Jetpack WindowManager's display-area folding features. During a real user fold/reopen, the Linux display closed, the official Android client was launched, and the runtime PID remained unchanged. Reopening FoldGPT restored the existing Linux interface. This does not yet validate an active Codex task or Remote.
+- Added native Android isolation probes outside PRoot. On the test device, Landlock ABI 6 and seccomp notification are available; user namespace creation returns EINVAL and mount namespace creation EPERM. The official Codex 0.153.4 legacy Landlock route rejects the tested workspace policies; local commands remain blocked.
 - Built and installed `app.foldgpt` with embedded Termux:X11, a separate foreground runtime service and private Linux storage. The integrated host now runs the official ChatGPT client and Codex interface independently of the Termux runtime host.
 - Compiled PRoot and matching loaders from pinned commit `7266fb3e8516535682f5a9c8f3a7e70f6506eddb`, resolving the Termux-specific loader paths.
 - Added shared-memory mapping and an `xfwm4` session. Verified fullscreen at 2448 × 1848; XRandR reports 119.98 Hz, with application FPS still unmeasured.

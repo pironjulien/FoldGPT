@@ -2,7 +2,7 @@
 
 Experimental Android host for the official ChatGPT Linux ARM64 desktop client on a Galaxy Z Fold.
 
-**Status: working desktop interface in a development prototype; not a public beta.** The integrated `app.foldgpt` APK now runs the client and Codex interface in its own Android app storage and UID. Local Codex commands are blocked, and Remote, fold routing, updates and background reliability remain unverified. See [PUBLICATION.md](PUBLICATION.md) for the tested scope.
+**Status: working desktop interface in a development prototype; not a public beta.** The integrated `app.foldgpt` APK now runs the client and Codex interface in its own Android app storage and UID. Secure prompt-free keyring startup and one real fold/reopen cycle are verified. Local Codex commands remain blocked; Remote, updates and sustained background reliability remain unverified. See [PUBLICATION.md](PUBLICATION.md) for the tested scope.
 
 ## What works
 
@@ -10,6 +10,8 @@ Experimental Android host for the official ChatGPT Linux ARM64 desktop client on
 - PRoot is built from pinned source in `vendor/proot`. Matching loaders fix the previous Termux-specific loader paths. Shared-memory mapping and `xfwm4` provide the working X11 session.
 - The client fills the tested inner display at 2448 × 1848. XRandR reports a 119.98 Hz display mode; application frame rate has not been measured.
 - Actual touch opens the Samsung keyboard in an editable field and touching outside closes it. The V5 bridge opens only on deliberate pointer input: automatic refocus leaves the dismissed keyboard closed. This was reproduced on-device without a model request; a new touch reopened it. Tapping Samsung keys entered `aet` in the official editor.
+- Android Keystore protects the Linux keyring password with a device-bound AES-GCM key. The service sends it through a private stdin pipe; the helper unlocks the existing GNOME collection over an encrypted Secret Service session. Two cold launches succeeded without a Linux prompt. Android must already be unlocked at startup; this does not change Android's screen lock.
+- Display-area folding features gate the Linux surface and keyboard. A real fold/reopen launched official ChatGPT Android and kept the same Linux runtime process; opening FoldGPT again restored its interface. The monitor uses public Jetpack WindowManager APIs independently of Activity window size.
 
 `foldgpt_ime.py` and `keyboard-focus.js` observe editable-field focus through a local Chromium debugging connection. They send visibility requests, without field contents, to an Android Unix socket that checks the peer UID. The bridge installs runtime DOM listeners; packaged OpenAI files are not patched.
 
@@ -46,13 +48,13 @@ python tools/deploy-session.py --serial YOUR_ADB_SERIAL
 python tools/device-shell.py --serial YOUR_ADB_SERIAL /usr/bin/uname -m
 ```
 
-The guest session requires Debian's `python3-websockets`, `dbus-x11`, `xfwm4` and `wmctrl`, in addition to the client dependencies. Obtain OpenAI's client from its official source; no OpenAI binaries are supplied here.
+The guest session requires Debian's `python3-websockets`, `python3-secretstorage`, `dbus-x11`, `xfwm4` and `wmctrl`, in addition to the client dependencies. The current development migration also requires provisioning the existing keyring password once with `tools/provision-keyring.py --serial YOUR_ADB_SERIAL --secret-file PRIVATE_SECRET_PATH`. It refuses to overwrite existing credentials and does not print the secret. Provisioning a new user's keyring during a fresh installation is not implemented. Obtain OpenAI's client from its official source; no OpenAI binaries are supplied here.
 
 ## Next validation gates
 
 - Resolve local Codex execution. One reproduced blocker is Debian `bwrap` 0.12.0 failing even `--help` because access to `/proc/sys/kernel/overflowuid` is denied.
 - Broaden keyboard verification to field switching, Unicode, Samsung composition and dictation.
-- Test native Remote, folding, background operation and clean shutdown.
+- Test native Remote, active-task continuity, locking, sustained background operation, inner split-screen and clean shutdown. One physical fold/reopen of the idle desktop session has passed.
 - Provide a fresh installer and verify signed APK/client updates preserve state.
 - Establish the production isolation model, dependency provenance and measured performance.
 
