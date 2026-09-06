@@ -18,6 +18,17 @@ Android reports `installed=false` for both. A subsequent FoldGPT APK update
 and client restart succeeded. This does not claim the old private data was
 deleted, or that the developer bootstrap is already a consumer installer.
 
+A final package inventory found a third obsolete package:
+`com.openai.chatgpt.launcher`, version 1.0, displayed as **FoldGPT**. Its
+manifest and DEX match the old `launcher_apk` prototype, whose sole activity
+opens `com.termux.x11.MainActivity`. It is not the official Android client.
+The installed APK was backed up and compared against the device SHA-256
+`e599075e5024a05303af1360d0f245d03c6b1bed99b9a53f4fdde9e6fd112bae`,
+then removed for user 0 with `-k`. Android confirms `installed=false`.
+Only `app.foldgpt` and the official `com.openai.chatgpt` remain installed for
+this setup. FoldGPT reopened successfully; retained legacy data is not claimed
+as reclaimed disk space.
+
 The integrated display notification uses `foldgpt.display.v1`, importance 2,
 no sound and the FoldGPT icon. Its actual Android notification flags include
 `SILENT` and `ONLY_ALERT_ONCE`. The runtime notification remains available to
