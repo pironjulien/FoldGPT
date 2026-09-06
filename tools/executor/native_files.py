@@ -1,4 +1,4 @@
-"""Policy-bearing read/write RPCs using a real native FD-based file helper.
+"""Policy-bearing file/directory RPCs using a real native FD-based helper.
 
 This initial backend admits one supervisor-owned ordinary workspace and no
 guest processes. It is not an installed production executor. Native Android
@@ -19,6 +19,8 @@ from tools.executor.policy_intent import prepare_policy_intent
 from tools.policy.managed_policy import GuestPath, PolicyError, parse_context
 
 MAX_DATA = 16 * 1024 * 1024
+MAX_ENTRIES = 100000
+MAX_DEPTH = 64
 
 
 def _native_failure(diagnostic):
@@ -30,7 +32,7 @@ def _native_failure(diagnostic):
     """
     stages = {"invocation", "root-fd", "length", "root-ownership", "allocation",
               "input", "input-length", "open", "file-kind", "write",
-              "directory-sync", "read", "read-bound", "output", "close"}
+              "directory-sync", "directory-state", "mkdir", "read", "read-bound", "output", "close"}
 
     def unique(pairs):
         result = {}
@@ -59,7 +61,7 @@ def _native_failure(diagnostic):
 
 
 class NativeFilesBackend:
-    supported_methods = frozenset({"fs/readFile", "fs/writeFile"})
+    supported_methods = frozenset({"fs/readFile", "fs/writeFile", "fs/createDirectory"})
     capabilities = frozenset()
 
     def __init__(self, helper, workspace, *, guest_workspace="/workspace"):
@@ -95,16 +97,17 @@ class NativeFilesBackend:
         """
         count = 0
         metadata = []
+        directories = {(): os.fstat(self.root)}
         pending = [(os.dup(self.root), (), 0)]
         try:
             while pending:
                 directory, parts, depth = pending.pop()
                 try:
-                    if depth > 64:
+                    if depth > MAX_DEPTH:
                         raise ValueError("Workspace depth exceeds admission limit")
                     for name in os.listdir(directory):
                         count += 1
-                        if count > 100000:
+                        if count > MAX_ENTRIES:
                             raise ValueError("Workspace exceeds admission limit")
                         fd = os.open(name, os.O_PATH | os.O_NOFOLLOW | os.O_CLOEXEC, dir_fd=directory)
                         try:
@@ -118,6 +121,7 @@ class NativeFilesBackend:
                             if name in (".git", ".agents") and stat.S_ISDIR(info.st_mode):
                                 metadata.append(guest)
                             if stat.S_ISDIR(info.st_mode):
+                                directories[parts + (name,)] = info
                                 # Open the already inspected directory inode.
                                 child = os.open(f"/proc/self/fd/{fd}", os.O_RDONLY | os.O_DIRECTORY | os.O_CLOEXEC)
                                 pending.append((child, parts + (name,), depth + 1))
@@ -128,7 +132,43 @@ class NativeFilesBackend:
         finally:
             for fd, _, _ in pending:
                 os.close(fd)
-        return metadata
+        return metadata, directories, count
+
+    @staticmethod
+    def _require_write(policy, path, metadata):
+        if not policy.decide_uri(path.uri).can_write:
+            raise PermissionError("The supplied filesystem policy denies this operation")
+        for protected in metadata:
+            if protected.contains(path) and not any(
+                    entry.access.value == "write" and protected.contains(entry.path) and entry.path.contains(path)
+                    for entry in policy.resolved_entries):
+                raise PermissionError("Existing project metadata is protected")
+
+    def _directory_plan(self, path, recursive, policy, metadata, directories, count):
+        """Authorize the complete missing suffix before ANY directory is made.
+
+        Existing ancestors need no new write authority: a narrower explicit
+        child grant can legitimately override a read/deny ancestor. Every
+        missing ancestor, however, is a separate creation and needs its own
+        effective write permission. The native helper rechecks the inspected
+        prefix inode and missing suffix, refusing a changed plan without retry.
+        """
+        parts = path.parts[len(self.mount.parts):]
+        if len(parts) > MAX_DEPTH:
+            raise ValueError("Directory creation exceeds workspace depth limit")
+        existing = 0
+        while existing < len(parts) and parts[:existing + 1] in directories:
+            existing += 1
+        missing = len(parts) - existing
+        if not recursive and missing > 1:
+            raise RpcError(-32004, "Requested directory parent does not exist")
+        if count + missing > MAX_ENTRIES:
+            raise ValueError("Directory creation exceeds workspace admission limit")
+        for size in range(existing + 1, len(parts) + 1):
+            self._require_write(policy, self.mount.append(parts[:size]), metadata)
+        parent = directories[parts[:existing]]
+        return ["mkdirs" if recursive else "mkdir", str(self.root), "/".join(parts) or ".",
+                str(missing), str(parent.st_dev), str(parent.st_ino)]
 
     async def handle(self, call, notify):
         if call.method not in self.supported_methods:
@@ -142,35 +182,36 @@ class NativeFilesBackend:
                 raise RpcError(-32000, "Workspace belongs to another executor session")
             params = call.params
             writing = call.method == "fs/writeFile"
+            making = call.method == "fs/createDirectory"
             try:
-                allowed = {"path", "sandbox", "followSymlinks"} | ({"dataBase64"} if writing else set())
+                allowed = {"path", "sandbox", "followSymlinks"} | (
+                    {"dataBase64"} if writing else {"recursive"} if making else set())
                 if type(params) is not dict or set(params) - allowed:
                     raise ValueError("Unsupported filesystem request field")
                 if params.get("followSymlinks") is not None and type(params["followSymlinks"]) is not bool:
                     raise ValueError("Invalid followSymlinks option")
+                if making and params.get("recursive") is not None and type(params["recursive"]) is not bool:
+                    raise ValueError("Invalid recursive option")
                 # Retain the complete context unchanged, not a writable-root
                 # approximation. Unsupported semantics refuse the entire RPC.
                 intent = prepare_policy_intent(params.get("sandbox"), session_id=call.session_id,
                     request_id=str(call.request_id), method=call.method)
                 policy = parse_context(intent.to_document()["context"])
                 path = GuestPath.from_uri(params["path"])
-                if not self.mount.contains(path) or path == self.mount:
+                if not self.mount.contains(path) or (path == self.mount and not making):
                     raise ValueError("Path is outside the admitted workspace mapping")
                 decision = policy.decide_uri(path.uri)
-                if not (decision.can_write if writing else decision.can_read):
+                if not (decision.can_write if writing or making else decision.can_read):
                     raise PermissionError("The supplied filesystem policy denies this operation")
-                metadata = self._inspect(policy)
+                metadata, directories, count = self._inspect(policy)
+                if writing or making:
+                    self._require_write(policy, path, metadata)
                 if writing:
                     # A successful write must not introduce a file kind that
                     # invalidates every subsequent workspace operation. This
                     # admission limit also applies to explicit policy grants.
                     if path.parts[-1] == ".git":
                         raise ValueError("Creating gitdir files requires the native alias resolver")
-                    for protected in metadata:
-                        if protected.contains(path) and not any(
-                                entry.access.value == "write" and protected.contains(entry.path) and entry.path.contains(path)
-                                for entry in policy.resolved_entries):
-                            raise PermissionError("Existing project metadata is protected")
                     encoded = params["dataBase64"]
                     if not isinstance(encoded, str) or len(encoded) > ((MAX_DATA + 2) // 3) * 4:
                         raise ValueError("Write exceeds the admitted data bound")
@@ -180,10 +221,13 @@ class NativeFilesBackend:
                 else:
                     data = b""
                 relative = "/".join(path.parts[len(self.mount.parts):])
+                arguments = self._directory_plan(path, params.get("recursive") is not False,
+                    policy, metadata, directories, count) if making else [
+                        "write" if writing else "read", str(self.root), relative, str(len(data))]
             except (PolicyError, ValueError, KeyError, PermissionError, OSError, binascii.Error) as error:
                 raise RpcError(-32000, str(error)) from error
             self.process = await asyncio.create_subprocess_exec(
-                self.helper, "write" if writing else "read", str(self.root), relative, str(len(data)),
+                self.helper, *arguments,
                 stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE,
                 close_fds=True, pass_fds=(self.root,), env={})
             communicate = asyncio.create_task(self.process.communicate(data))
@@ -191,9 +235,9 @@ class NativeFilesBackend:
                 output, diagnostic = await asyncio.wait_for(asyncio.shield(communicate), 30)
                 if self.process.returncode != 0:
                     raise _native_failure(diagnostic)
-                if diagnostic or (writing and output) or len(output) > MAX_DATA:
+                if diagnostic or ((writing or making) and output) or len(output) > MAX_DATA:
                     raise RpcError(-32000, "Native filesystem response violates its contract")
-                return {} if writing else {"dataBase64": base64.b64encode(output).decode("ascii")}
+                return {} if writing or making else {"dataBase64": base64.b64encode(output).decode("ascii")}
             finally:
                 # A transport cancellation is not a rollback of a write that
                 # has begun. Await termination before releasing root ownership.

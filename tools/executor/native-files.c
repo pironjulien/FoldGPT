@@ -18,6 +18,7 @@
 #include <unistd.h>
 
 #define MAX_DATA (16U * 1024U * 1024U)
+#define MAX_DEPTH 64U
 
 static int error(const char *stage) {
     fprintf(stderr,"{\"stage\":\"%s\",\"errno\":%d}\n",stage,errno);
@@ -75,20 +76,105 @@ static int write_all(int fd,const void *buffer,size_t length) {
     }
     return 0;
 }
+static int decimal(const char *text,uint64_t *value) {
+    if(!text[0]) return 0;
+    for(const char *p=text;*p;p++) if(*p<'0' || *p>'9') return 0;
+    char *end; errno=0;
+    unsigned long long number=strtoull(text,&end,10);
+    if(errno || *end) return 0;
+    *value=(uint64_t)number;
+    return 1;
+}
+static int create_directories(int root,char **argv) {
+    /* The trusted policy side authorizes EVERY missing suffix component and
+     * supplies the identity of the last existing directory it inspected.
+     * Recheck that immutable plan before the first mutation. Neither an
+     * unexpected existing object nor a missing ancestor is adopted/retried.
+     */
+    uint64_t missing,device,inode;
+    if(!decimal(argv[4],&missing) || missing>MAX_DEPTH ||
+            !decimal(argv[5],&device) || !decimal(argv[6],&inode)) {
+        errno=EINVAL; return error("directory-state");
+    }
+    char path[PATH_MAX]; strcpy(path,argv[3]);
+    char *components[MAX_DEPTH]; unsigned count=0;
+    if(strcmp(path,".")) {
+        char *next=path;
+        for(;;) {
+            if(count==MAX_DEPTH) { errno=E2BIG; return error("directory-state"); }
+            components[count++]=next;
+            char *slash=strchr(next,'/');
+            if(slash) *slash=0;
+            if(strlen(next)>NAME_MAX) { errno=ENAMETOOLONG; return error("directory-state"); }
+            if(!slash) break;
+            next=slash+1;
+        }
+    }
+    if(missing>count) { errno=EINVAL; return error("directory-state"); }
+    int recursive=!strcmp(argv[1],"mkdirs");
+    if(!recursive && missing>1) { errno=ENOENT; return error("open"); }
+    /* A request body is never interpreted as more directory authorizations. */
+    unsigned char unexpected;
+    ssize_t received;
+    do { received=read(STDIN_FILENO,&unexpected,1); } while(received<0 && errno==EINTR);
+    if(received<0) return error("input");
+    if(received) { errno=EMSGSIZE; return error("input-length"); }
+
+    unsigned existing=count-(unsigned)missing;
+    char prefix[PATH_MAX]="";
+    for(unsigned i=0;i<existing;i++) {
+        if(i) strcat(prefix,"/");
+        strcat(prefix,components[i]);
+    }
+    int directory=existing?open_beneath(root,prefix,O_RDONLY|O_DIRECTORY|O_CLOEXEC|O_NOFOLLOW,0):dup(root);
+    if(directory<0) return error("open");
+    struct stat st;
+    if(fstat(directory,&st)<0) return error("directory-state");
+    if(!S_ISDIR(st.st_mode) || st.st_uid!=getuid() ||
+            (uint64_t)st.st_dev!=device || (uint64_t)st.st_ino!=inode) {
+        errno=ESTALE; return error("directory-state");
+    }
+    if(!missing) {
+        if(!recursive) { errno=EEXIST; return error("mkdir"); }
+        if(close(directory)<0) return error("close");
+        return 0;
+    }
+    int check=open_beneath(directory,components[existing],O_PATH|O_CLOEXEC|O_NOFOLLOW,0);
+    if(check>=0) { close(check); errno=EEXIST; return error("directory-state"); }
+    if(errno!=ENOENT) return error("open");
+    umask(0077);
+    for(unsigned i=existing;i<count;i++) {
+        if(mkdirat(directory,components[i],0700)<0) return error("mkdir");
+        int child=open_beneath(directory,components[i],O_RDONLY|O_DIRECTORY|O_CLOEXEC|O_NOFOLLOW,0);
+        if(child<0) return error("open");
+        if(fstat(child,&st)<0) return error("directory-state");
+        if(!S_ISDIR(st.st_mode) || st.st_uid!=getuid() || (st.st_mode&0777)!=0700) {
+            errno=EPERM; return error("directory-state");
+        }
+        if(fsync(child)<0 || fsync(directory)<0) return error("directory-sync");
+        if(close(directory)<0) return error("close");
+        directory=child;
+    }
+    if(close(directory)<0) return error("close");
+    return 0;
+}
 int main(int argc,char **argv) {
-    if(argc!=5 || (strcmp(argv[1],"read") && strcmp(argv[1],"write")) || !valid_relative(argv[3])) {
+    int making=argc==7 && (!strcmp(argv[1],"mkdir") || !strcmp(argv[1],"mkdirs"));
+    if((!making && (argc!=5 || (strcmp(argv[1],"read") && strcmp(argv[1],"write")))) ||
+            (!valid_relative(argv[3]) && !(making && !strcmp(argv[3],".")))) {
         errno=EINVAL; return error("invocation");
     }
     char *end;
     errno=0; long descriptor=strtol(argv[2],&end,10);
     if(errno || !argv[2][0] || *end || descriptor<3 || descriptor>INT_MAX) { errno=EINVAL; return error("root-fd"); }
-    errno=0; unsigned long expected=strtoul(argv[4],&end,10);
-    if(errno || !argv[4][0] || *end || expected>MAX_DATA || argv[4][0]=='-') { errno=EINVAL; return error("length"); }
     int root=(int)descriptor;
     struct stat root_stat;
     if(fstat(root,&root_stat)<0 || !S_ISDIR(root_stat.st_mode) || root_stat.st_uid!=getuid() || (root_stat.st_mode&0077)) {
         errno=EPERM; return error("root-ownership");
     }
+    if(making) return create_directories(root,argv);
+    errno=0; unsigned long expected=strtoul(argv[4],&end,10);
+    if(errno || !argv[4][0] || *end || expected>MAX_DATA || argv[4][0]=='-') { errno=EINVAL; return error("length"); }
     int writing=!strcmp(argv[1],"write");
     unsigned char *data=malloc(MAX_DATA+1);
     if(!data) return error("allocation");
