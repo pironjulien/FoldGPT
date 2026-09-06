@@ -28,18 +28,70 @@ public final class KeyringVault {
 
     /** Caller owns the returned array and must overwrite it immediately after pipe transfer. */
     public static synchronized byte[] loadPassword(Context context) throws Exception {
+        return openPassword(context, false);
+    }
+
+    /**
+     * Installer-only entry point, before activation of a pristine rootfs.
+     * Commit the device-bound vault before creating the GNOME collection. A
+     * retry returns the same encrypted credential, never a replacement secret.
+     * The current migrated-runtime path deliberately continues to use loadPassword.
+     */
+    public static synchronized byte[] prepareFreshPassword(Context context) throws Exception {
+        if (existsWithoutFollowingLinks(new File(context.getFilesDir(), "debian"))) {
+            throw new IOException("Refusing fresh credential generation for an existing Linux installation");
+        }
+        return openPassword(context, true);
+    }
+
+    private static byte[] openPassword(Context context, boolean fresh) throws Exception {
         if (!context.getSystemService(UserManager.class).isUserUnlocked()
                 || context.getSystemService(KeyguardManager.class).isDeviceLocked()) {
             throw new GeneralSecurityException("Unlock Android before opening the Linux keyring");
         }
         File directory = new File(context.getNoBackupFilesDir(), "foldgpt-keyring");
-        if (!existsWithoutFollowingLinks(directory)) Os.mkdir(directory.getAbsolutePath(), 0700);
+        if (!existsWithoutFollowingLinks(directory)) {
+            try { Os.mkdir(directory.getAbsolutePath(), 0700); }
+            catch (ErrnoException e) { if (e.errno != OsConstants.EEXIST) throw e; }
+        }
         requirePrivate(directory, true);
+        syncDirectory(context.getNoBackupFilesDir());
+        File mutex = new File(directory, "vault.lock");
+        FileDescriptor fd = Os.open(mutex.getAbsolutePath(),
+                OsConstants.O_RDWR | OsConstants.O_CREAT | OsConstants.O_NOFOLLOW | OsConstants.O_CLOEXEC, 0600);
+        byte[] result = null;
+        try {
+            try (FileOutputStream output = new FileOutputStream(fd)) {
+                StructStat lockStat = Os.fstat(fd);
+                if (!OsConstants.S_ISREG(lockStat.st_mode) || lockStat.st_uid != android.os.Process.myUid()
+                        || (lockStat.st_mode & 0077) != 0 || lockStat.st_nlink != 1) {
+                    throw new GeneralSecurityException("Unsafe keyring vault lock");
+                }
+                // Java synchronized is per-process; the installer and :runtime
+                // service must serialize the complete credential/Keystore commit.
+                try (java.nio.channels.FileLock ignored = output.getChannel().lock()) {
+                    if (fresh && existsWithoutFollowingLinks(new File(context.getFilesDir(), "debian"))) {
+                        throw new IOException("Linux was activated during fresh credential preparation");
+                    }
+                    result = openVaultFiles(directory, fresh);
+                }
+            }
+            // Transfer ownership only after lock/stream cleanup succeeds.
+            byte[] transferred = result;
+            result = null;
+            return transferred;
+        } finally {
+            if (result != null) Arrays.fill(result, (byte) 0);
+        }
+    }
+
+    private static byte[] openVaultFiles(File directory, boolean fresh) throws Exception {
         File pending = new File(directory, "keyring-password.import");
         File encrypted = new File(directory, "keyring-password.v1");
         boolean hasPending = existsWithoutFollowingLinks(pending);
         boolean hasEncrypted = existsWithoutFollowingLinks(encrypted);
-        if (!hasPending && !hasEncrypted) throw new IOException("Linux keyring credential is not provisioned");
+        if (!fresh && !hasPending && !hasEncrypted) throw new IOException("Linux keyring credential is not provisioned");
+        if (fresh && hasPending) throw new IOException("Existing credential import requires the migration path");
         if (hasPending) requirePrivate(pending, false);
         if (hasEncrypted) requirePrivate(encrypted, false);
         KeyStore store = KeyStore.getInstance("AndroidKeyStore");
@@ -59,6 +111,7 @@ public final class KeyringVault {
         byte[] password = null;
         try {
             if (hasPending) imported = readPrivate(pending, MAX_PASSWORD);
+            if (fresh && !hasEncrypted) imported = newInstallationPassword();
             if (hasEncrypted) {
                 password = decrypt(key, readPrivate(encrypted, MAX_PASSWORD + 64));
                 // A matching import can remain after a crash between commit and deletion.
@@ -74,6 +127,9 @@ public final class KeyringVault {
                     output = atomic.startWrite();
                     Os.fchmod(output.getFD(), 0600);
                     output.write(payload);
+                    // AtomicFile logs some sync failures instead of propagating
+                    // them. A new keyring must never use an uncommitted secret.
+                    output.getFD().sync();
                     atomic.finishWrite(output);
                     output = null;
                 } finally {
@@ -84,13 +140,50 @@ public final class KeyringVault {
                 if (!MessageDigest.isEqual(imported, password)) throw new GeneralSecurityException("Keyring vault verification failed");
             }
             validatePassword(password);
-            if (hasPending) Os.remove(pending.getAbsolutePath());
+            syncDirectory(directory);
+            if (hasPending) {
+                Os.remove(pending.getAbsolutePath());
+                syncDirectory(directory);
+            }
             byte[] result = password;
             password = null;
             return result;
         } finally {
             if (imported != null) Arrays.fill(imported, (byte) 0);
             if (password != null) Arrays.fill(password, (byte) 0);
+        }
+    }
+
+    private static void syncDirectory(File directory) throws ErrnoException {
+        FileDescriptor fd = Os.open(directory.getAbsolutePath(),
+                OsConstants.O_RDONLY | OsConstants.O_NONBLOCK | OsConstants.O_NOFOLLOW | OsConstants.O_CLOEXEC, 0);
+        try {
+            // O_DIRECTORY is not exposed by the public Android OsConstants API.
+            // Validate the opened inode before syncing; NONBLOCK also prevents
+            // an unexpected FIFO from blocking this check.
+            if (!OsConstants.S_ISDIR(Os.fstat(fd).st_mode)) {
+                throw new ErrnoException("keyring directory sync", OsConstants.ENOTDIR);
+            }
+            Os.fsync(fd);
+        }
+        finally { Os.close(fd); }
+    }
+
+    private static byte[] newInstallationPassword() {
+        // 256 random bits, encoded without NUL for the GNOME master-password API.
+        // No immutable Java String ever holds the credential.
+        byte[] entropy = new byte[32];
+        byte[] encoded = new byte[64];
+        byte[] alphabet = "0123456789abcdef".getBytes(StandardCharsets.US_ASCII);
+        try {
+            new SecureRandom().nextBytes(entropy);
+            for (int i = 0; i < entropy.length; ++i) {
+                encoded[2 * i] = alphabet[(entropy[i] & 0xff) >>> 4];
+                encoded[2 * i + 1] = alphabet[entropy[i] & 0xf];
+            }
+            return encoded;
+        } finally {
+            Arrays.fill(entropy, (byte) 0);
         }
     }
 

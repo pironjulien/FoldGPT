@@ -1,10 +1,12 @@
 package app.foldgpt;
 
 import android.app.ActivityOptions;
+import android.app.KeyguardManager;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.os.PowerManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
@@ -24,6 +26,9 @@ public final class FoldActivity extends MainActivity {
         // The desktop client enforces a minimum window height. Keep its canvas
         // and let LorieView follow the input cursor above the Android keyboard.
         prefs.Reseed.put(false);
+        // Background computation uses the service's partial CPU wake lock.
+        // The display must follow Android's normal idle/screen-off policy.
+        prefs.screenIdleTimeout.put("system");
         if (!getPreferences(MODE_PRIVATE).getBoolean("configured", false)) {
             prefs.fullscreen.put(true);
             prefs.showAdditionalKbd.put(false);
@@ -55,16 +60,29 @@ public final class FoldActivity extends MainActivity {
         super.onConfigurationChanged(configuration);
         if (posture != null) posture.refreshDisplay();
     }
+    @Override public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        // A posture notification may arrive while the screen is turning off or
+        // the keyguard owns the window. Reconsider it when this Activity really
+        // becomes interactive; never wake/unlock the device to finish a handoff.
+        if (hasFocus && posture != null) onPostureChanged(posture.getState());
+    }
+    private boolean canHandleDisplayTransition() {
+        PowerManager power = getSystemService(PowerManager.class);
+        KeyguardManager keyguard = getSystemService(KeyguardManager.class);
+        return resumed && hasWindowFocus() && power != null && power.isInteractive()
+                && keyguard != null && !keyguard.isKeyguardLocked() && !keyguard.isDeviceLocked();
+    }
     private void onPostureChanged(FoldPostureController.State state) {
         if (isDestroyed() || isFinishing()) return;
         innerDisplay = state == FoldPostureController.State.INNER;
         findViewById(android.R.id.content).setVisibility(innerDisplay ? View.VISIBLE : View.INVISIBLE);
         if (innerDisplay) {
-            if (resumed) startForegroundService(new Intent(this, FoldRuntimeService.class));
+            if (canHandleDisplayTransition()) startForegroundService(new Intent(this, FoldRuntimeService.class));
             return;
         }
         getLorieView().setKeyboardVisible(false);
-        if (!resumed || state == FoldPostureController.State.WAITING || redirecting) return;
+        if (!canHandleDisplayTransition() || state == FoldPostureController.State.WAITING || redirecting) return;
         redirecting = true;
         if (state == FoldPostureController.State.UNAVAILABLE) {
             Toast.makeText(this, "La détection de l’écran intérieur est indisponible.", Toast.LENGTH_LONG).show();

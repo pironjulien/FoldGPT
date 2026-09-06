@@ -46,7 +46,21 @@ library and the candidate APK packages it successfully. This is build evidence;
 that candidate still awaits on-device validation. The build records source and
 patch hashes and preserves Linux filename case in its ext4 build directory.
 
+An [independent Android runtime build](tools/install/native/README.md) now also
+cross-compiles PRoot, its matched loaders, talloc and shared memory from pinned
+sources without a phone or Termux. Five ELF outputs pass static checks. These
+libraries remain separate candidates until their Android tests pass; the recipe
+does not replace the APK's existing libraries automatically.
+
 An APK build does not install Linux. `tools/migrate-device-runtime.py` copies an existing on-device development installation into an empty FoldGPT destination and refuses existing data. It is not a fresh installer. `install.sh` exits explicitly because its historical workflow is unvalidated.
+
+The [fresh-install preparation notes](docs/install/README.md) document a verified
+guest-script bundle, a [pristine Debian ARM64 build](docs/install/ROOTFS.md), and
+the remaining Android bootstrap requirements. The
+[executor integration audit](tools/executor/README.md) records the official
+policy handoff and its native enforcement gap. The
+[fold lifecycle notes](docs/fold-lifecycle.md) explain current background-launch
+limits. These preparatory components do not constitute a functional public release.
 
 For an already initialized debug installation, these tools update FoldGPT's guest scripts or run a diagnostic command:
 
@@ -57,7 +71,7 @@ python tools/inspect-gpu.py --serial YOUR_ADB_SERIAL
 python tools/audit-device-logs.py --serial YOUR_ADB_SERIAL
 ```
 
-The guest session requires Debian's `python3-websockets`, `python3-secretstorage`, `dbus-x11`, `xfwm4` and `wmctrl`, in addition to the client dependencies. The current development migration also requires provisioning the existing keyring password once with `tools/provision-keyring.py --serial YOUR_ADB_SERIAL --secret-file PRIVATE_SECRET_PATH`. It refuses to overwrite existing credentials and does not print the secret. Provisioning a new user's keyring during a fresh installation is not implemented. Obtain OpenAI's client from its official source; no OpenAI binaries are supplied here.
+The guest session requires Debian's `python3-websockets`, `python3-secretstorage`, `dbus-x11`, `xfwm4` and `wmctrl`, in addition to the client dependencies. The current development migration also requires provisioning the existing keyring password once with `tools/provision-keyring.py --serial YOUR_ADB_SERIAL --secret-file PRIVATE_SECRET_PATH`. It refuses to overwrite existing credentials and does not print the secret. [Fresh keyring preparation](docs/install/keyring.md) now has Linux checks and an Android generation API, but remains separate from a complete installer. Obtain OpenAI's client from its official source; no OpenAI binaries are supplied here.
 
 ## Next validation gates
 
