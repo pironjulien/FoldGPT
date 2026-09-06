@@ -2,6 +2,7 @@
 
 ## Unreleased — 2026-09-06
 
+- Corrected three executor review failures: bounded independent stdout delivery now allows EOF cleanup under saturation or malformed input, strict native ENOENT diagnostics retain Codex's NotFound code, and unsupported `.git` file creation is refused before mutation. Thirty-one transport/native tests pass under unprivileged WSL; twenty-three transport tests also pass on Windows. The Android production executor remains unfinished.
 - Connected the audited execution-server transport to real native read/write RPCs in a private host workspace, retaining per-request policy and explicit metadata exceptions. Twenty-six transport/native checks pass. The unchanged official Codex 0.153.4 also completes the environment handshake on the Fold with a fresh profile. Android Zygote tests verify the file helper's real reads/writes and refused aliases/incomplete inputs. Arbitrary-command policy enforcement and the production Android bridge remain unfinished.
 - Integrated fresh guest account provisioning with the leased Debian transaction. Real Android testing revealed umask-filtered file modes; exact staged modes and journal-bound recovery correct the cause. The original failed stage then resumes and executes its new guest identity under Zygote, without activation. Twenty-nine host tests pass, including 24 actual JVM deaths. No binary release is claimed.
 

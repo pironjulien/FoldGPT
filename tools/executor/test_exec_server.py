@@ -375,14 +375,128 @@ class ExecServerTests(unittest.IsolatedAsyncioTestCase):
 
         backend = RecordingRefusalBackend()
         server = ExecServer(backend, environment_info=INFO)
+        cleaned = asyncio.Event()
+        original_close = backend.close
+
+        async def close(session_id):
+            await original_close(session_id)
+            cleaned.set()
+
+        backend.close = close
+        running = asyncio.create_task(serve_stdio(server, EofAfterBlockedWriter(), HeldWriter()))
         try:
-            await asyncio.wait_for(serve_stdio(server, EofAfterBlockedWriter(), HeldWriter()), 2)
+            await asyncio.wait_for(cleaned.wait(), 2)
             self.assertTrue(blocked_write.is_set())
             self.assertTrue(server.closed)
             self.assertEqual(server.pending, {})
             self.assertEqual(backend.closed_sessions, [server.session_id])
+            release_writer.set()
+            await asyncio.wait_for(running, 2)
         finally:
             blocked_write.set()
+            release_writer.set()
+            running.cancel()
+            await asyncio.gather(running, return_exceptions=True)
+
+    async def test_inline_error_cannot_hide_eof_while_stdout_is_blocked(self):
+        # These routes emit directly from the receive loop. Previously each
+        # trapped EOF and native cleanup behind a blocked response write.
+        for error_frame in [
+            encode_message(request("process/read", {"processId": "p"}, 3)) + b"\n",
+            b"{malformed}\n",
+            encode_message(request("initialize", {"clientName": "again"}, 3)) + b"\n",
+        ]:
+            with self.subTest(error_frame=error_frame):
+                worker_entered = threading.Event()
+                writer_blocked = threading.Event()
+                release_writer = threading.Event()
+                cleaned = asyncio.Event()
+
+                class WaitingBackend(RecordingRefusalBackend):
+                    def __init__(self):
+                        super().__init__()
+                        self.cancelled = False
+
+                    async def handle(self, call, notify):
+                        worker_entered.set()
+                        try:
+                            await asyncio.Event().wait()
+                        except asyncio.CancelledError:
+                            self.cancelled = True
+                            raise
+
+                    async def close(self, session_id):
+                        await super().close(session_id)
+                        cleaned.set()
+
+                class EofReader:
+                    def __init__(self):
+                        self.frames = iter([
+                            encode_message(request("initialize", {"clientName": "test"})) + b"\n",
+                            b'{"method":"initialized"}\n',
+                            encode_message(request("process/read", {"processId": "p"}, 2)) + b"\n",
+                            error_frame,
+                        ])
+
+                    def readline(self, _limit):
+                        frame = next(self.frames, None)
+                        if frame == error_frame:
+                            worker_entered.wait()
+                        if frame is not None:
+                            return frame
+                        writer_blocked.wait()
+                        return b""
+
+                class HeldWriter(io.BytesIO):
+                    def write(self, data):
+                        if self.tell():
+                            writer_blocked.set()
+                            release_writer.wait()
+                        return super().write(data)
+
+                backend = WaitingBackend()
+                server = ExecServer(backend, environment_info=INFO, max_in_flight=1)
+                running = asyncio.create_task(serve_stdio(server, EofReader(), HeldWriter()))
+                try:
+                    await asyncio.wait_for(cleaned.wait(), 2)
+                    self.assertTrue(writer_blocked.is_set())
+                    self.assertTrue(backend.cancelled)
+                    self.assertEqual(backend.closed_sessions, [server.session_id])
+                    release_writer.set()
+                    await asyncio.wait_for(running, 2)
+                finally:
+                    worker_entered.set()
+                    writer_blocked.set()
+                    release_writer.set()
+                    running.cancel()
+                    await asyncio.gather(running, return_exceptions=True)
+
+    async def test_outbound_queue_saturation_disconnects_without_waiting_for_stdout(self):
+        release_writer = threading.Event()
+
+        class EndlessReader:
+            def __init__(self):
+                self.first = True
+
+            def readline(self, _limit):
+                if self.first:
+                    self.first = False
+                    return encode_message(request("initialize", {"clientName": "test"})) + b"\n"
+                return b"{malformed}\n"
+
+        class HeldWriter(io.BytesIO):
+            def write(self, data):
+                release_writer.wait()
+                return super().write(data)
+
+        backend = RecordingRefusalBackend()
+        server = ExecServer(backend, environment_info=INFO)
+        try:
+            with self.assertRaises(ProtocolClosed):
+                await asyncio.wait_for(serve_stdio(server, EndlessReader(), HeldWriter(), max_message_bytes=1024), 2)
+            self.assertTrue(server.closed)
+            self.assertEqual(backend.closed_sessions, [server.session_id])
+        finally:
             release_writer.set()
 
 

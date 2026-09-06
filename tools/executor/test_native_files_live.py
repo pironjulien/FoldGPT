@@ -10,7 +10,7 @@ import tempfile
 import unittest
 
 from tools.executor.exec_server import ExecServer
-from tools.executor.native_files import NativeFilesBackend
+from tools.executor.native_files import NativeFilesBackend, _native_failure
 from tools.executor.test_policy_intent import context
 
 HELPER = os.environ.get("FOLDGPT_NATIVE_FILES")
@@ -78,6 +78,36 @@ class NativeFilesLiveTests(unittest.IsolatedAsyncioTestCase):
         self.assertFalse((self.root / "new").exists())
         self.assertEqual((self.root / "private/secret").read_bytes(), b"private")
 
+    async def test_missing_files_preserve_official_not_found_semantics(self):
+        for path in ("absent", "absent-parent/file"):
+            with self.subTest(path=path):
+                response = await self.rpc(path)
+                self.assertEqual(response["error"]["code"], -32004)
+        write = await self.rpc("absent-parent/file", b"must-not-appear")
+        self.assertEqual(write["error"]["code"], -32004)
+        self.assertFalse((self.root / "absent-parent").exists())
+        for path in ("private/secret", "private/absent"):
+            denied = await self.rpc(path)
+            self.assertIn("error", denied)
+            self.assertNotEqual(denied["error"]["code"], -32004)
+        self.assertIn("result", await self.rpc("value"))
+
+    async def test_new_gitdir_files_refuse_before_mutation_even_with_explicit_grant(self):
+        (self.root / "nested").mkdir()
+        for explicit in (False, True):
+            with self.subTest(explicit=explicit):
+                policy = context()
+                if explicit:
+                    policy["permissions"]["file_system"]["entries"].append({
+                        "path": {"type": "path", "path": "file:///workspace/nested/.git"},
+                        "access": "write",})
+                result = await self.rpc("nested/.git", b"gitdir: /tmp/unsupported\n", policy)
+                self.assertIn("error", result)
+                self.assertFalse((self.root / "nested/.git").exists())
+                self.assertIn("result", await self.rpc("value"))
+                self.assertIn("result", await self.rpc("value", b"still-usable"))
+                self.assertEqual((self.root / "value").read_bytes(), b"still-usable")
+
     async def test_aliases_and_nested_metadata_are_not_writable(self):
         (self.root / "nested/.git").mkdir(parents=True)
         (self.root / "nested/.git/config").write_bytes(b"nested")
@@ -97,6 +127,28 @@ class NativeFilesLiveTests(unittest.IsolatedAsyncioTestCase):
                 pass_fds=(self.backend.root,), input=data, capture_output=True)
             self.assertNotEqual(result.returncode, 0)
         self.assertEqual((self.root / "value").read_bytes(), b"original")
+
+
+class NativeDiagnosticTests(unittest.TestCase):
+    def test_not_found_requires_a_strict_open_failure_record(self):
+        self.assertEqual(_native_failure(b'{"stage":"open","errno":2}\n').code, -32004)
+        for diagnostic in (
+            b'{"stage":"open","errno":2,"errno":13}',
+            b'{"stage":"open","errno":2,"extra":true}',
+            b'{"stage":"open","errno":2.0}',
+            b'{"stage":"open","errno":true}',
+            b'{"stage":"unknown","errno":2}',
+            b'{"stage":"open","errno":2} trailing',
+            b'{"stage":"open","errno":0}',
+            b'{"stage":"open","errno":99999}',
+            b'\xff', b'[]', b'x' * 1025,
+        ):
+            with self.subTest(diagnostic=diagnostic):
+                self.assertEqual(_native_failure(diagnostic).code, -32603)
+        for diagnostic in (b'{"stage":"directory-sync","errno":2}',
+                           b'{"stage":"open","errno":13}',
+                           b'{"stage":"open","errno":1}'):
+            self.assertNotEqual(_native_failure(diagnostic).code, -32004)
 
 
 if __name__ == "__main__":
