@@ -31,3 +31,28 @@ composition/autocorrect works, or that all official client windows are supported
 Cross-origin frames running in a separate renderer require CDP target attachment;
 closed shadow roots cannot be inspected by this DOM hook. These remain device and
 integration coverage limits, not claims of universal support.
+
+## Android kernel experiments
+
+Build the fixed experiments with Android NDK 29, then rebuild/install the debug
+APK. They are excluded from release builds. Open FoldGPT before broadcasting so
+Android's stopped-package handling cannot skip the receiver.
+
+```powershell
+./tools/build-landlock-probe.ps1
+gradle -p android :app:assembleDebug
+adb -s YOUR_SERIAL install -r android/app/build/outputs/apk/debug/app-debug.apk
+adb -s YOUR_SERIAL shell am start -n app.foldgpt/.FoldActivity
+adb -s YOUR_SERIAL shell am broadcast -n app.foldgpt/.LandlockProbeReceiver
+adb -s YOUR_SERIAL shell am broadcast -a app.foldgpt.PROBE_BROKER -n app.foldgpt/.LandlockProbeReceiver
+adb -s YOUR_SERIAL shell am broadcast -a app.foldgpt.PROBE_SHELL -n app.foldgpt/.LandlockProbeReceiver
+adb -s YOUR_SERIAL shell am broadcast -a app.foldgpt.PROBE_PROOT -n app.foldgpt/.LandlockProbeReceiver
+```
+
+Read each result from `cache/landlock-probe.log`, `cache/broker-probe.log`,
+`cache/shell-probe.log` or `cache/proot-probe.log` with `adb shell run-as
+app.foldgpt cat ...`. The receiver executes asynchronously; a broadcast result
+of zero alone is not a passing test. Require the native process's final independent
+verification and the corresponding `FoldGPT-Probe` completion in logcat. See
+`NATIVE-AUDIT.md` for the exact scope and deliberate metadata limitation in the
+first experiment. These tests do not invoke a model or demonstrate Codex integration.
