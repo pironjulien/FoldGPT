@@ -18,4 +18,5 @@ android {
 dependencies {
     implementation project(':lorie')
     implementation 'androidx.appcompat:appcompat:1.7.1'
+    implementation 'androidx.window:window-java:1.5.0'
 }

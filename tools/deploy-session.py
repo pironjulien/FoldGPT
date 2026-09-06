@@ -9,6 +9,7 @@ args = parser.parse_args()
 root = Path(__file__).resolve().parents[1]
 adb = ["adb", "-s", args.serial]
 for name, target in {
+    "foldgpt_keyring.py": "usr/local/lib/foldgpt/foldgpt_keyring.py",
     "foldgpt_ime.py": "usr/local/lib/foldgpt/foldgpt_ime.py",
     "keyboard-focus.js": "usr/local/lib/foldgpt/keyboard-focus.js",
     "foldgpt-session.sh": "usr/local/bin/foldgpt-session",

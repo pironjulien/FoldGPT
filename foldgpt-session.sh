@@ -7,6 +7,7 @@ export FOLDGPT_CDP_PORT=9223
 export XDG_RUNTIME_DIR=/tmp/runtime-julien
 mkdir -p "$XDG_RUNTIME_DIR" "$HOME/.local/state"
 chmod 700 "$XDG_RUNTIME_DIR"
+timeout 20s python3 /usr/local/lib/foldgpt/foldgpt_keyring.py
 python3 -u /usr/local/lib/foldgpt/foldgpt_ime.py > "$HOME/.local/state/foldgpt-ime.log" 2>&1 &
 ime_pid=$!
 # A window manager implements maximize, modal dialogs and display-size changes.

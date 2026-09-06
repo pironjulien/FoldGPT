@@ -28,3 +28,27 @@ Vérifications ADB actuelles : warranty_bit 0, verifiedbootstate green, flash.lo
 ## Suite retenue
 
 Conserver ce résultat comme preuve de compatibilité native. Une solution répondant aux contraintes doit fournir un confinement réellement appliqué, puis passer une tâche personnalisée avec vérification du fichier, un test Remote et des mesures de latence. Le shim actuel n'est pas validé comme moteur de production. Aucun nouveau compte ni secret n'a été introduit dans cette instance pendant cet audit. Les fichiers de l'autre outil et son processus ont été préservés.
+
+## Mesures complémentaires — 6 septembre 2026
+
+`tools/probe-android-isolation.c` a été compilé avec le NDK puis exécuté hors PRoot, depuis ADB shell et `run-as app.foldgpt`. Chaque appel modifiant un état reste dans un processus enfant jetable. Dans les deux contextes :
+
+```text
+/proc/self/ns/user: ENOENT
+/proc/self/ns/pid: ENOENT
+unshare(CLONE_NEWUSER): EINVAL
+unshare(CLONE_NEWNS): EPERM
+unshare(CLONE_NEWPID): EPERM
+landlock_create_ruleset(VERSION): 6
+seccomp(GET_ACTION_AVAIL, USER_NOTIF): 0
+```
+
+Les processus lancés par `run-as` n'héritent pas nécessairement des filtres seccomp d'un processus créé par Zygote. Ce relevé prouve la présence de ces interfaces dans le noyau, pas leur utilisabilité complète depuis un futur service isolé Android.
+
+Le PRoot épinglé supprime lui-même les flags de namespaces dans `src/syscall/enter.c`, indépendamment du preload. Retirer uniquement le shim ne suffit donc pas pour tester leur disponibilité.
+
+Bubblewrap 0.12 lit les identifiants overflow avant d'analyser `--help`. Corriger cet ordre rendrait la détection du binaire possible, mais ne fournirait pas les namespaces nécessaires à l'exécution.
+
+Le binaire officiel Codex 0.153.4 contient encore `features.use_legacy_landlock`, une option dépréciée. Les diagnostics hors compte, avec un répertoire de configuration séparé et sans requête modèle, ont refusé `:workspace` et une politique explicite lecture globale/écriture projet : `permission profiles requiring direct runtime enforcement are incompatible with --use-legacy-landlock`. Les protections de métadonnées du projet ne doivent pas être supprimées pour forcer cette voie. Aucune configuration du compte n'a été modifiée et aucun fichier témoin créé par Codex n'a été obtenu.
+
+Le service de virtualisation Android annonce uniquement les VM protégées avec Gunyah, sans `/dev/kvm`, et seulement l'OS Microdroid. Le noyau Microdroid présent sur le téléphone désactive namespaces et seccomp. Cette image ne remplace donc pas un noyau Linux offrant les primitives requises. L'installation presque en un clic d'un noyau personnalisé accepté par l'hyperviseur n'est pas démontrée.
