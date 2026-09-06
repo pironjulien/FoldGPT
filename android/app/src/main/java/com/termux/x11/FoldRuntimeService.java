@@ -68,11 +68,25 @@ public final class FoldRuntimeService extends Service {
         java.lang.Process started = null;
         byte[] keyringPassword = null;
         try {
+            File root = new File(getFilesDir(), "debian");
+            requireReadableFile(root, "usr/bin/env");
+            requireReadableFile(root, "usr/local/bin/foldgpt-session");
+            requireReadableFile(root, "usr/local/lib/foldgpt/foldgpt_keyring.py");
+            requireReadableFile(root, "usr/local/lib/foldgpt/foldgpt_ime.py");
+            requireReadableFile(root, "usr/local/lib/foldgpt/keyboard-focus.js");
+            requireReadableFile(root, "usr/share/X11/xkb/rules/evdev");
+            // Validate Linux and unlock its existing credential before creating native
+            // X11 threads. A missing first-install component must not leave a partial
+            // display server running or request a Linux password window.
+            keyringPassword = KeyringVault.loadPassword(this);
+            synchronized (lifecycleLock) {
+                if (stopping || destroyed) throw new InterruptedException("Workspace stopped");
+            }
             File temp = new File(getCacheDir(), "x11"); temp.mkdirs();
             File sharedMemory = new File(getCacheDir(), "shm");
             if (!sharedMemory.isDirectory() && !sharedMemory.mkdirs()) throw new IOException("Cannot create shared memory directory");
             Os.setenv("TMPDIR", temp.getAbsolutePath(), true);
-            Os.setenv("XKB_CONFIG_ROOT", new File(getFilesDir(), "debian/usr/share/X11/xkb").getAbsolutePath(), true);
+            Os.setenv("XKB_CONFIG_ROOT", new File(root, "usr/share/X11/xkb").getAbsolutePath(), true);
             System.loadLibrary("Xlorie");
             java.util.concurrent.CompletableFuture<Void> xStarted = new java.util.concurrent.CompletableFuture<>();
             mainHandler.post(() -> {
@@ -87,8 +101,6 @@ public final class FoldRuntimeService extends Service {
                 } catch (Throwable error) { xStarted.completeExceptionally(error); }
             });
             xStarted.get(15, java.util.concurrent.TimeUnit.SECONDS);
-            File root = new File(getFilesDir(), "debian");
-            if (!new File(root, "usr/bin/env").isFile()) throw new IOException("Linux doit être installé avant le premier lancement");
             File aliases = new File(getFilesDir(), "native"); aliases.mkdirs();
             File alias = new File(aliases, "libtalloc.so.2");
             refreshLibraryAlias(alias, getApplicationInfo().nativeLibraryDir + "/libtalloc.so");
@@ -109,7 +121,6 @@ public final class FoldRuntimeService extends Service {
             builder.environment().put("PROOT_LOADER_32", getApplicationInfo().nativeLibraryDir + "/libproot-loader32.so");
             builder.environment().put("PROOT_TMP_DIR", temp.getAbsolutePath());
             builder.redirectErrorStream(true).redirectOutput(new File(getFilesDir(), "runtime.log"));
-            keyringPassword = KeyringVault.loadPassword(this);
             synchronized (lifecycleLock) {
                 if (stopping || destroyed) throw new InterruptedException("Workspace stopped");
                 started = builder.start();
@@ -145,6 +156,12 @@ public final class FoldRuntimeService extends Service {
                 if (restartRequested) launchWorkspace();
                 else stopSelfResult(latestStartId);
             });
+        }
+    }
+    private static void requireReadableFile(File root, String relative) throws IOException {
+        File component = new File(root, relative);
+        if (!component.isFile() || !component.canRead()) {
+            throw new IOException("Linux installation is incomplete: " + relative);
         }
     }
     private static void refreshLibraryAlias(File alias, String target) throws ErrnoException {

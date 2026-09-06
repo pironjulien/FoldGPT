@@ -2,6 +2,9 @@
 
 ## Unreleased — 2026-09-06
 
+- Implemented authenticated fresh-rootfs preparation and recovery. The actual Android adapter prepares and resumes Debian under the application UID; an independent verifier matches all 20,240 logical members and 20,244 physical entries. The explicit PRoot hardlink backend passes actual Zygote guest stat/statx, shared data/metadata and unlink checks, and executes pristine Debian Perl. Sixteen unprivileged JVM tests include five real process deaths during storage conversion. This remains inactive base preparation, not the complete one-click installer.
+- Added an exact native runtime input gate after a release-content audit found an unused historical probe in the common native directory. The stray artifact is preserved outside packaging; rebuilt debug/release APKs pass independent library and diagnostic-class separation checks. Both variants compile and release vital lint passes; no binary has been published.
+
 - Implemented the native landlock-basic-data-v1 process backend and strict streaming client. Actual Linux shell, security and client tests pass. Eight native executable cases also pass under the Fold's real Zygote context, including denied access, failed exec, allocation/virtual-address limits, cancellation and descendant cleanup. Android Scudo remains enabled with its measured address reservation accounted for. This is not the complete managed Codex executor.
 
 - Verified FoldGPT restart with both old Termux applications disabled, then removed those packages for user 0 while preserving their private data and verified original APK backups. FoldGPT starts without them. Replaced the integrated display notification, disconnected screen and help with application-owned FoldGPT UI; Android confirms a silent low-importance display channel.

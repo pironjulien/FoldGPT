@@ -2,6 +2,7 @@ apply plugin: 'com.android.application'
 android {
     namespace 'app.foldgpt'
     compileSdk 37
+    ndkVersion '29.0.14206865'
     defaultConfig {
         applicationId 'app.foldgpt'
         minSdk 30
@@ -14,10 +15,31 @@ android {
     packaging { jniLibs { useLegacyPackaging true } }
     sourceSets.main.jniLibs.srcDirs = ['../native/runtime']
     sourceSets.debug.jniLibs.srcDirs = ['../native/debug']
+    externalNativeBuild { cmake { path '../install-native/CMakeLists.txt'; version '3.22.1' } }
     buildTypes { debug { debuggable true } }
 }
 dependencies {
     implementation project(':lorie')
     implementation 'androidx.appcompat:appcompat:1.7.1'
     implementation 'androidx.window:window-java:1.5.0'
+    implementation 'org.apache.commons:commons-compress:1.28.0'
+    testImplementation 'junit:junit:4.13.2'
 }
+
+// Local native outputs are ignored by Git. A stale diagnostic must never enter
+// production merely because it was left in the runtime build directory.
+tasks.register('verifyRuntimeLibraries') {
+    doLast {
+        def runtime = file('../native/runtime')
+        def allowed = ['libproot.so', 'libproot-loader.so', 'libproot-loader32.so',
+                       'libtalloc.so', 'libandroid-shmem.so']
+            .collect { 'arm64-v8a/' + it }.toSet()
+        def actual = fileTree(runtime).files.collect {
+            runtime.toPath().relativize(it.toPath()).toString().replace('\\', '/')
+        }.toSet()
+        if (actual != allowed) {
+            throw new GradleException("Native runtime inputs differ: missing=${allowed - actual}, unexpected=${actual - allowed}. Diagnostics belong in native/debug.")
+        }
+    }
+}
+tasks.named('preBuild').configure { dependsOn 'verifyRuntimeLibraries' }
