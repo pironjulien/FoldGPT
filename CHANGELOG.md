@@ -2,6 +2,7 @@
 
 ## Unreleased — 2026-09-06
 
+- Extended the native policy diagnostic through real execve, empty environment, descriptor cleanup and independent memory-sentinel checks. Against the same live authorized worker, an unconfined control can read memory, ptrace and duplicate its FD, while Landlock C is denied all three. Tests pass as an unprivileged WSL user with Yama unchanged; Android is compiled only and no general executor is implied.
 - Built and independently hash-checked a pristine Debian 13 ARM64 base with 289 authenticated packages, neutral network/identity templates and retained package provenance. Host ARM64 checks use QEMU only during construction; no emulator, OpenAI client, shim, personal profile or keyring is in the archive. Android activation and corresponding-source distribution work remain separate gates.
 - Cross-compiled PRoot, matching ARM64/ARM32 loaders, talloc and android-shmem using the official Linux NDK r29, independent of Termux. Source archives, patches and notices accompany five statically checked ELF candidates. Android execution and APK integration remain pending.
 - Verified real A/B/C/A read/write confinement on one inode with Landlock in native WSL workers and independent parent checks, plus a real blocked-open watchdog. The ARM64 Android diagnostic compiles; this is not an integrated Codex executor.

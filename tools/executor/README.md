@@ -5,6 +5,11 @@ execution server or a native sandbox. No configuration, official executable,
 phone state, account, or conversation is changed. It advertises no executor
 capability and produces no process/filesystem success responses.
 
+Separate native experiments now verify [exact-file A/B/C/A rights](native-abc-proof.md)
+and [exec startup plus three concurrent peer-access checks](native-exec-peer-proof.md)
+on WSL. Their Android binaries compile but have not run on the Fold. These
+diagnostics remain separate from the policy handoff and any execution server.
+
 ## Source boundary
 
 Rechecked locally against official Codex **0.153.4**, tag `rust-v0.153.4`, commit

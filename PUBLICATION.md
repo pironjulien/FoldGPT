@@ -19,7 +19,15 @@ This publication contains reviewed source for an experimental Android host. It i
 | Folding | One real fold/reopen produced the expected display-area callbacks, launched official ChatGPT Android and retained the same Linux runtime PID. Reopening FoldGPT restored the desktop interface. |
 | Android state | The inspected bootloader was locked, verified boot green, SELinux enforcing and Knox warranty bit zero. No Android root or bootloader unlock was used. |
 
-The runtime now belongs to FoldGPT. Preparing dependencies and migrating the existing Linux installation still require development tooling and Termux.
+The runtime now belongs to FoldGPT. The existing installation was prepared with
+development tooling and Termux. Independent native-library builds and a pristine
+Debian base are now available as reviewed local candidates; neither replaces
+the installed runtime automatically. See [installation preparation](docs/install/README.md).
+
+The new host checks cover authenticated Debian inputs, encrypted-keyring
+creation/recovery, file-policy differences and selected concurrent process
+accesses. They are explicitly separated from the observations on the phone
+above. The assembled fresh installer and general Codex executor remain unfinished.
 
 ## Known limits
 
