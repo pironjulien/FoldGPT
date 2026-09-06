@@ -8,6 +8,24 @@ export XDG_RUNTIME_DIR=/tmp/runtime-julien
 mkdir -p "$XDG_RUNTIME_DIR" "$HOME/.local/state"
 chmod 700 "$XDG_RUNTIME_DIR"
 timeout 20s python3 /usr/local/lib/foldgpt/foldgpt_keyring.py
+# Keep our driver separate from both Debian Mesa and the official client. This
+# selects libraries; inspect-gpu.py must still verify the client's actual use.
+gpu_prefix=/opt/foldgpt-gpu/mesa-26.2.2-foldgpt3
+if [[ -d "$gpu_prefix" ]]; then
+    for required in lib/libGL.so.1 lib/libEGL.so.1 lib/libvulkan_freedreno.so share/vulkan/icd.d/freedreno_icd.aarch64.json; do
+        if [[ ! -r "$gpu_prefix/$required" ]]; then
+            echo "FoldGPT GPU installation incomplete: $required" >&2
+            exit 1
+        fi
+    done
+    export VK_DRIVER_FILES="$gpu_prefix/share/vulkan/icd.d/freedreno_icd.aarch64.json"
+    export LD_LIBRARY_PATH="$gpu_prefix/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+    export MESA_LOADER_DRIVER_OVERRIDE=zink
+    export GALLIUM_DRIVER=zink
+    echo "FoldGPT GPU driver selected: Mesa 26.2.2 Zink/Turnip"
+else
+    echo "FoldGPT GPU driver not installed; using Debian graphics libraries" >&2
+fi
 python3 -u /usr/local/lib/foldgpt/foldgpt_ime.py > "$HOME/.local/state/foldgpt-ime.log" 2>&1 &
 ime_pid=$!
 # A window manager implements maximize, modal dialogs and display-size changes.

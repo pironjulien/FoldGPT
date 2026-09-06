@@ -1,0 +1,229 @@
+diff --git a/lorie/src/main/cpp/lorie/InitOutput.c b/lorie/src/main/cpp/lorie/InitOutput.c
+--- a/lorie/src/main/cpp/lorie/InitOutput.c
++++ b/lorie/src/main/cpp/lorie/InitOutput.c
+@@ -1128,12 +1128,15 @@
+ 
+ Bool loriePrepareAccess(PixmapPtr pPix, int index) {
+     LoriePixmapPriv *priv = exaGetPixmapDriverPrivate(pPix);
+-    if (lorieNeedsGpuLock(pPix, priv, index))
++    Bool needsGpuLock = lorieNeedsGpuLock(pPix, priv, index);
++    if (needsGpuLock)
+         lorie_mutex_lock(&pvfb->state->lock, &pvfb->state->lockingPid);
+ 
+     if (!priv->locked && !priv->mem) {
+         int err = LorieBuffer_lock(priv->buffer, &priv->locked);
+         if (err) {
++            if (needsGpuLock)
++                lorie_mutex_unlock(&pvfb->state->lock, &pvfb->state->lockingPid);
+             dprintf(2, "Failed to lock buffer, err %d\n", err);
+             return FALSE;
+         }
+@@ -1147,14 +1150,18 @@
+ 
+ void lorieFinishAccess(PixmapPtr pPix, int index) {
+     LoriePixmapPriv *priv = exaGetPixmapDriverPrivate(pPix);
++
++    if (!priv->wasLocked) {
++        int err = LorieBuffer_unlock(priv->buffer);
++        if (err)
++            FatalError("Failed to finish buffer CPU access, err %d\n", err);
++        priv->locked = NULL;
++        priv->wasLocked = FALSE;
++    }
++
++    // Publish CPU writes before allowing a renderer consumer to proceed.
+     if (lorieNeedsGpuLock(pPix, priv, index))
+         lorie_mutex_unlock(&pvfb->state->lock, &pvfb->state->lockingPid);
+-
+-    if (!priv->wasLocked) {
+-        LorieBuffer_unlock(priv->buffer);
+-        priv->locked = NULL;
+-        priv->wasLocked = FALSE;
+-    }
+ }
+ 
+ static ExaDriverRec lorieExa = {
+diff --git a/lorie/src/main/cpp/lorie/buffer.c b/lorie/src/main/cpp/lorie/buffer.c
+--- a/lorie/src/main/cpp/lorie/buffer.c
++++ b/lorie/src/main/cpp/lorie/buffer.c
+@@ -25,6 +25,7 @@
+ #include <android/sharedmem.h>
+ #include "list.h"
+ #include "buffer.h"
++#include "dmabuf_sync.h"
+ 
+ // libEGL exports this only since API 26, weak so the library still loads below that.
+ __attribute__((weak)) EGLClientBuffer eglGetNativeClientBufferANDROID(const struct AHardwareBuffer* buffer);
+@@ -34,6 +35,7 @@
+     LorieBuffer_Desc desc;
+ 
+     int8_t locked;
++    int8_t fdSyncKind;
+     void* lockedData;
+ 
+     // file descriptor of shared memory fragment for shared memory backed buffer
+@@ -322,6 +324,8 @@
+ 
+ __LIBC_HIDDEN__ int LorieBuffer_lock(LorieBuffer* buffer, void** out) {
+     int ret = 0;
++    if (out)
++        *out = NULL;
+     if (!buffer)
+         return ENODEV;
+ 
+@@ -332,11 +336,24 @@
+         return EEXIST;
+     }
+ 
+-    if (buffer->desc.type == LORIEBUFFER_REGULAR || buffer->desc.type == LORIEBUFFER_FD)
++    if (buffer->desc.type == LORIEBUFFER_FD) {
++        ret = lorieDmaBufCpuSync(buffer->fd, DMA_BUF_SYNC_START | DMA_BUF_SYNC_RW, &buffer->fdSyncKind);
++        if (ret)
++            return ret;
++        buffer->lockedData = buffer->desc.data;
++    } else if (buffer->desc.type == LORIEBUFFER_REGULAR)
+         buffer->lockedData = buffer->desc.data;
+     else if (buffer->desc.type == LORIEBUFFER_AHARDWAREBUFFER) {
++        ret = ENOSYS;
+         if (__builtin_available(android 26, *))
+             ret = AHardwareBuffer_lock(buffer->desc.buffer, AHARDWAREBUFFER_USAGE_CPU_READ_OFTEN | AHARDWAREBUFFER_USAGE_CPU_WRITE_OFTEN, -1, NULL, &buffer->lockedData);
++    } else {
++        ret = EINVAL;
++    }
++
++    if (ret) {
++        buffer->lockedData = NULL;
++        return ret;
+     }
+ 
+     if (out)
+@@ -357,10 +374,16 @@
+         return ENOENT;
+     }
+ 
+-    if (buffer->desc.type == LORIEBUFFER_AHARDWAREBUFFER) {
++    if (buffer->desc.type == LORIEBUFFER_FD) {
++        ret = lorieDmaBufCpuSync(buffer->fd, DMA_BUF_SYNC_END | DMA_BUF_SYNC_RW, &buffer->fdSyncKind);
++    } else if (buffer->desc.type == LORIEBUFFER_AHARDWAREBUFFER) {
++        ret = ENOSYS;
+         if (__builtin_available(android 26, *))
+             ret = AHardwareBuffer_unlock(buffer->desc.buffer, NULL);
+     }
++
++    if (ret)
++        return ret;
+ 
+     buffer->lockedData = NULL;
+     buffer->locked = false;
+@@ -387,14 +410,13 @@
+     if (socketFd < 0)
+         return;
+ 
+-    // Reset process-specific data;
+-    buffer.refcount = 0;
++    read(socketFd, &buffer, sizeof(buffer));
++    // Reset process-specific data after receiving the sender's structure.
++    buffer.refcount = 1;
+     buffer.locked = false;
++    buffer.fdSyncKind = LORIE_FD_SYNC_UNKNOWN;
+     buffer.fd = -1;
+     buffer.lockedData = NULL;
+-    __sync_fetch_and_add(&buffer.refcount, 1); // refcount is the first object in the struct
+-
+-    read(socketFd, &buffer, sizeof(buffer));
+     buffer.image = NULL; // Only for process-local use
+     if (buffer.desc.type == LORIEBUFFER_FD) {
+         size_t size = buffer.desc.stride * buffer.desc.height * sizeof(uint32_t);
+@@ -466,8 +488,19 @@
+         return;
+ 
+     glBindTexture(GL_TEXTURE_2D, buffer->id);
+-    if (buffer->desc.type == LORIEBUFFER_FD)
++    if (buffer->desc.type == LORIEBUFFER_FD) {
++        int ret = lorieDmaBufCpuSync(buffer->fd, DMA_BUF_SYNC_START | DMA_BUF_SYNC_READ, &buffer->fdSyncKind);
++        if (ret) {
++            dprintf(2, "DMA-BUF renderer CPU access failed: %s\n", strerror(ret));
++            abort();
++        }
+         glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, buffer->desc.stride, buffer->desc.height, buffer->desc.format == AHARDWAREBUFFER_FORMAT_B8G8R8A8_UNORM ? GL_BGRA_EXT : GL_RGBA, GL_UNSIGNED_BYTE, buffer->desc.data);
++        ret = lorieDmaBufCpuSync(buffer->fd, DMA_BUF_SYNC_END | DMA_BUF_SYNC_READ, &buffer->fdSyncKind);
++        if (ret) {
++            dprintf(2, "DMA-BUF renderer CPU access completion failed: %s\n", strerror(ret));
++            abort();
++        }
++    }
+ }
+ 
+ __LIBC_HIDDEN__ unsigned int LorieBuffer_getGLTextureId(LorieBuffer *buffer) {
+diff --git a/lorie/src/main/cpp/lorie/buffer.h b/lorie/src/main/cpp/lorie/buffer.h
+--- a/lorie/src/main/cpp/lorie/buffer.h
++++ b/lorie/src/main/cpp/lorie/buffer.h
+@@ -134,8 +134,9 @@
+ const LorieBuffer_Desc* _Nonnull LorieBuffer_description(LorieBuffer* _Nullable buffer);
+ 
+ /**
+- * Lock the AHardwareBuffer for direct CPU access.
+- * See AHardwareBuffer_lock() description for details
++ * Lock the buffer for direct CPU read/write access. DMA-BUF mappings are cache
++ * synchronized, and AHardwareBuffer uses its native lock API. The caller must
++ * still wait for producer fences and exclude concurrent GPU/CPU access.
+  *
+  * @param buffer the buffer to be locked
+  * @param outDesc description of the buffer to be locked
+@@ -145,8 +146,7 @@
+ int LorieBuffer_lock(LorieBuffer* _Nullable buffer, void* _Nullable * _Nonnull out);
+ 
+ /**
+- * Unlock the AHardwareBuffer from direct CPU access.
+- * See AHardwareBuffer_unlock() description for details
++ * End direct CPU access and make CPU writes visible to the buffer's exporter.
+  *
+  * @param buffer
+  * @return
+diff --git a/lorie/src/main/cpp/lorie/dmabuf_sync.h b/lorie/src/main/cpp/lorie/dmabuf_sync.h
+new file mode 100644
+--- /dev/null
++++ b/lorie/src/main/cpp/lorie/dmabuf_sync.h
+@@ -0,0 +1,42 @@
++/* SPDX-License-Identifier: GPL-3.0-or-later */
++#pragma once
++
++#include <errno.h>
++#include <linux/dma-buf.h>
++#include <stdint.h>
++#include <sys/ioctl.h>
++
++enum {
++    LORIE_FD_SYNC_UNKNOWN,
++    LORIE_FD_SYNC_SHARED_MEMORY,
++    LORIE_FD_SYNC_DMA_BUF,
++};
++
++/* Bracket CPU mmap accesses, in addition to the existing producer/consumer
++ * fences. Plain ashmem/memfd objects do not implement DMA-BUF ioctls. Cache
++ * that distinction only on ENOTTY; never swallow a DMA-BUF exporter failure.
++ * The state belongs to one owned descriptor and must be reset if it changes.
++ * Returns zero or a positive errno, like LorieBuffer_lock/unlock.
++ */
++static inline int lorieDmaBufCpuSync(int fd, uint64_t flags, int8_t *kind) {
++    if (*kind == LORIE_FD_SYNC_SHARED_MEMORY)
++        return 0;
++
++    struct dma_buf_sync sync = { .flags = flags };
++    int result;
++    do {
++        result = ioctl(fd, DMA_BUF_IOCTL_SYNC, &sync);
++    } while (result < 0 && (errno == EINTR || errno == EAGAIN));
++
++    if (result == 0) {
++        *kind = LORIE_FD_SYNC_DMA_BUF;
++        return 0;
++    }
++
++    int error = errno;
++    if (error == ENOTTY && *kind == LORIE_FD_SYNC_UNKNOWN) {
++        *kind = LORIE_FD_SYNC_SHARED_MEMORY;
++        return 0;
++    }
++    return error;
++}

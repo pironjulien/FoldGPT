@@ -1,0 +1,14 @@
+diff --git a/meson.build b/meson.build
+--- a/meson.build
++++ b/meson.build
+@@ -1916,6 +1916,9 @@ allow_fallback_for_libdrm = get_option('allow-fallback-for').contains('libdrm')
+ 
+ with_gallium_drisw_kms = false
+-if system_has_kms_drm
++# X11 on KGSL uses DMA-BUF image parameters even without a kernel DRM device.
++# The corresponding WSI image implementation requires libdrm; omitting it leaves
++# those image types unsupported in wsi_common while wsi_common_x11 selects them.
++if system_has_kms_drm or (with_platform_x11 and with_dri_platform == 'pseudo-drm')
+   dep_libdrm = dependency(
+     'libdrm', version : '>=' + _drm_ver,
+     required : with_dri2 or with_dri or with_gbm,

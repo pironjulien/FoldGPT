@@ -3,5 +3,11 @@
         <!-- ADB-only diagnostics; absent from release builds. No arbitrary command input. -->
         <receiver android:name="app.foldgpt.LandlockProbeReceiver"
             android:exported="true" android:permission="android.permission.DUMP" />
+        <service android:name="app.foldgpt.CodexProbeService" android:process=":offlineProbe"
+            android:exported="true" android:permission="android.permission.DUMP"
+            android:foregroundServiceType="specialUse">
+            <property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="ADB-only fixed offline Codex confinement diagnostic" />
+        </service>
     </application>
 </manifest>
