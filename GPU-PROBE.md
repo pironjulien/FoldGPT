@@ -208,6 +208,23 @@ shipping it as a standalone driver distribution. The upstream sources contain
 component-specific notices; do not label the whole bundle with only a generic
 MIT notice or copy the Ubuntu sysroot libraries into the Android package.
 
+`tools/gpu/package-review-bundle.py` now collects a local review companion from
+the exact candidate archive, verified pristine Mesa source archive, ordered
+patches, FoldGPT build/probe sources and license notices. Run it in WSL/Linux
+after `package-build.sh`. Its manifest inventories ten AArch64 ELF objects,
+their dependencies and symbol versions; Zink's dynamic Vulkan-loader dependency
+is also recorded. The highest required versions are GLIBC 2.38, GLIBCXX 3.4.29
+and CXXABI 1.3.9. All twenty-one payload hashes were independently checked, and two
+collection runs produced identical bytes. This is reproducible collection, not
+a second compilation or a runtime dependency test. The bundle remains local
+and explicitly marked as a candidate awaiting device validation.
+The collector pins the independently inspected binary archive's SHA-256 as well
+as the upstream source hash. A new build needs an explicit review and digest
+update; passing the safe-extraction prefix check alone does not authorize
+publication. Regressions reject an archive containing `auth.json` under an
+otherwise allowed prefix and reject private bytes appended to the real candidate.
+The imported archive validator is now included among the companion sources.
+
 ## Compositor texture import diagnosis
 
 `glx-tfp-probe.c` creates a private X pixmap and GLX pbuffer, fills the pixmap
