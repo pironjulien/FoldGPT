@@ -65,6 +65,22 @@ androidComponents.onVariants(androidComponents.selector().withBuildType('debug')
 // recipe. APK signature covers the embedded libraries and standard library.
 android.sourceSets.debug.assets.srcDir(rootProject.file('../android/native/python-debug-assets'))
 
+def managedProcessProbeAssets = layout.buildDirectory.dir('generated/managedProcessProbeAssets')
+def syncManagedProcessProbeAssets = tasks.register('syncManagedProcessProbeAssets', NativeFilesRpcAssets) {
+    from(rootProject.file('..')) {
+        include 'tools/executor/exec_server.py', 'tools/executor/native_files.py',
+                'tools/executor/policy_intent.py', 'tools/policy/managed_policy.py',
+                'tools/executor/native_files_rpc_fixture.py', 'tools/executor/native_process_policy.py',
+                'tools/executor/native-managed-test.py', 'tools/executor/native_managed_android_fixture.py'
+        into 'managed-process-probe'
+    }
+    outputDir.set(managedProcessProbeAssets)
+    into outputDir
+}
+androidComponents.onVariants(androidComponents.selector().withBuildType('debug')) { variant ->
+    variant.sources.assets.addGeneratedSourceDirectory(syncManagedProcessProbeAssets) { it.outputDir }
+}
+
 // Local native outputs are ignored by Git. A stale diagnostic must never enter
 // production merely because it was left in the runtime build directory.
 tasks.register('verifyRuntimeLibraries') {
