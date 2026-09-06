@@ -1,12 +1,23 @@
 """Policy-bearing file/directory RPCs using a real native FD-based helper.
 
-This initial backend admits one supervisor-owned ordinary workspace and no
-guest processes. It is not an installed production executor. Native Android
-execution, symlink/gitdir handling and process isolation remain integration work.
+This backend admits one supervisor-owned ordinary workspace and no guest
+processes. It is not an installed production executor. Symlink/gitdir handling
+and process isolation remain integration work. Walk/list/remove/copy follow the
+reviewed official tag rust-v0.153.4 (042fb41b7c813ac7999105e886b2b7aa715b5081),
+exec-server-protocol/src/protocol.rs, file-system/src/lib.rs and
+exec-server/src/{local_file_system,server/file_system_handler}.rs.
+
+Bulk operations retain the exclusive workspace admission: an unreadable tree,
+unsupported alias or a denied emitted/traversed child refuses the entire RPC.
+Listings do not silently omit policy-denied files. Copy refuses overlapping
+trees and bounds aggregate file data to 16 MiB; no truncation of a copy plan is
+treated as success. A transport/OS failure during an admitted mutation is not
+a transactional rollback. Only a fully successful native operation returns {}.
 """
 import asyncio
 import base64
 import binascii
+from collections import deque
 import errno
 import fcntl
 import json
@@ -60,7 +71,8 @@ def _native_failure(diagnostic):
     """
     stages = {"invocation", "root-fd", "length", "root-ownership", "allocation",
               "input", "input-length", "open", "file-kind", "write",
-              "directory-sync", "directory-state", "mkdir", "metadata", "read", "read-bound", "output", "close"}
+              "directory-sync", "directory-state", "mkdir", "metadata", "read", "read-bound", "output", "close",
+              "tree-plan", "tree-state", "remove", "copy"}
 
     try:
         if type(diagnostic) is not bytes or len(diagnostic) > 1024:
@@ -82,7 +94,8 @@ def _native_failure(diagnostic):
 
 class NativeFilesBackend:
     supported_methods = frozenset({"fs/readFile", "fs/writeFile", "fs/createDirectory",
-                                   "fs/getMetadata", "fs/canonicalize"})
+                                   "fs/getMetadata", "fs/canonicalize", "fs/readDirectory",
+                                   "fs/walk", "fs/remove", "fs/copy"})
     capabilities = frozenset()
 
     def __init__(self, helper, workspace, *, guest_workspace="/workspace"):
@@ -119,6 +132,7 @@ class NativeFilesBackend:
         count = 0
         metadata = []
         directories = {(): os.fstat(self.root)}
+        nodes = dict(directories)
         pending = [(os.dup(self.root), (), 0)]
         try:
             while pending:
@@ -127,6 +141,7 @@ class NativeFilesBackend:
                     if depth > MAX_DEPTH:
                         raise ValueError("Workspace depth exceeds admission limit")
                     for name in os.listdir(directory):
+                        name.encode("utf-8", errors="strict")
                         count += 1
                         if count > MAX_ENTRIES:
                             raise ValueError("Workspace exceeds admission limit")
@@ -137,6 +152,7 @@ class NativeFilesBackend:
                                     or (stat.S_ISREG(info.st_mode) and info.st_nlink != 1)):
                                 raise ValueError("Workspace contains an unsupported alias, owner or file kind")
                             guest = self.mount.append(parts + (name,))
+                            nodes[parts + (name,)] = info
                             if name == ".git" and stat.S_ISREG(info.st_mode):
                                 raise ValueError("gitdir worktrees require the native alias resolver")
                             if name in (".git", ".agents") and stat.S_ISDIR(info.st_mode):
@@ -153,7 +169,156 @@ class NativeFilesBackend:
         finally:
             for fd, _, _ in pending:
                 os.close(fd)
-        return metadata, directories, count
+        return metadata, directories, count, nodes
+
+    @staticmethod
+    def _snapshot(nodes):
+        """Exact native lstat snapshot; NUL framing permits tabs/newlines safely.
+
+        The helper enumerates the whole pinned tree and compares every actual
+        inode, kind, mode, size, mtime and ctime before executing a planned RPC.
+        No policy is reduced to this snapshot: authorization remains per request.
+        """
+        rows = []
+        for parts, info in sorted(nodes.items(), key=lambda item: ("/".join(item[0]) or ".").encode("utf-8")):
+            fields = ["/".join(parts) or ".", info.st_dev, info.st_ino, info.st_mode, info.st_size,
+                      info.st_mtime_ns // 1000000000, info.st_mtime_ns % 1000000000,
+                      info.st_ctime_ns // 1000000000, info.st_ctime_ns % 1000000000]
+            rows.append(b"\0".join(str(value).encode("utf-8") for value in fields) + b"\0")
+        data = b"".join(rows)
+        if not data or len(data) > MAX_DATA:
+            raise ValueError("Native operation snapshot exceeds admission bound")
+        return data
+
+    def _guest(self, parts):
+        return self.mount.append(parts)
+
+    def _require_read(self, policy, parts):
+        if not policy.decide_uri(self._guest(parts).uri).can_read:
+            raise PermissionError("The supplied filesystem policy denies this operation")
+
+    @staticmethod
+    def _children(nodes, parts):
+        return sorted((child for child in nodes if len(child) == len(parts) + 1 and child[:-1] == parts),
+                      key=lambda child: child[-1].encode("utf-8"))
+
+    def _listing(self, parts, nodes, policy):
+        if parts not in nodes:
+            return None  # Native lookup must supply the real NotFound result.
+        if not stat.S_ISDIR(nodes[parts].st_mode):
+            raise RpcError(-32600, "Requested readDirectory path is not a directory")
+        entries = []
+        for child in self._children(nodes, parts):
+            if len(entries) == 50000:
+                raise ValueError("Directory listing exceeds the admitted protocol response bound")
+            self._require_read(policy, child)
+            entries.append({"fileName": child[-1], "isDirectory": stat.S_ISDIR(nodes[child].st_mode),
+                            "isFile": stat.S_ISREG(nodes[child].st_mode)})
+        return {"entries": entries}
+
+    def _walk(self, parts, nodes, policy, options):
+        keys = {"maxDepth", "maxDirectories", "maxEntries", "followDirectorySymlinks", "pruneHiddenDirectories"}
+        if type(options) is not dict or set(options) - keys or keys - {"pruneHiddenDirectories"} - set(options):
+            raise ValueError("Walk requires all exact reviewed options")
+        options = {"pruneHiddenDirectories": False, **options}
+        for key in ("maxDepth", "maxDirectories", "maxEntries"):
+            if type(options[key]) is not int or options[key] < (0 if key == "maxDepth" else 1):
+                raise ValueError("Invalid filesystem walk bound")
+        for key in ("followDirectorySymlinks", "pruneHiddenDirectories"):
+            if type(options[key]) is not bool:
+                raise ValueError("Invalid filesystem walk option")
+        if options["maxDepth"] > 64 or options["maxDirectories"] > 10000 or options["maxEntries"] > 50000:
+            raise ValueError("Walk limits exceed the admitted workspace bounds")
+        outcome = {"entries": [], "errors": [], "truncated": False}
+        if parts not in nodes:
+            return None
+        if not stat.S_ISDIR(nodes[parts].st_mode):
+            return outcome
+        children = {}
+        for child in nodes:
+            if child:
+                children.setdefault(child[:-1], []).append(child)
+        for names in children.values():
+            names.sort(key=lambda child: child[-1].encode("utf-8"))
+        queue = deque([(parts, 0)])
+        directory_count, entry_count, response_bytes = 1, 0, 0
+        while queue:
+            directory, depth = queue.popleft()
+            self._require_read(policy, directory)
+            for child in children.get(directory, ()):
+                if entry_count == options["maxEntries"]:
+                    outcome["truncated"] = True
+                    return outcome
+                entry_count += 1
+                self._require_read(policy, child)
+                is_directory = stat.S_ISDIR(nodes[child].st_mode)
+                uri = self._guest(child).uri
+                response_bytes += len(uri.encode("utf-8")) + 64
+                if response_bytes > 4 * 1024 * 1024:
+                    outcome["truncated"] = True
+                    return outcome
+                outcome["entries"].append({"path": uri, "kind": "directory" if is_directory else "file"})
+                if is_directory and depth < options["maxDepth"]:
+                    if options["pruneHiddenDirectories"] and child[-1].startswith("."):
+                        continue
+                    if directory_count == options["maxDirectories"]:
+                        outcome["truncated"] = True
+                    else:
+                        directory_count += 1
+                        queue.append((child, depth + 1))
+        return outcome
+
+    def _remove_plan(self, parts, nodes, policy, metadata, recursive):
+        for child in nodes:
+            if child[:len(parts)] == parts:
+                if child != parts and not recursive:
+                    raise RpcError(-32600, "Requested directory is not empty")
+                self._require_write(policy, self._guest(child), metadata)
+
+    def _copy_plan(self, source, destination, nodes, policy, metadata, recursive):
+        if source[:len(destination)] == destination or destination[:len(source)] == source:
+            raise ValueError("Copy paths must not overlap in the admitted workspace")
+        if source not in nodes:
+            return
+        source_directory = stat.S_ISDIR(nodes[source].st_mode)
+        if source_directory and not recursive:
+            raise ValueError("Copying a directory requires recursive true")
+        selected = [(parts, info) for parts, info in nodes.items() if parts[:len(source)] == source]
+        prospective_metadata = list(metadata)
+        for parts, info in selected:
+            target = destination + parts[len(source):]
+            if stat.S_ISDIR(info.st_mode) and target[-1] in (".git", ".agents"):
+                prospective_metadata.append(self._guest(target))
+        created, total = set(), 0
+        for parts, info in selected:
+            self._require_read(policy, parts)
+            target = destination + parts[len(source):]
+            if len(target) > MAX_DEPTH + (1 if stat.S_ISREG(info.st_mode) else 0):
+                raise ValueError("Copy exceeds the admitted workspace depth")
+            self._require_write(policy, self._guest(target), prospective_metadata)
+            existing = nodes.get(target)
+            if existing and stat.S_IFMT(existing.st_mode) != stat.S_IFMT(info.st_mode):
+                raise ValueError("Copy destination kind conflicts with the source")
+            if stat.S_ISREG(info.st_mode):
+                if target[-1] == ".git":
+                    raise ValueError("Creating gitdir files requires the native alias resolver")
+                total += info.st_size
+                if total > MAX_DATA or info.st_mode & 0o7000:
+                    raise ValueError("Copy exceeds data bound or has unsupported special mode bits")
+            for depth in range(1, len(target)):
+                parent = target[:depth]
+                if parent in nodes:
+                    if not stat.S_ISDIR(nodes[parent].st_mode):
+                        raise ValueError("Copy destination ancestor is not a directory")
+                elif source_directory:
+                    self._require_write(policy, self._guest(parent), prospective_metadata)
+                    created.add(parent)
+                else:
+                    raise RpcError(-32004, "Copy destination parent does not exist")
+            if target not in nodes:
+                created.add(target)
+        if len(nodes) - 1 + len(created) > MAX_ENTRIES:
+            raise ValueError("Copy exceeds the workspace entry limit")
 
     @staticmethod
     def _require_write(policy, path, metadata):
@@ -207,29 +372,49 @@ class NativeFilesBackend:
             metadata_query = call.method == "fs/getMetadata"
             canonicalizing = call.method == "fs/canonicalize"
             inspecting = metadata_query or canonicalizing
+            listing = call.method == "fs/readDirectory"
+            walking = call.method == "fs/walk"
+            removing = call.method == "fs/remove"
+            copying = call.method == "fs/copy"
+            planned = listing or walking or removing or copying
+            planned_result = None
             try:
-                allowed = {"path", "sandbox"} | (set() if canonicalizing else {"followSymlinks"}) | (
-                    {"dataBase64"} if writing else {"recursive"} if making else set())
+                if copying:
+                    allowed = {"sourcePath", "destinationPath", "recursive", "sandbox"}
+                elif listing or walking:
+                    allowed = {"path", "sandbox"} | ({"options"} if walking else set())
+                else:
+                    allowed = {"path", "sandbox"} | (set() if canonicalizing else {"followSymlinks"}) | (
+                        {"dataBase64"} if writing else {"recursive"} if making else {"recursive", "force"} if removing else set())
                 if type(params) is not dict or set(params) - allowed:
                     raise ValueError("Unsupported filesystem request field")
                 if params.get("followSymlinks") is not None and type(params["followSymlinks"]) is not bool:
                     raise ValueError("Invalid followSymlinks option")
-                if making and params.get("recursive") is not None and type(params["recursive"]) is not bool:
+                if (making or removing or copying) and params.get("recursive") is not None and type(params["recursive"]) is not bool:
                     raise ValueError("Invalid recursive option")
+                if removing and params.get("force") is not None and type(params["force"]) is not bool:
+                    raise ValueError("Invalid force option")
+                if copying and type(params.get("recursive")) is not bool:
+                    raise ValueError("Copy requires an explicit recursive boolean")
                 # Retain the complete context unchanged, not a writable-root
                 # approximation. Unsupported semantics refuse the entire RPC.
                 intent = prepare_policy_intent(params.get("sandbox"), session_id=call.session_id,
                     request_id=str(call.request_id), method=call.method)
                 policy = parse_context(intent.to_document()["context"])
-                path = GuestPath.from_uri(params["path"])
-                if not self.mount.contains(path) or (path == self.mount and not (making or inspecting)):
+                path = GuestPath.from_uri(params["sourcePath"] if copying else params["path"])
+                if not self.mount.contains(path) or (path == self.mount and not (making or inspecting or listing or walking)):
                     raise ValueError("Path is outside the admitted workspace mapping")
                 decision = policy.decide_uri(path.uri)
-                if not (decision.can_write if writing or making else decision.can_read):
+                if not (decision.can_write if writing or making or removing else decision.can_read):
                     raise PermissionError("The supplied filesystem policy denies this operation")
-                metadata, directories, count = self._inspect(policy)
-                if writing or making:
+                destination = GuestPath.from_uri(params["destinationPath"]) if copying else None
+                if copying and (not self.mount.contains(destination) or destination == self.mount):
+                    raise ValueError("Copy destination is outside the admitted workspace mapping")
+                metadata, directories, count, nodes = self._inspect(policy)
+                if writing or making or removing:
                     self._require_write(policy, path, metadata)
+                if copying:
+                    self._require_write(policy, destination, metadata)
                 if writing:
                     # A successful write must not introduce a file kind that
                     # invalidates every subsequent workspace operation. This
@@ -245,7 +430,26 @@ class NativeFilesBackend:
                 else:
                     data = b""
                 relative = "/".join(path.parts[len(self.mount.parts):]) or "."
-                if making:
+                parts = path.parts[len(self.mount.parts):]
+                if planned:
+                    data = self._snapshot(nodes)
+                    if listing:
+                        planned_result = self._listing(parts, nodes, policy)
+                    elif walking:
+                        planned_result = self._walk(parts, nodes, policy, params["options"])
+                    elif removing:
+                        self._remove_plan(parts, nodes, policy, metadata, params.get("recursive") is not False)
+                    else:
+                        target = destination.parts[len(self.mount.parts):]
+                        self._copy_plan(parts, target, nodes, policy, metadata, params["recursive"])
+                    if removing:
+                        arguments = ["remove", str(self.root), relative, str(len(data)),
+                                     "0" if params.get("recursive") is False else "1", "0" if params.get("force") is False else "1"]
+                    elif copying:
+                        arguments = ["copy", str(self.root), relative, str(len(data)), "/".join(target), "1" if params["recursive"] else "0"]
+                    else:
+                        arguments = ["tree", str(self.root), relative, str(len(data))]
+                elif making:
                     arguments = self._directory_plan(path, params.get("recursive") is not False,
                         policy, metadata, directories, count)
                 elif inspecting:
@@ -254,7 +458,7 @@ class NativeFilesBackend:
                     arguments = [operation, str(self.root), relative, "0"]
                 else:
                     arguments = ["write" if writing else "read", str(self.root), relative, str(len(data))]
-            except (PolicyError, ValueError, KeyError, PermissionError, OSError, binascii.Error) as error:
+            except (PolicyError, ValueError, KeyError, PermissionError, OSError, binascii.Error, UnicodeError) as error:
                 raise RpcError(-32000, str(error)) from error
             self.process = await asyncio.create_subprocess_exec(
                 self.helper, *arguments,
@@ -265,8 +469,18 @@ class NativeFilesBackend:
                 output, diagnostic = await asyncio.wait_for(asyncio.shield(communicate), 30)
                 if self.process.returncode != 0:
                     raise _native_failure(diagnostic)
-                if diagnostic or ((writing or making or canonicalizing) and output) or len(output) > MAX_DATA:
+                if diagnostic or ((writing or making or canonicalizing or planned) and output) or len(output) > MAX_DATA:
                     raise RpcError(-32000, "Native filesystem response violates its contract")
+                if planned:
+                    # Listings are assembled from actual descriptor metadata only
+                    # after the native helper independently verifies the complete
+                    # tree and identities. A missing native target is never a
+                    # successful empty listing. Mutation success is syscall success.
+                    if listing or walking:
+                        if planned_result is None:
+                            raise RpcError(-32603, "Native listing unexpectedly admitted a missing target")
+                        return planned_result
+                    return {}
                 if metadata_query:
                     return _native_metadata(output)
                 if canonicalizing:

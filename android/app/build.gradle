@@ -26,6 +26,45 @@ dependencies {
     testImplementation 'junit:junit:4.13.2'
 }
 
+// The native file transport fixture executes only these APK-owned public source
+// files. Generated assets are debug-only, so the release has no probe payload.
+def nativeFilesRpcAssets = layout.buildDirectory.dir('generated/nativeFilesRpcAssets')
+abstract class NativeFilesRpcAssets extends Sync {
+    @OutputDirectory abstract DirectoryProperty getOutputDir()
+}
+def syncNativeFilesRpcAssets = tasks.register('syncNativeFilesRpcAssets', NativeFilesRpcAssets) {
+    from(rootProject.file('..')) {
+        include 'tools/executor/exec_server.py', 'tools/executor/native_files.py',
+                'tools/executor/policy_intent.py', 'tools/policy/managed_policy.py',
+                'tools/executor/native_files_server.py', 'tools/executor/native_files_rpc_fixture.py'
+        into 'native-files-rpc'
+    }
+    outputDir.set(nativeFilesRpcAssets)
+    into outputDir
+}
+androidComponents.onVariants(androidComponents.selector().withBuildType('debug')) { variant ->
+    variant.sources.assets.addGeneratedSourceDirectory(syncNativeFilesRpcAssets) { it.outputDir }
+}
+def privateExecProbeAssets = layout.buildDirectory.dir('generated/privateExecProbeAssets')
+def syncPrivateExecProbeAssets = tasks.register('syncPrivateExecProbeAssets', NativeFilesRpcAssets) {
+    from(rootProject.file('..')) {
+        include 'tools/executor/exec_server.py', 'tools/executor/native_files.py',
+                'tools/executor/policy_intent.py', 'tools/policy/managed_policy.py',
+                'tools/executor/native_files_rpc_fixture.py',
+                'tools/executor/native_file_streams.py',
+                'tools/executor/private_exec_broker.py', 'tools/executor/private_exec_fixture.py'
+        into 'private-exec-probe'
+    }
+    outputDir.set(privateExecProbeAssets)
+    into outputDir
+}
+androidComponents.onVariants(androidComponents.selector().withBuildType('debug')) { variant ->
+    variant.sources.assets.addGeneratedSourceDirectory(syncPrivateExecProbeAssets) { it.outputDir }
+}
+// An explicit local staging directory from the authenticated Android CPython
+// recipe. APK signature covers the embedded libraries and standard library.
+android.sourceSets.debug.assets.srcDir(rootProject.file('../android/native/python-debug-assets'))
+
 // Local native outputs are ignored by Git. A stale diagnostic must never enter
 // production merely because it was left in the runtime build directory.
 tasks.register('verifyRuntimeLibraries') {

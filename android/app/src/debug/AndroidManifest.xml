@@ -1,5 +1,15 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application>
+        <service android:name="app.foldgpt.NativePrivateExecProbeService" android:process=":privateExecProbe"
+            android:exported="true" android:permission="android.permission.DUMP" android:foregroundServiceType="specialUse">
+            <property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="ADB-only offline GNU guest bridge to a native Android file broker in private fixture directories" />
+        </service>
+        <service android:name="app.foldgpt.NativeFilesRpcProbeService" android:process=":nativeFileRpcProbe"
+            android:exported="true" android:permission="android.permission.DUMP" android:foregroundServiceType="specialUse">
+            <property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="ADB-only actual stdio policy and native file operations outside PRoot in a fresh private fixture" />
+        </service>
         <service android:name="app.foldgpt.install.CombinedPreparationProbeService" android:process=":combinedProbe"
             android:exported="true" android:permission="android.permission.DUMP" android:foregroundServiceType="specialUse">
             <property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"

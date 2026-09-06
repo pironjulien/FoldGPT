@@ -12,6 +12,8 @@ import zipfile
 RUNTIME = {"libXlorie.so", "libandroid-shmem.so", "libfoldgpt-install.so",
            "libproot-loader.so", "libproot-loader32.so", "libproot.so", "libtalloc.so"}
 DEBUG_CLASSES = (b"RootfsProbeService", b"ProotStorageProbeService", b"NativeRunnerProbeService", b"GuestAccountProbeService", b"InactivePreparationProbeService",
+                 b"NativeFilesRpcProbeService",
+                 b"NativePrivateExecProbeService",
                  b"CombinedPreparationProbeService", b"CombinedPreparationFixture",
                  b"CodexProbeService", b"LandlockProbeReceiver")
 
@@ -32,6 +34,38 @@ def verify(apk, debug):
             for descriptor in DEBUG_CLASSES:
                 if (descriptor in dex) != debug:
                     raise ValueError("Wrong diagnostic class separation: " + descriptor.decode())
+            file_rpc_assets = {name for name in names if name.startswith("assets/native-files-rpc/") and not name.endswith("/")}
+            expected_assets = {"assets/native-files-rpc/" + name for name in (
+                "tools/executor/exec_server.py", "tools/executor/native_files.py",
+                "tools/executor/policy_intent.py", "tools/policy/managed_policy.py",
+                "tools/executor/native_files_server.py", "tools/executor/native_files_rpc_fixture.py")}
+            if file_rpc_assets != (expected_assets if debug else set()):
+                raise ValueError("Wrong native file RPC source asset separation")
+            private_assets = {name for name in names if name.startswith("assets/private-exec-probe/") and not name.endswith("/")}
+            expected_private = {"assets/private-exec-probe/" + name for name in (
+                "tools/executor/exec_server.py", "tools/executor/native_files.py",
+                "tools/executor/policy_intent.py", "tools/policy/managed_policy.py",
+                "tools/executor/native_files_rpc_fixture.py", "tools/executor/private_exec_broker.py",
+                "tools/executor/native_file_streams.py",
+                "tools/executor/private_exec_fixture.py")}
+            if private_assets != (expected_private if debug else set()):
+                raise ValueError("Wrong private executor probe asset separation")
+            if ("lib/arm64-v8a/libfoldgpt-exec-bridge.so" in libraries) != debug:
+                raise ValueError("Wrong GNU bridge diagnostic separation")
+            if ("lib/arm64-v8a/libfoldgpt_file_handle.so" in libraries) != debug:
+                raise ValueError("Wrong native streaming helper diagnostic separation")
+            android_python = {name for name in names if name.startswith("assets/native-python/") and not name.endswith("/")}
+            python_notices = {name for name in names if name.startswith("assets/native-python-notices/") and not name.endswith("/")}
+            python_libs = {"lib/arm64-v8a/" + name for name in (
+                "libfoldgpt_python.so", "libpython3.14.so", "libcrypto_python.so", "libssl_python.so", "libsqlite3_python.so")}
+            if debug:
+                if (not python_libs.issubset(libraries)
+                        or "assets/native-python-notices/sources.json" not in python_notices
+                        or "assets/native-python/lib/python3.14/os.py" not in android_python
+                        or "assets/native-python/lib/python3.14/lib-dynload/_asyncio.cpython-314-aarch64-linux-android.so" not in android_python):
+                    raise ValueError("Native Android Python diagnostic inputs are incomplete")
+            elif android_python or python_notices or libraries & python_libs:
+                raise ValueError("Native Android Python diagnostic leaked into release")
     return {"apk_sha256": digest, "variant": "debug" if debug else "release",
             "native_libraries": len(libraries), "diagnostic_separation": "PASS",
             "limit": "Package contents only, not a binary release qualification"}

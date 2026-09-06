@@ -63,6 +63,257 @@ class NativeFilesLiveTests(unittest.IsolatedAsyncioTestCase):
         policy["permissions"]["file_system"]["entries"].append({
             "path": {"type": "path", "path": "file:///workspace/" + path}, "access": access})
 
+    async def tree_rpc(self, method, path="", policy=None, **options):
+        params = {"path": "file:///workspace/" + path, "sandbox": policy or context(), **options}
+        return await self.server.request({"id": 41, "method": "fs/" + method, "params": params})
+
+    async def copy_rpc(self, source, destination, policy=None, recursive=False):
+        return await self.server.request({"id": 42, "method": "fs/copy", "params": {
+            "sourcePath": "file:///workspace/" + source, "destinationPath": "file:///workspace/" + destination,
+            "recursive": recursive, "sandbox": policy or context()}})
+
+    @staticmethod
+    def walk_options(**changes):
+        return {"maxDepth": 4, "maxDirectories": 10, "maxEntries": 100,
+                "followDirectorySymlinks": False, **changes}
+
+    async def test_directory_listing_and_bfs_walk_match_real_names_types_and_bounds(self):
+        root = self.root / "tree"
+        (root / "nested").mkdir(parents=True)
+        (root / ".hidden").mkdir()
+        (root / "file é #?%").write_bytes(b"root")
+        (root / "nested/child").write_bytes(b"nested")
+        (root / ".hidden/secret").write_bytes(b"hidden")
+        before = {path: (path.stat().st_ino, path.stat().st_mtime_ns) for path in root.rglob("*")}
+        listing = (await self.tree_rpc("readDirectory", "tree"))["result"]
+        self.assertEqual(listing, {"entries": [
+            {"fileName": item.name, "isDirectory": item.is_dir(), "isFile": item.is_file()}
+            for item in sorted(root.iterdir(), key=lambda item: item.name)]})
+        walk = (await self.tree_rpc("walk", "tree", options=self.walk_options()))["result"]
+        expected = ["tree/.hidden", "tree/file%20%C3%A9%20%23%3F%25", "tree/nested", "tree/.hidden/secret", "tree/nested/child"]
+        self.assertEqual([entry["path"] for entry in walk["entries"]], ["file:///workspace/" + path for path in expected])
+        self.assertEqual([entry["kind"] for entry in walk["entries"]], ["directory", "file", "directory", "file", "file"])
+        self.assertEqual(walk["errors"], [])
+        self.assertFalse(walk["truncated"])
+        for options, count, truncated in ((self.walk_options(maxDepth=0), 3, False),
+                (self.walk_options(maxDirectories=1), 3, True), (self.walk_options(maxEntries=1), 1, True),
+                (self.walk_options(pruneHiddenDirectories=True), 4, False)):
+            result = (await self.tree_rpc("walk", "tree", options=options))["result"]
+            self.assertEqual(len(result["entries"]), count)
+            self.assertEqual(result["truncated"], truncated)
+        self.assertEqual(before, {path: (path.stat().st_ino, path.stat().st_mtime_ns) for path in root.rglob("*")})
+        self.assertEqual((await self.tree_rpc("walk", "value", options=self.walk_options()))["result"],
+                         {"entries": [], "errors": [], "truncated": False})
+        for method, opts in (("readDirectory", {}), ("walk", {"options": self.walk_options()})):
+            missing = await self.tree_rpc(method, "absent", **opts)
+            self.assertEqual(missing["error"]["code"], -32004)
+        self.assertIn("error", await self.tree_rpc("readDirectory", "value"))
+
+    async def test_walk_exact_upstream_options_and_policy_never_leak_denied_descendants(self):
+        for method, opts in (("readDirectory", {}), ("walk", {"options": self.walk_options()})):
+            denied = await self.tree_rpc(method, "", **opts)
+            self.assertIn("error", denied)
+            self.assertNotEqual(denied["error"]["code"], -32004)
+            self.assertNotIn("secret", json.dumps(denied))
+        policy = context()
+        policy["permissions"]["file_system"]["entries"][2]["access"] = "read"
+        self.assertIn("result", await self.tree_rpc("readDirectory", "", policy))
+        self.assertIn("result", await self.tree_rpc("walk", "", policy, options=self.walk_options(followDirectorySymlinks=True)))
+        self.grant(policy, "private/secret", "deny")
+        self.assertIn("error", await self.tree_rpc("walk", "", policy, options=self.walk_options()))
+        # A policy is checked only for returned/traversed descendants. A shallow
+        # request never reads the denied grandchild and can still succeed.
+        self.assertIn("result", await self.tree_rpc("walk", "", policy, options=self.walk_options(maxDepth=0)))
+        for change in ({"maxDepth": 65}, {"maxDirectories": 10001}, {"maxEntries": 50001},
+                       {"maxDirectories": 0}, {"maxEntries": 0}, {"maxDepth": -1}, {"maxEntries": True},
+                       {"pruneHiddenDirectories": None}, {"followDirectorySymlinks": "false"}, {"unknown": 1}):
+            self.assertIn("error", await self.tree_rpc("walk", "value", options=self.walk_options(**change)))
+        for missing in self.walk_options():
+            opts = self.walk_options()
+            del opts[missing]
+            self.assertIn("error", await self.tree_rpc("walk", "value", options=opts))
+
+    async def test_remove_has_real_upstream_default_recursive_force_and_explicit_nonrecursive_semantics(self):
+        for index, options in enumerate(({}, {"recursive": None, "force": None}, {"followSymlinks": False})):
+            path = self.root / f"remove-{index}"
+            (path / "nested").mkdir(parents=True)
+            (path / "nested/file").write_bytes(b"actual")
+            self.assertEqual((await self.tree_rpc("remove", path.name, **options))["result"], {})
+            self.assertFalse(path.exists())
+            self.assertEqual((await self.tree_rpc("remove", path.name, **options))["result"], {})
+        (self.root / "empty").mkdir()
+        self.assertEqual((await self.tree_rpc("remove", "empty", recursive=False, force=False))["result"], {})
+        self.assertEqual((await self.tree_rpc("remove", "absent", force=False))["error"]["code"], -32004)
+        self.assertEqual((await self.tree_rpc("remove", "missing/child"))["result"], {})
+        before = (self.root / "value").stat()
+        self.assertEqual((await self.tree_rpc("remove", "value", recursive=False, force=False))["result"], {})
+        self.assertFalse((self.root / "value").exists())
+        self.assertGreater(before.st_ino, 0)
+        self.assertIn("error", await self.tree_rpc("remove", "", force=True))
+
+    async def test_remove_preflights_all_protected_descendants_before_first_unlink(self):
+        tree = self.root / "remove-tree"
+        (tree / "z/.git").mkdir(parents=True)
+        (tree / "a").write_bytes(b"must stay")
+        (tree / "z/.git/config").write_bytes(b"protected")
+        before = {path: path.lstat().st_ino for path in tree.rglob("*")}
+        for policy in (context(), context()):
+            self.grant(policy, "remove-tree", "write")
+            self.assertIn("error", await self.tree_rpc("remove", "remove-tree", policy))
+            self.assertEqual(before, {path: path.lstat().st_ino for path in tree.rglob("*")})
+            self.assertEqual((tree / "a").read_bytes(), b"must stay")
+        policy = context()
+        self.grant(policy, "remove-tree/z/.git", "write")
+        self.grant(policy, "remove-tree/a", "read")
+        self.assertIn("error", await self.tree_rpc("remove", "remove-tree", policy))
+        self.assertTrue(tree.exists())
+        self.assertIn("error", await self.tree_rpc("remove", "remove-tree", policy, recursive=False))
+        self.grant(policy, "remove-tree/a", "write")
+        self.assertEqual((await self.tree_rpc("remove", "remove-tree", policy))["result"], {})
+        self.assertFalse(tree.exists())
+        self.assertEqual((self.root / ".git/config").read_bytes(), b"protected")
+
+    async def test_copy_files_and_recursive_merge_preserve_real_bytes_permissions_and_unrelated_inodes(self):
+        source = self.root / "source"
+        (source / "nested").mkdir(parents=True)
+        (source / "executable").write_bytes(b"#!/bin/sh\nprintf actual\n")
+        (source / "executable").chmod(0o751)
+        (source / "nested/empty").write_bytes(b"")
+        (source / "nested/binary").write_bytes(bytes(range(256)) * 71)
+        destination = self.root / "destination"
+        (destination / "nested").mkdir(parents=True)
+        (destination / "nested/binary").write_bytes(b"old destination")
+        (destination / "unrelated").write_bytes(b"retained")
+        unrelated = (destination / "unrelated").stat().st_ino
+        overwritten = (destination / "nested/binary").stat().st_ino
+        originals = {path: (path.stat().st_ino, path.read_bytes()) for path in source.rglob("*") if path.is_file()}
+        self.assertEqual((await self.copy_rpc("source", "destination", recursive=True))["result"], {})
+        for path, (inode, content) in originals.items():
+            copied = destination / path.relative_to(source)
+            self.assertEqual(copied.read_bytes(), content)
+            self.assertEqual(stat.S_IMODE(copied.stat().st_mode), stat.S_IMODE(path.stat().st_mode))
+            self.assertNotEqual(copied.stat().st_ino, inode)
+            self.assertEqual(path.stat().st_ino, inode)
+            self.assertEqual(path.read_bytes(), content)
+        self.assertEqual((destination / "nested/binary").stat().st_ino, overwritten)
+        self.assertEqual((destination / "unrelated").stat().st_ino, unrelated)
+        self.assertEqual((destination / "unrelated").read_bytes(), b"retained")
+        self.assertEqual((await self.copy_rpc("source", "new/parents/copied", recursive=True))["result"], {})
+        self.assertEqual((self.root / "new/parents/copied/executable").read_bytes(), (source / "executable").read_bytes())
+        self.assertEqual((await self.copy_rpc("source/executable", "file-copy"))["result"], {})
+        self.assertEqual((self.root / "file-copy").read_bytes(), (source / "executable").read_bytes())
+        self.assertEqual((await self.copy_rpc("source/executable", "absent-parent/file"))["error"]["code"], -32004)
+        self.assertFalse((self.root / "absent-parent").exists())
+
+    async def test_copy_preflights_protected_paths_source_reads_type_conflicts_and_missing_ancestor_grants(self):
+        source = self.root / "source"
+        (source / "nested").mkdir(parents=True)
+        (source / "a").write_bytes(b"first")
+        (source / "nested/z").write_bytes(b"last")
+        for relative, access in (("destination/nested/z", "deny"), ("destination/nested", "read"), ("source/nested/z", "deny")):
+            policy = context()
+            self.grant(policy, relative, access)
+            self.assertIn("error", await self.copy_rpc("source", "destination", policy, True))
+            self.assertFalse((self.root / "destination").exists())
+        self.assertIn("error", await self.copy_rpc("source", "destination", recursive=False))
+        self.assertFalse((self.root / "destination").exists())
+        (self.root / "destination").mkdir()
+        (self.root / "destination/nested").write_bytes(b"file blocks directory")
+        self.assertIn("error", await self.copy_rpc("source", "destination", recursive=True))
+        self.assertFalse((self.root / "destination/a").exists())
+        self.assertEqual((self.root / "destination/nested").read_bytes(), b"file blocks directory")
+        for first, second in (("source", "source"), ("source", "source/child"), ("source/nested", "source"), ("value", "value")):
+            self.assertIn("error", await self.copy_rpc(first, second, recursive=True))
+        self.assertEqual((self.root / "value").read_bytes(), b"original")
+        policy = context()
+        self.grant(policy, "private/copied", "write")
+        self.assertIn("result", await self.copy_rpc("source", "private/copied", policy, True))
+        self.assertEqual((self.root / "private/copied/nested/z").read_bytes(), b"last")
+        self.assertIn("error", await self.copy_rpc("source", "private/missing/copied", policy, True))
+        self.assertFalse((self.root / "private/missing").exists())
+
+    async def test_copy_refuses_new_metadata_subtrees_and_gitdir_file_even_with_parent_write(self):
+        (self.root / "source/.agents").mkdir(parents=True)
+        (self.root / "source/.agents/instructions").write_bytes(b"metadata")
+        (self.root / "source/a").write_bytes(b"ordinary")
+        self.assertIn("error", await self.copy_rpc("source", "target", recursive=True))
+        self.assertFalse((self.root / "target").exists())
+        policy = context()
+        self.grant(policy, "target/.agents", "write")
+        self.assertIn("result", await self.copy_rpc("source", "target", policy, True))
+        self.assertEqual((self.root / "target/.agents/instructions").read_bytes(), b"metadata")
+        self.grant(policy, "target/.git", "write")
+        self.assertIn("error", await self.copy_rpc("value", "target/.git", policy))
+        self.assertFalse((self.root / "target/.git").exists())
+
+    async def test_native_bulk_snapshot_refuses_stale_replaced_or_extra_files_before_mutation(self):
+        _, _, _, nodes = self.backend._inspect(None)
+        body = self.backend._snapshot(nodes)
+        def native(operation, path, *rest, data=body):
+            return subprocess.run([HELPER, operation, str(self.backend.root), path, str(len(data)), *rest],
+                                  input=data, pass_fds=(self.backend.root,), capture_output=True, timeout=5)
+        self.assertEqual(native("tree", "value").returncode, 0)
+        (self.root / "value").write_bytes(b"changed after authorization")
+        for args in (("remove", "value", "1", "1"), ("copy", "value", "destination", "0"), ("tree", ".")):
+            result = native(*args)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertEqual(result.stdout, b"")
+            self.assertEqual(json.loads(result.stderr)["stage"], "tree-state")
+            self.assertEqual((self.root / "value").read_bytes(), b"changed after authorization")
+            self.assertFalse((self.root / "destination").exists())
+        for bad in (body[:-1], body + b"extra\0", body + body, b"malformed"):
+            self.assertNotEqual(native("remove", "value", "1", "1", data=bad).returncode, 0)
+        for mutation in ("replace-inode", "new-protected-descendant", "new-hardlink"):
+            _, _, _, current = self.backend._inspect(None)
+            snapshot = self.backend._snapshot(current)
+            if mutation == "replace-inode":
+                original = self.root / "value"
+                original.rename(self.root / "retained")
+                original.write_bytes(b"replacement")
+            elif mutation == "new-protected-descendant":
+                (self.root / "introduced/.agents").mkdir(parents=True)
+                (self.root / "introduced/.agents/secret").write_bytes(b"new protected metadata")
+            else:
+                os.link(self.root / "value", self.root / "hardlink")
+            result = native("remove", "value", "1", "1", data=snapshot)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertEqual(result.stdout, b"")
+            self.assertTrue((self.root / "value").exists())
+            if mutation == "new-hardlink":
+                (self.root / "hardlink").unlink()
+        self.assertEqual((self.root / ".git/config").read_bytes(), b"protected")
+
+    async def test_bulk_rpcs_preserve_alias_refusals_and_reject_oversized_copy_before_creation(self):
+        alias = self.root / "alias"
+        for kind in ("symlink", "hardlink", "fifo", "gitdir"):
+            if kind == "symlink":
+                alias.symlink_to("value")
+            elif kind == "hardlink":
+                os.link(self.root / "value", alias)
+            elif kind == "fifo":
+                os.mkfifo(alias)
+            else:
+                (self.root / "nested").mkdir()
+                (self.root / "nested/.git").write_bytes(b"gitdir: /unadmitted\n")
+            try:
+                self.assertIn("error", await self.tree_rpc("readDirectory", ""))
+                self.assertIn("error", await self.tree_rpc("walk", "", options=self.walk_options()))
+                self.assertIn("error", await self.tree_rpc("remove", "value"))
+                self.assertIn("error", await self.copy_rpc("value", "destination"))
+                self.assertFalse((self.root / "destination").exists())
+                self.assertEqual((self.root / "value").read_bytes(), b"original")
+            finally:
+                if kind == "gitdir":
+                    (self.root / "nested/.git").unlink()
+                    (self.root / "nested").rmdir()
+                else:
+                    alias.unlink()
+        with (self.root / "large").open("wb") as stream:
+            stream.truncate(16 * 1024 * 1024 + 1)
+        self.assertIn("error", await self.copy_rpc("large", "destination"))
+        self.assertFalse((self.root / "destination").exists())
+        self.assertEqual((self.root / "large").stat().st_size, 16 * 1024 * 1024 + 1)
+
     async def test_native_metadata_matches_physical_objects_and_is_fresh_after_write(self):
         for relative in ("value", ".git", ""):
             physical = self.root / relative
@@ -411,6 +662,26 @@ class NativeFilesLiveTests(unittest.IsolatedAsyncioTestCase):
                 "path": "file:///workspace/new/absent", "sandbox": context()})
             self.assertEqual(missing["error"]["code"], -32004)
             self.assertEqual((root / "new/child/value").read_bytes(), b"stdio-native-bytes")
+            # The actual stdio protocol now covers the operations used around
+            # patch application: inspect a tree, copy, edit, and remove a file.
+            listed = await exchange(11, "fs/readDirectory", {"path": "file:///workspace/new/child", "sandbox": context()})
+            self.assertEqual(listed["result"], {"entries": [{"fileName": "value", "isDirectory": False, "isFile": True}]})
+            walked = await exchange(12, "fs/walk", {"path": "file:///workspace/new", "options": self.walk_options(), "sandbox": context()})
+            self.assertEqual(walked["result"]["entries"], [
+                {"path": "file:///workspace/new/child", "kind": "directory"},
+                {"path": "file:///workspace/new/child/value", "kind": "file"}])
+            copied = await exchange(13, "fs/copy", {"sourcePath": "file:///workspace/new/child/value",
+                "destinationPath": "file:///workspace/new/copied", "recursive": False, "sandbox": context()})
+            self.assertEqual(copied["result"], {})
+            self.assertEqual((root / "new/copied").read_bytes(), b"stdio-native-bytes")
+            self.assertNotEqual((root / "new/copied").stat().st_ino, (root / "new/child/value").stat().st_ino)
+            written = await exchange(14, "fs/writeFile", {"path": "file:///workspace/new/copied", "sandbox": context(),
+                "dataBase64": base64.b64encode(b"patched through actual RPC").decode()})
+            self.assertEqual(written["result"], {})
+            self.assertEqual((root / "new/copied").read_bytes(), b"patched through actual RPC")
+            removed = await exchange(15, "fs/remove", {"path": "file:///workspace/new/child/value", "sandbox": context(), "force": False})
+            self.assertEqual(removed["result"], {})
+            self.assertFalse((root / "new/child/value").exists())
             process.stdin.close()
             await process.stdin.wait_closed()
             self.assertEqual(await asyncio.wait_for(process.wait(), 5), 0)
