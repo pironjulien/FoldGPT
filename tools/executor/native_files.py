@@ -23,6 +23,34 @@ MAX_ENTRIES = 100000
 MAX_DEPTH = 64
 
 
+def _unique_object(pairs):
+    result = {}
+    for key, value in pairs:
+        if key in result:
+            raise ValueError("Duplicate native response field")
+        result[key] = value
+    return result
+
+
+def _native_metadata(output):
+    """Require exactly the reviewed metadata shape from the native statx call."""
+    try:
+        if type(output) is not bytes or len(output) > 1024:
+            raise ValueError("Invalid native metadata length")
+        value = json.loads(output.decode("ascii"), object_pairs_hook=_unique_object)
+        if (type(value) is not dict or set(value) != {
+                "isDirectory", "isFile", "isSymlink", "size", "createdAtMs", "modifiedAtMs"}
+                or any(type(value[key]) is not bool for key in ("isDirectory", "isFile", "isSymlink"))
+                or value["isDirectory"] == value["isFile"] or value["isSymlink"]
+                or type(value["size"]) is not int or not 0 <= value["size"] < 2**64
+                or any(type(value[key]) is not int or not -(2**63) <= value[key] < 2**63
+                    for key in ("createdAtMs", "modifiedAtMs"))):
+            raise ValueError("Invalid native metadata record")
+    except (ValueError, UnicodeError, TypeError, RecursionError) as error:
+        raise RpcError(-32603, "Native filesystem metadata violates its contract") from error
+    return value
+
+
 def _native_failure(diagnostic):
     """Translate only a validated native error record into official RPC codes.
 
@@ -32,20 +60,12 @@ def _native_failure(diagnostic):
     """
     stages = {"invocation", "root-fd", "length", "root-ownership", "allocation",
               "input", "input-length", "open", "file-kind", "write",
-              "directory-sync", "directory-state", "mkdir", "read", "read-bound", "output", "close"}
-
-    def unique(pairs):
-        result = {}
-        for key, value in pairs:
-            if key in result:
-                raise ValueError("Duplicate native error field")
-            result[key] = value
-        return result
+              "directory-sync", "directory-state", "mkdir", "metadata", "read", "read-bound", "output", "close"}
 
     try:
         if type(diagnostic) is not bytes or len(diagnostic) > 1024:
             raise ValueError("Invalid native diagnostic length")
-        value = json.loads(diagnostic.decode("ascii"), object_pairs_hook=unique)
+        value = json.loads(diagnostic.decode("ascii"), object_pairs_hook=_unique_object)
         if (type(value) is not dict or set(value) != {"stage", "errno"}
                 or type(value["stage"]) is not str or value["stage"] not in stages
                 or type(value["errno"]) is not int or not 1 <= value["errno"] <= 4095):
@@ -61,7 +81,8 @@ def _native_failure(diagnostic):
 
 
 class NativeFilesBackend:
-    supported_methods = frozenset({"fs/readFile", "fs/writeFile", "fs/createDirectory"})
+    supported_methods = frozenset({"fs/readFile", "fs/writeFile", "fs/createDirectory",
+                                   "fs/getMetadata", "fs/canonicalize"})
     capabilities = frozenset()
 
     def __init__(self, helper, workspace, *, guest_workspace="/workspace"):
@@ -183,8 +204,11 @@ class NativeFilesBackend:
             params = call.params
             writing = call.method == "fs/writeFile"
             making = call.method == "fs/createDirectory"
+            metadata_query = call.method == "fs/getMetadata"
+            canonicalizing = call.method == "fs/canonicalize"
+            inspecting = metadata_query or canonicalizing
             try:
-                allowed = {"path", "sandbox", "followSymlinks"} | (
+                allowed = {"path", "sandbox"} | (set() if canonicalizing else {"followSymlinks"}) | (
                     {"dataBase64"} if writing else {"recursive"} if making else set())
                 if type(params) is not dict or set(params) - allowed:
                     raise ValueError("Unsupported filesystem request field")
@@ -198,7 +222,7 @@ class NativeFilesBackend:
                     request_id=str(call.request_id), method=call.method)
                 policy = parse_context(intent.to_document()["context"])
                 path = GuestPath.from_uri(params["path"])
-                if not self.mount.contains(path) or (path == self.mount and not making):
+                if not self.mount.contains(path) or (path == self.mount and not (making or inspecting)):
                     raise ValueError("Path is outside the admitted workspace mapping")
                 decision = policy.decide_uri(path.uri)
                 if not (decision.can_write if writing or making else decision.can_read):
@@ -220,10 +244,16 @@ class NativeFilesBackend:
                         raise ValueError("Write exceeds the admitted data bound")
                 else:
                     data = b""
-                relative = "/".join(path.parts[len(self.mount.parts):])
-                arguments = self._directory_plan(path, params.get("recursive") is not False,
-                    policy, metadata, directories, count) if making else [
-                        "write" if writing else "read", str(self.root), relative, str(len(data))]
+                relative = "/".join(path.parts[len(self.mount.parts):]) or "."
+                if making:
+                    arguments = self._directory_plan(path, params.get("recursive") is not False,
+                        policy, metadata, directories, count)
+                elif inspecting:
+                    operation = "canonicalize" if canonicalizing else (
+                        "metadata-nofollow" if params.get("followSymlinks") is False else "metadata")
+                    arguments = [operation, str(self.root), relative, "0"]
+                else:
+                    arguments = ["write" if writing else "read", str(self.root), relative, str(len(data))]
             except (PolicyError, ValueError, KeyError, PermissionError, OSError, binascii.Error) as error:
                 raise RpcError(-32000, str(error)) from error
             self.process = await asyncio.create_subprocess_exec(
@@ -235,8 +265,16 @@ class NativeFilesBackend:
                 output, diagnostic = await asyncio.wait_for(asyncio.shield(communicate), 30)
                 if self.process.returncode != 0:
                     raise _native_failure(diagnostic)
-                if diagnostic or ((writing or making) and output) or len(output) > MAX_DATA:
+                if diagnostic or ((writing or making or canonicalizing) and output) or len(output) > MAX_DATA:
                     raise RpcError(-32000, "Native filesystem response violates its contract")
+                if metadata_query:
+                    return _native_metadata(output)
+                if canonicalizing:
+                    # The native helper has resolved the real admitted object
+                    # through the pinned mount with aliases forbidden. Only now
+                    # may its canonical guest URI be returned. Physical host
+                    # paths and successful lexical-only guesses never escape.
+                    return {"path": path.uri}
                 return {} if writing or making else {"dataBase64": base64.b64encode(output).decode("ascii")}
             finally:
                 # A transport cancellation is not a rollback of a write that

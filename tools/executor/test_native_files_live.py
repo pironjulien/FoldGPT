@@ -11,8 +11,8 @@ import sys
 import tempfile
 import unittest
 
-from tools.executor.exec_server import ExecServer
-from tools.executor.native_files import NativeFilesBackend, _native_failure
+from tools.executor.exec_server import ExecServer, RpcError
+from tools.executor.native_files import NativeFilesBackend, _native_failure, _native_metadata
 from tools.executor.test_policy_intent import context
 
 HELPER = os.environ.get("FOLDGPT_NATIVE_FILES")
@@ -53,10 +53,160 @@ class NativeFilesLiveTests(unittest.IsolatedAsyncioTestCase):
         params = {"path": "file:///workspace/" + path, "sandbox": policy or context(), **options}
         return await self.server.request({"id": 3, "method": "fs/createDirectory", "params": params})
 
+    async def inspect(self, path, *, canonicalize=False, policy=None, **options):
+        params = {"path": "file:///workspace/" + path, "sandbox": policy or context(), **options}
+        return await self.server.request({"id": 4,
+            "method": "fs/canonicalize" if canonicalize else "fs/getMetadata", "params": params})
+
     @staticmethod
     def grant(policy, path, access):
         policy["permissions"]["file_system"]["entries"].append({
             "path": {"type": "path", "path": "file:///workspace/" + path}, "access": access})
+
+    async def test_native_metadata_matches_physical_objects_and_is_fresh_after_write(self):
+        for relative in ("value", ".git", ""):
+            physical = self.root / relative
+            expected = physical.stat()
+            birth_seconds = int(subprocess.check_output(["stat", "--printf=%W", str(physical)]))
+            for follow in (None, False, True):
+                with self.subTest(relative=relative, follow=follow):
+                    result = (await self.inspect(relative, followSymlinks=follow))["result"]
+                    self.assertEqual(result["isFile"], stat.S_ISREG(expected.st_mode))
+                    self.assertEqual(result["isDirectory"], stat.S_ISDIR(expected.st_mode))
+                    self.assertFalse(result["isSymlink"])
+                    self.assertEqual(result["size"], expected.st_size)
+                    self.assertEqual(result["modifiedAtMs"], expected.st_mtime_ns // 1000000)
+                    if birth_seconds:
+                        self.assertGreaterEqual(result["createdAtMs"], birth_seconds * 1000)
+                        self.assertLess(result["createdAtMs"], (birth_seconds + 1) * 1000)
+                    else:
+                        self.assertEqual(result["createdAtMs"], 0)
+            self.assertEqual(physical.stat().st_ino, expected.st_ino)
+        before = (self.root / "value").stat()
+        self.assertIn("result", await self.rpc("value", b"a different native file length"))
+        current = (await self.inspect("value"))["result"]
+        self.assertEqual(current["size"], (self.root / "value").stat().st_size)
+        self.assertEqual(current["modifiedAtMs"], (self.root / "value").stat().st_mtime_ns // 1000000)
+        self.assertEqual((self.root / "value").stat().st_ino, before.st_ino)
+
+    async def test_metadata_preserves_upstream_pre_epoch_option_semantics(self):
+        path = self.root / "value"
+        os.utime(path, ns=(-1234567890, -1234567890))
+        actual = path.stat().st_mtime_ns
+        self.assertLess(actual, 0, "The fixture filesystem must support pre-epoch mtimes")
+        for follow in (True, None):
+            self.assertEqual((await self.inspect("value", followSymlinks=follow))["result"]["modifiedAtMs"], 0)
+        self.assertEqual((await self.inspect("value", followSymlinks=False))["result"]["modifiedAtMs"],
+            actual // 1000000)
+        self.assertEqual(path.read_bytes(), b"original")
+
+    async def test_metadata_and_canonicalization_follow_each_actual_policy_without_leaks(self):
+        before = (self.root / "value").stat()
+        for access in ("write", "read", "deny", "write"):
+            policy = context()
+            self.grant(policy, "value", access)
+            for canonicalize in (False, True):
+                result = await self.inspect("value", canonicalize=canonicalize, policy=policy)
+                self.assertEqual("result" in result, access != "deny")
+                if access == "deny":
+                    self.assertNotEqual(result["error"]["code"], -32004)
+            self.assertEqual((self.root / "value").stat().st_ino, before.st_ino)
+            self.assertEqual((self.root / "value").read_bytes(), b"original")
+        policy = context()
+        self.grant(policy, "private/secret", "read")
+        for canonicalize in (False, True):
+            # The explicit child grant is effective despite its denied parent.
+            self.assertIn("result", await self.inspect("private/secret", canonicalize=canonicalize, policy=policy))
+            for relative in ("private", "private/secret", "private/absent"):
+                denied = await self.inspect(relative, canonicalize=canonicalize)
+                self.assertIn("error", denied)
+                self.assertNotEqual(denied["error"]["code"], -32004)
+
+    async def test_canonicalization_requires_real_object_and_returns_only_guest_uri(self):
+        directory = self.root / "données #?%"
+        directory.mkdir()
+        (directory / "value").write_bytes(b"real")
+        for relative, canonical in (
+                ("", "file:///workspace"),
+                ("//value", "file:///workspace/value"),
+                ("donn%c3%a9es%20%23%3f%25//value", "file:///workspace/donn%C3%A9es%20%23%3F%25/value"),
+                (".git", "file:///workspace/.git")):
+            result = await self.inspect(relative, canonicalize=True)
+            self.assertEqual(result["result"], {"path": canonical})
+            self.assertNotIn(str(self.root), json.dumps(result))
+        for canonicalize in (False, True):
+            for relative in ("absent", "absent-parent/child"):
+                response = await self.inspect(relative, canonicalize=canonicalize)
+                self.assertEqual(response["error"]["code"], -32004)
+            self.assertIn("result", await self.inspect("value", canonicalize=canonicalize))
+        self.assertFalse((self.root / "absent").exists())
+        self.assertFalse((self.root / "absent-parent").exists())
+
+    async def test_inspection_refuses_aliases_special_files_and_unsupported_requests(self):
+        alias = self.root / "alias"
+        for kind in ("symlink", "directory-symlink", "hardlink", "fifo"):
+            if kind == "symlink":
+                alias.symlink_to("value")
+            elif kind == "directory-symlink":
+                alias.symlink_to(".git", target_is_directory=True)
+            elif kind == "hardlink":
+                os.link(self.root / "value", alias)
+            else:
+                os.mkfifo(alias)
+            try:
+                for follow in (False, True, None):
+                    self.assertIn("error", await self.inspect("alias", followSymlinks=follow))
+                self.assertIn("error", await self.inspect("alias", canonicalize=True))
+            finally:
+                alias.unlink()
+        for canonicalize in (False, True):
+            for path in ("../outside", "%2e%2e/outside", "private%2Fsecret"):
+                self.assertIn("error", await self.inspect(path, canonicalize=canonicalize))
+            for options in ({"unknown": True}, {"followSymlinks": "false"}):
+                self.assertIn("error", await self.inspect("value", canonicalize=canonicalize, **options))
+            policy = context()
+            policy["permissions"]["file_system"]["unknown"] = True
+            self.assertIn("error", await self.inspect("value", canonicalize=canonicalize, policy=policy))
+        self.assertIn("error", await self.inspect("value", canonicalize=True, followSymlinks=True))
+        self.assertEqual((self.root / "value").read_bytes(), b"original")
+        self.assertEqual((self.root / ".git/config").read_bytes(), b"protected")
+
+    async def test_native_inspection_rechecks_type_aliases_and_empty_input_independently(self):
+        def native(operation, path, length="0", data=b""):
+            return subprocess.run([HELPER, operation, str(self.backend.root), path, length],
+                pass_fds=(self.backend.root,), input=data, capture_output=True, timeout=5)
+        for operation in ("metadata", "metadata-nofollow", "canonicalize"):
+            for path, length, body in (("../outside", "0", b""), ("absent", "0", b""),
+                    ("value", "1", b""), ("value", "-0", b""), ("value", "0", b"unexpected")):
+                result = native(operation, path, length, body)
+                self.assertNotEqual(result.returncode, 0)
+                self.assertEqual(result.stdout, b"")
+            for kind in ("symlink", "hardlink", "fifo"):
+                alias = self.root / "native-alias"
+                if kind == "symlink":
+                    alias.symlink_to("value")
+                elif kind == "hardlink":
+                    os.link(self.root / "value", alias)
+                else:
+                    os.mkfifo(alias)
+                try:
+                    result = native(operation, "native-alias")
+                    self.assertNotEqual(result.returncode, 0)
+                    self.assertEqual(result.stdout, b"")
+                finally:
+                    alias.unlink()
+            for path in ("value", ".git", "."):
+                result = native(operation, path)
+                self.assertEqual(result.returncode, 0, result.stderr)
+                self.assertEqual(result.stderr, b"")
+                if operation == "canonicalize":
+                    self.assertEqual(result.stdout, b"")
+                else:
+                    actual = (self.root / path).stat()
+                    parsed = _native_metadata(result.stdout)
+                    self.assertEqual(parsed["size"], actual.st_size)
+                    self.assertEqual(parsed["isFile"], stat.S_ISREG(actual.st_mode))
+        self.assertEqual((self.root / "value").read_bytes(), b"original")
 
     async def test_recursive_directory_creation_and_following_file_rpcs(self):
         for number, options in enumerate(({}, {"recursive": None}, {"recursive": True, "followSymlinks": False})):
@@ -242,6 +392,25 @@ class NativeFilesLiveTests(unittest.IsolatedAsyncioTestCase):
             self.assertIn("error", await exchange(5, "fs/createDirectory", {
                 "path": "file:///workspace/denied/intermediate/leaf", "sandbox": policy}))
             self.assertFalse((root / "denied").exists())
+            metadata = await exchange(6, "fs/getMetadata", {
+                "path": "file:///workspace/new/child/value", "sandbox": context(), "followSymlinks": False})
+            self.assertTrue(metadata["result"]["isFile"])
+            self.assertEqual(metadata["result"]["size"], (root / "new/child/value").stat().st_size)
+            self.assertEqual(metadata["result"]["modifiedAtMs"],
+                (root / "new/child/value").stat().st_mtime_ns // 1000000)
+            canonical = await exchange(7, "fs/canonicalize", {
+                "path": "file:///workspace/new//child/value", "sandbox": context()})
+            self.assertEqual(canonical["result"], {"path": "file:///workspace/new/child/value"})
+            self.grant(policy, "new/child/value", "deny")
+            for identifier, method in ((8, "fs/getMetadata"), (9, "fs/canonicalize")):
+                denied = await exchange(identifier, method, {
+                    "path": "file:///workspace/new/child/value", "sandbox": policy})
+                self.assertIn("error", denied)
+                self.assertNotEqual(denied["error"]["code"], -32004)
+            missing = await exchange(10, "fs/canonicalize", {
+                "path": "file:///workspace/new/absent", "sandbox": context()})
+            self.assertEqual(missing["error"]["code"], -32004)
+            self.assertEqual((root / "new/child/value").read_bytes(), b"stdio-native-bytes")
             process.stdin.close()
             await process.stdin.wait_closed()
             self.assertEqual(await asyncio.wait_for(process.wait(), 5), 0)
@@ -337,6 +506,24 @@ class NativeFilesLiveTests(unittest.IsolatedAsyncioTestCase):
 
 
 class NativeDiagnosticTests(unittest.TestCase):
+    def test_native_metadata_requires_exact_types_fields_and_bounds(self):
+        valid = {"isDirectory": False, "isFile": True, "isSymlink": False,
+                 "size": 8, "createdAtMs": 0, "modifiedAtMs": -1235}
+        self.assertEqual(_native_metadata(json.dumps(valid).encode()), valid)
+        invalid = [b'[]', b'\xff', b'x' * 1025, b'{}',
+            json.dumps(valid).encode() + b' trailing',
+            json.dumps(valid).replace('"size": 8', '"size": 8, "size": 9').encode()]
+        for key, value in (("size", -1), ("size", 2**64), ("size", True), ("size", 8.0),
+                ("createdAtMs", None), ("createdAtMs", -(2**63) - 1), ("modifiedAtMs", 2**63),
+                ("isDirectory", 0), ("isDirectory", True), ("isFile", False),
+                ("isSymlink", True), ("unknown", False)):
+            invalid.append(json.dumps({**valid, key: value}).encode())
+        for output in invalid:
+            with self.subTest(output=output):
+                with self.assertRaises(RpcError) as raised:
+                    _native_metadata(output)
+                self.assertEqual(raised.exception.code, -32603)
+
     def test_not_found_requires_a_strict_open_failure_record(self):
         self.assertEqual(_native_failure(b'{"stage":"open","errno":2}\n').code, -32004)
         for diagnostic in (

@@ -1,0 +1,114 @@
+--- a/src/tracee/event.c
++++ b/src/tracee/event.c
+@@ -52,6 +52,12 @@
+ #include "attribute.h"
+ #include "compat.h"
+ 
++/* --kill-on-exit also owns cancellation of the tracer.  Block SIGTERM
++ * across the first fork until the event loop has installed its handler. */
++static bool kill_on_sigterm = false;
++static sigset_t launch_signal_mask;
++static volatile sig_atomic_t termination_requested = 0;
++
+ static bool seccomp_after_ptrace_enter = false;
+ static bool seccomp_ptrace_event_supported = false;
+ 
+@@ -91,13 +97,30 @@
+ 	if (tracee->verbose > 0)
+ 		list_open_fd(tracee);
+ 
++	kill_on_sigterm = tracee->killall_on_exit;
++	if (kill_on_sigterm) {
++		sigset_t mask;
++		sigemptyset(&mask);
++		sigaddset(&mask, SIGTERM);
++		if (sigprocmask(SIG_BLOCK, &mask, &launch_signal_mask) < 0)
++			return -errno;
++	}
++
+ 	pid = fork();
+ 	switch(pid) {
+-	case -1:
++	case -1: {
++		int saved_errno = errno;
+ 		note(tracee, ERROR, SYSTEM, "fork()");
+-		return -errno;
++		if (kill_on_sigterm)
++			(void) sigprocmask(SIG_SETMASK, &launch_signal_mask, NULL);
++		return -saved_errno;
++	}
+ 
+ 	case 0: /* child */
++		/* The guest keeps the launcher's original signal mask. */
++		if (kill_on_sigterm && sigprocmask(SIG_SETMASK, &launch_signal_mask, NULL) < 0)
++			return -errno;
++
+ 		/* SIG_IGN survives fork(2) and execve(2), so an ignored
+ 		 * SIGPIPE anywhere above proot is inherited by every
+ 		 * process of the guest: write(2) then fails with EPIPE
+@@ -153,12 +176,13 @@
+ {
+ 	note(NULL, WARNING, INTERNAL, "signal %d received from process %d",
+ 		signum, siginfo->si_pid);
++	termination_requested = 1;
+ 	kill_all_tracees();
+ 
+ 	/* Exit immediately for system signals (segmentation fault,
+ 	 * illegal instruction, ...), otherwise exit cleanly through
+ 	 * the event loop.  */
+-	if (signum != SIGQUIT)
++	if (signum != SIGQUIT && signum != SIGTERM)
+ 		_exit(EXIT_FAILURE);
+ }
+ 
+@@ -319,6 +343,12 @@
+ 	/* Handle all signals.  */
+ 	for (signum = 0; signum < SIGRTMAX; signum++) {
+ 		switch (signum) {
++		case SIGTERM:
++			/* Opt in to the same cleanup/reap path as SIGQUIT.
++			 * Other sessions retain upstream SIGTERM semantics. */
++			signal_action.sa_sigaction = kill_on_sigterm ? kill_all_tracees2 : (void *)SIG_IGN;
++			break;
++
+ 		case SIGQUIT:
+ 		case SIGILL:
+ 		case SIGABRT:
+@@ -355,6 +385,10 @@
+ 		}
+ 
+ 		status = sigaction(signum, &signal_action, NULL);
++		if (status < 0 && signum == SIGTERM && kill_on_sigterm) {
++			note(NULL, ERROR, SYSTEM, "sigaction(SIGTERM)");
++			return EXIT_FAILURE;
++		}
+ 		if (status < 0 && errno != EINVAL)
+ 			note(NULL, WARNING, SYSTEM, "sigaction(%d)", signum);
+ 	}
+@@ -375,6 +409,13 @@
+ 	if (status < 0)
+ 		note(NULL, WARNING, SYSTEM, "sigaction(SIGALRM)");
+ 
++	/* The initial tracee PID and the SIGTERM handler now both exist.
++	 * A cancellation queued during fork is safe to deliver here. */
++	if (kill_on_sigterm && sigprocmask(SIG_SETMASK, &launch_signal_mask, NULL) < 0) {
++		note(NULL, ERROR, SYSTEM, "sigprocmask()");
++		return EXIT_FAILURE;
++	}
++
+ 	while (1) {
+ 		int tracee_status;
+ 		Tracee *tracee;
+@@ -416,6 +457,12 @@
+ 		/* Get information about this tracee. */
+ 		tracee = get_tracee(NULL, pid, true);
+ 		assert(tracee != NULL);
++
++		/* A fork/clone may already have attached a child whose first
++		 * stop was still queued when the handler walked the tracee
++		 * list.  Kill that child before it can run guest code too. */
++		if (termination_requested && WIFSTOPPED(tracee_status))
++			kill(pid, SIGKILL);
+ 
+ 		tracee->running = false;
+ 

@@ -6,6 +6,7 @@
 #define _GNU_SOURCE
 #include <errno.h>
 #include <fcntl.h>
+#include <inttypes.h>
 #include <limits.h>
 #include <linux/openat2.h>
 #include <stdint.h>
@@ -85,6 +86,71 @@ static int decimal(const char *text,uint64_t *value) {
     *value=(uint64_t)number;
     return 1;
 }
+static int empty_input(void) {
+    unsigned char unexpected;
+    ssize_t received;
+    do { received=read(STDIN_FILENO,&unexpected,1); } while(received<0 && errno==EINTR);
+    if(received<0) return error("input");
+    if(received) { errno=EMSGSIZE; return error("input-length"); }
+    return 0;
+}
+static int64_t timestamp_ms(int64_t seconds,uint32_t nanoseconds,int nofollow) {
+    /* Match the two reviewed upstream conversions: default/follow metadata
+     * maps pre-epoch or unrepresentable times to zero; Linux no-follow
+     * metadata uses signed, saturating millisecond arithmetic.
+     */
+    int64_t milliseconds;
+    if(!nofollow && seconds<0) return 0;
+    if(seconds>INT64_MAX/1000) {
+        if(!nofollow) return 0;
+        milliseconds=INT64_MAX;
+    } else if(seconds<INT64_MIN/1000) milliseconds=INT64_MIN;
+    else milliseconds=seconds*1000;
+    int64_t fraction=nanoseconds/1000000;
+    if(milliseconds>INT64_MAX-fraction) return nofollow?INT64_MAX:0;
+    return milliseconds+fraction;
+}
+static int inspect_path(int root,const char *operation,const char *path) {
+    /* O_PATH never activates a special file. The native lookup, type, owner
+     * and link checks are required even after trusted workspace admission.
+     * Canonicalization returns success only after this real object lookup;
+     * the caller maps its already canonical components back to a guest URI.
+     */
+    int pin=open_beneath(root,path,O_PATH|O_CLOEXEC|O_NOFOLLOW,0);
+    if(pin<0) return error("open");
+    struct stat st;
+    if(fstat(pin,&st)<0) return error("metadata");
+    if(st.st_uid!=getuid() || (!S_ISDIR(st.st_mode) && !S_ISREG(st.st_mode)) ||
+            (S_ISREG(st.st_mode) && st.st_nlink!=1)) {
+        errno=EPERM; return error("file-kind");
+    }
+    if(strcmp(operation,"canonicalize")) {
+        struct statx sx;
+        unsigned required=STATX_TYPE|STATX_MODE|STATX_NLINK|STATX_UID|STATX_INO|STATX_SIZE|STATX_MTIME;
+        if(syscall(SYS_statx,pin,"",AT_EMPTY_PATH|AT_SYMLINK_NOFOLLOW,
+                required|STATX_BTIME,&sx)<0) return error("metadata");
+        if((sx.stx_mask&required)!=required || sx.stx_ino!=(uint64_t)st.st_ino ||
+                sx.stx_uid!=getuid() || (sx.stx_mode&S_IFMT)!=(st.st_mode&S_IFMT) ||
+                (S_ISREG(st.st_mode) && sx.stx_nlink!=1) ||
+                sx.stx_mtime.tv_nsec>=1000000000U ||
+                ((sx.stx_mask&STATX_BTIME) && sx.stx_btime.tv_nsec>=1000000000U)) {
+            errno=ESTALE; return error("metadata");
+        }
+        int nofollow=!strcmp(operation,"metadata-nofollow");
+        int64_t created=(sx.stx_mask&STATX_BTIME)?timestamp_ms(sx.stx_btime.tv_sec,sx.stx_btime.tv_nsec,nofollow):0;
+        int64_t modified=timestamp_ms(sx.stx_mtime.tv_sec,sx.stx_mtime.tv_nsec,nofollow);
+        char result[256];
+        int length=snprintf(result,sizeof(result),
+            "{\"isDirectory\":%s,\"isFile\":%s,\"isSymlink\":false,\"size\":%" PRIu64
+            ",\"createdAtMs\":%" PRId64 ",\"modifiedAtMs\":%" PRId64 "}\n",
+            S_ISDIR(st.st_mode)?"true":"false",S_ISREG(st.st_mode)?"true":"false",
+            (uint64_t)sx.stx_size,created,modified);
+        if(length<0 || (size_t)length>=sizeof(result)) { errno=EOVERFLOW; return error("metadata"); }
+        if(write_all(STDOUT_FILENO,result,(size_t)length)<0) return error("output");
+    }
+    if(close(pin)<0) return error("close");
+    return 0;
+}
 static int create_directories(int root,char **argv) {
     /* The trusted policy side authorizes EVERY missing suffix component and
      * supplies the identity of the last existing directory it inspected.
@@ -114,11 +180,8 @@ static int create_directories(int root,char **argv) {
     int recursive=!strcmp(argv[1],"mkdirs");
     if(!recursive && missing>1) { errno=ENOENT; return error("open"); }
     /* A request body is never interpreted as more directory authorizations. */
-    unsigned char unexpected;
-    ssize_t received;
-    do { received=read(STDIN_FILENO,&unexpected,1); } while(received<0 && errno==EINTR);
-    if(received<0) return error("input");
-    if(received) { errno=EMSGSIZE; return error("input-length"); }
+    int input_error=empty_input();
+    if(input_error) return input_error;
 
     unsigned existing=count-(unsigned)missing;
     char prefix[PATH_MAX]="";
@@ -160,8 +223,10 @@ static int create_directories(int root,char **argv) {
 }
 int main(int argc,char **argv) {
     int making=argc==7 && (!strcmp(argv[1],"mkdir") || !strcmp(argv[1],"mkdirs"));
-    if((!making && (argc!=5 || (strcmp(argv[1],"read") && strcmp(argv[1],"write")))) ||
-            (!valid_relative(argv[3]) && !(making && !strcmp(argv[3],".")))) {
+    int inspecting=argc==5 && (!strcmp(argv[1],"metadata") ||
+        !strcmp(argv[1],"metadata-nofollow") || !strcmp(argv[1],"canonicalize"));
+    if((!making && !inspecting && (argc!=5 || (strcmp(argv[1],"read") && strcmp(argv[1],"write")))) ||
+            (!valid_relative(argv[3]) && !((making || inspecting) && !strcmp(argv[3],".")))) {
         errno=EINVAL; return error("invocation");
     }
     char *end;
@@ -173,6 +238,12 @@ int main(int argc,char **argv) {
         errno=EPERM; return error("root-ownership");
     }
     if(making) return create_directories(root,argv);
+    if(inspecting) {
+        if(strcmp(argv[4],"0")) { errno=EINVAL; return error("length"); }
+        int input_error=empty_input();
+        if(input_error) return input_error;
+        return inspect_path(root,argv[1],argv[3]);
+    }
     errno=0; unsigned long expected=strtoul(argv[4],&end,10);
     if(errno || !argv[4][0] || *end || expected>MAX_DATA || argv[4][0]=='-') { errno=EINVAL; return error("length"); }
     int writing=!strcmp(argv[1],"write");
