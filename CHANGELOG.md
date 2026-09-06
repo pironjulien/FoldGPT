@@ -2,6 +2,8 @@
 
 ## Unreleased — 2026-09-06
 
+- Identified and removed the separate legacy `com.openai.chatgpt.launcher`, which was also labelled FoldGPT and only opened Termux:X11. Its installed APK was backed up and hash-verified before user-0 removal with data retained. The installed application list now contains only `app.foldgpt` and the official `com.openai.chatgpt` for this setup.
+
 - Implemented authenticated fresh-rootfs preparation and recovery. The actual Android adapter prepares and resumes Debian under the application UID; an independent verifier matches all 20,240 logical members and 20,244 physical entries. The explicit PRoot hardlink backend passes actual Zygote guest stat/statx, shared data/metadata and unlink checks, and executes pristine Debian Perl. Sixteen unprivileged JVM tests include five real process deaths during storage conversion. This remains inactive base preparation, not the complete one-click installer.
 - Added an exact native runtime input gate after a release-content audit found an unused historical probe in the common native directory. The stray artifact is preserved outside packaging; rebuilt debug/release APKs pass independent library and diagnostic-class separation checks. Both variants compile and release vital lint passes; no binary has been published.
 
