@@ -2,6 +2,14 @@
 
 ## Unreleased — 2026-09-06
 
+- Provide actual executable metadata for the exact `/proc/self/exe` alias,
+  pinning the notifying task and preserving the TGID symlink identity for
+  nofollow requests from secondary threads. The real regression fails against
+  the old runner and passes against the corrected one; 18 factory tests pass
+  with 2 optional shim cases skipped, plus resolver and kernel checks.
+  Compile and inspect the Android artifact without deploying it. Bionic
+  `realpath` and complete Android loading remain unqualified.
+
 - Resume the authorized native qualification with stock SELinux enforced.
   V11 authorization and admission pass; its actual Bionic worker exits 127
   during executable identification, before kernel proofs. Native and JNI

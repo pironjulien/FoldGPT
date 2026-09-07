@@ -1,0 +1,72 @@
+{
+  "scope": "Exact host-build verification evidence; no Android execution",
+  "build": "foldgpt-bionic-supervisor-PHREPY0u",
+  "files": [
+    {
+      "path": "factory-tests.txt",
+      "source": "downloads\\bionic-supervisor\\foldgpt-bionic-supervisor-PHREPY0u\\factory-tests.txt",
+      "bytes": 2682,
+      "sha256": "da54aa27d8bb71da21a5194b74e05870be6d437f5f46c64426928ce3ab963c7b"
+    },
+    {
+      "path": "factory-observations.json",
+      "source": "downloads\\bionic-supervisor\\foldgpt-bionic-supervisor-PHREPY0u\\factory-observations.json",
+      "bytes": 114235,
+      "sha256": "e719326df9477e080438e6fbd19c379d9c6f68fb8b9940367cedfec2686caa84"
+    },
+    {
+      "path": "runtime-paths-python-tests.txt",
+      "source": "downloads\\bionic-supervisor\\foldgpt-bionic-supervisor-PHREPY0u\\runtime-paths-python-tests.txt",
+      "bytes": 2491,
+      "sha256": "8fec9ded1b469816049b1404c7e2d8ffb5406c9990f648de05c16dde72e17766"
+    },
+    {
+      "path": "runtime-paths-c-tests.txt",
+      "source": "downloads\\bionic-supervisor\\foldgpt-bionic-supervisor-PHREPY0u\\runtime-paths-c-tests.txt",
+      "bytes": 175,
+      "sha256": "7a9c26c03ddd059efee1ec26acfe1d7ef0542907b67f56a2f0235de773cd7196"
+    },
+    {
+      "path": "kernel-tests.txt",
+      "source": "downloads\\bionic-supervisor\\foldgpt-bionic-supervisor-PHREPY0u\\kernel-tests.txt",
+      "bytes": 796,
+      "sha256": "8181e154cb0007fa4735a26c2990870b414836c2f23ee7e085d2c2be54c4c4bb"
+    },
+    {
+      "path": "qualification.json",
+      "source": "downloads\\bionic-supervisor\\foldgpt-bionic-supervisor-PHREPY0u\\qualification.json",
+      "bytes": 5795,
+      "sha256": "166ae54a9a7b08790035f2cd5db277c58862d3cef74048d7092cc4f09a95ee25"
+    },
+    {
+      "path": "executable-metadata-baseline.json",
+      "source": "downloads\\bionic-supervisor\\foldgpt-bionic-supervisor-PHREPY0u\\executable-metadata-baseline.json",
+      "bytes": 4389,
+      "sha256": "c43f9733b7d73a56eddbdd796b39caaef180869dd1403496ceb1e6373b973a63"
+    },
+    {
+      "path": "SOURCES.sha256",
+      "source": "downloads\\bionic-supervisor\\foldgpt-bionic-supervisor-PHREPY0u\\SOURCES.sha256",
+      "bytes": 4983,
+      "sha256": "37163e7c613086dc7778491647fda38811d080385bd124dfe15b26315777dfcf"
+    },
+    {
+      "path": "BINARIES.sha256",
+      "source": "downloads\\bionic-supervisor\\foldgpt-bionic-supervisor-PHREPY0u\\BINARIES.sha256",
+      "bytes": 1182,
+      "sha256": "c8333a9561714e47f7b122ac1e555443bf27f963c47ca8c74b44c50fa6b9be11"
+    },
+    {
+      "path": "compilers.txt",
+      "source": "downloads\\bionic-supervisor\\foldgpt-bionic-supervisor-PHREPY0u\\compilers.txt",
+      "bytes": 575,
+      "sha256": "058abb729c0c8cce3d9d41d1d0a8958b5ae56c1f604e443f28cc60eb2b88cb51"
+    },
+    {
+      "path": "test-identity.txt",
+      "source": "downloads\\bionic-supervisor\\foldgpt-bionic-supervisor-PHREPY0u\\test-identity.txt",
+      "bytes": 59,
+      "sha256": "6527e0b2524b480c3d2cf0e83a00fc4e741c817f42a9757866bd97ec8b9ecb29"
+    }
+  ]
+}

@@ -21,9 +21,15 @@ Le boot, la fixture, les APK et les indicateurs d'intégrité restent inchangés
 Les preuves V10 restent conservées indépendamment. Lire le rapport et ses
 [preuves exactes](verification/native-v11-20260907/manifest.json) avant la suite.
 
-Prochaine analyse sur PC : identification de l'exécutable par Bionic dans la
-politique de fichiers du superviseur. Les mécanismes du worker et les commandes
-ordinaires restent à valider ; ne pas réactiver l'ancien diagnostic GNU/PRoot.
+Le correctif des métadonnées de l'exécutable passe désormais sur PC dans le
+build `foldgpt-bionic-supervisor-PHREPY0u`, avec comparaison au runner précédent
+et au noyau réel, y compris depuis un pthread. Les sources et preuves sont
+suivies dans Git. Aucun nouvel APK n'est empaqueté ni installé. La résolution
+`realpath` Bionic et l'effet de son repli dans le chargeur restent à établir ;
+ne pas considérer l'ajout d'`O_PATH` comme une correction, car l'injection de
+ce type de FD est refusée par le noyau. Lire les limites du rapport courant.
+Les mécanismes du worker et les commandes ordinaires restent à valider ;
+ne pas réactiver l'ancien diagnostic GNU/PRoot.
 La [comparaison statique ARM64](../docs/research/native-engine-arm64-library-compatibility-2026-09-07.md)
 a également été terminée sur PC ; elle ne prouve pas le chargement Android.
 

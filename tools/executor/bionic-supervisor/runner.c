@@ -363,6 +363,62 @@ static int runtime_object(const char *path,int nofollow,char resolved[MAX_PATH])
   errno=EACCES;return -1;
 }
 static int runtime_path(const char *path,char resolved[MAX_PATH]) {return runtime_object(path,0,resolved);}
+static int worker_tgid(int task,unsigned tid) {
+  int fd=openat(task,"status",O_RDONLY|O_CLOEXEC);if(fd<0)return -1;
+  char status[4097];size_t used=0;int error=0;
+  while(used<sizeof(status)-1){
+    ssize_t count=read(fd,status+used,sizeof(status)-1-used);
+    if(count<0){if(errno==EINTR)continue;error=errno;break;}
+    if(!count)break;
+    used+=(size_t)count;
+  }
+  close(fd);if(error){errno=error;return -1;}status[used]=0;
+  unsigned pid=0,tgid=0;int have_pid=0,have_tgid=0;
+  for(char *line=status;line&&*line;){
+    char *next=strchr(line,'\n');if(!next)break;*next++=0;
+    char extra;
+    if(!strncmp(line,"Pid:",4)){
+      if(have_pid++||sscanf(line+4," %u %c",&pid,&extra)!=1){errno=EPROTO;return -1;}
+    }else if(!strncmp(line,"Tgid:",5)){
+      if(have_tgid++||sscanf(line+5," %u %c",&tgid,&extra)!=1){errno=EPROTO;return -1;}
+    }
+    line=next;
+  }
+  if(have_pid!=1||have_tgid!=1||pid!=tid||!tgid||tgid>INT_MAX){errno=EPROTO;return -1;}
+  return (int)tgid;
+}
+static int worker_executable_fd(int listener,const struct seccomp_notif *n,int nofollow) {
+  /* /proc/self/exe is the notifying task's executable, not the supervisor's.
+   * Pin that task directory before validating the blocked notification. Only
+   * this exact metadata alias may cross procfs; no proc FD enters the worker. */
+  char proc[80],path[MAX_PATH],checked[MAX_PATH];
+  snprintf(proc,sizeof(proc),"/proc/%u",n->pid);
+  int task=open(proc,O_PATH|O_DIRECTORY|O_CLOEXEC),group=-1,target=-1,link=-1,result=-1;
+  if(task<0)return -1;
+  if(!valid(listener,n->id)){errno=ESRCH;goto done;}
+  /* self names the TGID even for a secondary thread. Follow the same entry
+   * too: its target can be unavailable after the group leader exits. */
+  int tgid=worker_tgid(task,n->pid);if(tgid<0)goto done;
+  if(!valid(listener,n->id)){errno=ESRCH;goto done;}
+  snprintf(proc,sizeof(proc),"/proc/%d",tgid);group=open(proc,O_PATH|O_DIRECTORY|O_CLOEXEC);
+  if(group<0)goto done;
+  if(!valid(listener,n->id)){errno=ESRCH;goto done;}
+  if(nofollow){link=openat(group,"exe",O_PATH|O_NOFOLLOW|O_CLOEXEC);if(link<0)goto done;}
+  target=openat(group,"exe",O_PATH|O_CLOEXEC);if(target<0)goto done;
+  struct stat st;if(fstat(target,&st)<0)goto done;
+  if(!S_ISREG(st.st_mode)){errno=EACCES;goto done;}
+  if(runtime_descriptor_path(target,0,path)<0)goto done;
+  int admitted=runtime_path(path,checked);if(admitted<0)goto done;
+  if(!admitted){errno=EACCES;goto done;}
+  if(nofollow){
+    if(fstat(link,&st)<0)goto done;
+    if(!S_ISLNK(st.st_mode)){errno=ESTALE;goto done;}
+  }
+  if(!valid(listener,n->id)){errno=ESRCH;goto done;}
+  if(nofollow){result=link;link=-1;}else{result=target;target=-1;}
+done:;
+  int saved=errno;if(link>=0)close(link);if(target>=0)close(target);if(group>=0)close(group);close(task);errno=saved;return result;
+}
 static int pinned_worker_fd(int listener,const struct seccomp_notif *n,int number,int shared_offset) {
   if(number<0){errno=EBADF;return -1;}
   int fd;
@@ -504,6 +560,17 @@ static int acquisition(int listener,const struct seccomp_notif *n) {
     size_t bytes=(size_t)length;if(bytes>mode)bytes=(size_t)mode;
     if(output>INT64_MAX||pwrite(mem,native,bytes,(off_t)output)!=(ssize_t)bytes){error=EFAULT;goto done;}
     result=(int)bytes;goto done;
+  }
+  if((kind==1||kind==4)&&!strcmp(path,"/proc/self/exe")){
+    int fd=worker_executable_fd(listener,n,!!(flags&AT_SYMLINK_NOFOLLOW));
+    if(fd<0){error=errno;goto done;}
+    if(kind==1){struct stat st;if(fstat(fd,&st)<0)error=errno;
+      else if(!valid(listener,n->id))error=ESRCH;
+      else if(output>INT64_MAX||pwrite(mem,&st,sizeof(st),(off_t)output)!=sizeof(st))error=EFAULT;else result=0;}
+    else{struct statx st;if(syscall(SYS_statx,fd,"",AT_EMPTY_PATH|(flags&AT_STATX_SYNC_TYPE),(unsigned)n->data.args[3],&st)<0)error=errno;
+      else if(!valid(listener,n->id))error=ESRCH;
+      else if(output>INT64_MAX||pwrite(mem,&st,sizeof(st),(off_t)output)!=sizeof(st))error=EFAULT;else result=0;}
+    close(fd);goto done;
   }
   int nofollow=(kind==1||kind==4)?!!(flags&AT_SYMLINK_NOFOLLOW):kind==3||(!kind&&(flags&O_NOFOLLOW));
   int runtime=runtime_object(path,nofollow,native);

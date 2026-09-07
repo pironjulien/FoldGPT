@@ -1,0 +1,25 @@
+test_01_factory_dynamic_python_and_policy (__main__.FactoryTests.test_01_factory_dynamic_python_and_policy) ... ok
+test_02_real_stdin_eof_and_binary_write (__main__.FactoryTests.test_02_real_stdin_eof_and_binary_write) ... ok
+test_03_interrupt_and_termination (__main__.FactoryTests.test_03_interrupt_and_termination) ... ok
+test_04_timeout_and_descendant_cleanup (__main__.FactoryTests.test_04_timeout_and_descendant_cleanup) ... ok
+test_05_cwd_env_and_protected_paths (__main__.FactoryTests.test_05_cwd_env_and_protected_paths) ... ok
+test_06_output_cap (__main__.FactoryTests.test_06_output_cap) ... ok
+test_07_lstat_nofollow_and_bad_metadata_flags (__main__.FactoryTests.test_07_lstat_nofollow_and_bad_metadata_flags) ... ok
+test_08_real_unittest_discovery_directory_streams (__main__.FactoryTests.test_08_real_unittest_discovery_directory_streams) ... ok
+test_09_cancellation_channel_eof (__main__.FactoryTests.test_09_cancellation_channel_eof) ... ok
+test_10_cancel_start_while_real_workspace_lease_owned (__main__.FactoryTests.test_10_cancel_start_while_real_workspace_lease_owned) ... ok
+test_11_supervisor_loss_quarantines_real_owner (__main__.FactoryTests.test_11_supervisor_loss_quarantines_real_owner) ... ok
+test_12_explicit_runtime_denial_is_not_overwritten (__main__.FactoryTests.test_12_explicit_runtime_denial_is_not_overwritten) ... ok
+test_13_fchdir_and_actual_relative_cwd (__main__.FactoryTests.test_13_fchdir_and_actual_relative_cwd) ... ok
+test_14_attested_shim_real_bash_and_python_chdir (__main__.FactoryTests.test_14_attested_shim_real_bash_and_python_chdir) ... skipped 'The separately built attested cwd shim was not supplied'
+test_15_shim_attestation_mismatch_refused (__main__.FactoryTests.test_15_shim_attestation_mismatch_refused) ... skipped 'The separately built attested cwd shim was not supplied'
+test_16_runtime_alias_cannot_grant_workspace_execute (__main__.FactoryTests.test_16_runtime_alias_cannot_grant_workspace_execute) ... ok
+test_17_thread_directory_listing_preserves_real_entries (__main__.FactoryTests.test_17_thread_directory_listing_preserves_real_entries) ... ok
+test_18_final_record_without_owner_wait_keeps_quarantine (__main__.FactoryTests.test_18_final_record_without_owner_wait_keeps_quarantine) ... ok
+test_19_getdents_memory_denial_never_becomes_empty_listing (__main__.FactoryTests.test_19_getdents_memory_denial_never_becomes_empty_listing) ... ok
+test_20_current_executable_metadata_is_real_and_proc_stays_denied (__main__.FactoryTests.test_20_current_executable_metadata_is_real_and_proc_stays_denied) ... ok
+
+----------------------------------------------------------------------
+Ran 20 tests in 18.453s
+
+OK (skipped=2)

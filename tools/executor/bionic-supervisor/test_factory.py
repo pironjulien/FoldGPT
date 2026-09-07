@@ -379,6 +379,40 @@ print('actual broker denial preserved')
         self.assertEqual(result["exitCode"], 0, result)
         self.assertEqual(self.output(result), b"actual broker denial preserved\n")
 
+    async def test_20_current_executable_metadata_is_real_and_proc_stays_denied(self):
+        await self.backend.close("test")
+        executable = (BUILD / "executable-metadata-test").resolve(strict=True)
+        self.options["executables"] = {"logical-executable": str(executable)}
+        self.options["runtime"].append({"path": str(executable), "execute": True})
+        self.backend = factory(self.options)
+        context = kernel.context(self.workspace)
+        await self.call("process/start", {"processId": "metadata", "argv": ["logical-executable", str(executable)],
+            "cwd": context["cwd"], "env": {}, "tty": False, "pipeStdin": True, "sandbox": context})
+        record = self.backend.processes.processes[("test", "metadata")]
+        result = await self.until(record, b'"mainAndThread":true}')
+        observed = json.loads(self.output(result))
+        self.assertTrue(observed["mainAndThread"])
+        self.assertEqual(record.argv[0], "logical-executable")
+        self.assertFalse((self.workspace / record.argv[0]).exists())
+        # Independent kernel metadata while our still-owned worker is blocked
+        # on its input pipe. Do not compare two broker-emulated stat results.
+        proc = Path(f"/proc/{observed['pid']}/exe")
+        actual_link, actual_target = proc.lstat(), proc.stat()
+        self.assertEqual(proc.readlink(), executable)
+        for name, actual in (("linkDevice", actual_link.st_dev), ("linkInode", actual_link.st_ino),
+                ("linkMode", actual_link.st_mode), ("linkSize", actual_link.st_size),
+                ("targetDevice", actual_target.st_dev), ("targetInode", actual_target.st_ino)):
+            self.assertEqual(observed[name], actual, name)
+        self.assertEqual((actual_target.st_dev, actual_target.st_ino),
+                         (executable.stat().st_dev, executable.stat().st_ino))
+        OBSERVATIONS.append({"test": self.id(), "independentProcMetadata": observed,
+                             "argv0": record.argv[0], "executable": str(executable)})
+        await self.call("process/write", {"processId": record.key, "writeId": "release",
+            "chunk": base64.b64encode(b"R").decode()})
+        result = await self.complete(record)
+        self.assertEqual(result["exitCode"], 0, result)
+        self.assertEqual(self.output(result, "stderr"), b"")
+
 
 if __name__ == "__main__":
     try:

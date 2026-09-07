@@ -5,8 +5,8 @@ Le dépôt privé de travail est `pironjulien/FoldGPT-workspace`, branche
 checkpoint ne signifie pas que les commandes ordinaires fonctionnent déjà sur
 le téléphone.
 
-**Clôture demandée par Julien le 7 septembre vers 07:16 :** les essais sont
-arrêtés pour reprendre au travail. Lire d'abord [HANDOFF.md](HANDOFF.md).
+**Session reprise le 7 septembre après la clôture de nuit :** lire d'abord
+[HANDOFF.md](HANDOFF.md) pour le résultat téléphone V11 et le correctif PC.
 Le complément v8 décrit ci-dessous ajoute le build GNU ARM64 achevé et ses
 entrées exactes ; il ne valide pas son exécution sur le Fold.
 

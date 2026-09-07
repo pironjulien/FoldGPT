@@ -53,8 +53,8 @@ cohérente avec le diagnostic ; l'ordre exact des appels et leurs errno ne sont
 pas enregistrés dans ce rapport. Une correction doit fournir les vraies
 métadonnées de l'exécutable autorisé, avec descripteur et identité de tâche
 vérifiés, tout en respectant les sémantiques de lien et les refus des autres
-chemins `/proc`. Ce correctif est en cours sur PC ; aucune correction n'est
-encore qualifiée sur Android.
+chemins `/proc`. Ce correctif est désormais vérifié sur PC comme décrit
+ci-dessous ; aucune correction n'est encore qualifiée sur Android.
 
 Le [source officiel Bionic consulté](https://android.googlesource.com/platform/bionic/+/refs/heads/main/linker/linker_main.cpp#214),
 blob `425bcda67fe7f342222c02a74d3f13bb059825ac`, confirme aux lignes214–237
@@ -64,6 +64,49 @@ fonction avec `args.argv[0]`. Le chargeur appelle ensuite `realpath` pour
 choisir sa configuration ; cette étape doit aussi être examinée. Le source
 amont consulté explique le diagnostic, sans prétendre être le source exact
 du binaire Samsung installé.
+
+Le [source officiel de `realpath`](https://android.googlesource.com/platform/bionic/+/refs/heads/main/libc/bionic/realpath.cpp#46),
+blob `e43d8e2ff0702618e463eb02805e324bb3860446`, précise l'étape suivante :
+ouvrir le chemin avec `O_PATH|O_CLOEXEC`, lire ses métadonnées via le FD,
+résoudre ce FD par `readlink`, puis vérifier que la cible possède toujours le
+même device/inode. Le runner V11 refuse `O_PATH` et ne traite pas spécialement
+la lecture du lien d'un FD de la tâche. Le refus `O_PATH` est une limite déjà
+établie : l'injection noyau `SECCOMP_IOCTL_NOTIF_ADDFD` rejette ces descripteurs,
+comme expliqué et testé dans le [contrat du superviseur](../../tools/executor/bionic-supervisor/README.md).
+Ajouter seulement le flag ne corrige pas cette limite ; retourner un FD
+`O_RDONLY` à sa place falsifierait le contrat de l'appel. Aucun de ces
+changements n'est introduit. Dans le chargeur amont, l'échec de `realpath`
+n'est pas immédiatement fatal : il conserve le chemin d'entrée. Le chargement
+effectif des dépendances dans ce cas reste à mesurer sur Android. Le succès
+des tests de métadonnées sur PC ne qualifie donc ni `realpath` Bionic ni le
+démarrage complet du chargeur installé sur Samsung.
+
+## Correction vérifiée sur PC après le résultat téléphone
+
+Build final : `foldgpt-bionic-supervisor-PHREPY0u`. Le helper épingle la tâche
+émettrice et, pour une requête sans suivi, son lien de groupe TGID. Il vérifie
+le fichier exécutable réellement épinglé contre le runtime autorisé, puis
+retourne ses vraies métadonnées ou celles du lien selon les flags. Les
+notifications périmées et les cibles devenues non attestables sont refusées.
+Cette restriction ne reproduit pas toutes les sémantiques POSIX après
+disparition du leader ou suppression de la cible. `argv[0]` reste inchangé.
+
+Le même travailleur réel échoue avec l'ancien runner KvSGBnzP sur
+`stat("/proc/self/exe")`, errno13, et passe avec le nouveau. Le test compare
+également ses résultats à une lecture indépendante du noyau pendant que le
+travailleur est encore vivant, puis le libère par son entrée standard et
+vérifie sa terminaison. Il couvre les métadonnées cible/lien depuis le thread
+principal et un pthread, les flags invalides, mauvais pointeurs et refus des
+autres chemins proc. Les 20 tests factory comprennent 18 succès et 2 cas du
+shim optionnel non fourni ignorés ; les 16 tests Python de résolution et les
+tests C/noyau passent aussi. Les [preuves exactes](../../recovery/verification/native-executable-metadata-20260907/manifest.json)
+sont conservées dans Git. Le build intermédiaire t256JoQD et son premier
+rapport de contrôle restent historiques.
+
+Superviseur ARM64 compilé et inspecté :
+`7ed43a09ad5e22cb5e5e1ae347d83947f1f6167a797c8aa8b9d399bf09645a03`.
+Il n'est ni empaqueté dans un nouvel APK ni installé sur le Fold. L'essai V11
+en échec et son marker sont conservés ; aucun second lancement n'a eu lieu.
 
 ## Nettoyage et intégrité vérifiés séparément du succès
 

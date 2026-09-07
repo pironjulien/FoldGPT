@@ -1,0 +1,183 @@
+{
+  "schema": "foldgpt.bionic-kernel-qualification.v1",
+  "success": true,
+  "platform": "linux",
+  "uid": 65534,
+  "gid": 65534,
+  "androidExecution": false,
+  "workspace": "/var/tmp/foldgpt-kernel-qualification-lh325_ie/workspace",
+  "options": {
+    "helper": "/var/tmp/foldgpt-bionic-supervisor-PHREPY0u/native-files",
+    "handleHelper": "/var/tmp/foldgpt-bionic-supervisor-PHREPY0u/native-file-handle",
+    "processRunner": "/var/tmp/foldgpt-bionic-supervisor-PHREPY0u/runner",
+    "workspace": "/var/tmp/foldgpt-kernel-qualification-lh325_ie/workspace",
+    "executables": {
+      "kernel-qualification": "/var/tmp/foldgpt-bionic-supervisor-PHREPY0u/qualification-worker"
+    },
+    "runtime": [
+      {
+        "path": "/var/tmp/foldgpt-bionic-supervisor-PHREPY0u/qualification-worker",
+        "execute": true
+      },
+      {
+        "path": "/usr",
+        "execute": true
+      },
+      {
+        "path": "/lib",
+        "execute": true
+      },
+      {
+        "path": "/lib64",
+        "execute": true
+      },
+      {
+        "path": "/etc/ld.so.cache",
+        "execute": false
+      }
+    ],
+    "limits": {
+      "wall_ms": 3000,
+      "cpu_seconds": 1,
+      "uid_task_budget": 2,
+      "data_bytes": 16777216,
+      "file_bytes": 1048576,
+      "output_bytes": 8192,
+      "descriptors": 32
+    }
+  },
+  "read": {
+    "chunks": [
+      {
+        "seq": 1,
+        "stream": "stdout",
+        "chunk": "eyJ0eXBlIjoia2VybmVsLXF1YWxpZmljYXRpb24iLCJzdWNjZXNzIjp0cnVlLCJtZW1vcnlSZWFkIjp0cnVlLCJtZW1vcnlXcml0ZSI6dHJ1ZSwicGlkZmRHZXRmZCI6dHJ1ZSwic2hhcmVkT2Zmc2V0Ijp0cnVlLCJwcml2YXRlUmVhZERlbmllZCI6dHJ1ZSwicHJvdGVjdGVkV3JpdGVEZW5pZWQiOnRydWUsInJhd0NoZGlyRGVuaWVkIjp0cnVlLCJuZXR3b3JrRGVuaWVkIjp0cnVlLCJpb2N0bERlbmllZCI6dHJ1ZSwiYmluZGVyRGVuaWVkIjp0cnVlLCJ0aHJlYWRNZW1vcnkiOnRydWUsInRocmVhZFBpZGZkR2V0ZmQiOnRydWV9Cg=="
+      }
+    ],
+    "nextSeq": 4,
+    "exited": true,
+    "exitCode": 0,
+    "closed": true,
+    "failure": null,
+    "sandboxDenied": false
+  },
+  "stdout": "{\"type\":\"kernel-qualification\",\"success\":true,\"memoryRead\":true,\"memoryWrite\":true,\"pidfdGetfd\":true,\"sharedOffset\":true,\"privateReadDenied\":true,\"protectedWriteDenied\":true,\"rawChdirDenied\":true,\"networkDenied\":true,\"ioctlDenied\":true,\"binderDenied\":true,\"threadMemory\":true,\"threadPidfdGetfd\":true}\n",
+  "stderr": "",
+  "nativeResult": {
+    "type": "result",
+    "outcome": "exited",
+    "exitCode": 0,
+    "signal": 0,
+    "cleanupComplete": true,
+    "started": true,
+    "grants": 8,
+    "denials": 6,
+    "stdoutBytes": 301,
+    "stderrBytes": 0,
+    "stage": 0,
+    "errno": 0
+  },
+  "supervisorReturncode": 0,
+  "proofs": {
+    "type": "kernel-qualification",
+    "success": true,
+    "memoryRead": true,
+    "memoryWrite": true,
+    "pidfdGetfd": true,
+    "sharedOffset": true,
+    "privateReadDenied": true,
+    "protectedWriteDenied": true,
+    "rawChdirDenied": true,
+    "networkDenied": true,
+    "ioctlDenied": true,
+    "binderDenied": true,
+    "threadMemory": true,
+    "threadPidfdGetfd": true
+  },
+  "quarantined": false,
+  "requests": [
+    {
+      "id": 1,
+      "method": "process/start",
+      "params": {
+        "processId": "kernel-qualification",
+        "argv": [
+          "kernel-qualification"
+        ],
+        "cwd": "file:///var/tmp/foldgpt-kernel-qualification-lh325_ie/workspace",
+        "env": {},
+        "pipeStdin": false,
+        "tty": false,
+        "sandbox": {
+          "permissions": {
+            "type": "managed",
+            "file_system": {
+              "type": "restricted",
+              "entries": [
+                {
+                  "path": {
+                    "type": "path",
+                    "path": "file:///var/tmp/foldgpt-kernel-qualification-lh325_ie/workspace"
+                  },
+                  "access": "write"
+                },
+                {
+                  "path": {
+                    "type": "path",
+                    "path": "file:///var/tmp/foldgpt-kernel-qualification-lh325_ie/workspace/private"
+                  },
+                  "access": "deny"
+                }
+              ]
+            },
+            "network": "restricted"
+          },
+          "cwd": "file:///var/tmp/foldgpt-kernel-qualification-lh325_ie/workspace",
+          "workspaceRoots": [
+            "file:///var/tmp/foldgpt-kernel-qualification-lh325_ie/workspace"
+          ],
+          "windowsSandboxLevel": "disabled"
+        }
+      }
+    },
+    {
+      "id": 2,
+      "method": "process/read",
+      "params": {
+        "processId": "kernel-qualification"
+      }
+    }
+  ],
+  "notifications": [
+    {
+      "method": "process/output",
+      "params": {
+        "processId": "kernel-qualification",
+        "seq": 1,
+        "stream": "stdout",
+        "chunk": "eyJ0eXBlIjoia2VybmVsLXF1YWxpZmljYXRpb24iLCJzdWNjZXNzIjp0cnVlLCJtZW1vcnlSZWFkIjp0cnVlLCJtZW1vcnlXcml0ZSI6dHJ1ZSwicGlkZmRHZXRmZCI6dHJ1ZSwic2hhcmVkT2Zmc2V0Ijp0cnVlLCJwcml2YXRlUmVhZERlbmllZCI6dHJ1ZSwicHJvdGVjdGVkV3JpdGVEZW5pZWQiOnRydWUsInJhd0NoZGlyRGVuaWVkIjp0cnVlLCJuZXR3b3JrRGVuaWVkIjp0cnVlLCJpb2N0bERlbmllZCI6dHJ1ZSwiYmluZGVyRGVuaWVkIjp0cnVlLCJ0aHJlYWRNZW1vcnkiOnRydWUsInRocmVhZFBpZGZkR2V0ZmQiOnRydWV9Cg=="
+      }
+    },
+    {
+      "method": "process/exited",
+      "params": {
+        "processId": "kernel-qualification",
+        "seq": 2,
+        "exitCode": 0,
+        "sandboxDenied": false
+      }
+    },
+    {
+      "method": "process/closed",
+      "params": {
+        "processId": "kernel-qualification",
+        "seq": 3
+      }
+    }
+  ],
+  "files": {
+    "directory/marker": "d4169ac586761c1e922c624e2655466dea2b3266c3c9af4c88b08908f8a12ce8",
+    "input": "c4248ab5c8ce52888cd24315ffa32480bbd0bd25b8572185780db830bd914b77",
+    "private/secret": "be3a4ca66e020d499c2c2ea49f759a92dcd7b0ef56fe9551dde0c1dc16286da4"
+  }
+}

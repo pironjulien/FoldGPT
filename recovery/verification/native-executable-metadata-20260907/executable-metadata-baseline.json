@@ -1,0 +1,28 @@
+{
+  "schema": "foldgpt.executable-metadata-negative-control.v1",
+  "success": true,
+  "baselineRunner": "/var/tmp/foldgpt-bionic-supervisor-KvSGBnzP/runner",
+  "workerBuild": "/var/tmp/foldgpt-bionic-supervisor-PHREPY0u",
+  "observation": {
+    "nativeResult": {
+      "type": "result",
+      "outcome": "exited",
+      "exitCode": 1,
+      "signal": 0,
+      "cleanupComplete": true,
+      "started": true,
+      "grants": 3,
+      "denials": 1,
+      "stdoutBytes": 0,
+      "stderrBytes": 74,
+      "stage": 0,
+      "errno": 0
+    },
+    "supervisorReturncode": 0,
+    "closed": true,
+    "stdout": "",
+    "stderr": "metadata regression line 33 errno 13\nmetadata regression line 69 errno 13\n"
+  },
+  "unittestOutput": "test_20_current_executable_metadata_is_real_and_proc_stays_denied (__main__.Baseline.test_20_current_executable_metadata_is_real_and_proc_stays_denied) ... FAIL\n\n======================================================================\nFAIL: test_20_current_executable_metadata_is_real_and_proc_stays_denied (__main__.Baseline.test_20_current_executable_metadata_is_real_and_proc_stays_denied)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/usr/lib/python3.12/unittest/async_case.py\", line 90, in _callTestMethod\n    if self._callMaybeAsync(method) is not None:\n       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.12/unittest/async_case.py\", line 112, in _callMaybeAsync\n    return self._asyncioRunner.run(\n           ^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.12/asyncio/runners.py\", line 118, in run\n    return self._loop.run_until_complete(task)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.12/asyncio/base_events.py\", line 687, in run_until_complete\n    return future.result()\n           ^^^^^^^^^^^^^^^\n  File \"/var/tmp/foldgpt-bionic-supervisor-PHREPY0u/package/tools/executor/bionic-supervisor/test_factory.py\", line 392, in test_20_current_executable_metadata_is_real_and_proc_stays_denied\n    result = await self.until(record, b'\"mainAndThread\":true}')\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/var/tmp/foldgpt-bionic-supervisor-PHREPY0u/package/tools/executor/bionic-supervisor/test_factory.py\", line 89, in until\n    self.fail(\"Native process never produced readiness: \" + repr(result))\nAssertionError: Native process never produced readiness: {'chunks': [{'seq': 2, 'stream': 'stderr', 'chunk': 'bWV0YWRhdGEgcmVncmVzc2lvbiBsaW5lIDMzIGVycm5vIDEzCm1ldGFkYXRhIHJlZ3Jlc3Npb24gbGluZSA2OSBlcnJubyAxMwo='}], 'nextSeq': 3, 'exited': True, 'exitCode': 1, 'closed': False, 'failure': None, 'sandboxDenied': False}\n\n----------------------------------------------------------------------\nRan 1 test in 0.017s\n\nFAILED (failures=1)\n",
+  "failure": "Traceback (most recent call last):\n  File \"/usr/lib/python3.12/unittest/async_case.py\", line 90, in _callTestMethod\n    if self._callMaybeAsync(method) is not None:\n       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.12/unittest/async_case.py\", line 112, in _callMaybeAsync\n    return self._asyncioRunner.run(\n           ^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.12/asyncio/runners.py\", line 118, in run\n    return self._loop.run_until_complete(task)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.12/asyncio/base_events.py\", line 687, in run_until_complete\n    return future.result()\n           ^^^^^^^^^^^^^^^\n  File \"/var/tmp/foldgpt-bionic-supervisor-PHREPY0u/package/tools/executor/bionic-supervisor/test_factory.py\", line 392, in test_20_current_executable_metadata_is_real_and_proc_stays_denied\n    result = await self.until(record, b'\"mainAndThread\":true}')\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/var/tmp/foldgpt-bionic-supervisor-PHREPY0u/package/tools/executor/bionic-supervisor/test_factory.py\", line 89, in until\n    self.fail(\"Native process never produced readiness: \" + repr(result))\nAssertionError: Native process never produced readiness: {'chunks': [{'seq': 2, 'stream': 'stderr', 'chunk': 'bWV0YWRhdGEgcmVncmVzc2lvbiBsaW5lIDMzIGVycm5vIDEzCm1ldGFkYXRhIHJlZ3Jlc3Npb24gbGluZSA2OSBlcnJubyAxMwo='}], 'nextSeq': 3, 'exited': True, 'exitCode': 1, 'closed': False, 'failure': None, 'sandboxDenied': False}\n"
+}
