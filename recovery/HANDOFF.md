@@ -59,9 +59,9 @@ Les journaux `pc-v11-*`, `fixture-v11`, `python-v11` et
   régressions ciblées et Clippy passent. Les [preuves de ce test réel](verification/engine-native-runtime/tests.txt)
   sont conservées dans Git. Cela ne sélectionne aucun exécuteur sur Android.
 
-## Suite concrète
+## Historique V10 et dépendances de l'intégration
 
-**Dernier état : v10 installé, session en quarantaine conservée.** Le démarrage
+**État V10 conservé, distinct du V11 courant décrit en tête.** Le démarrage
 stdio dépasse le refus de socket. Le statut authentifié du service PID11821
 confirme `factory_construct`, `PermissionError`, errno13, refus de
 `/linkerconfig`. Le bootstrap PID11978 reste vivant ; son nettoyage n'est pas
@@ -73,7 +73,7 @@ L'APK figé est `tools/executor/shizuku-lab/build/kernel-v10-stdio/app-debug.apk
 SHA-256 `46049fd8d2f381c2680023c12005a4d57cf4c9a51c829a447eb88642e6b3a6a4`.
 Le stage est `kernel-stage-v10`. Lire le
 [rapport v10 et la prochaine correction](../docs/research/native-v10-retained-session-2026-09-07.md).
-La vérification des chemins runtime doit être adaptée aux parents interdits
+La vérification des chemins runtime a depuis été corrigée et préparée dans V11,
 sans retirer le contrôle du chevauchement avec le workspace. Les mécanismes
 noyau du worker restent non mesurés. Les étapes v6 à v9 ci-dessous sont
 historiques et ne doivent pas être rejouées après la quarantaine v10.
@@ -118,6 +118,9 @@ historiques et ne doivent pas être rejouées après la quarantaine v10.
    PC. Le transport doit conserver politiques, flux, erreurs et ownership. Le runtime reste
    local (`is_remote=false`) ; les chemins invisibles au contrôleur sont
    actuellement refusés avant les routes qui supposent encore un accès direct.
+   L'[audit du contrôleur](../docs/research/native-executor-controller-path-audit-2026-09-07.md)
+   détaille les routes encore directes, leurs autorités et les preuves nécessaires.
+   Retirer le refus `ExecutorOnly` seul serait incorrect.
 4. Compléter les opérations de fichiers/processus nécessaires. Le superviseur
    refuse encore notamment suppression/renommage/liens, exécution de fichiers
    compilés dans le projet, TTY et réseau. Les quotas actuels sont des limites

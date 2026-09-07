@@ -1,0 +1,285 @@
+{
+  "schemaVersion": 3,
+  "observedAt": "2026-09-07T05:00:12.981836+00:00",
+  "completedAt": "2026-09-07T05:00:22.709204+00:00",
+  "uid": 10412,
+  "package": "app.foldgpt",
+  "memoryKiB": {
+    "MemTotal": 11351456,
+    "MemFree": 498232,
+    "MemAvailable": 3655348,
+    "Buffers": 2168,
+    "Cached": 3296960,
+    "SwapCached": 6676,
+    "Active": 2334108,
+    "Inactive": 3514624,
+    "Unevictable": 307276,
+    "Mlocked": 293164,
+    "SwapTotal": 12582908,
+    "SwapFree": 8882028,
+    "Dirty": 564,
+    "Writeback": 0,
+    "AnonPages": 3241956,
+    "Mapped": 1643228,
+    "Shmem": 41900,
+    "KReclaimable": 524792,
+    "Slab": 1143436,
+    "SReclaimable": 466172,
+    "SUnreclaim": 677264,
+    "KernelStack": 165952,
+    "ShadowCallStack": 0,
+    "PageTables": 344072,
+    "SecPageTables": 19224,
+    "NFS_Unstable": 0,
+    "Bounce": 0,
+    "WritebackTmp": 0,
+    "CommitLimit": 18016972,
+    "Committed_AS": 694563656,
+    "VmallocTotal": 261087232,
+    "VmallocUsed": 410148,
+    "VmallocChunk": 0,
+    "Percpu": 14368,
+    "AnonHugePages": 16384,
+    "ShmemHugePages": 0,
+    "ShmemPmdMapped": 0,
+    "FileHugePages": 0,
+    "FilePmdMapped": 0,
+    "CmaTotal": 733184,
+    "CmaFree": 876,
+    "system": 475320,
+    "RbinTotal": 409600,
+    "RbinAlloced": 2424,
+    "GcmaTotal": 483328,
+    "GcmaAlloced": 75128,
+    "GcmaFree": 4,
+    "GcmaCached": 408196,
+    "DmaHeapPool": 24064,
+    "HugepagePool": 0,
+    "zram0": 816440,
+    "GpuTotal": 543024,
+    "KgslShmemUsage": 10724,
+    "GpuSwap": 0
+  },
+  "summedPssKiB": 712435,
+  "observedPssKiB": 712435,
+  "processCount": 23,
+  "pssObservedCount": 23,
+  "pssUnavailablePids": [],
+  "pssCoverageComplete": true,
+  "samePidSetAtBoundaries": true,
+  "scope": "Sequential process snapshot, not an atomic measurement or reservation; PSS excludes some graphics driver accounting and other UIDs (including Shizuku).",
+  "rawObservation": "downloads\\runtime\\android-memory-v3-20260907.json",
+  "rawSha256": "ecee8c6766c1a631d653dd080e3265cdd3aa407a8b6ea3e550535dc3b99cb86c",
+  "collectorSha256": "b23fc98667a4db2061d3341f986ad811fa53af4dce822c51fea509aa34e22549",
+  "bootBefore": "348d453e-f4e5-40e0-8ef0-030f4d5e38af",
+  "bootAfter": "348d453e-f4e5-40e0-8ef0-030f4d5e38af",
+  "limits": [
+    {
+      "pid": 16917,
+      "displayName": "app.foldgpt",
+      "code": 0,
+      "memory": [
+        "Max data size             unlimited            unlimited            bytes",
+        "Max address space         unlimited            unlimited            bytes"
+      ]
+    },
+    {
+      "pid": 17419,
+      "displayName": "app.foldgpt:runtime",
+      "code": 0,
+      "memory": [
+        "Max data size             unlimited            unlimited            bytes",
+        "Max address space         unlimited            unlimited            bytes"
+      ]
+    },
+    {
+      "pid": 17493,
+      "displayName": "libproot.so",
+      "code": 0,
+      "memory": [
+        "Max data size             unlimited            unlimited            bytes",
+        "Max address space         unlimited            unlimited            bytes"
+      ]
+    },
+    {
+      "pid": 17682,
+      "displayName": "dbus-run-session",
+      "code": 0,
+      "memory": [
+        "Max data size             unlimited            unlimited            bytes",
+        "Max address space         unlimited            unlimited            bytes"
+      ]
+    },
+    {
+      "pid": 17686,
+      "displayName": "dbus-daemon",
+      "code": 0,
+      "memory": [
+        "Max data size             unlimited            unlimited            bytes",
+        "Max address space         unlimited            unlimited            bytes"
+      ]
+    },
+    {
+      "pid": 17697,
+      "displayName": "bash",
+      "code": 0,
+      "memory": [
+        "Max data size             unlimited            unlimited            bytes",
+        "Max address space         unlimited            unlimited            bytes"
+      ]
+    },
+    {
+      "pid": 18033,
+      "displayName": "gnome-keyring-daemon",
+      "code": 0,
+      "memory": [
+        "Max data size             unlimited            unlimited            bytes",
+        "Max address space         unlimited            unlimited            bytes"
+      ]
+    },
+    {
+      "pid": 18090,
+      "displayName": "python3",
+      "code": 0,
+      "memory": [
+        "Max data size             unlimited            unlimited            bytes",
+        "Max address space         unlimited            unlimited            bytes"
+      ]
+    },
+    {
+      "pid": 18092,
+      "displayName": "xfwm4",
+      "code": 0,
+      "memory": [
+        "Max data size             unlimited            unlimited            bytes",
+        "Max address space         unlimited            unlimited            bytes"
+      ]
+    },
+    {
+      "pid": 18094,
+      "displayName": "ChatGPT",
+      "code": 0,
+      "memory": [
+        "Max data size             unlimited            unlimited            bytes",
+        "Max address space         unlimited            unlimited            bytes"
+      ]
+    },
+    {
+      "pid": 18309,
+      "displayName": "browser_crashpad_handler",
+      "code": 0,
+      "memory": [
+        "Max data size             unlimited            unlimited            bytes",
+        "Max address space         unlimited            unlimited            bytes"
+      ]
+    },
+    {
+      "pid": 18317,
+      "displayName": "browser_crashpad_handler",
+      "code": 0,
+      "memory": [
+        "Max data size             unlimited            unlimited            bytes",
+        "Max address space         unlimited            unlimited            bytes"
+      ]
+    },
+    {
+      "pid": 18325,
+      "displayName": "Codex",
+      "code": 0,
+      "memory": [
+        "Max data size             unlimited            unlimited            bytes",
+        "Max address space         unlimited            unlimited            bytes"
+      ]
+    },
+    {
+      "pid": 18338,
+      "displayName": "Codex",
+      "code": 0,
+      "memory": [
+        "Max data size             unlimited            unlimited            bytes",
+        "Max address space         unlimited            unlimited            bytes"
+      ]
+    },
+    {
+      "pid": 18566,
+      "displayName": "Codex",
+      "code": 0,
+      "memory": [
+        "Max data size             unlimited            unlimited            bytes",
+        "Max address space         unlimited            unlimited            bytes"
+      ]
+    },
+    {
+      "pid": 18770,
+      "displayName": "proot",
+      "code": 0,
+      "memory": [
+        "Max data size             unlimited            unlimited            bytes",
+        "Max address space         unlimited            unlimited            bytes"
+      ]
+    },
+    {
+      "pid": 19178,
+      "displayName": "Codex",
+      "code": 0,
+      "memory": [
+        "Max data size             unlimited            unlimited            bytes",
+        "Max address space         unlimited            unlimited            bytes"
+      ]
+    },
+    {
+      "pid": 19203,
+      "displayName": "Codex",
+      "code": 0,
+      "memory": [
+        "Max data size             unlimited            unlimited            bytes",
+        "Max address space         unlimited            unlimited            bytes"
+      ]
+    },
+    {
+      "pid": 19243,
+      "displayName": "Codex",
+      "code": 0,
+      "memory": [
+        "Max data size             4294967296           4294967296           bytes",
+        "Max address space         unlimited            unlimited            bytes"
+      ]
+    },
+    {
+      "pid": 19943,
+      "displayName": "Codex",
+      "code": 0,
+      "memory": [
+        "Max data size             8589934592           8589934592           bytes",
+        "Max address space         unlimited            unlimited            bytes"
+      ]
+    },
+    {
+      "pid": 19985,
+      "displayName": "codex",
+      "code": 0,
+      "memory": [
+        "Max data size             unlimited            unlimited            bytes",
+        "Max address space         unlimited            unlimited            bytes"
+      ]
+    },
+    {
+      "pid": 22187,
+      "displayName": "Codex",
+      "code": 0,
+      "memory": [
+        "Max data size             8589934592           8589934592           bytes",
+        "Max address space         unlimited            unlimited            bytes"
+      ]
+    },
+    {
+      "pid": 22188,
+      "displayName": "Codex",
+      "code": 0,
+      "memory": [
+        "Max data size             8589934592           8589934592           bytes",
+        "Max address space         unlimited            unlimited            bytes"
+      ]
+    }
+  ]
+}

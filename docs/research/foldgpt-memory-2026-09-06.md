@@ -73,3 +73,43 @@ warranty bit 0, verified boot green, flash locked 1 and SELinux Enforcing.
 The command is documented in the [Android 17 behavior changes](https://developer.android.com/about/versions/17/behavior-changes-all),
 reopened in the integrated browser on 7 September; the page is dated 4 August
 2026. Its mutating `ignore` and `manual` commands were not used.
+
+## New live observation, 7 September at 07:00 Paris
+
+The corrected collector uses `adb shell -T` and checks exit status, UID,
+per-process starttime, boot identity and process membership around the sequential
+snapshot. A denied, malformed or raced PSS reading now makes the whole-UID total
+unknown; a partial observed sum is separately labelled. Seven regression tests
+cover CRLF, denied/empty readings, partial coverage, PID reuse/changed owner,
+membership changes and failed process enumeration. The independent review also
+required a final starttime check to detect reuse after a process's individual
+PSS reading window. All seven pass. Matching boundary sets do not rule out
+transient processes between these sequential observations.
+
+The actual new observation is retained in
+`downloads/runtime/android-memory-v3-20260907.json`; its SHA-256, collector
+identity, figures and process limits are in the tracked
+[verification report](../../recovery/verification/android-memory-20260907.json).
+
+| Observation | Result |
+| --- | --- |
+| MemTotal | 11,351,456 KiB = 10.83 GiB usable by Android |
+| MemAvailable at this instant | 3,655,348 KiB = 3.49 GiB |
+| FoldGPT UID 10412 | 23 processes, all 23 PSS readings usable |
+| Sum of PSS | 712,435 KiB = 695.74 MiB |
+| Main app, runtime, PRoot, official client and engine | RLIMIT_DATA and RLIMIT_AS unlimited |
+| Four interface child processes | One RLIMIT_DATA of 4 GiB, three of 8 GiB |
+| Boot before and after | `348d453e-f4e5-40e0-8ef0-030f4d5e38af` |
+
+This does not account for every allocation attributable to the project: graphics
+driver accounting is incomplete and Shizuku executes under UID2000, outside the
+FoldGPT UID. The reading is not an atomic memory snapshot, and availability and
+PSS change with reclaim and workload. It does not demonstrate an aggregate 2 GiB
+limit or mean that reserving 4 GiB is possible or needed.
+
+Separately, the experimental Bionic supervisor currently validates a maximum
+`data_bytes` of 2 GiB in `processes.py`, `wire.py` and `runner.c`; the runner applies
+it as **per-process RLIMIT_DATA**, not a physical RAM reservation or workspace
+quota. Its general default is 256 MiB and the fixed qualification uses 16 MiB.
+These configured limits do not describe the already-running official interface.
+No memory limit was raised or removed by this observation.

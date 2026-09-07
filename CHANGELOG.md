@@ -2,6 +2,12 @@
 
 ## Unreleased — 2026-09-06
 
+- Correct read-only memory accounting to retain remote ADB failures and reject
+  missing, partial or raced PSS as complete totals. Seven regression tests pass;
+  the live 23-process FoldGPT observation is retained with actual rlimits.
+  Audit remaining ExecutorOnly controller paths and their required authorities;
+  clarify the current V11 handoff versus retained V10 and older build history.
+
 - Published private recovery supplement v7: 2,819 files downloaded,
   authenticated and restored, then 2,818 project files independently verified
   after additive merge into the Windows clone. All 25 release assets match

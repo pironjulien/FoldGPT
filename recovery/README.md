@@ -69,7 +69,7 @@ Ce complément contient 123 fichiers vérifiés et l'APK debug de FoldGPT
 compilé et signé, **pas installé sur le téléphone**. Il reste séparé de
 l'ancienne sortie APK de l'archive principale. Voir le
 [rapport de restauration](verification/github-supplement-v2-restoration.json).
-Le superviseur actuel figé est `foldgpt-bionic-supervisor-8Kd8xQRE` ; il inclut
+Le superviseur figé de ce complément v2 est `foldgpt-bionic-supervisor-8Kd8xQRE` ; il inclut
 les corrections de revue sur les threads et l'attente réelle du superviseur.
 Les anciens fichiers `native-checkpoint*` sans `v2` restent une preuve
 historique de l'étape précédente et ne sont pas le complément à utiliser.
