@@ -39,16 +39,21 @@ ancien checkpoint ; il ne reçoit pas cette sauvegarde privée.
 
 ## Suite concrète
 
-1. Qualifier `/proc/TID/mem`, `pidfd_getfd` et les mêmes accès depuis un thread
+1. Le diagnostic Android est désormais installé dans le laboratoire autorisé
+   `app.foldgpt.shizukuprobe` v6. Shizuku a réellement lancé le bootstrap UID2000,
+   mais celui-ci est sorti70 avant `ready` et avant le worker, avec attente JNI
+   et nettoyage complets. Le stade et l'exception de préparation sont en cours
+   d'ajout dans une nouvelle version ; conserver le rapport et la réservation
+   `files/kernel-v2`, ne pas rejouer v6. Voir le
+   [rapport actuel](../docs/research/native-kernel-qualification-2026-09-07.md).
+   Les chemins APK et les 81 alias Python ont été résolus et vérifiés contre le
+   vrai `nativeLibraryDir`. Il faut les recalculer après chaque installation.
+2. Après résolution de ce démarrage, qualifier `/proc/TID/mem`, `pidfd_getfd` et les mêmes accès depuis un thread
    secondaire dans le **véritable UserService Shizuku**. La
    [qualification minimale](../tools/executor/bionic-supervisor/qualification.md)
    décrit la fixture vierge, l'unique requête, les empreintes, les résultats
    attendus et le nettoyage. Les preuves PC ne constituent pas des preuves
    Android et ne doivent pas être rebaptisées.
-2. Résoudre depuis le paquet installé les chemins des helpers, du superviseur
-   et des exécutables. Le `nativeLibraryDir` Android change à l'installation ;
-   l'admission du shim le traite déjà, les autres entrées doivent être rendues
-   concrètes sans inventer un chemin `/data/app` ni relâcher les contrôles.
 3. Relier au service Android la liaison moteur/ExecServer maintenant prouvée sur
    PC. Le transport doit conserver politiques, flux, erreurs et ownership. Le runtime reste
    local (`is_remote=false`) ; les chemins invisibles au contrôleur sont

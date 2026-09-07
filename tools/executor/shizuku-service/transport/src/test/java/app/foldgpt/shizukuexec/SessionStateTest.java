@@ -8,6 +8,8 @@ public final class SessionStateTest {
     private static final String PREFIX = "{\"schema\":\"foldgpt.shizuku.session.v1\",\"event\":\"";
     private static final String READY = PREFIX + "ready\"}";
     private static final String CLEAN = PREFIX + "closed\",\"cleanupComplete\":true,\"exitCode\":0}";
+    private static final String SETUP = PREFIX + "setup_failed\",\"stage\":\"broker_open\",\"errorType\":\"NotImplementedError\","
+        + "\"errno\":null,\"source\":\"private_exec_broker.py\",\"line\":98,\"message\":\"chmod: cannot use dir_fd and follow_symlinks together\"}";
     private SessionState state() { return new SessionState(2000, 10412); }
 
     @Test public void authenticatesActualApplicationUidOnly() {
@@ -72,5 +74,49 @@ public final class SessionStateTest {
         org.json.JSONObject result = new org.json.JSONObject(state.json());
         assertFalse(result.getBoolean("bootstrapReaped"));
         assertTrue(result.getBoolean("refusedBeforeFork"));
+    }
+    @Test public void setupDiagnosticNeverReplacesActualCleanupAndWait() throws Exception {
+        SessionState state = state(); state.report(SETUP);
+        JSONObjectAssertions.requireSetup(state.json());
+        assertFalse(state.releasable());
+        state.reaped(70 << 8); assertFalse(state.releasable());
+        state.report(CLEAN.replace(":0}", ":70}")); assertTrue(state.releasable());
+        SessionState quarantined = state(); quarantined.report(SETUP);
+        quarantined.report(PREFIX + "quarantined\",\"cleanupComplete\":false}");
+        quarantined.reaped(70 << 8); assertFalse(quarantined.releasable());
+        SessionState denied = state(); denied.report(SETUP.replace("NotImplementedError", "PermissionError").replace("null", "13"));
+        assertEquals(13, new org.json.JSONObject(denied.json()).getJSONObject("setupError").getInt("errno"));
+        assertFalse(denied.releasable());
+    }
+    @Test public void setupDiagnosticRejectsSuccessReadyDuplicatesAndLateFrames() {
+        SessionState state = state(); state.report(SETUP);
+        for (String invalid : new String[] {SETUP, READY, CLEAN})
+            assertThrows(IllegalArgumentException.class, () -> state.report(invalid));
+        SessionState ready = state(); ready.report(READY);
+        assertThrows(IllegalArgumentException.class, () -> ready.report(SETUP));
+        SessionState closed = state(); closed.report(CLEAN);
+        assertThrows(IllegalArgumentException.class, () -> closed.report(SETUP));
+    }
+    @Test public void setupDiagnosticRejectsCoercionDuplicateKeysEscapesAndBounds() {
+        for (String invalid : new String[] {
+            SETUP.replace("broker_open", "arbitrary"), SETUP.replace("null", "\"null\""),
+            SETUP.replace("null", "true"), SETUP.replace("null", "4096"), SETUP.replace("null", "01"),
+            SETUP.replace("\"line\":98", "\"line\":98,\"line\":98"),
+            SETUP.replace("\"line\":98", "\"line\":-1"), SETUP.replace("\"line\":98", "\"line\":1000000"),
+            SETUP.replace("chmod: cannot use dir_fd and follow_symlinks together", "x".repeat(161)),
+            SETUP.replace("chmod:", "\\nchmod:"), SETUP.replace("private_exec_broker.py", "../../file.py"), SETUP + "tail"
+        }) {
+            SessionState state = state();
+            assertThrows(IllegalArgumentException.class, () -> state.report(invalid));
+            assertFalse(state.releasable());
+        }
+    }
+    private static final class JSONObjectAssertions {
+        static void requireSetup(String raw) throws Exception {
+            org.json.JSONObject value = new org.json.JSONObject(raw).getJSONObject("setupError");
+            assertEquals("broker_open", value.getString("stage"));
+            assertEquals("NotImplementedError", value.getString("errorType"));
+            assertTrue(value.isNull("errno")); assertEquals(98, value.getInt("line"));
+        }
     }
 }

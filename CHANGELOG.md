@@ -2,6 +2,8 @@
 
 ## Unreleased — 2026-09-06
 
+- Added exclusive staging and independent device snapshots for the fixed native kernel qualification. The actual v2 Fold fixture is verified for exact bytes, ownership and permissions; the collector preserves remote exit status and transfers file bytes as base64 to avoid this Windows ADB build's stdout newline conversion. Earlier invalid collection attempts are preserved and explicitly superseded. This prepares the trial without claiming native execution.
+
 - Completed private GitHub recovery validation: downloaded/authenticated/restored the full encrypted archive, checked all 113,900 files and 441 symlinks, then hydrated a real Windows clone and verified its 100,332 ignored data files byte-for-byte without changing tracked sources. Published corrected native artifacts and exact engine/vendor source recovery; OneDrive reports the recovery/signing identities in sync. Global tool installations and regenerable caches remain documented separately.
 
 - Verified the auxiliary Rust engine against the actual Python ExecServer and corrected C supervisor on the PC. Real process/file operations, full policy, binary streams, exit, disconnection without replay and separate native cleanup pass; 27 targeted regressions and final Clippy pass. The exact engine patch restores from a fresh upstream clone and its test logs are preserved in private recovery. Android registration remains inactive.

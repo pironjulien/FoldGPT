@@ -58,13 +58,41 @@ command is supplied for review, not an instruction to repeat unchanged tests.
 
 ## Android integration contract for independent review
 
+The diagnostic APK now selects
+`tools.executor.bionic-supervisor.qualification_factory:factory`. This separate
+facade calls the unchanged production factory but admits only one exact fixed
+start, then `process/read` and `process/terminate` with exactly
+`{"processId":"kernel-qualification"}`. Extra fields, altered arguments,
+environment, policy, or stdin configuration and every filesystem RPC are
+refused. Repeated starts are refused without replay. Backend options must use
+the exact limits and runtime grants below and installed native-library paths;
+parentEnvironment is absent or empty, and cwdShim is absent.
+
+The parent task selected the fresh v2 fixture. Its sibling `evidence.json` must
+not already exist. The facade opens that file exclusively as mode0600 through
+the pinned shell-owned mode0700 parent. It writes the real process result when
+the actual factory record finishes, including stdout/stderr, nativeResult,
+supervisorPid/Returncode/Waited, processClosed, quarantine, and the still-live
+bootstrap's PID and bounded `/proc/self/status` plus security-context reads.
+This is explicitly `lifetimeScope: native-process-only`: neither a completed
+record nor this file proves the bootstrap/JNI wait. A final record from a
+still-live stopped owner produces success=false, supervisorWaited=false and
+quarantined=true. Cleanup and lease ownership remain entirely with the real
+backend. Evidence failure cannot turn native cleanup into success.
+
+Six nonroot host facade tests passed against the frozen 8Kd8xQRE binaries:
+actual main/pthread result before backend close, exact-request enforcement,
+concurrent duplicate refusal, a real missing-input failure with clean owner,
+the host-only stopped-owner quarantine fault, and exclusive/alias-safe evidence
+creation. The Android native C artifacts remain byte-identical to 8Kd8xQRE.
+
 Use the existing authenticated Shizuku ExecServer/JNI transport, in actual
 UID/GID2000, SELinux `u:r:shell:s0`, with no effective/permitted/inheritable or
 ambient capability. Do not invoke the old GNU/PRoot/ptrace runtime or replace
 the previous successful fixed-lab probe. This is a new disposable qualification
 deployment, for example:
 
-`/data/local/tmp/foldgpt-bionic-supervisor-qualification-v1/workspace`.
+`/data/local/tmp/foldgpt-bionic-supervisor-qualification-v2/workspace`.
 
 Prepare this previously nonexistent directory as shell-owned mode0700. Fixed
 contents, all files mode0600 and directories mode0700:
@@ -103,7 +131,7 @@ After the normal initialize / initialized handshake, send this exact start
 request through the authenticated ExecServer session:
 
 ```json
-{"id":2,"method":"process/start","params":{"processId":"kernel-qualification","argv":["kernel-qualification"],"cwd":"file:///data/local/tmp/foldgpt-bionic-supervisor-qualification-v1/workspace","env":{},"pipeStdin":false,"tty":false,"sandbox":{"permissions":{"type":"managed","file_system":{"type":"restricted","entries":[{"path":{"type":"path","path":"file:///data/local/tmp/foldgpt-bionic-supervisor-qualification-v1/workspace"},"access":"write"},{"path":{"type":"path","path":"file:///data/local/tmp/foldgpt-bionic-supervisor-qualification-v1/workspace/private"},"access":"deny"}]},"network":"restricted"},"cwd":"file:///data/local/tmp/foldgpt-bionic-supervisor-qualification-v1/workspace","workspaceRoots":["file:///data/local/tmp/foldgpt-bionic-supervisor-qualification-v1/workspace"],"windowsSandboxLevel":"disabled"}}}
+{"id":2,"method":"process/start","params":{"processId":"kernel-qualification","argv":["kernel-qualification"],"cwd":"file:///data/local/tmp/foldgpt-bionic-supervisor-qualification-v2/workspace","env":{},"pipeStdin":false,"tty":false,"sandbox":{"permissions":{"type":"managed","file_system":{"type":"restricted","entries":[{"path":{"type":"path","path":"file:///data/local/tmp/foldgpt-bionic-supervisor-qualification-v2/workspace"},"access":"write"},{"path":{"type":"path","path":"file:///data/local/tmp/foldgpt-bionic-supervisor-qualification-v2/workspace/private"},"access":"deny"}]},"network":"restricted"},"cwd":"file:///data/local/tmp/foldgpt-bionic-supervisor-qualification-v2/workspace","workspaceRoots":["file:///data/local/tmp/foldgpt-bionic-supervisor-qualification-v2/workspace"],"windowsSandboxLevel":"disabled"}}}
 ```
 
 Collect process/output, process/exited and process/closed notifications and the

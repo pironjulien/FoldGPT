@@ -1,0 +1,122 @@
+"""Add verified supplemental ignored files without replacing any existing data.
+
+Run only after restore-archive.py authenticated and verified the source snapshot.
+Git sources, submodules, existing bytes and literal link targets are preserved.
+All collisions are checked before the first copy. No phone operation occurs.
+"""
+import argparse
+import hashlib
+import json
+import os
+from pathlib import Path
+import shutil
+import stat
+import subprocess
+
+
+def digest(path):
+    with path.open('rb') as stream:
+        return hashlib.file_digest(stream, 'sha256').hexdigest()
+
+
+def merge(source, project):
+    source, project = source.resolve(strict=True), project.resolve(strict=True)
+    if source == project or source.is_relative_to(project) or project.is_relative_to(source):
+        raise ValueError('Supplement and Git project must be separate directories')
+    git = ['git', '-C', str(project)]
+    root = subprocess.check_output(git + ['rev-parse', '--show-toplevel'], text=True).strip()
+    if Path(root).resolve() != project:
+        raise ValueError('Project must be the Git root')
+    index = subprocess.check_output(git + ['ls-files', '--stage', '-z']).split(b'\0')
+    tracked, submodules = set(), set()
+    for row in filter(None, index):
+        header, raw = row.split(b'\t', 1)
+        name = os.fsdecode(raw)
+        tracked.add(name)
+        if header.startswith(b'160000 '):
+            submodules.add(name)
+    candidates = []
+    for base, directories, files in os.walk(source, followlinks=False):
+        directories[:] = sorted(name for name in directories if name != '.git')
+        paths = [Path(base) / name for name in sorted(files) if name != '.git']
+        paths += [Path(base) / name for name in directories]
+        for path in paths:
+            relative = path.relative_to(source)
+            name = relative.as_posix()
+            if name in tracked or any(name == boundary or name.startswith(boundary + '/') for boundary in submodules):
+                continue
+            candidates.append((path, relative, name))
+    classified = subprocess.run(git + ['check-ignore', '-z', '--stdin'],
+        input=b''.join(os.fsencode(name + ('/' if path.is_dir() and not path.is_symlink() else '')) + b'\0'
+                       for path, _, name in candidates), capture_output=True)
+    if classified.returncode not in (0, 1):
+        raise RuntimeError('Cannot classify supplemental files')
+    ignored = {os.fsdecode(name).removesuffix('/') for name in classified.stdout.split(b'\0') if name}
+    pending, missing_directories, identical = [], [], 0
+    for path, relative, name in candidates:
+        if name not in ignored:
+            continue
+        destination = project / relative
+        # Never follow a link in the destination's parent chain, even inside Git.
+        parent = destination.parent
+        while parent != project:
+            if parent.is_symlink() or (parent.exists() and not parent.is_dir()):
+                raise ValueError('Unsafe existing supplemental parent: ' + name)
+            parent = parent.parent
+        mode = path.lstat().st_mode
+        if stat.S_ISLNK(mode):
+            expected = ('link', os.readlink(path))
+        elif stat.S_ISDIR(mode):
+            if destination.is_symlink() or (destination.exists() and not destination.is_dir()):
+                raise FileExistsError('Existing directory differs; nothing replaced: ' + name)
+            if not destination.exists():
+                missing_directories.append((path, destination))
+            continue
+        elif stat.S_ISREG(mode):
+            expected = ('file', digest(path))
+        else:
+            raise ValueError('Unsupported supplemental file type: ' + name)
+        if destination.exists() or destination.is_symlink():
+            same = (destination.is_symlink() and expected == ('link', os.readlink(destination)))
+            if not destination.is_symlink() and destination.is_file() and expected[0] == 'file':
+                same = digest(destination) == expected[1]
+            if not same:
+                raise FileExistsError('Existing data differ; nothing replaced: ' + name)
+            identical += 1
+        else:
+            pending.append((path, destination, name, expected))
+    for path, destination in sorted(missing_directories, key=lambda row: len(row[1].parts)):
+        destination.mkdir(parents=True, exist_ok=True)
+    for path, destination, name, expected in pending:
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        if expected[0] == 'link':
+            os.symlink(expected[1], destination)
+        else:
+            with path.open('rb') as original, destination.open('xb') as output:
+                shutil.copyfileobj(original, output)
+            shutil.copystat(path, destination, follow_symlinks=False)
+            if digest(destination) != expected[1]:
+                raise RuntimeError('Supplement changed while copying: ' + name)
+    for path, destination in sorted(missing_directories, key=lambda row: len(row[1].parts), reverse=True):
+        shutil.copystat(path, destination, follow_symlinks=False)
+    return {'sourceCommit': subprocess.check_output(git + ['rev-parse', 'HEAD'], text=True).strip(),
+            'addedFilesAndLinks': len(pending), 'identicalExistingFilesAndLinks': identical,
+            'addedDirectories': len(missing_directories),
+            'sourceFilesOverwritten': False, 'existingDataReplaced': False,
+            'addedPaths': [row[2] for row in pending]}
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--snapshot', required=True, type=Path)
+    parser.add_argument('--project', required=True, type=Path)
+    parser.add_argument('--report', required=True, type=Path)
+    args = parser.parse_args()
+    report = merge(args.snapshot, args.project)
+    args.report.parent.mkdir(parents=True, exist_ok=True)
+    args.report.write_text(json.dumps(report, indent=2) + '\n')
+    print(json.dumps({key: value for key, value in report.items() if key != 'addedPaths'}))
+
+
+if __name__ == '__main__':
+    main()

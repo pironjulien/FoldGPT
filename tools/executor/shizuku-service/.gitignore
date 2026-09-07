@@ -2,5 +2,6 @@
 build/
 transport/build/
 transport/.cxx/
+qualification/build/
 local.properties
 __pycache__/

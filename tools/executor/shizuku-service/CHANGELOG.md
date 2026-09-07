@@ -2,6 +2,23 @@
 
 ## 2026-09-07
 
+- Add a canonical private setup_failed frame with bounded stage, exception,
+  errno, basename/line and ASCII message. The parser accepts it only before ready,
+  rejects duplicates/late success, and retains the existing actual wait/cleanup
+  ownership gate. Real host setup failures and20 JVM tests pass. Lab v7 uses a
+  new kernel-v3 report/attempt directory while retaining the fixed native basev2.
+
+- Reuse the single fixed diagnostic Activity source in laboratory v6, with
+  KERNEL_* actions and a canonical private kernel-v2 report subdirectory.
+- Add explicit hash-checked frozen JNI inputs for the additive lab build so
+  its transport and shim retain the previously reviewed APK bytes exactly.
+
+- Added a separate fixed-kernel diagnostic APK using the actual authenticated
+  UserService transport, with one attempt and independent native/JNI evidence.
+- Resolve attested helper, runner and worker markers from PackageManager and
+  the real interpreter ELF; verify all native hashes and staged Python data
+  before shell-side fork. The diagnostic never selects general model commands.
+
 - Added an independently built Shizuku transport library with caller-UID
   authentication, session ownership and once-only RPC pipe transfers.
 - Added an APK-owned fixed Python bootstrap and async-signal-safe JNI launcher

@@ -32,9 +32,13 @@ public final class Deployment {
         String name = config.getString("pythonLibrary");
         File directory = new File(context.getApplicationInfo().nativeLibraryDir).getCanonicalFile();
         File file = InstalledLibrary.verify(directory, name, config.getString("pythonSha256"));
+        InstalledLibrary.verifyInventory(config, directory);
         InstalledLibrary.verifyCwd(config.getJSONObject("backendOptions"), directory);
+        // Shell-owned data are intentionally inaccessible to the application UID.
+        // The real UserService repeats APK admission and checks them before fork.
+        if (android.system.Os.getuid() == 2000) PythonRuntime.verify(context, config, directory);
         executable = file.getPath();
-        argv = new String[] {executable, "-I", "-S", "-u", "-c", ENTRY, context.getApplicationInfo().sourceDir};
+        argv = new String[] {executable, "-I", "-S", "-B", "-u", "-c", ENTRY, context.getApplicationInfo().sourceDir};
         transportLibrary = new File(directory, "libfoldgpt_shizuku_transport.so").getPath();
     }
     static byte[] readBounded(InputStream input, int limit) throws Exception {

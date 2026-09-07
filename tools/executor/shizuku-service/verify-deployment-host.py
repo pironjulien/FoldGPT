@@ -54,6 +54,26 @@ def run(shim):
         assert good["options"] == {**config["backendOptions"], "cwdShim": {"path": str(library), "sha256": digest}}, good
         assert config["backendOptions"]["cwdShim"]["path"] == MARKER
         observations = {"actualPackagePath": str(directory), "success": good}
+        native_config = {"pythonLibrary": interpreter.name, "pythonSha256": hashlib.sha256(interpreter.read_bytes()).hexdigest(),
+            "nativeLibraries": {interpreter.name: hashlib.sha256(interpreter.read_bytes()).hexdigest(), LIBRARY_NAME: digest},
+            "backendOptions": {"helper": MARKER, "handleHelper": MARKER, "processRunner": MARKER,
+                "executables": {"fixed-worker": MARKER}, "runtime": [{"path": MARKER, "execute": True},
+                    {"path": "/system/lib64", "execute": True}], "workspace": "/unchanged-workspace"}}
+        native_good = invoke(native_config)
+        assert native_good["ok"] and native_good["options"]["helper"] == str(library), native_good
+        assert native_good["options"]["executables"] == {"fixed-worker": str(library)}, native_good
+        assert native_good["options"]["runtime"] == [{"path": str(library), "execute": True},
+                    {"path": "/system/lib64", "execute": True}], native_good
+        assert native_good["options"]["workspace"] == "/unchanged-workspace", native_good
+        assert native_config["backendOptions"]["helper"] == MARKER
+        observations["nativeInventory"] = native_good
+        for field in ("helper", "handleHelper", "processRunner"):
+            bad = invoke({**native_config, "backendOptions": {**native_config["backendOptions"], field: str(library)}})
+            assert not bad["ok"], bad
+        bad = invoke({**native_config, "nativeLibraries": {**native_config["nativeLibraries"], LIBRARY_NAME: "0" * 64}})
+        assert not bad["ok"], bad
+        bad = invoke({**native_config, "backendOptions": {**native_config["backendOptions"], "executables": {"fixed-worker": "@nativeLibraryDir/libabsent.so"}}})
+        assert not bad["ok"], bad
         for name, invalid in {
             "absolute": {"path": str(library), "sha256": digest},
             "traversal": {"path": "@nativeLibraryDir/../" + LIBRARY_NAME, "sha256": digest},

@@ -67,4 +67,19 @@ public final class InstalledLibraryTest {
         Files.delete(library.toPath());
         InstalledLibrary.verifyCwd(new JSONObject(), directory);
     }
+
+    @Test public void attestedInventoryRequiresMarkersForEveryExecutableRole() throws Exception {
+        JSONObject backend = new JSONObject().put("helper", InstalledLibrary.CWD_PATH)
+            .put("handleHelper", InstalledLibrary.CWD_PATH).put("processRunner", InstalledLibrary.CWD_PATH)
+            .put("executables", new JSONObject().put("fixed", InstalledLibrary.CWD_PATH))
+            .put("runtime", new org.json.JSONArray().put(new JSONObject().put("path", InstalledLibrary.CWD_PATH).put("execute", true)));
+        JSONObject config = new JSONObject().put("pythonLibrary", InstalledLibrary.CWD_NAME).put("pythonSha256", digest)
+            .put("nativeLibraries", new JSONObject().put(InstalledLibrary.CWD_NAME, digest)).put("backendOptions", backend);
+        InstalledLibrary.verifyInventory(config, directory);
+        backend.put("helper", library.getPath());
+        assertThrows(SecurityException.class, () -> InstalledLibrary.verifyInventory(config, directory));
+        backend.put("helper", InstalledLibrary.CWD_PATH);
+        backend.getJSONObject("executables").put("fixed", "@nativeLibraryDir/libabsent.so");
+        assertThrows(SecurityException.class, () -> InstalledLibrary.verifyInventory(config, directory));
+    }
 }

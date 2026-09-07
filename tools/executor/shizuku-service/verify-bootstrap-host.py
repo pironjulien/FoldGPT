@@ -56,9 +56,23 @@ def read_line(stream, timeout=5):
 def run():
     if os.getuid() == 0:
         raise SystemExit("Run under an ordinary Linux UID")
+    # Exercise the actual diagnostic encoder with the maximal admitted fields,
+    # quotes, non-ASCII and newline content; it must remain one <=512-byte frame.
+    encoder = (
+        "import sys;sys.path.insert(0,sys.argv[1]);"
+        "from foldgpt_shizuku_bootstrap import report_setup_failure;"
+        "error=type('E'*64,(Exception,),{})(('x\\n\\\"\\\\é'*200));"
+        "report_setup_failure('factory_construct',error)"
+    )
+    encoded = subprocess.run([sys.executable, "-I", "-S", "-c", encoder,
+        str(HERE / "transport/src/main/assets/foldgpt-executor")], env={}, capture_output=True, check=True, timeout=5)
+    assert encoded.stdout == b"" and len(encoded.stderr) <= 512 and encoded.stderr.count(b"\n") == 1
+    value = json.loads(encoded.stderr)
+    assert len(value["errorType"]) == 64 and len(value["message"]) == 160 and value["errno"] is None
+    assert all(32 <= ord(char) <= 126 and char not in '\\"' for char in value["message"])
     with tempfile.TemporaryDirectory(prefix="foldgpt-bootstrap-", dir="/var/tmp") as temporary:
         root = Path(temporary)
-        for mode in ("eof", "cancel-open-input", "quarantine"):
+        for mode in ("eof", "cancel-open-input", "quarantine", "bad-schema", "broker-permissions", "broker-missing", "factory-missing"):
             directory = root / mode
             directory.mkdir(mode=0o700)
             workspace = directory / "workspace"
@@ -73,6 +87,14 @@ def run():
                 "backendOptions": {"workspace": str(workspace), "failClose": mode == "quarantine"},
                 "environmentInfo": {"shell": {"name": "sh", "path": "/bin/sh"}, "cwd": "file:///workspace",
                     "userHomeDir": "file:///home/test", "platformOs": "linux"}}
+            if mode == "bad-schema":
+                config["schema"] = "invalid"
+            elif mode == "broker-permissions":
+                broker.chmod(0o777)
+            elif mode == "broker-missing":
+                config["brokerDirectory"] = str(directory / "missing-broker")
+            elif mode == "factory-missing":
+                config["backendFactory"] = "no_such_installed_host_factory:create_backend"
             with zipfile.ZipFile(apk, "w") as archive:
                 archive.writestr("assets/foldgpt-executor-deployment.json", json.dumps(config))
                 archive.writestr("assets/foldgpt-executor/transport_test_factory.py", FACTORY)
@@ -89,6 +111,30 @@ def run():
                 stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, bufsize=0)
             os.close(control_read)
             try:
+                if mode in {"bad-schema", "broker-permissions", "broker-missing", "factory-missing"}:
+                    diagnostic = read_line(process.stderr)
+                    expected_stage = {"bad-schema": "deployment", "broker-permissions": "broker_open",
+                                      "broker-missing": "broker_open", "factory-missing": "factory_import"}[mode]
+                    assert set(diagnostic) == {"schema", "event", "stage", "errorType", "errno", "source", "line", "message"}, diagnostic
+                    assert diagnostic["event"] == "setup_failed" and diagnostic["stage"] == expected_stage, diagnostic
+                    assert diagnostic["errorType"] == {"bad-schema": "ValueError", "broker-permissions": "PermissionError",
+                                                       "broker-missing": "FileNotFoundError", "factory-missing": "ModuleNotFoundError"}[mode], diagnostic
+                    assert diagnostic["errno"] == (2 if mode == "broker-missing" else None), diagnostic
+                    assert len(diagnostic["message"]) <= 160 and 0 < diagnostic["line"] < 1000000, diagnostic
+                    final = read_line(process.stderr)
+                    if mode == "factory-missing":
+                        assert final["event"] == "quarantined" and final["cleanupComplete"] is False, final
+                        assert process.poll() is None and (broker / "process-session.json").exists()
+                        # The deliberately missing factory module cannot create a
+                        # child; stop only this retained host-test bootstrap.
+                        process.kill(); process.wait(timeout=5)
+                    else:
+                        assert final == {"schema": "foldgpt.shizuku.session.v1", "event": "closed", "cleanupComplete": True, "exitCode": 70}, final
+                        assert process.wait(timeout=5) == 70
+                        assert not (broker / "process-session.json").exists()
+                    assert process.stdout.read() == b""
+                    assert not (workspace / "diagnostic-child.pid").exists()
+                    continue
                 assert read_line(process.stderr)["event"] == "ready"
                 assert (broker / "process-session.json").exists()
                 process.stdin.write(b'{"id":1,"method":"initialize","params":{"clientName":"transport-host"}}\n')
@@ -130,7 +176,7 @@ def run():
                     except subprocess.TimeoutExpired: process.kill(); process.wait(timeout=5)
                 for stream in (process.stdin, process.stdout, process.stderr):
                     stream.close()
-    print("PASS: actual ExecServer handshake; complete nested policy preserved and refused; real diagnostic child cleanup on stdin EOF and service EOF with stdin open; failed cleanup retains live owner and persistent marker")
+    print("PASS: actual ExecServer handshake; complete nested policy preserved and refused; real diagnostic child cleanup on stdin EOF and service EOF with stdin open; failed cleanup retains live owner and persistent marker; four real setup failures expose bounded stage/cause without changing cleanup/wait semantics")
 
 
 if __name__ == "__main__":
