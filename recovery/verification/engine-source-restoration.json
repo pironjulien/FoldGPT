@@ -2,7 +2,7 @@
   "restored": true,
   "freshUpstreamClone": true,
   "base": "3d2ee51ca2d5db578f328aa75e20aa22c0197c9a",
-  "restoredPatchSha256": "6570e5eaf91873c10e27dcacaa97480f61e9e6d3a9742b75f99a251ad8d148f6",
+  "restoredPatchSha256": "3de9c0db116c299bf091ad694ff64480d61417af45e3852b2626908ce4111504",
   "exactPatchMatch": true,
-  "destination": "C:\\Dev\\FoldGPT-recovery\\restored-engine-final-20260907"
+  "destination": "C:\\Dev\\FoldGPT-recovery\\restored-engine-native-rpc-20260907"
 }

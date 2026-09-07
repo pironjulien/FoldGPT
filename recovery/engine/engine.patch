@@ -1,8 +1,8 @@
 diff --git a/CHANGELOG.md b/CHANGELOG.md
-index 2eb564c560a4c85507169a26637f6bce59f7e1fb..461785d0087762719980053a052e01b52db73e7b 100644
+index 2eb564c560a4c85507169a26637f6bce59f7e1fb..bf67038bdf4444de971d30c70e2154cb6441e34f 100644
 --- a/CHANGELOG.md
 +++ b/CHANGELOG.md
-@@ -1 +1,13 @@
+@@ -1 +1,16 @@
  The changelog can be found on the [releases page](https://github.com/openai/codex/releases).
 +
 +## FoldGPT auxiliary engine — unreleased
@@ -14,14 +14,17 @@ index 2eb564c560a4c85507169a26637f6bce59f7e1fb..461785d0087762719980053a052e01b5
 +- Add a bounded owned-process output/control adapter and PC integration tests.
 +- Allow native providers to supply exclusively owned, bounded process events
 +  without a mandatory broadcast hop; verify real child output under backpressure.
++- Connect an authenticated fixed ExecServer transport as the real local runtime,
++  preserving full sandbox context and reporting disconnection without replay or
++  synthetic native completion. Verify Rust-to-Python-to-native execution on PC.
 +- Record incomplete Android bootstrap and host filesystem routes in
 +  `FOLDGPT-INTEGRATION.md`; no phone activation is included.
 diff --git a/FOLDGPT-INTEGRATION.md b/FOLDGPT-INTEGRATION.md
 new file mode 100644
-index 0000000000000000000000000000000000000000..52e75e09f5bbecb1787d3aa52e0dfcd1b68ddc38
+index 0000000000000000000000000000000000000000..ba6bfd0f657f191af812232ba3da12e9291aac6f
 --- /dev/null
 +++ b/FOLDGPT-INTEGRATION.md
-@@ -0,0 +1,129 @@
+@@ -0,0 +1,172 @@
 +# FoldGPT auxiliary engine: local runtime boundary
 +
 +Base: `rust-v0.153.4`, commit `3d2ee51ca2d5db578f328aa75e20aa22c0197c9a`.
@@ -71,14 +74,36 @@ index 0000000000000000000000000000000000000000..52e75e09f5bbecb1787d3aa52e0dfcd1
 +`Failed` remain distinct. This is available to an actual native `ExecProcess`
 +implementation, which still must supply its retained reads and native controls.
 +
++`ExecServerLocalRuntime::connect` now supplies a production wire adapter over one
++already-authenticated, bootstrap-owned pair of asynchronous I/O streams. It
++reuses the official ExecServer client and typed process/filesystem implementations,
++without a remote Environment, executable, URL or replacement transport. The
++bootstrap owns authentication and the independent native cleanup channel. The
++adapter never attaches the official stdio child supervisor, whose process-tree
++kill policy would conflict with that ownership.
++
++This fixed transport has no reconnect strategy. Process start is not replayed
++after sending; disconnect closes RPC admission even for previously cloned
++backends. A lost native read returns an error instead of the resumable client's
++synthetic `exited/closed` failure response; process events report `Failed` without
++inventing an exit. `disconnect()` closes transport only, and never attests native
++cleanup. The filesystem adapter retains the complete typed sandbox context,
++including cwd even when the ordinary remote helper could omit it.
++
++The official wire client retains its existing bounded broadcast/replay buffers;
++it does not automatically use `from_owned_receiver`. The new real integration
++test uses the native factory's explicit 32 KiB output cap. It does not establish
++lossless arbitrary-size output for this adapter.
++
 +## Integration still required
 +
 +The following are explicit limits of this increment, not supported Android paths:
 +
 +- Authenticate, start and monitor the native service in the real application
 +  bootstrap, then register the provider. No production activation path exists.
-+- Implement native `ExecBackend` and `ExecutorFileSystem` with the full request
-+  semantics. The tests use real PC-local backends, not Android backends.
++- Qualify the native factory behind `ExecServerLocalRuntime` on Android and
++  complete its unsupported request semantics. The same actual factory and C
++  supervisor are connected in the PC test, but this does not prove Android rights.
 +- Consume `ControllerPathAccess` in host command, terminal, one-shot shell,
 +  plugin-attribution, shell-admission, shell-snapshot and local file-watch routes.
 +  Several existing local branches still assume controller-visible filesystem
@@ -143,6 +168,27 @@ index 0000000000000000000000000000000000000000..52e75e09f5bbecb1787d3aa52e0dfcd1
 +new application/model qualification.
 +The matching `process::tests` library selection also passed all 15 cases,
 +including retained replay, late output and process lifecycle regressions.
++
++The real Rust-to-Python/native-factory integration passed with the independently
++qualified `/var/tmp/foldgpt-bionic-supervisor-8Kd8xQRE` build, running as uid 1000.
++`just test -p codex-exec-server --test native_local_runtime --run-ignored all`
++requires `FOLDGPT_NATIVE_FACTORY_BUILD` explicitly; without the prerequisite it
++cannot silently substitute a fake server. The test verifies exact serialized
++process and filesystem policy, all environment-policy fields, real cwd/env,
++separate stdout/stderr, actual stdin EOF, binary stdin/stdout, exit 23, successful
++file reads/writes, forbidden-path and unsupported-TTY refusals before mutation,
++managed-network refusal, and closure of a live worker's transport. Previously
++cloned execution/filesystem backends both reject later requests. An independent
++observer retains the actual supervisor result and termination status after RPC
++loss; all three workers report native cleanup and the interrupted worker reports
++`cancelled`. No second start or replacement server is observed.
++
++Evidence: `C:/Dev/foldgpt-engine-native-runtime-tests.log`. This test exercises the
++injected environment boundary, not the complete application/model loop on Android.
++The matching library selection passed 27 tests (268 filtered), covering local
++registration including the `ExecutorOnly` refusal, client disconnect/recovery,
++process event ordering, network admission, and previous remote filesystem cwd
++behavior. Evidence: `C:/Dev/foldgpt-engine-native-runtime-regression.log`.
 +
 +## Release lockfile normalization
 +
@@ -1851,17 +1897,71 @@ index 8d43ca03efd099dc8910a2622438c5e4c35f9702..58c5350091c690f9348526b172295163
  mod injected_models_cache;
  #[cfg(not(target_os = "windows"))]
  mod interrupt_hooks;
+diff --git a/codex-rs/exec-server/BUILD.bazel b/codex-rs/exec-server/BUILD.bazel
+index db2230799f6652d4606dc7653d68fd4eae2a41b6..8b8a0954b64b80a7fa89c71a083d78f03b4cd47a 100644
+--- a/codex-rs/exec-server/BUILD.bazel
++++ b/codex-rs/exec-server/BUILD.bazel
+@@ -19,6 +19,7 @@ codex_rust_crate(
+     ],
+     integration_compile_data_extra = [
+         "src/proto/codex.exec_server.relay.v1.rs",
++        "tests/fixtures/native_exec_server.py",
+     ],
+     # Keep the crate's tests single-threaded under Bazel because they install
+     # process-global test-binary dispatch state, and the remote exec-server
+diff --git a/codex-rs/exec-server/src/client.rs b/codex-rs/exec-server/src/client.rs
+index bd758cdd9ca360ae1dc8c0693c704e081253580d..b9c17801c9407f792597d2efd05bc4e28d85d4e1 100644
+--- a/codex-rs/exec-server/src/client.rs
++++ b/codex-rs/exec-server/src/client.rs
+@@ -127,6 +127,8 @@ use codex_http_client::HttpClientFactory;
+ 
+ #[path = "client/accepted.rs"]
+ pub(crate) mod accepted;
++#[path = "client/fixed_transport.rs"]
++mod fixed_transport;
+ pub(crate) mod http_client;
+ mod network_policy_audit;
+ #[path = "client_recovery.rs"]
+diff --git a/codex-rs/exec-server/src/client/fixed_transport.rs b/codex-rs/exec-server/src/client/fixed_transport.rs
+new file mode 100644
+index 0000000000000000000000000000000000000000..dcbc3acffc4958447b974848c6260f114f935921
+--- /dev/null
++++ b/codex-rs/exec-server/src/client/fixed_transport.rs
+@@ -0,0 +1,20 @@
++use super::ExecServerClient;
++use super::ExecServerError;
++
++impl ExecServerClient {
++    /// Disconnect a non-resumable transport without supervising its native owner.
++    pub(crate) async fn close_fixed_transport(&self) -> Result<(), ExecServerError> {
++        if self.inner.reconnect_strategy.is_some() {
++            return Err(ExecServerError::Protocol(
++                "fixed local transport must not have a reconnect strategy".into(),
++            ));
++        }
++        let rpc_client = self.rpc_client_without_recovery()?;
++        rpc_client.close_transport().await;
++        self.inner.request_recovery(
++            rpc_client,
++            "local executor transport closed by its owner".into(),
++        );
++        Ok(())
++    }
++}
 diff --git a/codex-rs/exec-server/src/environment.rs b/codex-rs/exec-server/src/environment.rs
-index 953f8d4da2518e447649aa520dba8f36496cca97..1cc32425b4fd7b3d044a237e7b12eed9d8a7562f 100644
+index 953f8d4da2518e447649aa520dba8f36496cca97..42ca72ca4022cdcbd60ef6dd7cfd34359b89e0ca 100644
 --- a/codex-rs/exec-server/src/environment.rs
 +++ b/codex-rs/exec-server/src/environment.rs
-@@ -48,6 +48,13 @@ use tracing::instrument::WithSubscriber;
+@@ -48,6 +48,16 @@ use tracing::instrument::WithSubscriber;
  
  #[path = "environment/accepted.rs"]
  mod accepted;
++#[path = "environment/exec_server_runtime.rs"]
++mod exec_server_runtime;
 +#[path = "environment/local_runtime.rs"]
 +mod local_runtime;
 +
++pub use exec_server_runtime::ExecServerLocalRuntime;
 +pub use local_runtime::ControllerPathAccess;
 +pub use local_runtime::LocalRuntime;
 +pub use local_runtime::LocalSandboxOwnership;
@@ -1869,7 +1969,7 @@ index 953f8d4da2518e447649aa520dba8f36496cca97..1cc32425b4fd7b3d044a237e7b12eed9
  
  pub const CODEX_EXEC_SERVER_URL_ENV_VAR: &str = "CODEX_EXEC_SERVER_URL";
  pub const CODEX_EXEC_SERVER_NOISE_REGISTRY_URL_ENV_VAR: &str =
-@@ -269,24 +276,56 @@ impl EnvironmentManager {
+@@ -269,24 +279,56 @@ impl EnvironmentManager {
          snapshot: EnvironmentProviderSnapshot,
          local_runtime_paths: Option<ExecServerRuntimePaths>,
          http_client_factory: HttpClientFactory,
@@ -1935,7 +2035,7 @@ index 953f8d4da2518e447649aa520dba8f36496cca97..1cc32425b4fd7b3d044a237e7b12eed9
              environment_map.insert(
                  LOCAL_ENVIRONMENT_ID.to_string(),
                  Arc::clone(&local_environment),
-@@ -667,6 +706,7 @@ pub struct Environment {
+@@ -667,6 +709,7 @@ pub struct Environment {
      filesystem: Arc<dyn ExecutorFileSystem>,
      http_client: Arc<dyn HttpClient>,
      local_runtime_paths: Option<ExecServerRuntimePaths>,
@@ -1943,7 +2043,7 @@ index 953f8d4da2518e447649aa520dba8f36496cca97..1cc32425b4fd7b3d044a237e7b12eed9
  }
  
  impl Environment {
-@@ -684,6 +724,7 @@ impl Environment {
+@@ -684,6 +727,7 @@ impl Environment {
                  OutboundProxyPolicy::ReqwestDefault,
              ))),
              local_runtime_paths: None,
@@ -1951,7 +2051,7 @@ index 953f8d4da2518e447649aa520dba8f36496cca97..1cc32425b4fd7b3d044a237e7b12eed9
          }
      }
  }
-@@ -764,6 +805,7 @@ impl Environment {
+@@ -764,6 +808,7 @@ impl Environment {
              )),
              http_client: Arc::new(RouteAwareHttpClient::new(http_client_factory)),
              local_runtime_paths: Some(local_runtime_paths),
@@ -1959,7 +2059,7 @@ index 953f8d4da2518e447649aa520dba8f36496cca97..1cc32425b4fd7b3d044a237e7b12eed9
          }
      }
  
-@@ -793,6 +835,7 @@ impl Environment {
+@@ -793,6 +838,7 @@ impl Environment {
              filesystem,
              http_client: Arc::new(client),
              local_runtime_paths,
@@ -1967,7 +2067,7 @@ index 953f8d4da2518e447649aa520dba8f36496cca97..1cc32425b4fd7b3d044a237e7b12eed9
          }
      }
  
-@@ -896,6 +939,9 @@ impl Environment {
+@@ -896,6 +942,9 @@ impl Environment {
          fields(remote = self.is_remote())
      )]
      pub async fn info(&self) -> Result<EnvironmentInfo, ExecServerError> {
@@ -1977,7 +2077,7 @@ index 953f8d4da2518e447649aa520dba8f36496cca97..1cc32425b4fd7b3d044a237e7b12eed9
          match &self.remote_client {
              Some(client) => client.environment_info().await,
              None => Ok(EnvironmentInfo::local()),
-@@ -951,6 +997,9 @@ impl Environment {
+@@ -951,6 +1000,9 @@ impl Environment {
          fields(remote = self.is_remote())
      )]
      pub async fn force_info(&self) -> Result<EnvironmentInfo, ExecServerError> {
@@ -1987,7 +2087,7 @@ index 953f8d4da2518e447649aa520dba8f36496cca97..1cc32425b4fd7b3d044a237e7b12eed9
          match &self.remote_client {
              Some(client) => client.get().await?.force_environment_info().await,
              None => Ok(EnvironmentInfo::local()),
-@@ -1066,6 +1115,9 @@ impl Environment {
+@@ -1066,6 +1118,9 @@ impl Environment {
  
      /// Returns whether startup has completed, including a first connection made by refresh.
      pub fn startup_finished(&self) -> bool {
@@ -1997,7 +2097,7 @@ index 953f8d4da2518e447649aa520dba8f36496cca97..1cc32425b4fd7b3d044a237e7b12eed9
          self.remote_client
              .as_ref()
              .is_none_or(LazyRemoteExecServerClient::startup_finished)
-@@ -1078,6 +1130,9 @@ impl Environment {
+@@ -1078,6 +1133,9 @@ impl Environment {
          fields(remote = self.is_remote())
      )]
      pub async fn wait_until_ready(&self) -> Result<(), ExecServerError> {
@@ -2007,7 +2107,7 @@ index 953f8d4da2518e447649aa520dba8f36496cca97..1cc32425b4fd7b3d044a237e7b12eed9
          match &self.remote_client {
              Some(client) => client.wait_until_ready().await,
              None => Ok(()),
-@@ -1086,6 +1141,9 @@ impl Environment {
+@@ -1086,6 +1144,9 @@ impl Environment {
  
      /// Returns whether the environment can serve a request without waiting or reconnecting.
      pub(crate) fn readiness_result(&self) -> Option<Result<(), ExecServerError>> {
@@ -2017,7 +2117,7 @@ index 953f8d4da2518e447649aa520dba8f36496cca97..1cc32425b4fd7b3d044a237e7b12eed9
          match &self.remote_client {
              Some(client) => client.readiness_result(),
              None => Some(Ok(())),
-@@ -1094,11 +1152,15 @@ impl Environment {
+@@ -1094,11 +1155,15 @@ impl Environment {
  
      /// Returns the environment's status without starting or recovering it.
      ///
@@ -2034,6 +2134,152 @@ index 953f8d4da2518e447649aa520dba8f36496cca97..1cc32425b4fd7b3d044a237e7b12eed9
          match &self.remote_client {
              Some(client) => client.status().await,
              None => EnvironmentObservedStatus::Ready,
+diff --git a/codex-rs/exec-server/src/environment/exec_server_runtime.rs b/codex-rs/exec-server/src/environment/exec_server_runtime.rs
+new file mode 100644
+index 0000000000000000000000000000000000000000..4099e8160a39ec15a6a2b80221df644cc4e90655
+--- /dev/null
++++ b/codex-rs/exec-server/src/environment/exec_server_runtime.rs
+@@ -0,0 +1,140 @@
++use std::sync::Arc;
++use std::sync::atomic::AtomicBool;
++use std::sync::atomic::Ordering;
++
++use codex_http_client::HttpClientFactory;
++use tokio::io::AsyncRead;
++use tokio::io::AsyncWrite;
++
++use crate::ControllerPathAccess;
++use crate::EnvironmentObservedStatus;
++use crate::ExecBackend;
++use crate::ExecProcessFuture;
++use crate::ExecServerClient;
++use crate::ExecServerClientConnectOptions;
++use crate::ExecServerError;
++use crate::ExecutorFileSystem;
++use crate::LocalRuntime;
++use crate::LocalSandboxOwnership;
++use crate::SandboxOwner;
++use crate::client::LazyRemoteExecServerClient;
++use crate::connection::JsonRpcConnection;
++use crate::protocol::EnvironmentInfo;
++use crate::remote_file_system::RemoteFileSystem;
++use crate::remote_process::RemoteProcess;
++
++/// A local runtime over one authenticated, bootstrap-owned ExecServer connection.
++///
++/// The bootstrap must authenticate and own the local service and both I/O halves
++/// before connecting. This API neither launches a process nor selects a URL or
++/// replacement transport. It reuses the official wire client and typed backends
++/// without creating a remote Environment or allowing connection recovery.
++///
++/// Transport state, process exit and native cleanup are separate. The bootstrap
++/// must retain its independent native cleanup observer and ownership after this
++/// runtime disconnects or is dropped; no method here attests native cleanup.
++pub struct ExecServerLocalRuntime {
++    client: LazyRemoteExecServerClient,
++    connected_client: ExecServerClient,
++    backend: Arc<dyn ExecBackend>,
++    filesystem: Arc<dyn ExecutorFileSystem>,
++    controller_paths: ControllerPathAccess,
++    disconnect_requested: AtomicBool,
++}
++
++impl ExecServerLocalRuntime {
++    /// Initialize exactly one already-authenticated local stream.
++    ///
++    /// For the Android bridge, the bootstrap supplies the packaged peer-checking
++    /// AF_UNIX client's stdin/stdout. A raw socket is also suitable only after its
++    /// actual peer credentials have been verified by the bootstrap. There is no
++    /// reconnect closure, executable, shell string or resumable session argument.
++    pub async fn connect<R, W>(
++        reader: R,
++        writer: W,
++        controller_paths: ControllerPathAccess,
++        http_client_factory: HttpClientFactory,
++    ) -> Result<Arc<Self>, ExecServerError>
++    where
++        R: AsyncRead + Unpin + Send + 'static,
++        W: AsyncWrite + Unpin + Send + 'static,
++    {
++        let connected_client = ExecServerClient::connect(
++            JsonRpcConnection::from_stdio(reader, writer, "authenticated local executor".into()),
++            ExecServerClientConnectOptions::default(),
++        )
++        .await?;
++        let client = LazyRemoteExecServerClient::from_connected(
++            connected_client.clone(),
++            http_client_factory,
++        );
++        Ok(Arc::new(Self {
++            backend: Arc::new(RemoteProcess::for_local_runtime(client.clone())),
++            filesystem: Arc::new(RemoteFileSystem::for_local_runtime(client.clone())),
++            client,
++            connected_client,
++            controller_paths,
++            disconnect_requested: AtomicBool::new(false),
++        }))
++    }
++
++    /// Close admission and the transport, without reporting native cleanup.
++    /// The bootstrap must continue observing and owning the service separately.
++    pub async fn disconnect(&self) -> Result<(), ExecServerError> {
++        self.disconnect_requested.store(true, Ordering::Release);
++        self.connected_client.close_fixed_transport().await
++    }
++}
++
++impl LocalRuntime for ExecServerLocalRuntime {
++    fn exec_backend(&self) -> Arc<dyn ExecBackend> {
++        Arc::clone(&self.backend)
++    }
++    fn filesystem(&self) -> Arc<dyn ExecutorFileSystem> {
++        Arc::clone(&self.filesystem)
++    }
++    fn sandbox_ownership(&self) -> LocalSandboxOwnership {
++        LocalSandboxOwnership {
++            process: SandboxOwner::Executor,
++            filesystem: SandboxOwner::Executor,
++        }
++    }
++    fn controller_path_access(&self) -> ControllerPathAccess {
++        self.controller_paths
++    }
++    fn info(&self) -> ExecProcessFuture<'_, EnvironmentInfo> {
++        Box::pin(async {
++            self.wait_until_ready().await?;
++            self.client.environment_info().await
++        })
++    }
++    fn observed_status(&self) -> EnvironmentObservedStatus {
++        if self.disconnect_requested.load(Ordering::Acquire) {
++            return EnvironmentObservedStatus::Disconnected { error: "local executor transport was closed by its owner; native cleanup is not attested".into() };
++        }
++        match self.client.readiness_result() {
++            Some(Ok(())) => EnvironmentObservedStatus::Ready,
++            Some(Err(error)) => EnvironmentObservedStatus::Disconnected {
++                error: error.to_string(),
++            },
++            None => EnvironmentObservedStatus::Disconnected {
++                error: "local executor transport disconnected; no replacement is configured".into(),
++            },
++        }
++    }
++    fn wait_until_ready(&self) -> ExecProcessFuture<'_, ()> {
++        Box::pin(async {
++            match self.observed_status() {
++                EnvironmentObservedStatus::Ready => {
++                    self.connected_client.environment_status().await.map(drop)
++                }
++                EnvironmentObservedStatus::Pending => Err(ExecServerError::Disconnected(
++                    "local executor is not initialized".into(),
++                )),
++                EnvironmentObservedStatus::Disconnected { error } => {
++                    Err(ExecServerError::Disconnected(error))
++                }
++            }
++        })
++    }
++}
 diff --git a/codex-rs/exec-server/src/environment/local_runtime.rs b/codex-rs/exec-server/src/environment/local_runtime.rs
 new file mode 100644
 index 0000000000000000000000000000000000000000..b0c452d362e9d005b15e466365c3cd9997039a90
@@ -2522,10 +2768,10 @@ index ad557c3b292d32702444da91f1d67535bf810a0c..883ec4c816f940548291fc013f9f3eaf
      pub fn default_environment_is_remote(&self) -> bool {
          match &self.source {
 diff --git a/codex-rs/exec-server/src/lib.rs b/codex-rs/exec-server/src/lib.rs
-index f0e23038bbd8a2f992592e8ba39ebfaed36a31bb..b2844e1dfe57ac11b69cf1a5be59994d3aeacd4b 100644
+index f0e23038bbd8a2f992592e8ba39ebfaed36a31bb..2fbd6fbe2f9a06806c2c5f31f2383d36da56417d 100644
 --- a/codex-rs/exec-server/src/lib.rs
 +++ b/codex-rs/exec-server/src/lib.rs
-@@ -90,14 +90,18 @@ pub use environment::CODEX_EXEC_SERVER_NOISE_CHATGPT_ACCOUNT_ID_ENV_VAR;
+@@ -90,14 +90,19 @@ pub use environment::CODEX_EXEC_SERVER_NOISE_CHATGPT_ACCOUNT_ID_ENV_VAR;
  pub use environment::CODEX_EXEC_SERVER_NOISE_ENVIRONMENT_ID_ENV_VAR;
  pub use environment::CODEX_EXEC_SERVER_NOISE_REGISTRY_URL_ENV_VAR;
  pub use environment::CODEX_EXEC_SERVER_URL_ENV_VAR;
@@ -2535,6 +2781,7 @@ index f0e23038bbd8a2f992592e8ba39ebfaed36a31bb..b2844e1dfe57ac11b69cf1a5be59994d
  pub use environment::EnvironmentManager;
  pub use environment::EnvironmentObservedStatus;
  pub use environment::EnvironmentReadyInfo;
++pub use environment::ExecServerLocalRuntime;
  pub use environment::LOCAL_ENVIRONMENT_ID;
 +pub use environment::LocalRuntime;
 +pub use environment::LocalSandboxOwnership;
@@ -2643,6 +2890,678 @@ index 726c8a63928b2b5cc67dbab26ab4a386a4f188e6..660343ef34f78702142dff2ea96231fb
      }
  }
  
+diff --git a/codex-rs/exec-server/src/remote_file_system.rs b/codex-rs/exec-server/src/remote_file_system.rs
+index d574cece8c7ebf187db99938000907d9fdba9197..a3a18731021be949b2bcbd3f135a474234ba974a 100644
+--- a/codex-rs/exec-server/src/remote_file_system.rs
++++ b/codex-rs/exec-server/src/remote_file_system.rs
+@@ -47,6 +47,12 @@ type InFlightMetadataRequest = OnceCell<Result<FileMetadata, Arc<io::Error>>>;
+ pub(crate) struct RemoteFileSystem {
+     client: LazyRemoteExecServerClient,
+     metadata_requests: Mutex<HashMap<PathUri, Arc<InFlightMetadataRequest>>>,
++    sandbox_context_transfer: SandboxContextTransfer,
++}
++
++enum SandboxContextTransfer {
++    DropUnusedCwd,
++    Preserve,
+ }
+ 
+ impl RemoteFileSystem {
+@@ -55,6 +61,24 @@ impl RemoteFileSystem {
+         Self {
+             client,
+             metadata_requests: Mutex::new(HashMap::new()),
++            sandbox_context_transfer: SandboxContextTransfer::DropUnusedCwd,
++        }
++    }
++
++    pub(crate) fn for_local_runtime(client: LazyRemoteExecServerClient) -> Self {
++        Self {
++            sandbox_context_transfer: SandboxContextTransfer::Preserve,
++            ..Self::new(client)
++        }
++    }
++
++    fn sandbox_context(
++        &self,
++        sandbox: Option<&FileSystemSandboxContext>,
++    ) -> Option<FileSystemSandboxContext> {
++        match self.sandbox_context_transfer {
++            SandboxContextTransfer::DropUnusedCwd => remote_sandbox_context(sandbox),
++            SandboxContextTransfer::Preserve => sandbox.cloned(),
+         }
+     }
+ 
+@@ -68,7 +92,7 @@ impl RemoteFileSystem {
+         let response = client
+             .fs_canonicalize(FsCanonicalizeParams {
+                 path: path.clone(),
+-                sandbox: remote_sandbox_context(sandbox),
++                sandbox: self.sandbox_context(sandbox),
+             })
+             .await
+             .map_err(map_remote_error)?;
+@@ -87,7 +111,7 @@ impl RemoteFileSystem {
+             .fs_read_file(FsReadFileParams {
+                 path: path.clone(),
+                 follow_symlinks: (!options.follow_symlinks).then_some(false),
+-                sandbox: remote_sandbox_context(sandbox),
++                sandbox: self.sandbox_context(sandbox),
+             })
+             .await
+             .map_err(map_remote_error)?;
+@@ -106,7 +130,7 @@ impl RemoteFileSystem {
+     ) -> FileSystemResult<FileSystemReadStream> {
+         trace!("remote fs read_file_stream");
+         let client = self.client.get().await.map_err(map_remote_error)?;
+-        file_stream::open(client, path.clone(), remote_sandbox_context(sandbox)).await
++        file_stream::open(client, path.clone(), self.sandbox_context(sandbox)).await
+     }
+ 
+     async fn write_file(
+@@ -123,7 +147,7 @@ impl RemoteFileSystem {
+                 path: path.clone(),
+                 data_base64: STANDARD.encode(contents),
+                 follow_symlinks: (!options.follow_symlinks).then_some(false),
+-                sandbox: remote_sandbox_context(sandbox),
++                sandbox: self.sandbox_context(sandbox),
+             })
+             .await;
+         self.metadata_requests.lock().await.clear();
+@@ -144,7 +168,7 @@ impl RemoteFileSystem {
+                 path: path.clone(),
+                 recursive: Some(options.recursive),
+                 follow_symlinks: (!options.follow_symlinks).then_some(false),
+-                sandbox: remote_sandbox_context(sandbox),
++                sandbox: self.sandbox_context(sandbox),
+             })
+             .await;
+         self.metadata_requests.lock().await.clear();
+@@ -204,7 +228,7 @@ impl RemoteFileSystem {
+             .fs_get_metadata(FsGetMetadataParams {
+                 path: path.clone(),
+                 follow_symlinks: (!options.follow_symlinks).then_some(false),
+-                sandbox: remote_sandbox_context(sandbox),
++                sandbox: self.sandbox_context(sandbox),
+             })
+             .await
+             .map_err(map_remote_error)?;
+@@ -228,7 +252,7 @@ impl RemoteFileSystem {
+         let response = client
+             .fs_read_directory(FsReadDirectoryParams {
+                 path: path.clone(),
+-                sandbox: remote_sandbox_context(sandbox),
++                sandbox: self.sandbox_context(sandbox),
+             })
+             .await
+             .map_err(map_remote_error)?;
+@@ -255,7 +279,7 @@ impl RemoteFileSystem {
+             .fs_walk(FsWalkParams {
+                 path: path.clone(),
+                 options,
+-                sandbox: remote_sandbox_context(sandbox),
++                sandbox: self.sandbox_context(sandbox),
+             })
+             .await
+             .map_err(map_remote_error)
+@@ -275,7 +299,7 @@ impl RemoteFileSystem {
+                 recursive: Some(options.recursive),
+                 force: Some(options.force),
+                 follow_symlinks: (!options.follow_symlinks).then_some(false),
+-                sandbox: remote_sandbox_context(sandbox),
++                sandbox: self.sandbox_context(sandbox),
+             })
+             .await;
+         self.metadata_requests.lock().await.clear();
+@@ -297,7 +321,7 @@ impl RemoteFileSystem {
+                 source_path: source_path.clone(),
+                 destination_path: destination_path.clone(),
+                 recursive: options.recursive,
+-                sandbox: remote_sandbox_context(sandbox),
++                sandbox: self.sandbox_context(sandbox),
+             })
+             .await;
+         self.metadata_requests.lock().await.clear();
+diff --git a/codex-rs/exec-server/src/remote_process.rs b/codex-rs/exec-server/src/remote_process.rs
+index 4c2d4c8e63514a3f8157f1b0275662f5407fcd68..9cc2cca444add1f501b2ea4076a07e06cfc48257 100644
+--- a/codex-rs/exec-server/src/remote_process.rs
++++ b/codex-rs/exec-server/src/remote_process.rs
+@@ -21,16 +21,34 @@ use crate::protocol::WriteResponse;
+ #[derive(Clone)]
+ pub(crate) struct RemoteProcess {
+     client: LazyRemoteExecServerClient,
++    failure_transfer: FailureTransfer,
+ }
+ 
+ struct RemoteExecProcess {
+     session: Session,
++    failure_transfer: FailureTransfer,
++}
++
++#[derive(Clone, Copy)]
++enum FailureTransfer {
++    SessionResponse,
++    NativeError,
+ }
+ 
+ impl RemoteProcess {
+     pub(crate) fn new(client: LazyRemoteExecServerClient) -> Self {
+         trace!("remote process new");
+-        Self { client }
++        Self {
++            client,
++            failure_transfer: FailureTransfer::SessionResponse,
++        }
++    }
++
++    pub(crate) fn for_local_runtime(client: LazyRemoteExecServerClient) -> Self {
++        Self {
++            client,
++            failure_transfer: FailureTransfer::NativeError,
++        }
+     }
+ 
+     async fn start(
+@@ -43,7 +61,10 @@ impl RemoteProcess {
+         let sandbox_type = sandbox_type_from_protocol(session.sandbox_type());
+ 
+         Ok(StartedExecProcess {
+-            process: Arc::new(RemoteExecProcess { session }),
++            process: Arc::new(RemoteExecProcess {
++                session,
++                failure_transfer: self.failure_transfer,
++            }),
+             sandbox_type,
+         })
+     }
+@@ -72,7 +93,17 @@ impl RemoteExecProcess {
+         max_bytes: Option<usize>,
+         wait_ms: Option<u64>,
+     ) -> Result<ReadResponse, crate::ExecServerError> {
+-        self.session.read(after_seq, max_bytes, wait_ms).await
++        let response = self.session.read(after_seq, max_bytes, wait_ms).await?;
++        // The resumable session API represents terminal transport failure with
++        // synthetic lifecycle flags. A native owner must observe exit/cleanup
++        // independently, so never expose those flags as a native completion.
++        if matches!(self.failure_transfer, FailureTransfer::NativeError)
++            && response.exit_code.is_none()
++            && let Some(failure) = &response.failure
++        {
++            return Err(crate::ExecServerError::Disconnected(failure.clone()));
++        }
++        Ok(response)
+     }
+ 
+     async fn write(&self, chunk: Vec<u8>) -> Result<WriteResponse, crate::ExecServerError> {
+diff --git a/codex-rs/exec-server/tests/fixtures/native_exec_server.py b/codex-rs/exec-server/tests/fixtures/native_exec_server.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..776d39a2106a140bd6339cfbdb2ab048ee3f8747
+--- /dev/null
++++ b/codex-rs/exec-server/tests/fixtures/native_exec_server.py
+@@ -0,0 +1,88 @@
++"""PC integration launcher: real factory, with a read-only evidence observer."""
++
++import asyncio
++import importlib
++import json
++import os
++from pathlib import Path
++import sys
++
++build, workspace, evidence = map(Path, sys.argv[1:])
++if os.getuid() == 0:
++    raise RuntimeError("The native integration test must run unprivileged")
++sys.path.insert(0, str(build / "package"))
++from tools.executor.exec_server import ExecServer, local_environment_info, serve_stdio
++
++factory = importlib.import_module("tools.executor.bionic-supervisor.factory").factory
++os.chdir(workspace)
++backend = factory(
++    {
++        "helper": str(build / "native-files"),
++        "handleHelper": str(build / "native-file-handle"),
++        "processRunner": str(build / "runner"),
++        "workspace": str(workspace),
++        "executables": {"/usr/bin/bash": "/usr/bin/bash"},
++        "runtime": [
++            {"path": path, "execute": execute}
++            for path, execute in (
++                ("/usr", True),
++                ("/lib", True),
++                ("/lib64", True),
++                ("/etc/ld.so.cache", False),
++            )
++        ],
++        "limits": {"wall_ms": 3000, "output_bytes": 32768},
++        "parentEnvironment": {"PATH": "/usr/bin:/bin", "HOME": str(workspace)},
++    }
++)
++
++
++class ObservedBackend:
++    supported_methods = backend.supported_methods
++    capabilities = backend.capabilities
++
++    def __init__(self):
++        self.calls = []
++        self.records = {}
++
++    async def handle(self, call, notify):
++        self.calls.append({"method": call.method, "params": call.params})
++        try:
++            return await backend.handle(call, notify)
++        finally:
++            # Keep references before normal expiry or close removes the registry.
++            self.records.update(backend.processes.processes)
++
++    async def close(self, session_id):
++        error = None
++        try:
++            await backend.close(session_id)
++        except BaseException as failure:
++            error = repr(failure)
++            raise
++        finally:
++            evidence.write_text(
++                json.dumps(
++                    {
++                        "pid": os.getpid(),
++                        "calls": self.calls,
++                        "closeError": error,
++                        "quarantined": backend.processes.quarantined,
++                        "records": [
++                            {
++                                "key": record.key,
++                                "nativeResult": record.native_result,
++                                "supervisorReturncode": None
++                                if record.process is None
++                                else record.process.returncode,
++                            }
++                            for record in self.records.values()
++                        ],
++                    }
++                )
++            )
++
++
++info = local_environment_info()
++info["shell"] = {"name": "bash", "path": "/usr/bin/bash"}
++asyncio.run(serve_stdio(ExecServer(ObservedBackend(), environment_info=info)))
+diff --git a/codex-rs/exec-server/tests/native_local_runtime.rs b/codex-rs/exec-server/tests/native_local_runtime.rs
+new file mode 100644
+index 0000000000000000000000000000000000000000..c5d6cb90be26fa37a4373adf3b69a60bfa87d959
+--- /dev/null
++++ b/codex-rs/exec-server/tests/native_local_runtime.rs
+@@ -0,0 +1,369 @@
++#![cfg(target_os = "linux")]
++
++use std::collections::HashMap;
++use std::os::unix::fs::DirBuilderExt;
++use std::path::Path;
++use std::process::Stdio;
++use std::sync::Arc;
++use std::time::Duration;
++
++use anyhow::Context;
++use anyhow::Result;
++use codex_exec_server::ControllerPathAccess;
++use codex_exec_server::EnvironmentManager;
++use codex_exec_server::EnvironmentObservedStatus;
++use codex_exec_server::ExecEnvPolicy;
++use codex_exec_server::ExecOutputStream;
++use codex_exec_server::ExecParams;
++use codex_exec_server::ExecProcess;
++use codex_exec_server::ExecProcessEvent;
++use codex_exec_server::ExecServerLocalRuntime;
++use codex_exec_server::FileSystemSandboxContext;
++use codex_exec_server::LOCAL_ENVIRONMENT_ID;
++use codex_exec_server::LocalRuntime;
++use codex_exec_server::ProcessId;
++use codex_http_client::HttpClientFactory;
++use codex_http_client::OutboundProxyPolicy;
++use codex_protocol::config_types::ShellEnvironmentPolicyInherit;
++use codex_utils_path_uri::PathUri;
++use pretty_assertions::assert_eq;
++use serde_json::Value;
++use serde_json::json;
++use tokio::process::Command;
++use tokio::time::timeout;
++
++fn policy(workspace: &Path) -> Result<FileSystemSandboxContext> {
++    let cwd = PathUri::from_host_native_path(workspace)?;
++    Ok(serde_json::from_value(json!({
++        "permissions": {"type": "managed", "file_system": {"type": "restricted", "entries": [
++            {"path": {"type": "path", "path": cwd}, "access": "write"},
++            {"path": {"type": "path", "path": PathUri::from_host_native_path(workspace.join("private"))?}, "access": "deny"}
++        ]}, "network": "restricted"},
++        "cwd": cwd, "workspaceRoots": [cwd], "windowsSandboxLevel": "disabled"
++    }))?)
++}
++
++fn command(key: &str, shell: &str, sandbox: &FileSystemSandboxContext) -> Result<ExecParams> {
++    Ok(ExecParams {
++        process_id: ProcessId::from(key),
++        argv: vec![
++            "/usr/bin/bash".into(),
++            "--noprofile".into(),
++            "--norc".into(),
++            "-c".into(),
++            shell.into(),
++        ],
++        cwd: sandbox.cwd.clone().context("test policy cwd")?,
++        env_policy: None,
++        shell_snapshot: None,
++        env: HashMap::from([("VALUE".into(), "preserved environment".into())]),
++        tty: false,
++        pipe_stdin: false,
++        arg0: None,
++        sandbox: Some(sandbox.clone()),
++        enforce_managed_network: false,
++        managed_network: None,
++        network_proxy: None,
++    })
++}
++
++async fn output(process: &dyn ExecProcess) -> Result<(Vec<u8>, Vec<u8>, i32)> {
++    timeout(Duration::from_secs(12), async {
++        let mut after = None;
++        let mut stdout = Vec::new();
++        let mut stderr = Vec::new();
++        loop {
++            let response = process.read(after, Some(32768), Some(100)).await?;
++            anyhow::ensure!(
++                response.failure.is_none(),
++                "native process failed: {response:?}"
++            );
++            for chunk in response.chunks {
++                match chunk.stream {
++                    ExecOutputStream::Stdout => stdout.extend_from_slice(&chunk.chunk.0),
++                    ExecOutputStream::Stderr => stderr.extend_from_slice(&chunk.chunk.0),
++                    ExecOutputStream::Pty => anyhow::bail!("pipe process returned PTY output"),
++                }
++                after = Some(chunk.seq);
++            }
++            if response.closed {
++                anyhow::ensure!(response.exited, "closure must include actual exit");
++                return Ok((
++                    stdout,
++                    stderr,
++                    response.exit_code.context("actual exit code")?,
++                ));
++            }
++        }
++    })
++    .await?
++}
++
++/// Uses an explicitly supplied, compiled native factory checkpoint. This cannot
++/// silently turn into a mock or run as root when that prerequisite is absent.
++#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
++#[ignore = "requires FOLDGPT_NATIVE_FACTORY_BUILD and the real Linux native helpers"]
++async fn real_native_factory_preserves_local_identity_policy_io_and_disconnect() -> Result<()> {
++    let build = std::env::var_os("FOLDGPT_NATIVE_FACTORY_BUILD")
++        .context("compiled native factory checkpoint required")?;
++    let base = tempfile::Builder::new()
++        .prefix("foldgpt-rust-native-")
++        .tempdir_in("/var/tmp")?;
++    let workspace = base.path().join("workspace");
++    std::fs::DirBuilder::new().mode(0o700).create(&workspace)?;
++    std::fs::create_dir(workspace.join("private"))?;
++    std::fs::create_dir(workspace.join(".git"))?;
++    std::fs::write(workspace.join("private/secret"), b"private data")?;
++    std::fs::write(
++        base.path().join("environments.toml"),
++        "default = \"local\"\ninclude_local = true\n",
++    )?;
++    let launcher = base.path().join("launcher.py");
++    std::fs::write(&launcher, include_str!("fixtures/native_exec_server.py"))?;
++    let evidence_path = base.path().join("evidence.json");
++    // The test bootstrap owns this exact child and its pipes. The runtime has
++    // no executable, replacement callback, URL, or process-tree kill policy.
++    let mut child = Command::new("/usr/bin/python3")
++        .args(["-I", "-B"])
++        .arg(&launcher)
++        .arg(build)
++        .arg(&workspace)
++        .arg(&evidence_path)
++        .stdin(Stdio::piped())
++        .stdout(Stdio::piped())
++        .stderr(Stdio::inherit())
++        .spawn()?;
++    let child_pid = child.id().context("bootstrap-owned server PID")?;
++    let runtime = ExecServerLocalRuntime::connect(
++        child.stdout.take().context("server stdout")?,
++        child.stdin.take().context("server stdin")?,
++        ControllerPathAccess::Shared,
++        HttpClientFactory::new(OutboundProxyPolicy::ReqwestDefault),
++    )
++    .await?;
++    let sandbox = policy(&workspace)?;
++    let mut first = command(
++        "native",
++        "printf '%s\\n%s\\n%s\\n' \"$PWD\" \"$VALUE\" \"$POLICY_VALUE\"; printf stderr >&2; if read value; then exit 8; else printf EOF; fi; printf 42 > answer; exit 23",
++        &sandbox,
++    )?;
++    first.env_policy = Some(ExecEnvPolicy {
++        inherit: ShellEnvironmentPolicyInherit::All,
++        ignore_default_excludes: false,
++        exclude: vec!["HOME".into()],
++        r#set: HashMap::from([("POLICY_VALUE".into(), "policy override".into())]),
++        include_only: vec!["PATH".into(), "POLICY_*".into()],
++    });
++    let test_result: Result<()> = async {
++        let manager = EnvironmentManager::prepare_from_codex_home(base.path())
++            .await?
++            .build_with_local_runtime(
++                runtime.clone(),
++                /*local_runtime_paths*/ None,
++                HttpClientFactory::new(OutboundProxyPolicy::ReqwestDefault),
++            )?;
++        let environment = manager
++            .default_environment()
++            .context("registered local environment")?;
++        anyhow::ensure!(!environment.is_remote(), "native runtime must remain local");
++        anyhow::ensure!(Arc::ptr_eq(
++            &environment,
++            &manager
++                .get_environment(LOCAL_ENVIRONMENT_ID)
++                .context("local registry")?
++        ));
++        let info = environment.info().await?;
++        anyhow::ensure!(info.cwd == sandbox.cwd && info.shell.path == "/usr/bin/bash");
++        let started = environment.get_exec_backend().start(first.clone()).await?;
++        let actual = output(started.process.as_ref()).await?;
++        let expected = (
++            format!(
++                "{}\npreserved environment\npolicy override\nEOF",
++                workspace.display()
++            )
++            .into_bytes(),
++            b"stderr".to_vec(),
++            23,
++        );
++        anyhow::ensure!(
++            actual == expected,
++            "stdout/stderr/EOF/exit differ: {actual:?}"
++        );
++        let files = environment.get_filesystem();
++        let backend = environment.get_exec_backend();
++        let answer = PathUri::from_host_native_path(workspace.join("answer"))?;
++        anyhow::ensure!(
++            files
++                .read_file(&answer, Default::default(), Some(&sandbox))
++                .await?
++                == b"42"
++        );
++        files
++            .write_file(&answer, b"43".to_vec(), Default::default(), Some(&sandbox))
++            .await?;
++        anyhow::ensure!(std::fs::read(workspace.join("answer"))? == b"43");
++        let forbidden = PathUri::from_host_native_path(workspace.join("private/blocked"))?;
++        anyhow::ensure!(
++            files
++                .write_file(
++                    &forbidden,
++                    b"bad".to_vec(),
++                    Default::default(),
++                    Some(&sandbox)
++                )
++                .await
++                .is_err()
++        );
++        let mut unsupported = command("unsupported", "printf bad > unsupported", &sandbox)?;
++        unsupported.tty = true;
++        anyhow::ensure!(
++            environment
++                .get_exec_backend()
++                .start(unsupported)
++                .await
++                .is_err()
++        );
++        anyhow::ensure!(
++            !workspace.join("private/blocked").exists() && !workspace.join("unsupported").exists()
++        );
++        let mut unsupported_network = command(
++            "managed-network",
++            "printf bad > unsupported-network",
++            &sandbox,
++        )?;
++        unsupported_network.enforce_managed_network = true;
++        anyhow::ensure!(backend.start(unsupported_network).await.is_err());
++        anyhow::ensure!(!workspace.join("unsupported-network").exists());
++        let mut binary = command(
++            "binary",
++            "exec /usr/bin/python3 -I -B -c 'import os;os.write(1,os.read(0,5))'",
++            &sandbox,
++        )?;
++        binary.pipe_stdin = true;
++        let started = environment.get_exec_backend().start(binary).await?;
++        started.process.write(b"\0\xffABC".to_vec()).await?;
++        anyhow::ensure!(
++            output(started.process.as_ref()).await? == (b"\0\xffABC".to_vec(), Vec::new(), 0)
++        );
++        let started = environment
++            .get_exec_backend()
++            .start(command(
++                "disconnect",
++                "printf READY; exec /usr/bin/sleep 100",
++                &sandbox,
++            )?)
++            .await?;
++        let ready = timeout(Duration::from_secs(5), async {
++            loop {
++                let read = started.process.read(None, Some(32768), Some(100)).await?;
++                if !read.chunks.is_empty() {
++                    return Ok::<_, anyhow::Error>(read);
++                }
++                anyhow::ensure!(
++                    read.failure.is_none() && !read.closed,
++                    "worker did not become ready: {read:?}"
++                );
++            }
++        })
++        .await??;
++        anyhow::ensure!(ready.chunks.iter().any(|chunk| chunk.chunk.0 == b"READY"));
++        let mut events = started.process.subscribe_events();
++        runtime.disconnect().await?;
++        anyhow::ensure!(matches!(
++            runtime.observed_status(),
++            EnvironmentObservedStatus::Disconnected { .. }
++        ));
++        anyhow::ensure!(runtime.wait_until_ready().await.is_err());
++        anyhow::ensure!(
++            backend
++                .start(command("after-loss", "printf bad > replayed", &sandbox)?)
++                .await
++                .is_err()
++        );
++        let after_loss = PathUri::from_host_native_path(workspace.join("after-loss-file"))?;
++        anyhow::ensure!(
++            files
++                .write_file(
++                    &after_loss,
++                    b"bad".to_vec(),
++                    Default::default(),
++                    Some(&sandbox)
++                )
++                .await
++                .is_err()
++        );
++        let lost = timeout(
++            Duration::from_secs(5),
++            started.process.read(None, Some(32768), Some(100)),
++        )
++        .await?;
++        anyhow::ensure!(lost.is_err(), "disconnect cannot attest exit: {lost:?}");
++        timeout(Duration::from_secs(5), async {
++            loop {
++                match events.recv().await? {
++                    ExecProcessEvent::Output(_) => {}
++                    ExecProcessEvent::Failed(_) => return Ok::<_, anyhow::Error>(()),
++                    event @ (ExecProcessEvent::Exited { .. } | ExecProcessEvent::Closed { .. }) => {
++                        anyhow::bail!("transport loss synthesized a native event: {event:?}");
++                    }
++                }
++            }
++        })
++        .await??;
++        Ok(())
++    }
++    .await;
++    // Always await the real bootstrap child and its separate native close evidence.
++    let _ = runtime.disconnect().await;
++    let status = timeout(Duration::from_secs(15), child.wait()).await??;
++    test_result?;
++    anyhow::ensure!(status.success(), "native server failed: {status}");
++    let evidence: Value = serde_json::from_slice(&std::fs::read(evidence_path)?)?;
++    assert_eq!(evidence["pid"], child_pid);
++    assert_eq!(evidence["closeError"], Value::Null);
++    assert_eq!(evidence["quarantined"], false);
++    let calls = evidence["calls"]
++        .as_array()
++        .context("observed wire calls")?;
++    let starts: Vec<_> = calls
++        .iter()
++        .filter(|call| call["method"] == "process/start")
++        .collect();
++    assert_eq!(
++        starts
++            .iter()
++            .map(|call| call["params"]["processId"].clone())
++            .collect::<Vec<_>>(),
++        vec![
++            json!("native"),
++            json!("unsupported"),
++            json!("binary"),
++            json!("disconnect")
++        ]
++    );
++    assert_eq!(starts[0]["params"], serde_json::to_value(&first)?);
++    for call in calls.iter().filter(|call| {
++        ["fs/readFile", "fs/writeFile"].contains(&call["method"].as_str().unwrap_or_default())
++    }) {
++        assert_eq!(call["params"]["sandbox"], serde_json::to_value(&sandbox)?);
++    }
++    let records = evidence["records"]
++        .as_array()
++        .context("independent native observations")?;
++    for key in ["native", "binary", "disconnect"] {
++        let record = records
++            .iter()
++            .find(|record| record["key"] == key)
++            .context("native process record")?;
++        assert_eq!(record["nativeResult"]["cleanupComplete"], true);
++        anyhow::ensure!(
++            record["supervisorReturncode"].is_i64(),
++            "supervisor termination must be observed"
++        );
++    }
++    anyhow::ensure!(
++        !workspace.join("replayed").exists() && !workspace.join("after-loss-file").exists()
++    );
++    println!("real native factory evidence: {evidence}");
++    Ok(())
++}
 diff --git a/codex-rs/exec-server/tests/owned_process_events.rs b/codex-rs/exec-server/tests/owned_process_events.rs
 new file mode 100644
 index 0000000000000000000000000000000000000000..a47edaf41ae43c2981f6eb7d0acc3dfe9f6c3264

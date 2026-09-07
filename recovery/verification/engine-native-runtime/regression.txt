@@ -1,0 +1,35 @@
+RUST_MIN_STACK=8388608 NEXTEST_PROFILE=local cargo nextest run --no-fail-fast "$@"
+   Compiling codex-exec-server v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/exec-server)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 14.29s
+────────────
+ Nextest run ID 506a52a1-183a-449e-9d1c-76078d7b120d with nextest profile: local
+    Starting 27 tests across 1 binary (268 tests skipped)
+        PASS [   0.008s] ( 1/27) codex-exec-server client::tests::terminal_stdio_startup_failure_is_remembered
+        PASS [   0.008s] ( 2/27) codex-exec-server client::tests::retryable_startup_failure_does_not_burn_environment
+        PASS [   0.009s] ( 3/27) codex-exec-server environment::local_runtime::tests::executor_only_paths_are_rejected_before_unadapted_controller_routes_can_run
+        PASS [   0.009s] ( 4/27) codex-exec-server client::tests::process_events_are_delivered_in_seq_order_when_notifications_are_reordered
+        PASS [   0.009s] ( 5/27) codex-exec-server remote_file_system::tests::transport_errors_map_to_broken_pipe
+        PASS [   0.010s] ( 6/27) codex-exec-server client::tests::environment_info_is_cached::from_initialize
+        PASS [   0.011s] ( 7/27) codex-exec-server environment::local_runtime::tests::injected_local_runtime_owns_real_process_and_filesystem_operations
+        PASS [   0.014s] ( 8/27) codex-exec-server environment::local_runtime::tests::injected_runtime_rejects_configurations_without_a_local_environment
+        PASS [   0.006s] ( 9/27) codex-exec-server remote_file_system::tests::remote_sandbox_context_drops_unused_cwd
+        PASS [   0.035s] (10/27) codex-exec-server remote_file_system::tests::remote_sandbox_context_preserves_required_cwd
+        PASS [   0.008s] (11/27) codex-exec-server client::tests::process_start_propagates_caller_trace_context_across_background_task
+        PASS [   0.008s] (12/27) codex-exec-server client::tests::network_policy_tests::policy_decisions_reject_forged_process_and_use_trusted_controller_metadata
+        PASS [   0.036s] (13/27) codex-exec-server environment::local_runtime::tests::injected_runtime_readiness_does_not_fall_back_to_always_ready_local
+        PASS [   0.008s] (14/27) codex-exec-server client::tests::connect_stdio_command_initializes_json_rpc_client
+        PASS [   0.010s] (15/27) codex-exec-server client::tests::connect_for_transport_initializes_stdio_command
+        PASS [   0.010s] (16/27) codex-exec-server client::tests::initial_connection_is_shared_by_all_waiters
+        PASS [   0.010s] (17/27) codex-exec-server client::tests::remote_websocket_client_resumes_session
+        PASS [   0.038s] (18/27) codex-exec-server client::tests::transport_disconnect_fails_sessions_and_rejects_new_sessions
+        PASS [   0.068s] (19/27) codex-exec-server client::tests::wake_notifications_do_not_block_other_sessions
+        PASS [   0.053s] (20/27) codex-exec-server client::tests::environment_info_is_cached::legacy_server
+        PASS [   0.057s] (21/27) codex-exec-server client::tests::network_policy_tests::abandoned_process_start_unregisters_and_cleans_up
+        PASS [   0.059s] (22/27) codex-exec-server client::tests::explicit_resume_drains_notifications_before_initialize_response
+        PASS [   0.066s] (23/27) codex-exec-server client::tests::network_policy_tests::policy_requests_use_process_decider_and_cancel_on_unregister
+        PASS [   0.101s] (24/27) codex-exec-server client::tests::session_write_retries_same_write_id_after_recovery
+        PASS [   0.111s] (25/27) codex-exec-server client::tests::malformed_stdio_message_terminates_spawned_process
+        PASS [   0.115s] (26/27) codex-exec-server client::tests::dropping_stdio_client_terminates_spawned_process
+        PASS [   0.512s] (27/27) codex-exec-server client::tests::failed_reconnect_does_not_burn_environment
+────────────
+     Summary [   0.541s] 27 tests run: 27 passed, 268 skipped

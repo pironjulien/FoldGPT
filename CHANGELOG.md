@@ -2,6 +2,8 @@
 
 ## Unreleased — 2026-09-06
 
+- Verified the auxiliary Rust engine against the actual Python ExecServer and corrected C supervisor on the PC. Real process/file operations, full policy, binary streams, exit, disconnection without replay and separate native cleanup pass; 27 targeted regressions and final Clippy pass. The exact engine patch restores from a fresh upstream clone and its test logs are preserved in private recovery. Android registration remains inactive.
+
 - Independently reviewed the Bionic supervisor and corrected secondary-thread directory reads that could falsely report an empty directory, plus premature lease release before native supervisor reaping. The frozen corrected build passes 19 real process tests, two direct kernel tests and the fixed main/pthread qualification. Its Android ARM64 binaries compile with ELF checks; Android execution remains unmeasured. The exact next fixed device qualification is documented without activating the production route.
 
 - Added the actual Bionic libc cwd shim and immutable APK path/digest admission. Four real native-supervisor composition tests pass for Bash/Python cwd, relative policy, reserved preload and attestation; raw chdir stays denied. The updated signed debug APK contains the shim, preserves the installed certificate and passes package/ELF checks. Sixteen transport unit tests pass; no native deployment is activated and no phone is accessed by this work.

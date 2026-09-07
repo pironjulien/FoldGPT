@@ -1,0 +1,33 @@
+{
+  "sourceCommit": "4679ea1a4a44fa82e30a38c704c1eb8c0de9b963",
+  "restoredIgnoredRoots": [
+    "HANDOFF.md",
+    "chatgpt_fold_live.png",
+    "chatgpt_icon.png",
+    "check_accent.png",
+    "downloads",
+    "fold_full_android_screenshot.png",
+    "fold_full_android_screenshot_cleaned.png",
+    "live_ime_screen.png",
+    "logs",
+    "screen.png",
+    "screen_after_ctrl_alt_k.png",
+    "screen_test_kbd.png",
+    "test_kbd_broadcast.png",
+    "x11_classes.dex",
+    "x_post_assets",
+    "tools/executor/shizuku-service/build",
+    "tools/executor/shizuku-service/transport/build",
+    "tools/executor/shizuku-lab/build",
+    "tools/executor/shizuku-lab/app/build",
+    "tools/executor/android-engine/pty-prototype",
+    "launcher_apk/bin",
+    "launcher_apk/obj",
+    "launcher_apk/res/mipmap-xxhdpi/ic_launcher.png",
+    "android/build",
+    "android/local.properties",
+    "android/native",
+    "android/app/build"
+  ],
+  "sourceFilesOverwritten": false
+}

@@ -29,6 +29,13 @@ ancien checkpoint ; il ne reçoit pas cette sauvegarde privée.
   ciblés passent avec vrais processus et octets. Trois échecs de la suite large
   sont également reproduits sur la base amont intacte : aucune suite complète
   verte n'est revendiquée. Voir `FOLDGPT-INTEGRATION.md` après restauration.
+- Le nouveau `ExecServerLocalRuntime` a ensuite relié le client Rust au vrai
+  serveur Python et au superviseur C `8Kd8xQRE` sur PC : commandes, cwd/env,
+  stdin binaire, stdout/stderr/EOF, exit 23, opérations fichiers et refus avant
+  mutation passent. Une coupure ferme l'admission sans rejeu ni faux événement
+  de terminaison ; le nettoyage est constaté séparément côté natif. Les 27
+  régressions ciblées et Clippy passent. Les [preuves de ce test réel](verification/engine-native-runtime/tests.txt)
+  sont conservées dans Git. Cela ne sélectionne aucun exécuteur sur Android.
 
 ## Suite concrète
 
@@ -42,8 +49,8 @@ ancien checkpoint ; il ne reçoit pas cette sauvegarde privée.
    et des exécutables. Le `nativeLibraryDir` Android change à l'installation ;
    l'admission du shim le traite déjà, les autres entrées doivent être rendues
    concrètes sans inventer un chemin `/data/app` ni relâcher les contrôles.
-3. Relier le moteur au vrai protocole ExecServer du backend natif. Le transport
-   doit conserver politiques, flux, erreurs et ownership. Le runtime reste
+3. Relier au service Android la liaison moteur/ExecServer maintenant prouvée sur
+   PC. Le transport doit conserver politiques, flux, erreurs et ownership. Le runtime reste
    local (`is_remote=false`) ; les chemins invisibles au contrôleur sont
    actuellement refusés avant les routes qui supposent encore un accès direct.
 4. Compléter les opérations de fichiers/processus nécessaires. Le superviseur

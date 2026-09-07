@@ -1,0 +1,18 @@
+cargo clippy --fix --tests --allow-dirty {args}
+    Checking codex-exec-server v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/exec-server)
+    Checking codex-apply-patch v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/apply-patch)
+    Checking codex-exec-server-test-support v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/exec-server/tests/support)
+    Checking codex-arg0 v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/arg0)
+    Checking codex-test-binary-support v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/test-binary-support)
+warning: used `unwrap()` on an `Option` value
+  --> exec-server/tests/native_local_runtime.rs:50:14
+   |
+50 |         cwd: sandbox.cwd.clone().unwrap(),
+   |              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: if this value is `None`, it will panic
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.95.0/index.html#unwrap_used
+   = note: requested on the command line with `-D clippy::unwrap-used`
+
+warning: `codex-exec-server` (test "native_local_runtime") generated 1 warning
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 27.68s
