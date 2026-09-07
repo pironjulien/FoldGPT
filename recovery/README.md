@@ -20,12 +20,66 @@ Les dépendances, résultats d'essais et données locales ignorées par Git sont
 conservés séparément dans une archive chiffrée de la release privée de reprise.
 La clé de déchiffrement reste dans le coffre OneDrive
 `Documents/NexusSecure/projects/FoldGPT/recovery.agekey`, jamais dans GitHub.
-Les instructions et le manifeste précis de cette archive sont ajoutés après
-validation du téléchargement et du déchiffrement.
+La release est `recovery-2026-09-07` dans ce même dépôt privé. Son archive
+principale représente 127 425 entrées, 13 639 569 361 octets de fichiers,
+et 9 872 503 793 octets chiffrés répartis en dix morceaux. SHA-256 de
+l'ensemble chiffré :
+`002f1e0bc3a6a9d2d95091b419413475212a1e51696f0bb37e33028bfc7271b0`.
+
+## Récupérer les données locales
+
+Depuis PowerShell, avec GitHub CLI connecté au compte ayant accès au dépôt :
+
+```powershell
+gh release download recovery-2026-09-07 --repo pironjulien/FoldGPT-workspace --dir C:\Dev\FoldGPT-recovery\downloaded
+$ErrorActionPreference = 'Stop'
+$foldRecoveryKey = (Join-Path $env:OneDrive 'Documents\NexusSecure\projects\FoldGPT\recovery.agekey').Replace('\','/')
+$foldRecoveryKeyLinux = (& wsl --distribution Ubuntu-24.04 --exec wslpath -u $foldRecoveryKey).Trim()
+if ($LASTEXITCODE -ne 0) { throw 'Impossible de résoudre le chemin du coffre' }
+wsl --distribution Ubuntu-24.04 --exec python3 /mnt/c/Dev/ChatgptFold/tools/recovery/restore-archive.py --assets /mnt/c/Dev/FoldGPT-recovery/downloaded --identity $foldRecoveryKeyLinux --destination /var/tmp/foldgpt-recovered --report /mnt/c/Dev/FoldGPT-recovery/archive-verification.json
+```
+
+Le PC doit disposer de WSL Ubuntu, Python 3.12 ou plus récent et `age` dans
+Ubuntu ; voir [l'environnement de build](build-environment.md). WSL est utilisé
+sur le PC pour conserver les liens Linux de l'archive. Les destinations doivent
+être nouvelles. Le script vérifie les dix morceaux, authentifie entièrement le
+déchiffrement avant extraction, compare l'inventaire et contrôle les octets de
+chaque fichier effectivement restauré. La clé n'est jamais affichée.
+
+L'archive est un instantané réalisé pendant le développement. **Les sources
+les plus récentes sont celles de la branche Git**, pas celles de l'archive.
+Hydrater ensuite le clone neuf avec seulement ses données ignorées par Git :
+
+```powershell
+wsl --distribution Ubuntu-24.04 --exec python3 /mnt/c/Dev/ChatgptFold/tools/recovery/hydrate-project.py --snapshot /var/tmp/foldgpt-recovered/ChatgptFold --project /mnt/c/Dev/ChatgptFold --report /mnt/c/Dev/FoldGPT-recovery/hydration.json
+```
+
+La procédure conserve les fichiers suivis par Git et les sous-modules déjà
+restaurés. Elle refuse les collisions avec des données locales préexistantes.
+Les liens absolus sont conservés avec leur cible originale ; les sorties de
+build dépendant d'un ancien chemin doivent être reconstruites, pas exécutées
+aveuglément. `android/local.properties` conserve le chemin SDK du premier PC :
+le régénérer si l'emplacement du SDK diffère sur le second.
+
+## Récupérer le moteur séparé
 
 Le code du moteur séparé est développé sous `C:\Dev\FoldgptEngine`, à partir du
 commit Codex `3d2ee51ca2d5db578f328aa75e20aa22c0197c9a` (`rust-v0.153.4`).
-Son état de travail sera inclus dans la même reprise.
+Son état de travail est exporté dans `recovery/engine/engine.patch` avec le
+commit officiel exact et le SHA-256 du patch dans `manifest.json` :
+
+```powershell
+python tools/recovery/restore-engine.py --destination C:\Dev\FoldgptEngine
+wsl --distribution Ubuntu-24.04 --exec python3 /mnt/c/Dev/ChatgptFold/tools/recovery/hydrate-project.py --snapshot /var/tmp/foldgpt-recovered/FoldgptEngine --project /mnt/c/Dev/FoldgptEngine --report /mnt/c/Dev/FoldGPT-recovery/engine-hydration.json
+```
+
+Le script récupère la release officielle, vérifie son commit, applique le patch
+contrôlé et interdit les pushes vers le dépôt public amont. Les caches Rust
+`target`, Gradle `.gradle`/`.cxx`, Python `__pycache__` et métadonnées `.git`
+ne sont pas archivés ; ils sont régénérables. Les dépendances globales du PC
+restent à installer selon le document d'environnement.
+
+## Signature et état du travail
 
 La clé de signature Android de FoldGPT est également conservée dans le coffre,
 fichier `android-debug.keystore` à côté de `recovery.agekey`. Le build principal

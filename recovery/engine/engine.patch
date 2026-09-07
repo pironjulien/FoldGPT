@@ -1,0 +1,2966 @@
+diff --git a/CHANGELOG.md b/CHANGELOG.md
+index 2eb564c560a4c85507169a26637f6bce59f7e1fb..f1e24a4ad040b972a8f2f78a6fdfec7addc1fa11 100644
+--- a/CHANGELOG.md
++++ b/CHANGELOG.md
+@@ -1 +1,11 @@
+ The changelog can be found on the [releases page](https://github.com/openai/codex/releases).
++
++## FoldGPT auxiliary engine — unreleased
++
++- Add an injectable real local execution/filesystem runtime with separate sandbox
++  ownership and controller path visibility, without changing remote identity.
++- Route model unified execution and apply-patch sandbox intent to the selected
++  runtime and preserve required-policy refusals.
++- Add a bounded owned-process output/control adapter and PC integration tests.
++- Record incomplete Android bootstrap and host filesystem routes in
++  `FOLDGPT-INTEGRATION.md`; no phone activation is included.
+diff --git a/FOLDGPT-INTEGRATION.md b/FOLDGPT-INTEGRATION.md
+new file mode 100644
+index 0000000000000000000000000000000000000000..3a3472c996521609a872ba0120a8b5e93b20a531
+--- /dev/null
++++ b/FOLDGPT-INTEGRATION.md
+@@ -0,0 +1,109 @@
++# FoldGPT auxiliary engine: local runtime boundary
++
++Base: `rust-v0.153.4`, commit `3d2ee51ca2d5db578f328aa75e20aa22c0197c9a`.
++
++This checkout is a separate engine. It does not alter the official application's
++files or its bundled engine. Nothing in this increment selects this engine on a
++phone or starts an Android worker.
++
++## Implemented boundary
++
++Application bootstrap may supply an authenticated `Arc<dyn LocalRuntime>` to
++`PreparedEnvironmentManager::build_with_local_runtime`. This uses the discovered
++environment configuration, registers the provider as the real `local` environment,
++and keeps `Environment::is_remote()` false. The default, local lookup and registry
++lookup share one `Environment` instance. A configuration excluding local
++execution, including a Noise-only configuration, is rejected.
++
++The provider owns `ExecBackend`, `ExecutorFileSystem`, metadata and readiness.
++Process sandbox ownership, filesystem sandbox ownership and direct controller
++path access are separate declarations. Ordinary local and remote environments
++retain their previous behavior.
++
++This increment admits only `ControllerPathAccess::Shared`. An `ExecutorOnly`
++provider is rejected at registration, before the unadapted direct controller
++routes can execute. The declaration is already explicit so those routes can be
++adapted without conflating sandbox ownership with path visibility.
++
++The model's unified execution route now chooses the sandbox owner independently
++of host locality and sends the existing typed `ExecParams`, including sandbox and
++network context, to the selected backend. Apply-patch does the same for filesystem
++sandbox context. Existing approval and permission resolution remain in the
++controller. There is no backend retry through an unsandboxed controller launcher.
++An implementation must reject unsupported policy semantics before mutation.
++
++The independent `OwnedProcessDriver` adapter accepts bounded split output streams,
++queued stdin, real exit notifications and fallible native controls. Its producer
++must retain descendant ownership and apply backpressure. A successful control
++request is not proof of cleanup; the runtime must attest cleanup separately. This
++adapter is not yet selected by the unified execution injection route, which uses
++the existing `ExecProcess` API.
++
++## Integration still required
++
++The following are explicit limits of this increment, not supported Android paths:
++
++- Authenticate, start and monitor the native service in the real application
++  bootstrap, then register the provider. No production activation path exists.
++- Implement native `ExecBackend` and `ExecutorFileSystem` with the full request
++  semantics. The tests use real PC-local backends, not Android backends.
++- Consume `ControllerPathAccess` in host command, terminal, one-shot shell,
++  plugin-attribution, shell-admission, shell-snapshot and local file-watch routes.
++  Several existing local branches still assume controller-visible filesystem
++  paths. Registration currently rejects `ExecutorOnly` until those routes are addressed.
++- Connect lossless owned output to the real process managers, including cancellation,
++  disconnect propagation, descendant cleanup and cleanup quarantine.
++- Implement and qualify the actual Android policy enforcement and lifecycle.
++  These traits make no claim that namespace, Landlock or bubblewrap is available.
++- Build/link the auxiliary engine for its actual GNU ARM64 target and validate its
++  launch within the existing application identity. No Android engine build or
++  complete model/UI execution is demonstrated by PC tests.
++
++## Validation cases
++
++The new local runtime tests cover actual PC child-process execution, exit 23,
++filesystem content, identity consistency, readiness/disconnection delegation,
++configuration conflicts and policy refusals without fallback. The core integration
++test scripts model tool calls through the standard response test harness while
++executing real process/filesystem operations; it checks successful execution and
++apply-patch, followed by required-sandbox refusals before writes.
++
++The owned driver tests use real Python child processes and one-chunk output
++backpressure, preserving 771,006 stdout bytes and 385,500 stderr bytes, stdin EOF,
++exit 23, unsupported controls, termination and reaping. These are PC transport
++tests and do not certify Android process ownership.
++
++Verified on WSL Ubuntu 24.04 with Rust 1.95.0, as the unprivileged
++`foldgpt-build` user:
++
++- `just test -p codex-exec-server -p codex-utils-pty --locked`: 552 tests run,
++  549 passed, three failed, three skipped. All four new runtime tests and both
++  owned-driver tests passed.
++- `just test -p codex-core --test all injected_local_runtime --locked`: the one
++  selected model-dispatch integration test passed; 1,643 tests were filtered out.
++- The three package failures are the existing remote shell-snapshot cases
++  `shell_snapshot_v2_filters_profile_exports_and_stays_in_memory::remote_sandbox`
++  and `shell_snapshot_v2_capture_failure_falls_back_and_retries` for
++  `remote_pipe_recovery` and `remote_tty_recovery`. The identical cases failed on
++  the pristine base commit with only the mechanical lock normalization below
++  (12 of 15 selected baseline cases passed). This increment does not repair those
++  upstream snapshot defects or claim a green complete package suite.
++
++The complete core and workspace test suites were not run. Linux PC verification
++does not establish Windows, ARM64 linking, Android or application UI compatibility.
++
++`just fix` was scoped to the three changed crates and completed. `just fmt`
++completed for all repository formatter groups; its two uv project environments
++were located separately on WSL's Linux filesystem because installing wheel files
++on the Windows mount returned `EPERM`. No formatter implementation was changed.
++`just bazel-lock-update` completed under Bazel 9.0.0 without changing
++`MODULE.bazel.lock`. Its existing dependency-version and crate-annotation warnings
++were retained; no dependencies were upgraded to silence them.
++
++## Release lockfile normalization
++
++The exact upstream release tag has workspace version `0.153.4` but retains `0.0.0`
++for 149 workspace packages in `Cargo.lock`. Cargo 1.95 refuses `--locked` until
++those local package versions are synchronized. The generated change is confined
++to those version lines: no registry/git package version, checksum or dependency
++list changes. Keep this mechanical normalization separate from runtime changes.
+diff --git a/codex-rs/Cargo.lock b/codex-rs/Cargo.lock
+index e217b702497e6ff02969a51046f7ba887024f487..ca93c945c9a5d608944d81bc0c12f6df8b9118af 100644
+--- a/codex-rs/Cargo.lock
++++ b/codex-rs/Cargo.lock
+@@ -394,7 +394,7 @@ checksum = "2a4385e2e34eb35d6b3efe798b9eb88096925d87726c0798709bf56d9ed84af3"
+ 
+ [[package]]
+ name = "app_test_support"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "anyhow",
+  "base64 0.22.1",
+@@ -1897,7 +1897,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-agent-extension"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "anyhow",
+  "codex-core",
+@@ -1909,7 +1909,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-agent-graph-store"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "codex-protocol",
+  "codex-state",
+@@ -1924,7 +1924,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-agent-identity"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "anyhow",
+  "base64 0.22.1",
+@@ -1944,7 +1944,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-agent-roles"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "codex-config",
+  "codex-file-system",
+@@ -1957,7 +1957,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-analytics"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "codex-app-server-protocol",
+  "codex-git-utils",
+@@ -1978,7 +1978,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-ansi-escape"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "ansi-to-tui",
+  "ratatui",
+@@ -1987,7 +1987,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-api"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "anyhow",
+  "assert_matches",
+@@ -2022,7 +2022,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-app-server"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "anyhow",
+  "app_test_support",
+@@ -2124,7 +2124,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-app-server-client"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "codex-app-server",
+  "codex-app-server-protocol",
+@@ -2151,7 +2151,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-app-server-daemon"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "anyhow",
+  "codex-app-server-protocol",
+@@ -2172,7 +2172,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-app-server-protocol"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "anyhow",
+  "codex-app-server-protocol-noop-macros",
+@@ -2206,11 +2206,11 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-app-server-protocol-noop-macros"
+-version = "0.0.0"
++version = "0.153.4"
+ 
+ [[package]]
+ name = "codex-app-server-test-client"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "anyhow",
+  "clap",
+@@ -2232,7 +2232,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-app-server-transport"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "anyhow",
+  "axum",
+@@ -2274,7 +2274,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-apply-patch"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "anyhow",
+  "assert_cmd",
+@@ -2294,7 +2294,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-arg0"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "anyhow",
+  "codex-apply-patch",
+@@ -2316,7 +2316,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-async-utils"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "pretty_assertions",
+  "tokio",
+@@ -2325,7 +2325,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-aws-auth"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "aws-config",
+  "aws-credential-types",
+@@ -2340,7 +2340,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-backend-client"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "anyhow",
+  "codex-api",
+@@ -2360,7 +2360,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-backend-openapi-models"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "serde",
+  "serde_json",
+@@ -2369,7 +2369,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-build-info"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "codex-install-context",
+  "pretty_assertions",
+@@ -2381,7 +2381,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-bwrap"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "cc",
+  "libc",
+@@ -2390,7 +2390,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-chatgpt"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "anyhow",
+  "clap",
+@@ -2412,7 +2412,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-cli"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "anyhow",
+  "app_test_support",
+@@ -2502,7 +2502,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-client"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "codex-http-client",
+  "eventsource-stream",
+@@ -2515,7 +2515,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-cloud-config"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "base64 0.22.1",
+  "chrono",
+@@ -2540,7 +2540,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-cloud-tasks"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "anyhow",
+  "chrono",
+@@ -2573,7 +2573,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-cloud-tasks-client"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "anyhow",
+  "chrono",
+@@ -2588,7 +2588,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-cloud-tasks-mock-client"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "chrono",
+  "codex-cloud-tasks-client",
+@@ -2597,7 +2597,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-code-mode"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "codex-code-mode-protocol",
+  "codex-http-client",
+@@ -2620,7 +2620,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-code-mode-host"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "anyhow",
+  "axum",
+@@ -2648,7 +2648,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-code-mode-protocol"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "codex-protocol",
+  "glob",
+@@ -2666,7 +2666,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-code-mode-runtime"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "base64 0.22.1",
+  "codex-code-mode-protocol",
+@@ -2684,11 +2684,11 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-collaboration-mode-templates"
+-version = "0.0.0"
++version = "0.153.4"
+ 
+ [[package]]
+ name = "codex-config"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "anyhow",
+  "base64 0.22.1",
+@@ -2737,7 +2737,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-config-schema"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "anyhow",
+  "clap",
+@@ -2746,7 +2746,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-connectors"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "anyhow",
+  "arc-swap",
+@@ -2768,7 +2768,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-connectors-extension"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "codex-connectors",
+  "codex-core-plugins",
+@@ -2782,7 +2782,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-context-fragments"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "codex-protocol",
+  "codex-utils-string",
+@@ -2790,7 +2790,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-core"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "anyhow",
+  "arc-swap",
+@@ -2924,7 +2924,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-core-api"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "codex-analytics",
+  "codex-app-server-protocol",
+@@ -2947,7 +2947,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-core-plugins"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "anyhow",
+  "chrono",
+@@ -3003,7 +3003,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-diagnostics"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "libc",
+  "pretty_assertions",
+@@ -3011,7 +3011,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-exec"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "anyhow",
+  "assert_cmd",
+@@ -3060,7 +3060,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-exec-server"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "anyhow",
+  "arc-swap",
+@@ -3119,7 +3119,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-exec-server-protocol"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "base64 0.22.1",
+  "codex-file-system",
+@@ -3134,7 +3134,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-exec-server-test-support"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "anyhow",
+  "codex-exec-server",
+@@ -3149,7 +3149,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-execpolicy"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "anyhow",
+  "clap",
+@@ -3167,7 +3167,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-experimental-api-macros"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "proc-macro2",
+  "quote",
+@@ -3176,7 +3176,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-extension-api"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "codex-config",
+  "codex-context-fragments",
+@@ -3193,7 +3193,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-extension-items"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "codex-utils-absolute-path",
+  "pretty_assertions",
+@@ -3205,7 +3205,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-external-agent-migration"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "chrono",
+  "codex-analytics",
+@@ -3235,7 +3235,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-features"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "codex-otel",
+  "codex-protocol",
+@@ -3248,7 +3248,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-feedback"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "anyhow",
+  "bytes",
+@@ -3270,7 +3270,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-file-search"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "anyhow",
+  "clap",
+@@ -3286,7 +3286,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-file-system"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "bytes",
+  "codex-protocol",
+@@ -3298,7 +3298,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-file-watcher"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "notify",
+  "pretty_assertions",
+@@ -3309,7 +3309,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-git-attribution"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "codex-backend-client",
+  "codex-extension-api",
+@@ -3322,7 +3322,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-git-utils"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "anyhow",
+  "chrono",
+@@ -3348,7 +3348,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-goal-extension"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "anyhow",
+  "chrono",
+@@ -3372,7 +3372,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-guardian-context"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "codex-protocol",
+  "pretty_assertions",
+@@ -3381,7 +3381,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-guardian-v2"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "anyhow",
+  "codex-analytics",
+@@ -3411,7 +3411,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-history"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "anyhow",
+  "codex-protocol",
+@@ -3423,7 +3423,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-history-notes-extension"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "codex-api",
+  "codex-client",
+@@ -3447,7 +3447,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-home"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "codex-extension-api",
+  "codex-utils-absolute-path",
+@@ -3458,7 +3458,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-hooks"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "anyhow",
+  "async-channel",
+@@ -3484,7 +3484,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-http-client"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "bytes",
+  "codex-utils-cargo-bin",
+@@ -3516,7 +3516,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-image-generation-extension"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "base64 0.22.1",
+  "codex-api",
+@@ -3543,7 +3543,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-install-context"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "codex-utils-absolute-path",
+  "codex-utils-home-dir",
+@@ -3556,7 +3556,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-keyring-store"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "keyring",
+  "tracing",
+@@ -3564,7 +3564,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-linux-sandbox"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "clap",
+  "codex-core",
+@@ -3591,7 +3591,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-lmstudio"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "codex-core",
+  "codex-http-client",
+@@ -3605,7 +3605,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-login"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "anyhow",
+  "base64 0.22.1",
+@@ -3648,7 +3648,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-mcp"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "anyhow",
+  "arc-swap",
+@@ -3688,7 +3688,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-mcp-extension"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "anyhow",
+  "axum",
+@@ -3719,7 +3719,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-mcp-server"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "anyhow",
+  "app_test_support",
+@@ -3758,7 +3758,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-memories-extension"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "codex-core",
+  "codex-extension-api",
+@@ -3779,7 +3779,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-memories-read"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "codex-protocol",
+  "codex-shell-command",
+@@ -3789,7 +3789,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-memories-write"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "anyhow",
+  "chrono",
+@@ -3826,7 +3826,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-message-history"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "codex-config",
+  "memchr",
+@@ -3840,7 +3840,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-model-provider"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "codex-agent-identity",
+  "codex-api",
+@@ -3864,7 +3864,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-model-provider-info"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "codex-api",
+  "codex-protocol",
+@@ -3881,7 +3881,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-models-manager"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "chrono",
+  "codex-collaboration-mode-templates",
+@@ -3901,7 +3901,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-network-proxy"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "anyhow",
+  "base64 0.22.1",
+@@ -3939,7 +3939,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-ollama"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "assert_matches",
+  "async-stream",
+@@ -3959,7 +3959,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-otel"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "chrono",
+  "codex-api",
+@@ -3992,7 +3992,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-otel-trace-websocket"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "anyhow",
+  "axum",
+@@ -4003,7 +4003,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-plugin"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "codex-config",
+  "codex-protocol",
+@@ -4017,7 +4017,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-process-hardening"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "libc",
+  "pretty_assertions",
+@@ -4025,7 +4025,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-prompts"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "anyhow",
+  "codex-context-fragments",
+@@ -4039,7 +4039,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-protocol"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "anyhow",
+  "chardetng",
+@@ -4083,7 +4083,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-queue-extension"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "anyhow",
+  "codex-core",
+@@ -4104,7 +4104,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-realtime-webrtc"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "anyhow",
+  "codex-install-context",
+@@ -4117,7 +4117,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-response-debug-context"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "base64 0.22.1",
+  "codex-api",
+@@ -4128,7 +4128,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-responses-api-proxy"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "anyhow",
+  "clap",
+@@ -4145,7 +4145,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-rmcp-client"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "anyhow",
+  "axum",
+@@ -4191,7 +4191,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-rollout"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "anyhow",
+  "chrono",
+@@ -4218,7 +4218,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-rollout-trace"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "anyhow",
+  "codex-code-mode",
+@@ -4234,7 +4234,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-sandboxing"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "anyhow",
+  "appcontainer_common",
+@@ -4261,7 +4261,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-secrets"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "age",
+  "anyhow",
+@@ -4282,7 +4282,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-shell-command"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "anyhow",
+  "base64 0.22.1",
+@@ -4305,7 +4305,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-shell-escalation"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "anyhow",
+  "clap",
+@@ -4325,7 +4325,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-skills"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "codex-protocol",
+  "codex-shell-command",
+@@ -4342,7 +4342,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-skills-extension"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "assert_matches",
+  "codex-analytics",
+@@ -4379,7 +4379,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-state"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "anyhow",
+  "chrono",
+@@ -4403,7 +4403,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-stdio-to-uds"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "anyhow",
+  "codex-uds",
+@@ -4415,7 +4415,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-terminal-detection"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "pretty_assertions",
+  "tracing",
+@@ -4423,7 +4423,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-test-binary-support"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "codex-arg0",
+  "tempfile",
+@@ -4431,7 +4431,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-thread-manager-sample"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "anyhow",
+  "clap",
+@@ -4442,7 +4442,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-thread-store"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "chrono",
+  "codex-app-server-protocol",
+@@ -4472,7 +4472,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-tools"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "bitflags 2.13.1",
+  "codex-code-mode",
+@@ -4497,7 +4497,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-tui"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "anyhow",
+  "app_test_support",
+@@ -4610,7 +4610,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-uds"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "async-io",
+  "pretty_assertions",
+@@ -4622,7 +4622,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-utils-absolute-path"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "dirs",
+  "dunce",
+@@ -4636,14 +4636,14 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-utils-approval-presets"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "codex-protocol",
+ ]
+ 
+ [[package]]
+ name = "codex-utils-audio"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "base64 0.22.1",
+  "codex-protocol",
+@@ -4657,7 +4657,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-utils-cache"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "lru",
+  "sha1 0.10.6",
+@@ -4666,7 +4666,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-utils-cargo-bin"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "assert_cmd",
+  "runfiles",
+@@ -4675,7 +4675,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-utils-cli"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "clap",
+  "codex-protocol",
+@@ -4687,15 +4687,15 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-utils-elapsed"
+-version = "0.0.0"
++version = "0.153.4"
+ 
+ [[package]]
+ name = "codex-utils-fuzzy-match"
+-version = "0.0.0"
++version = "0.153.4"
+ 
+ [[package]]
+ name = "codex-utils-git-discovery"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "codex-git-utils",
+  "codex-utils-absolute-path",
+@@ -4708,7 +4708,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-utils-home-dir"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "codex-utils-absolute-path",
+  "dirs",
+@@ -4718,7 +4718,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-utils-image"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "base64 0.22.1",
+  "codex-utils-cache",
+@@ -4731,7 +4731,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-utils-json-to-toml"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "pretty_assertions",
+  "serde_json",
+@@ -4740,7 +4740,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-utils-oss"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "codex-core",
+  "codex-lmstudio",
+@@ -4750,7 +4750,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-utils-output-truncation"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "codex-protocol",
+  "codex-utils-string",
+@@ -4759,7 +4759,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-utils-path"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "codex-utils-absolute-path",
+  "dunce",
+@@ -4769,7 +4769,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-utils-path-uri"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "base64 0.22.1",
+  "codex-utils-absolute-path",
+@@ -4785,7 +4785,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-utils-plugins"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "codex-exec-server",
+  "codex-exec-server-protocol",
+@@ -4799,7 +4799,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-utils-pty"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "anyhow",
+  "filedescriptor",
+@@ -4815,7 +4815,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-utils-readiness"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "assert_matches",
+  "thiserror 2.0.18",
+@@ -4825,7 +4825,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-utils-redacted-string"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "schemars 0.8.22",
+  "serde",
+@@ -4833,14 +4833,14 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-utils-rustls-provider"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "rustls",
+ ]
+ 
+ [[package]]
+ name = "codex-utils-sandbox-summary"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "codex-protocol",
+  "codex-utils-absolute-path",
+@@ -4849,7 +4849,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-utils-sleep-inhibitor"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "core-foundation 0.9.4",
+  "libc",
+@@ -4859,14 +4859,14 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-utils-stream-parser"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "pretty_assertions",
+ ]
+ 
+ [[package]]
+ name = "codex-utils-string"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "pretty_assertions",
+  "regex-lite",
+@@ -4876,14 +4876,14 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-utils-template"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "pretty_assertions",
+ ]
+ 
+ [[package]]
+ name = "codex-v8-poc"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "pretty_assertions",
+  "v8",
+@@ -4891,7 +4891,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-voice-host"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "anyhow",
+  "codex-install-context",
+@@ -4905,7 +4905,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-web-search-extension"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "codex-api",
+  "codex-core",
+@@ -4926,7 +4926,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-websocket-client"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "codex-http-client",
+  "codex-utils-rustls-provider",
+@@ -4942,7 +4942,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-windows-sandbox"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "anyhow",
+  "base64 0.22.1",
+@@ -4968,7 +4968,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-workload-identity"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "codex-http-client",
+  "pretty_assertions",
+@@ -4983,7 +4983,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "codex-worktree"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "anyhow",
+  "codex-git-utils",
+@@ -5222,7 +5222,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "core_test_support"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "anyhow",
+  "assert_cmd",
+@@ -9520,7 +9520,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "mcp_test_support"
+-version = "0.0.0"
++version = "0.153.4"
+ dependencies = [
+  "anyhow",
+  "codex-login",
+diff --git a/codex-rs/core/src/tools/handlers/unified_exec/exec_command.rs b/codex-rs/core/src/tools/handlers/unified_exec/exec_command.rs
+index 8b97ff06b243cc20974a2aa747e7883acae25f37..4dd3587de7648698caccb510925456efb525c1af 100644
+--- a/codex-rs/core/src/tools/handlers/unified_exec/exec_command.rs
++++ b/codex-rs/core/src/tools/handlers/unified_exec/exec_command.rs
+@@ -195,9 +195,9 @@ impl ExecCommandHandler {
+         let environment = Arc::clone(&turn_environment.environment);
+         let fs = environment.get_filesystem();
+ 
+-        // Remote executors enforce URI-native sandbox policy themselves. Only a host-local
+-        // sandbox needs a native cwd for resolving paths nested in the permissions config.
+-        let requires_host_native_cwd = !environment.is_remote()
++        // Executor-owned enforcement retains native URI policy even for a local broker.
++        let requires_host_native_cwd = environment.process_sandbox_owner()
++            == codex_exec_server::SandboxOwner::Controller
+             && SandboxManager::new().select_initial(
+                 turn_environment.permission_profile(),
+                 SandboxablePreference::Auto,
+diff --git a/codex-rs/core/src/tools/runtimes/apply_patch.rs b/codex-rs/core/src/tools/runtimes/apply_patch.rs
+index 723e6eb034187b931eec2d08f6025e4451742d69..022d48d26429cbab3473eb80587d86913c35a0be 100644
+--- a/codex-rs/core/src/tools/runtimes/apply_patch.rs
++++ b/codex-rs/core/src/tools/runtimes/apply_patch.rs
+@@ -158,7 +158,8 @@ impl ToolRuntime<ApplyPatchRequest, ApplyPatchRuntimeOutput> for ApplyPatchRunti
+     }
+ 
+     fn uses_executor_managed_process_sandbox(&self, req: &ApplyPatchRequest) -> bool {
+-        req.turn_environment.environment.is_remote()
++        req.turn_environment.environment.filesystem_sandbox_owner()
++            == codex_exec_server::SandboxOwner::Executor
+     }
+ 
+     fn sandbox_cwd<'a>(&self, req: &'a ApplyPatchRequest) -> Option<&'a PathUri> {
+diff --git a/codex-rs/core/src/tools/runtimes/unified_exec.rs b/codex-rs/core/src/tools/runtimes/unified_exec.rs
+index aea36d9f48ebbc22d2ea5d3b0fbb6964009f9376..be19f04f3f973eb1a20894b188dc128a268a00ab 100644
+--- a/codex-rs/core/src/tools/runtimes/unified_exec.rs
++++ b/codex-rs/core/src/tools/runtimes/unified_exec.rs
+@@ -205,7 +205,9 @@ impl<'a> ToolRuntime<UnifiedExecRequest, UnifiedExecAttempt> for UnifiedExecRunt
+     }
+ 
+     fn uses_executor_managed_process_sandbox(&self, req: &UnifiedExecRequest) -> bool {
+-        req.turn_environment.environment.is_remote() || req.shell_snapshot.is_some()
++        req.turn_environment.environment.process_sandbox_owner()
++            == codex_exec_server::SandboxOwner::Executor
++            || req.shell_snapshot.is_some()
+     }
+ 
+     fn sandbox_cwd<'b>(&self, req: &'b UnifiedExecRequest) -> Option<&'b PathUri> {
+diff --git a/codex-rs/core/src/unified_exec/process_manager.rs b/codex-rs/core/src/unified_exec/process_manager.rs
+index 21218570af85277b4e21885cfa77c53c6271bed1..104562cef1563b365d684d95b63c80f8d5c3ec4b 100644
+--- a/codex-rs/core/src/unified_exec/process_manager.rs
++++ b/codex-rs/core/src/unified_exec/process_manager.rs
+@@ -1189,7 +1189,10 @@ impl UnifiedExecProcessManager {
+         spawn_lifecycle: SpawnLifecycleHandle,
+         environment: &codex_exec_server::Environment,
+     ) -> Result<UnifiedExecProcess, ToolError> {
+-        let mut request = if environment.is_remote() || shell_snapshot.is_some() {
++        let mut request = if environment.process_sandbox_owner()
++            == codex_exec_server::SandboxOwner::Executor
++            || shell_snapshot.is_some()
++        {
+             attempt.env_for_exec_server(command, options)
+         } else {
+             attempt.env_for(command, options, network, environment_id)
+@@ -1239,10 +1242,13 @@ impl UnifiedExecProcessManager {
+     ) -> Result<UnifiedExecProcess, UnifiedExecError> {
+         let inherited_fds = spawn_lifecycle.inherited_fds();
+ 
+-        if environment.is_remote() || request.exec_server_shell_snapshot.is_some() {
++        if environment.process_sandbox_owner() == codex_exec_server::SandboxOwner::Executor
++            || request.exec_server_shell_snapshot.is_some()
++        {
+             if !inherited_fds.is_empty() {
+                 return Err(UnifiedExecError::create_process(
+-                    "remote exec-server does not support inherited file descriptors".to_string(),
++                    "executor-managed processes do not support inherited file descriptors"
++                        .to_string(),
+                 ));
+             }
+ 
+diff --git a/codex-rs/core/tests/common/test_codex.rs b/codex-rs/core/tests/common/test_codex.rs
+index 6e7b9d6e77a1db506ab9755e778dcffbcfa22532..461782d443c5b81accaefda2341d950bae092259 100644
+--- a/codex-rs/core/tests/common/test_codex.rs
++++ b/codex-rs/core/tests/common/test_codex.rs
+@@ -332,6 +332,7 @@ pub struct TestCodexBuilder {
+     user_shell_override: Option<Shell>,
+     exec_server_url: Option<String>,
+     extensions: Arc<ExtensionRegistry<Config>>,
++    environment_manager: Option<Arc<codex_exec_server::EnvironmentManager>>,
+     user_instructions_provider: Option<Arc<dyn UserInstructionsProvider>>,
+     supports_openai_form_elicitation: bool,
+     external_time_provider: Option<Arc<dyn TimeProvider>>,
+@@ -341,6 +342,14 @@ pub struct TestCodexBuilder {
+ }
+ 
+ impl TestCodexBuilder {
++    pub fn with_environment_manager(
++        mut self,
++        environment_manager: Arc<codex_exec_server::EnvironmentManager>,
++    ) -> Self {
++        self.environment_manager = Some(environment_manager);
++        self
++    }
++
+     pub fn with_config<T>(mut self, mutator: T) -> Self
+     where
+         T: FnOnce(&mut Config) + Send + 'static,
+@@ -634,19 +643,23 @@ impl TestCodexBuilder {
+             std::env::current_exe()?,
+             codex_linux_sandbox_exe,
+         )?;
+-        let environment_manager = Arc::new(if include_local_environment {
+-            codex_exec_server::EnvironmentManager::create_for_tests_with_local(
+-                exec_server_url,
+-                local_runtime_paths,
+-            )
+-            .await
++        let environment_manager = if let Some(manager) = &self.environment_manager {
++            Arc::clone(manager)
+         } else {
+-            codex_exec_server::EnvironmentManager::create_for_tests(
+-                exec_server_url,
+-                Some(local_runtime_paths),
+-            )
+-            .await
+-        });
++            Arc::new(if include_local_environment {
++                codex_exec_server::EnvironmentManager::create_for_tests_with_local(
++                    exec_server_url,
++                    local_runtime_paths,
++                )
++                .await
++            } else {
++                codex_exec_server::EnvironmentManager::create_for_tests(
++                    exec_server_url,
++                    Some(local_runtime_paths),
++                )
++                .await
++            })
++        };
+         let file_system = test_env.environment().get_filesystem();
+         let mut workspace_setups = vec![];
+         swap(&mut self.workspace_setups, &mut workspace_setups);
+@@ -1355,6 +1368,7 @@ pub fn test_codex() -> TestCodexBuilder {
+         user_shell_override: None,
+         exec_server_url: None,
+         extensions: empty_extension_registry(),
++        environment_manager: None,
+         user_instructions_provider: None,
+         supports_openai_form_elicitation: false,
+         external_time_provider: None,
+diff --git a/codex-rs/core/tests/suite/injected_local_runtime.rs b/codex-rs/core/tests/suite/injected_local_runtime.rs
+new file mode 100644
+index 0000000000000000000000000000000000000000..733e70f5e04d4bb4a62a0e55eb3e33a4d76131ce
+--- /dev/null
++++ b/codex-rs/core/tests/suite/injected_local_runtime.rs
+@@ -0,0 +1,208 @@
++use std::sync::Arc;
++use std::sync::Mutex;
++
++use anyhow::Result;
++use codex_exec_server::ControllerPathAccess;
++use codex_exec_server::Environment;
++use codex_exec_server::EnvironmentInfo;
++use codex_exec_server::EnvironmentManager;
++use codex_exec_server::EnvironmentObservedStatus;
++use codex_exec_server::ExecBackend;
++use codex_exec_server::ExecBackendFuture;
++use codex_exec_server::ExecParams;
++use codex_exec_server::ExecProcessFuture;
++use codex_exec_server::ExecutorFileSystem;
++use codex_exec_server::LocalRuntime;
++use codex_exec_server::LocalSandboxOwnership;
++use codex_exec_server::SandboxOwner;
++use codex_http_client::HttpClientFactory;
++use codex_http_client::OutboundProxyPolicy;
++use codex_protocol::models::PermissionProfile;
++use codex_utils_path_uri::PathUri;
++use core_test_support::responses;
++use core_test_support::responses::ev_apply_patch_custom_tool_call;
++use core_test_support::responses::ev_completed;
++use core_test_support::responses::ev_function_call;
++use core_test_support::responses::mount_sse_sequence;
++use core_test_support::responses::sse;
++use core_test_support::test_codex::TestEnv;
++use core_test_support::test_codex::test_codex;
++use pretty_assertions::assert_eq;
++use serde_json::json;
++
++struct Runtime {
++    backend: Arc<RecordingBackend>,
++    environment: Environment,
++    info: EnvironmentInfo,
++}
++
++struct RecordingBackend {
++    inner: Arc<dyn ExecBackend>,
++    requests: Mutex<Vec<ExecParams>>,
++}
++
++impl ExecBackend for RecordingBackend {
++    fn start(&self, params: ExecParams) -> ExecBackendFuture<'_> {
++        let Ok(mut requests) = self.requests.lock() else {
++            return Box::pin(async {
++                Err(codex_exec_server::ExecServerError::Protocol(
++                    "recorded request lock poisoned".into(),
++                ))
++            });
++        };
++        requests.push(params.clone());
++        self.inner.start(params)
++    }
++}
++
++impl LocalRuntime for Runtime {
++    fn exec_backend(&self) -> Arc<dyn ExecBackend> {
++        self.backend.clone()
++    }
++    fn filesystem(&self) -> Arc<dyn ExecutorFileSystem> {
++        self.environment.get_filesystem()
++    }
++    fn sandbox_ownership(&self) -> LocalSandboxOwnership {
++        LocalSandboxOwnership {
++            process: SandboxOwner::Executor,
++            filesystem: SandboxOwner::Executor,
++        }
++    }
++    fn controller_path_access(&self) -> ControllerPathAccess {
++        ControllerPathAccess::Shared
++    }
++    fn info(&self) -> ExecProcessFuture<'_, EnvironmentInfo> {
++        Box::pin(async { Ok(self.info.clone()) })
++    }
++    fn observed_status(&self) -> EnvironmentObservedStatus {
++        EnvironmentObservedStatus::Ready
++    }
++    fn wait_until_ready(&self) -> ExecProcessFuture<'_, ()> {
++        Box::pin(async { Ok(()) })
++    }
++}
++
++// This test specifically exercises injection into a real local host. It must not
++// switch to a foreign remote TestEnv selected by the broader test matrix.
++#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
++async fn model_exec_and_apply_patch_use_injected_local_runtime_and_preserve_refusals() -> Result<()>
++{
++    let server = responses::start_mock_server().await;
++    let test_env = TestEnv::local().await?;
++    let cwd = test_env.cwd().clone();
++    let home = Arc::new(tempfile::tempdir()?);
++    std::fs::write(
++        home.path().join("environments.toml"),
++        "default = \"local\"\ninclude_local = true\n",
++    )?;
++    let environment = Environment::default_for_tests();
++    let runtime = Arc::new(Runtime {
++        backend: Arc::new(RecordingBackend {
++            inner: environment.get_exec_backend(),
++            requests: Mutex::new(Vec::new()),
++        }),
++        environment,
++        info: EnvironmentInfo {
++            cwd: Some(PathUri::from_abs_path(&cwd)),
++            ..EnvironmentInfo::local()
++        },
++    });
++    let manager = Arc::new(
++        EnvironmentManager::prepare_from_codex_home(home.path())
++            .await?
++            .build_with_local_runtime(
++                runtime.clone(),
++                /*local_runtime_paths*/ None,
++                HttpClientFactory::new(OutboundProxyPolicy::ReqwestDefault),
++            )?,
++    );
++    assert!(!manager.default_environment().unwrap().is_remote());
++    let test = test_codex()
++        .with_model("gpt-5.4")
++        .with_home(home)
++        .with_environment_manager(manager)
++        .build_with_environment(&server, test_env)
++        .await?;
++    #[cfg(unix)]
++    let command = "printf runtime-dispatch > command.txt; printf runtime-dispatch; exit 23";
++    #[cfg(windows)]
++    let command = "Set-Content -NoNewline command.txt runtime-dispatch; Write-Output runtime-dispatch; exit 23";
++    let successful = mount_sse_sequence(&server, vec![
++        sse(vec![ev_function_call("exec-native", "exec_command", &json!({"cmd": command, "login": false}).to_string()), ev_completed("exec-response")]),
++        sse(vec![ev_apply_patch_custom_tool_call("patch-native", "*** Begin Patch\n*** Add File: patch.txt\n+runtime-filesystem\n*** End Patch\n"), ev_completed("patch-response")]),
++        sse(vec![ev_completed("complete-response")]),
++    ]).await;
++    // Full access is a test input to validate the launch route. The following
++    // turn independently verifies that a required sandbox is never removed.
++    test.submit_turn_with_permission_profile(
++        "execute and apply patch",
++        PermissionProfile::Disabled,
++    )
++    .await?;
++    assert_eq!(std::fs::read(cwd.join("command.txt"))?, b"runtime-dispatch");
++    assert_eq!(
++        std::fs::read(cwd.join("patch.txt"))?,
++        b"runtime-filesystem\n"
++    );
++    let output = successful.requests()[1]
++        .function_call_output_text("exec-native")
++        .unwrap();
++    assert!(output.contains("Process exited with code 23"), "{output}");
++    assert!(output.contains("runtime-dispatch"), "{output}");
++    let completed = successful.requests()[2].custom_tool_call_output("patch-native");
++    assert!(
++        completed
++            .to_string()
++            .contains("Success. Updated the following files")
++    );
++
++    #[cfg(unix)]
++    let forbidden_command = "printf must-not-run > forbidden.txt";
++    #[cfg(windows)]
++    let forbidden_command = "Set-Content forbidden.txt must-not-run";
++    let refused = mount_sse_sequence(&server, vec![
++        sse(vec![ev_function_call("refused-native", "exec_command", &json!({"cmd": forbidden_command, "login": false}).to_string()), ev_completed("refused-exec-response")]),
++        sse(vec![ev_apply_patch_custom_tool_call("refused-patch", "*** Begin Patch\n*** Add File: forbidden-patch.txt\n+must-not-be-written\n*** End Patch\n"), ev_completed("refused-patch-response")]),
++        sse(vec![ev_completed("refused-complete-response")]),
++    ]).await;
++    test.submit_turn_with_permission_profile(
++        "attempt required sandbox",
++        PermissionProfile::workspace_write(),
++    )
++    .await?;
++    let refusal = refused.requests()[1]
++        .function_call_output_text("refused-native")
++        .unwrap();
++    assert!(
++        refusal.contains("sandbox runtime paths are not configured"),
++        "{refusal}"
++    );
++    assert!(!cwd.join("forbidden.txt").exists());
++    assert!(!cwd.join("forbidden-patch.txt").exists());
++    let patch_refusal = refused.requests()[2].custom_tool_call_output("refused-patch");
++    let patch_refusal = patch_refusal["output"].as_str().unwrap();
++    assert!(
++        patch_refusal.starts_with("Exit code: 1\n"),
++        "{patch_refusal}"
++    );
++    assert!(
++        patch_refusal.contains("Failed to write file"),
++        "{patch_refusal}"
++    );
++    let requests = runtime.backend.requests.lock().unwrap();
++    let successful_request = requests
++        .iter()
++        .find(|request| request.argv.iter().any(|arg| arg == command))
++        .unwrap();
++    let refused_request = requests
++        .iter()
++        .find(|request| request.argv.iter().any(|arg| arg == forbidden_command))
++        .unwrap();
++    assert_eq!(
++        (&successful_request.cwd, &successful_request.sandbox),
++        (&PathUri::from_abs_path(&cwd), &None)
++    );
++    assert!(refused_request.sandbox.is_some());
++    assert_eq!(refused_request.cwd, PathUri::from_abs_path(&cwd));
++    Ok(())
++}
+diff --git a/codex-rs/core/tests/suite/mod.rs b/codex-rs/core/tests/suite/mod.rs
+index 8d43ca03efd099dc8910a2622438c5e4c35f9702..58c5350091c690f9348526b172295163df5f10bc 100644
+--- a/codex-rs/core/tests/suite/mod.rs
++++ b/codex-rs/core/tests/suite/mod.rs
+@@ -87,6 +87,7 @@ mod hooks_executor;
+ #[cfg(not(target_os = "windows"))]
+ mod hooks_mcp;
+ mod image_rollout;
++mod injected_local_runtime;
+ mod injected_models_cache;
+ #[cfg(not(target_os = "windows"))]
+ mod interrupt_hooks;
+diff --git a/codex-rs/exec-server/src/environment.rs b/codex-rs/exec-server/src/environment.rs
+index 953f8d4da2518e447649aa520dba8f36496cca97..1cc32425b4fd7b3d044a237e7b12eed9d8a7562f 100644
+--- a/codex-rs/exec-server/src/environment.rs
++++ b/codex-rs/exec-server/src/environment.rs
+@@ -48,6 +48,13 @@ use tracing::instrument::WithSubscriber;
+ 
+ #[path = "environment/accepted.rs"]
+ mod accepted;
++#[path = "environment/local_runtime.rs"]
++mod local_runtime;
++
++pub use local_runtime::ControllerPathAccess;
++pub use local_runtime::LocalRuntime;
++pub use local_runtime::LocalSandboxOwnership;
++pub use local_runtime::SandboxOwner;
+ 
+ pub const CODEX_EXEC_SERVER_URL_ENV_VAR: &str = "CODEX_EXEC_SERVER_URL";
+ pub const CODEX_EXEC_SERVER_NOISE_REGISTRY_URL_ENV_VAR: &str =
+@@ -269,24 +276,56 @@ impl EnvironmentManager {
+         snapshot: EnvironmentProviderSnapshot,
+         local_runtime_paths: Option<ExecServerRuntimePaths>,
+         http_client_factory: HttpClientFactory,
++    ) -> Result<Self, ExecServerError> {
++        Self::from_snapshot_with_runtime(
++            snapshot,
++            local_runtime_paths,
++            http_client_factory,
++            /*local_runtime*/ None,
++        )
++    }
++
++    pub(crate) fn from_snapshot_with_runtime(
++        snapshot: EnvironmentProviderSnapshot,
++        local_runtime_paths: Option<ExecServerRuntimePaths>,
++        http_client_factory: HttpClientFactory,
++        local_runtime: Option<Arc<dyn LocalRuntime>>,
+     ) -> Result<Self, ExecServerError> {
+         let EnvironmentProviderSnapshot {
+             environments,
+             default,
+             include_local,
+         } = snapshot;
++        if local_runtime.is_some() && !include_local {
++            return Err(ExecServerError::Protocol(
++                "injected local runtime requires a configured local environment".to_string(),
++            ));
++        }
++        if local_runtime.as_ref().is_some_and(|runtime| {
++            runtime.controller_path_access() == ControllerPathAccess::ExecutorOnly
++        }) {
++            return Err(ExecServerError::Protocol(
++                "executor-only local paths require controller filesystem routing that is not yet implemented".to_string(),
++            ));
++        }
+         let mut environment_map =
+             HashMap::with_capacity(environments.len() + usize::from(include_local));
+         let local_environment = if include_local {
+-            let local_runtime_paths = local_runtime_paths.clone().ok_or_else(|| {
+-                ExecServerError::Protocol(
+-                    "local environment requires configured runtime paths".to_string(),
+-                )
+-            })?;
+-            let local_environment = Arc::new(Environment::local(
+-                local_runtime_paths,
+-                http_client_factory.clone(),
+-            ));
++            let local_environment = Arc::new(match local_runtime {
++                Some(runtime) => Environment::local_with_runtime(
++                    runtime,
++                    local_runtime_paths.clone(),
++                    http_client_factory.clone(),
++                ),
++                None => {
++                    let paths = local_runtime_paths.clone().ok_or_else(|| {
++                        ExecServerError::Protocol(
++                            "local environment requires configured runtime paths".to_string(),
++                        )
++                    })?;
++                    Environment::local(paths, http_client_factory.clone())
++                }
++            });
+             environment_map.insert(
+                 LOCAL_ENVIRONMENT_ID.to_string(),
+                 Arc::clone(&local_environment),
+@@ -667,6 +706,7 @@ pub struct Environment {
+     filesystem: Arc<dyn ExecutorFileSystem>,
+     http_client: Arc<dyn HttpClient>,
+     local_runtime_paths: Option<ExecServerRuntimePaths>,
++    local_runtime: Option<Arc<dyn LocalRuntime>>,
+ }
+ 
+ impl Environment {
+@@ -684,6 +724,7 @@ impl Environment {
+                 OutboundProxyPolicy::ReqwestDefault,
+             ))),
+             local_runtime_paths: None,
++            local_runtime: None,
+         }
+     }
+ }
+@@ -764,6 +805,7 @@ impl Environment {
+             )),
+             http_client: Arc::new(RouteAwareHttpClient::new(http_client_factory)),
+             local_runtime_paths: Some(local_runtime_paths),
++            local_runtime: None,
+         }
+     }
+ 
+@@ -793,6 +835,7 @@ impl Environment {
+             filesystem,
+             http_client: Arc::new(client),
+             local_runtime_paths,
++            local_runtime: None,
+         }
+     }
+ 
+@@ -896,6 +939,9 @@ impl Environment {
+         fields(remote = self.is_remote())
+     )]
+     pub async fn info(&self) -> Result<EnvironmentInfo, ExecServerError> {
++        if let Some(runtime) = &self.local_runtime {
++            return runtime.info().await;
++        }
+         match &self.remote_client {
+             Some(client) => client.environment_info().await,
+             None => Ok(EnvironmentInfo::local()),
+@@ -951,6 +997,9 @@ impl Environment {
+         fields(remote = self.is_remote())
+     )]
+     pub async fn force_info(&self) -> Result<EnvironmentInfo, ExecServerError> {
++        if let Some(runtime) = &self.local_runtime {
++            return runtime.info().await;
++        }
+         match &self.remote_client {
+             Some(client) => client.get().await?.force_environment_info().await,
+             None => Ok(EnvironmentInfo::local()),
+@@ -1066,6 +1115,9 @@ impl Environment {
+ 
+     /// Returns whether startup has completed, including a first connection made by refresh.
+     pub fn startup_finished(&self) -> bool {
++        if self.local_runtime.is_some() {
++            return self.local_readiness_result().is_some();
++        }
+         self.remote_client
+             .as_ref()
+             .is_none_or(LazyRemoteExecServerClient::startup_finished)
+@@ -1078,6 +1130,9 @@ impl Environment {
+         fields(remote = self.is_remote())
+     )]
+     pub async fn wait_until_ready(&self) -> Result<(), ExecServerError> {
++        if let Some(runtime) = &self.local_runtime {
++            return runtime.wait_until_ready().await;
++        }
+         match &self.remote_client {
+             Some(client) => client.wait_until_ready().await,
+             None => Ok(()),
+@@ -1086,6 +1141,9 @@ impl Environment {
+ 
+     /// Returns whether the environment can serve a request without waiting or reconnecting.
+     pub(crate) fn readiness_result(&self) -> Option<Result<(), ExecServerError>> {
++        if self.local_runtime.is_some() {
++            return self.local_readiness_result();
++        }
+         match &self.remote_client {
+             Some(client) => client.readiness_result(),
+             None => Some(Ok(())),
+@@ -1094,11 +1152,15 @@ impl Environment {
+ 
+     /// Returns the environment's status without starting or recovering it.
+     ///
+-    /// Local environments are always ready. Remote environments with an
++    /// Built-in local environments are always ready; injected local runtimes
++    /// supply their own observed status. Remote environments with an
+     /// already-ready cached connection receive a fail-fast `environment/status`
+     /// probe; other remote states are returned from cached connection state
+     /// without waiting for startup or recovery.
+     pub async fn status(&self) -> EnvironmentObservedStatus {
++        if let Some(runtime) = &self.local_runtime {
++            return runtime.observed_status();
++        }
+         match &self.remote_client {
+             Some(client) => client.status().await,
+             None => EnvironmentObservedStatus::Ready,
+diff --git a/codex-rs/exec-server/src/environment/local_runtime.rs b/codex-rs/exec-server/src/environment/local_runtime.rs
+new file mode 100644
+index 0000000000000000000000000000000000000000..b0c452d362e9d005b15e466365c3cd9997039a90
+--- /dev/null
++++ b/codex-rs/exec-server/src/environment/local_runtime.rs
+@@ -0,0 +1,115 @@
++use std::sync::Arc;
++
++use codex_http_client::HttpClientFactory;
++
++use super::Environment;
++use super::EnvironmentObservedStatus;
++use crate::ExecBackend;
++use crate::ExecProcessFuture;
++use crate::ExecServerError;
++use crate::ExecServerRuntimePaths;
++use crate::ExecutorFileSystem;
++use crate::client::http_client::RouteAwareHttpClient;
++use crate::protocol::EnvironmentInfo;
++
++/// The component that applies a requested sandbox, independently of host locality.
++#[derive(Clone, Copy, Debug, Eq, PartialEq)]
++pub enum SandboxOwner {
++    Controller,
++    Executor,
++}
++
++/// Execution and filesystem enforcement can belong to different implementations.
++#[derive(Clone, Copy, Debug, Eq, PartialEq)]
++pub struct LocalSandboxOwnership {
++    pub process: SandboxOwner,
++    pub filesystem: SandboxOwner,
++}
++
++/// Whether executor paths can also be accessed directly by the controller.
++#[derive(Clone, Copy, Debug, Eq, PartialEq)]
++pub enum ControllerPathAccess {
++    Shared,
++    ExecutorOnly,
++}
++
++/// A real local host runtime supplied by the application bootstrap.
++///
++/// The owner authenticates the runtime before registration and retains its process
++/// and filesystem backends for the environment's lifetime. Both backends must
++/// enforce their complete request context and reject operations after connection
++/// loss; metadata readiness alone is not launch authorization. Paths are actual
++/// executor-native paths, never controller-side textual remappings.
++///
++/// Boxed futures preserve object safety at this runtime injection boundary.
++pub trait LocalRuntime: Send + Sync {
++    fn exec_backend(&self) -> Arc<dyn ExecBackend>;
++    fn filesystem(&self) -> Arc<dyn ExecutorFileSystem>;
++    fn sandbox_ownership(&self) -> LocalSandboxOwnership;
++    fn controller_path_access(&self) -> ControllerPathAccess;
++    fn info(&self) -> ExecProcessFuture<'_, EnvironmentInfo>;
++    fn observed_status(&self) -> EnvironmentObservedStatus;
++    fn wait_until_ready(&self) -> ExecProcessFuture<'_, ()>;
++}
++
++impl Environment {
++    pub(super) fn local_with_runtime(
++        runtime: Arc<dyn LocalRuntime>,
++        local_runtime_paths: Option<ExecServerRuntimePaths>,
++        http_client_factory: HttpClientFactory,
++    ) -> Self {
++        Self {
++            remote_client: None,
++            ready_info: Arc::new(arc_swap::ArcSwapOption::empty()),
++            provisioning_status_tx: None,
++            startup_task: Arc::new(std::sync::Mutex::new(None)),
++            exec_backend: runtime.exec_backend(),
++            filesystem: runtime.filesystem(),
++            http_client: Arc::new(RouteAwareHttpClient::new(http_client_factory)),
++            local_runtime_paths,
++            local_runtime: Some(runtime),
++        }
++    }
++
++    /// Who enforces model command sandbox intent for this environment.
++    pub fn process_sandbox_owner(&self) -> SandboxOwner {
++        match &self.local_runtime {
++            Some(runtime) => runtime.sandbox_ownership().process,
++            None if self.is_remote() => SandboxOwner::Executor,
++            None => SandboxOwner::Controller,
++        }
++    }
++
++    /// Who enforces the optional agent context on filesystem operations.
++    pub fn filesystem_sandbox_owner(&self) -> SandboxOwner {
++        match &self.local_runtime {
++            Some(runtime) => runtime.sandbox_ownership().filesystem,
++            None if self.is_remote() => SandboxOwner::Executor,
++            None => SandboxOwner::Controller,
++        }
++    }
++
++    /// Direct filesystem access is separate from transport and sandbox ownership.
++    pub fn controller_path_access(&self) -> ControllerPathAccess {
++        match &self.local_runtime {
++            Some(runtime) => runtime.controller_path_access(),
++            None if self.is_remote() => ControllerPathAccess::ExecutorOnly,
++            None => ControllerPathAccess::Shared,
++        }
++    }
++
++    pub(super) fn local_readiness_result(&self) -> Option<Result<(), ExecServerError>> {
++        let runtime = self.local_runtime.as_ref()?;
++        match runtime.observed_status() {
++            EnvironmentObservedStatus::Ready => Some(Ok(())),
++            EnvironmentObservedStatus::Pending => None,
++            EnvironmentObservedStatus::Disconnected { error } => {
++                Some(Err(ExecServerError::Protocol(error)))
++            }
++        }
++    }
++}
++
++#[cfg(test)]
++#[path = "local_runtime_tests.rs"]
++mod tests;
+diff --git a/codex-rs/exec-server/src/environment/local_runtime_tests.rs b/codex-rs/exec-server/src/environment/local_runtime_tests.rs
+new file mode 100644
+index 0000000000000000000000000000000000000000..2ad6d0de3c4ed0ecc024b0c6a5ddc5ccf360fcf3
+--- /dev/null
++++ b/codex-rs/exec-server/src/environment/local_runtime_tests.rs
+@@ -0,0 +1,315 @@
++use std::sync::Arc;
++use std::sync::Mutex;
++
++use codex_http_client::HttpClientFactory;
++use codex_http_client::OutboundProxyPolicy;
++use codex_protocol::models::PermissionProfile;
++use codex_utils_path_uri::PathUri;
++use pretty_assertions::assert_eq;
++
++use super::*;
++use crate::EnvironmentManager;
++use crate::ExecBackendFuture;
++use crate::ExecParams;
++use crate::ExecProcessEvent;
++use crate::FileSystemSandboxContext;
++use crate::LOCAL_ENVIRONMENT_ID;
++use crate::PreparedEnvironmentManager;
++use crate::ProcessId;
++use crate::environment_bootstrap::PreparedEnvironmentSource;
++use crate::environment_provider::EnvironmentDefault;
++use crate::environment_provider::EnvironmentProviderSnapshot;
++use crate::local_file_system::LocalFileSystem;
++use crate::local_process::LocalProcess;
++use crate::remote::NoiseRendezvousEnvironmentConfig;
++
++struct RecordingBackend {
++    inner: LocalProcess,
++    requests: Mutex<Vec<ExecParams>>,
++}
++
++impl ExecBackend for RecordingBackend {
++    fn start(&self, params: ExecParams) -> ExecBackendFuture<'_> {
++        self.requests.lock().unwrap().push(params.clone());
++        self.inner.start(params)
++    }
++}
++
++struct Runtime {
++    backend: Arc<RecordingBackend>,
++    filesystem: Arc<dyn ExecutorFileSystem>,
++    info: EnvironmentInfo,
++    status: Mutex<EnvironmentObservedStatus>,
++    controller_paths: ControllerPathAccess,
++}
++
++impl Runtime {
++    fn new(cwd: &std::path::Path) -> Arc<Self> {
++        Arc::new(Self {
++            backend: Arc::new(RecordingBackend {
++                inner: LocalProcess::default(),
++                requests: Mutex::new(Vec::new()),
++            }),
++            filesystem: Arc::new(LocalFileSystem::unsandboxed()),
++            info: EnvironmentInfo {
++                cwd: Some(PathUri::from_host_native_path(cwd).unwrap()),
++                ..EnvironmentInfo::local()
++            },
++            status: Mutex::new(EnvironmentObservedStatus::Ready),
++            controller_paths: ControllerPathAccess::Shared,
++        })
++    }
++}
++
++impl LocalRuntime for Runtime {
++    fn exec_backend(&self) -> Arc<dyn ExecBackend> {
++        self.backend.clone()
++    }
++    fn filesystem(&self) -> Arc<dyn ExecutorFileSystem> {
++        Arc::clone(&self.filesystem)
++    }
++    fn sandbox_ownership(&self) -> LocalSandboxOwnership {
++        LocalSandboxOwnership {
++            process: SandboxOwner::Executor,
++            filesystem: SandboxOwner::Executor,
++        }
++    }
++    fn controller_path_access(&self) -> ControllerPathAccess {
++        self.controller_paths
++    }
++    fn info(&self) -> ExecProcessFuture<'_, EnvironmentInfo> {
++        Box::pin(async { Ok(self.info.clone()) })
++    }
++    fn observed_status(&self) -> EnvironmentObservedStatus {
++        self.status.lock().unwrap().clone()
++    }
++    fn wait_until_ready(&self) -> ExecProcessFuture<'_, ()> {
++        Box::pin(async {
++            match self.observed_status() {
++                EnvironmentObservedStatus::Ready => Ok(()),
++                EnvironmentObservedStatus::Pending => {
++                    Err(ExecServerError::Protocol("runtime is pending".into()))
++                }
++                EnvironmentObservedStatus::Disconnected { error } => {
++                    Err(ExecServerError::Protocol(error))
++                }
++            }
++        })
++    }
++}
++
++fn manager(runtime: Arc<Runtime>) -> EnvironmentManager {
++    PreparedEnvironmentManager {
++        source: PreparedEnvironmentSource::Snapshot(EnvironmentProviderSnapshot {
++            environments: Vec::new(),
++            default: EnvironmentDefault::EnvironmentId(LOCAL_ENVIRONMENT_ID.into()),
++            include_local: true,
++        }),
++    }
++    .build_with_local_runtime(
++        runtime,
++        /*local_runtime_paths*/ None,
++        HttpClientFactory::new(OutboundProxyPolicy::ReqwestDefault),
++    )
++    .unwrap()
++}
++
++#[tokio::test]
++async fn injected_local_runtime_owns_real_process_and_filesystem_operations() {
++    let temp = tempfile::tempdir().unwrap();
++    let runtime = Runtime::new(temp.path());
++    let manager = manager(Arc::clone(&runtime));
++    let environment = manager.default_environment().unwrap();
++    assert!(Arc::ptr_eq(
++        &environment,
++        &manager.try_local_environment().unwrap()
++    ));
++    assert!(Arc::ptr_eq(
++        &environment,
++        &manager.get_environment(LOCAL_ENVIRONMENT_ID).unwrap()
++    ));
++    assert!(!environment.is_remote());
++    assert!(Arc::ptr_eq(
++        &environment.get_filesystem(),
++        &runtime.filesystem
++    ));
++    assert_eq!(environment.info().await.unwrap(), runtime.info);
++    assert_eq!(environment.force_info().await.unwrap(), runtime.info);
++
++    #[cfg(unix)]
++    let argv = vec![
++        "/bin/sh".into(),
++        "-c".into(),
++        "printf real-child > result; exit 23".into(),
++    ];
++    #[cfg(windows)]
++    let argv = vec![
++        "cmd.exe".into(),
++        "/C".into(),
++        "<nul set /p =real-child>result & exit /b 23".into(),
++    ];
++    let params = ExecParams {
++        process_id: ProcessId::from("injected-child"),
++        argv,
++        cwd: runtime.info.cwd.clone().unwrap(),
++        env_policy: None,
++        shell_snapshot: None,
++        env: Default::default(),
++        tty: false,
++        pipe_stdin: false,
++        arg0: None,
++        sandbox: None,
++        enforce_managed_network: false,
++        managed_network: None,
++        network_proxy: None,
++    };
++    let started = environment
++        .get_exec_backend()
++        .start(params.clone())
++        .await
++        .unwrap();
++    let mut events = started.process.subscribe_events();
++    let exit = tokio::time::timeout(std::time::Duration::from_secs(10), async {
++        loop {
++            if let ExecProcessEvent::Exited { exit_code, .. } = events.recv().await.unwrap() {
++                break exit_code;
++            }
++        }
++    })
++    .await
++    .unwrap();
++    assert_eq!(exit, 23);
++    let path = PathUri::from_host_native_path(temp.path().join("result")).unwrap();
++    assert_eq!(
++        environment
++            .get_filesystem()
++            .read_file(&path, Default::default(), /*sandbox*/ None)
++            .await
++            .unwrap(),
++        b"real-child"
++    );
++
++    let restricted = FileSystemSandboxContext::from_permission_profile_with_cwd(
++        PermissionProfile::workspace_write(),
++        params.cwd.clone(),
++    );
++    let restricted_params = ExecParams {
++        process_id: ProcessId::from("refused-child"),
++        sandbox: Some(restricted.clone()),
++        ..params.clone()
++    };
++    let result = environment
++        .get_exec_backend()
++        .start(restricted_params.clone())
++        .await;
++    assert!(
++        result
++            .err()
++            .unwrap()
++            .to_string()
++            .contains("sandbox runtime paths are not configured")
++    );
++    assert_eq!(
++        *runtime.backend.requests.lock().unwrap(),
++        vec![params, restricted_params]
++    );
++    let error = environment
++        .get_filesystem()
++        .write_file(
++            &path,
++            b"must not be written".to_vec(),
++            Default::default(),
++            Some(&restricted),
++        )
++        .await
++        .unwrap_err();
++    assert!(
++        error
++            .to_string()
++            .contains("sandboxed filesystem operations require configured runtime paths")
++    );
++    assert_eq!(
++        std::fs::read(temp.path().join("result")).unwrap(),
++        b"real-child"
++    );
++}
++
++#[tokio::test]
++async fn injected_runtime_readiness_does_not_fall_back_to_always_ready_local() {
++    let temp = tempfile::tempdir().unwrap();
++    let runtime = Runtime::new(temp.path());
++    let environment = manager(Arc::clone(&runtime)).default_environment().unwrap();
++    *runtime.status.lock().unwrap() = EnvironmentObservedStatus::Pending;
++    assert!(!environment.startup_finished());
++    assert!(environment.readiness_result().is_none());
++    assert_eq!(
++        environment.status().await,
++        EnvironmentObservedStatus::Pending
++    );
++    let failure = EnvironmentObservedStatus::Disconnected {
++        error: "worker connection lost".into(),
++    };
++    *runtime.status.lock().unwrap() = failure.clone();
++    assert!(environment.startup_finished());
++    assert!(environment.readiness_result().unwrap().is_err());
++    assert_eq!(environment.status().await, failure);
++    assert!(environment.wait_until_ready().await.is_err());
++    *runtime.status.lock().unwrap() = EnvironmentObservedStatus::Ready;
++    environment.wait_until_ready().await.unwrap();
++    assert!(environment.readiness_result().unwrap().is_ok());
++}
++
++#[tokio::test]
++async fn injected_runtime_rejects_configurations_without_a_local_environment() {
++    let temp = tempfile::tempdir().unwrap();
++    let sources = [
++        PreparedEnvironmentSource::Snapshot(EnvironmentProviderSnapshot {
++            environments: Vec::new(),
++            default: EnvironmentDefault::Disabled,
++            include_local: false,
++        }),
++        PreparedEnvironmentSource::Noise(
++            NoiseRendezvousEnvironmentConfig::new(
++                "https://registry.invalid".into(),
++                "environment".into(),
++                "test-token".into(),
++                /*chatgpt_account_id*/ None,
++            )
++            .unwrap(),
++        ),
++    ];
++    for source in sources {
++        let result = PreparedEnvironmentManager { source }.build_with_local_runtime(
++            Runtime::new(temp.path()),
++            /*local_runtime_paths*/ None,
++            HttpClientFactory::new(OutboundProxyPolicy::ReqwestDefault),
++        );
++        assert!(result.is_err());
++    }
++}
++
++#[tokio::test]
++async fn executor_only_paths_are_rejected_before_unadapted_controller_routes_can_run() {
++    let temp = tempfile::tempdir().unwrap();
++    let mut runtime = Runtime::new(temp.path());
++    Arc::get_mut(&mut runtime).unwrap().controller_paths = ControllerPathAccess::ExecutorOnly;
++    let result = PreparedEnvironmentManager {
++        source: PreparedEnvironmentSource::Snapshot(EnvironmentProviderSnapshot {
++            environments: Vec::new(),
++            default: EnvironmentDefault::EnvironmentId(LOCAL_ENVIRONMENT_ID.into()),
++            include_local: true,
++        }),
++    }
++    .build_with_local_runtime(
++        runtime.clone(),
++        /*local_runtime_paths*/ None,
++        HttpClientFactory::new(OutboundProxyPolicy::ReqwestDefault),
++    );
++    assert!(
++        result
++            .unwrap_err()
++            .to_string()
++            .contains("executor-only local paths require controller filesystem routing")
++    );
++    assert!(runtime.backend.requests.lock().unwrap().is_empty());
++}
+diff --git a/codex-rs/exec-server/src/environment_bootstrap.rs b/codex-rs/exec-server/src/environment_bootstrap.rs
+index ad557c3b292d32702444da91f1d67535bf810a0c..883ec4c816f940548291fc013f9f3eaf0018d46b 100644
+--- a/codex-rs/exec-server/src/environment_bootstrap.rs
++++ b/codex-rs/exec-server/src/environment_bootstrap.rs
+@@ -3,6 +3,7 @@ use codex_http_client::HttpClientFactory;
+ use crate::EnvironmentManager;
+ use crate::ExecServerError;
+ use crate::ExecServerRuntimePaths;
++use crate::LocalRuntime;
+ use crate::environment_provider::EnvironmentDefault;
+ use crate::environment_provider::EnvironmentProviderSnapshot;
+ use crate::remote::NoiseRendezvousEnvironmentConfig;
+@@ -24,6 +25,32 @@ pub struct PreparedEnvironmentManager {
+ }
+ 
+ impl PreparedEnvironmentManager {
++    /// Builds the real local host from an application-owned runtime.
++    ///
++    /// This does not authenticate or start the runtime. Its bootstrap must do so
++    /// before calling this method. Conflicting non-local configuration is refused
++    /// instead of silently selecting the controller's default local launcher.
++    pub fn build_with_local_runtime(
++        self,
++        runtime: std::sync::Arc<dyn LocalRuntime>,
++        local_runtime_paths: Option<ExecServerRuntimePaths>,
++        http_client_factory: HttpClientFactory,
++    ) -> Result<EnvironmentManager, ExecServerError> {
++        match self.source {
++            PreparedEnvironmentSource::Snapshot(snapshot) => {
++                EnvironmentManager::from_snapshot_with_runtime(
++                    snapshot,
++                    local_runtime_paths,
++                    http_client_factory,
++                    Some(runtime),
++                )
++            }
++            PreparedEnvironmentSource::Noise(_) => Err(ExecServerError::Protocol(
++                "injected local runtime is incompatible with a Noise-only environment".to_string(),
++            )),
++        }
++    }
++
+     /// Returns whether the discovered default environment is remote.
+     pub fn default_environment_is_remote(&self) -> bool {
+         match &self.source {
+diff --git a/codex-rs/exec-server/src/lib.rs b/codex-rs/exec-server/src/lib.rs
+index f0e23038bbd8a2f992592e8ba39ebfaed36a31bb..b2844e1dfe57ac11b69cf1a5be59994d3aeacd4b 100644
+--- a/codex-rs/exec-server/src/lib.rs
++++ b/codex-rs/exec-server/src/lib.rs
+@@ -90,14 +90,18 @@ pub use environment::CODEX_EXEC_SERVER_NOISE_CHATGPT_ACCOUNT_ID_ENV_VAR;
+ pub use environment::CODEX_EXEC_SERVER_NOISE_ENVIRONMENT_ID_ENV_VAR;
+ pub use environment::CODEX_EXEC_SERVER_NOISE_REGISTRY_URL_ENV_VAR;
+ pub use environment::CODEX_EXEC_SERVER_URL_ENV_VAR;
++pub use environment::ControllerPathAccess;
+ pub use environment::Environment;
+ pub use environment::EnvironmentConnectionState;
+ pub use environment::EnvironmentManager;
+ pub use environment::EnvironmentObservedStatus;
+ pub use environment::EnvironmentReadyInfo;
+ pub use environment::LOCAL_ENVIRONMENT_ID;
++pub use environment::LocalRuntime;
++pub use environment::LocalSandboxOwnership;
+ pub use environment::MAX_SELECTED_CAPABILITY_ROOTS;
+ pub use environment::REMOTE_ENVIRONMENT_ID;
++pub use environment::SandboxOwner;
+ pub use environment_bootstrap::PreparedEnvironmentManager;
+ pub use environment_provider::DefaultEnvironmentProvider;
+ pub use environment_provider::EnvironmentProvider;
+diff --git a/codex-rs/utils/pty/src/lib.rs b/codex-rs/utils/pty/src/lib.rs
+index 1200c1143803145682180c4b351d9e8f96b74c3e..a840b669bbb8704b4ab07fb7d9165013bdaeaf0a 100644
+--- a/codex-rs/utils/pty/src/lib.rs
++++ b/codex-rs/utils/pty/src/lib.rs
+@@ -47,3 +47,10 @@ pub use win::PsuedoCon;
+ pub use win::conpty::RawConPty;
+ #[cfg(windows)]
+ pub use windows_input::WindowsTtyInputNormalizer;
++
++/// Native owned-process adapter with lossless output and fallible controls.
++pub use process::OwnedProcessController;
++/// Native owned-process adapter with lossless output and fallible controls.
++pub use process::OwnedProcessDriver;
++/// Native owned-process adapter with lossless output and fallible controls.
++pub use process::spawn_from_owned_driver;
+diff --git a/codex-rs/utils/pty/src/owned_driver_tests.rs b/codex-rs/utils/pty/src/owned_driver_tests.rs
+new file mode 100644
+index 0000000000000000000000000000000000000000..a89fbc5a702c24670e08344f0bebec2d47983ff2
+--- /dev/null
++++ b/codex-rs/utils/pty/src/owned_driver_tests.rs
+@@ -0,0 +1,211 @@
++use crate::OwnedProcessController;
++use crate::OwnedProcessDriver;
++use crate::ProcessSignal;
++use crate::SpawnedProcess;
++use crate::TerminalSize;
++use crate::spawn_from_owned_driver;
++use pretty_assertions::assert_eq;
++use std::io::Read;
++use std::io::Write;
++use std::io::{self};
++use std::process::Child;
++use std::process::Command;
++use std::process::Stdio;
++use std::sync::Arc;
++use std::sync::Mutex;
++use std::time::Duration;
++use tokio::sync::mpsc;
++use tokio::sync::oneshot;
++
++struct PcChild(Arc<Mutex<Child>>);
++impl OwnedProcessController for PcChild {
++    fn signal(&mut self, _: ProcessSignal) -> io::Result<()> {
++        #[cfg(unix)]
++        {
++            let pid = self.0.lock().unwrap().id();
++            if unsafe { libc::kill(pid as i32, libc::SIGINT) } == -1 {
++                return Err(io::Error::last_os_error());
++            }
++            Ok(())
++        }
++        #[cfg(not(unix))]
++        {
++            Err(io::Error::new(
++                io::ErrorKind::Unsupported,
++                "PC pipe fixture has no console",
++            ))
++        }
++    }
++    fn request_terminate(&mut self) -> io::Result<()> {
++        self.0.lock().unwrap().kill()
++    }
++    fn resize(&mut self, _: TerminalSize) -> anyhow::Result<()> {
++        Err(io::Error::new(io::ErrorKind::Unsupported, "real pipe fixture has no PTY").into())
++    }
++}
++
++fn read_output(mut pipe: impl Read + Send + 'static, sender: mpsc::Sender<Vec<u8>>) {
++    tokio::task::spawn_blocking(move || {
++        let mut buffer = [0; 257];
++        loop {
++            let size = pipe.read(&mut buffer).expect("read real child pipe");
++            if size == 0 {
++                break;
++            }
++            if sender.blocking_send(buffer[..size].to_vec()).is_err() {
++                break;
++            }
++        }
++    });
++}
++
++fn real_child(python: &str, mode: &str) -> (SpawnedProcess, Arc<Mutex<Child>>) {
++    let mut command = Command::new(python);
++    command
++        .args([
++            "-u",
++            "-c",
++            r#"
++import sys, time
++if sys.argv[1] == 'wait':
++    time.sleep(120)
++else:
++    sys.stdout.buffer.write(sys.stdin.buffer.read())
++    for index in range(3000):
++        sys.stdout.buffer.write(bytes([index % 251]) * 257)
++    sys.stdout.buffer.flush()
++    for index in range(1500):
++        sys.stderr.buffer.write(bytes([250 - index % 251]) * 257)
++    sys.stderr.buffer.flush()
++    sys.exit(23)
++"#,
++            mode,
++        ])
++        .stdin(Stdio::piped())
++        .stdout(Stdio::piped())
++        .stderr(Stdio::piped());
++    #[cfg(windows)]
++    {
++        use std::os::windows::process::CommandExt;
++        command.creation_flags(0x08000000); // CREATE_NO_WINDOW
++    }
++    let mut child = command.spawn().expect("launch actual fixture binary");
++    let mut input = child.stdin.take().unwrap();
++    let (writer_tx, mut writer_rx) = mpsc::channel::<Vec<u8>>(1);
++    let writer_handle = tokio::task::spawn_blocking(move || {
++        while let Some(chunk) = writer_rx.blocking_recv() {
++            if input.write_all(&chunk).is_err() {
++                break;
++            }
++        }
++        drop(input);
++    });
++    let (stdout_tx, stdout_rx) = mpsc::channel(1);
++    let (stderr_tx, stderr_rx) = mpsc::channel(1);
++    read_output(child.stdout.take().unwrap(), stdout_tx);
++    read_output(child.stderr.take().unwrap(), stderr_tx);
++    let child = Arc::new(Mutex::new(child));
++    let waiter = Arc::clone(&child);
++    let (exit_tx, exit_rx) = oneshot::channel();
++    tokio::spawn(async move {
++        loop {
++            let status = waiter
++                .lock()
++                .unwrap()
++                .try_wait()
++                .expect("wait actual child");
++            if let Some(status) = status {
++                let _ = exit_tx.send(status.code().unwrap_or(-1));
++                break;
++            }
++            tokio::time::sleep(Duration::from_millis(10)).await;
++        }
++    });
++    (
++        spawn_from_owned_driver(OwnedProcessDriver {
++            writer_tx,
++            stdout_rx,
++            stderr_rx,
++            exit_rx,
++            controller: Box::new(PcChild(Arc::clone(&child))),
++            writer_handle: Some(writer_handle),
++        }),
++        child,
++    )
++}
++
++async fn drain(mut receiver: mpsc::Receiver<Vec<u8>>) -> Vec<u8> {
++    let mut bytes = Vec::new();
++    while let Some(chunk) = receiver.recv().await {
++        bytes.extend(chunk);
++    }
++    bytes
++}
++
++#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
++async fn owned_driver_preserves_real_binary_streams_and_stdin_eof() {
++    let Some(python) = super::find_python() else {
++        eprintln!("skipping owned-driver test because Python is unavailable");
++        return;
++    };
++    let (process, child) = real_child(&python, "bulk");
++    let input = vec![0, 255, 13, 10, 0, 128];
++    let writer = process.session.writer_sender();
++    writer.send(input.clone()).await.unwrap();
++    drop(writer);
++    process.session.close_stdin();
++    // The one-chunk channels deliberately fill while the consumer is absent.
++    tokio::time::sleep(Duration::from_millis(50)).await;
++    let (stdout, stderr, code) = tokio::time::timeout(Duration::from_secs(15), async {
++        tokio::join!(
++            drain(process.stdout_rx),
++            drain(process.stderr_rx),
++            process.exit_rx
++        )
++    })
++    .await
++    .expect("actual process and both streams finish");
++    let mut expected_stdout = input;
++    for index in 0..3000 {
++        expected_stdout.extend([(index % 251) as u8; 257]);
++    }
++    let mut expected_stderr = Vec::new();
++    for index in 0..1500 {
++        expected_stderr.extend([(250 - index % 251) as u8; 257]);
++    }
++    assert_eq!(stdout, expected_stdout);
++    assert_eq!(stderr, expected_stderr);
++    assert_eq!(code.unwrap(), 23);
++    assert!(child.lock().unwrap().try_wait().unwrap().is_some());
++}
++
++#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
++async fn owned_driver_forwards_controls_and_terminates_real_child() {
++    let Some(python) = super::find_python() else {
++        eprintln!("skipping owned-driver test because Python is unavailable");
++        return;
++    };
++    let (process, child) = real_child(&python, "wait");
++    assert!(
++        process
++            .session
++            .resize(TerminalSize { rows: 24, cols: 80 })
++            .is_err()
++    );
++    #[cfg(not(unix))]
++    assert_eq!(
++        process
++            .session
++            .signal(ProcessSignal::Interrupt)
++            .unwrap_err()
++            .kind(),
++        io::ErrorKind::Unsupported
++    );
++    process.session.try_request_terminate().unwrap();
++    let code = tokio::time::timeout(Duration::from_secs(5), process.exit_rx)
++        .await
++        .unwrap()
++        .unwrap();
++    assert_ne!(code, 0);
++    assert!(child.lock().unwrap().try_wait().unwrap().is_some());
++}
+diff --git a/codex-rs/utils/pty/src/process.rs b/codex-rs/utils/pty/src/process.rs
+index 5593450b89d0578d59f3ab74cb5cfcf625c908f6..f9bda321094d0c7fa52def05721daf754b8b7c70 100644
+--- a/codex-rs/utils/pty/src/process.rs
++++ b/codex-rs/utils/pty/src/process.rs
+@@ -123,6 +123,9 @@ pub struct ProcessHandle {
+     // Optional resize hook for driver-backed sessions that proxy PTY control to
+     // another backend instead of owning local PTY handles.
+     resizer: StdMutex<Option<ResizeFn>>,
++    // Native signal delivery does not consume later termination control.
++    #[cfg_attr(not(windows), allow(dead_code))]
++    interrupt_preserves_control: bool,
+ }
+ 
+ impl fmt::Debug for ProcessHandle {
+@@ -156,6 +159,7 @@ impl ProcessHandle {
+             exit_code,
+             _pty_handles: StdMutex::new(pty_handles),
+             resizer: StdMutex::new(resizer),
++            interrupt_preserves_control: false,
+         }
+     }
+ 
+@@ -219,24 +223,35 @@ impl ProcessHandle {
+     /// Attempts to kill the child while leaving the reader/writer tasks alive
+     /// so callers can still drain output until EOF.
+     pub fn request_terminate(&self) {
+-        if let Ok(mut killer_opt) = self.killer.lock()
+-            && let Some(mut killer) = killer_opt.take()
+-        {
+-            let _ = killer.kill();
++        let _ = self.try_request_terminate();
++    }
++
++    /// Request termination and report the actual controller result.
++    /// Retain the controller after failure so ownership and retry remain possible.
++    pub fn try_request_terminate(&self) -> io::Result<()> {
++        let mut killer_opt = self
++            .killer
++            .lock()
++            .map_err(|_| io::Error::other("process control lock poisoned"))?;
++        if let Some(killer) = killer_opt.as_mut() {
++            killer.kill()?;
++            killer_opt.take();
+         }
++        Ok(())
+     }
+ 
+     pub fn signal(&self, signal: ProcessSignal) -> io::Result<()> {
+-        let Ok(mut killer_opt) = self.killer.lock() else {
+-            return Ok(());
+-        };
++        let mut killer_opt = self
++            .killer
++            .lock()
++            .map_err(|_| io::Error::other("process control lock poisoned"))?;
+         let Some(killer) = killer_opt.as_mut() else {
+             return Ok(());
+         };
+ 
+         let result = killer.signal(signal);
+         #[cfg(windows)]
+-        if result.is_ok() {
++        if result.is_ok() && !self.interrupt_preserves_control {
+             killer_opt.take();
+         }
+         result
+@@ -479,3 +494,10 @@ pub fn spawn_from_driver(driver: ProcessDriver) -> SpawnedProcess {
+         exit_rx: exit_rx_out,
+     }
+ }
++
++#[path = "process/owned_driver.rs"]
++mod owned_driver;
++
++pub use owned_driver::OwnedProcessController;
++pub use owned_driver::OwnedProcessDriver;
++pub use owned_driver::spawn_from_owned_driver;
+diff --git a/codex-rs/utils/pty/src/process/owned_driver.rs b/codex-rs/utils/pty/src/process/owned_driver.rs
+new file mode 100644
+index 0000000000000000000000000000000000000000..7104365aa6510c1a77639f525888272893aabf69
+--- /dev/null
++++ b/codex-rs/utils/pty/src/process/owned_driver.rs
+@@ -0,0 +1,113 @@
++use std::io;
++use std::sync::Arc;
++use std::sync::Mutex as StdMutex;
++use std::sync::atomic::AtomicBool;
++
++use anyhow::anyhow;
++use tokio::sync::mpsc;
++use tokio::sync::oneshot;
++use tokio::task::JoinHandle;
++
++use super::ChildTerminator;
++use super::ProcessHandle;
++use super::ProcessSignal;
++use super::SpawnedProcess;
++use super::TerminalSize;
++
++/// Control of a real process owned by an external native runtime.
++/// Success means the controller accepted the actual operation. Exit and stream
++/// closure remain separate events; a failed request must not be acknowledged.
++pub trait OwnedProcessController: Send + Sync {
++    fn signal(&mut self, signal: ProcessSignal) -> io::Result<()>;
++    fn request_terminate(&mut self) -> io::Result<()>;
++    fn resize(&mut self, size: TerminalSize) -> anyhow::Result<()>;
++}
++
++/// An owned process with lossless bounded output channels.
++///
++/// The producer must apply backpressure through these channels and report any
++/// transport failure separately. It closes each sender only after all bytes have
++/// been forwarded. `exit_rx` is a process status, never a cleanup attestation.
++/// The runtime must retain descendant ownership after this adapter is dropped.
++pub struct OwnedProcessDriver {
++    pub writer_tx: mpsc::Sender<Vec<u8>>,
++    pub stdout_rx: mpsc::Receiver<Vec<u8>>,
++    pub stderr_rx: mpsc::Receiver<Vec<u8>>,
++    pub exit_rx: oneshot::Receiver<i32>,
++    pub controller: Box<dyn OwnedProcessController>,
++    /// Owns queued stdin writes. Dropping the final sender must close the actual
++    /// child input after queued bytes are written, including for an empty input.
++    pub writer_handle: Option<JoinHandle<()>>,
++}
++
++struct OwnedControllerTerminator {
++    controller: Arc<StdMutex<Box<dyn OwnedProcessController>>>,
++}
++
++impl ChildTerminator for OwnedControllerTerminator {
++    fn signal(&mut self, signal: ProcessSignal) -> io::Result<()> {
++        self.controller
++            .lock()
++            .map_err(|_| io::Error::other("native process control lock poisoned"))?
++            .signal(signal)
++    }
++
++    fn kill(&mut self) -> io::Result<()> {
++        self.controller
++            .lock()
++            .map_err(|_| io::Error::other("native process control lock poisoned"))?
++            .request_terminate()
++    }
++}
++
++/// Adapt a native owned process without a broadcast hop or an output-copy task.
++/// The existing upstream managers consume the same SpawnedProcess structure.
++pub fn spawn_from_owned_driver(driver: OwnedProcessDriver) -> SpawnedProcess {
++    let OwnedProcessDriver {
++        writer_tx,
++        stdout_rx,
++        stderr_rx,
++        exit_rx,
++        controller,
++        writer_handle,
++    } = driver;
++    let controller = Arc::new(StdMutex::new(controller));
++    let resize_controller = Arc::clone(&controller);
++    let exit_status = Arc::new(AtomicBool::new(false));
++    let wait_exit_status = Arc::clone(&exit_status);
++    let exit_code = Arc::new(StdMutex::new(None));
++    let wait_exit_code = Arc::clone(&exit_code);
++    let (exit_tx, exit_rx_out) = oneshot::channel();
++    let wait_handle = tokio::spawn(async move {
++        let code = exit_rx.await.unwrap_or(-1);
++        wait_exit_status.store(true, std::sync::atomic::Ordering::SeqCst);
++        if let Ok(mut guard) = wait_exit_code.lock() {
++            *guard = Some(code);
++        }
++        let _ = exit_tx.send(code);
++    });
++    let session = ProcessHandle {
++        writer_tx: StdMutex::new(Some(writer_tx)),
++        killer: StdMutex::new(Some(Box::new(OwnedControllerTerminator { controller }))),
++        reader_handle: StdMutex::new(None),
++        reader_abort_handles: StdMutex::new(Vec::new()),
++        writer_handle: StdMutex::new(writer_handle),
++        wait_handle: StdMutex::new(Some(wait_handle)),
++        exit_status,
++        exit_code,
++        _pty_handles: StdMutex::new(None),
++        resizer: StdMutex::new(Some(Box::new(move |size| {
++            resize_controller
++                .lock()
++                .map_err(|_| anyhow!("native resize control lock poisoned"))?
++                .resize(size)
++        }))),
++        interrupt_preserves_control: true,
++    };
++    SpawnedProcess {
++        session,
++        stdout_rx,
++        stderr_rx,
++        exit_rx: exit_rx_out,
++    }
++}
+diff --git a/codex-rs/utils/pty/src/tests.rs b/codex-rs/utils/pty/src/tests.rs
+index b3d732bf854fe89700f85f827affdc36ef7334dd..6dfa047593c8236ad992ac531203decd7709367a 100644
+--- a/codex-rs/utils/pty/src/tests.rs
++++ b/codex-rs/utils/pty/src/tests.rs
+@@ -13,6 +13,9 @@ use crate::spawn_pipe_process;
+ use crate::spawn_pipe_process_no_stdin;
+ use crate::spawn_pty_process;
+ 
++#[path = "owned_driver_tests.rs"]
++mod owned_driver_tests;
++
+ #[cfg(windows)]
+ #[path = "windows_tests.rs"]
+ mod windows_tests;
