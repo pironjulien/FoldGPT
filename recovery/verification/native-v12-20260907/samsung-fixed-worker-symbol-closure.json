@@ -1,0 +1,262 @@
+{
+  "worker": {
+    "undefined": [
+      {
+        "symbol": "__libc_init",
+        "binding": "GLOBAL",
+        "versioned": "__libc_init@LIBC"
+      },
+      {
+        "symbol": "__cxa_atexit",
+        "binding": "GLOBAL",
+        "versioned": "__cxa_atexit@LIBC"
+      },
+      {
+        "symbol": "__register_atfork",
+        "binding": "GLOBAL",
+        "versioned": "__register_atfork@LIBC"
+      },
+      {
+        "symbol": "getresuid",
+        "binding": "GLOBAL",
+        "versioned": "getresuid@LIBC"
+      },
+      {
+        "symbol": "getresgid",
+        "binding": "GLOBAL",
+        "versioned": "getresgid@LIBC"
+      },
+      {
+        "symbol": "prctl",
+        "binding": "GLOBAL",
+        "versioned": "prctl@LIBC"
+      },
+      {
+        "symbol": "pthread_create",
+        "binding": "GLOBAL",
+        "versioned": "pthread_create@LIBC"
+      },
+      {
+        "symbol": "printf",
+        "binding": "GLOBAL",
+        "versioned": "printf@LIBC"
+      },
+      {
+        "symbol": "pthread_join",
+        "binding": "GLOBAL",
+        "versioned": "pthread_join@LIBC"
+      },
+      {
+        "symbol": "puts",
+        "binding": "GLOBAL",
+        "versioned": "puts@LIBC"
+      },
+      {
+        "symbol": "syscall",
+        "binding": "GLOBAL",
+        "versioned": "syscall@LIBC"
+      },
+      {
+        "symbol": "read",
+        "binding": "GLOBAL",
+        "versioned": "read@LIBC"
+      },
+      {
+        "symbol": "close",
+        "binding": "GLOBAL",
+        "versioned": "close@LIBC"
+      },
+      {
+        "symbol": "__errno",
+        "binding": "GLOBAL",
+        "versioned": "__errno@LIBC"
+      },
+      {
+        "symbol": "getuid",
+        "binding": "GLOBAL",
+        "versioned": "getuid@LIBC"
+      },
+      {
+        "symbol": "memchr",
+        "binding": "GLOBAL",
+        "versioned": "memchr@LIBC"
+      },
+      {
+        "symbol": "strcmp",
+        "binding": "GLOBAL",
+        "versioned": "strcmp@LIBC"
+      },
+      {
+        "symbol": "lseek",
+        "binding": "GLOBAL",
+        "versioned": "lseek@LIBC"
+      },
+      {
+        "symbol": "open",
+        "binding": "GLOBAL",
+        "versioned": "open@LIBC"
+      },
+      {
+        "symbol": "socket",
+        "binding": "GLOBAL",
+        "versioned": "socket@LIBC"
+      },
+      {
+        "symbol": "ioctl",
+        "binding": "GLOBAL",
+        "versioned": "ioctl@LIBC"
+      }
+    ],
+    "unresolved_strong_by_name": []
+  },
+  "libc": {
+    "undefined": [
+      {
+        "symbol": "dlsym",
+        "binding": "GLOBAL",
+        "versioned": "dlsym@LIBC"
+      },
+      {
+        "symbol": "android_dlopen_ext",
+        "binding": "GLOBAL",
+        "versioned": "android_dlopen_ext@LIBC"
+      },
+      {
+        "symbol": "dlopen",
+        "binding": "GLOBAL",
+        "versioned": "dlopen@LIBC"
+      },
+      {
+        "symbol": "dlclose",
+        "binding": "GLOBAL",
+        "versioned": "dlclose@LIBC"
+      },
+      {
+        "symbol": "dlerror",
+        "binding": "GLOBAL",
+        "versioned": "dlerror@LIBC"
+      },
+      {
+        "symbol": "__scudo_default_options",
+        "binding": "WEAK",
+        "versioned": "__scudo_default_options"
+      },
+      {
+        "symbol": "__loader_shared_globals",
+        "binding": "GLOBAL",
+        "versioned": "__loader_shared_globals"
+      },
+      {
+        "symbol": "__loader_add_thread_local_dtor",
+        "binding": "WEAK",
+        "versioned": "__loader_add_thread_local_dtor"
+      },
+      {
+        "symbol": "__loader_remove_thread_local_dtor",
+        "binding": "WEAK",
+        "versioned": "__loader_remove_thread_local_dtor"
+      },
+      {
+        "symbol": "dladdr",
+        "binding": "GLOBAL",
+        "versioned": "dladdr@LIBC"
+      },
+      {
+        "symbol": "android_get_application_target_sdk_version",
+        "binding": "GLOBAL",
+        "versioned": "android_get_application_target_sdk_version@LIBC_N"
+      },
+      {
+        "symbol": "dl_iterate_phdr",
+        "binding": "GLOBAL",
+        "versioned": "dl_iterate_phdr@LIBC"
+      },
+      {
+        "symbol": "__loader_android_get_exported_namespace",
+        "binding": "WEAK",
+        "versioned": "__loader_android_get_exported_namespace"
+      }
+    ],
+    "unresolved_strong_by_name": []
+  },
+  "libdl": {
+    "undefined": [
+      {
+        "symbol": "__loader_android_get_LD_LIBRARY_PATH",
+        "binding": "WEAK",
+        "versioned": "__loader_android_get_LD_LIBRARY_PATH"
+      },
+      {
+        "symbol": "__loader_dlopen",
+        "binding": "WEAK",
+        "versioned": "__loader_dlopen"
+      },
+      {
+        "symbol": "__loader_dlerror",
+        "binding": "WEAK",
+        "versioned": "__loader_dlerror"
+      },
+      {
+        "symbol": "__loader_dlsym",
+        "binding": "WEAK",
+        "versioned": "__loader_dlsym"
+      },
+      {
+        "symbol": "__loader_dlvsym",
+        "binding": "WEAK",
+        "versioned": "__loader_dlvsym"
+      },
+      {
+        "symbol": "__loader_dladdr",
+        "binding": "WEAK",
+        "versioned": "__loader_dladdr"
+      },
+      {
+        "symbol": "__loader_dlclose",
+        "binding": "WEAK",
+        "versioned": "__loader_dlclose"
+      },
+      {
+        "symbol": "__loader_dl_iterate_phdr",
+        "binding": "WEAK",
+        "versioned": "__loader_dl_iterate_phdr"
+      },
+      {
+        "symbol": "__loader_android_dlopen_ext",
+        "binding": "WEAK",
+        "versioned": "__loader_android_dlopen_ext"
+      },
+      {
+        "symbol": "__loader_android_get_application_target_sdk_version",
+        "binding": "WEAK",
+        "versioned": "__loader_android_get_application_target_sdk_version"
+      },
+      {
+        "symbol": "__loader_android_handle_signal",
+        "binding": "WEAK",
+        "versioned": "__loader_android_handle_signal"
+      },
+      {
+        "symbol": "__loader_cfi_fail",
+        "binding": "WEAK",
+        "versioned": "__loader_cfi_fail"
+      }
+    ],
+    "unresolved_strong_by_name": []
+  },
+  "linker": {
+    "undefined": [
+      {
+        "symbol": "__gcov_dump",
+        "binding": "WEAK",
+        "versioned": "__gcov_dump"
+      },
+      {
+        "symbol": "__gcov_flush",
+        "binding": "WEAK",
+        "versioned": "__gcov_flush"
+      }
+    ],
+    "unresolved_strong_by_name": []
+  }
+}

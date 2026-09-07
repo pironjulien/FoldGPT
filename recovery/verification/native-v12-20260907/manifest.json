@@ -1,0 +1,71 @@
+{
+  "scope": "Exact V12 Android evidence; fixed kernel qualification passed, ordinary interface execution not validated",
+  "files": [
+    {
+      "path": "authorization.json",
+      "source": "downloads/native-kernel-trial/v12-admission-20260907/authorization.json",
+      "size": 611,
+      "sha256": "dbae44f22e788f8a412db89e760d45b3b6c024410cf334f142d666e6fbbe1e65"
+    },
+    {
+      "path": "preflight.json",
+      "source": "downloads/native-kernel-trial/v12-admission-20260907/preflight.json",
+      "size": 2150,
+      "sha256": "9e4b92a666c8c2ac36b5a01501294169ec2149c761069e07ec8cdc692338b4ca"
+    },
+    {
+      "path": "package-info.json",
+      "source": "downloads/native-kernel-trial/v12-admission-20260907/package-info.json",
+      "size": 508,
+      "sha256": "36ef4a1f17b61d0f82d37ab66a7194b7a89a8db67668a00c01368f22d14dfad4"
+    },
+    {
+      "path": "launch.stdout",
+      "source": "downloads/native-kernel-trial/v12-fixed-launch-20260907/launch.stdout",
+      "size": 348,
+      "sha256": "f3a9a602dc6b6006d7d16282201e2bb925332f685f488466ed4e86c08ad42432"
+    },
+    {
+      "path": "launch.stderr",
+      "source": "downloads/native-kernel-trial/v12-fixed-launch-20260907/launch.stderr",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "before.json",
+      "source": "downloads/native-kernel-trial/v12-before-fixed-20260907/snapshot.json",
+      "size": 149563,
+      "sha256": "a784fd4d177bf309e9915810cb2636cd6cf0f42c96a653071a4af54ed68ba32a"
+    },
+    {
+      "path": "after.json",
+      "source": "downloads/native-kernel-trial/v12-fixed-collection-20260907/after/snapshot.json",
+      "size": 149745,
+      "sha256": "eba757f25c4e1c836ba20048d5f1eefdc293b83b2d8a01b3f3f926b73f27749d"
+    },
+    {
+      "path": "app-report.json",
+      "source": "downloads/native-kernel-trial/v12-fixed-collection-20260907/app-report.json",
+      "size": 6024,
+      "sha256": "2245732dcaecd7e180dddf4ce43fa5c448e26df133385e58460c38d48d0b1099"
+    },
+    {
+      "path": "native-evidence.json",
+      "source": "downloads/native-kernel-trial/v12-fixed-collection-20260907/native-evidence.json",
+      "size": 2776,
+      "sha256": "d22f3ea5925005cc2a23dc0f6d522e10375b3e3c07c6a9d4aaa16ee600ab7685"
+    },
+    {
+      "path": "independent-verification.json",
+      "source": "downloads/native-kernel-trial/v12-fixed-collection-20260907/independent-verification.json",
+      "size": 1497,
+      "sha256": "f004543e95f756fce54f176cc71ef23a943d03de73982a278901889ce7101ca3"
+    },
+    {
+      "path": "samsung-fixed-worker-symbol-closure.json",
+      "source": "downloads/native-kernel-trial/python-cli-v12/samsung-fixed-worker-symbol-closure.json",
+      "size": 6273,
+      "sha256": "30990198e67588a47c32cf68c450ce07c16663fb17edc1ea585b69b9d9b9512c"
+    }
+  ]
+}

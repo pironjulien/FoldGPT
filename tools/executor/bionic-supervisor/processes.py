@@ -90,6 +90,19 @@ class Processes(NativeProcessesBackend):
 
     async def _control(self, record, endpoint):
         ready = False
+        input_closed = False
+
+        async def answer(payload):
+            nonlocal input_closed
+            try:
+                await _packet(endpoint, payload)
+            except BrokenPipeError:
+                # The native owner seals its receive side after terminal
+                # cleanup. A decision or startup ACK may finish concurrently.
+                # EPIPE proves only that this half-channel closed; continue
+                # reading and require the real final result and owner wait.
+                input_closed = True
+
         while True:
             message = await _receive(endpoint)
             if message is None:
@@ -103,16 +116,17 @@ class Processes(NativeProcessesBackend):
                 if ready or message != {"type": "ready", "profile": "bionic-managed-v1"}:
                     raise RpcError(-32603, "Invalid Bionic startup handshake")
                 ready = True
-                await _packet(endpoint, b"P")
+                await answer(b"P")
             elif kind == "acquire":
-                if not ready or record.native_result is not None:
+                if not ready or input_closed or record.native_result is not None:
                     raise RpcError(-32603, "Acquisition outside its bound process lifetime")
                 evaluating = asyncio.create_task(asyncio.to_thread(record.policy.decide, message))
                 decision = await _finish(evaluating)
                 relative = decision["relative"].encode("utf-8")
                 response = struct.pack("<QiI4Q", decision["id"], decision["error"], len(relative),
                     decision["device"], decision["inode"], decision["parentDevice"], decision["parentInode"]) + relative
-                await _packet(endpoint, response)
+                if not record.termination_requested:
+                    await answer(response)
             elif kind == "started":
                 if not ready or record.native_started is not None or message != {
                     "type": "started", "profile": "bionic-managed-v1", "setupCompleted": True}:

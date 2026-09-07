@@ -1,12 +1,18 @@
 diff --git a/CHANGELOG.md b/CHANGELOG.md
-index 2eb564c560a4c85507169a26637f6bce59f7e1fb..bf67038bdf4444de971d30c70e2154cb6441e34f 100644
+index 2eb564c560a4c85507169a26637f6bce59f7e1fb..54d3225a2b856ee1612de4ae175ee094650701c0 100644
 --- a/CHANGELOG.md
 +++ b/CHANGELOG.md
-@@ -1 +1,16 @@
+@@ -1 +1,22 @@
  The changelog can be found on the [releases page](https://github.com/openai/codex/releases).
 +
 +## FoldGPT auxiliary engine — unreleased
 +
++- Resolve injected local runtime metadata and shell from the provider, preserve
++  missing optional metadata, and refuse failed metadata or unknown shells without
++  controller fallback. Select the reported executable and keep controller V1
++  snapshot launches off that runtime; Android snapshots and activation remain open.
++- Recognize reported Android command semantics as POSIX without changing unknown
++  platform handling or the selected runtime's enforcement policy.
 +- Add an injectable real local execution/filesystem runtime with separate sandbox
 +  ownership and controller path visibility, without changing remote identity.
 +- Route model unified execution and apply-patch sandbox intent to the selected
@@ -21,10 +27,10 @@ index 2eb564c560a4c85507169a26637f6bce59f7e1fb..bf67038bdf4444de971d30c70e2154cb
 +  `FOLDGPT-INTEGRATION.md`; no phone activation is included.
 diff --git a/FOLDGPT-INTEGRATION.md b/FOLDGPT-INTEGRATION.md
 new file mode 100644
-index 0000000000000000000000000000000000000000..ba6bfd0f657f191af812232ba3da12e9291aac6f
+index 0000000000000000000000000000000000000000..9182b1a33c1f6b60f9974a2b7a540a69afa6d1c2
 --- /dev/null
 +++ b/FOLDGPT-INTEGRATION.md
-@@ -0,0 +1,172 @@
+@@ -0,0 +1,207 @@
 +# FoldGPT auxiliary engine: local runtime boundary
 +
 +Base: `rust-v0.153.4`, commit `3d2ee51ca2d5db578f328aa75e20aa22c0197c9a`.
@@ -58,6 +64,19 @@ index 0000000000000000000000000000000000000000..ba6bfd0f657f191af812232ba3da12e9
 +sandbox context. Existing approval and permission resolution remain in the
 +controller. There is no backend retry through an unsandboxed controller launcher.
 +An implementation must reject unsupported policy semantics before mutation.
++
++The turn now obtains an injected local runtime's shell, home, temporary roots,
++platform OS and snapshot capability from `Environment::info()`, even when its
++paths are shared. Missing optional metadata stays missing. An info error or an
++unrecognized runtime shell fails environment resolution instead of selecting
++the controller shell. Model commands use that runtime's direct shell mode and
++reported executable, including when the model names that exact installed path;
++other shell types remain explicitly unsupported until runtime discovery exists.
++The controller's V1 snapshot launcher does not execute an injected runtime shell.
++Executor snapshots still require the actual advertised V2 implementation; this
++increment does not implement snapshots in Bionic or activate ExecutorOnly paths.
++Reported Android uses POSIX command-classification semantics, alongside Linux
++and macOS; unknown platforms retain the existing conservative treatment.
 +
 +The independent `OwnedProcessDriver` adapter accepts bounded split output streams,
 +queued stdin, real exit notifications and fallible native controls. Its producer
@@ -105,7 +124,7 @@ index 0000000000000000000000000000000000000000..ba6bfd0f657f191af812232ba3da12e9
 +  complete its unsupported request semantics. The same actual factory and C
 +  supervisor are connected in the PC test, but this does not prove Android rights.
 +- Consume `ControllerPathAccess` in host command, terminal, one-shot shell,
-+  plugin-attribution, shell-admission, shell-snapshot and local file-watch routes.
++  plugin-attribution, complete shell discovery/snapshots and local file-watch routes.
 +  Several existing local branches still assume controller-visible filesystem
 +  paths. Registration currently rejects `ExecutorOnly` until those routes are addressed.
 +- Connect lossless owned output to the real process managers, including cancellation,
@@ -189,6 +208,28 @@ index 0000000000000000000000000000000000000000..ba6bfd0f657f191af812232ba3da12e9
 +registration including the `ExecutorOnly` refusal, client disconnect/recovery,
 +process event ordering, network admission, and previous remote filesystem cwd
 +behavior. Evidence: `C:/Dev/foldgpt-engine-native-runtime-regression.log`.
++
++The metadata/shell follow-up passed 41 selected core and exec-server library
++tests, including the six new runtime metadata cases, existing local/remote shell
++selection and the preserved `ExecutorOnly` registration refusal. The active V1
++snapshot test proves the controller does not launch the runtime shell, with an
++ordinary local positive control that actually creates its marker. An injected
++runtime also selects direct execution when the controller uses `ZshFork`.
++
++The selected model-dispatch integration passed with a real PC executable under
++an alternate runtime basename, the explicit reported shell path and `login:true`.
++Although the controller enables V2 snapshots, the runtime reports the capability
++as false and receives no snapshot request. The test also preserves real file
++operations, exit 23, apply-patch and required-policy refusals. Its declared Android
++metadata exercises command classification; execution still occurs on Linux PC.
++Evidence: `C:/Dev/foldgpt-engine-metadata-regression.log` and
++`C:/Dev/foldgpt-engine-metadata-integration.log`. Both runs use the unprivileged
++`foldgpt-build` user and the existing WSL target directory. These checks do not
++establish complete model/UI execution on the phone.
++
++For this follow-up, `just fix -p codex-core -p codex-exec-server --lib --locked`
++and `just fmt` both completed successfully. The unrelated pre-existing unused
++`body_json` import was preserved, and the scoped `git diff --check` passed.
 +
 +## Release lockfile normalization
 +
@@ -1522,8 +1563,378 @@ index e217b702497e6ff02969a51046f7ba887024f487..ca93c945c9a5d608944d81bc0c12f6df
  dependencies = [
   "anyhow",
   "codex-login",
+diff --git a/codex-rs/core/src/environment_selection.rs b/codex-rs/core/src/environment_selection.rs
+index 3310867aeadc192173fe31b9b294fa2c5960cab6..493d5e0d992c3458b9190a155fad340eddc85ca8 100644
+--- a/codex-rs/core/src/environment_selection.rs
++++ b/codex-rs/core/src/environment_selection.rs
+@@ -629,7 +629,9 @@ impl ThreadEnvironments {
+         // Resolve the attachment only after both prerequisites are ready.
+         let ((), installed_config) = tokio::try_join!(connection_ready, configuration_ready)?;
+         let executor_platform_os;
+-        let (shell, user_home_dir, temporary_dirs, snapshot_v2) = if environment.is_remote() {
++        let (shell, user_home_dir, temporary_dirs, snapshot_v2) = if environment.is_remote()
++            || environment.has_local_runtime()
++        {
+             match environment.info().await {
+                 Ok(info) => {
+                     executor_platform_os = info.platform_os;
+@@ -638,6 +640,11 @@ impl ThreadEnvironments {
+                     let shell_snapshot_v2_supported = info.capabilities.shell_snapshot_v2;
+                     let shell = match Shell::from_environment_shell_info(info.shell) {
+                         Ok(shell) => Some(shell),
++                        Err(err) if environment.has_local_runtime() => {
++                            return Err(Arc::new(ExecServerError::Protocol(format!(
++                                "invalid shell reported by local runtime `{environment_id}`: {err}"
++                            ))));
++                        }
+                         Err(err) => {
+                             tracing::warn!(
+                                 "failed to resolve shell for environment `{environment_id}`: {err}"
+@@ -652,6 +659,7 @@ impl ThreadEnvironments {
+                         shell_snapshot_v2_supported,
+                     )
+                 }
++                Err(err) if environment.has_local_runtime() => return Err(Arc::new(err)),
+                 Err(err) => {
+                     executor_platform_os = None;
+                     tracing::warn!("failed to get info for environment `{environment_id}`: {err}");
+@@ -938,6 +946,10 @@ impl TurnEnvironmentSnapshot {
+     }
+ }
+ 
++#[cfg(test)]
++#[path = "environment_selection_runtime_tests.rs"]
++mod runtime_tests;
++
+ #[cfg(test)]
+ mod tests {
+     use std::time::Duration;
+diff --git a/codex-rs/core/src/environment_selection_runtime_tests.rs b/codex-rs/core/src/environment_selection_runtime_tests.rs
+new file mode 100644
+index 0000000000000000000000000000000000000000..939e5fdc683c222ca98df1ec77c23fcd701d225d
+--- /dev/null
++++ b/codex-rs/core/src/environment_selection_runtime_tests.rs
+@@ -0,0 +1,290 @@
++use std::path::PathBuf;
++use std::sync::Arc;
++
++use codex_exec_server::ControllerPathAccess;
++use codex_exec_server::Environment;
++use codex_exec_server::EnvironmentCapabilities;
++use codex_exec_server::EnvironmentInfo;
++use codex_exec_server::EnvironmentManager;
++use codex_exec_server::EnvironmentObservedStatus;
++use codex_exec_server::ExecBackend;
++use codex_exec_server::ExecProcessFuture;
++use codex_exec_server::ExecServerError;
++use codex_exec_server::ExecutorFileSystem;
++use codex_exec_server::LocalRuntime;
++use codex_exec_server::LocalSandboxOwnership;
++use codex_exec_server::SandboxOwner;
++use codex_exec_server::ShellInfo;
++use codex_http_client::HttpClientFactory;
++use codex_http_client::OutboundProxyPolicy;
++use codex_otel::SessionTelemetry;
++use codex_protocol::ThreadId;
++use codex_protocol::protocol::EnvironmentConfigState;
++use codex_protocol::protocol::SessionSource;
++use codex_protocol::protocol::TurnEnvironmentSelection;
++use codex_tools::UnifiedExecShellMode;
++use codex_tools::ZshForkConfig;
++use codex_utils_absolute_path::AbsolutePathBuf;
++use codex_utils_path_uri::PathUri;
++use pretty_assertions::assert_eq;
++
++use super::ResolvedEnvironment;
++use super::ThreadEnvironments;
++use crate::shell::Shell;
++use crate::shell::ShellType;
++use crate::shell_snapshot::ShellSnapshot;
++
++struct Runtime {
++    environment: Environment,
++    info: Result<EnvironmentInfo, String>,
++}
++
++impl LocalRuntime for Runtime {
++    fn exec_backend(&self) -> Arc<dyn ExecBackend> {
++        self.environment.get_exec_backend()
++    }
++    fn filesystem(&self) -> Arc<dyn ExecutorFileSystem> {
++        self.environment.get_filesystem()
++    }
++    fn sandbox_ownership(&self) -> LocalSandboxOwnership {
++        LocalSandboxOwnership {
++            process: SandboxOwner::Executor,
++            filesystem: SandboxOwner::Executor,
++        }
++    }
++    fn controller_path_access(&self) -> ControllerPathAccess {
++        ControllerPathAccess::Shared
++    }
++    fn info(&self) -> ExecProcessFuture<'_, EnvironmentInfo> {
++        Box::pin(async { self.info.clone().map_err(ExecServerError::Protocol) })
++    }
++    fn observed_status(&self) -> EnvironmentObservedStatus {
++        EnvironmentObservedStatus::Ready
++    }
++    fn wait_until_ready(&self) -> ExecProcessFuture<'_, ()> {
++        Box::pin(async { Ok(()) })
++    }
++}
++
++fn runtime_info() -> EnvironmentInfo {
++    EnvironmentInfo {
++        shell: ShellInfo {
++            name: "bash".into(),
++            path: "/runtime/native/libfoldgpt_bash.so".into(),
++        },
++        cwd: Some(PathUri::parse("file:///executor/project").unwrap()),
++        user_home_dir: Some(PathUri::parse("file:///executor/home").unwrap()),
++        platform_os: Some("android".into()),
++        temporary_directories: Some(vec![PathUri::parse("file:///executor/tmp").unwrap()]),
++        temp_dir: Some(PathUri::parse("file:///executor/tmp").unwrap()),
++        capabilities: EnvironmentCapabilities::default(),
++    }
++}
++
++async fn resolve(
++    info: Result<EnvironmentInfo, String>,
++    snapshot: ShellSnapshot,
++) -> Result<ResolvedEnvironment, Arc<ExecServerError>> {
++    let home = tempfile::tempdir().unwrap();
++    std::fs::write(
++        home.path().join("environments.toml"),
++        "default = \"local\"\ninclude_local = true\n",
++    )
++    .unwrap();
++    let cwd = info
++        .as_ref()
++        .ok()
++        .and_then(|info| info.cwd.clone())
++        .unwrap_or_else(|| PathUri::parse("file:///executor/project").unwrap());
++    let runtime = Arc::new(Runtime {
++        environment: Environment::default_for_tests(),
++        info,
++    });
++    let manager = EnvironmentManager::prepare_from_codex_home(home.path())
++        .await
++        .unwrap()
++        .build_with_local_runtime(
++            runtime,
++            /*local_runtime_paths*/ None,
++            HttpClientFactory::new(OutboundProxyPolicy::ReqwestDefault),
++        )
++        .unwrap();
++    let environment = manager.default_environment().unwrap();
++    ThreadEnvironments::resolve_environment(
++        TurnEnvironmentSelection {
++            environment_id: "local".into(),
++            cwd,
++            workspace_roots: vec![],
++            config: EnvironmentConfigState::FromThread,
++        },
++        environment,
++        Shell {
++            shell_type: ShellType::Zsh,
++            shell_path: PathBuf::from("/controller/zsh"),
++        },
++        snapshot,
++        /*configuration_ready*/ None,
++    )
++    .await
++}
++
++#[tokio::test]
++async fn injected_local_runtime_metadata_reaches_turn_without_controller_defaults() {
++    let expected = runtime_info();
++    let resolved = resolve(Ok(expected.clone()), ShellSnapshot::disabled())
++        .await
++        .unwrap();
++    assert!(!resolved.environment.is_remote());
++    assert_eq!(
++        (
++            resolved.shell,
++            resolved.user_home_dir,
++            resolved.executor_platform_os,
++            resolved.temporary_directories,
++            resolved.shell_snapshot_v2_supported
++        ),
++        (
++            Some(Shell {
++                shell_type: ShellType::Bash,
++                shell_path: PathBuf::from(expected.shell.path)
++            }),
++            expected.user_home_dir,
++            expected.platform_os,
++            expected.temporary_directories,
++            expected.capabilities.shell_snapshot_v2
++        ),
++    );
++}
++
++#[tokio::test]
++async fn injected_local_runtime_absent_metadata_stays_absent_and_capability_is_honored() {
++    let mut info = runtime_info();
++    info.user_home_dir = None;
++    info.platform_os = None;
++    info.temporary_directories = None;
++    info.capabilities.shell_snapshot_v2 = true;
++    let resolved = resolve(Ok(info), ShellSnapshot::disabled()).await.unwrap();
++    assert_eq!(
++        (
++            resolved.user_home_dir,
++            resolved.executor_platform_os,
++            resolved.temporary_directories,
++            resolved.shell_snapshot_v2_supported
++        ),
++        (None, None, None, true),
++    );
++}
++
++#[tokio::test]
++async fn injected_local_runtime_info_failure_prevents_ready_turn() {
++    let error = match resolve(
++        Err("runtime metadata disconnected".into()),
++        ShellSnapshot::disabled(),
++    )
++    .await
++    {
++        Ok(_) => panic!("metadata failure must not produce a ready local environment"),
++        Err(error) => error,
++    };
++    assert!(error.to_string().contains("runtime metadata disconnected"));
++}
++
++#[tokio::test]
++async fn injected_local_runtime_unknown_shell_prevents_controller_fallback() {
++    let mut info = runtime_info();
++    info.shell.name = "unknown-native-shell".into();
++    let error = match resolve(Ok(info), ShellSnapshot::disabled()).await {
++        Ok(_) => panic!("invalid runtime shell must not produce a ready local environment"),
++        Err(error) => error,
++    };
++    assert!(
++        error
++            .to_string()
++            .contains("invalid shell reported by local runtime")
++    );
++}
++
++#[tokio::test]
++async fn injected_local_runtime_uses_direct_shell_instead_of_controller_zsh_fork() {
++    let resolved = resolve(Ok(runtime_info()), ShellSnapshot::disabled())
++        .await
++        .unwrap();
++    let home = tempfile::tempdir().unwrap();
++    let mode = UnifiedExecShellMode::ZshFork(ZshForkConfig {
++        shell_zsh_path: AbsolutePathBuf::from_absolute_path(home.path().join("controller-zsh"))
++            .unwrap(),
++        main_execve_wrapper_exe: AbsolutePathBuf::from_absolute_path(
++            home.path().join("controller-wrapper"),
++        )
++        .unwrap(),
++    });
++    assert_eq!(
++        crate::tools::handlers::unified_exec::shell_mode_for_environment(
++            &mode,
++            &resolved.environment
++        ),
++        UnifiedExecShellMode::Direct,
++    );
++}
++
++#[tokio::test]
++#[cfg(unix)]
++async fn injected_local_runtime_never_launches_controller_v1_snapshot() {
++    use std::os::unix::fs::PermissionsExt;
++
++    let home = tempfile::tempdir().unwrap();
++    let marker = home.path().join("controller-shell-was-launched");
++    let executable = home.path().join("runtime-shell");
++    let marker_arg = shlex::try_quote(marker.to_str().unwrap()).unwrap();
++    std::fs::write(
++        &executable,
++        format!("#!/bin/sh\nprintf called > {marker_arg}\nexit 1\n"),
++    )
++    .unwrap();
++    std::fs::set_permissions(&executable, std::fs::Permissions::from_mode(0o755)).unwrap();
++    let mut info = runtime_info();
++    info.shell.path = executable.to_string_lossy().into_owned();
++    let cwd = PathUri::from_host_native_path(home.path()).unwrap();
++    info.cwd = Some(cwd.clone());
++    let shell = Shell::from_environment_shell_info(info.shell.clone()).unwrap();
++    let thread = ThreadId::new();
++    let telemetry = SessionTelemetry::new(
++        thread,
++        "test",
++        "test",
++        /*account_id*/ None,
++        /*account_email*/ None,
++        /*auth_mode*/ None,
++        "test-originator".into(),
++        /*log_user_prompts*/ false,
++        "test-terminal".into(),
++        SessionSource::Cli,
++    );
++    let snapshot = ShellSnapshot::new(
++        AbsolutePathBuf::from_absolute_path(home.path()).unwrap(),
++        thread,
++        telemetry,
++        /*state_db*/ None,
++    );
++    let resolved = resolve(Ok(info), snapshot.clone()).await.unwrap();
++    assert!(resolved.shell_snapshot.await.is_none());
++    assert!(
++        !marker.exists(),
++        "controller executed the runtime's shell during V1 capture"
++    );
++    assert!(!home.path().join("shell_snapshots").exists());
++    // Positive control: with an ordinary local environment this enabled V1
++    // capture reaches the executable and writes the marker before refusing its
++    // deliberate exit 1. The runtime assertion above cannot pass due to a broken
++    // test shell or an inaccessible cwd.
++    assert!(
++        snapshot
++            .build(Arc::new(Environment::default_for_tests()), cwd, Some(shell))
++            .await
++            .is_none()
++    );
++    assert!(
++        marker.exists(),
++        "ordinary local V1 capture did not reach the control executable"
++    );
++}
+diff --git a/codex-rs/core/src/shell_snapshot.rs b/codex-rs/core/src/shell_snapshot.rs
+index 2e0d734a9849da07da358a4ddc262990847e0ae2..00580b8627b8b8192f718ec99c6789a817d714fc 100644
+--- a/codex-rs/core/src/shell_snapshot.rs
++++ b/codex-rs/core/src/shell_snapshot.rs
+@@ -74,7 +74,9 @@ impl ShellSnapshot {
+         shell: Option<Shell>,
+     ) -> Option<Arc<ShellSnapshotFile>> {
+         let config = self.config.as_ref()?;
+-        if environment.is_remote() {
++        // V1 creates files and launches its shell in the controller. A runtime
++        // supplied by bootstrap must use its own advertised snapshot capability.
++        if environment.is_remote() || environment.has_local_runtime() {
+             return None;
+         }
+ 
+diff --git a/codex-rs/core/src/tools/handlers/unified_exec.rs b/codex-rs/core/src/tools/handlers/unified_exec.rs
+index 9f9f8a8cf1ea9fbd01f01813e9dcf1ccca6ab1e1..c59a311deb5e982dc949f678d5e02476f177fc05 100644
+--- a/codex-rs/core/src/tools/handlers/unified_exec.rs
++++ b/codex-rs/core/src/tools/handlers/unified_exec.rs
+@@ -147,7 +147,7 @@ pub(crate) fn shell_mode_for_environment(
+     turn_shell_mode: &UnifiedExecShellMode,
+     environment: &Environment,
+ ) -> UnifiedExecShellMode {
+-    if environment.is_remote() {
++    if environment.is_remote() || environment.has_local_runtime() {
+         UnifiedExecShellMode::Direct
+     } else {
+         turn_shell_mode.clone()
 diff --git a/codex-rs/core/src/tools/handlers/unified_exec/exec_command.rs b/codex-rs/core/src/tools/handlers/unified_exec/exec_command.rs
-index 8b97ff06b243cc20974a2aa747e7883acae25f37..4dd3587de7648698caccb510925456efb525c1af 100644
+index 8b97ff06b243cc20974a2aa747e7883acae25f37..129f932005e9d26311a8825a1993f60c3362f806 100644
 --- a/codex-rs/core/src/tools/handlers/unified_exec/exec_command.rs
 +++ b/codex-rs/core/src/tools/handlers/unified_exec/exec_command.rs
 @@ -195,9 +195,9 @@ impl ExecCommandHandler {
@@ -1539,6 +1950,44 @@ index 8b97ff06b243cc20974a2aa747e7883acae25f37..4dd3587de7648698caccb510925456ef
              && SandboxManager::new().select_initial(
                  turn_environment.permission_profile(),
                  SandboxablePreference::Auto,
+@@ -244,8 +244,14 @@ impl ExecCommandHandler {
+         .await;
+         let shell_mode =
+             shell_mode_for_environment(&turn.unified_exec_shell_mode, environment.as_ref());
+-        // Remote environments may use a different OS and must build commands with their native
+-        // shell; fall back to the session shell when the environment did not report one.
++        // Executor runtimes may use a different shell even when their files are
++        // shared. An injected local runtime must never fall back to the controller.
++        if environment.has_local_runtime() && turn_environment.shell.is_none() {
++            return Err(FunctionCallError::RespondToModel(format!(
++                "local runtime `{}` does not report a shell",
++                turn_environment.selection.environment_id
++            )));
++        }
+         let shell = turn_environment
+             .shell
+             .clone()
+@@ -253,7 +259,7 @@ impl ExecCommandHandler {
+             .unwrap_or_else(|| session.user_shell());
+         // TODO(anp): Resolve requested shells in remote environments instead of restricting
+         // commands to the reported default shell.
+-        if environment.is_remote()
++        if (environment.is_remote() || environment.has_local_runtime())
+             && let Some(requested_shell) = args.shell.take()
+         {
+             let Some(remote_shell) = turn_environment.shell.as_ref() else {
+@@ -262,7 +268,10 @@ impl ExecCommandHandler {
+                     turn_environment.selection.environment_id
+                 )));
+             };
+-            if detect_shell_type(Path::new(&requested_shell)) != Some(remote_shell.shell_type) {
++            if !(environment.has_local_runtime()
++                && Path::new(&requested_shell) == remote_shell.shell_path)
++                && detect_shell_type(Path::new(&requested_shell)) != Some(remote_shell.shell_type)
++            {
+                 return Err(FunctionCallError::RespondToModel(format!(
+                     "environment `{}` only supports `{}`",
+                     turn_environment.selection.environment_id,
 diff --git a/codex-rs/core/src/tools/runtimes/apply_patch.rs b/codex-rs/core/src/tools/runtimes/apply_patch.rs
 index 723e6eb034187b931eec2d08f6025e4451742d69..022d48d26429cbab3473eb80587d86913c35a0be 100644
 --- a/codex-rs/core/src/tools/runtimes/apply_patch.rs
@@ -1569,7 +2018,7 @@ index aea36d9f48ebbc22d2ea5d3b0fbb6964009f9376..be19f04f3f973eb1a20894b188dc128a
  
      fn sandbox_cwd<'b>(&self, req: &'b UnifiedExecRequest) -> Option<&'b PathUri> {
 diff --git a/codex-rs/core/src/unified_exec/process_manager.rs b/codex-rs/core/src/unified_exec/process_manager.rs
-index 21218570af85277b4e21885cfa77c53c6271bed1..104562cef1563b365d684d95b63c80f8d5c3ec4b 100644
+index 21218570af85277b4e21885cfa77c53c6271bed1..2cdc747b806c065e897c21143733f60debf6d18d 100644
 --- a/codex-rs/core/src/unified_exec/process_manager.rs
 +++ b/codex-rs/core/src/unified_exec/process_manager.rs
 @@ -1189,7 +1189,10 @@ impl UnifiedExecProcessManager {
@@ -1600,6 +2049,15 @@ index 21218570af85277b4e21885cfa77c53c6271bed1..104562cef1563b365d684d95b63c80f8
                  ));
              }
  
+@@ -1377,7 +1383,7 @@ impl UnifiedExecProcessManager {
+         // Legacy executors omit the platform. Unknown reported platforms use the
+         // more conservative Windows rules rather than silently weakening checks.
+         let command_platform = match request.turn_environment.executor_platform_os.as_deref() {
+-            Some("linux" | "macos") => DangerousCommandPlatform::Posix,
++            Some("linux" | "macos" | "android") => DangerousCommandPlatform::Posix,
+             Some("windows") | Some(_) => DangerousCommandPlatform::Windows,
+             None => DangerousCommandPlatform::host(),
+         };
 diff --git a/codex-rs/core/tests/common/test_codex.rs b/codex-rs/core/tests/common/test_codex.rs
 index 6e7b9d6e77a1db506ab9755e778dcffbcfa22532..461782d443c5b81accaefda2341d950bae092259 100644
 --- a/codex-rs/core/tests/common/test_codex.rs
@@ -1673,10 +2131,10 @@ index 6e7b9d6e77a1db506ab9755e778dcffbcfa22532..461782d443c5b81accaefda2341d950b
          external_time_provider: None,
 diff --git a/codex-rs/core/tests/suite/injected_local_runtime.rs b/codex-rs/core/tests/suite/injected_local_runtime.rs
 new file mode 100644
-index 0000000000000000000000000000000000000000..733e70f5e04d4bb4a62a0e55eb3e33a4d76131ce
+index 0000000000000000000000000000000000000000..ecbf46453a1075a0fe7ffca48ce1e3808076b42c
 --- /dev/null
 +++ b/codex-rs/core/tests/suite/injected_local_runtime.rs
-@@ -0,0 +1,208 @@
+@@ -0,0 +1,258 @@
 +use std::sync::Arc;
 +use std::sync::Mutex;
 +
@@ -1694,6 +2152,7 @@ index 0000000000000000000000000000000000000000..733e70f5e04d4bb4a62a0e55eb3e33a4
 +use codex_exec_server::LocalRuntime;
 +use codex_exec_server::LocalSandboxOwnership;
 +use codex_exec_server::SandboxOwner;
++use codex_features::Feature;
 +use codex_http_client::HttpClientFactory;
 +use codex_http_client::OutboundProxyPolicy;
 +use codex_protocol::models::PermissionProfile;
@@ -1775,16 +2234,29 @@ index 0000000000000000000000000000000000000000..733e70f5e04d4bb4a62a0e55eb3e33a4
 +        "default = \"local\"\ninclude_local = true\n",
 +    )?;
 +    let environment = Environment::default_for_tests();
++    let mut info = EnvironmentInfo {
++        cwd: Some(PathUri::from_abs_path(&cwd)),
++        ..EnvironmentInfo::local()
++    };
++    // A real executable under a non-shell basename proves command construction
++    // uses the provider's path instead of rediscovering a controller shell.
++    #[cfg(unix)]
++    {
++        let shell_path = home.path().join("native-runtime-shell");
++        std::os::unix::fs::symlink(&info.shell.path, &shell_path)?;
++        info.shell.path = shell_path.to_string_lossy().into_owned();
++        // Exercise the Android command-classification branch while the actual
++        // process test continues to run on this POSIX host.
++        info.platform_os = Some("android".into());
++    }
++    info.capabilities.shell_snapshot_v2 = false;
 +    let runtime = Arc::new(Runtime {
 +        backend: Arc::new(RecordingBackend {
 +            inner: environment.get_exec_backend(),
 +            requests: Mutex::new(Vec::new()),
 +        }),
 +        environment,
-+        info: EnvironmentInfo {
-+            cwd: Some(PathUri::from_abs_path(&cwd)),
-+            ..EnvironmentInfo::local()
-+        },
++        info,
 +    });
 +    let manager = Arc::new(
 +        EnvironmentManager::prepare_from_codex_home(home.path())
@@ -1800,14 +2272,25 @@ index 0000000000000000000000000000000000000000..733e70f5e04d4bb4a62a0e55eb3e33a4
 +        .with_model("gpt-5.4")
 +        .with_home(home)
 +        .with_environment_manager(manager)
++        .with_config(|config| {
++            config.features.enable(Feature::ShellSnapshotV2).unwrap();
++        })
 +        .build_with_environment(&server, test_env)
 +        .await?;
 +    #[cfg(unix)]
 +    let command = "printf runtime-dispatch > command.txt; printf runtime-dispatch; exit 23";
 +    #[cfg(windows)]
 +    let command = "Set-Content -NoNewline command.txt runtime-dispatch; Write-Output runtime-dispatch; exit 23";
++    #[cfg(unix)]
++    let explicit_command = "printf runtime-explicit";
++    #[cfg(windows)]
++    let explicit_command = "Write-Output runtime-explicit";
 +    let successful = mount_sse_sequence(&server, vec![
-+        sse(vec![ev_function_call("exec-native", "exec_command", &json!({"cmd": command, "login": false}).to_string()), ev_completed("exec-response")]),
++        sse(vec![
++            ev_function_call("exec-native", "exec_command", &json!({"cmd": command, "login": false}).to_string()),
++            ev_function_call("exec-native-explicit", "exec_command", &json!({"cmd": explicit_command, "login": true, "shell":runtime.info.shell.path}).to_string()),
++            ev_completed("exec-response"),
++        ]),
 +        sse(vec![ev_apply_patch_custom_tool_call("patch-native", "*** Begin Patch\n*** Add File: patch.txt\n+runtime-filesystem\n*** End Patch\n"), ev_completed("patch-response")]),
 +        sse(vec![ev_completed("complete-response")]),
 +    ]).await;
@@ -1828,6 +2311,13 @@ index 0000000000000000000000000000000000000000..733e70f5e04d4bb4a62a0e55eb3e33a4
 +        .unwrap();
 +    assert!(output.contains("Process exited with code 23"), "{output}");
 +    assert!(output.contains("runtime-dispatch"), "{output}");
++    let explicit_output = successful.requests()[1]
++        .function_call_output_text("exec-native-explicit")
++        .unwrap();
++    assert!(
++        explicit_output.contains("runtime-explicit"),
++        "{explicit_output}"
++    );
 +    let completed = successful.requests()[2].custom_tool_call_output("patch-native");
 +    assert!(
 +        completed
@@ -1877,6 +2367,24 @@ index 0000000000000000000000000000000000000000..733e70f5e04d4bb4a62a0e55eb3e33a4
 +        .iter()
 +        .find(|request| request.argv.iter().any(|arg| arg == forbidden_command))
 +        .unwrap();
++    let explicit_request = requests
++        .iter()
++        .find(|request| request.argv.iter().any(|arg| arg == explicit_command))
++        .unwrap();
++    assert_eq!(
++        (
++            &successful_request.argv[0],
++            &explicit_request.argv[0],
++            &successful_request.shell_snapshot,
++            &explicit_request.shell_snapshot
++        ),
++        (
++            &runtime.info.shell.path,
++            &runtime.info.shell.path,
++            &None,
++            &None
++        ),
++    );
 +    assert_eq!(
 +        (&successful_request.cwd, &successful_request.sandbox),
 +        (&PathUri::from_abs_path(&cwd), &None)
@@ -2282,10 +2790,10 @@ index 0000000000000000000000000000000000000000..4099e8160a39ec15a6a2b80221df644c
 +}
 diff --git a/codex-rs/exec-server/src/environment/local_runtime.rs b/codex-rs/exec-server/src/environment/local_runtime.rs
 new file mode 100644
-index 0000000000000000000000000000000000000000..b0c452d362e9d005b15e466365c3cd9997039a90
+index 0000000000000000000000000000000000000000..1440edbe6a7e8d5f2ca3c1962e169daa8ea410e3
 --- /dev/null
 +++ b/codex-rs/exec-server/src/environment/local_runtime.rs
-@@ -0,0 +1,115 @@
+@@ -0,0 +1,123 @@
 +use std::sync::Arc;
 +
 +use codex_http_client::HttpClientFactory;
@@ -2341,6 +2849,14 @@ index 0000000000000000000000000000000000000000..b0c452d362e9d005b15e466365c3cd99
 +}
 +
 +impl Environment {
++    /// Whether bootstrap supplied the local shell, metadata and execution runtime.
++    ///
++    /// This is independent of sandbox ownership and controller path visibility;
++    /// a shared-path runtime can still use a different shell and temporary roots.
++    pub fn has_local_runtime(&self) -> bool {
++        self.local_runtime.is_some()
++    }
++
 +    pub(super) fn local_with_runtime(
 +        runtime: Arc<dyn LocalRuntime>,
 +        local_runtime_paths: Option<ExecServerRuntimePaths>,

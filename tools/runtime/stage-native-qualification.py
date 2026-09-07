@@ -13,6 +13,20 @@ import re
 import shlex
 import subprocess
 import tarfile
+from runtime_qualification_identity import BASE as RUNTIME_BASE, DIRECTORIES, FILES, ENTRIES
+
+
+def fixture(base):
+    if base == RUNTIME_BASE:
+        return dict(FILES), {name: set(values) for name, values in ENTRIES.items()}
+    if not re.fullmatch(r'/data/local/tmp/foldgpt-bionic-supervisor-qualification-[A-Za-z0-9_-]+', base):
+        raise ValueError('Expected a dedicated kernel base or the exact independent runtime base')
+    return ({'workspace/input': b'pin-memory-ok\n',
+             'workspace/private/secret': b'probe-private-unchanged\n',
+             'workspace/directory/marker': b'marker\n'},
+            {'workspace': {'.git', 'directory', 'input', 'private'},
+             'workspace/private': {'secret'}, 'workspace/directory': {'marker'},
+             'workspace/.git': set()})
 
 
 def main():
@@ -23,15 +37,14 @@ def main():
     parser.add_argument('--output', required=True, type=Path)
     parser.add_argument('--verify-only', action='store_true', help='Read an existing fixture without creating or changing it')
     args = parser.parse_args()
-    if not re.fullmatch(r'/data/local/tmp/foldgpt-bionic-supervisor-qualification-[A-Za-z0-9_-]+', args.base):
-        parser.error('Expected a dedicated native qualification base')
+    try:
+        files, entries = fixture(args.base)
+    except ValueError as error:
+        parser.error(str(error))
     args.output.mkdir(parents=True, exist_ok=False)
-    files = {'workspace/input': b'pin-memory-ok\n',
-             'workspace/private/secret': b'probe-private-unchanged\n',
-             'workspace/directory/marker': b'marker\n'}
     payload = io.BytesIO()
     with tarfile.open(fileobj=payload, mode='w') as archive:
-        for name in ('broker', 'workspace', 'workspace/private', 'workspace/directory', 'workspace/.git'):
+        for name in DIRECTORIES:
             entry = tarfile.TarInfo(name)
             entry.type = tarfile.DIRTYPE
             entry.mode = 0o700
@@ -72,8 +85,7 @@ def main():
         if not args.verify_only:
             run('create', ['sh', '-c', 'umask 077\nmkdir -- ' + shlex.quote(args.base)])
             run('extract', ['tar', '-xf', '-', '-C', args.base], data)
-        paths = [args.base] + [args.base + '/' + name for name in
-            ('broker', 'workspace', 'workspace/private', 'workspace/directory', 'workspace/.git')]
+        paths = [args.base] + [args.base + '/' + name for name in DIRECTORIES]
         observed = run('directory-metadata', ['stat', '-c', '%u:%g:%a:%F', *paths]).decode().splitlines()
         if observed != ['2000:2000:700:directory'] * len(paths):
             raise RuntimeError('Unexpected fixture directory ownership or permissions')
@@ -85,10 +97,7 @@ def main():
             metadata = run('file-metadata-' + str(index), ['stat', '-c', '%u:%g:%a:%F', args.base + '/' + name])
             if metadata.strip() != b'2000:2000:600:regular file':
                 raise RuntimeError('Unexpected fixture file metadata')
-        for index, (name, expected) in enumerate({
-                'workspace': {'.git', 'directory', 'input', 'private'},
-                'workspace/private': {'secret'}, 'workspace/directory': {'marker'},
-                'workspace/.git': set()}.items()):
+        for index, (name, expected) in enumerate(entries.items()):
             listing = run('directory-entries-' + str(index), ['ls', '-1A', args.base + '/' + name])
             if set(listing.decode().splitlines()) != expected:
                 raise RuntimeError('Unexpected fixture directory entry: ' + name)

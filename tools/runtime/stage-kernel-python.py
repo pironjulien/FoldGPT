@@ -14,7 +14,8 @@ import shlex
 import subprocess
 import tarfile
 
-from qualification_identity import PACKAGES, V11_PACKAGE, resolve_identity
+from qualification_identity import INDEPENDENT, PACKAGES, resolve_identity
+from runtime_qualification_identity import PACKAGE as RUNTIME_PACKAGE, resolve_runtime_identity
 
 
 def main():
@@ -23,13 +24,14 @@ def main():
     parser.add_argument('--serial', required=True)
     parser.add_argument('--stage', required=True, type=Path)
     parser.add_argument('--output', required=True, type=Path)
-    parser.add_argument('--package', choices=PACKAGES, required=True)
+    parser.add_argument('--package', choices=(*PACKAGES, RUNTIME_PACKAGE), required=True)
     parser.add_argument('--base', required=True)
     parser.add_argument('--report-version', '--lab-report-version', dest='report_version', type=int,
-                        help='Exact report generation for this package/base; V11 requires 11')
+                        help='Exact report generation for this package/base; independent versions must match')
     args = parser.parse_args()
     try:
-        identity = resolve_identity(args.package, args.base, args.report_version)
+        resolver = resolve_runtime_identity if args.package == RUNTIME_PACKAGE else resolve_identity
+        identity = resolver(args.package, args.base, args.report_version)
     except ValueError as error:
         parser.error(str(error))
     args.output.mkdir(parents=True, exist_ok=False)
@@ -49,10 +51,10 @@ def main():
     try:
         info_file = identity.report_file('package-info.json')
         info = json.loads(run('package-info', ['run-as', args.package, 'cat', info_file]))
-        if args.package == V11_PACKAGE and (info.get('packageName') != identity.package
+        if (args.package in INDEPENDENT or args.package == RUNTIME_PACKAGE) and (info.get('packageName') != identity.package
                 or info.get('nativeBase') != identity.base or type(info.get('diagnosticVersion')) is not int
-                or info['diagnosticVersion'] != 11):
-            raise ValueError('Package information does not identify the independent V11 fixture')
+                or info['diagnosticVersion'] != identity.report_version):
+            raise ValueError('Package information does not identify the independent fixture')
         native_directory = info['nativeLibraryDir']
         if (not native_directory.startswith('/data/app/') or not native_directory.endswith('/lib/arm64')
                 or str(PurePosixPath(native_directory)) != native_directory or '..' in PurePosixPath(native_directory).parts

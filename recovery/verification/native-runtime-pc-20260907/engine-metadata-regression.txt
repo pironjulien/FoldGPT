@@ -1,0 +1,49 @@
+RUST_MIN_STACK=8388608 NEXTEST_PROFILE=local cargo nextest run --no-fail-fast "$@"
+   Compiling codex-exec-server v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/exec-server)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 19.24s
+────────────
+ Nextest run ID 5a36035f-169f-4b7d-a794-2d57ac5ddacb with nextest profile: local
+    Starting 41 tests across 2 binaries (2695 tests skipped)
+        PASS [   0.016s] ( 1/41) codex-core environment_selection::tests::local_environment_cwd_uses_starting_local_selection
+        PASS [   0.017s] ( 2/41) codex-core environment_selection::tests::toml_default_thread_environment_selections_include_local_and_remote
+        PASS [   0.017s] ( 3/41) codex-core environment_selection::tests::unresolved_environment_selections_are_skipped
+        PASS [   0.011s] ( 4/41) codex-core tools::handlers::unified_exec::tests::test_get_command_rejects_explicit_login_when_disallowed
+        PASS [   0.011s] ( 5/41) codex-core tools::handlers::unified_exec::tests::test_get_command_rejects_explicit_shell_in_zsh_fork_mode
+        PASS [   0.012s] ( 6/41) codex-core tools::handlers::unified_exec::tests::shell_mode_for_environment_uses_direct_mode_for_remote_environments
+        PASS [   0.044s] ( 7/41) codex-core environment_selection::runtime_tests::injected_local_runtime_never_launches_controller_v1_snapshot
+        PASS [   0.017s] ( 8/41) codex-core tools::handlers::unified_exec::tests::test_get_command_respects_explicit_bash_shell
+        PASS [   0.017s] ( 9/41) codex-core tools::handlers::unified_exec::tests::test_get_command_respects_explicit_cmd_shell
+        PASS [   0.018s] (10/41) codex-core tools::handlers::unified_exec::tests::test_get_command_resolves_powershell_by_type
+        PASS [   0.021s] (11/41) codex-core environment_selection::tests::default_thread_environment_selections_empty_when_default_disabled
+        PASS [   0.021s] (12/41) codex-core environment_selection::runtime_tests::injected_local_runtime_info_failure_prevents_ready_turn
+        PASS [   0.023s] (13/41) codex-core environment_selection::runtime_tests::injected_local_runtime_absent_metadata_stays_absent_and_capability_is_honored
+        PASS [   0.023s] (14/41) codex-core environment_selection::tests::owner_environment_config_is_inherited_and_reset_for_new_cwd
+        PASS [   0.023s] (15/41) codex-core environment_selection::tests::inherited_environment_reuses_parent_handle_and_uses_child_config
+        PASS [   0.023s] (16/41) codex-core environment_selection::runtime_tests::injected_local_runtime_unknown_shell_prevents_controller_fallback
+        PASS [   0.023s] (17/41) codex-core environment_selection::tests::failed_resolution_is_replaced_from_the_environment_manager
+        PASS [   0.024s] (18/41) codex-core environment_selection::tests::local_environment_uses_configured_shell_and_login_policy
+        PASS [   0.024s] (19/41) codex-core environment_selection::tests::default_thread_environment_selections_use_manager_default_id
+        PASS [   0.025s] (20/41) codex-core environment_selection::tests::single_local_environment_cwd_requires_exactly_one_local_environment
+        PASS [   0.025s] (21/41) codex-core environment_selection::tests::resolve_environment_selections_keeps_first_duplicate_id
+        PASS [   0.025s] (22/41) codex-core environment_selection::runtime_tests::injected_local_runtime_metadata_reaches_turn_without_controller_defaults
+        PASS [   0.015s] (23/41) codex-exec-server environment::local_runtime::tests::executor_only_paths_are_rejected_before_unadapted_controller_routes_can_run
+        PASS [   0.029s] (24/41) codex-core environment_selection::runtime_tests::injected_local_runtime_uses_direct_shell_instead_of_controller_zsh_fork
+        PASS [   0.020s] (25/41) codex-core tools::handlers::unified_exec::tests::test_get_command_uses_default_shell_when_unspecified
+        PASS [   0.010s] (26/41) codex-exec-server environment::local_runtime::tests::injected_runtime_readiness_does_not_fall_back_to_always_ready_local
+        PASS [   0.008s] (27/41) codex-exec-server environment::local_runtime::tests::injected_runtime_rejects_configurations_without_a_local_environment
+        PASS [   0.068s] (28/41) codex-core environment_selection::tests::snapshot_refreshes_readiness_in_selection_order
+        PASS [   0.014s] (29/41) codex-exec-server environment::local_runtime::tests::injected_local_runtime_owns_real_process_and_filesystem_operations
+        PASS [   0.051s] (30/41) codex-core environment_selection::tests::resolved_environment_selections_use_first_selection_as_primary
+        PASS [   0.107s] (31/41) codex-core environment_selection::tests::blocking_snapshot_waits_for_starting_environment
+        PASS [   0.178s] (32/41) codex-core tools::handlers::unified_exec::tests::exec_command_post_tool_use_payload_uses_output_for_noninteractive_one_shot_commands
+        PASS [   0.179s] (33/41) codex-core tools::handlers::unified_exec::tests::exec_command_pre_tool_use_payload_uses_raw_command
+        PASS [   0.192s] (34/41) codex-core tools::handlers::unified_exec::tests::exec_command_reuses_foreign_windows_grant
+        PASS [   0.196s] (35/41) codex-core tools::handlers::unified_exec::tests::exec_command_rejects_login_when_selected_environment_disallows_it
+        PASS [   0.209s] (36/41) codex-core tools::handlers::unified_exec::tests::exec_command_post_tool_use_payload_skips_running_sessions
+        PASS [   0.209s] (37/41) codex-core tools::handlers::unified_exec::tests::exec_command_pre_tool_use_payload_skips_write_stdin
+        PASS [   0.192s] (38/41) codex-core tools::handlers::unified_exec::tests::exec_command_post_tool_use_payload_uses_output_for_interactive_completion
+        PASS [   0.180s] (39/41) codex-core tools::handlers::unified_exec::tests::write_stdin_post_tool_use_payload_uses_original_exec_call_id_and_command_on_completion
+        PASS [   0.366s] (40/41) codex-core environment_selection::tests::replacement_environment_events_follow_selected_environment
+        PASS [   0.478s] (41/41) codex-core tools::handlers::unified_exec::tests::write_stdin_post_tool_use_payload_keeps_parallel_session_metadata_separate
+────────────
+     Summary [   0.531s] 41 tests run: 41 passed, 2695 skipped

@@ -115,7 +115,7 @@ def main():
     parser.add_argument('--package', choices=PACKAGES, required=True)
     parser.add_argument('--base', required=True)
     parser.add_argument('--report-version', '--lab-report-version', dest='report_version', type=int,
-                        help='Exact report generation for this package/base; V11 requires 11')
+                        help='Exact report generation for this package/base; independent versions must match')
     args = parser.parse_args()
     try:
         fixture_identity = resolve_identity(args.package, args.base, args.report_version)
@@ -157,8 +157,9 @@ def main():
     clean = fixture_identity.matches_evidence(app, native) and transport_clean(app, native)
     command = [sys.executable, '-B', str(Path(__file__).with_name('snapshot-native-qualification.py')),
         '--adb', args.adb, '--serial', args.serial, '--output', str(args.output / 'after'),
-        '--before', str(args.before), '--package', 'app.foldgpt', '--package', 'app.foldgpt.shizukuprobe',
-        '--package', args.package]
+        '--before', str(args.before)]
+    for package in (*fixture_identity.retained_packages, args.package):
+        command += ['--package', package]
     if clean:
         command += ['--workspace', fixture_identity.workspace]
         for field in ('supervisorPid', 'bootstrapPid'):
@@ -246,7 +247,7 @@ def main():
         checks['sameDeviceBootAndIndicators'] = all(comparison.get(name) is True
             for name in ('sameDevice', 'sameBoot', 'sameIndicators')) and after.get('observedStockIndicators') is True
         checks['originalPackagesUnchanged'] = all(comparison.get('packagesUnchanged', {}).get(name) is True
-            for name in ('app.foldgpt', 'app.foldgpt.shizukuprobe'))
+            for name in fixture_identity.retained_packages)
         with args.apk.open('rb') as apk_file:
             apk_sha = hashlib.file_digest(apk_file, 'sha256').hexdigest()
         checks['installedApkMatches'] = list(after.get('packages', {}).get(args.package, {}).values()) == [apk_sha]

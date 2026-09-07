@@ -5,7 +5,43 @@ Le dépôt de travail est **privé** : `pironjulien/FoldGPT-workspace`, branche
 sous-modules, moteur séparé et données locales. Le dépôt public `FoldGPT` est un
 ancien checkpoint ; il ne reçoit pas cette sauvegarde privée.
 
-## Session reprise : résultat V11, 7 septembre vers 19:03
+## État courant : V12 réussit sur le Fold, 7 septembre vers 19:49
+
+La qualification fixe Shizuku/Bionic V12 réussit, avec les 24 vérifications
+indépendantes, nettoyage réel et boot/APK/fixture inchangés. Lire le
+[rapport V12](../docs/research/native-v12-device-result-2026-09-07.md) et les
+[preuves suivies](verification/native-v12-20260907/manifest.json).
+L'action V12 a été consommée : conserver son marker et ne pas la rejouer.
+
+Le projet Python complet passe sur PC avec Bash natif, création/modification,
+trois tests et zipapp. La prochaine identité séparée est
+`app.foldgpt.runtimequalification.v1`, base
+`/data/local/tmp/foldgpt-bionic-runtime-qualification-v1`. Avant son déploiement,
+la course annulation/expiration du canal SOCK_SEQPACKET est maintenant corrigée
+et vérifiée : six tests de synchronisation et cinq tests du projet passent sur
+le nouveau gel `N0kMFS8z`, avec les contrôles canoniques. Conserver le build V12
+`PHREPY0u` intact. La fixture runtime-v1 est créée et vérifiée sur le téléphone ;
+son worker n'est pas encore lancé. Lire le
+[contrat et les preuves PC](../tools/executor/bionic-supervisor/runtime_qualification.md).
+
+L'incrément de métadonnées/shell du moteur passe 41 tests ciblés et une
+intégration modèle/commande/apply-patch réelle sur PC. Le patch moteur exporté
+inclut ce résultat. L'injection app-server interne est l'étape suivante ; les
+accès `ExecutorOnly` restent refusés jusqu'à leur raccordement réel.
+
+Les commandes ordinaires depuis l'interface ne sont pas encore démontrées.
+Le moteur auxiliaire et ses accès projet/autorités restent à raccorder selon
+l'audit du contrôleur. La priorité reste ce fonctionnement, finitions suspendues.
+
+## Historique : résultat V11, 7 septembre vers 19:03
+
+Priorité confirmée par Julien vers 19:36 : démontrer le fonctionnement réel
+du petit projet Python depuis l'interface avant toute finition. L'enquête sur
+les points noirs est suspendue : corruption capturée aujourd'hui malgré les
+bibliothèques foldgpt5 effectivement mappées. Aucun correctif GPU nouveau ni
+changement de pilote n'a été appliqué. Les captures privées et mesures sont
+dans `downloads/menu-points-20260907`; les nouvelles sondes sous `tools/gpu`
+sont des préparations non validées sur l'appareil, pas une résolution.
 
 Julien a repris le travail et reconnecté le Fold. Le maintien éveillé USB est
 activé et vérifié sans entrée injectée ; conserver ce réglage pendant la session

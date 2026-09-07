@@ -1,0 +1,1 @@
+PASS actual C follow/nofollow, containment, missing/dangling, magic links, renamed/deleted/closed FD, ambiguous names, actual search denial; nonroot; Samsung SELinux untested

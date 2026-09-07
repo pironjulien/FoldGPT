@@ -1,0 +1,18 @@
+RUST_MIN_STACK=8388608 NEXTEST_PROFILE=local cargo nextest run --no-fail-fast "$@"
+   Compiling codex-core v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/core)
+warning: unused import: `wiremock::matchers::body_json`
+  --> core/tests/suite/openai_file_mcp.rs:47:5
+   |
+47 | use wiremock::matchers::body_json;
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: `codex-core` (test "all") generated 1 warning (run `cargo fix --test "all" -p codex-core` to apply 1 suggestion)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 44.24s
+────────────
+ Nextest run ID b539e58b-98a6-4e4e-a2eb-edbc362dba5d with nextest profile: local
+    Starting 1 test across 1 binary (1643 tests skipped)
+        PASS [   0.866s] (1/1) codex-core::all suite::injected_local_runtime::model_exec_and_apply_patch_use_injected_local_runtime_and_preserve_refusals
+────────────
+     Summary [   0.871s] 1 test run: 1 passed, 1643 skipped

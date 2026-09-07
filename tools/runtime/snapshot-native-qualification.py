@@ -14,6 +14,15 @@ from pathlib import Path
 import re
 import shlex
 import subprocess
+from runtime_qualification_identity import BASE as RUNTIME_BASE
+
+
+def fixture_names(workspace):
+    if workspace == RUNTIME_BASE + '/workspace':
+        return ('private/secret',)
+    if re.fullmatch(r'/data/local/tmp/foldgpt-bionic-supervisor-qualification-[A-Za-z0-9_-]+/workspace', workspace):
+        return ('input', 'private/secret', 'directory/marker')
+    raise ValueError('Only an exact dedicated qualification workspace may be collected')
 
 
 def main():
@@ -29,10 +38,10 @@ def main():
     for package in args.package:
         if not re.fullmatch(r'[A-Za-z][A-Za-z0-9_]*(?:\.[A-Za-z][A-Za-z0-9_]*)+', package):
             parser.error('Invalid Android package name')
-    if args.workspace and not re.fullmatch(
-            r'/data/local/tmp/foldgpt-bionic-supervisor-qualification-[A-Za-z0-9_-]+/workspace',
-            args.workspace):
-        parser.error('Only a dedicated qualification workspace may be collected')
+    try:
+        names = fixture_names(args.workspace) if args.workspace else ()
+    except ValueError as error:
+        parser.error(str(error))
     if any(pid <= 0 for pid in args.absent_pid):
         parser.error('Expected absent PIDs must be positive')
     args.output.mkdir(parents=True, exist_ok=False)
@@ -108,7 +117,7 @@ def main():
         report['packages'][package] = files
     if args.workspace:
         files = {}
-        for name in ('input', 'private/secret', 'directory/marker'):
+        for name in names:
             encoded = read('fixture-' + name.replace('/', '-'), ['base64', args.workspace + '/' + name])
             value = base64.b64decode(encoded.replace(b'\r', b'').replace(b'\n', b''), validate=True) if encoded is not None else None
             files[name] = hashlib.sha256(value).hexdigest() if value is not None else None

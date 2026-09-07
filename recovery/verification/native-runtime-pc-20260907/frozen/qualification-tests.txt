@@ -1,0 +1,1 @@
+{"success": true, "evidence": "/var/tmp/foldgpt-kernel-qualification-ms7nwm6k/evidence", "quarantined": false, "error": null}

@@ -1,0 +1,9 @@
+{
+  "schema": "foldgpt.android-kernel-package.v1",
+  "nativeLibraryDir": "\/data\/app\/~~f0IO1t5SHQE1k7o8Lsx_6A==\/app.foldgpt.kernelqualification.v12-EVfaepKvpNYsjVjx6DE7VA==\/lib\/arm64",
+  "sourceDir": "\/data\/app\/~~f0IO1t5SHQE1k7o8Lsx_6A==\/app.foldgpt.kernelqualification.v12-EVfaepKvpNYsjVjx6DE7VA==\/base.apk",
+  "clientUid": 10400,
+  "packageName": "app.foldgpt.kernelqualification.v12",
+  "nativeBase": "\/data\/local\/tmp\/foldgpt-bionic-supervisor-qualification-v4",
+  "diagnosticVersion": 12
+}

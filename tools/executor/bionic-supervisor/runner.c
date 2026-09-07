@@ -96,6 +96,22 @@ static int receive(void *data,size_t length) {
     struct pollfd p={cfg.control,POLLIN,0};(void)poll(&p,1,20);
   }
 }
+static int finish_control_input(void) {
+  /* No further decision can be used after terminal cleanup. Seal reception
+   * before draining: a concurrent final response must either be consumed here
+   * or receive EPIPE. Closing with unread SEQPACKET data would otherwise report
+   * ECONNRESET before the peer can read our actual cleanup result. */
+  if(shutdown(cfg.control,SHUT_RD)<0)return -1;
+  for(;;){
+    unsigned char discarded[4096];
+    ssize_t count=recv(cfg.control,discarded,sizeof(discarded),MSG_DONTWAIT);
+    if(count>0)continue;
+    if(!count)return 0;
+    if(errno==EINTR)continue;
+    if(errno==EAGAIN||errno==EWOULDBLOCK)return 0;
+    return -1;
+  }
+}
 static int identity(void) {
   uid_t a,b,c;gid_t d,e,f;
   struct __user_cap_header_struct h={.version=_LINUX_CAPABILITY_VERSION_3};
@@ -464,6 +480,7 @@ static int authorize(uint64_t id,const char *path,const char *operation,uint64_t
     (unsigned long long)id,operation,(unsigned long long)flags,encoded);
   if(packet(message,(size_t)count,0)<0)return -1;
   unsigned char response[sizeof(*decision)+MAX_PATH];int length=receive(response,sizeof(response));
+  if(length<0)return -1;
   if(length<(int)sizeof(*decision)){errno=EPROTO;return -1;}memcpy(decision,response,sizeof(*decision));
   if(decision->id!=id||decision->error<0||decision->error>4095||decision->length>=MAX_PATH||
      length!=(int)(sizeof(*decision)+decision->length)||memchr(response+sizeof(*decision),0,decision->length)) {errno=EPROTO;return -1;}
@@ -620,9 +637,12 @@ done:
   close(mem);if(error)denials++;else grants++;return reply(listener,n->id,result,error);
 }
 static int no_worker_result(int stage,int error) {
+  const char *outcome=cancelled?"cancelled":
+    error==ECANCELED&&deadline>0&&milliseconds()>=deadline?"timeout":"setup_error";
+  if(finish_control_input()<0){error=errno;outcome="broker_error";}
   char message[384];int length=snprintf(message,sizeof(message),
     "{\"type\":\"result\",\"outcome\":\"%s\",\"exitCode\":-1,\"signal\":0,\"cleanupComplete\":true,\"started\":false,\"grants\":0,\"denials\":0,\"stdoutBytes\":0,\"stderrBytes\":0,\"stage\":%d,\"errno\":%d}",
-    cancelled?"cancelled":"setup_error",stage,error>0?error:EPROTO);
+    outcome,stage,error>0?error:EPROTO);
   (void)packet(message,(size_t)length,1);return 70;
 }
 static int supervise(void) {
@@ -651,7 +671,11 @@ static int supervise(void) {
     if(listener<0&&(p[3].revents&POLLIN)){listener=receive_fd(transfer[0]);if(listener<0){cancelled=1;outcome="setup_error";}else nonblock(listener);}
     if(listener>=0&&(p[4].revents&POLLIN)&&!terminating){memset(notification,0,sizes.seccomp_notif);
       if(ioctl(listener,SECCOMP_IOCTL_NOTIF_RECV,notification)<0){if(errno!=EINTR&&errno!=ENOENT&&errno!=EAGAIN){cancelled=1;outcome="broker_error";}}
-      else if(acquisition(listener,notification)<0){saved_error=errno;cancelled=1;outcome="broker_error";}}
+      else if(acquisition(listener,notification)<0){saved_error=errno;
+        if(saved_error==ECANCELED&&cancelled)outcome="cancelled";
+        else if(saved_error==ECANCELED&&milliseconds()>=deadline)outcome="timeout";
+        else outcome="broker_error";
+        cancelled=1;}}
     for(int i=0;i<3;i++)if(p[i].revents&(POLLIN|POLLHUP|POLLERR)){
       char data[4096];ssize_t n=read(p[i].fd,data,sizeof(data));
       if(!n){if(i==0)out_eof=1;else if(i==1)err_eof=1;else setup_eof=1;}
@@ -664,11 +688,14 @@ static int supervise(void) {
         bytes[i]+=sent;if(sent<amount){cancelled=1;if(!strcmp(outcome,"exited"))outcome="broker_error";}}
       else if(n<0&&errno!=EAGAIN&&errno!=EINTR){cancelled=1;outcome="broker_error";}
     }
-    if(setup_eof&&!started&&!terminating){
+    if(setup_eof&&!started&&!terminating&&!cancelled&&milliseconds()<deadline){
       if(setup_size==sizeof(int)){memcpy(&stage,setup_data,sizeof(int));setup_ok=stage==0;}
       if(!setup_ok||listener<0){cancelled=1;outcome="setup_error";if(setup_size>=8){memcpy(&stage,setup_data+setup_size-8,4);memcpy(&saved_error,setup_data+setup_size-4,4);}}
       else{const char *event="{\"type\":\"started\",\"profile\":\"bionic-managed-v1\",\"setupCompleted\":true}";
-        if(packet(event,strlen(event),0)<0){cancelled=1;outcome="broker_error";}else started=1;}
+        if(packet(event,strlen(event),0)<0){saved_error=errno;
+          if(saved_error==ECANCELED)outcome=cancelled?"cancelled":"timeout";
+          else outcome="broker_error";
+          cancelled=1;}else started=1;}
     }
     if(!observed){siginfo_t info={0};if(waitid(P_PID,(id_t)leader,&info,WEXITED|WNOHANG|WNOWAIT)==0&&info.si_pid==leader){
       observed=1;(void)kill(-leader,SIGKILL);if(!terminating){terminating=1;cleanup=milliseconds()+5000;}}}
@@ -678,6 +705,7 @@ static int supervise(void) {
   }
   free(notification);if(listener>=0)close(listener);close(transfer[0]);close(out[0]);close(err[0]);close(setup[0]);
   int code=WIFEXITED(status)?WEXITSTATUS(status):-1,sig=WIFSIGNALED(status)?WTERMSIG(status):0;
+  if(finish_control_input()<0){saved_error=errno;outcome="broker_error";}
   char final[768];int length=snprintf(final,sizeof(final),"{\"type\":\"result\",\"outcome\":\"%s\",\"exitCode\":%d,\"signal\":%d,\"cleanupComplete\":%s,\"started\":%s,\"grants\":%llu,\"denials\":%llu,\"stdoutBytes\":%llu,\"stderrBytes\":%llu,\"stage\":%d,\"errno\":%d}",
     outcome,code,sig,reaped&&empty?"true":"false",started?"true":"false",(unsigned long long)grants,(unsigned long long)denials,(unsigned long long)bytes[0],(unsigned long long)bytes[1],stage,saved_error);
   (void)packet(final,(size_t)length,1);return reaped&&empty&&started?0:70;

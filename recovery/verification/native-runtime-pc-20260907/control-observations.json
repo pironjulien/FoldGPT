@@ -1,0 +1,148 @@
+{
+  "schema": "foldgpt.control-termination.host-tests.v1",
+  "success": true,
+  "androidExecution": false,
+  "observations": [
+    {
+      "test": "__main__.ControlTerminationTests.test_01_rpc_cancel_while_first_real_decision_is_pending",
+      "nativeResult": {
+        "type": "result",
+        "outcome": "cancelled",
+        "exitCode": -1,
+        "signal": 9,
+        "cleanupComplete": true,
+        "started": true,
+        "grants": 3,
+        "denials": 0,
+        "stdoutBytes": 0,
+        "stderrBytes": 0,
+        "stage": 0,
+        "errno": 125
+      },
+      "supervisorPid": 684,
+      "supervisorReturncode": 0,
+      "closed": true,
+      "quarantined": false,
+      "terminationRequested": true,
+      "startErrors": [],
+      "responseSendErrors": []
+    },
+    {
+      "test": "__main__.ControlTerminationTests.test_02_native_timeout_while_first_real_decision_is_pending",
+      "nativeResult": {
+        "type": "result",
+        "outcome": "timeout",
+        "exitCode": -1,
+        "signal": 9,
+        "cleanupComplete": true,
+        "started": true,
+        "grants": 3,
+        "denials": 0,
+        "stdoutBytes": 0,
+        "stderrBytes": 0,
+        "stage": 0,
+        "errno": 125
+      },
+      "supervisorPid": 688,
+      "supervisorReturncode": 0,
+      "closed": true,
+      "quarantined": false,
+      "terminationRequested": false,
+      "startErrors": [],
+      "responseSendErrors": [
+        32
+      ]
+    },
+    {
+      "test": "__main__.ControlTerminationTests.test_03_command_eof_while_first_real_decision_is_pending",
+      "nativeResult": {
+        "type": "result",
+        "outcome": "cancelled",
+        "exitCode": -1,
+        "signal": 9,
+        "cleanupComplete": true,
+        "started": true,
+        "grants": 3,
+        "denials": 0,
+        "stdoutBytes": 0,
+        "stderrBytes": 0,
+        "stage": 0,
+        "errno": 125
+      },
+      "supervisorPid": 692,
+      "supervisorReturncode": 0,
+      "closed": true,
+      "quarantined": false,
+      "terminationRequested": false,
+      "startErrors": [],
+      "responseSendErrors": [
+        32
+      ]
+    },
+    {
+      "test": "__main__.ControlTerminationTests.test_04_response_already_queued_when_cancellation_arrives",
+      "nativeResult": {
+        "type": "result",
+        "outcome": "cancelled",
+        "exitCode": -1,
+        "signal": 9,
+        "cleanupComplete": true,
+        "started": true,
+        "grants": 3,
+        "denials": 0,
+        "stdoutBytes": 0,
+        "stderrBytes": 0,
+        "stage": 0,
+        "errno": 125
+      },
+      "supervisorPid": 696,
+      "supervisorReturncode": 0,
+      "closed": true,
+      "quarantined": false,
+      "terminationRequested": true,
+      "startErrors": [],
+      "responseQueuedBeforeCancellation": true
+    },
+    {
+      "test": "__main__.ControlTerminationTests.test_05_ack_finishes_after_native_startup_timeout",
+      "nativeResult": {
+        "type": "result",
+        "outcome": "timeout",
+        "exitCode": -1,
+        "signal": 0,
+        "cleanupComplete": true,
+        "started": false,
+        "grants": 0,
+        "denials": 0,
+        "stdoutBytes": 0,
+        "stderrBytes": 0,
+        "stage": 14,
+        "errno": 125
+      },
+      "supervisorPid": 700,
+      "supervisorReturncode": 70,
+      "closed": true,
+      "quarantined": false,
+      "terminationRequested": false,
+      "startErrors": [
+        "Bionic command failed before setup completed"
+      ],
+      "ackSendErrors": [
+        32
+      ]
+    },
+    {
+      "test": "__main__.ControlTerminationTests.test_06_epipe_without_final_result_keeps_quarantine",
+      "nativeResult": null,
+      "supervisorPid": 703,
+      "supervisorReturncode": -9,
+      "closed": false,
+      "quarantined": true,
+      "leaseRetained": true,
+      "failure": "Bionic supervisor ended without a cleanup result",
+      "ackSendErrors": [
+        32
+      ]
+    }
+  ]
+}

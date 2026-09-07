@@ -1,0 +1,210 @@
+{
+  "scope": "Native runtime and engine metadata tests on PC; no Android runtime project or ordinary UI success implied",
+  "frozen": "foldgpt-bionic-supervisor-N0kMFS8z",
+  "files": [
+    {
+      "path": "frozen/SOURCES.sha256",
+      "source": "/mnt/c/Dev/ChatgptFold/downloads/bionic-supervisor/foldgpt-bionic-supervisor-N0kMFS8z/SOURCES.sha256",
+      "size": 5663,
+      "sha256": "b4c5ac2983ce2ce0a663f555fab8883e1bbff26729c522c0052ffd5e13324406"
+    },
+    {
+      "path": "frozen/BINARIES.sha256",
+      "source": "/mnt/c/Dev/ChatgptFold/downloads/bionic-supervisor/foldgpt-bionic-supervisor-N0kMFS8z/BINARIES.sha256",
+      "size": 1182,
+      "sha256": "a51dac561fbfec90262fb92a93539536305cb7ec97d5f391f4b8d0d8ad55763d"
+    },
+    {
+      "path": "frozen/test-identity.txt",
+      "source": "/mnt/c/Dev/ChatgptFold/downloads/bionic-supervisor/foldgpt-bionic-supervisor-N0kMFS8z/test-identity.txt",
+      "size": 59,
+      "sha256": "6527e0b2524b480c3d2cf0e83a00fc4e741c817f42a9757866bd97ec8b9ecb29"
+    },
+    {
+      "path": "frozen/factory-tests.txt",
+      "source": "/mnt/c/Dev/ChatgptFold/downloads/bionic-supervisor/foldgpt-bionic-supervisor-N0kMFS8z/factory-tests.txt",
+      "size": 2682,
+      "sha256": "4ebff07cc34559af487de391fa148ec92ee8d115bc4767c00c7f037ff3e58459"
+    },
+    {
+      "path": "frozen/factory-observations.json",
+      "source": "/mnt/c/Dev/ChatgptFold/downloads/bionic-supervisor/foldgpt-bionic-supervisor-N0kMFS8z/factory-observations.json",
+      "size": 114525,
+      "sha256": "d81b446f3220e492c97936df298c7d1aa1cf81bb49e2bfa32f523ba80e8d4608"
+    },
+    {
+      "path": "frozen/runtime-paths-c-tests.txt",
+      "source": "/mnt/c/Dev/ChatgptFold/downloads/bionic-supervisor/foldgpt-bionic-supervisor-N0kMFS8z/runtime-paths-c-tests.txt",
+      "size": 175,
+      "sha256": "7a9c26c03ddd059efee1ec26acfe1d7ef0542907b67f56a2f0235de773cd7196"
+    },
+    {
+      "path": "frozen/runtime-paths-python-tests.txt",
+      "source": "/mnt/c/Dev/ChatgptFold/downloads/bionic-supervisor/foldgpt-bionic-supervisor-N0kMFS8z/runtime-paths-python-tests.txt",
+      "size": 2491,
+      "sha256": "531b694d4878b5ccf4c8ced2093cf9033c4f85e99c30cbd73dd6796fd127586a"
+    },
+    {
+      "path": "frozen/kernel-tests.txt",
+      "source": "/mnt/c/Dev/ChatgptFold/downloads/bionic-supervisor/foldgpt-bionic-supervisor-N0kMFS8z/kernel-tests.txt",
+      "size": 796,
+      "sha256": "61eb21c544fad90d3f577c433215db545d4efc8ae09963659e67fb4b61b7ef43"
+    },
+    {
+      "path": "frozen/qualification-tests.txt",
+      "source": "/mnt/c/Dev/ChatgptFold/downloads/bionic-supervisor/foldgpt-bionic-supervisor-N0kMFS8z/qualification-tests.txt",
+      "size": 126,
+      "sha256": "0efcbf64b95ece95cb857f7749a68e62e2ccef35bb995650fb3813d9d4577581"
+    },
+    {
+      "path": "frozen/qualification.json",
+      "source": "/mnt/c/Dev/ChatgptFold/downloads/bionic-supervisor/foldgpt-bionic-supervisor-N0kMFS8z/qualification.json",
+      "size": 5795,
+      "sha256": "7203a6d75c1ef91bd7e33990cfcf44c89b44a5360e2e59b015f3a12e262bf180"
+    },
+    {
+      "path": "runtime-observations.json",
+      "source": "/var/tmp/foldgpt-runtime-test-report-iuywva5t/observations.json",
+      "size": 105252,
+      "sha256": "5149285d2bbe93f6f7847363103006a5557ec79593c7b796e25af44d977093c5"
+    },
+    {
+      "path": "runtime-case-1/evidence.json",
+      "source": "/var/tmp/foldgpt-runtime-qualification-0_d6_9l4/evidence.json",
+      "size": 8962,
+      "sha256": "a8b14366c09216b1044de5731a608a25bbfecf857e93719efc261ac73e74dc55"
+    },
+    {
+      "path": "runtime-case-1/workspace/qualification-result.json",
+      "source": "/var/tmp/foldgpt-runtime-qualification-0_d6_9l4/workspace/qualification-result.json",
+      "size": 1917,
+      "sha256": "c88d542824cf1cd643706f71e254cd30f6b30fd6b896213c827df47f08b8f65d"
+    },
+    {
+      "path": "runtime-case-1/workspace/directory/project/calculator.py",
+      "source": "/var/tmp/foldgpt-runtime-qualification-0_d6_9l4/workspace/directory/project/calculator.py",
+      "size": 61,
+      "sha256": "5ff5bcc7b86709dce8de9f46da4f5c682863251ba74c45f48412c144a1efcdce"
+    },
+    {
+      "path": "runtime-case-1/workspace/directory/project/test_calculator.py",
+      "source": "/var/tmp/foldgpt-runtime-qualification-0_d6_9l4/workspace/directory/project/test_calculator.py",
+      "size": 349,
+      "sha256": "7304c93304cea56813eb9fc006dbeaf5e90152ad05082aceb09c5475edd9dead"
+    },
+    {
+      "path": "runtime-case-1/workspace/directory/project/__main__.py",
+      "source": "/var/tmp/foldgpt-runtime-qualification-0_d6_9l4/workspace/directory/project/__main__.py",
+      "size": 46,
+      "sha256": "223726b08f3671c415d997b5a8f1cf86be2dc7ed011496fdfe03677da1a5f932"
+    },
+    {
+      "path": "runtime-case-1/workspace/directory/dist/calculator.pyz",
+      "source": "/var/tmp/foldgpt-runtime-qualification-0_d6_9l4/workspace/directory/dist/calculator.pyz",
+      "size": 606,
+      "sha256": "3097301385ad22b0a413a20d47dc53371ef1c93a4a1443863cb798aaaed9ceb1"
+    },
+    {
+      "path": "runtime-case-2/evidence.json",
+      "source": "/var/tmp/foldgpt-runtime-qualification-tsgl58xm/evidence.json",
+      "size": 8962,
+      "sha256": "de3f964a6ed103b89bba29649fa106a7fed2b85468f62e23f12abffbfdb3a55b"
+    },
+    {
+      "path": "runtime-case-2/workspace/qualification-result.json",
+      "source": "/var/tmp/foldgpt-runtime-qualification-tsgl58xm/workspace/qualification-result.json",
+      "size": 1917,
+      "sha256": "90e61a078de082e80511a0e0029179ebf1f85b571e7dc1967e16713c54ad8f74"
+    },
+    {
+      "path": "runtime-case-2/workspace/directory/project/calculator.py",
+      "source": "/var/tmp/foldgpt-runtime-qualification-tsgl58xm/workspace/directory/project/calculator.py",
+      "size": 61,
+      "sha256": "5ff5bcc7b86709dce8de9f46da4f5c682863251ba74c45f48412c144a1efcdce"
+    },
+    {
+      "path": "runtime-case-2/workspace/directory/project/test_calculator.py",
+      "source": "/var/tmp/foldgpt-runtime-qualification-tsgl58xm/workspace/directory/project/test_calculator.py",
+      "size": 349,
+      "sha256": "7304c93304cea56813eb9fc006dbeaf5e90152ad05082aceb09c5475edd9dead"
+    },
+    {
+      "path": "runtime-case-2/workspace/directory/project/__main__.py",
+      "source": "/var/tmp/foldgpt-runtime-qualification-tsgl58xm/workspace/directory/project/__main__.py",
+      "size": 46,
+      "sha256": "223726b08f3671c415d997b5a8f1cf86be2dc7ed011496fdfe03677da1a5f932"
+    },
+    {
+      "path": "runtime-case-2/workspace/directory/dist/calculator.pyz",
+      "source": "/var/tmp/foldgpt-runtime-qualification-tsgl58xm/workspace/directory/dist/calculator.pyz",
+      "size": 606,
+      "sha256": "3097301385ad22b0a413a20d47dc53371ef1c93a4a1443863cb798aaaed9ceb1"
+    },
+    {
+      "path": "runtime-case-3/evidence.json",
+      "source": "/var/tmp/foldgpt-runtime-qualification-14ker3_g/evidence.json",
+      "size": 1772,
+      "sha256": "b5805f8855e34f6730a49bb14da6426f39219f0b9d146f5e24827b6a5da73313"
+    },
+    {
+      "path": "runtime-case-4/evidence.json",
+      "source": "/var/tmp/foldgpt-runtime-qualification-g58v5lrw/no-shim-evidence.json",
+      "size": 1766,
+      "sha256": "d1daab306108a241a493b8d39bc4ccfc44972bc8ab40c2a65d0338f902a3a3af"
+    },
+    {
+      "path": "runtime-case-5/evidence.json",
+      "source": "/var/tmp/foldgpt-runtime-qualification-0yt1v0v6/evidence.json",
+      "size": 1644,
+      "sha256": "5232adbcb28be7160db976f594dc3295fc7b4c172be4a9ba35907da6fccf5cc3"
+    },
+    {
+      "path": "control-observations.json",
+      "source": "/var/tmp/foldgpt-control-termination-af0bf335/observations.json",
+      "size": 3919,
+      "sha256": "ed3002d95cbefacb6c31a6f5f30a129b9f9bb58a7aa6bcc95e0bfc980b71a628"
+    },
+    {
+      "path": "failed-shared-build-uid/factory-tests.txt",
+      "source": "/var/tmp/foldgpt-bionic-supervisor-ltehYTi7/factory-tests.txt",
+      "size": 8547,
+      "sha256": "ebf5baa49c456b89672ce7231c730be476da76c7db4cd7535564ff3efedc075e"
+    },
+    {
+      "path": "failed-android-shim-on-host/observations.json",
+      "source": "/var/tmp/foldgpt-runtime-test-report-3vj4et3f/observations.json",
+      "size": 100122,
+      "sha256": "d8f406978a7abe888d378ee7332c1d5037efee28e0ac88573883a28ee16e6991"
+    },
+    {
+      "path": "failed-android-shim-on-host/evidence.json",
+      "source": "/var/tmp/foldgpt-runtime-qualification-oz2vbrus/evidence.json",
+      "size": 2152,
+      "sha256": "28e99d73a9a71d03b6931c804dc61dba14f83425e2f71d65e9b1f2cd5d5fa00b"
+    },
+    {
+      "path": "engine-metadata-integration.txt",
+      "source": "/mnt/c/Dev/foldgpt-engine-metadata-integration.log",
+      "size": 1051,
+      "sha256": "6a813e72c02ec68d7622444d3a84668b8940adf2046954a6091b342d297273ad"
+    },
+    {
+      "path": "engine-metadata-regression.txt",
+      "source": "/mnt/c/Dev/foldgpt-engine-metadata-regression.log",
+      "size": 6303,
+      "sha256": "9abd3d2a7692bb46d4a940340162f5541c48f4d3ceedbf1a000ec6a4d4d98b0f"
+    },
+    {
+      "path": "engine-metadata-fix.txt",
+      "source": "/mnt/c/Dev/foldgpt-engine-metadata-fix.log",
+      "size": 8550,
+      "sha256": "e4f3953d5b44758e83c0551c9da176da6a421efc9fed0453f6e02478b35f295b"
+    },
+    {
+      "path": "engine-metadata-fmt.txt",
+      "source": "/mnt/c/Dev/foldgpt-engine-metadata-fmt.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ]
+}

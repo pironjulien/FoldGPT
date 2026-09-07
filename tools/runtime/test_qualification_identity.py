@@ -7,8 +7,8 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-from qualification_identity import (LAB_PACKAGE, LEGACY_PACKAGE, V11_PACKAGE,
-                                    V2_BASE, V3_BASE, resolve_identity)
+from qualification_identity import (LAB_PACKAGE, LEGACY_PACKAGE, V11_PACKAGE, V12_PACKAGE,
+                                    V2_BASE, V3_BASE, V4_BASE, resolve_identity)
 
 HERE = Path(__file__).resolve().parent
 
@@ -21,6 +21,18 @@ def script(name):
 
 
 class IdentityTests(unittest.TestCase):
+    def test_v12_paths_and_evidence_are_independent(self):
+        identity = resolve_identity(V12_PACKAGE, V4_BASE, 12)
+        self.assertEqual(identity.workspace, V4_BASE + '/workspace')
+        self.assertEqual(identity.report_file('report.json'), 'files/kernel-v12/report.json')
+        self.assertEqual(identity.retained_packages, ('app.foldgpt', LAB_PACKAGE, V11_PACKAGE))
+        app = {'diagnosticVersion': 12, 'packageName': V12_PACKAGE, 'nativeBase': V4_BASE,
+               'requestedAction': V12_PACKAGE + '.KERNEL_RUN_FIXED_V12'}
+        self.assertTrue(identity.matches_evidence(app, {'workspace': identity.workspace}))
+        for change in ({'diagnosticVersion': 11}, {'packageName': V11_PACKAGE}, {'nativeBase': V3_BASE},
+                       {'requestedAction': V12_PACKAGE + '.KERNEL_RUN_FIXED_V11'}):
+            self.assertFalse(identity.matches_evidence(app | change, {'workspace': identity.workspace}))
+
     def test_v11_paths_are_independent(self):
         identity = resolve_identity(V11_PACKAGE, V3_BASE, 11)
         self.assertEqual(identity.workspace, V3_BASE + '/workspace')
@@ -32,7 +44,10 @@ class IdentityTests(unittest.TestCase):
                 (LAB_PACKAGE, V3_BASE, 6), (LAB_PACKAGE, V2_BASE, 11),
                 (LEGACY_PACKAGE, V3_BASE, None), (V11_PACKAGE, V3_BASE + '/', 11),
                 (V11_PACKAGE, V3_BASE + '/../qualification-v2', 11),
-                (V11_PACKAGE, V3_BASE, True), ('unrelated.application', V3_BASE, 11)):
+                (V11_PACKAGE, V3_BASE, True), ('unrelated.application', V3_BASE, 11),
+                (V12_PACKAGE, V2_BASE, 12), (V12_PACKAGE, V3_BASE, 12),
+                (V12_PACKAGE, V4_BASE, 11), (V11_PACKAGE, V4_BASE, 11),
+                (V12_PACKAGE, V4_BASE, True), (V12_PACKAGE, V4_BASE + '/', 12)):
             with self.subTest(package=package, base=base, version=version), self.assertRaises(ValueError):
                 resolve_identity(package, base, version)
 
@@ -63,6 +78,23 @@ class IdentityTests(unittest.TestCase):
                 argv = [filename, '--adb', 'NEVER_INVOKE_ADB', '--serial', 'PC-ONLY',
                         '--output', str(output), '--package', V11_PACKAGE,
                         '--base', V2_BASE, '--report-version', '11']
+                argv += (['--stage', temporary] if filename.startswith('stage-')
+                         else ['--apk', temporary, '--before', temporary])
+                with patch.object(sys, 'argv', argv), patch.object(subprocess, 'run') as invoked:
+                    with self.assertRaises(SystemExit) as failure:
+                        module.main()
+                    self.assertEqual(failure.exception.code, 2)
+                    invoked.assert_not_called()
+                self.assertFalse(output.exists())
+
+    def test_v12_collision_fails_before_subprocess_or_output_creation(self):
+        for filename in ('stage-kernel-python.py', 'collect-native-qualification.py'):
+            module = script(filename)
+            with tempfile.TemporaryDirectory() as temporary:
+                output = Path(temporary) / 'uncreated-v12'
+                argv = [filename, '--adb', 'NEVER_INVOKE_ADB', '--serial', 'PC-ONLY',
+                        '--output', str(output), '--package', V12_PACKAGE,
+                        '--base', V3_BASE, '--report-version', '12']
                 argv += (['--stage', temporary] if filename.startswith('stage-')
                          else ['--apk', temporary, '--before', temporary])
                 with patch.object(sys, 'argv', argv), patch.object(subprocess, 'run') as invoked:

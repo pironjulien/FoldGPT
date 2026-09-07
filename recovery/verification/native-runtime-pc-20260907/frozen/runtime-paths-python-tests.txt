@@ -1,0 +1,21 @@
+test_01_ordinary_file_directory_and_borrowed_cloexec_fd (__main__.RuntimePathTests.test_01_ordinary_file_directory_and_borrowed_cloexec_fd) ... ok
+test_02_allowed_external_alias_and_real_factory_admission (__main__.RuntimePathTests.test_02_allowed_external_alias_and_real_factory_admission) ... ok
+test_03_workspace_direct_descendant_and_ancestor_aliases_refused (__main__.RuntimePathTests.test_03_workspace_direct_descendant_and_ancestor_aliases_refused) ... ok
+test_04_lexical_workspace_alias_to_external_still_refused (__main__.RuntimePathTests.test_04_lexical_workspace_alias_to_external_still_refused) ... ok
+test_05_policy_denies_both_lexical_and_physical_alias_spellings (__main__.RuntimePathTests.test_05_policy_denies_both_lexical_and_physical_alias_spellings) ... ok
+test_06_parent_lstat_fault_does_not_move_to_runtime_policy (__main__.RuntimePathTests.test_06_parent_lstat_fault_does_not_move_to_runtime_policy) ... ok
+test_07_missing_dangling_and_symlink_loop_fail_closed (__main__.RuntimePathTests.test_07_missing_dangling_and_symlink_loop_fail_closed) ... ok
+test_08_closed_descriptor_reports_ebadf (__main__.RuntimePathTests.test_08_closed_descriptor_reports_ebadf) ... ok
+test_09_deleted_fd_and_real_deleted_suffix_name_refused (__main__.RuntimePathTests.test_09_deleted_fd_and_real_deleted_suffix_name_refused) ... ok
+test_10_rename_resolves_actual_descriptor_not_replacement (__main__.RuntimePathTests.test_10_rename_resolves_actual_descriptor_not_replacement) ... ok
+test_11_ambiguous_input_is_rejected_without_normalization (__main__.RuntimePathTests.test_11_ambiguous_input_is_rejected_without_normalization) ... ok
+test_12_magic_links_direct_and_hidden_behind_ordinary_link_refused (__main__.RuntimePathTests.test_12_magic_links_direct_and_hidden_behind_ordinary_link_refused) ... ok
+test_13_fifo_and_socket_are_not_runtime_objects (__main__.RuntimePathTests.test_13_fifo_and_socket_are_not_runtime_objects) ... ok
+test_14_actual_search_permission_denial_is_not_ignored (__main__.RuntimePathTests.test_14_actual_search_permission_denial_is_not_ignored) ... ok
+test_15_actual_alias_retarget_during_admission_is_estale (__main__.RuntimePathTests.test_15_actual_alias_retarget_during_admission_is_estale) ... ok
+test_16_returned_physical_name_cannot_be_replaced_by_a_symlink (__main__.RuntimePathTests.test_16_returned_physical_name_cannot_be_replaced_by_a_symlink) ... ok
+
+----------------------------------------------------------------------
+Ran 16 tests in 0.014s
+
+OK

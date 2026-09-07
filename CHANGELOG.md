@@ -2,6 +2,22 @@
 
 ## Unreleased — 2026-09-06
 
+- Qualify the fixed Shizuku/Bionic V12 worker on the real Fold: all 24
+  independent checks pass, including real main/pthread operations, byte streams,
+  owner waits and complete cleanup. Preserve exact evidence and unchanged
+  boot, original APKs and fixture. Ordinary interface execution remains pending.
+  Keep V10/V11 history and the consumed V12 marker intact.
+- Prepare the full native Bash/Python project qualification on PC: create and
+  edit source, run three tests, build and execute a zipapp, exercise binary
+  streams and policy refusals. Correct terminal SEQPACKET handling with receive
+  shutdown/draining and continued final-record reads after EPIPE. Six real
+  scheduling regressions and five full-project tests pass on frozen N0kMFS8z;
+  missing cleanup evidence still retains quarantine. Preserve negative controls.
+- Export the separate engine's verified native metadata/shell increment:
+  41 targeted tests and one model execution/apply-patch integration pass on PC,
+  using actual provider paths and Android POSIX command classification. Preserve
+  the ExecutorOnly registration refusal until controller routes are implemented.
+
 - Provide actual executable metadata for the exact `/proc/self/exe` alias,
   pinning the notifying task and preserving the TGID symlink identity for
   nofollow requests from secondary threads. The real regression fails against

@@ -1,0 +1,157 @@
+{
+  "schema": "foldgpt.android-kernel-rpc.v1",
+  "nativeLibraryDir": "\/data\/app\/~~f0IO1t5SHQE1k7o8Lsx_6A==\/app.foldgpt.kernelqualification.v12-EVfaepKvpNYsjVjx6DE7VA==\/lib\/arm64",
+  "clientUid": 10400,
+  "shizukuServerUid": 2000,
+  "nativeEvidenceRequired": true,
+  "preflight": {
+    "schema": "foldgpt.executor-preflight.v1",
+    "nativeSpawnAttempted": false,
+    "admission": {
+      "schema": "foldgpt.executor-admission.v1",
+      "admitted": true,
+      "stage": "complete",
+      "subject": "",
+      "facts": {},
+      "error": null
+    },
+    "service": {
+      "state": "idle",
+      "admission": null,
+      "preflight": {
+        "schema": "foldgpt.executor-admission.v1",
+        "admitted": true,
+        "stage": "complete",
+        "subject": "",
+        "facts": {},
+        "error": null
+      }
+    },
+    "context": {
+      "serviceUid": 2000,
+      "servicePid": 20947,
+      "clientUid": 10400,
+      "installedVersion": 12,
+      "contextNativeLibraryDir": "\/data\/app\/~~f0IO1t5SHQE1k7o8Lsx_6A==\/app.foldgpt.kernelqualification.v12-EVfaepKvpNYsjVjx6DE7VA==\/lib\/arm64",
+      "contextSourceDir": "\/data\/app\/~~f0IO1t5SHQE1k7o8Lsx_6A==\/app.foldgpt.kernelqualification.v12-EVfaepKvpNYsjVjx6DE7VA==\/base.apk",
+      "packageManagerNativeLibraryDir": "\/data\/app\/~~f0IO1t5SHQE1k7o8Lsx_6A==\/app.foldgpt.kernelqualification.v12-EVfaepKvpNYsjVjx6DE7VA==\/lib\/arm64",
+      "packageManagerSourceDir": "\/data\/app\/~~f0IO1t5SHQE1k7o8Lsx_6A==\/app.foldgpt.kernelqualification.v12-EVfaepKvpNYsjVjx6DE7VA==\/base.apk",
+      "nativeDirectoryMatches": true,
+      "sourceDirectoryMatches": true
+    }
+  },
+  "read": {
+    "chunks": [
+      {
+        "seq": 1,
+        "stream": "stdout",
+        "chunk": "eyJ0eXBlIjoia2VybmVsLXF1YWxpZmljYXRpb24iLCJzdWNjZXNzIjp0cnVlLCJtZW1vcnlSZWFkIjp0cnVlLCJtZW1vcnlXcml0ZSI6dHJ1ZSwicGlkZmRHZXRmZCI6dHJ1ZSwic2hhcmVkT2Zmc2V0Ijp0cnVlLCJwcml2YXRlUmVhZERlbmllZCI6dHJ1ZSwicHJvdGVjdGVkV3JpdGVEZW5pZWQiOnRydWUsInJhd0NoZGlyRGVuaWVkIjp0cnVlLCJuZXR3b3JrRGVuaWVkIjp0cnVlLCJpb2N0bERlbmllZCI6dHJ1ZSwiYmluZGVyRGVuaWVkIjp0cnVlLCJ0aHJlYWRNZW1vcnkiOnRydWUsInRocmVhZFBpZGZkR2V0ZmQiOnRydWV9Cg=="
+      }
+    ],
+    "nextSeq": 4,
+    "exited": true,
+    "exitCode": 0,
+    "closed": true,
+    "failure": null,
+    "sandboxDenied": false
+  },
+  "stdout": "{\"type\":\"kernel-qualification\",\"success\":true,\"memoryRead\":true,\"memoryWrite\":true,\"pidfdGetfd\":true,\"sharedOffset\":true,\"privateReadDenied\":true,\"protectedWriteDenied\":true,\"rawChdirDenied\":true,\"networkDenied\":true,\"ioctlDenied\":true,\"binderDenied\":true,\"threadMemory\":true,\"threadPidfdGetfd\":true}\n",
+  "stderr": "",
+  "transport": {
+    "schema": "foldgpt.shizuku.transport.v1",
+    "ready": true,
+    "cancelRequested": true,
+    "bootstrapReaped": true,
+    "cleanupComplete": true,
+    "ownerRetained": false,
+    "quarantined": false,
+    "refusedBeforeFork": false,
+    "setupError": null,
+    "transportFailed": false,
+    "waitStatus": 0
+  },
+  "rpcSuccess": true,
+  "transportCleanupComplete": true,
+  "state": "complete",
+  "frames": [
+    {
+      "id": 1,
+      "result": {
+        "sessionId": "338dc14e-085d-4c72-ac4c-54d81b4a896a",
+        "environmentInfo": {
+          "cwd": "file:\/\/\/data\/local\/tmp\/foldgpt-bionic-supervisor-qualification-v4\/workspace",
+          "userHomeDir": "file:\/\/\/data\/local\/tmp\/foldgpt-bionic-supervisor-qualification-v4\/workspace",
+          "platformOs": "android",
+          "shell": {
+            "name": "kernel-qualification",
+            "path": "kernel-qualification"
+          },
+          "capabilities": {
+            "capabilityDiscoverySandbox": false,
+            "environmentConfigRead": false,
+            "httpHeaderEnvVars": false,
+            "networkProxyLaunch": false,
+            "sandboxedFileStreaming": false,
+            "shellSnapshotV2": false
+          }
+        }
+      }
+    },
+    {
+      "id": 2,
+      "result": {
+        "processId": "kernel-qualification",
+        "sandboxType": "linuxSeccomp"
+      }
+    },
+    {
+      "method": "process\/output",
+      "params": {
+        "processId": "kernel-qualification",
+        "seq": 1,
+        "stream": "stdout",
+        "chunk": "eyJ0eXBlIjoia2VybmVsLXF1YWxpZmljYXRpb24iLCJzdWNjZXNzIjp0cnVlLCJtZW1vcnlSZWFkIjp0cnVlLCJtZW1vcnlXcml0ZSI6dHJ1ZSwicGlkZmRHZXRmZCI6dHJ1ZSwic2hhcmVkT2Zmc2V0Ijp0cnVlLCJwcml2YXRlUmVhZERlbmllZCI6dHJ1ZSwicHJvdGVjdGVkV3JpdGVEZW5pZWQiOnRydWUsInJhd0NoZGlyRGVuaWVkIjp0cnVlLCJuZXR3b3JrRGVuaWVkIjp0cnVlLCJpb2N0bERlbmllZCI6dHJ1ZSwiYmluZGVyRGVuaWVkIjp0cnVlLCJ0aHJlYWRNZW1vcnkiOnRydWUsInRocmVhZFBpZGZkR2V0ZmQiOnRydWV9Cg=="
+      }
+    },
+    {
+      "method": "process\/exited",
+      "params": {
+        "processId": "kernel-qualification",
+        "seq": 2,
+        "exitCode": 0,
+        "sandboxDenied": false
+      }
+    },
+    {
+      "method": "process\/closed",
+      "params": {
+        "processId": "kernel-qualification",
+        "seq": 3
+      }
+    },
+    {
+      "id": 3,
+      "result": {
+        "chunks": [
+          {
+            "seq": 1,
+            "stream": "stdout",
+            "chunk": "eyJ0eXBlIjoia2VybmVsLXF1YWxpZmljYXRpb24iLCJzdWNjZXNzIjp0cnVlLCJtZW1vcnlSZWFkIjp0cnVlLCJtZW1vcnlXcml0ZSI6dHJ1ZSwicGlkZmRHZXRmZCI6dHJ1ZSwic2hhcmVkT2Zmc2V0Ijp0cnVlLCJwcml2YXRlUmVhZERlbmllZCI6dHJ1ZSwicHJvdGVjdGVkV3JpdGVEZW5pZWQiOnRydWUsInJhd0NoZGlyRGVuaWVkIjp0cnVlLCJuZXR3b3JrRGVuaWVkIjp0cnVlLCJpb2N0bERlbmllZCI6dHJ1ZSwiYmluZGVyRGVuaWVkIjp0cnVlLCJ0aHJlYWRNZW1vcnkiOnRydWUsInRocmVhZFBpZGZkR2V0ZmQiOnRydWV9Cg=="
+          }
+        ],
+        "nextSeq": 4,
+        "exited": true,
+        "exitCode": 0,
+        "closed": true,
+        "failure": null,
+        "sandboxDenied": false
+      }
+    }
+  ],
+  "diagnosticVersion": 12,
+  "requestedAction": "app.foldgpt.kernelqualification.v12.KERNEL_RUN_FIXED_V12",
+  "packageName": "app.foldgpt.kernelqualification.v12",
+  "nativeBase": "\/data\/local\/tmp\/foldgpt-bionic-supervisor-qualification-v4",
+  "recordedWallTimeMs": 1788803341796,
+  "recordedElapsedRealtimeMs": 71748390
+}

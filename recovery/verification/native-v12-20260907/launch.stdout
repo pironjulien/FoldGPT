@@ -1,0 +1,7 @@
+Starting: Intent { act=app.foldgpt.kernelqualification.v12.KERNEL_RUN_FIXED_V12 cmp=app.foldgpt.kernelqualification.v12/app.foldgpt.kernelqualification.QualificationActivity }
+Status: ok
+LaunchState: WARM
+Activity: app.foldgpt.kernelqualification.v12/app.foldgpt.kernelqualification.QualificationActivity
+TotalTime: 25
+WaitTime: 31
+Complete

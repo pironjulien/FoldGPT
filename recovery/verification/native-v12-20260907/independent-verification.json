@@ -1,0 +1,45 @@
+{
+  "schema": "foldgpt.independent-kernel-qualification.v1",
+  "success": true,
+  "checks": {
+    "recordsCollected": true,
+    "fixtureEvidenceIdentity": true,
+    "beforeSnapshotValid": true,
+    "recordSchemasAndPhases": true,
+    "nativeAndroidIdentity": true,
+    "actualBootstrapShellContext": true,
+    "bootstrapPidConsistent": true,
+    "nativeSuccess": true,
+    "cleanNativeAndTransport": true,
+    "transportWait": true,
+    "realExitZero": true,
+    "rpcSuccess": true,
+    "exactProofFlags": true,
+    "actualRpcLifecycleAndBytes": true,
+    "byteStreamsAgree": true,
+    "reportedByteCountsAgree": true,
+    "nativeWorkspace": true,
+    "deviceSnapshotValid": true,
+    "sameDeviceBootAndIndicators": true,
+    "originalPackagesUnchanged": true,
+    "installedApkMatches": true,
+    "fixtureUnchanged": true,
+    "workerAndSupervisorAbsent": true,
+    "reportedOwnersAbsent": true
+  },
+  "collected": {
+    "app-report": {
+      "collected": true,
+      "sha256": "2245732dcaecd7e180dddf4ce43fa5c448e26df133385e58460c38d48d0b1099"
+    },
+    "native-evidence": {
+      "collected": true,
+      "sha256": "d22f3ea5925005cc2a23dc0f6d522e10375b3e3c07c6a9d4aaa16ee600ab7685"
+    }
+  },
+  "error": null,
+  "package": "app.foldgpt.kernelqualification.v12",
+  "base": "/data/local/tmp/foldgpt-bionic-supervisor-qualification-v4",
+  "reportVersion": 12,
+  "scope": "Fixed Shizuku/Bionic worker only; ordinary model commands are not validated"
+}

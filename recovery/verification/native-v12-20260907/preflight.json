@@ -1,0 +1,62 @@
+{
+  "schema": "foldgpt.android-service-inspection.v1",
+  "servicePresent": true,
+  "nativeSpawnAttempted": false,
+  "operation": "preflight_v12",
+  "preflight": {
+    "schema": "foldgpt.executor-preflight.v1",
+    "nativeSpawnAttempted": false,
+    "admission": {
+      "schema": "foldgpt.executor-admission.v1",
+      "admitted": true,
+      "stage": "complete",
+      "subject": "",
+      "facts": {},
+      "error": null
+    },
+    "service": {
+      "state": "idle",
+      "admission": null,
+      "preflight": {
+        "schema": "foldgpt.executor-admission.v1",
+        "admitted": true,
+        "stage": "complete",
+        "subject": "",
+        "facts": {},
+        "error": null
+      }
+    },
+    "context": {
+      "serviceUid": 2000,
+      "servicePid": 20947,
+      "clientUid": 10400,
+      "installedVersion": 12,
+      "contextNativeLibraryDir": "\/data\/app\/~~f0IO1t5SHQE1k7o8Lsx_6A==\/app.foldgpt.kernelqualification.v12-EVfaepKvpNYsjVjx6DE7VA==\/lib\/arm64",
+      "contextSourceDir": "\/data\/app\/~~f0IO1t5SHQE1k7o8Lsx_6A==\/app.foldgpt.kernelqualification.v12-EVfaepKvpNYsjVjx6DE7VA==\/base.apk",
+      "packageManagerNativeLibraryDir": "\/data\/app\/~~f0IO1t5SHQE1k7o8Lsx_6A==\/app.foldgpt.kernelqualification.v12-EVfaepKvpNYsjVjx6DE7VA==\/lib\/arm64",
+      "packageManagerSourceDir": "\/data\/app\/~~f0IO1t5SHQE1k7o8Lsx_6A==\/app.foldgpt.kernelqualification.v12-EVfaepKvpNYsjVjx6DE7VA==\/base.apk",
+      "nativeDirectoryMatches": true,
+      "sourceDirectoryMatches": true
+    }
+  },
+  "serviceStatus": {
+    "state": "idle",
+    "admission": null,
+    "preflight": {
+      "schema": "foldgpt.executor-admission.v1",
+      "admitted": true,
+      "stage": "complete",
+      "subject": "",
+      "facts": {},
+      "error": null
+    }
+  },
+  "state": "complete",
+  "transportCleanupComplete": false,
+  "diagnosticVersion": 12,
+  "requestedAction": "app.foldgpt.kernelqualification.v12.KERNEL_PREFLIGHT",
+  "packageName": "app.foldgpt.kernelqualification.v12",
+  "nativeBase": "\/data\/local\/tmp\/foldgpt-bionic-supervisor-qualification-v4",
+  "recordedWallTimeMs": 1788803215323,
+  "recordedElapsedRealtimeMs": 71621917
+}
