@@ -2,6 +2,15 @@
 
 ## 2026-09-07
 
+- Version8 adds an authenticated read-only UserService preflight and bounded
+  actual admission stage/cause reporting after v7 lost its pre-session error
+  across Binder. Fixed read-only actions inspect the previous v3 service with
+  NO_CREATE or preflight the new v4 service without JNI load/fork. New reports
+  use files/kernel-v4; native bytes, bootstrap and lifetime protections remain
+  unchanged. The previous-tag absence never establishes cleanup. Final APK
+  76f58714... passes package/native/source/signature checks and24 transport JVM
+  tests; cancellation is rechecked after preflight before opening a session.
+
 - Version7 adds bounded private setup diagnostics after the real v6 bootstrap
   exited70 before ready. Its new attempt/reports use files/kernel-v3; the native
   base remains v2 and all84 native ELF entries match v6 byte for byte. The only

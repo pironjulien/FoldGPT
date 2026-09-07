@@ -20,23 +20,32 @@ public final class Deployment {
     /** Read-only admission for an application owner before selecting Shizuku. */
     public static void verifyInstalledInputs(Context context) throws Exception { new Deployment(context); }
 
-    Deployment(Context context) throws Exception {
+    Deployment(Context context) throws Exception { this(context, new AdmissionTrace()); }
+    Deployment(Context context, AdmissionTrace trace) throws Exception {
+        trace.at(AdmissionTrace.Stage.DEPLOYMENT_ASSET);
         JSONObject config;
         try (InputStream input = context.getAssets().open(ASSET)) {
             config = new JSONObject(new String(readBounded(input, 65536), StandardCharsets.UTF_8));
         }
+        trace.at(AdmissionTrace.Stage.DEPLOYMENT_SCHEMA);
         if (!"foldgpt.shizuku.deployment.v1".equals(config.getString("schema"))
                 || !context.getPackageName().equals(config.getString("packageName"))) {
             throw new SecurityException("Deployment does not identify this installed application");
         }
         String name = config.getString("pythonLibrary");
+        trace.at(AdmissionTrace.Stage.NATIVE_DIRECTORY);
+        trace.fact("observed", context.getApplicationInfo().nativeLibraryDir);
         File directory = new File(context.getApplicationInfo().nativeLibraryDir).getCanonicalFile();
+        trace.fact("canonical", directory.getPath());
+        trace.at(AdmissionTrace.Stage.INTERPRETER); trace.subject(name);
         File file = InstalledLibrary.verify(directory, name, config.getString("pythonSha256"));
-        InstalledLibrary.verifyInventory(config, directory);
+        trace.at(AdmissionTrace.Stage.NATIVE_INVENTORY);
+        InstalledLibrary.verifyInventory(config, directory, trace);
+        trace.at(AdmissionTrace.Stage.CWD_SHIM);
         InstalledLibrary.verifyCwd(config.getJSONObject("backendOptions"), directory);
         // Shell-owned data are intentionally inaccessible to the application UID.
         // The real UserService repeats APK admission and checks them before fork.
-        if (android.system.Os.getuid() == 2000) PythonRuntime.verify(context, config, directory);
+        if (android.system.Os.getuid() == 2000) PythonRuntime.verify(context, config, directory, trace);
         executable = file.getPath();
         argv = new String[] {executable, "-I", "-S", "-B", "-u", "-c", ENTRY, context.getApplicationInfo().sourceDir};
         transportLibrary = new File(directory, "libfoldgpt_shizuku_transport.so").getPath();

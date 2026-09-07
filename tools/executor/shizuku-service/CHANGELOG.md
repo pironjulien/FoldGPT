@@ -2,6 +2,13 @@
 
 ## 2026-09-07
 
+- Preserve bounded actual admission causes/stages in authenticated service
+  status, including pre-session failures; add a read-only preflight that runs
+  identical installed-input checks in the real UserService without loading JNI
+  or creating native ownership. The fixed diagnostic captures service status
+  when open fails and can inspect the previous tag using SDK NO_CREATE. No
+  admission observation changes the existing cleanup/wait ownership gate.
+
 - Add a canonical private setup_failed frame with bounded stage, exception,
   errno, basename/line and ASCII message. The parser accepts it only before ready,
   rejects duplicates/late success, and retains the existing actual wait/cleanup

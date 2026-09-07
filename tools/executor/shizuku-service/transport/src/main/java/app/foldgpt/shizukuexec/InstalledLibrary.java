@@ -39,12 +39,16 @@ final class InstalledLibrary {
     }
 
     static void verifyInventory(JSONObject config, File directory) throws Exception {
+        verifyInventory(config, directory, new AdmissionTrace());
+    }
+    static void verifyInventory(JSONObject config, File directory, AdmissionTrace trace) throws Exception {
         if (!config.has("nativeLibraries")) return;
         JSONObject files = config.getJSONObject("nativeLibraries");
         if (files.length() == 0 || files.length() > 128) throw new SecurityException("Invalid native inventory size");
         java.util.Iterator<String> names = files.keys();
         while (names.hasNext()) {
             String name = names.next();
+            trace.subject(name);
             if (!(files.get(name) instanceof String)) throw new SecurityException("Native digest is not a string");
             verify(directory, name, files.getString(name));
         }

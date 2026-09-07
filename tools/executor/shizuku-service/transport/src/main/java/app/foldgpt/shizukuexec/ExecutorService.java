@@ -6,6 +6,7 @@ import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.system.Os;
 import android.system.OsConstants;
+import org.json.JSONObject;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -16,6 +17,7 @@ public final class ExecutorService extends IExecutorService.Stub {
     private final Context context;
     private Session current;
     private boolean destroyRequested;
+    private JSONObject lastAdmission, lastPreflight;
 
     public ExecutorService(Context context) {
         this.context = context;
@@ -27,25 +29,68 @@ public final class ExecutorService extends IExecutorService.Stub {
     }
     @Override public synchronized IExecutorSession open(IBinder owner) {
         authenticate();
-        if (destroyRequested) throw new IllegalStateException("Service destruction is already pending");
-        if (owner == null || !owner.isBinderAlive()) throw new IllegalArgumentException("A live client owner is required");
-        if (current != null && !current.state.releasable()) {
-            throw new IllegalStateException("Existing session retains native ownership");
-        }
+        AdmissionTrace trace = new AdmissionTrace();
         try {
-            Deployment deployment = new Deployment(context);
+            if (destroyRequested) throw new IllegalStateException("Service destruction is already pending");
+            if (owner == null || !owner.isBinderAlive()) throw new IllegalArgumentException("A live client owner is required");
+            if (current != null && !current.state.releasable()) {
+                throw new IllegalStateException("Existing session retains native ownership");
+            }
+            Deployment deployment = new Deployment(context, trace);
+            trace.at(AdmissionTrace.Stage.TRANSPORT_LOAD);
             NativeSpawn.load(deployment.transportLibrary);
+            trace.at(AdmissionTrace.Stage.OWNER_LINK);
             Session session = new Session(owner);
             // Publish owner before native fork so destroy/death cannot race an
             // unregistered native child. Failed launch remains explicit.
             current = session;
-            session.launch(deployment);
+            session.launch(deployment, trace);
+            trace.at(AdmissionTrace.Stage.COMPLETE);
+            lastAdmission = trace.result(true, null);
             return session;
-        } catch (Exception | LinkageError error) { throw new IllegalStateException("Executor admission failed", error); }
+        } catch (Exception | LinkageError error) {
+            lastAdmission = trace.result(false, error);
+            throw new IllegalStateException("Executor admission failed; authenticated status contains the bounded cause", error);
+        }
     }
     @Override public synchronized String status() {
         authenticate();
-        return current == null ? "{\"state\":\"idle\"}" : current.state.json();
+        try {
+            JSONObject result = current == null ? new JSONObject().put("state", "idle") : new JSONObject(current.state.json());
+            return result.put("admission", lastAdmission == null ? JSONObject.NULL : lastAdmission)
+                .put("preflight", lastPreflight == null ? JSONObject.NULL : lastPreflight).toString();
+        } catch (Exception error) { throw new IllegalStateException("Executor status encoding failed", error); }
+    }
+    @Override public synchronized String preflight() {
+        authenticate();
+        AdmissionTrace trace = new AdmissionTrace();
+        try {
+            if (destroyRequested) throw new IllegalStateException("Service destruction is already pending");
+            if (current != null && !current.state.releasable()) throw new IllegalStateException("Existing session retains native ownership");
+            // Same installed-input checks as open, but no System.load, owner,
+            // pipes, bootstrap fork, broker/socket, workspace marker or worker.
+            new Deployment(context, trace);
+            trace.at(AdmissionTrace.Stage.COMPLETE);
+            lastPreflight = trace.result(true, null);
+        } catch (Exception | LinkageError error) { lastPreflight = trace.result(false, error); }
+        try {
+            JSONObject result = new JSONObject().put("schema", "foldgpt.executor-preflight.v1")
+                .put("nativeSpawnAttempted", false).put("admission", lastPreflight).put("service", new JSONObject(status()));
+            try {
+                android.content.pm.ApplicationInfo cached = context.getApplicationInfo();
+                android.content.pm.PackageInfo installed = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
+                android.content.pm.ApplicationInfo fresh = installed.applicationInfo;
+                result.put("context", new JSONObject().put("serviceUid", Os.getuid()).put("servicePid", Os.getpid())
+                    .put("clientUid", clientUid).put("installedVersion", installed.getLongVersionCode())
+                    .put("contextNativeLibraryDir", AdmissionTrace.ascii(cached.nativeLibraryDir, 1024))
+                    .put("contextSourceDir", AdmissionTrace.ascii(cached.sourceDir, 1024))
+                    .put("packageManagerNativeLibraryDir", AdmissionTrace.ascii(fresh.nativeLibraryDir, 1024))
+                    .put("packageManagerSourceDir", AdmissionTrace.ascii(fresh.sourceDir, 1024))
+                    .put("nativeDirectoryMatches", java.util.Objects.equals(cached.nativeLibraryDir, fresh.nativeLibraryDir))
+                    .put("sourceDirectoryMatches", java.util.Objects.equals(cached.sourceDir, fresh.sourceDir)));
+            } catch (Exception | LinkageError error) { result.put("contextError", AdmissionTrace.failure(error)); }
+            return result.toString();
+        } catch (Exception error) { throw new IllegalStateException("Executor preflight encoding failed", error); }
     }
     @Override public synchronized void destroy() {
         int caller = Binder.getCallingUid();
@@ -73,20 +118,24 @@ public final class ExecutorService extends IExecutorService.Stub {
         boolean cancelling;
         Session(IBinder owner) throws Exception { this.owner = owner; owner.linkToDeath(this, 0); }
 
-        synchronized void launch(Deployment deployment) throws Exception {
+        synchronized void launch(Deployment deployment, AdmissionTrace trace) throws Exception {
             ParcelFileDescriptor[] stdin = null, stdout = null, reports = null, controls = null;
             boolean spawned = false;
             try {
+                trace.at(AdmissionTrace.Stage.PIPE_CREATE);
                 stdin = ParcelFileDescriptor.createPipe();
                 stdout = ParcelFileDescriptor.createPipe();
                 reports = ParcelFileDescriptor.createPipe();
                 controls = ParcelFileDescriptor.createPipe();
                 input = stdin[1]; output = stdout[0]; control = controls[1];
+                trace.at(AdmissionTrace.Stage.CONTROL_FLAGS);
                 int flags = Os.fcntlInt(control.getFileDescriptor(), OsConstants.F_GETFL, 0);
                 Os.fcntlInt(control.getFileDescriptor(), OsConstants.F_SETFL, flags | OsConstants.O_NONBLOCK);
+                trace.at(AdmissionTrace.Stage.NATIVE_FORK);
                 int pid = NativeSpawn.launch(deployment.executable, deployment.argv,
                     stdin[0].getFd(), stdout[1].getFd(), reports[1].getFd(), controls[0].getFd());
                 spawned = true;
+                trace.at(AdmissionTrace.Stage.OBSERVER_START);
                 ParcelFileDescriptor report = reports[0]; reports[0] = null;
                 Thread observer = new Thread(() -> observe(pid, report), "foldgpt-executor-owner");
                 observer.start();

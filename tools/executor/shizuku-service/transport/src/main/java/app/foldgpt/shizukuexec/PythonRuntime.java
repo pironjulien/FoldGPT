@@ -16,12 +16,15 @@ import java.util.Set;
 
 /** Admit fixed Python data before the interpreter can import any staged file. */
 final class PythonRuntime {
-    static void verify(Context context, JSONObject config, File nativeDirectory) throws Exception {
+    static void verify(Context context, JSONObject config, File nativeDirectory, AdmissionTrace trace) throws Exception {
         if (!config.has("pythonRuntime")) return;
+        trace.at(AdmissionTrace.Stage.PYTHON_DOMAIN);
         try (InputStream input = new FileInputStream("/proc/self/attr/current")) {
             String label = new String(Deployment.readBounded(input, 4096), StandardCharsets.US_ASCII).replace("\0", "").trim();
+            trace.fact("observed", label);
             if (!label.equals("u:r:shell:s0")) throw new SecurityException("Python bootstrap requires the actual shell SELinux domain");
         }
+        trace.at(AdmissionTrace.Stage.PYTHON_MANIFEST);
         JSONObject runtime = config.getJSONObject("pythonRuntime");
         if (runtime.length() != 3) throw new SecurityException("Invalid Python runtime contract");
         String asset = runtime.getString("manifestAsset");
@@ -30,19 +33,26 @@ final class PythonRuntime {
         try (InputStream input = context.getAssets().open(asset)) { bytes = Deployment.readBounded(input, 2097152); }
         requireDigest(bytes, runtime.getString("manifestSha256"));
         JSONObject manifest = new JSONObject(new String(bytes, StandardCharsets.UTF_8));
+        trace.at(AdmissionTrace.Stage.PYTHON_ROOT);
         File root = new File(runtime.getString("path"));
+        trace.fact("expected", root.getPath());
+        trace.fact("canonical", root.getCanonicalPath());
         if (!root.isAbsolute() || !root.getCanonicalFile().equals(root)) throw new SecurityException("Invalid Python runtime root");
         StructStat rootStat = Os.lstat(root.getPath());
+        trace.fact("uid", rootStat.st_uid); trace.fact("mode", rootStat.st_mode);
         if (!OsConstants.S_ISDIR(rootStat.st_mode) || rootStat.st_uid != 2000 || (rootStat.st_mode & 0077) != 0) {
             throw new SecurityException("Python runtime must be an owner-only shell directory");
         }
         Set<String> expected = new HashSet<>();
         JSONArray data = manifest.getJSONArray("dataFiles");
+        trace.at(AdmissionTrace.Stage.PYTHON_DATA);
         for (int i = 0; i < data.length(); ++i) {
             JSONObject entry = data.getJSONObject(i);
+            trace.subject(entry.getString("path"));
             File file = descendant(root, entry.getString("path"), expected);
             if (!file.getCanonicalFile().equals(file)) throw new SecurityException("Python data alias is not admitted");
             StructStat info = Os.lstat(file.getPath());
+            trace.fact("uid", info.st_uid); trace.fact("mode", info.st_mode);
             if (!OsConstants.S_ISREG(info.st_mode) || info.st_uid != 2000 || (info.st_mode & 0022) != 0
                     || info.st_size != entry.getLong("bytes") || info.st_size > 16777216) {
                 throw new SecurityException("Python data differs from bounded runtime inventory");
@@ -53,20 +63,33 @@ final class PythonRuntime {
         }
         JSONArray aliases = manifest.getJSONArray("runtimeAliases");
         JSONObject nativeFiles = config.getJSONObject("nativeLibraries");
+        trace.at(AdmissionTrace.Stage.PYTHON_ALIASES);
         for (int i = 0; i < aliases.length(); ++i) {
             JSONObject entry = aliases.getJSONObject(i);
+            trace.subject(entry.getString("path"));
             File file = descendant(root, entry.getString("path"), expected);
             String name = entry.getString("nativeLibrary");
             if (!entry.getString("sha256").equals(nativeFiles.getString(name))) throw new SecurityException("Python ELF alias digest differs");
             File target = new File(nativeDirectory, name);
+            trace.fact("expected", target.getPath());
+            trace.fact("mode", Os.lstat(file.getPath()).st_mode);
+            trace.fact("observed", Os.readlink(file.getPath()));
+            trace.fact("canonical", file.getCanonicalPath());
             if (!OsConstants.S_ISLNK(Os.lstat(file.getPath()).st_mode)
                     || !Os.readlink(file.getPath()).equals(target.getPath()) || !file.getCanonicalFile().equals(target)) {
                 throw new SecurityException("Python ELF alias must target the actual installed APK library");
             }
         }
         Set<String> actual = new HashSet<>();
-        walk(root, root, actual);
-        if (!actual.equals(expected)) throw new SecurityException("Unexpected or missing staged Python file");
+        trace.at(AdmissionTrace.Stage.PYTHON_TREE);
+        walk(root, root, actual, trace);
+        if (!actual.equals(expected)) {
+            String unexpected = actual.stream().filter(path -> !expected.contains(path)).sorted().findFirst().orElse(null);
+            String missing = expected.stream().filter(path -> !actual.contains(path)).sorted().findFirst().orElse(null);
+            trace.subject(unexpected != null ? "unexpected:" + unexpected : "missing:" + missing);
+            trace.fact("expected", expected.size()); trace.fact("observed", actual.size());
+            throw new SecurityException("Unexpected or missing staged Python file");
+        }
     }
     private static File descendant(File root, String relative, Set<String> paths) throws Exception {
         if (relative.isEmpty() || relative.startsWith("/") || relative.contains("\\") || relative.indexOf('\0') >= 0
@@ -74,15 +97,17 @@ final class PythonRuntime {
                 || !paths.add(relative)) throw new SecurityException("Invalid Python inventory path");
         return new File(root, relative);
     }
-    private static void walk(File root, File directory, Set<String> files) throws Exception {
+    private static void walk(File root, File directory, Set<String> files, AdmissionTrace trace) throws Exception {
+        trace.subject(root.toPath().relativize(directory.toPath()).toString());
         StructStat info = Os.lstat(directory.getPath());
+        trace.fact("uid", info.st_uid); trace.fact("mode", info.st_mode);
         if (!OsConstants.S_ISDIR(info.st_mode) || info.st_uid != 2000 || (info.st_mode & 0022) != 0) {
             throw new SecurityException("Python runtime directory is not admitted");
         }
         File[] children = directory.listFiles();
         if (children == null) throw new SecurityException("Cannot inspect Python runtime directory");
         for (File child : children) {
-            if (OsConstants.S_ISDIR(Os.lstat(child.getPath()).st_mode)) walk(root, child, files);
+            if (OsConstants.S_ISDIR(Os.lstat(child.getPath()).st_mode)) walk(root, child, files, trace);
             else files.add(root.toPath().relativize(child.toPath()).toString());
         }
     }
