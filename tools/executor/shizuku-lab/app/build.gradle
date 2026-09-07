@@ -14,8 +14,8 @@ android {
         applicationId 'app.foldgpt.shizukuprobe'
         minSdk 30
         targetSdk 37
-        versionCode 8
-        versionName '8.0-kernel-admission-diagnostics'
+        versionCode 9
+        versionName '9.0-explicit-versioned-diagnostic-launch'
         buildConfigField 'String', 'PROBE_SHA256', '"' + expectedProbeSha + '"'
     }
     buildFeatures { aidl true; buildConfig true }

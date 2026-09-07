@@ -2,6 +2,7 @@ package app.foldgpt.kernelqualification;
 
 import android.app.Activity;
 import android.content.ComponentName;
+import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.os.Binder;
@@ -29,9 +30,11 @@ import rikka.shizuku.Shizuku;
 
 /** One fixed kernel diagnostic, through the production authenticated transport. */
 public final class QualificationActivity extends Activity {
-    private static final String REPORT_DIRECTORY = "kernel-v4";
+    private static final String REPORT_DIRECTORY = "kernel-v5";
     private static final String COLLECT_ACTION = ".KERNEL_COLLECT_INFO";
-    private static final String RUN_ACTION = ".KERNEL_RUN_FIXED";
+    // Android can restore the previous Activity Intent after a package update.
+    // An earlier APK's launch action must never reserve this revision's trial.
+    private static final String RUN_ACTION = ".KERNEL_RUN_FIXED_V9";
     private static final String PREFLIGHT_ACTION = ".KERNEL_PREFLIGHT";
     private static final String OLD_STATUS_ACTION = ".KERNEL_STATUS_V3";
     private final Handler main = new Handler(Looper.getMainLooper());
@@ -41,6 +44,7 @@ public final class QualificationActivity extends Activity {
     private volatile IExecutorSession session;
     private volatile boolean cleanupComplete;
     private volatile boolean cancelRequested;
+    private volatile boolean nativeOpenAttempted;
     private boolean bound, permissionRequested, finished, running;
     private boolean preflightOnly, oldStatusOnly;
     private String reportName = "report.json";
@@ -96,8 +100,8 @@ public final class QualificationActivity extends Activity {
                 .put("nativeLibraryDir", getApplicationInfo().nativeLibraryDir).put("clientUid", android.os.Process.myUid()));
             text.setText("Waiting for official Shizuku authorization");
             args = new Shizuku.UserServiceArgs(new ComponentName(this, ExecutorService.class))
-                .daemon(false).tag(oldStatusOnly ? "foldgpt-kernel-qualification-v3" : "foldgpt-kernel-qualification-v4")
-                .version(oldStatusOnly ? 3 : 4)
+                .daemon(false).tag(oldStatusOnly ? "foldgpt-kernel-qualification-v3" : "foldgpt-kernel-qualification-v5")
+                .version(oldStatusOnly ? 3 : 5)
                 .processNameSuffix("kernelqualification").debuggable(false);
             Shizuku.addBinderDeadListener(dead);
             Shizuku.addRequestPermissionResultListener(permission);
@@ -166,6 +170,7 @@ public final class QualificationActivity extends Activity {
                 throw new IllegalStateException("Read-only executor preflight refused before open");
             }
             if (cancelRequested) throw new IllegalStateException("Qualification admission was cancelled during preflight");
+            nativeOpenAttempted = true;
             session = service.open(owner);
             if (cancelRequested) throw new IllegalStateException("Qualification admission was cancelled while opening the service");
             try (OutputStream output = new ParcelFileDescriptor.AutoCloseOutputStream(session.takeInput());
@@ -291,6 +296,9 @@ public final class QualificationActivity extends Activity {
         }
     }
     private void persist(JSONObject report) throws Exception {
+        report.put("diagnosticVersion", 9).put("requestedAction", getIntent().getAction())
+            .put("recordedWallTimeMs", System.currentTimeMillis())
+            .put("recordedElapsedRealtimeMs", SystemClock.elapsedRealtime());
         AtomicFile file = new AtomicFile(new File(reportDirectory(), reportName));
         FileOutputStream output = file.startWrite();
         try { output.write((report.toString(2) + "\n").getBytes(StandardCharsets.UTF_8)); file.finishWrite(output); }
@@ -302,6 +310,17 @@ public final class QualificationActivity extends Activity {
             throw new SecurityException("Diagnostic report directory is not admitted");
         }
         return directory;
+    }
+    @Override protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        // Explicit am start may deliver to the existing top Activity. Previously
+        // this was ignored and the caller unknowingly read an older report.
+        if (!finished || (nativeOpenAttempted && !cleanupComplete)) {
+            text.append("\nNew action refused while prior work or ownership remains unresolved.");
+            return;
+        }
+        setIntent(new Intent(this, QualificationActivity.class).setAction(intent.getAction()));
+        recreate();
     }
     @Override protected void onDestroy() {
         cancel(); releaseIfClean();
