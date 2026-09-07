@@ -116,6 +116,12 @@ ou une autre clé produit une erreur explicite ; aucune nouvelle identité n'est
 créée silencieusement. Cette clé concerne FoldGPT, pas l'application officielle
 ChatGPT.
 
+Le fournisseur OneDrive déclare ces deux fichiers **synchronisés** via l'API
+Windows Cloud Files (`InSyncState=1`, contrôle du 7 septembre à 03:28). Le
+[rapport](verification/vault-sync.json) ne contient aucune clé. Ce contrôle
+reflète l'état local déclaré par OneDrive ; un téléchargement indépendant du
+coffre depuis le second PC n'a pas été effectué ici.
+
 État technique vérifié au début de cette sauvegarde : le test fixe
 Shizuku/Bionic crée, teste et construit réellement un projet Python sur le
 Fold. L'intégration aux commandes, fichiers et sessions ordinaires est en cours.

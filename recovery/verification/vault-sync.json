@@ -1,0 +1,22 @@
+{
+  "observedAt": "2026-09-07T03:28:41.9984052+02:00",
+  "source": "Windows Cloud Files API CfGetPlaceholderInfo(Standard)",
+  "files": [
+    {
+      "name": "recovery.agekey",
+      "placeholderQueryHresult": 0,
+      "cloudProviderInSyncState": 1,
+      "pinState": 1,
+      "fileBytes": 189,
+      "cloudDownloadIndependentlyVerified": false
+    },
+    {
+      "name": "android-debug.keystore",
+      "placeholderQueryHresult": 0,
+      "cloudProviderInSyncState": 1,
+      "pinState": 1,
+      "fileBytes": 2618,
+      "cloudDownloadIndependentlyVerified": false
+    }
+  ]
+}
