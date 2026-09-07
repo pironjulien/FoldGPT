@@ -2,6 +2,13 @@
 
 ## Unreleased — 2026-09-06
 
+- Close the overnight session at Julien's request for work-PC recovery. The
+  separate GNU ARM64 CLI and code-mode companion compile in release (exit 0);
+  PC CPU-emulation help/version checks and real V8 evaluation pass. Preserve
+  symbols, exact build inputs and recorded limitations; no Android engine
+  execution or ordinary interface command success is claimed. Restore display
+  idle protection and record the pending V11 permission and next steps.
+
 - Correct read-only memory accounting to retain remote ADB failures and reject
   missing, partial or raced PSS as complete totals. Seven regression tests pass;
   the live 23-process FoldGPT observation is retained with actual rlimits.

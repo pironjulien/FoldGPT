@@ -1,0 +1,12 @@
+{
+  "sourceManifestSha256": "d889fba0d8cdf5f6f0c6e083a05b371d1ddde9e0b95971b9f6611be7503c1d9a",
+  "sourceFiles": 6956,
+  "restoredEngine": "C:\\Dev\\FoldGPT-recovery\\restored-engine-native-rpc-20260907",
+  "counts": {
+    "exact": 303,
+    "lineEndingsOnly": 6653
+  },
+  "issues": [],
+  "exactBytesRestoredByGit": false,
+  "scope": "Comparison to the build input manifest; line-ending differences are retained in the separate exact source snapshot."
+}

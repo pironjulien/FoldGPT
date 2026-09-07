@@ -5,6 +5,38 @@ Le dépôt de travail est **privé** : `pironjulien/FoldGPT-workspace`, branche
 sous-modules, moteur séparé et données locales. Le dépôt public `FoldGPT` est un
 ancien checkpoint ; il ne reçoit pas cette sauvegarde privée.
 
+## Session arrêtée à la demande de Julien, 7 septembre vers 07:16
+
+Julien part au travail et a demandé d'arrêter les essais, de tout consigner et
+de finaliser la sauvegarde pour reprendre sur l'autre PC. Aucun nouvel essai
+sur le Fold ne doit être déduit de cette clôture. La session de nuit est close ;
+**le projet et les commandes ordinaires depuis l'interface restent inachevés**.
+
+Le moteur auxiliaire GNU ARM64 et son compagnon ont réellement compilé en
+release, sortie 0, en 18 min 08 s. Le compagnon a exécuté `text(6 * 7)` donnant
+42 sur PC, puis fermé la session et quitté avec 0. Lire le
+[rapport du build ARM64](../docs/research/native-engine-arm64-build-2026-09-07.md)
+pour l'état final des autres vérifications ; aucune exécution de ce moteur sur
+le Fold n'est établie. Les sources du build et celles restaurées par Git ont
+le même contenu, avec des différences de matérialisation Windows documentées.
+
+Le dernier contrôle mémoire en lecture seule, à 07:00, mesure 10,83 Gio utilisables
+par Android, 3,49 Gio disponibles à cet instant et 695,74 Mio PSS pour les 23
+processus de l'UID FoldGPT. Voir le
+[rapport mémoire](verification/android-memory-20260907.json) et ses limites.
+Il ne démontre aucun plafond global de 2 Gio pour FoldGPT.
+
+Des copies exactes de cinq bibliothèques GNU du téléphone ont été collectées
+en lecture seule dans `downloads/engine-arm64-device-libs-20260907` pour une
+future comparaison des exigences ELF. Cette comparaison n'a pas été effectuée
+avant l'arrêt ; aucune bibliothèque ni commande GNU n'a été exécutée sur le
+téléphone pour cette collecte.
+
+Pour reprendre : restaurer le clone et les compléments avec `recovery/README.md`,
+puis lire le point V11 ci-dessous et l'audit des accès du contrôleur. Le premier
+verrou téléphone reste son déverrouillage normal et l'autorisation officielle
+Shizuku. Préserver V10, les fixtures et toutes les preuves existantes.
+
 ## Point courant : V11 attend l'autorisation Shizuku
 
 Le correctif des chemins runtime passe sur PC ; le superviseur figé courant
