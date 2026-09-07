@@ -2,6 +2,10 @@
 
 ## Unreleased — 2026-09-06
 
+- Publish recovery supplement v8 and verify its actual GitHub download,
+  authenticated restoration and all 7,169 files (3,241,402,905 file bytes).
+  All 27 published release assets match their recorded sizes and digests.
+
 - Close the overnight session at Julien's request for work-PC recovery. The
   separate GNU ARM64 CLI and code-mode companion compile in release (exit 0);
   PC CPU-emulation help/version checks and real V8 evaluation pass. Preserve

@@ -28,6 +28,18 @@ PC de reprise et ne font pas partie de l'archive du projet.
 Le Linux de compilation est uniquement sur le PC. Il ne représente pas une
 machine virtuelle installée sur le Fold.
 
+Le complément v8 ajoute le build **GNU ARM64** du moteur auxiliaire : GCC/G++
+croisés 13.3.0, cible Rust `aarch64-unknown-linux-gnu`, sysroot glibc 2.39,
+OpenSSL statique 3.6.3 et la paire V8 150.4.0 avec sandbox. Les scripts exacts,
+preuves, binaires/symboles et dépendances sont sous
+`downloads/engine-gnu-arm64-20260907` après restauration. Le dossier
+`build-evidence` contient `prepare_snapshot.py`, `prepare_dependencies.sh`,
+`build_engine.sh` et les vérificateurs. Les chemins de ces scripts sont ceux du
+PC de build (`/opt/foldgpt/engine-gnu-arm64`, `C:/Dev/FoldgptEngine`).
+`qemu-aarch64-static` sert uniquement aux contrôles CPU sur PC. La qualification
+avec le runtime GNU du Fold reste à faire ; voir le
+[rapport du build](../docs/research/native-engine-arm64-build-2026-09-07.md).
+
 Paquets Ubuntu requis par les builds utilisés :
 
 ```sh

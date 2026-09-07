@@ -37,6 +37,12 @@ puis lire le point V11 ci-dessous et l'audit des accès du contrôleur. Le premi
 verrou téléphone reste son déverrouillage normal et l'autorisation officielle
 Shizuku. Préserver V10, les fixtures et toutes les preuves existantes.
 
+La clôture est sauvegardée dans le complément privé v8 : 7 169 fichiers
+retéléchargés, authentifiés et vérifiés après extraction. Les 27 éléments de
+la release correspondent à leurs tailles et empreintes. Les sources et cette
+reprise sont sur la branche `codex/foldgpt-beta`. Le build ARM64 et ses entrées
+exactes sont sous `downloads/engine-gnu-arm64-20260907` après restauration.
+
 ## Point courant : V11 attend l'autorisation Shizuku
 
 Le correctif des chemins runtime passe sur PC ; le superviseur figé courant

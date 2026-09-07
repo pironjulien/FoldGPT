@@ -17,6 +17,7 @@ authentifiées, extraites et vérifiées fichier par fichier :
 | `native-checkpoint-v5*` | 2 798 | 0 | 54 234 188 |
 | `native-checkpoint-v6*` | 468 | 0 | 1 323 849 |
 | `native-checkpoint-v7*` | 2 819 | 0 | 54 505 580 |
+| `native-checkpoint-v8*` | 7 169 | 0 | 956 432 196 |
 
 Le complément sans suffixe de version reste historique. Utiliser les manifestes
 et la procédure de restauration additive du README. Les sources Git récentes
@@ -51,3 +52,12 @@ du résolveur par descripteurs et les preuves de build. L'autorisation Shizuku
 attend derrière le verrouillage du Fold. Aucune tentative native V11 n'est
 lancée et les commandes ordinaires restent à valider. V10 reste intact en
 quarantaine. Lire le point courant de `recovery/HANDOFF.md` sur la branche.
+
+La session de nuit est arrêtée à la demande de Julien pour reprendre sur son
+PC du travail. Le complément v8 conserve le moteur GNU ARM64 et son compagnon
+compilés, leurs symboles, les entrées exactes du build, les dépendances et les
+dernières observations en lecture seule. Ses 7 169 fichiers ont été réellement
+retéléchargés, authentifiés, restaurés et vérifiés. Le projet reste inachevé :
+aucune exécution de ce nouveau moteur sur le Fold ni réussite des commandes
+ordinaires n'est revendiquée. Les écrans ont reçu la commande de veille et la
+protection d'inactivité est réactivée. Voir le guide et le handoff actuels.

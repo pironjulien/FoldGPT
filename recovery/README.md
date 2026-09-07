@@ -5,6 +5,11 @@ Le dépôt privé de travail est `pironjulien/FoldGPT-workspace`, branche
 checkpoint ne signifie pas que les commandes ordinaires fonctionnent déjà sur
 le téléphone.
 
+**Clôture demandée par Julien le 7 septembre vers 07:16 :** les essais sont
+arrêtés pour reprendre au travail. Lire d'abord [HANDOFF.md](HANDOFF.md).
+Le complément v8 décrit ci-dessous ajoute le build GNU ARM64 achevé et ses
+entrées exactes ; il ne valide pas son exécution sur le Fold.
+
 ```powershell
 gh repo clone pironjulien/FoldGPT-workspace C:\Dev\ChatgptFold -- -c core.autocrlf=false
 Set-Location C:\Dev\ChatgptFold
@@ -237,6 +242,42 @@ La fusion v7 a également été réalisée sur le clone Windows : **2 818 fichie
 du projet vérifiés indépendamment**, sans modification des sources ni
 remplacement de données. Le fichier de checkpoint reste dans le snapshot.
 Voir la [preuve de fusion](verification/github-supplement-v7-merge.json).
+
+## Complément v8 : clôture de nuit et build GNU ARM64
+
+Le complément `native-checkpoint-v8*` conserve les deux exécutables GNU ARM64,
+leurs symboles et versions non dépouillées, les preuves PC, les scripts de
+compilation, l'instantané exact des 6 956 sources et les dépendances OpenSSL/V8.
+Il ajoute aussi les dernières observations mémoire et les cinq bibliothèques
+GNU copiées en lecture seule du Fold pour une comparaison future.
+
+Archive chiffrée : **956 432 196 octets**, SHA256
+`0578a1b5b816bbe29081642c03c9052f88624cf8c0a331908898dc17e1163355`.
+Elle contient 3 241 402 905 octets de fichiers avant compression. L'archive
+principale et les compléments précédents restent nécessaires.
+
+Ce complément a été retéléchargé depuis GitHub, authentifié, déchiffré et
+réellement extrait : **7 169 fichiers vérifiés**, sans lien symbolique.
+Voir la [preuve de restauration v8](verification/github-supplement-v8-restoration.json).
+Les fusions Windows précédemment vérifiées couvrent le socle et v3 à v7 ; le
+v8 est ici vérifié par sa restauration Linux complète, sans nouvelle fusion
+Windows lors de la clôture.
+
+Après les fusions précédentes, restaurer puis fusionner ce complément dans des
+dossiers neufs, avec les mêmes outils :
+
+```powershell
+wsl --distribution Ubuntu-24.04 --exec python3 /mnt/c/Dev/ChatgptFold/tools/recovery/restore-archive.py --assets /mnt/c/Dev/FoldGPT-recovery/downloaded --manifest native-checkpoint-v8-manifest.json --identity $foldRecoveryKeyLinux --destination /var/tmp/foldgpt-native-v8 --report /mnt/c/Dev/FoldGPT-recovery/native-v8-verification.json
+wsl --distribution Ubuntu-24.04 --exec python3 /mnt/c/Dev/ChatgptFold/tools/recovery/merge-supplement.py --snapshot /var/tmp/foldgpt-native-v8/foldgpt-native-artifacts-v8-20260907 --project /mnt/c/Dev/ChatgptFold --report /mnt/c/Dev/FoldGPT-recovery/native-v8-merge.json
+```
+
+Les artefacts se retrouvent sous `downloads/engine-gnu-arm64-20260907` :
+`build-evidence/20260907T045021Z/artifacts`, `source-snapshot` et `dependencies`.
+L'instantané exact du build reste une preuve ; les sources de développement
+actuelles se récupèrent avec le patch Git décrit ci-dessous. Les chemins de
+build `/opt/foldgpt` sont ceux du PC d'origine. Lire les scripts avant reprise
+et reconstituer leur environnement selon [build-environment.md](build-environment.md).
+Ce complément n'installe rien sur le téléphone et n'active aucun exécuteur.
 
 ## Récupérer le moteur séparé
 
