@@ -1,0 +1,33 @@
+{
+  "schema": "foldgpt.independent-kernel-qualification.v1",
+  "success": false,
+  "checks": {
+    "recordsCollected": true,
+    "fixtureEvidenceIdentity": true,
+    "beforeSnapshotValid": true,
+    "recordSchemasAndPhases": false,
+    "nativeAndroidIdentity": true,
+    "actualBootstrapShellContext": true,
+    "bootstrapPidConsistent": true,
+    "nativeSuccess": false,
+    "cleanNativeAndTransport": true,
+    "transportWait": true,
+    "realExitZero": false,
+    "rpcSuccess": false
+  },
+  "collected": {
+    "app-report": {
+      "collected": true,
+      "sha256": "f6c35262067078690c200e2ea79639cd04df20ec8e5158279942083c23356376"
+    },
+    "native-evidence": {
+      "collected": true,
+      "sha256": "0a3c3d6b1d2d6722489449460a35d3e08b9df9bf37f048a94e323d905f124b5b"
+    }
+  },
+  "error": "Expecting value: line 1 column 1 (char 0)",
+  "package": "app.foldgpt.kernelqualification.v11",
+  "base": "/data/local/tmp/foldgpt-bionic-supervisor-qualification-v3",
+  "reportVersion": 11,
+  "scope": "Fixed Shizuku/Bionic worker only; ordinary model commands are not validated"
+}

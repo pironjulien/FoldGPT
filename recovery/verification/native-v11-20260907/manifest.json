@@ -1,0 +1,59 @@
+{
+  "scope": "Exact copies of selected resumed-session evidence; no qualification success implied",
+  "files": [
+    {
+      "path": "authorization.json",
+      "source": "downloads/native-kernel-trial/v11-resume-shizuku-20260907/authorization.json",
+      "size": 628,
+      "sha256": "52a75007001659cd5e46d73be3926b10e89d7d02048cd67ff55d374623c007f3"
+    },
+    {
+      "path": "preflight.json",
+      "source": "downloads/native-kernel-trial/v11-resume-shizuku-20260907/preflight.json",
+      "size": 2212,
+      "sha256": "bcb8f96c737fcba5e9dc05fb171ae42a29d7c799a29d40539f995d348389c866"
+    },
+    {
+      "path": "single-fixed-invocation.json",
+      "source": "downloads/native-kernel-trial/v11-resume-shizuku-20260907/single-fixed-invocation.json",
+      "size": 444,
+      "sha256": "ddb636c89e4d97a7858d7ede4c853f1e82c9efd4803a8ae1a66a6c6382156570"
+    },
+    {
+      "path": "before.json",
+      "source": "downloads/native-kernel-trial/v11-immediately-before-fixed-20260907/snapshot.json",
+      "size": 139654,
+      "sha256": "8d58da41964ff48b63ef68b3afb9aa47f09ccaa2510161fd76bfa737e5301a8c"
+    },
+    {
+      "path": "after.json",
+      "source": "downloads/native-kernel-trial/v11-fixed-collection-20260907/after/snapshot.json",
+      "size": 139738,
+      "sha256": "710a0bb16807d71117bb4a755099d537fc76c12f62f8928b83ac2fd92256491c"
+    },
+    {
+      "path": "app-report.json",
+      "source": "downloads/native-kernel-trial/v11-fixed-collection-20260907/app-report.json",
+      "size": 6235,
+      "sha256": "f6c35262067078690c200e2ea79639cd04df20ec8e5158279942083c23356376"
+    },
+    {
+      "path": "native-evidence.json",
+      "source": "downloads/native-kernel-trial/v11-fixed-collection-20260907/native-evidence.json",
+      "size": 2175,
+      "sha256": "0a3c3d6b1d2d6722489449460a35d3e08b9df9bf37f048a94e323d905f124b5b"
+    },
+    {
+      "path": "independent-verification.json",
+      "source": "downloads/native-kernel-trial/v11-fixed-collection-20260907/independent-verification.json",
+      "size": 1115,
+      "sha256": "99cfe67082008f864632b09aa6a489b4eaef596eccba00e7b159b4cfa51a3ca9"
+    },
+    {
+      "path": "usb-idle-verification.json",
+      "source": "downloads/runtime/usb-awake-20260907/idle-verification-20260907T165600Z.json",
+      "size": 1387,
+      "sha256": "916fd445b5d19b0e22fe9f15ee453acb61855b587ede57181e231e28472f8b2b"
+    }
+  ]
+}

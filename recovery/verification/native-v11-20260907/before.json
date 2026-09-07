@@ -1,0 +1,6832 @@
+{
+  "schema": "foldgpt.native-device-snapshot.v1",
+  "timestamp": "2026-09-07T17:02:25.694243+00:00",
+  "serial": "R3GL808JN4A",
+  "commands": {
+    "boot-id": {
+      "argv": [
+        "cat",
+        "/proc/sys/kernel/random/boot_id"
+      ],
+      "returncode": 0,
+      "stdoutSha256": "9b69258cefc2b26d95de5a80c3b61c7286313b38b97241401bd6337a7d6c2bca",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "kernel": {
+      "argv": [
+        "uname",
+        "-r"
+      ],
+      "returncode": 0,
+      "stdoutSha256": "336374cdf1745c922f1b540b6bd2920156b36d7cb7cd93f65e45523098bdeff1",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "ro.boot.warranty_bit": {
+      "argv": [
+        "getprop",
+        "ro.boot.warranty_bit"
+      ],
+      "returncode": 0,
+      "stdoutSha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "ro.boot.verifiedbootstate": {
+      "argv": [
+        "getprop",
+        "ro.boot.verifiedbootstate"
+      ],
+      "returncode": 0,
+      "stdoutSha256": "c1755d092f917a4f588d634d0359bc4bbbc2c8518f9337053b03e8a90c92482f",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "ro.boot.flash.locked": {
+      "argv": [
+        "getprop",
+        "ro.boot.flash.locked"
+      ],
+      "returncode": 0,
+      "stdoutSha256": "f1b2f662800122bed0ff255693df89c4487fbdcf453d3524a42d4ec20c3d9c04",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "selinux": {
+      "argv": [
+        "getenforce"
+      ],
+      "returncode": 0,
+      "stdoutSha256": "e89a4ddfd263cff912d0c4ffb45dbd00238dc96464ed27e332297ead6c655eb6",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "shell-identity": {
+      "argv": [
+        "id"
+      ],
+      "returncode": 0,
+      "stdoutSha256": "2e3d6afde869d420f84254c32b0babe4d9d750b4eec11eafa9913aee6cac1a65",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "shell-domain": {
+      "argv": [
+        "cat",
+        "/proc/self/attr/current"
+      ],
+      "returncode": 0,
+      "stdoutSha256": "7ce09ff45c275a4a153cfdaa35d803196243c5b38561263a9821bd6ece72ef31",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "shell-status": {
+      "argv": [
+        "cat",
+        "/proc/self/status"
+      ],
+      "returncode": 0,
+      "stdoutSha256": "109ea88cc174aac2bea4faadb2500350457733cac77117d18cf5a83f558730ff",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "memory": {
+      "argv": [
+        "cat",
+        "/proc/meminfo"
+      ],
+      "returncode": 0,
+      "stdoutSha256": "6a23a0406158fc420f401cb9b49ec02e884a8aa83c77aab2a753e39782fc756c",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "processes": {
+      "argv": [
+        "ps",
+        "-A",
+        "-o",
+        "UID,PID,PPID,NAME"
+      ],
+      "returncode": 0,
+      "stdoutSha256": "8b855da139dc4e4d8cbb377eb4b0c39a5865c6aff899963018d46f7cc6fe2036",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "app.foldgpt-paths": {
+      "argv": [
+        "pm",
+        "path",
+        "app.foldgpt"
+      ],
+      "returncode": 0,
+      "stdoutSha256": "312737042367ab52c32edb9b8c69955052c479a9ee74aeff0db93746295c0ebb",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "app.foldgpt-apk-0": {
+      "argv": [
+        "sha256sum",
+        "/data/app/~~5E59pSImRSmGlu92aovtbw==/app.foldgpt-yaFxXrtiXOjNFHnirC5pbw==/base.apk"
+      ],
+      "returncode": 0,
+      "stdoutSha256": "96703e345bdf6f193a8af6fd6677864699ec3cf0096c84f8dd1d0870868a0af9",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "app.foldgpt.shizukuprobe-paths": {
+      "argv": [
+        "pm",
+        "path",
+        "app.foldgpt.shizukuprobe"
+      ],
+      "returncode": 0,
+      "stdoutSha256": "e61b24524d35fba9b573e3705791001e38b3f867d07fc750b0f70f79546014c4",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "app.foldgpt.shizukuprobe-apk-0": {
+      "argv": [
+        "sha256sum",
+        "/data/app/~~IqwCzu74D0U2fXYD3dH7TA==/app.foldgpt.shizukuprobe-KntqLBos0Lg9-yPpUPx8Bw==/base.apk"
+      ],
+      "returncode": 0,
+      "stdoutSha256": "bbc55711b7d95ed97033f3cc8263da63f96af5847ce2595cdeed9bd7482dafa0",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "app.foldgpt.kernelqualification.v11-paths": {
+      "argv": [
+        "pm",
+        "path",
+        "app.foldgpt.kernelqualification.v11"
+      ],
+      "returncode": 0,
+      "stdoutSha256": "cbab7af6c40f4f07493192501891409e2df9e761c4481a9756c79878f6f33979",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "app.foldgpt.kernelqualification.v11-apk-0": {
+      "argv": [
+        "sha256sum",
+        "/data/app/~~CbjEFOzCuV1P05vmxMBJ8Q==/app.foldgpt.kernelqualification.v11-0tAbAL7yUWWW2eVlPTp6FQ==/base.apk"
+      ],
+      "returncode": 0,
+      "stdoutSha256": "1962d116c69c8089592bffb073d9685fcbe3084e9dbae36c36e07793c591a1ba",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "fixture-input": {
+      "argv": [
+        "base64",
+        "/data/local/tmp/foldgpt-bionic-supervisor-qualification-v3/workspace/input"
+      ],
+      "returncode": 0,
+      "stdoutSha256": "a4caeb61872b3358896eff05508d79dad02724dcd726c5402783f2f06b2d9040",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "fixture-private-secret": {
+      "argv": [
+        "base64",
+        "/data/local/tmp/foldgpt-bionic-supervisor-qualification-v3/workspace/private/secret"
+      ],
+      "returncode": 0,
+      "stdoutSha256": "a43505349aa7d74fea1bf99b32d8a4d3bc2ac21a3e065f395fd56dfb7182a8e9",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "fixture-directory-marker": {
+      "argv": [
+        "base64",
+        "/data/local/tmp/foldgpt-bionic-supervisor-qualification-v3/workspace/directory/marker"
+      ],
+      "returncode": 0,
+      "stdoutSha256": "17fe97f857ca05e09c1772e20d124d9b977bd9d2d02e9526e5c0e8e83c3ff33c",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "fixture-git-config": {
+      "argv": [
+        "stat",
+        "-c",
+        "%F",
+        "/data/local/tmp/foldgpt-bionic-supervisor-qualification-v3/workspace/.git/config"
+      ],
+      "returncode": 1,
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSha256": "5f4553293ecafa2bf2ee99b41a69b8adc25016f567802eeadbc9e0d47654d1fc"
+    },
+    "fixture-git-list": {
+      "argv": [
+        "ls",
+        "-A",
+        "/data/local/tmp/foldgpt-bionic-supervisor-qualification-v3/workspace/.git"
+      ],
+      "returncode": 0,
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "boot-id-end": {
+      "argv": [
+        "cat",
+        "/proc/sys/kernel/random/boot_id"
+      ],
+      "returncode": 0,
+      "stdoutSha256": "9b69258cefc2b26d95de5a80c3b61c7286313b38b97241401bd6337a7d6c2bca",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "errors": [],
+  "bootId": "348d453e-f4e5-40e0-8ef0-030f4d5e38af",
+  "kernel": "6.12.58-android16-6-p6370076-abogkiF971BXXS2AZH7-4k",
+  "indicators": {
+    "ro.boot.warranty_bit": "0",
+    "ro.boot.verifiedbootstate": "green",
+    "ro.boot.flash.locked": "1",
+    "selinux": "Enforcing"
+  },
+  "adbShellIdentity": "uid=2000(shell) gid=2000(shell) groups=2000(shell),1004(input),1007(log),1011(adb),1015(sdcard_rw),1028(sdcard_r),1078(ext_data_rw),1079(ext_obb_rw),3001(net_bt_admin),3002(net_bt),3003(inet),3006(net_bw_stats),3009(readproc),3011(uhid),3012(readtracefs) context=u:r:shell:s0",
+  "adbShellDomain": "u:r:shell:s0\u0000",
+  "adbShellStatus": "Name:\tcat\r\nUmask:\t0000\r\nState:\tR (running)\r\nTgid:\t31750\r\nNgid:\t0\r\nPid:\t31750\r\nPPid:\t27442\r\nTracerPid:\t0\r\nUid:\t2000\t2000\t2000\t2000\r\nGid:\t2000\t2000\t2000\t2000\r\nFDSize:\t64\r\nGroups:\t1004 1007 1011 1015 1028 1078 1079 3001 3002 3003 3006 3009 3011 3012 \r\nKthread:\t0\r\nVmPeak:\t10839124 kB\r\nVmSize:\t10839100 kB\r\nVmLck:\t       0 kB\r\nVmPin:\t       0 kB\r\nVmHWM:\t    4732 kB\r\nVmRSS:\t    4732 kB\r\nRssAnon:\t     768 kB\r\nRssFile:\t    3556 kB\r\nRssShmem:\t     408 kB\r\nVmData:\t    2916 kB\r\nVmStk:\t     136 kB\r\nVmExe:\t     324 kB\r\nVmLib:\t    4552 kB\r\nVmPTE:\t     116 kB\r\nVmSwap:\t       0 kB\r\nCoreDumping:\t0\r\nTHP_enabled:\t1\r\nuntag_mask:\t0xffffffffffffff\r\nThreads:\t1\r\nSigQ:\t0/38443\r\nSigPnd:\t0000000000000000\r\nShdPnd:\t0000000000000000\r\nSigBlk:\t0000000080000000\r\nSigIgn:\t0000002000000000\r\nSigCgt:\t0000004c400084f8\r\nCapInh:\t0000000000000000\r\nCapPrm:\t0000000000000000\r\nCapEff:\t0000000000000000\r\nCapBnd:\t00000000008000c0\r\nCapAmb:\t0000000000000000\r\nNoNewPrivs:\t0\r\nSeccomp:\t0\r\nSeccomp_filters:\t0\r\nSpeculation_Store_Bypass:\tthread vulnerable\r\nSpeculationIndirectBranch:\tunknown\r\nCpus_allowed:\tff\r\nCpus_allowed_list:\t0-7\r\nMems_allowed:\t1\r\nMems_allowed_list:\t0\r\nvoluntary_ctxt_switches:\t0\r\nnonvoluntary_ctxt_switches:\t24",
+  "memory": "MemTotal:       11351456 kB\r\nMemFree:          522768 kB\r\nMemAvailable:    4491064 kB\r\nBuffers:            5376 kB\r\nCached:          2786980 kB\r\nSwapCached:         6168 kB\r\nActive:          2277920 kB\r\nInactive:        2366928 kB\r\nActive(anon):    1631168 kB\r\nInactive(anon):   678984 kB\r\nActive(file):     646752 kB\r\nInactive(file):  1687944 kB\r\nUnevictable:       16704 kB\r\nMlocked:           13316 kB\r\nSwapTotal:      12582908 kB\r\nSwapFree:        7511944 kB\r\nDirty:               496 kB\r\nWriteback:             0 kB\r\nAnonPages:       2265272 kB\r\nMapped:          1247828 kB\r\nShmem:             49680 kB\r\nKReclaimable:    1577892 kB\r\nSlab:            1523028 kB\r\nSReclaimable:     778812 kB\r\nSUnreclaim:       744216 kB\r\nKernelStack:      176688 kB\r\nShadowCallStack:       0 kB\r\nPageTables:       371568 kB\r\nSecPageTables:     22248 kB\r\nNFS_Unstable:          0 kB\r\nBounce:                0 kB\r\nWritebackTmp:          0 kB\r\nCommitLimit:    18016972 kB\r\nCommitted_AS:   779908228 kB\r\nVmallocTotal:   261087232 kB\r\nVmallocUsed:      421308 kB\r\nVmallocChunk:          0 kB\r\nPercpu:            15040 kB\r\nAnonHugePages:         0 kB\r\nShmemHugePages:        0 kB\r\nShmemPmdMapped:        0 kB\r\nFileHugePages:         0 kB\r\nFilePmdMapped:         0 kB\r\nCmaTotal:         733184 kB\r\nCmaFree:               0 kB\r\nsystem:           383856 kB\r\nRbinTotal:        409600 kB\r\nRbinAlloced:        2424 kB\r\nGcmaTotal:        483328 kB\r\nGcmaAlloced:       75128 kB\r\nGcmaFree:            140 kB\r\nGcmaCached:       408060 kB\r\nDmaHeapPool:      376192 kB\r\nHugepagePool:          0 kB\r\nzram0:           1269712 kB\r\nGpuTotal:         403464 kB\r\nKgslShmemUsage:        0 kB\r\nGpuSwap:               0 kB",
+  "processes": [
+    {
+      "uid": "0",
+      "pid": 1,
+      "ppid": 0,
+      "name": "init"
+    },
+    {
+      "uid": "0",
+      "pid": 2,
+      "ppid": 0,
+      "name": "[kthreadd]"
+    },
+    {
+      "uid": "0",
+      "pid": 3,
+      "ppid": 2,
+      "name": "[pool_workqueue_release]"
+    },
+    {
+      "uid": "0",
+      "pid": 4,
+      "ppid": 2,
+      "name": "[kworker/R-kvfree_rcu_reclaim]"
+    },
+    {
+      "uid": "0",
+      "pid": 5,
+      "ppid": 2,
+      "name": "[kworker/R-rcu_gp]"
+    },
+    {
+      "uid": "0",
+      "pid": 6,
+      "ppid": 2,
+      "name": "[kworker/R-sync_wq]"
+    },
+    {
+      "uid": "0",
+      "pid": 7,
+      "ppid": 2,
+      "name": "[kworker/R-slub_flushwq]"
+    },
+    {
+      "uid": "0",
+      "pid": 8,
+      "ppid": 2,
+      "name": "[kworker/R-netns]"
+    },
+    {
+      "uid": "0",
+      "pid": 14,
+      "ppid": 2,
+      "name": "[kworker/R-mm_percpu_wq]"
+    },
+    {
+      "uid": "0",
+      "pid": 15,
+      "ppid": 2,
+      "name": "[rcu_tasks_kthread]"
+    },
+    {
+      "uid": "0",
+      "pid": 16,
+      "ppid": 2,
+      "name": "[rcu_tasks_trace_kthread]"
+    },
+    {
+      "uid": "0",
+      "pid": 17,
+      "ppid": 2,
+      "name": "[ksoftirqd/0]"
+    },
+    {
+      "uid": "0",
+      "pid": 18,
+      "ppid": 2,
+      "name": "[rcu_preempt]"
+    },
+    {
+      "uid": "0",
+      "pid": 19,
+      "ppid": 2,
+      "name": "[rcuog/0]"
+    },
+    {
+      "uid": "0",
+      "pid": 20,
+      "ppid": 2,
+      "name": "[rcuop/0]"
+    },
+    {
+      "uid": "0",
+      "pid": 21,
+      "ppid": 2,
+      "name": "[rcub/0]"
+    },
+    {
+      "uid": "0",
+      "pid": 22,
+      "ppid": 2,
+      "name": "[rcu_exp_par_gp_kthread_worker/0]"
+    },
+    {
+      "uid": "0",
+      "pid": 23,
+      "ppid": 2,
+      "name": "[rcu_exp_gp_kthread_worker]"
+    },
+    {
+      "uid": "0",
+      "pid": 24,
+      "ppid": 2,
+      "name": "[migration/0]"
+    },
+    {
+      "uid": "0",
+      "pid": 25,
+      "ppid": 2,
+      "name": "[idle_inject/0]"
+    },
+    {
+      "uid": "0",
+      "pid": 26,
+      "ppid": 2,
+      "name": "[cpuhp/0]"
+    },
+    {
+      "uid": "0",
+      "pid": 27,
+      "ppid": 2,
+      "name": "[cpuhp/1]"
+    },
+    {
+      "uid": "0",
+      "pid": 28,
+      "ppid": 2,
+      "name": "[idle_inject/1]"
+    },
+    {
+      "uid": "0",
+      "pid": 29,
+      "ppid": 2,
+      "name": "[migration/1]"
+    },
+    {
+      "uid": "0",
+      "pid": 30,
+      "ppid": 2,
+      "name": "[ksoftirqd/1]"
+    },
+    {
+      "uid": "0",
+      "pid": 32,
+      "ppid": 2,
+      "name": "[kworker/1:0H-kblockd]"
+    },
+    {
+      "uid": "0",
+      "pid": 33,
+      "ppid": 2,
+      "name": "[rcuop/1]"
+    },
+    {
+      "uid": "0",
+      "pid": 34,
+      "ppid": 2,
+      "name": "[cpuhp/2]"
+    },
+    {
+      "uid": "0",
+      "pid": 35,
+      "ppid": 2,
+      "name": "[idle_inject/2]"
+    },
+    {
+      "uid": "0",
+      "pid": 36,
+      "ppid": 2,
+      "name": "[migration/2]"
+    },
+    {
+      "uid": "0",
+      "pid": 37,
+      "ppid": 2,
+      "name": "[ksoftirqd/2]"
+    },
+    {
+      "uid": "0",
+      "pid": 39,
+      "ppid": 2,
+      "name": "[kworker/2:0H-kverityd]"
+    },
+    {
+      "uid": "0",
+      "pid": 40,
+      "ppid": 2,
+      "name": "[rcuop/2]"
+    },
+    {
+      "uid": "0",
+      "pid": 41,
+      "ppid": 2,
+      "name": "[cpuhp/3]"
+    },
+    {
+      "uid": "0",
+      "pid": 42,
+      "ppid": 2,
+      "name": "[idle_inject/3]"
+    },
+    {
+      "uid": "0",
+      "pid": 43,
+      "ppid": 2,
+      "name": "[migration/3]"
+    },
+    {
+      "uid": "0",
+      "pid": 44,
+      "ppid": 2,
+      "name": "[ksoftirqd/3]"
+    },
+    {
+      "uid": "0",
+      "pid": 47,
+      "ppid": 2,
+      "name": "[rcuop/3]"
+    },
+    {
+      "uid": "0",
+      "pid": 48,
+      "ppid": 2,
+      "name": "[cpuhp/4]"
+    },
+    {
+      "uid": "0",
+      "pid": 49,
+      "ppid": 2,
+      "name": "[idle_inject/4]"
+    },
+    {
+      "uid": "0",
+      "pid": 50,
+      "ppid": 2,
+      "name": "[migration/4]"
+    },
+    {
+      "uid": "0",
+      "pid": 51,
+      "ppid": 2,
+      "name": "[ksoftirqd/4]"
+    },
+    {
+      "uid": "0",
+      "pid": 54,
+      "ppid": 2,
+      "name": "[rcuog/4]"
+    },
+    {
+      "uid": "0",
+      "pid": 55,
+      "ppid": 2,
+      "name": "[rcuop/4]"
+    },
+    {
+      "uid": "0",
+      "pid": 56,
+      "ppid": 2,
+      "name": "[cpuhp/5]"
+    },
+    {
+      "uid": "0",
+      "pid": 57,
+      "ppid": 2,
+      "name": "[idle_inject/5]"
+    },
+    {
+      "uid": "0",
+      "pid": 58,
+      "ppid": 2,
+      "name": "[migration/5]"
+    },
+    {
+      "uid": "0",
+      "pid": 59,
+      "ppid": 2,
+      "name": "[ksoftirqd/5]"
+    },
+    {
+      "uid": "0",
+      "pid": 62,
+      "ppid": 2,
+      "name": "[rcuop/5]"
+    },
+    {
+      "uid": "0",
+      "pid": 63,
+      "ppid": 2,
+      "name": "[cpuhp/6]"
+    },
+    {
+      "uid": "0",
+      "pid": 64,
+      "ppid": 2,
+      "name": "[idle_inject/6]"
+    },
+    {
+      "uid": "0",
+      "pid": 65,
+      "ppid": 2,
+      "name": "[migration/6]"
+    },
+    {
+      "uid": "0",
+      "pid": 66,
+      "ppid": 2,
+      "name": "[ksoftirqd/6]"
+    },
+    {
+      "uid": "0",
+      "pid": 69,
+      "ppid": 2,
+      "name": "[rcuop/6]"
+    },
+    {
+      "uid": "0",
+      "pid": 70,
+      "ppid": 2,
+      "name": "[cpuhp/7]"
+    },
+    {
+      "uid": "0",
+      "pid": 71,
+      "ppid": 2,
+      "name": "[idle_inject/7]"
+    },
+    {
+      "uid": "0",
+      "pid": 72,
+      "ppid": 2,
+      "name": "[migration/7]"
+    },
+    {
+      "uid": "0",
+      "pid": 73,
+      "ppid": 2,
+      "name": "[ksoftirqd/7]"
+    },
+    {
+      "uid": "0",
+      "pid": 76,
+      "ppid": 2,
+      "name": "[rcuop/7]"
+    },
+    {
+      "uid": "0",
+      "pid": 79,
+      "ppid": 2,
+      "name": "[kworker/R-inet_frag_wq]"
+    },
+    {
+      "uid": "0",
+      "pid": 80,
+      "ppid": 2,
+      "name": "[kauditd]"
+    },
+    {
+      "uid": "0",
+      "pid": 81,
+      "ppid": 2,
+      "name": "[khungtaskd]"
+    },
+    {
+      "uid": "0",
+      "pid": 82,
+      "ppid": 2,
+      "name": "[oom_reaper]"
+    },
+    {
+      "uid": "0",
+      "pid": 84,
+      "ppid": 2,
+      "name": "[kworker/R-writeback]"
+    },
+    {
+      "uid": "0",
+      "pid": 85,
+      "ppid": 2,
+      "name": "[kcompactd0]"
+    },
+    {
+      "uid": "0",
+      "pid": 86,
+      "ppid": 2,
+      "name": "[khugepaged]"
+    },
+    {
+      "uid": "0",
+      "pid": 88,
+      "ppid": 2,
+      "name": "[kworker/R-kblockd]"
+    },
+    {
+      "uid": "0",
+      "pid": 91,
+      "ppid": 2,
+      "name": "[kworker/R-edac-poller]"
+    },
+    {
+      "uid": "0",
+      "pid": 92,
+      "ppid": 2,
+      "name": "[kworker/R-devfreq_wq]"
+    },
+    {
+      "uid": "0",
+      "pid": 93,
+      "ppid": 2,
+      "name": "[watchdogd]"
+    },
+    {
+      "uid": "0",
+      "pid": 95,
+      "ppid": 2,
+      "name": "[kworker/R-quota_events_unbound]"
+    },
+    {
+      "uid": "0",
+      "pid": 99,
+      "ppid": 2,
+      "name": "[kswapd0]"
+    },
+    {
+      "uid": "0",
+      "pid": 103,
+      "ppid": 2,
+      "name": "[kworker/R-bioset]"
+    },
+    {
+      "uid": "0",
+      "pid": 106,
+      "ppid": 2,
+      "name": "[kworker/R-nvme-wq]"
+    },
+    {
+      "uid": "0",
+      "pid": 107,
+      "ppid": 2,
+      "name": "[kworker/R-nvme-reset-wq]"
+    },
+    {
+      "uid": "0",
+      "pid": 108,
+      "ppid": 2,
+      "name": "[kworker/R-nvme-delete-wq]"
+    },
+    {
+      "uid": "0",
+      "pid": 109,
+      "ppid": 2,
+      "name": "[kworker/R-vfio-irqfd-cleanup]"
+    },
+    {
+      "uid": "0",
+      "pid": 110,
+      "ppid": 2,
+      "name": "[kworker/R-uas]"
+    },
+    {
+      "uid": "0",
+      "pid": 111,
+      "ppid": 2,
+      "name": "[kworker/R-dm_bufio_cache]"
+    },
+    {
+      "uid": "0",
+      "pid": 112,
+      "ppid": 2,
+      "name": "[hwrng]"
+    },
+    {
+      "uid": "0",
+      "pid": 113,
+      "ppid": 2,
+      "name": "[irq/15-gunyah_rm_tx]"
+    },
+    {
+      "uid": "0",
+      "pid": 114,
+      "ppid": 2,
+      "name": "[irq/16-gunyah_rm_rx]"
+    },
+    {
+      "uid": "0",
+      "pid": 115,
+      "ppid": 2,
+      "name": "[kworker/R-mld]"
+    },
+    {
+      "uid": "0",
+      "pid": 116,
+      "ppid": 2,
+      "name": "[kworker/R-ipv6_addrconf]"
+    },
+    {
+      "uid": "0",
+      "pid": 140,
+      "ppid": 2,
+      "name": "[dmabuf-deferred-free-worker]"
+    },
+    {
+      "uid": "0",
+      "pid": 141,
+      "ppid": 2,
+      "name": "[qcom,system-pool-refill-thread]"
+    },
+    {
+      "uid": "0",
+      "pid": 142,
+      "ppid": 2,
+      "name": "[rbin]"
+    },
+    {
+      "uid": "0",
+      "pid": 143,
+      "ppid": 2,
+      "name": "[rbin_shrink]"
+    },
+    {
+      "uid": "0",
+      "pid": 145,
+      "ppid": 2,
+      "name": "[adci_thread]"
+    },
+    {
+      "uid": "0",
+      "pid": 150,
+      "ppid": 2,
+      "name": "[irq/29-qcom,qmp-tme]"
+    },
+    {
+      "uid": "0",
+      "pid": 151,
+      "ppid": 2,
+      "name": "[mem_buf_trusted_vm_rcvr]"
+    },
+    {
+      "uid": "0",
+      "pid": 152,
+      "ppid": 2,
+      "name": "[mem_buf_oem_vm_rcvr]"
+    },
+    {
+      "uid": "0",
+      "pid": 155,
+      "ppid": 2,
+      "name": "[halt_drain_rqs]"
+    },
+    {
+      "uid": "0",
+      "pid": 156,
+      "ppid": 2,
+      "name": "[core_ctl]"
+    },
+    {
+      "uid": "0",
+      "pid": 157,
+      "ppid": 2,
+      "name": "[msm-watchdog]"
+    },
+    {
+      "uid": "0",
+      "pid": 159,
+      "ppid": 2,
+      "name": "[irq/67-arm-smmu-context-fault]"
+    },
+    {
+      "uid": "0",
+      "pid": 161,
+      "ppid": 2,
+      "name": "[irq/68-arm-smmu-context-fault]"
+    },
+    {
+      "uid": "0",
+      "pid": 162,
+      "ppid": 2,
+      "name": "[irq/70-arm-smmu-context-fault]"
+    },
+    {
+      "uid": "0",
+      "pid": 163,
+      "ppid": 2,
+      "name": "[irq/71-arm-smmu-context-fault]"
+    },
+    {
+      "uid": "0",
+      "pid": 164,
+      "ppid": 2,
+      "name": "[irq/202-c229000.tsens0]"
+    },
+    {
+      "uid": "0",
+      "pid": 165,
+      "ppid": 2,
+      "name": "[irq/203-c229000.tsens0]"
+    },
+    {
+      "uid": "0",
+      "pid": 166,
+      "ppid": 2,
+      "name": "[irq/204-c22a000.tsens1]"
+    },
+    {
+      "uid": "0",
+      "pid": 167,
+      "ppid": 2,
+      "name": "[irq/205-c22a000.tsens1]"
+    },
+    {
+      "uid": "0",
+      "pid": 168,
+      "ppid": 2,
+      "name": "[irq/206-c22b000.tsens2]"
+    },
+    {
+      "uid": "0",
+      "pid": 169,
+      "ppid": 2,
+      "name": "[irq/207-c22b000.tsens2]"
+    },
+    {
+      "uid": "0",
+      "pid": 170,
+      "ppid": 2,
+      "name": "[irq/72-arm-smmu-context-fault]"
+    },
+    {
+      "uid": "0",
+      "pid": 171,
+      "ppid": 2,
+      "name": "[irq/209-c22c000.tsens3]"
+    },
+    {
+      "uid": "0",
+      "pid": 172,
+      "ppid": 2,
+      "name": "[irq/211-c22c000.tsens3]"
+    },
+    {
+      "uid": "0",
+      "pid": 173,
+      "ppid": 2,
+      "name": "[irq/73-arm-smmu-context-fault]"
+    },
+    {
+      "uid": "0",
+      "pid": 184,
+      "ppid": 2,
+      "name": "[irq/214-c22d000.tsens4]"
+    },
+    {
+      "uid": "0",
+      "pid": 185,
+      "ppid": 2,
+      "name": "[irq/215-c22d000.tsens4]"
+    },
+    {
+      "uid": "0",
+      "pid": 186,
+      "ppid": 2,
+      "name": "[irq/74-arm-smmu-context-fault]"
+    },
+    {
+      "uid": "0",
+      "pid": 187,
+      "ppid": 2,
+      "name": "[irq/75-arm-smmu-context-fault]"
+    },
+    {
+      "uid": "0",
+      "pid": 188,
+      "ppid": 2,
+      "name": "[irq/222-c22e000.tsens5]"
+    },
+    {
+      "uid": "0",
+      "pid": 189,
+      "ppid": 2,
+      "name": "[irq/223-c22e000.tsens5]"
+    },
+    {
+      "uid": "0",
+      "pid": 190,
+      "ppid": 2,
+      "name": "[irq/224-c22f000.tsens6]"
+    },
+    {
+      "uid": "0",
+      "pid": 191,
+      "ppid": 2,
+      "name": "[irq/225-c22f000.tsens6]"
+    },
+    {
+      "uid": "0",
+      "pid": 192,
+      "ppid": 2,
+      "name": "[kworker/R-sec_abc_wq]"
+    },
+    {
+      "uid": "0",
+      "pid": 193,
+      "ppid": 2,
+      "name": "[irq/76-arm-smmu-context-fault]"
+    },
+    {
+      "uid": "0",
+      "pid": 194,
+      "ppid": 2,
+      "name": "[scsi_eh_0]"
+    },
+    {
+      "uid": "0",
+      "pid": 195,
+      "ppid": 2,
+      "name": "[kworker/R-scsi_tmf_0]"
+    },
+    {
+      "uid": "0",
+      "pid": 196,
+      "ppid": 2,
+      "name": "[kworker/R-qc_ufs_qos_swq]"
+    },
+    {
+      "uid": "0",
+      "pid": 197,
+      "ppid": 2,
+      "name": "[kworker/R-ufs_eh_wq_0]"
+    },
+    {
+      "uid": "0",
+      "pid": 198,
+      "ppid": 2,
+      "name": "[kworker/R-ufs_clkscaling_0]"
+    },
+    {
+      "uid": "0",
+      "pid": 202,
+      "ppid": 2,
+      "name": "[kworker/R-vlum]"
+    },
+    {
+      "uid": "0",
+      "pid": 203,
+      "ppid": 2,
+      "name": "[qrtr_ns]"
+    },
+    {
+      "uid": "0",
+      "pid": 204,
+      "ppid": 2,
+      "name": "[kworker/R-blk_sec_common]"
+    },
+    {
+      "uid": "0",
+      "pid": 209,
+      "ppid": 2,
+      "name": "[kworker/R-f2fs_truncate_wq]"
+    },
+    {
+      "uid": "0",
+      "pid": 210,
+      "ppid": 2,
+      "name": "[f2fs_ckpt-259:18]"
+    },
+    {
+      "uid": "0",
+      "pid": 211,
+      "ppid": 2,
+      "name": "[f2fs_flush-259:18]"
+    },
+    {
+      "uid": "0",
+      "pid": 212,
+      "ppid": 2,
+      "name": "[f2fs_discard-259:18]"
+    },
+    {
+      "uid": "0",
+      "pid": 213,
+      "ppid": 2,
+      "name": "[f2fs_gc-259:18]"
+    },
+    {
+      "uid": "0",
+      "pid": 214,
+      "ppid": 2,
+      "name": "[kworker/R-kdmflush/254:0]"
+    },
+    {
+      "uid": "0",
+      "pid": 215,
+      "ppid": 2,
+      "name": "[kworker/R-kdmflush/254:1]"
+    },
+    {
+      "uid": "0",
+      "pid": 216,
+      "ppid": 2,
+      "name": "[kworker/R-kdmflush/254:2]"
+    },
+    {
+      "uid": "0",
+      "pid": 217,
+      "ppid": 2,
+      "name": "[kworker/R-kdmflush/254:3]"
+    },
+    {
+      "uid": "0",
+      "pid": 218,
+      "ppid": 2,
+      "name": "[kworker/R-kdmflush/254:4]"
+    },
+    {
+      "uid": "0",
+      "pid": 219,
+      "ppid": 2,
+      "name": "[kworker/R-kdmflush/254:5]"
+    },
+    {
+      "uid": "0",
+      "pid": 220,
+      "ppid": 2,
+      "name": "[kworker/R-kdmflush/254:6]"
+    },
+    {
+      "uid": "0",
+      "pid": 221,
+      "ppid": 2,
+      "name": "[kworker/R-kdmflush/254:7]"
+    },
+    {
+      "uid": "0",
+      "pid": 222,
+      "ppid": 2,
+      "name": "[kworker/R-kverityd]"
+    },
+    {
+      "uid": "0",
+      "pid": 223,
+      "ppid": 2,
+      "name": "[erofs_worker/0]"
+    },
+    {
+      "uid": "0",
+      "pid": 224,
+      "ppid": 2,
+      "name": "[erofs_worker/1]"
+    },
+    {
+      "uid": "0",
+      "pid": 225,
+      "ppid": 2,
+      "name": "[erofs_worker/2]"
+    },
+    {
+      "uid": "0",
+      "pid": 226,
+      "ppid": 2,
+      "name": "[erofs_worker/3]"
+    },
+    {
+      "uid": "0",
+      "pid": 227,
+      "ppid": 2,
+      "name": "[erofs_worker/4]"
+    },
+    {
+      "uid": "0",
+      "pid": 228,
+      "ppid": 2,
+      "name": "[erofs_worker/5]"
+    },
+    {
+      "uid": "0",
+      "pid": 229,
+      "ppid": 2,
+      "name": "[erofs_worker/6]"
+    },
+    {
+      "uid": "0",
+      "pid": 230,
+      "ppid": 2,
+      "name": "[erofs_worker/7]"
+    },
+    {
+      "uid": "0",
+      "pid": 231,
+      "ppid": 2,
+      "name": "[kworker/R-kdmflush/254:8]"
+    },
+    {
+      "uid": "0",
+      "pid": 232,
+      "ppid": 2,
+      "name": "[kworker/R-kverityd]"
+    },
+    {
+      "uid": "0",
+      "pid": 233,
+      "ppid": 2,
+      "name": "[kworker/R-kdmflush/254:9]"
+    },
+    {
+      "uid": "0",
+      "pid": 234,
+      "ppid": 2,
+      "name": "[kworker/R-kverityd]"
+    },
+    {
+      "uid": "0",
+      "pid": 235,
+      "ppid": 2,
+      "name": "[kworker/R-kdmflush/254:10]"
+    },
+    {
+      "uid": "0",
+      "pid": 236,
+      "ppid": 2,
+      "name": "[kworker/R-kverityd]"
+    },
+    {
+      "uid": "0",
+      "pid": 237,
+      "ppid": 2,
+      "name": "[kworker/R-kdmflush/254:11]"
+    },
+    {
+      "uid": "0",
+      "pid": 238,
+      "ppid": 2,
+      "name": "[kworker/R-kverityd]"
+    },
+    {
+      "uid": "0",
+      "pid": 239,
+      "ppid": 2,
+      "name": "[kworker/R-kdmflush/254:12]"
+    },
+    {
+      "uid": "0",
+      "pid": 240,
+      "ppid": 2,
+      "name": "[kworker/R-kverityd]"
+    },
+    {
+      "uid": "0",
+      "pid": 241,
+      "ppid": 2,
+      "name": "[kworker/R-kdmflush/254:13]"
+    },
+    {
+      "uid": "0",
+      "pid": 242,
+      "ppid": 2,
+      "name": "[kworker/R-kverityd]"
+    },
+    {
+      "uid": "0",
+      "pid": 243,
+      "ppid": 2,
+      "name": "[kworker/R-kdmflush/254:14]"
+    },
+    {
+      "uid": "0",
+      "pid": 244,
+      "ppid": 2,
+      "name": "[kworker/R-kverityd]"
+    },
+    {
+      "uid": "0",
+      "pid": 245,
+      "ppid": 2,
+      "name": "[kworker/R-kdmflush/254:15]"
+    },
+    {
+      "uid": "0",
+      "pid": 246,
+      "ppid": 2,
+      "name": "[kworker/R-kverityd]"
+    },
+    {
+      "uid": "0",
+      "pid": 252,
+      "ppid": 1,
+      "name": "init"
+    },
+    {
+      "uid": "0",
+      "pid": 253,
+      "ppid": 1,
+      "name": "ueventd"
+    },
+    {
+      "uid": "0",
+      "pid": 330,
+      "ppid": 2,
+      "name": "[kworker/R-kdmflush/254:28]"
+    },
+    {
+      "uid": "0",
+      "pid": 335,
+      "ppid": 2,
+      "name": "[kworker/R-kdmflush/254:33]"
+    },
+    {
+      "uid": "0",
+      "pid": 336,
+      "ppid": 2,
+      "name": "[kworker/R-kdmflush/254:34]"
+    },
+    {
+      "uid": "0",
+      "pid": 337,
+      "ppid": 2,
+      "name": "[kworker/R-kdmflush/254:35]"
+    },
+    {
+      "uid": "0",
+      "pid": 338,
+      "ppid": 2,
+      "name": "[kworker/R-kdmflush/254:36]"
+    },
+    {
+      "uid": "0",
+      "pid": 341,
+      "ppid": 2,
+      "name": "[kworker/R-kdmflush/254:39]"
+    },
+    {
+      "uid": "0",
+      "pid": 342,
+      "ppid": 2,
+      "name": "[kworker/R-kdmflush/254:40]"
+    },
+    {
+      "uid": "0",
+      "pid": 343,
+      "ppid": 2,
+      "name": "[kworker/R-kdmflush/254:41]"
+    },
+    {
+      "uid": "0",
+      "pid": 344,
+      "ppid": 2,
+      "name": "[kworker/R-kdmflush/254:42]"
+    },
+    {
+      "uid": "0",
+      "pid": 345,
+      "ppid": 2,
+      "name": "[kworker/R-kdmflush/254:43]"
+    },
+    {
+      "uid": "0",
+      "pid": 347,
+      "ppid": 2,
+      "name": "[kworker/R-kdmflush/254:45]"
+    },
+    {
+      "uid": "0",
+      "pid": 348,
+      "ppid": 2,
+      "name": "[kworker/R-kdmflush/254:46]"
+    },
+    {
+      "uid": "0",
+      "pid": 350,
+      "ppid": 2,
+      "name": "[kworker/R-kdmflush/254:48]"
+    },
+    {
+      "uid": "0",
+      "pid": 351,
+      "ppid": 2,
+      "name": "[kworker/R-kdmflush/254:49]"
+    },
+    {
+      "uid": "0",
+      "pid": 352,
+      "ppid": 2,
+      "name": "[kworker/R-kdmflush/254:50]"
+    },
+    {
+      "uid": "0",
+      "pid": 353,
+      "ppid": 2,
+      "name": "[kworker/R-kdmflush/254:51]"
+    },
+    {
+      "uid": "0",
+      "pid": 354,
+      "ppid": 2,
+      "name": "[kworker/R-kdmflush/254:52]"
+    },
+    {
+      "uid": "0",
+      "pid": 355,
+      "ppid": 2,
+      "name": "[kworker/R-kdmflush/254:53]"
+    },
+    {
+      "uid": "0",
+      "pid": 357,
+      "ppid": 2,
+      "name": "[kworker/R-kdmflush/254:55]"
+    },
+    {
+      "uid": "0",
+      "pid": 358,
+      "ppid": 2,
+      "name": "[kworker/R-kdmflush/254:56]"
+    },
+    {
+      "uid": "0",
+      "pid": 359,
+      "ppid": 2,
+      "name": "[kworker/R-kdmflush/254:57]"
+    },
+    {
+      "uid": "0",
+      "pid": 360,
+      "ppid": 2,
+      "name": "[kworker/R-kdmflush/254:58]"
+    },
+    {
+      "uid": "0",
+      "pid": 361,
+      "ppid": 2,
+      "name": "[kworker/R-kdmflush/254:59]"
+    },
+    {
+      "uid": "0",
+      "pid": 362,
+      "ppid": 2,
+      "name": "[kworker/R-kdmflush/254:60]"
+    },
+    {
+      "uid": "0",
+      "pid": 363,
+      "ppid": 2,
+      "name": "[kworker/R-kdmflush/254:61]"
+    },
+    {
+      "uid": "0",
+      "pid": 365,
+      "ppid": 2,
+      "name": "[kworker/R-kdmflush/254:63]"
+    },
+    {
+      "uid": "0",
+      "pid": 367,
+      "ppid": 2,
+      "name": "[kworker/R-kdmflush/254:65]"
+    },
+    {
+      "uid": "0",
+      "pid": 368,
+      "ppid": 2,
+      "name": "[kworker/R-kdmflush/254:66]"
+    },
+    {
+      "uid": "0",
+      "pid": 370,
+      "ppid": 2,
+      "name": "[kworker/R-kdmflush/254:68]"
+    },
+    {
+      "uid": "0",
+      "pid": 371,
+      "ppid": 2,
+      "name": "[kworker/R-kdmflush/254:69]"
+    },
+    {
+      "uid": "0",
+      "pid": 373,
+      "ppid": 2,
+      "name": "[kworker/R-kdmflush/254:71]"
+    },
+    {
+      "uid": "0",
+      "pid": 379,
+      "ppid": 2,
+      "name": "[kworker/R-ext4-rsv-conversion]"
+    },
+    {
+      "uid": "0",
+      "pid": 380,
+      "ppid": 2,
+      "name": "[kworker/R-ext4-rsv-conversion]"
+    },
+    {
+      "uid": "0",
+      "pid": 381,
+      "ppid": 2,
+      "name": "[kworker/R-ext4-rsv-conversion]"
+    },
+    {
+      "uid": "0",
+      "pid": 464,
+      "ppid": 2,
+      "name": "[kworker/R-five_wq]"
+    },
+    {
+      "uid": "0",
+      "pid": 483,
+      "ppid": 2,
+      "name": "[krfcommd]"
+    },
+    {
+      "uid": "0",
+      "pid": 508,
+      "ppid": 2,
+      "name": "[kworker/R-ssc_flip_wq]"
+    },
+    {
+      "uid": "0",
+      "pid": 509,
+      "ppid": 2,
+      "name": "[kworker/R-sdump_wq]"
+    },
+    {
+      "uid": "0",
+      "pid": 510,
+      "ppid": 2,
+      "name": "[kworker/R-accel_wq]"
+    },
+    {
+      "uid": "0",
+      "pid": 511,
+      "ppid": 2,
+      "name": "[kworker/R-prox_wq]"
+    },
+    {
+      "uid": "0",
+      "pid": 513,
+      "ppid": 2,
+      "name": "[kworker/R-sub_accel_wq]"
+    },
+    {
+      "uid": "0",
+      "pid": 694,
+      "ppid": 2,
+      "name": "[kworker/R-memlat_wq]"
+    },
+    {
+      "uid": "0",
+      "pid": 939,
+      "ppid": 2,
+      "name": "[irq/77-arm-smmu-context-fault]"
+    },
+    {
+      "uid": "1092",
+      "pid": 940,
+      "ppid": 1,
+      "name": "prng_seeder"
+    },
+    {
+      "uid": "0",
+      "pid": 943,
+      "ppid": 2,
+      "name": "[irq/240-pmh0104-temp-alarm]"
+    },
+    {
+      "uid": "0",
+      "pid": 944,
+      "ppid": 2,
+      "name": "[spi4]"
+    },
+    {
+      "uid": "0",
+      "pid": 948,
+      "ppid": 2,
+      "name": "[irq/242-pmic_pwrkey]"
+    },
+    {
+      "uid": "0",
+      "pid": 953,
+      "ppid": 2,
+      "name": "[irq/243-pmic_resin]"
+    },
+    {
+      "uid": "0",
+      "pid": 954,
+      "ppid": 2,
+      "name": "[spi17]"
+    },
+    {
+      "uid": "0",
+      "pid": 982,
+      "ppid": 2,
+      "name": "[kworker/R-samsung_mobile_device:sec-auth-]"
+    },
+    {
+      "uid": "0",
+      "pid": 983,
+      "ppid": 2,
+      "name": "[msm_perf:events_notify]"
+    },
+    {
+      "uid": "0",
+      "pid": 985,
+      "ppid": 2,
+      "name": "[irq/246-back_cover]"
+    },
+    {
+      "uid": "0",
+      "pid": 989,
+      "ppid": 2,
+      "name": "[irq/245-flip]"
+    },
+    {
+      "uid": "0",
+      "pid": 997,
+      "ppid": 2,
+      "name": "[irq/247-protocol_irq]"
+    },
+    {
+      "uid": "0",
+      "pid": 999,
+      "ppid": 2,
+      "name": "[irq/241-pmr735d-temp-alarm]"
+    },
+    {
+      "uid": "0",
+      "pid": 1000,
+      "ppid": 2,
+      "name": "[khvcd]"
+    },
+    {
+      "uid": "0",
+      "pid": 1001,
+      "ppid": 2,
+      "name": "[khppd]"
+    },
+    {
+      "uid": "0",
+      "pid": 1002,
+      "ppid": 2,
+      "name": "[cdsprm-wq]"
+    },
+    {
+      "uid": "0",
+      "pid": 1003,
+      "ppid": 2,
+      "name": "[kworker/R-cdsprm-wq-delay]"
+    },
+    {
+      "uid": "0",
+      "pid": 1005,
+      "ppid": 2,
+      "name": "[irq/261-max17342-irq]"
+    },
+    {
+      "uid": "0",
+      "pid": 1006,
+      "ppid": 2,
+      "name": "[irq/262-pmh0101-temp-alarm]"
+    },
+    {
+      "uid": "0",
+      "pid": 1008,
+      "ppid": 2,
+      "name": "[irq/263-pmh0110-d-temp-alarm]"
+    },
+    {
+      "uid": "0",
+      "pid": 1009,
+      "ppid": 2,
+      "name": "[irq/264-LOWER_C2C_DETECT]"
+    },
+    {
+      "uid": "0",
+      "pid": 1010,
+      "ppid": 2,
+      "name": "[irq/265-MAIN_BAT_DETECT]"
+    },
+    {
+      "uid": "0",
+      "pid": 1012,
+      "ppid": 2,
+      "name": "[irq/266-SUB_BAT_DETECT]"
+    },
+    {
+      "uid": "0",
+      "pid": 1014,
+      "ppid": 2,
+      "name": "[irq/267-pmh0110-f-temp-alarm]"
+    },
+    {
+      "uid": "0",
+      "pid": 1020,
+      "ppid": 2,
+      "name": "[kworker/R-bootc_wq]"
+    },
+    {
+      "uid": "0",
+      "pid": 1021,
+      "ppid": 2,
+      "name": "[irq/268-pmh0110-g-temp-alarm]"
+    },
+    {
+      "uid": "0",
+      "pid": 1024,
+      "ppid": 2,
+      "name": "[irq/269-pmh0110-i-temp-alarm]"
+    },
+    {
+      "uid": "0",
+      "pid": 1027,
+      "ppid": 2,
+      "name": "[kworker/R-cpucp_wq]"
+    },
+    {
+      "uid": "0",
+      "pid": 1029,
+      "ppid": 2,
+      "name": "[irq/78-arm-smmu-context-fault]"
+    },
+    {
+      "uid": "0",
+      "pid": 1030,
+      "ppid": 2,
+      "name": "[irq/270-ocp-warn-irq]"
+    },
+    {
+      "uid": "1013",
+      "pid": 1032,
+      "ppid": 1,
+      "name": "audioadsprpcd"
+    },
+    {
+      "uid": "0",
+      "pid": 1033,
+      "ppid": 2,
+      "name": "[irq/271-bcl-lvl0]"
+    },
+    {
+      "uid": "0",
+      "pid": 1034,
+      "ppid": 2,
+      "name": "[kworker/6:2H-kverityd]"
+    },
+    {
+      "uid": "0",
+      "pid": 1035,
+      "ppid": 2,
+      "name": "[zram_comp]"
+    },
+    {
+      "uid": "0",
+      "pid": 1036,
+      "ppid": 2,
+      "name": "[kworker/R-cfg80211]"
+    },
+    {
+      "uid": "0",
+      "pid": 1037,
+      "ppid": 2,
+      "name": "[kworker/R-typec_manager_event]"
+    },
+    {
+      "uid": "0",
+      "pid": 1038,
+      "ppid": 2,
+      "name": "[kworker/R-typec_manager_muic_event]"
+    },
+    {
+      "uid": "0",
+      "pid": 1041,
+      "ppid": 2,
+      "name": "[kworker/R-bwmon_wq]"
+    },
+    {
+      "uid": "0",
+      "pid": 1042,
+      "ppid": 2,
+      "name": "[irq/317-310b3400.qcom,bwmon-llcc-gold]"
+    },
+    {
+      "uid": "0",
+      "pid": 1043,
+      "ppid": 2,
+      "name": "[irq/317-310b7400.qcom,bwmon-llcc-prime]"
+    },
+    {
+      "uid": "1036",
+      "pid": 1044,
+      "ppid": 1,
+      "name": "logd"
+    },
+    {
+      "uid": "0",
+      "pid": 1045,
+      "ppid": 2,
+      "name": "[irq/320-31091000.qcom,bwmon-ddr]"
+    },
+    {
+      "uid": "1069",
+      "pid": 1046,
+      "ppid": 1,
+      "name": "lmkd"
+    },
+    {
+      "uid": "1000",
+      "pid": 1047,
+      "ppid": 1,
+      "name": "servicemanager"
+    },
+    {
+      "uid": "0",
+      "pid": 1049,
+      "ppid": 2,
+      "name": "[kworker/R-qcrypto_seq_response_wq]"
+    },
+    {
+      "uid": "0",
+      "pid": 1050,
+      "ppid": 2,
+      "name": "[irq/79-arm-smmu-context-fault]"
+    },
+    {
+      "uid": "1000",
+      "pid": 1052,
+      "ppid": 1,
+      "name": "vndservicemanager"
+    },
+    {
+      "uid": "0",
+      "pid": 1058,
+      "ppid": 2,
+      "name": "[kworker/6:4H-kblockd]"
+    },
+    {
+      "uid": "0",
+      "pid": 1068,
+      "ppid": 2,
+      "name": "[kworker/R-mpcie_wq]"
+    },
+    {
+      "uid": "0",
+      "pid": 1070,
+      "ppid": 2,
+      "name": "[irq/325-goodix_fp_irq]"
+    },
+    {
+      "uid": "0",
+      "pid": 1071,
+      "ppid": 2,
+      "name": "[irq/80-arm-smmu-context-fault]"
+    },
+    {
+      "uid": "0",
+      "pid": 1072,
+      "ppid": 2,
+      "name": "[kworker/R-pcie_l1ss_ctrl_wq]"
+    },
+    {
+      "uid": "0",
+      "pid": 1074,
+      "ppid": 2,
+      "name": "[kworker/R-fingerprint_debug_wq]"
+    },
+    {
+      "uid": "0",
+      "pid": 1075,
+      "ppid": 2,
+      "name": "[psimon]"
+    },
+    {
+      "uid": "0",
+      "pid": 1080,
+      "ppid": 2,
+      "name": "[kworker/R-pcie_error_wq0]"
+    },
+    {
+      "uid": "0",
+      "pid": 1081,
+      "ppid": 2,
+      "name": "[kthread_spi_cnss_writer]"
+    },
+    {
+      "uid": "0",
+      "pid": 1082,
+      "ppid": 2,
+      "name": "[kthread_spi_cnss_reader]"
+    },
+    {
+      "uid": "0",
+      "pid": 1085,
+      "ppid": 2,
+      "name": "[irq/337-int_global_int]"
+    },
+    {
+      "uid": "0",
+      "pid": 1086,
+      "ppid": 2,
+      "name": "[irq/340-pn547_clk_req]"
+    },
+    {
+      "uid": "0",
+      "pid": 1087,
+      "ppid": 2,
+      "name": "[irq/341-qpt_data_irq]"
+    },
+    {
+      "uid": "0",
+      "pid": 1088,
+      "ppid": 2,
+      "name": "[irq/342-qpt_overflow_irq]"
+    },
+    {
+      "uid": "0",
+      "pid": 1089,
+      "ppid": 2,
+      "name": "[irq/343-tfa98xx]"
+    },
+    {
+      "uid": "0",
+      "pid": 1090,
+      "ppid": 2,
+      "name": "[irq/362-smp2p_2]"
+    },
+    {
+      "uid": "0",
+      "pid": 1091,
+      "ppid": 2,
+      "name": "[irq/344-generic-irq]"
+    },
+    {
+      "uid": "0",
+      "pid": 1092,
+      "ppid": 2,
+      "name": "[kworker/R-SEC-PD-EVENT]"
+    },
+    {
+      "uid": "0",
+      "pid": 1093,
+      "ppid": 2,
+      "name": "[kworker/R-sns_event_check_wq]"
+    },
+    {
+      "uid": "0",
+      "pid": 1094,
+      "ppid": 2,
+      "name": "[kworker/R-cifsiod]"
+    },
+    {
+      "uid": "0",
+      "pid": 1095,
+      "ppid": 2,
+      "name": "[kworker/R-smb3decryptd]"
+    },
+    {
+      "uid": "0",
+      "pid": 1096,
+      "ppid": 2,
+      "name": "[kworker/R-cifsfileinfoput]"
+    },
+    {
+      "uid": "0",
+      "pid": 1097,
+      "ppid": 2,
+      "name": "[kworker/R-cifsoplockd]"
+    },
+    {
+      "uid": "0",
+      "pid": 1098,
+      "ppid": 2,
+      "name": "[irq/345-smp2p_5]"
+    },
+    {
+      "uid": "0",
+      "pid": 1099,
+      "ppid": 2,
+      "name": "[kworker/R-deferredclose]"
+    },
+    {
+      "uid": "0",
+      "pid": 1100,
+      "ppid": 2,
+      "name": "[kworker/R-sns_event_check_wq]"
+    },
+    {
+      "uid": "0",
+      "pid": 1101,
+      "ppid": 2,
+      "name": "[kworker/R-serverclose]"
+    },
+    {
+      "uid": "0",
+      "pid": 1102,
+      "ppid": 2,
+      "name": "[kworker/R-cfid_put_wq]"
+    },
+    {
+      "uid": "0",
+      "pid": 1103,
+      "ppid": 2,
+      "name": "[irq/444-smp2p_1]"
+    },
+    {
+      "uid": "0",
+      "pid": 1104,
+      "ppid": 2,
+      "name": "[kworker/R-sns_event_check_wq]"
+    },
+    {
+      "uid": "0",
+      "pid": 1105,
+      "ppid": 2,
+      "name": "[irq/346-smp2p_19]"
+    },
+    {
+      "uid": "0",
+      "pid": 1106,
+      "ppid": 2,
+      "name": "[kworker/R-sns_event_check_wq]"
+    },
+    {
+      "uid": "0",
+      "pid": 1107,
+      "ppid": 2,
+      "name": "[irq/347-smp2p_22]"
+    },
+    {
+      "uid": "0",
+      "pid": 1108,
+      "ppid": 2,
+      "name": "[kworker/R-sns_event_check_wq]"
+    },
+    {
+      "uid": "0",
+      "pid": 1109,
+      "ppid": 2,
+      "name": "[compose-effects]"
+    },
+    {
+      "uid": "0",
+      "pid": 1110,
+      "ppid": 2,
+      "name": "[kworker/R-vib_workqueue]"
+    },
+    {
+      "uid": "0",
+      "pid": 1122,
+      "ppid": 2,
+      "name": "[irq/353-q6v5 wdog]"
+    },
+    {
+      "uid": "0",
+      "pid": 1123,
+      "ppid": 2,
+      "name": "[kworker/R-sec_input_irq_wq]"
+    },
+    {
+      "uid": "0",
+      "pid": 1124,
+      "ppid": 2,
+      "name": "[kworker/R-sec_ts_probe_wq]"
+    },
+    {
+      "uid": "0",
+      "pid": 1125,
+      "ppid": 2,
+      "name": "[kworker/R-sec_input_irq_wq]"
+    },
+    {
+      "uid": "0",
+      "pid": 1126,
+      "ppid": 2,
+      "name": "[kworker/R-sec_ts_probe_wq]"
+    },
+    {
+      "uid": "0",
+      "pid": 1127,
+      "ppid": 2,
+      "name": "[irq/351-SX9385]"
+    },
+    {
+      "uid": "1000",
+      "pid": 1130,
+      "ppid": 1,
+      "name": "qseecomd"
+    },
+    {
+      "uid": "0",
+      "pid": 1131,
+      "ppid": 1,
+      "name": "vold"
+    },
+    {
+      "uid": "0",
+      "pid": 1132,
+      "ppid": 2,
+      "name": "[irq/367-SX9385_SUB]"
+    },
+    {
+      "uid": "0",
+      "pid": 1134,
+      "ppid": 2,
+      "name": "[irq/368-bcl-lvl1]"
+    },
+    {
+      "uid": "0",
+      "pid": 1135,
+      "ppid": 2,
+      "name": "[jbd2/sda36-8]"
+    },
+    {
+      "uid": "0",
+      "pid": 1136,
+      "ppid": 2,
+      "name": "[kworker/R-ext4-rsv-conversion]"
+    },
+    {
+      "uid": "0",
+      "pid": 1137,
+      "ppid": 2,
+      "name": "[irq/369-msm_cvp]"
+    },
+    {
+      "uid": "0",
+      "pid": 1139,
+      "ppid": 2,
+      "name": "[kworker/R-msm_cvp_workerq_iris]"
+    },
+    {
+      "uid": "0",
+      "pid": 1140,
+      "ppid": 2,
+      "name": "[kworker/R-pm_workerq_iris]"
+    },
+    {
+      "uid": "0",
+      "pid": 1141,
+      "ppid": 2,
+      "name": "[kworker/R-pm_workq]"
+    },
+    {
+      "uid": "0",
+      "pid": 1142,
+      "ppid": 2,
+      "name": "[kworker/R-batch_workq]"
+    },
+    {
+      "uid": "0",
+      "pid": 1143,
+      "ppid": 2,
+      "name": "[irq/371-msm-vidc]"
+    },
+    {
+      "uid": "0",
+      "pid": 1145,
+      "ppid": 2,
+      "name": "[irq/372-pwr_event_irq]"
+    },
+    {
+      "uid": "0",
+      "pid": 1146,
+      "ppid": 2,
+      "name": "[irq/373-dp_hs_phy_irq]"
+    },
+    {
+      "uid": "0",
+      "pid": 1147,
+      "ppid": 2,
+      "name": "[irq/374-dm_hs_phy_irq]"
+    },
+    {
+      "uid": "0",
+      "pid": 1148,
+      "ppid": 2,
+      "name": "[irq/375-ss_phy_irq]"
+    },
+    {
+      "uid": "0",
+      "pid": 1151,
+      "ppid": 2,
+      "name": "[irq/81-arm-smmu-context-fault]"
+    },
+    {
+      "uid": "0",
+      "pid": 1156,
+      "ppid": 2,
+      "name": "[irq/82-arm-smmu-context-fault]"
+    },
+    {
+      "uid": "0",
+      "pid": 1158,
+      "ppid": 2,
+      "name": "[irq/83-arm-smmu-context-fault]"
+    },
+    {
+      "uid": "0",
+      "pid": 1163,
+      "ppid": 2,
+      "name": "[irq/84-arm-smmu-context-fault]"
+    },
+    {
+      "uid": "0",
+      "pid": 1168,
+      "ppid": 2,
+      "name": "[irq/85-arm-smmu-context-fault]"
+    },
+    {
+      "uid": "0",
+      "pid": 1169,
+      "ppid": 2,
+      "name": "[jbd2/sda5-8]"
+    },
+    {
+      "uid": "0",
+      "pid": 1170,
+      "ppid": 2,
+      "name": "[kworker/R-ext4-rsv-conversion]"
+    },
+    {
+      "uid": "0",
+      "pid": 1171,
+      "ppid": 2,
+      "name": "[irq/86-arm-smmu-context-fault]"
+    },
+    {
+      "uid": "0",
+      "pid": 1176,
+      "ppid": 2,
+      "name": "[irq/87-arm-smmu-context-fault]"
+    },
+    {
+      "uid": "0",
+      "pid": 1182,
+      "ppid": 2,
+      "name": "[irq/88-arm-smmu-context-fault]"
+    },
+    {
+      "uid": "0",
+      "pid": 1183,
+      "ppid": 2,
+      "name": "[irq/89-arm-smmu-context-fault]"
+    },
+    {
+      "uid": "0",
+      "pid": 1184,
+      "ppid": 2,
+      "name": "[kworker/R-samsung_mobile_device:battery]"
+    },
+    {
+      "uid": "0",
+      "pid": 1185,
+      "ppid": 2,
+      "name": "[irq/377-cisd-ovp-power]"
+    },
+    {
+      "uid": "0",
+      "pid": 1186,
+      "ppid": 2,
+      "name": "[cvp-dsp-thread]"
+    },
+    {
+      "uid": "0",
+      "pid": 1191,
+      "ppid": 2,
+      "name": "[kworker/R-kgsl-highprio-workqueue]"
+    },
+    {
+      "uid": "0",
+      "pid": 1192,
+      "ppid": 2,
+      "name": "[kworker/R-kgsl-workqueue]"
+    },
+    {
+      "uid": "0",
+      "pid": 1193,
+      "ppid": 2,
+      "name": "[kworker/R-kgsl-lockless-work]"
+    },
+    {
+      "uid": "0",
+      "pid": 1194,
+      "ppid": 2,
+      "name": "[irq/366-fold_s3932t_i2c]"
+    },
+    {
+      "uid": "0",
+      "pid": 1199,
+      "ppid": 2,
+      "name": "[jbd2/sda6-8]"
+    },
+    {
+      "uid": "0",
+      "pid": 1200,
+      "ppid": 2,
+      "name": "[kworker/R-ext4-rsv-conversion]"
+    },
+    {
+      "uid": "0",
+      "pid": 1210,
+      "ppid": 2,
+      "name": "[irq/90-arm-smmu-context-fault]"
+    },
+    {
+      "uid": "0",
+      "pid": 1216,
+      "ppid": 2,
+      "name": "[irq/91-arm-smmu-context-fault]"
+    },
+    {
+      "uid": "0",
+      "pid": 1217,
+      "ppid": 2,
+      "name": "[irq/390-bhi]"
+    },
+    {
+      "uid": "0",
+      "pid": 1218,
+      "ppid": 2,
+      "name": "[jbd2/sda7-8]"
+    },
+    {
+      "uid": "0",
+      "pid": 1219,
+      "ppid": 2,
+      "name": "[kworker/R-ext4-rsv-conversion]"
+    },
+    {
+      "uid": "0",
+      "pid": 1220,
+      "ppid": 2,
+      "name": "[jbd2/sda22-8]"
+    },
+    {
+      "uid": "0",
+      "pid": 1221,
+      "ppid": 2,
+      "name": "[kworker/R-ext4-rsv-conversion]"
+    },
+    {
+      "uid": "0",
+      "pid": 1225,
+      "ppid": 2,
+      "name": "[kworker/R-kdmflush/254:73]"
+    },
+    {
+      "uid": "0",
+      "pid": 1226,
+      "ppid": 2,
+      "name": "[kworker/R-kdmflush/254:74]"
+    },
+    {
+      "uid": "0",
+      "pid": 1230,
+      "ppid": 2,
+      "name": "[irq/365-synaptics_i2c_fold]"
+    },
+    {
+      "uid": "0",
+      "pid": 1231,
+      "ppid": 2,
+      "name": "[jbd2/sda30-8]"
+    },
+    {
+      "uid": "0",
+      "pid": 1232,
+      "ppid": 2,
+      "name": "[kworker/R-ext4-rsv-conversion]"
+    },
+    {
+      "uid": "0",
+      "pid": 1234,
+      "ppid": 2,
+      "name": "[jbd2/sda37-8]"
+    },
+    {
+      "uid": "0",
+      "pid": 1235,
+      "ppid": 2,
+      "name": "[kworker/R-ext4-rsv-conversion]"
+    },
+    {
+      "uid": "0",
+      "pid": 1240,
+      "ppid": 2,
+      "name": "[kworker/R-fw_update]"
+    },
+    {
+      "uid": "0",
+      "pid": 1241,
+      "ppid": 1,
+      "name": "iod"
+    },
+    {
+      "uid": "0",
+      "pid": 1244,
+      "ppid": 2,
+      "name": "[irq/378-max77775-irq]"
+    },
+    {
+      "uid": "0",
+      "pid": 1247,
+      "ppid": 2,
+      "name": "[glink_soccp]"
+    },
+    {
+      "uid": "0",
+      "pid": 1248,
+      "ppid": 2,
+      "name": "[irq/380-q6v5 wdog]"
+    },
+    {
+      "uid": "0",
+      "pid": 1249,
+      "ppid": 2,
+      "name": "[glink-glink_ssr]"
+    },
+    {
+      "uid": "0",
+      "pid": 1250,
+      "ppid": 2,
+      "name": "[qrtr_rx]"
+    },
+    {
+      "uid": "0",
+      "pid": 1251,
+      "ppid": 2,
+      "name": "[glink-IPCRTR]"
+    },
+    {
+      "uid": "0",
+      "pid": 1252,
+      "ppid": 2,
+      "name": "[irq/424-q6v5 wdog]"
+    },
+    {
+      "uid": "0",
+      "pid": 1253,
+      "ppid": 2,
+      "name": "[irq/430-q6v5 wdog]"
+    },
+    {
+      "uid": "0",
+      "pid": 1257,
+      "ppid": 2,
+      "name": "[irq/436-bcl-lvl2]"
+    },
+    {
+      "uid": "1000",
+      "pid": 1260,
+      "ppid": 1,
+      "name": "spdaemon"
+    },
+    {
+      "uid": "1000",
+      "pid": 1261,
+      "ppid": 1,
+      "name": "sec_nvm"
+    },
+    {
+      "uid": "1000",
+      "pid": 1263,
+      "ppid": 1,
+      "name": "android.system.suspend-service"
+    },
+    {
+      "uid": "1017",
+      "pid": 1264,
+      "ppid": 1,
+      "name": "keystore2"
+    },
+    {
+      "uid": "0",
+      "pid": 1268,
+      "ppid": 2,
+      "name": "[kworker/R-sec_input_vbus_noti]"
+    },
+    {
+      "uid": "0",
+      "pid": 1269,
+      "ppid": 1,
+      "name": "android.hardware.boot-service.qti"
+    },
+    {
+      "uid": "1000",
+      "pid": 1270,
+      "ppid": 1,
+      "name": "android.hardware.security.keymint-service-spu-qti"
+    },
+    {
+      "uid": "1000",
+      "pid": 1271,
+      "ppid": 1,
+      "name": "android.hardware.security.keymint-service"
+    },
+    {
+      "uid": "0",
+      "pid": 1272,
+      "ppid": 1,
+      "name": "avf_qcvm_manager"
+    },
+    {
+      "uid": "1000",
+      "pid": 1273,
+      "ppid": 1,
+      "name": "vendor.samsung.hardware.security.engmode-service"
+    },
+    {
+      "uid": "1000",
+      "pid": 1274,
+      "ppid": 1,
+      "name": "vendor.samsung.hardware.security.fkeymaster-service"
+    },
+    {
+      "uid": "1000",
+      "pid": 1275,
+      "ppid": 1,
+      "name": "vendor.samsung.hardware.security.hdcp.wifidisplay-service"
+    },
+    {
+      "uid": "1000",
+      "pid": 1276,
+      "ppid": 1,
+      "name": "vendor.samsung.hardware.security.rtts-service"
+    },
+    {
+      "uid": "1000",
+      "pid": 1277,
+      "ppid": 1,
+      "name": "vendor.samsung.hardware.security.vaultkeeper-service"
+    },
+    {
+      "uid": "0",
+      "pid": 1284,
+      "ppid": 2,
+      "name": "[glink_cdsp]"
+    },
+    {
+      "uid": "0",
+      "pid": 1285,
+      "ppid": 2,
+      "name": "[qrtr_rx]"
+    },
+    {
+      "uid": "0",
+      "pid": 1286,
+      "ppid": 2,
+      "name": "[glink-IPCRTR]"
+    },
+    {
+      "uid": "0",
+      "pid": 1288,
+      "ppid": 2,
+      "name": "[irq/92-arm-smmu-context-fault]"
+    },
+    {
+      "uid": "0",
+      "pid": 1289,
+      "ppid": 2,
+      "name": "[irq/93-arm-smmu-context-fault]"
+    },
+    {
+      "uid": "0",
+      "pid": 1290,
+      "ppid": 2,
+      "name": "[irq/94-arm-smmu-context-fault]"
+    },
+    {
+      "uid": "0",
+      "pid": 1291,
+      "ppid": 2,
+      "name": "[irq/95-arm-smmu-context-fault]"
+    },
+    {
+      "uid": "0",
+      "pid": 1293,
+      "ppid": 2,
+      "name": "[irq/35-arm-smmu-context-fault]"
+    },
+    {
+      "uid": "0",
+      "pid": 1294,
+      "ppid": 2,
+      "name": "[glink-mpam-glink-apps-dsp]"
+    },
+    {
+      "uid": "0",
+      "pid": 1295,
+      "ppid": 2,
+      "name": "[irq/36-arm-smmu-context-fault]"
+    },
+    {
+      "uid": "0",
+      "pid": 1298,
+      "ppid": 2,
+      "name": "[irq/37-arm-smmu-context-fault]"
+    },
+    {
+      "uid": "0",
+      "pid": 1299,
+      "ppid": 2,
+      "name": "[irq/96-arm-smmu-context-fault]"
+    },
+    {
+      "uid": "0",
+      "pid": 1300,
+      "ppid": 2,
+      "name": "[irq/38-arm-smmu-context-fault]"
+    },
+    {
+      "uid": "0",
+      "pid": 1301,
+      "ppid": 2,
+      "name": "[irq/97-arm-smmu-context-fault]"
+    },
+    {
+      "uid": "0",
+      "pid": 1302,
+      "ppid": 2,
+      "name": "[kgsl_cooling_worker]"
+    },
+    {
+      "uid": "0",
+      "pid": 1303,
+      "ppid": 2,
+      "name": "[irq/98-arm-smmu-context-fault]"
+    },
+    {
+      "uid": "0",
+      "pid": 1304,
+      "ppid": 2,
+      "name": "[adspsleepmon-worker]"
+    },
+    {
+      "uid": "0",
+      "pid": 1310,
+      "ppid": 2,
+      "name": "[irq/99-arm-smmu-context-fault]"
+    },
+    {
+      "uid": "0",
+      "pid": 1311,
+      "ppid": 2,
+      "name": "[kworker/R-usb_notify]"
+    },
+    {
+      "uid": "0",
+      "pid": 1312,
+      "ppid": 2,
+      "name": "[irq/100-arm-smmu-context-fault]"
+    },
+    {
+      "uid": "0",
+      "pid": 1313,
+      "ppid": 2,
+      "name": "[kworker/R-op_wait]"
+    },
+    {
+      "uid": "0",
+      "pid": 1314,
+      "ppid": 2,
+      "name": "[kworker/R-op_send]"
+    },
+    {
+      "uid": "0",
+      "pid": 1315,
+      "ppid": 2,
+      "name": "[kworker/R-ccic_irq_event]"
+    },
+    {
+      "uid": "0",
+      "pid": 1316,
+      "ppid": 2,
+      "name": "[kworker/R-pass-through]"
+    },
+    {
+      "uid": "0",
+      "pid": 1317,
+      "ppid": 2,
+      "name": "[kworker/R-sm5443a-PD-DC]"
+    },
+    {
+      "uid": "0",
+      "pid": 1318,
+      "ppid": 2,
+      "name": "[kworker/R-sm5443a-WPC-DC]"
+    },
+    {
+      "uid": "0",
+      "pid": 1319,
+      "ppid": 2,
+      "name": "[kworker/R-samsung_mobile_device:sec-direc]"
+    },
+    {
+      "uid": "0",
+      "pid": 1320,
+      "ppid": 2,
+      "name": "[kworker/R-k_ipa_usb]"
+    },
+    {
+      "uid": "0",
+      "pid": 1322,
+      "ppid": 2,
+      "name": "[irq/101-arm-smmu-context-fault]"
+    },
+    {
+      "uid": "0",
+      "pid": 1323,
+      "ppid": 2,
+      "name": "[irq/102-arm-smmu-context-fault]"
+    },
+    {
+      "uid": "0",
+      "pid": 1324,
+      "ppid": 2,
+      "name": "[kgsl-events]"
+    },
+    {
+      "uid": "0",
+      "pid": 1325,
+      "ppid": 2,
+      "name": "[kgsl_hwsched]"
+    },
+    {
+      "uid": "0",
+      "pid": 1326,
+      "ppid": 2,
+      "name": "[irq/103-arm-smmu-context-fault]"
+    },
+    {
+      "uid": "0",
+      "pid": 1327,
+      "ppid": 2,
+      "name": "[kworker/R-mfc_workqueue]"
+    },
+    {
+      "uid": "0",
+      "pid": 1328,
+      "ppid": 2,
+      "name": "[irq/450-wpc-det-irq]"
+    },
+    {
+      "uid": "0",
+      "pid": 1329,
+      "ppid": 2,
+      "name": "[irq/452-wpc-pdrc-irq]"
+    },
+    {
+      "uid": "0",
+      "pid": 1330,
+      "ppid": 2,
+      "name": "[irq/104-arm-smmu-context-fault]"
+    },
+    {
+      "uid": "0",
+      "pid": 1331,
+      "ppid": 2,
+      "name": "[irq/453-wpc-pdet-b-irq]"
+    },
+    {
+      "uid": "0",
+      "pid": 1332,
+      "ppid": 2,
+      "name": "[irq/105-arm-smmu-context-fault]"
+    },
+    {
+      "uid": "0",
+      "pid": 1333,
+      "ppid": 2,
+      "name": "[irq/106-arm-smmu-context-fault]"
+    },
+    {
+      "uid": "0",
+      "pid": 1334,
+      "ppid": 2,
+      "name": "[glink-fastrpcglink-apps-dsp]"
+    },
+    {
+      "uid": "0",
+      "pid": 1335,
+      "ppid": 2,
+      "name": "[irq/449-jig-irq]"
+    },
+    {
+      "uid": "0",
+      "pid": 1336,
+      "ppid": 2,
+      "name": "[irq/107-arm-smmu-context-fault]"
+    },
+    {
+      "uid": "0",
+      "pid": 1337,
+      "ppid": 2,
+      "name": "[glink-cdsprmglink-apps-dsp]"
+    },
+    {
+      "uid": "0",
+      "pid": 1338,
+      "ppid": 2,
+      "name": "[kworker/R-byte-cntr]"
+    },
+    {
+      "uid": "0",
+      "pid": 1339,
+      "ppid": 2,
+      "name": "[kworker/R-sm5443a-PD-DC-sub]"
+    },
+    {
+      "uid": "0",
+      "pid": 1340,
+      "ppid": 2,
+      "name": "[kworker/R-sm5443a-WPC-DC-sub]"
+    },
+    {
+      "uid": "0",
+      "pid": 1341,
+      "ppid": 2,
+      "name": "[irq/108-arm-smmu-context-fault]"
+    },
+    {
+      "uid": "0",
+      "pid": 1342,
+      "ppid": 2,
+      "name": "[glink-cvp-glink-apps-dsp]"
+    },
+    {
+      "uid": "0",
+      "pid": 1356,
+      "ppid": 2,
+      "name": "[kworker/R-max77775_pd]"
+    },
+    {
+      "uid": "0",
+      "pid": 1357,
+      "ppid": 2,
+      "name": "[kworker/R-ipa_power_mgmt]"
+    },
+    {
+      "uid": "0",
+      "pid": 1358,
+      "ppid": 2,
+      "name": "[kworker/R-transport_power_mgmt]"
+    },
+    {
+      "uid": "0",
+      "pid": 1359,
+      "ppid": 2,
+      "name": "[kworker/R-page_recycle_stats_collection]"
+    },
+    {
+      "uid": "0",
+      "pid": 1360,
+      "ppid": 2,
+      "name": "[kworker/R-ipa_pm_activate]"
+    },
+    {
+      "uid": "0",
+      "pid": 1361,
+      "ppid": 2,
+      "name": "[kworker/R-ipa_usb_wq]"
+    },
+    {
+      "uid": "0",
+      "pid": 1362,
+      "ppid": 2,
+      "name": "[kworker/R-rmnet_ctlwq]"
+    },
+    {
+      "uid": "0",
+      "pid": 1363,
+      "ppid": 2,
+      "name": "[kworker/R-rmnet_llwq]"
+    },
+    {
+      "uid": "0",
+      "pid": 1364,
+      "ppid": 2,
+      "name": "[irq/69-arm-smmu-context-fault]"
+    },
+    {
+      "uid": "0",
+      "pid": 1365,
+      "ppid": 2,
+      "name": "[irq/109-arm-smmu-context-fault]"
+    },
+    {
+      "uid": "0",
+      "pid": 1367,
+      "ppid": 2,
+      "name": "[irq/110-arm-smmu-context-fault]"
+    },
+    {
+      "uid": "0",
+      "pid": 1368,
+      "ppid": 2,
+      "name": "[irq/111-arm-smmu-context-fault]"
+    },
+    {
+      "uid": "0",
+      "pid": 1369,
+      "ppid": 2,
+      "name": "[irq/112-arm-smmu-context-fault]"
+    },
+    {
+      "uid": "0",
+      "pid": 1370,
+      "ppid": 2,
+      "name": "[irq/113-arm-smmu-context-fault]"
+    },
+    {
+      "uid": "0",
+      "pid": 1371,
+      "ppid": 2,
+      "name": "[kworker/R-dsi_post_cmd_tx_workq]"
+    },
+    {
+      "uid": "0",
+      "pid": 1372,
+      "ppid": 2,
+      "name": "[kworker/R-dsi_post_cmd_tx_workq]"
+    },
+    {
+      "uid": "0",
+      "pid": 1373,
+      "ppid": 2,
+      "name": "[kworker/R-drm_dp]"
+    },
+    {
+      "uid": "0",
+      "pid": 1374,
+      "ppid": 2,
+      "name": "[kworker/R-debug_tear_wq]"
+    },
+    {
+      "uid": "0",
+      "pid": 1375,
+      "ppid": 2,
+      "name": "[kworker/R-max77775-charger]"
+    },
+    {
+      "uid": "0",
+      "pid": 1376,
+      "ppid": 2,
+      "name": "[kworker/R-ipa_interrupt_wq]"
+    },
+    {
+      "uid": "0",
+      "pid": 1377,
+      "ppid": 2,
+      "name": "[kworker/R-ipawq36]"
+    },
+    {
+      "uid": "0",
+      "pid": 1378,
+      "ppid": 2,
+      "name": "[kworker/R-iparepwq36]"
+    },
+    {
+      "uid": "0",
+      "pid": 1379,
+      "ppid": 2,
+      "name": "[kworker/R-ipawq33]"
+    },
+    {
+      "uid": "0",
+      "pid": 1380,
+      "ppid": 2,
+      "name": "[kworker/R-iparepwq33]"
+    },
+    {
+      "uid": "0",
+      "pid": 1381,
+      "ppid": 2,
+      "name": "[kworker/R-ipafreepagewq33]"
+    },
+    {
+      "uid": "0",
+      "pid": 1382,
+      "ppid": 2,
+      "name": "[kworker/R-ipawq32]"
+    },
+    {
+      "uid": "0",
+      "pid": 1383,
+      "ppid": 2,
+      "name": "[kworker/R-iparepwq32]"
+    },
+    {
+      "uid": "0",
+      "pid": 1384,
+      "ppid": 2,
+      "name": "[kworker/R-ipa_uc_holb_wq]"
+    },
+    {
+      "uid": "0",
+      "pid": 1386,
+      "ppid": 2,
+      "name": "[kworker/R-clnt_req]"
+    },
+    {
+      "uid": "0",
+      "pid": 1387,
+      "ppid": 2,
+      "name": "[irq/451-wpc-irq]"
+    },
+    {
+      "uid": "0",
+      "pid": 1390,
+      "ppid": 2,
+      "name": "[kworker/R-sec_input_vbus_noti]"
+    },
+    {
+      "uid": "0",
+      "pid": 1391,
+      "ppid": 2,
+      "name": "[kworker/R-cds_recovery_workqueue]"
+    },
+    {
+      "uid": "0",
+      "pid": 1392,
+      "ppid": 2,
+      "name": "[wlan_logging_thread]"
+    },
+    {
+      "uid": "0",
+      "pid": 1399,
+      "ppid": 2,
+      "name": "[kworker/R-f2fs_truncate_wq]"
+    },
+    {
+      "uid": "0",
+      "pid": 1400,
+      "ppid": 2,
+      "name": "[f2fs_ckpt-254:73]"
+    },
+    {
+      "uid": "0",
+      "pid": 1401,
+      "ppid": 2,
+      "name": "[f2fs_flush-254:73]"
+    },
+    {
+      "uid": "0",
+      "pid": 1402,
+      "ppid": 2,
+      "name": "[f2fs_discard-254:73]"
+    },
+    {
+      "uid": "0",
+      "pid": 1404,
+      "ppid": 2,
+      "name": "[glink_spss]"
+    },
+    {
+      "uid": "0",
+      "pid": 1405,
+      "ppid": 2,
+      "name": "[glink-glink_ssr]"
+    },
+    {
+      "uid": "0",
+      "pid": 1406,
+      "ppid": 2,
+      "name": "[glink-sp_kernel]"
+    },
+    {
+      "uid": "0",
+      "pid": 1407,
+      "ppid": 2,
+      "name": "[f2fs_gc-254:73]"
+    },
+    {
+      "uid": "1000",
+      "pid": 1409,
+      "ppid": 1,
+      "name": "vendor.samsung.hardware.security.proca@2.0-service"
+    },
+    {
+      "uid": "1000",
+      "pid": 1411,
+      "ppid": 1,
+      "name": "vaultkeeperd"
+    },
+    {
+      "uid": "0",
+      "pid": 1412,
+      "ppid": 2,
+      "name": "[glink_adsp]"
+    },
+    {
+      "uid": "0",
+      "pid": 1413,
+      "ppid": 2,
+      "name": "[glink-glink_ssr]"
+    },
+    {
+      "uid": "0",
+      "pid": 1415,
+      "ppid": 2,
+      "name": "[glink-mhi_sat]"
+    },
+    {
+      "uid": "0",
+      "pid": 1416,
+      "ppid": 2,
+      "name": "[qrtr_rx]"
+    },
+    {
+      "uid": "0",
+      "pid": 1417,
+      "ppid": 2,
+      "name": "[glink-IPCRTR]"
+    },
+    {
+      "uid": "0",
+      "pid": 1428,
+      "ppid": 2,
+      "name": "[kworker/R-vrr_workqueue]"
+    },
+    {
+      "uid": "0",
+      "pid": 1431,
+      "ppid": 2,
+      "name": "[glink-sec_nvm_sp_nvm]"
+    },
+    {
+      "uid": "0",
+      "pid": 1432,
+      "ppid": 2,
+      "name": "[irq/461-UB_CON_DET]"
+    },
+    {
+      "uid": "0",
+      "pid": 1434,
+      "ppid": 2,
+      "name": "[kworker/R-panel_notify_wq]"
+    },
+    {
+      "uid": "0",
+      "pid": 1435,
+      "ppid": 2,
+      "name": "[kworker/R-panel_smooth_br]"
+    },
+    {
+      "uid": "0",
+      "pid": 1438,
+      "ppid": 2,
+      "name": "[kworker/R-vrr_workqueue]"
+    },
+    {
+      "uid": "0",
+      "pid": 1439,
+      "ppid": 2,
+      "name": "[irq/114-arm-smmu-context-fault]"
+    },
+    {
+      "uid": "0",
+      "pid": 1440,
+      "ppid": 2,
+      "name": "[irq/115-arm-smmu-context-fault]"
+    },
+    {
+      "uid": "0",
+      "pid": 1441,
+      "ppid": 2,
+      "name": "[irq/116-arm-smmu-context-fault]"
+    },
+    {
+      "uid": "0",
+      "pid": 1442,
+      "ppid": 2,
+      "name": "[irq/117-arm-smmu-context-fault]"
+    },
+    {
+      "uid": "0",
+      "pid": 1443,
+      "ppid": 2,
+      "name": "[irq/118-arm-smmu-context-fault]"
+    },
+    {
+      "uid": "0",
+      "pid": 1444,
+      "ppid": 2,
+      "name": "[irq/119-arm-smmu-context-fault]"
+    },
+    {
+      "uid": "0",
+      "pid": 1445,
+      "ppid": 2,
+      "name": "[kworker/R-pdr_notifier_wq]"
+    },
+    {
+      "uid": "0",
+      "pid": 1446,
+      "ppid": 2,
+      "name": "[kworker/R-pdr_notifier_wq]"
+    },
+    {
+      "uid": "0",
+      "pid": 1447,
+      "ppid": 2,
+      "name": "[kworker/R-pdr_notifier_wq]"
+    },
+    {
+      "uid": "0",
+      "pid": 1448,
+      "ppid": 2,
+      "name": "[glink-fastrpcglink-apps-dsp]"
+    },
+    {
+      "uid": "0",
+      "pid": 1449,
+      "ppid": 2,
+      "name": "[kworker/R-pdr_notifier_wq]"
+    },
+    {
+      "uid": "0",
+      "pid": 1450,
+      "ppid": 2,
+      "name": "[glink-adsp_apps]"
+    },
+    {
+      "uid": "0",
+      "pid": 1451,
+      "ppid": 2,
+      "name": "[glink-sleepmonglink-apps-adsp]"
+    },
+    {
+      "uid": "0",
+      "pid": 1452,
+      "ppid": 2,
+      "name": "[glink-bt_cp_ctrl]"
+    },
+    {
+      "uid": "0",
+      "pid": 1453,
+      "ppid": 2,
+      "name": "[irq/463-UB_CON_DET]"
+    },
+    {
+      "uid": "0",
+      "pid": 1455,
+      "ppid": 2,
+      "name": "[kworker/R-panel_notify_wq]"
+    },
+    {
+      "uid": "0",
+      "pid": 1456,
+      "ppid": 2,
+      "name": "[kworker/R-panel_smooth_br]"
+    },
+    {
+      "uid": "0",
+      "pid": 1461,
+      "ppid": 2,
+      "name": "[kworker/R-sdm_dp_audio_notify]"
+    },
+    {
+      "uid": "0",
+      "pid": 1462,
+      "ppid": 2,
+      "name": "[kworker/R-hdcp_1x_1]"
+    },
+    {
+      "uid": "0",
+      "pid": 1463,
+      "ppid": 2,
+      "name": "[hdcp_2x]"
+    },
+    {
+      "uid": "0",
+      "pid": 1464,
+      "ppid": 2,
+      "name": "[dp_hdcp2p2]"
+    },
+    {
+      "uid": "0",
+      "pid": 1465,
+      "ppid": 2,
+      "name": "[crtc_commit:216]"
+    },
+    {
+      "uid": "0",
+      "pid": 1466,
+      "ppid": 2,
+      "name": "[crtc_event:216]"
+    },
+    {
+      "uid": "0",
+      "pid": 1467,
+      "ppid": 2,
+      "name": "[crtc_commit:295]"
+    },
+    {
+      "uid": "0",
+      "pid": 1468,
+      "ppid": 2,
+      "name": "[crtc_event:295]"
+    },
+    {
+      "uid": "0",
+      "pid": 1469,
+      "ppid": 2,
+      "name": "[crtc_commit:308]"
+    },
+    {
+      "uid": "0",
+      "pid": 1470,
+      "ppid": 2,
+      "name": "[crtc_event:308]"
+    },
+    {
+      "uid": "0",
+      "pid": 1471,
+      "ppid": 2,
+      "name": "[crtc_commit:321]"
+    },
+    {
+      "uid": "0",
+      "pid": 1472,
+      "ppid": 2,
+      "name": "[crtc_event:321]"
+    },
+    {
+      "uid": "0",
+      "pid": 1473,
+      "ppid": 2,
+      "name": "[crtc_commit:334]"
+    },
+    {
+      "uid": "0",
+      "pid": 1474,
+      "ppid": 2,
+      "name": "[crtc_event:334]"
+    },
+    {
+      "uid": "0",
+      "pid": 1475,
+      "ppid": 2,
+      "name": "[crtc_commit:347]"
+    },
+    {
+      "uid": "0",
+      "pid": 1476,
+      "ppid": 2,
+      "name": "[crtc_event:347]"
+    },
+    {
+      "uid": "0",
+      "pid": 1477,
+      "ppid": 2,
+      "name": "[crtc_commit:360]"
+    },
+    {
+      "uid": "0",
+      "pid": 1478,
+      "ppid": 2,
+      "name": "[crtc_event:360]"
+    },
+    {
+      "uid": "0",
+      "pid": 1479,
+      "ppid": 2,
+      "name": "[crtc_commit:373]"
+    },
+    {
+      "uid": "0",
+      "pid": 1480,
+      "ppid": 2,
+      "name": "[crtc_event:373]"
+    },
+    {
+      "uid": "0",
+      "pid": 1481,
+      "ppid": 2,
+      "name": "[pp_event]"
+    },
+    {
+      "uid": "0",
+      "pid": 1482,
+      "ppid": 2,
+      "name": "[card0-crtc0]"
+    },
+    {
+      "uid": "0",
+      "pid": 1483,
+      "ppid": 2,
+      "name": "[card0-crtc1]"
+    },
+    {
+      "uid": "0",
+      "pid": 1484,
+      "ppid": 2,
+      "name": "[card0-crtc2]"
+    },
+    {
+      "uid": "0",
+      "pid": 1485,
+      "ppid": 2,
+      "name": "[card0-crtc3]"
+    },
+    {
+      "uid": "0",
+      "pid": 1486,
+      "ppid": 2,
+      "name": "[card0-crtc4]"
+    },
+    {
+      "uid": "0",
+      "pid": 1487,
+      "ppid": 2,
+      "name": "[card0-crtc5]"
+    },
+    {
+      "uid": "0",
+      "pid": 1488,
+      "ppid": 2,
+      "name": "[card0-crtc6]"
+    },
+    {
+      "uid": "0",
+      "pid": 1489,
+      "ppid": 2,
+      "name": "[card0-crtc7]"
+    },
+    {
+      "uid": "0",
+      "pid": 1492,
+      "ppid": 2,
+      "name": "[kworker/R-cam-cpas]"
+    },
+    {
+      "uid": "0",
+      "pid": 1497,
+      "ppid": 2,
+      "name": "[glink-cryptoapp]"
+    },
+    {
+      "uid": "0",
+      "pid": 1499,
+      "ppid": 2,
+      "name": "[kworker/R-qcom,cam_virtual_cdm]"
+    },
+    {
+      "uid": "0",
+      "pid": 1500,
+      "ppid": 2,
+      "name": "[kworker/R-rt-cdm0_0]"
+    },
+    {
+      "uid": "0",
+      "pid": 1501,
+      "ppid": 2,
+      "name": "[kworker/R-rt-cdm0_1]"
+    },
+    {
+      "uid": "0",
+      "pid": 1502,
+      "ppid": 2,
+      "name": "[kworker/R-rt-cdm0_2]"
+    },
+    {
+      "uid": "0",
+      "pid": 1503,
+      "ppid": 2,
+      "name": "[kworker/R-rt-cdm0_3]"
+    },
+    {
+      "uid": "0",
+      "pid": 1504,
+      "ppid": 2,
+      "name": "[kworker/R-rt-cdm1_0]"
+    },
+    {
+      "uid": "0",
+      "pid": 1505,
+      "ppid": 2,
+      "name": "[kworker/R-rt-cdm1_1]"
+    },
+    {
+      "uid": "0",
+      "pid": 1506,
+      "ppid": 2,
+      "name": "[kworker/R-rt-cdm1_2]"
+    },
+    {
+      "uid": "0",
+      "pid": 1507,
+      "ppid": 2,
+      "name": "[kworker/R-rt-cdm1_3]"
+    },
+    {
+      "uid": "0",
+      "pid": 1508,
+      "ppid": 2,
+      "name": "[kworker/R-rt-cdm2_0]"
+    },
+    {
+      "uid": "0",
+      "pid": 1509,
+      "ppid": 2,
+      "name": "[kworker/R-rt-cdm2_1]"
+    },
+    {
+      "uid": "0",
+      "pid": 1510,
+      "ppid": 2,
+      "name": "[kworker/R-rt-cdm2_2]"
+    },
+    {
+      "uid": "0",
+      "pid": 1511,
+      "ppid": 2,
+      "name": "[kworker/R-rt-cdm2_3]"
+    },
+    {
+      "uid": "0",
+      "pid": 1512,
+      "ppid": 2,
+      "name": "[kworker/R-rt-cdm3_0]"
+    },
+    {
+      "uid": "0",
+      "pid": 1513,
+      "ppid": 2,
+      "name": "[kworker/R-rt-cdm3_1]"
+    },
+    {
+      "uid": "0",
+      "pid": 1514,
+      "ppid": 2,
+      "name": "[kworker/R-rt-cdm3_2]"
+    },
+    {
+      "uid": "0",
+      "pid": 1515,
+      "ppid": 2,
+      "name": "[kworker/R-rt-cdm3_3]"
+    },
+    {
+      "uid": "0",
+      "pid": 1516,
+      "ppid": 2,
+      "name": "[kworker/R-rt-cdm4_0]"
+    },
+    {
+      "uid": "0",
+      "pid": 1517,
+      "ppid": 2,
+      "name": "[kworker/R-rt-cdm4_1]"
+    },
+    {
+      "uid": "0",
+      "pid": 1519,
+      "ppid": 2,
+      "name": "[kworker/R-rt-cdm4_2]"
+    },
+    {
+      "uid": "0",
+      "pid": 1520,
+      "ppid": 2,
+      "name": "[kworker/R-rt-cdm4_3]"
+    },
+    {
+      "uid": "1058",
+      "pid": 1522,
+      "ppid": 1,
+      "name": "tombstoned"
+    },
+    {
+      "uid": "0",
+      "pid": 1525,
+      "ppid": 2,
+      "name": "[irq/352-cs40l26 IRQ1 Controller]"
+    },
+    {
+      "uid": "0",
+      "pid": 1532,
+      "ppid": 2,
+      "name": "[irq/491-CCI0]"
+    },
+    {
+      "uid": "0",
+      "pid": 1533,
+      "ppid": 2,
+      "name": "[kworker/R-cam_cci_wq]"
+    },
+    {
+      "uid": "0",
+      "pid": 1534,
+      "ppid": 2,
+      "name": "[kworker/R-cam_cci_wq]"
+    },
+    {
+      "uid": "0",
+      "pid": 1535,
+      "ppid": 2,
+      "name": "[irq/492-CCI1]"
+    },
+    {
+      "uid": "0",
+      "pid": 1536,
+      "ppid": 2,
+      "name": "[kworker/R-cam_cci_wq]"
+    },
+    {
+      "uid": "0",
+      "pid": 1537,
+      "ppid": 2,
+      "name": "[kworker/R-cam_cci_wq]"
+    },
+    {
+      "uid": "0",
+      "pid": 1538,
+      "ppid": 2,
+      "name": "[irq/493-CCI2]"
+    },
+    {
+      "uid": "0",
+      "pid": 1539,
+      "ppid": 2,
+      "name": "[kworker/R-cam_cci_wq]"
+    },
+    {
+      "uid": "0",
+      "pid": 1540,
+      "ppid": 2,
+      "name": "[kworker/R-cam_cci_wq]"
+    },
+    {
+      "uid": "0",
+      "pid": 1582,
+      "ppid": 2,
+      "name": "[glink-sp_keymaster]"
+    },
+    {
+      "uid": "0",
+      "pid": 1710,
+      "ppid": 2,
+      "name": "[kworker/R-ext4-rsv-conversion]"
+    },
+    {
+      "uid": "0",
+      "pid": 1711,
+      "ppid": 2,
+      "name": "[kworker/R-kverityd]"
+    },
+    {
+      "uid": "0",
+      "pid": 1712,
+      "ppid": 2,
+      "name": "[kworker/R-kverityd]"
+    },
+    {
+      "uid": "0",
+      "pid": 1713,
+      "ppid": 2,
+      "name": "[kworker/R-kverityd]"
+    },
+    {
+      "uid": "0",
+      "pid": 1714,
+      "ppid": 2,
+      "name": "[kworker/R-kverityd]"
+    },
+    {
+      "uid": "0",
+      "pid": 1715,
+      "ppid": 2,
+      "name": "[kworker/R-kverityd]"
+    },
+    {
+      "uid": "0",
+      "pid": 1716,
+      "ppid": 2,
+      "name": "[kworker/R-kverityd]"
+    },
+    {
+      "uid": "0",
+      "pid": 1717,
+      "ppid": 2,
+      "name": "[kworker/R-kverityd]"
+    },
+    {
+      "uid": "0",
+      "pid": 1718,
+      "ppid": 2,
+      "name": "[kworker/R-kverityd]"
+    },
+    {
+      "uid": "0",
+      "pid": 1719,
+      "ppid": 2,
+      "name": "[kworker/R-kverityd]"
+    },
+    {
+      "uid": "0",
+      "pid": 1720,
+      "ppid": 2,
+      "name": "[kworker/R-kverityd]"
+    },
+    {
+      "uid": "0",
+      "pid": 1721,
+      "ppid": 2,
+      "name": "[kworker/R-kverityd]"
+    },
+    {
+      "uid": "0",
+      "pid": 1722,
+      "ppid": 2,
+      "name": "[kworker/R-kverityd]"
+    },
+    {
+      "uid": "0",
+      "pid": 1723,
+      "ppid": 2,
+      "name": "[kworker/R-kverityd]"
+    },
+    {
+      "uid": "0",
+      "pid": 1724,
+      "ppid": 2,
+      "name": "[kworker/R-kverityd]"
+    },
+    {
+      "uid": "0",
+      "pid": 1725,
+      "ppid": 2,
+      "name": "[kworker/R-kverityd]"
+    },
+    {
+      "uid": "0",
+      "pid": 1726,
+      "ppid": 2,
+      "name": "[kworker/R-kverityd]"
+    },
+    {
+      "uid": "0",
+      "pid": 1727,
+      "ppid": 2,
+      "name": "[kworker/R-kverityd]"
+    },
+    {
+      "uid": "0",
+      "pid": 1728,
+      "ppid": 2,
+      "name": "[kworker/R-ext4-rsv-conversion]"
+    },
+    {
+      "uid": "0",
+      "pid": 1729,
+      "ppid": 2,
+      "name": "[kworker/R-ext4-rsv-conversion]"
+    },
+    {
+      "uid": "0",
+      "pid": 1730,
+      "ppid": 2,
+      "name": "[kworker/R-kverityd]"
+    },
+    {
+      "uid": "0",
+      "pid": 1732,
+      "ppid": 2,
+      "name": "[kworker/R-ext4-rsv-conversion]"
+    },
+    {
+      "uid": "0",
+      "pid": 1733,
+      "ppid": 2,
+      "name": "[kworker/R-ext4-rsv-conversion]"
+    },
+    {
+      "uid": "0",
+      "pid": 1734,
+      "ppid": 2,
+      "name": "[kworker/R-ext4-rsv-conversion]"
+    },
+    {
+      "uid": "0",
+      "pid": 1735,
+      "ppid": 2,
+      "name": "[kworker/R-ext4-rsv-conversion]"
+    },
+    {
+      "uid": "0",
+      "pid": 1736,
+      "ppid": 2,
+      "name": "[kworker/R-ext4-rsv-conversion]"
+    },
+    {
+      "uid": "0",
+      "pid": 1737,
+      "ppid": 2,
+      "name": "[kworker/R-ext4-rsv-conversion]"
+    },
+    {
+      "uid": "0",
+      "pid": 1738,
+      "ppid": 2,
+      "name": "[kworker/R-ext4-rsv-conversion]"
+    },
+    {
+      "uid": "0",
+      "pid": 1739,
+      "ppid": 2,
+      "name": "[kworker/R-ext4-rsv-conversion]"
+    },
+    {
+      "uid": "0",
+      "pid": 1740,
+      "ppid": 2,
+      "name": "[kworker/R-ext4-rsv-conversion]"
+    },
+    {
+      "uid": "0",
+      "pid": 1741,
+      "ppid": 2,
+      "name": "[kworker/R-ext4-rsv-conversion]"
+    },
+    {
+      "uid": "0",
+      "pid": 1742,
+      "ppid": 2,
+      "name": "[kworker/R-kverityd]"
+    },
+    {
+      "uid": "0",
+      "pid": 1743,
+      "ppid": 2,
+      "name": "[kworker/R-ext4-rsv-conversion]"
+    },
+    {
+      "uid": "0",
+      "pid": 1744,
+      "ppid": 2,
+      "name": "[kworker/R-kverityd]"
+    },
+    {
+      "uid": "0",
+      "pid": 1745,
+      "ppid": 2,
+      "name": "[kworker/R-ext4-rsv-conversion]"
+    },
+    {
+      "uid": "0",
+      "pid": 1746,
+      "ppid": 2,
+      "name": "[kworker/R-ext4-rsv-conversion]"
+    },
+    {
+      "uid": "0",
+      "pid": 1747,
+      "ppid": 2,
+      "name": "[kworker/R-ext4-rsv-conversion]"
+    },
+    {
+      "uid": "0",
+      "pid": 1748,
+      "ppid": 2,
+      "name": "[kworker/R-ext4-rsv-conversion]"
+    },
+    {
+      "uid": "0",
+      "pid": 1749,
+      "ppid": 2,
+      "name": "[kworker/R-ext4-rsv-conversion]"
+    },
+    {
+      "uid": "0",
+      "pid": 1750,
+      "ppid": 2,
+      "name": "[kworker/R-ext4-rsv-conversion]"
+    },
+    {
+      "uid": "0",
+      "pid": 1751,
+      "ppid": 2,
+      "name": "[kworker/R-ext4-rsv-conversion]"
+    },
+    {
+      "uid": "0",
+      "pid": 1752,
+      "ppid": 2,
+      "name": "[kworker/R-ext4-rsv-conversion]"
+    },
+    {
+      "uid": "0",
+      "pid": 1753,
+      "ppid": 2,
+      "name": "[kworker/R-ext4-rsv-conversion]"
+    },
+    {
+      "uid": "0",
+      "pid": 1754,
+      "ppid": 2,
+      "name": "[kworker/R-kverityd]"
+    },
+    {
+      "uid": "0",
+      "pid": 1755,
+      "ppid": 2,
+      "name": "[kworker/R-ext4-rsv-conversion]"
+    },
+    {
+      "uid": "0",
+      "pid": 1756,
+      "ppid": 2,
+      "name": "[kworker/R-ext4-rsv-conversion]"
+    },
+    {
+      "uid": "0",
+      "pid": 1757,
+      "ppid": 2,
+      "name": "[kworker/R-ext4-rsv-conversion]"
+    },
+    {
+      "uid": "0",
+      "pid": 1758,
+      "ppid": 2,
+      "name": "[kworker/R-ext4-rsv-conversion]"
+    },
+    {
+      "uid": "0",
+      "pid": 1759,
+      "ppid": 2,
+      "name": "[kworker/R-ext4-rsv-conversion]"
+    },
+    {
+      "uid": "0",
+      "pid": 1760,
+      "ppid": 2,
+      "name": "[kworker/R-ext4-rsv-conversion]"
+    },
+    {
+      "uid": "0",
+      "pid": 1761,
+      "ppid": 2,
+      "name": "[kworker/R-ext4-rsv-conversion]"
+    },
+    {
+      "uid": "0",
+      "pid": 1762,
+      "ppid": 2,
+      "name": "[kworker/R-ext4-rsv-conversion]"
+    },
+    {
+      "uid": "0",
+      "pid": 1763,
+      "ppid": 2,
+      "name": "[kworker/R-ext4-rsv-conversion]"
+    },
+    {
+      "uid": "0",
+      "pid": 1764,
+      "ppid": 2,
+      "name": "[kworker/R-ext4-rsv-conversion]"
+    },
+    {
+      "uid": "0",
+      "pid": 1765,
+      "ppid": 2,
+      "name": "[kworker/R-ext4-rsv-conversion]"
+    },
+    {
+      "uid": "0",
+      "pid": 1766,
+      "ppid": 2,
+      "name": "[kworker/R-ext4-rsv-conversion]"
+    },
+    {
+      "uid": "0",
+      "pid": 1767,
+      "ppid": 2,
+      "name": "[kworker/R-ext4-rsv-conversion]"
+    },
+    {
+      "uid": "0",
+      "pid": 1768,
+      "ppid": 2,
+      "name": "[kworker/R-ext4-rsv-conversion]"
+    },
+    {
+      "uid": "0",
+      "pid": 1769,
+      "ppid": 2,
+      "name": "[kworker/R-ext4-rsv-conversion]"
+    },
+    {
+      "uid": "0",
+      "pid": 1770,
+      "ppid": 2,
+      "name": "[kworker/R-ext4-rsv-conversion]"
+    },
+    {
+      "uid": "0",
+      "pid": 1771,
+      "ppid": 2,
+      "name": "[kworker/R-kverityd]"
+    },
+    {
+      "uid": "0",
+      "pid": 1772,
+      "ppid": 2,
+      "name": "[kworker/R-ext4-rsv-conversion]"
+    },
+    {
+      "uid": "0",
+      "pid": 1773,
+      "ppid": 2,
+      "name": "[kworker/R-kverityd]"
+    },
+    {
+      "uid": "0",
+      "pid": 1774,
+      "ppid": 2,
+      "name": "[kworker/R-ext4-rsv-conversion]"
+    },
+    {
+      "uid": "0",
+      "pid": 1775,
+      "ppid": 2,
+      "name": "[kworker/R-kverityd]"
+    },
+    {
+      "uid": "0",
+      "pid": 1776,
+      "ppid": 2,
+      "name": "[kworker/R-kverityd]"
+    },
+    {
+      "uid": "0",
+      "pid": 1777,
+      "ppid": 2,
+      "name": "[kworker/R-kverityd]"
+    },
+    {
+      "uid": "0",
+      "pid": 1778,
+      "ppid": 2,
+      "name": "[kworker/R-kverityd]"
+    },
+    {
+      "uid": "0",
+      "pid": 1779,
+      "ppid": 2,
+      "name": "[kworker/R-kverityd]"
+    },
+    {
+      "uid": "0",
+      "pid": 1780,
+      "ppid": 2,
+      "name": "[kworker/R-kverityd]"
+    },
+    {
+      "uid": "0",
+      "pid": 1781,
+      "ppid": 2,
+      "name": "[kworker/R-kverityd]"
+    },
+    {
+      "uid": "0",
+      "pid": 1782,
+      "ppid": 2,
+      "name": "[kworker/R-kverityd]"
+    },
+    {
+      "uid": "0",
+      "pid": 1783,
+      "ppid": 2,
+      "name": "[kworker/R-ext4-rsv-conversion]"
+    },
+    {
+      "uid": "0",
+      "pid": 1784,
+      "ppid": 2,
+      "name": "[kworker/R-ext4-rsv-conversion]"
+    },
+    {
+      "uid": "0",
+      "pid": 1785,
+      "ppid": 2,
+      "name": "[kworker/R-ext4-rsv-conversion]"
+    },
+    {
+      "uid": "0",
+      "pid": 1786,
+      "ppid": 2,
+      "name": "[kworker/R-ext4-rsv-conversion]"
+    },
+    {
+      "uid": "0",
+      "pid": 1787,
+      "ppid": 2,
+      "name": "[kworker/R-ext4-rsv-conversion]"
+    },
+    {
+      "uid": "0",
+      "pid": 1788,
+      "ppid": 2,
+      "name": "[kworker/R-ext4-rsv-conversion]"
+    },
+    {
+      "uid": "0",
+      "pid": 1789,
+      "ppid": 2,
+      "name": "[kworker/R-ext4-rsv-conversion]"
+    },
+    {
+      "uid": "0",
+      "pid": 1790,
+      "ppid": 2,
+      "name": "[kworker/R-ext4-rsv-conversion]"
+    },
+    {
+      "uid": "0",
+      "pid": 1791,
+      "ppid": 2,
+      "name": "[kworker/R-ext4-rsv-conversion]"
+    },
+    {
+      "uid": "0",
+      "pid": 1792,
+      "ppid": 2,
+      "name": "[kworker/R-ext4-rsv-conversion]"
+    },
+    {
+      "uid": "0",
+      "pid": 1793,
+      "ppid": 2,
+      "name": "[kworker/R-ext4-rsv-conversion]"
+    },
+    {
+      "uid": "0",
+      "pid": 1794,
+      "ppid": 2,
+      "name": "[kworker/R-ext4-rsv-conversion]"
+    },
+    {
+      "uid": "0",
+      "pid": 1795,
+      "ppid": 2,
+      "name": "[kworker/R-ext4-rsv-conversion]"
+    },
+    {
+      "uid": "0",
+      "pid": 1796,
+      "ppid": 2,
+      "name": "[kworker/R-ext4-rsv-conversion]"
+    },
+    {
+      "uid": "1000",
+      "pid": 1828,
+      "ppid": 1,
+      "name": "cass"
+    },
+    {
+      "uid": "1000",
+      "pid": 1829,
+      "ppid": 1,
+      "name": "emservice"
+    },
+    {
+      "uid": "1000",
+      "pid": 1832,
+      "ppid": 1,
+      "name": "time_daemon"
+    },
+    {
+      "uid": "1000",
+      "pid": 1851,
+      "ppid": 1,
+      "name": "rttsservice"
+    },
+    {
+      "uid": "0",
+      "pid": 1901,
+      "ppid": 1,
+      "name": "netd"
+    },
+    {
+      "uid": "1066",
+      "pid": 1902,
+      "ppid": 1,
+      "name": "statsd"
+    },
+    {
+      "uid": "0",
+      "pid": 1903,
+      "ppid": 1,
+      "name": "zygote64"
+    },
+    {
+      "uid": "0",
+      "pid": 1904,
+      "ppid": 2,
+      "name": "[kworker/R-at_usb0]"
+    },
+    {
+      "uid": "0",
+      "pid": 1905,
+      "ppid": 2,
+      "name": "[kworker/R-at_usb1]"
+    },
+    {
+      "uid": "0",
+      "pid": 1906,
+      "ppid": 2,
+      "name": "[kworker/R-at_usb2]"
+    },
+    {
+      "uid": "0",
+      "pid": 1907,
+      "ppid": 2,
+      "name": "[kworker/R-qdss]"
+    },
+    {
+      "uid": "0",
+      "pid": 1908,
+      "ppid": 2,
+      "name": "[kworker/R-qdss_mdm]"
+    },
+    {
+      "uid": "0",
+      "pid": 1909,
+      "ppid": 2,
+      "name": "[kworker/R-qdss_sw]"
+    },
+    {
+      "uid": "0",
+      "pid": 1910,
+      "ppid": 1901,
+      "name": "iptables-restore"
+    },
+    {
+      "uid": "0",
+      "pid": 1911,
+      "ppid": 1901,
+      "name": "ip6tables-restore"
+    },
+    {
+      "uid": "1000",
+      "pid": 1983,
+      "ppid": 1,
+      "name": "hlosminkdaemon"
+    },
+    {
+      "uid": "1021",
+      "pid": 1986,
+      "ppid": 1,
+      "name": "android.hardware.gnss-aidl-service-qti"
+    },
+    {
+      "uid": "1000",
+      "pid": 1988,
+      "ppid": 1,
+      "name": "sscrpcd"
+    },
+    {
+      "uid": "1000",
+      "pid": 1993,
+      "ppid": 1,
+      "name": "diag-router"
+    },
+    {
+      "uid": "1000",
+      "pid": 2043,
+      "ppid": 1,
+      "name": "qccsyshal_aidl-service"
+    },
+    {
+      "uid": "1002",
+      "pid": 2053,
+      "ppid": 1,
+      "name": "android.hardware.bluetooth@aidl-service-qti"
+    },
+    {
+      "uid": "1047",
+      "pid": 2056,
+      "ppid": 1,
+      "name": "android.hardware.camera.provider-V1-external-service"
+    },
+    {
+      "uid": "1080",
+      "pid": 2060,
+      "ppid": 1,
+      "name": "android.hardware.contexthub-service.qmi"
+    },
+    {
+      "uid": "1000",
+      "pid": 2061,
+      "ppid": 1,
+      "name": "android.hardware.gatekeeper-service"
+    },
+    {
+      "uid": "1000",
+      "pid": 2063,
+      "ppid": 1,
+      "name": "android.hardware.secure_element-service"
+    },
+    {
+      "uid": "9999",
+      "pid": 2064,
+      "ppid": 1,
+      "name": "android.hardware.security.secretkeeper-service-qti"
+    },
+    {
+      "uid": "1000",
+      "pid": 2065,
+      "ppid": 1,
+      "name": "android.hardware.sensors-service.multihal"
+    },
+    {
+      "uid": "1000",
+      "pid": 2066,
+      "ppid": 1,
+      "name": "android.hardware.usb-service.qti"
+    },
+    {
+      "uid": "1083",
+      "pid": 2067,
+      "ppid": 1,
+      "name": "vendor.samsung.hardware.uwb@1.0-service"
+    },
+    {
+      "uid": "1010",
+      "pid": 2068,
+      "ppid": 1,
+      "name": "android.hardware.wifi-service"
+    },
+    {
+      "uid": "1041",
+      "pid": 2069,
+      "ppid": 1,
+      "name": "audiohalservice.qti"
+    },
+    {
+      "uid": "1002",
+      "pid": 2070,
+      "ppid": 1,
+      "name": "android.hardware.bluetooth.ranging-service.samsung"
+    },
+    {
+      "uid": "1000",
+      "pid": 2071,
+      "ppid": 1,
+      "name": "vendor.samsung.hardware.biometrics.face-service"
+    },
+    {
+      "uid": "1000",
+      "pid": 2072,
+      "ppid": 1,
+      "name": "hermesd"
+    },
+    {
+      "uid": "1000",
+      "pid": 2073,
+      "ppid": 1,
+      "name": "vendor.samsung.hardware.hyper-service"
+    },
+    {
+      "uid": "9999",
+      "pid": 2083,
+      "ppid": 1,
+      "name": "vendor.qti.hardware.memtrack-service"
+    },
+    {
+      "uid": "1000",
+      "pid": 2088,
+      "ppid": 1,
+      "name": "android.hardware.power.samsung-service"
+    },
+    {
+      "uid": "1000",
+      "pid": 2093,
+      "ppid": 1,
+      "name": "poweropt-service"
+    },
+    {
+      "uid": "1046",
+      "pid": 2098,
+      "ppid": 1,
+      "name": "samsung.software.media.c2@1.0-service"
+    },
+    {
+      "uid": "1041",
+      "pid": 2099,
+      "ppid": 1,
+      "name": "secaudiohalaidl"
+    },
+    {
+      "uid": "1000",
+      "pid": 2100,
+      "ppid": 1,
+      "name": "snapdragon_services"
+    },
+    {
+      "uid": "1000",
+      "pid": 2102,
+      "ppid": 1,
+      "name": "vendor.qti.hardware.capabilityconfigstore-service"
+    },
+    {
+      "uid": "1000",
+      "pid": 2103,
+      "ppid": 1,
+      "name": "vendor.qti.hardware.display.allocator-service"
+    },
+    {
+      "uid": "1000",
+      "pid": 2104,
+      "ppid": 1,
+      "name": "vendor.qti.hardware.display.composer-service"
+    },
+    {
+      "uid": "1000",
+      "pid": 2105,
+      "ppid": 1,
+      "name": "dspservice"
+    },
+    {
+      "uid": "0",
+      "pid": 2106,
+      "ppid": 1,
+      "name": "vendor.qti.hardware.perf2-hal-service"
+    },
+    {
+      "uid": "1046",
+      "pid": 2108,
+      "ppid": 1,
+      "name": "media.hwcodec"
+    },
+    {
+      "uid": "1000",
+      "pid": 2109,
+      "ppid": 1,
+      "name": "vendor.qti.qspa-service"
+    },
+    {
+      "uid": "1000",
+      "pid": 2110,
+      "ppid": 1,
+      "name": "vendor.qti.qtvm.proxyclient-service"
+    },
+    {
+      "uid": "1047",
+      "pid": 2111,
+      "ppid": 1,
+      "name": "vendor.samsung.hardware.camera.provider-service_64"
+    },
+    {
+      "uid": "1000",
+      "pid": 2112,
+      "ppid": 1,
+      "name": "vendor.samsung.hardware.health-service"
+    },
+    {
+      "uid": "1000",
+      "pid": 2113,
+      "ppid": 1,
+      "name": "vendor.samsung.hardware.sysinput-service"
+    },
+    {
+      "uid": "1000",
+      "pid": 2114,
+      "ppid": 1,
+      "name": "vendor.samsung.hardware.thermal-service"
+    },
+    {
+      "uid": "1000",
+      "pid": 2117,
+      "ppid": 1,
+      "name": "vendor.samsung.hardware.tlc.ucm-service"
+    },
+    {
+      "uid": "1000",
+      "pid": 2118,
+      "ppid": 1,
+      "name": "vendor.samsung.hardware.vibrator-service"
+    },
+    {
+      "uid": "1010",
+      "pid": 2119,
+      "ppid": 1,
+      "name": "vendor.samsung.hardware.wifi-service"
+    },
+    {
+      "uid": "1013",
+      "pid": 2128,
+      "ppid": 1,
+      "name": "android.hardware.drm-service.clearkey"
+    },
+    {
+      "uid": "1013",
+      "pid": 2137,
+      "ppid": 1,
+      "name": "android.hardware.drm-service.widevine"
+    },
+    {
+      "uid": "0",
+      "pid": 2165,
+      "ppid": 1272,
+      "name": "virtmgr_avf_qcvm_manage"
+    },
+    {
+      "uid": "1000",
+      "pid": 2166,
+      "ppid": 1,
+      "name": "pd-mapper"
+    },
+    {
+      "uid": "1000",
+      "pid": 2168,
+      "ppid": 1,
+      "name": "pm-service"
+    },
+    {
+      "uid": "1000",
+      "pid": 2170,
+      "ppid": 1,
+      "name": "factory.ssc"
+    },
+    {
+      "uid": "1041",
+      "pid": 2173,
+      "ppid": 1,
+      "name": "audioserver"
+    },
+    {
+      "uid": "1076",
+      "pid": 2180,
+      "ppid": 1,
+      "name": "credstore"
+    },
+    {
+      "uid": "1072",
+      "pid": 2182,
+      "ppid": 1,
+      "name": "gpuservice"
+    },
+    {
+      "uid": "1000",
+      "pid": 2185,
+      "ppid": 1,
+      "name": "heatmap"
+    },
+    {
+      "uid": "1000",
+      "pid": 2195,
+      "ppid": 1,
+      "name": "perfmond"
+    },
+    {
+      "uid": "1000",
+      "pid": 2200,
+      "ppid": 1,
+      "name": "surfaceflinger"
+    },
+    {
+      "uid": "9999",
+      "pid": 2201,
+      "ppid": 1,
+      "name": "rmt_storage"
+    },
+    {
+      "uid": "2903",
+      "pid": 2202,
+      "ppid": 1,
+      "name": "tftp_server"
+    },
+    {
+      "uid": "0",
+      "pid": 2210,
+      "ppid": 2,
+      "name": "[irq/120-arm-smmu-context-fault]"
+    },
+    {
+      "uid": "0",
+      "pid": 2219,
+      "ppid": 2,
+      "name": "[irq/541-swr_master_irq]"
+    },
+    {
+      "uid": "0",
+      "pid": 2224,
+      "ppid": 2,
+      "name": "[kworker/R-tfa98xx]"
+    },
+    {
+      "uid": "5031",
+      "pid": 2237,
+      "ppid": 1,
+      "name": "dsms"
+    },
+    {
+      "uid": "0",
+      "pid": 2245,
+      "ppid": 1,
+      "name": "zygote_next"
+    },
+    {
+      "uid": "1000",
+      "pid": 2246,
+      "ppid": 1,
+      "name": "mosey_server"
+    },
+    {
+      "uid": "1000",
+      "pid": 2247,
+      "ppid": 1,
+      "name": "vendor.qti.hardware.spu-service"
+    },
+    {
+      "uid": "1000",
+      "pid": 2256,
+      "ppid": 1,
+      "name": "qwesd"
+    },
+    {
+      "uid": "0",
+      "pid": 2354,
+      "ppid": 2,
+      "name": "[kworker/R-tfa98xx]"
+    },
+    {
+      "uid": "0",
+      "pid": 2368,
+      "ppid": 2165,
+      "name": "crosvm_trustedvm"
+    },
+    {
+      "uid": "1000",
+      "pid": 2418,
+      "ppid": 1,
+      "name": "subsystem_ramdump"
+    },
+    {
+      "uid": "0",
+      "pid": 2423,
+      "ppid": 2,
+      "name": "[gmu_f2h]"
+    },
+    {
+      "uid": "1000",
+      "pid": 2426,
+      "ppid": 1,
+      "name": "pm-proxy"
+    },
+    {
+      "uid": "1000",
+      "pid": 2449,
+      "ppid": 1,
+      "name": "ewlogd"
+    },
+    {
+      "uid": "9999",
+      "pid": 2458,
+      "ppid": 1,
+      "name": "traced_probes"
+    },
+    {
+      "uid": "9999",
+      "pid": 2459,
+      "ppid": 1,
+      "name": "traced"
+    },
+    {
+      "uid": "1000",
+      "pid": 2519,
+      "ppid": 1903,
+      "name": "system_server"
+    },
+    {
+      "uid": "0",
+      "pid": 2525,
+      "ppid": 2,
+      "name": "[irq/546-gh_dbl_rx_4]"
+    },
+    {
+      "uid": "0",
+      "pid": 2526,
+      "ppid": 2,
+      "name": "[irq/561-gh_dbl_rx_3]"
+    },
+    {
+      "uid": "0",
+      "pid": 2527,
+      "ppid": 2,
+      "name": "[irq/562-gh_dbl_rx_7]"
+    },
+    {
+      "uid": "0",
+      "pid": 2528,
+      "ppid": 2,
+      "name": "[irq/563-gh_dbl_rx_9]"
+    },
+    {
+      "uid": "0",
+      "pid": 2529,
+      "ppid": 2,
+      "name": "[qrtr_rx]"
+    },
+    {
+      "uid": "1001",
+      "pid": 2560,
+      "ppid": 1,
+      "name": "shsusrd"
+    },
+    {
+      "uid": "1047",
+      "pid": 2596,
+      "ppid": 1,
+      "name": "cameraserver"
+    },
+    {
+      "uid": "1000",
+      "pid": 2599,
+      "ppid": 1,
+      "name": "fabric_crypto"
+    },
+    {
+      "uid": "1000",
+      "pid": 2615,
+      "ppid": 1,
+      "name": "imsd"
+    },
+    {
+      "uid": "1067",
+      "pid": 2623,
+      "ppid": 1,
+      "name": "incidentd"
+    },
+    {
+      "uid": "1000",
+      "pid": 2662,
+      "ppid": 1,
+      "name": "smdexe"
+    },
+    {
+      "uid": "1000",
+      "pid": 2665,
+      "ppid": 1,
+      "name": "ddexe"
+    },
+    {
+      "uid": "1000",
+      "pid": 2669,
+      "ppid": 1,
+      "name": "connfwexe"
+    },
+    {
+      "uid": "0",
+      "pid": 2670,
+      "ppid": 1,
+      "name": "installd"
+    },
+    {
+      "uid": "1040",
+      "pid": 2672,
+      "ppid": 1,
+      "name": "media.extractor"
+    },
+    {
+      "uid": "0",
+      "pid": 2673,
+      "ppid": 2,
+      "name": "[glink_modem]"
+    },
+    {
+      "uid": "1013",
+      "pid": 2675,
+      "ppid": 1,
+      "name": "media.metrics"
+    },
+    {
+      "uid": "1013",
+      "pid": 2677,
+      "ppid": 1,
+      "name": "mediaserver"
+    },
+    {
+      "uid": "0",
+      "pid": 2680,
+      "ppid": 2,
+      "name": "[qrtr_rx]"
+    },
+    {
+      "uid": "0",
+      "pid": 2681,
+      "ppid": 2,
+      "name": "[glink-IPCRTR]"
+    },
+    {
+      "uid": "1000",
+      "pid": 2683,
+      "ppid": 1,
+      "name": "spqr_service"
+    },
+    {
+      "uid": "0",
+      "pid": 2685,
+      "ppid": 1,
+      "name": "storaged"
+    },
+    {
+      "uid": "1000",
+      "pid": 2688,
+      "ppid": 1,
+      "name": "perfservice"
+    },
+    {
+      "uid": "1010",
+      "pid": 2690,
+      "ppid": 1,
+      "name": "wificond"
+    },
+    {
+      "uid": "1047",
+      "pid": 2693,
+      "ppid": 1,
+      "name": "camxlpaioisfactorytest"
+    },
+    {
+      "uid": "1000",
+      "pid": 2694,
+      "ppid": 1,
+      "name": "qsap_dcfd"
+    },
+    {
+      "uid": "1001",
+      "pid": 2695,
+      "ppid": 1,
+      "name": "dlsc"
+    },
+    {
+      "uid": "1001",
+      "pid": 2698,
+      "ppid": 1,
+      "name": "ipacm-diag"
+    },
+    {
+      "uid": "1001",
+      "pid": 2699,
+      "ppid": 1,
+      "name": "ipacm"
+    },
+    {
+      "uid": "1001",
+      "pid": 2700,
+      "ppid": 1,
+      "name": "qms"
+    },
+    {
+      "uid": "1001",
+      "pid": 2702,
+      "ppid": 1,
+      "name": "tlpd"
+    },
+    {
+      "uid": "1000",
+      "pid": 2703,
+      "ppid": 1,
+      "name": "adsprpcd"
+    },
+    {
+      "uid": "1000",
+      "pid": 2712,
+      "ppid": 1,
+      "name": "cdsprpcd"
+    },
+    {
+      "uid": "1001",
+      "pid": 2724,
+      "ppid": 1,
+      "name": "rild"
+    },
+    {
+      "uid": "1046",
+      "pid": 2738,
+      "ppid": 1,
+      "name": "media.swcodec"
+    },
+    {
+      "uid": "1001",
+      "pid": 2749,
+      "ppid": 2702,
+      "name": "tlpd"
+    },
+    {
+      "uid": "1000",
+      "pid": 2758,
+      "ppid": 1,
+      "name": "cnss-daemon"
+    },
+    {
+      "uid": "1000",
+      "pid": 2770,
+      "ppid": 1,
+      "name": "gatekeeperd"
+    },
+    {
+      "uid": "0",
+      "pid": 2789,
+      "ppid": 1,
+      "name": "update_engine"
+    },
+    {
+      "uid": "1000",
+      "pid": 2807,
+      "ppid": 1,
+      "name": "qcc-vendor"
+    },
+    {
+      "uid": "1021",
+      "pid": 2810,
+      "ppid": 1,
+      "name": "lowi-server"
+    },
+    {
+      "uid": "1000",
+      "pid": 2816,
+      "ppid": 1,
+      "name": "vendor.samsung.hardware.biometrics.fingerprint-service"
+    },
+    {
+      "uid": "1021",
+      "pid": 2821,
+      "ppid": 1,
+      "name": "xtra-daemon"
+    },
+    {
+      "uid": "0",
+      "pid": 2824,
+      "ppid": 2,
+      "name": "[glink-LOOPBACK_CTL_MPSS]"
+    },
+    {
+      "uid": "1001",
+      "pid": 2900,
+      "ppid": 1,
+      "name": "adpl"
+    },
+    {
+      "uid": "10252",
+      "pid": 2939,
+      "ppid": 1903,
+      "name": "com.samsung.android.sm.devicesecurity"
+    },
+    {
+      "uid": "10408",
+      "pid": 3013,
+      "ppid": 1903,
+      "name": "com.instagram.android"
+    },
+    {
+      "uid": "1000",
+      "pid": 3052,
+      "ppid": 1903,
+      "name": "com.samsung.android.fmm"
+    },
+    {
+      "uid": "0",
+      "pid": 3127,
+      "ppid": 2,
+      "name": "[irq/460-esd_recovery]"
+    },
+    {
+      "uid": "10088",
+      "pid": 3128,
+      "ppid": 1903,
+      "name": "com.facebook.services"
+    },
+    {
+      "uid": "0",
+      "pid": 3398,
+      "ppid": 2,
+      "name": "[irq/462-esd_recovery]"
+    },
+    {
+      "uid": "0",
+      "pid": 3658,
+      "ppid": 2,
+      "name": "[glink-DS]"
+    },
+    {
+      "uid": "0",
+      "pid": 3659,
+      "ppid": 2,
+      "name": "[glink-DATA1]"
+    },
+    {
+      "uid": "0",
+      "pid": 3660,
+      "ppid": 2,
+      "name": "[glink-DATA4]"
+    },
+    {
+      "uid": "0",
+      "pid": 3661,
+      "ppid": 2,
+      "name": "[glink-DATA11]"
+    },
+    {
+      "uid": "10342",
+      "pid": 3675,
+      "ppid": 1903,
+      "name": "com.google.android.permissioncontroller"
+    },
+    {
+      "uid": "10124",
+      "pid": 3677,
+      "ppid": 1903,
+      "name": "com.osp.app.signin"
+    },
+    {
+      "uid": "1001",
+      "pid": 3811,
+      "ppid": 1,
+      "name": "multiclientd"
+    },
+    {
+      "uid": "0",
+      "pid": 3822,
+      "ppid": 2,
+      "name": "[kworker/R-ipawq34]"
+    },
+    {
+      "uid": "0",
+      "pid": 3823,
+      "ppid": 2,
+      "name": "[kworker/R-iparepwq34]"
+    },
+    {
+      "uid": "0",
+      "pid": 3824,
+      "ppid": 2,
+      "name": "[kworker/R-ipawq104]"
+    },
+    {
+      "uid": "0",
+      "pid": 3825,
+      "ppid": 2,
+      "name": "[kworker/R-iparepwq104]"
+    },
+    {
+      "uid": "0",
+      "pid": 3826,
+      "ppid": 2,
+      "name": "[kworker/R-ipawq120]"
+    },
+    {
+      "uid": "0",
+      "pid": 3827,
+      "ppid": 2,
+      "name": "[kworker/R-iparepwq120]"
+    },
+    {
+      "uid": "0",
+      "pid": 3831,
+      "ppid": 2,
+      "name": "[kworker/R-ipawq95]"
+    },
+    {
+      "uid": "0",
+      "pid": 3832,
+      "ppid": 2,
+      "name": "[kworker/R-iparepwq95]"
+    },
+    {
+      "uid": "0",
+      "pid": 3833,
+      "ppid": 2,
+      "name": "[kworker/R-ipafreepagewq95]"
+    },
+    {
+      "uid": "0",
+      "pid": 3834,
+      "ppid": 2,
+      "name": "[kworker/R-ipawq35]"
+    },
+    {
+      "uid": "0",
+      "pid": 3835,
+      "ppid": 2,
+      "name": "[kworker/R-iparepwq35]"
+    },
+    {
+      "uid": "0",
+      "pid": 3836,
+      "ppid": 2,
+      "name": "[kworker/R-ipawq105]"
+    },
+    {
+      "uid": "0",
+      "pid": 3837,
+      "ppid": 2,
+      "name": "[kworker/R-iparepwq105]"
+    },
+    {
+      "uid": "0",
+      "pid": 3838,
+      "ppid": 2,
+      "name": "[kworker/R-ipafreepagewq105]"
+    },
+    {
+      "uid": "0",
+      "pid": 3839,
+      "ppid": 2,
+      "name": "[kworker/R-ipawq121]"
+    },
+    {
+      "uid": "0",
+      "pid": 3840,
+      "ppid": 2,
+      "name": "[kworker/R-iparepwq121]"
+    },
+    {
+      "uid": "0",
+      "pid": 3841,
+      "ppid": 2,
+      "name": "[kworker/R-ipafreepagewq121]"
+    },
+    {
+      "uid": "0",
+      "pid": 3846,
+      "ppid": 2,
+      "name": "[kworker/R-wda_wq]"
+    },
+    {
+      "uid": "1001",
+      "pid": 4055,
+      "ppid": 2700,
+      "name": "qsap_qms_0"
+    },
+    {
+      "uid": "10340",
+      "pid": 4179,
+      "ppid": 1903,
+      "name": "com.google.android.cellbroadcastreceiver"
+    },
+    {
+      "uid": "10065",
+      "pid": 4371,
+      "ppid": 1903,
+      "name": "com.sec.android.provider.badge"
+    },
+    {
+      "uid": "1001",
+      "pid": 4586,
+      "ppid": 1903,
+      "name": "com.android.phone"
+    },
+    {
+      "uid": "1073",
+      "pid": 4710,
+      "ppid": 1903,
+      "name": "com.android.networkstack.process"
+    },
+    {
+      "uid": "1000",
+      "pid": 4721,
+      "ppid": 1903,
+      "name": "com.sec.epdg"
+    },
+    {
+      "uid": "10153",
+      "pid": 4736,
+      "ppid": 1903,
+      "name": "com.samsung.android.wallpaper.live"
+    },
+    {
+      "uid": "10056",
+      "pid": 4737,
+      "ppid": 1903,
+      "name": "com.android.systemui"
+    },
+    {
+      "uid": "1002",
+      "pid": 4858,
+      "ppid": 1903,
+      "name": "com.android.bluetooth"
+    },
+    {
+      "uid": "2918",
+      "pid": 4902,
+      "ppid": 1903,
+      "name": ".cacertservice"
+    },
+    {
+      "uid": "10271",
+      "pid": 4916,
+      "ppid": 1903,
+      "name": ".qms"
+    },
+    {
+      "uid": "1000",
+      "pid": 4919,
+      "ppid": 1903,
+      "name": "com.sec.sve"
+    },
+    {
+      "uid": "1027",
+      "pid": 4924,
+      "ppid": 1903,
+      "name": "com.android.nfc"
+    },
+    {
+      "uid": "1000",
+      "pid": 4937,
+      "ppid": 1903,
+      "name": "com.sec.imsservice"
+    },
+    {
+      "uid": "1068",
+      "pid": 4946,
+      "ppid": 1903,
+      "name": "com.android.se"
+    },
+    {
+      "uid": "1001",
+      "pid": 4962,
+      "ppid": 1903,
+      "name": ".dataservices"
+    },
+    {
+      "uid": "10293",
+      "pid": 5013,
+      "ppid": 1903,
+      "name": "com.google.android.googlequicksearchbox:googleapp"
+    },
+    {
+      "uid": "1027",
+      "pid": 5100,
+      "ppid": 1,
+      "name": "android.hardware.nfc-service.nxp"
+    },
+    {
+      "uid": "10407",
+      "pid": 5199,
+      "ppid": 1903,
+      "name": "com.facebook.katana"
+    },
+    {
+      "uid": "0",
+      "pid": 5251,
+      "ppid": 2,
+      "name": "[qrtr_rx]"
+    },
+    {
+      "uid": "0",
+      "pid": 5415,
+      "ppid": 2,
+      "name": "[scheduler_thread]"
+    },
+    {
+      "uid": "0",
+      "pid": 5423,
+      "ppid": 2,
+      "name": "[ipa_log_thread]"
+    },
+    {
+      "uid": "10162",
+      "pid": 5465,
+      "ppid": 1903,
+      "name": "com.sec.android.app.launcher"
+    },
+    {
+      "uid": "0",
+      "pid": 5474,
+      "ppid": 2,
+      "name": "[dp_refill_thread]"
+    },
+    {
+      "uid": "0",
+      "pid": 5475,
+      "ppid": 2,
+      "name": "[dp_rx_thread_0]"
+    },
+    {
+      "uid": "0",
+      "pid": 5476,
+      "ppid": 2,
+      "name": "[dp_rx_thread_1]"
+    },
+    {
+      "uid": "0",
+      "pid": 5477,
+      "ppid": 2,
+      "name": "[dp_rx_thread_2]"
+    },
+    {
+      "uid": "0",
+      "pid": 5478,
+      "ppid": 2,
+      "name": "[dp_rx_thread_3]"
+    },
+    {
+      "uid": "0",
+      "pid": 5479,
+      "ppid": 2,
+      "name": "[dp_rx_thread_4]"
+    },
+    {
+      "uid": "5009",
+      "pid": 5548,
+      "ppid": 1903,
+      "name": "com.samsung.android.scloud"
+    },
+    {
+      "uid": "1010",
+      "pid": 5638,
+      "ppid": 1,
+      "name": "wpa_supplicant"
+    },
+    {
+      "uid": "10288",
+      "pid": 5651,
+      "ppid": 1903,
+      "name": "com.google.android.apps.messaging"
+    },
+    {
+      "uid": "10138",
+      "pid": 5742,
+      "ppid": 1903,
+      "name": "com.samsung.android.samsungpass"
+    },
+    {
+      "uid": "1010",
+      "pid": 5745,
+      "ppid": 1,
+      "name": "cnss_dumpcollector"
+    },
+    {
+      "uid": "1000",
+      "pid": 5767,
+      "ppid": 1,
+      "name": "eris"
+    },
+    {
+      "uid": "0",
+      "pid": 5821,
+      "ppid": 2,
+      "name": "[kworker/R-stk_alps_wq]"
+    },
+    {
+      "uid": "5013",
+      "pid": 5885,
+      "ppid": 1903,
+      "name": "com.sec.location.nsflp2"
+    },
+    {
+      "uid": "10331",
+      "pid": 5939,
+      "ppid": 1903,
+      "name": "com.google.android.ext.services"
+    },
+    {
+      "uid": "0",
+      "pid": 5952,
+      "ppid": 1,
+      "name": "hcgcd"
+    },
+    {
+      "uid": "10119",
+      "pid": 5953,
+      "ppid": 1903,
+      "name": "com.android.proxyhandler"
+    },
+    {
+      "uid": "5278",
+      "pid": 6003,
+      "ppid": 1903,
+      "name": "com.samsung.android.authfw"
+    },
+    {
+      "uid": "10129",
+      "pid": 6040,
+      "ppid": 1903,
+      "name": "com.samsung.android.carkey"
+    },
+    {
+      "uid": "1000",
+      "pid": 6061,
+      "ppid": 1903,
+      "name": "com.skms.android.agent:remote"
+    },
+    {
+      "uid": "1000",
+      "pid": 6083,
+      "ppid": 1,
+      "name": "pageboostd"
+    },
+    {
+      "uid": "1000",
+      "pid": 6174,
+      "ppid": 1,
+      "name": "perfsdkserver"
+    },
+    {
+      "uid": "10057",
+      "pid": 6220,
+      "ppid": 1903,
+      "name": "com.samsung.android.aremoji"
+    },
+    {
+      "uid": "10353",
+      "pid": 6222,
+      "ppid": 1903,
+      "name": "com.samsung.android.app.reminder"
+    },
+    {
+      "uid": "10394",
+      "pid": 6224,
+      "ppid": 1903,
+      "name": "com.samsung.android.app.notes"
+    },
+    {
+      "uid": "10130",
+      "pid": 6242,
+      "ppid": 1903,
+      "name": "com.samsung.android.app.contacts"
+    },
+    {
+      "uid": "0",
+      "pid": 6264,
+      "ppid": 2,
+      "name": "[kworker/R-kdmflush/254:75]"
+    },
+    {
+      "uid": "10379",
+      "pid": 6266,
+      "ppid": 1903,
+      "name": "com.samsung.android.calendar"
+    },
+    {
+      "uid": "0",
+      "pid": 6276,
+      "ppid": 2,
+      "name": "[zram0_prefetchd]"
+    },
+    {
+      "uid": "0",
+      "pid": 6277,
+      "ppid": 2,
+      "name": "[zram0_discard]"
+    },
+    {
+      "uid": "0",
+      "pid": 6303,
+      "ppid": 1,
+      "name": "thermal-engine-v2"
+    },
+    {
+      "uid": "10127",
+      "pid": 6314,
+      "ppid": 1903,
+      "name": "com.android.providers.calendar"
+    },
+    {
+      "uid": "1000",
+      "pid": 6373,
+      "ppid": 1903,
+      "name": "com.samsung.android.stickercenter"
+    },
+    {
+      "uid": "0",
+      "pid": 6403,
+      "ppid": 2,
+      "name": "[kworker/0:0H-kverityd]"
+    },
+    {
+      "uid": "10068",
+      "pid": 6564,
+      "ppid": 1903,
+      "name": "android.process.acore"
+    },
+    {
+      "uid": "10336",
+      "pid": 6715,
+      "ppid": 1903,
+      "name": "com.google.android.rkpdapp"
+    },
+    {
+      "uid": "10319",
+      "pid": 6744,
+      "ppid": 1903,
+      "name": "com.qualcomm.location"
+    },
+    {
+      "uid": "1000",
+      "pid": 6797,
+      "ppid": 1903,
+      "name": "com.samsung.android.app.dressroom"
+    },
+    {
+      "uid": "10056",
+      "pid": 6868,
+      "ppid": 1903,
+      "name": "com.samsung.android.app.aodservice:provider"
+    },
+    {
+      "uid": "10133",
+      "pid": 6951,
+      "ppid": 1903,
+      "name": "com.samsung.android.mobileservice"
+    },
+    {
+      "uid": "10161",
+      "pid": 7061,
+      "ppid": 1903,
+      "name": "com.samsung.android.themestore"
+    },
+    {
+      "uid": "10089",
+      "pid": 7118,
+      "ppid": 1903,
+      "name": "com.sec.android.app.samsungapps"
+    },
+    {
+      "uid": "1000",
+      "pid": 7156,
+      "ppid": 1903,
+      "name": "com.samsung.android.themecenter"
+    },
+    {
+      "uid": "10389",
+      "pid": 7179,
+      "ppid": 1903,
+      "name": "com.google.android.contacts"
+    },
+    {
+      "uid": "5004",
+      "pid": 7494,
+      "ppid": 1903,
+      "name": "com.samsung.cmh"
+    },
+    {
+      "uid": "10335",
+      "pid": 7542,
+      "ppid": 1903,
+      "name": "com.google.android.providers.media.module"
+    },
+    {
+      "uid": "10123",
+      "pid": 7567,
+      "ppid": 1903,
+      "name": "com.sec.spp.push"
+    },
+    {
+      "uid": "10139",
+      "pid": 7578,
+      "ppid": 1903,
+      "name": "com.samsung.android.smartsuggestions"
+    },
+    {
+      "uid": "10288",
+      "pid": 7632,
+      "ppid": 1903,
+      "name": "com.google.android.apps.messaging:rcs"
+    },
+    {
+      "uid": "5004",
+      "pid": 7640,
+      "ppid": 1903,
+      "name": "com.samsung.faceservice"
+    },
+    {
+      "uid": "1000",
+      "pid": 7663,
+      "ppid": 1903,
+      "name": "com.qualcomm.qti.services.systemhelper:systemhelper_service"
+    },
+    {
+      "uid": "1000",
+      "pid": 7722,
+      "ppid": 1903,
+      "name": "com.sec.android.diagmonagent"
+    },
+    {
+      "uid": "10243",
+      "pid": 7728,
+      "ppid": 1903,
+      "name": "com.sec.android.daemonapp"
+    },
+    {
+      "uid": "1000",
+      "pid": 7771,
+      "ppid": 1903,
+      "name": "com.samsung.android.sead"
+    },
+    {
+      "uid": "1000",
+      "pid": 7820,
+      "ppid": 1903,
+      "name": "com.sec.android.sdhms"
+    },
+    {
+      "uid": "10380",
+      "pid": 7863,
+      "ppid": 1903,
+      "name": "com.sec.android.app.clockpackage"
+    },
+    {
+      "uid": "10105",
+      "pid": 7886,
+      "ppid": 1903,
+      "name": "com.samsung.android.mcfds"
+    },
+    {
+      "uid": "0",
+      "pid": 7939,
+      "ppid": 2,
+      "name": "[fuse-wd0:203]"
+    },
+    {
+      "uid": "1000",
+      "pid": 7999,
+      "ppid": 1903,
+      "name": "com.samsung.android.cloptimizer"
+    },
+    {
+      "uid": "5279",
+      "pid": 8062,
+      "ppid": 1903,
+      "name": "com.samsung.android.spayfw"
+    },
+    {
+      "uid": "10137",
+      "pid": 8120,
+      "ppid": 1903,
+      "name": "com.samsung.android.mcfserver"
+    },
+    {
+      "uid": "10279",
+      "pid": 8142,
+      "ppid": 1903,
+      "name": "com.google.android.apps.carrier.carrierwifi"
+    },
+    {
+      "uid": "10135",
+      "pid": 8193,
+      "ppid": 1903,
+      "name": "com.samsung.android.intellivoiceservice"
+    },
+    {
+      "uid": "1000",
+      "pid": 8513,
+      "ppid": 1,
+      "name": "vendor.samsung.hardware.tlc.payment-service"
+    },
+    {
+      "uid": "10056",
+      "pid": 8549,
+      "ppid": 1903,
+      "name": "com.samsung.android.app.aodservice"
+    },
+    {
+      "uid": "5023",
+      "pid": 8605,
+      "ppid": 1903,
+      "name": "com.samsung.android.networkdiagnostic"
+    },
+    {
+      "uid": "1000",
+      "pid": 8630,
+      "ppid": 1903,
+      "name": "com.samsung.android.dqagent"
+    },
+    {
+      "uid": "10202",
+      "pid": 8659,
+      "ppid": 1903,
+      "name": "com.samsung.android.honeyboard"
+    },
+    {
+      "uid": "10371",
+      "pid": 8868,
+      "ppid": 1903,
+      "name": "com.samsung.android.game.gamehome:notification"
+    },
+    {
+      "uid": "10168",
+      "pid": 9273,
+      "ppid": 1903,
+      "name": "com.microsoft.appmanager:pnsvc"
+    },
+    {
+      "uid": "10070",
+      "pid": 9369,
+      "ppid": 1903,
+      "name": "com.samsung.accessory.budsunitemgr"
+    },
+    {
+      "uid": "1000",
+      "pid": 9510,
+      "ppid": 1903,
+      "name": "com.samsung.android.vtcamerasettings"
+    },
+    {
+      "uid": "1000",
+      "pid": 9618,
+      "ppid": 1903,
+      "name": "com.samsung.android.biometrics.app.setting"
+    },
+    {
+      "uid": "10220",
+      "pid": 9684,
+      "ppid": 1903,
+      "name": "com.samsung.android.privateaccesstokens"
+    },
+    {
+      "uid": "10077",
+      "pid": 9718,
+      "ppid": 1903,
+      "name": "com.samsung.android.dkey"
+    },
+    {
+      "uid": "10168",
+      "pid": 9842,
+      "ppid": 1903,
+      "name": "com.microsoft.appmanager"
+    },
+    {
+      "uid": "1000",
+      "pid": 10181,
+      "ppid": 1903,
+      "name": "com.samsung.SMT"
+    },
+    {
+      "uid": "0",
+      "pid": 10238,
+      "ppid": 2,
+      "name": "[kworker/7:3-pm]"
+    },
+    {
+      "uid": "0",
+      "pid": 10255,
+      "ppid": 2,
+      "name": "[kworker/u34:1-memlat_wq]"
+    },
+    {
+      "uid": "0",
+      "pid": 10328,
+      "ppid": 2,
+      "name": "[kworker/0:1H-kverityd]"
+    },
+    {
+      "uid": "10079",
+      "pid": 10373,
+      "ppid": 1903,
+      "name": "com.samsung.android.providers.media"
+    },
+    {
+      "uid": "10354",
+      "pid": 10420,
+      "ppid": 1903,
+      "name": "com.sec.android.app.shealth:remote"
+    },
+    {
+      "uid": "10118",
+      "pid": 10443,
+      "ppid": 1903,
+      "name": "com.samsung.android.privacydashboard"
+    },
+    {
+      "uid": "10100",
+      "pid": 10468,
+      "ppid": 1903,
+      "name": "com.samsung.android.kmxservice:AiPrivacy"
+    },
+    {
+      "uid": "0",
+      "pid": 10476,
+      "ppid": 2,
+      "name": "[kworker/3:3-five_wq]"
+    },
+    {
+      "uid": "10221",
+      "pid": 10685,
+      "ppid": 1903,
+      "name": "com.samsung.android.rampart"
+    },
+    {
+      "uid": "10245",
+      "pid": 10739,
+      "ppid": 1903,
+      "name": "com.samsung.android.securitybrief"
+    },
+    {
+      "uid": "10100",
+      "pid": 10845,
+      "ppid": 1903,
+      "name": "com.samsung.android.kmxservice"
+    },
+    {
+      "uid": "10289",
+      "pid": 10994,
+      "ppid": 1903,
+      "name": "com.android.vending:background"
+    },
+    {
+      "uid": "10139",
+      "pid": 11010,
+      "ppid": 1903,
+      "name": "com.samsung.android.smartsuggestions:moneta"
+    },
+    {
+      "uid": "1000",
+      "pid": 11314,
+      "ppid": 1903,
+      "name": "com.android.keychain"
+    },
+    {
+      "uid": "1000",
+      "pid": 11529,
+      "ppid": 1,
+      "name": "vendor.samsung.hardware.tlc.blockchain-service"
+    },
+    {
+      "uid": "0",
+      "pid": 11573,
+      "ppid": 2,
+      "name": "[glink-sec_nvm_sp_keymaster]"
+    },
+    {
+      "uid": "10321",
+      "pid": 11626,
+      "ppid": 1903,
+      "name": "com.google.android.gms.ui"
+    },
+    {
+      "uid": "10146",
+      "pid": 11898,
+      "ppid": 1903,
+      "name": "com.sec.android.app.safetyassurance"
+    },
+    {
+      "uid": "1000",
+      "pid": 11911,
+      "ppid": 1903,
+      "name": "com.samsung.android.emergency"
+    },
+    {
+      "uid": "10251",
+      "pid": 12202,
+      "ppid": 1903,
+      "name": "com.samsung.android.app.smartcapture"
+    },
+    {
+      "uid": "10062",
+      "pid": 12443,
+      "ppid": 1903,
+      "name": "com.samsung.android.mcf.autohotspot"
+    },
+    {
+      "uid": "10395",
+      "pid": 13013,
+      "ppid": 1903,
+      "name": "com.samsung.android.spay"
+    },
+    {
+      "uid": "1000",
+      "pid": 13197,
+      "ppid": 1903,
+      "name": "com.samsung.android.motionphoto.app:MPRemoteService"
+    },
+    {
+      "uid": "1000",
+      "pid": 13314,
+      "ppid": 1903,
+      "name": "com.samsung.android.provider.filterprovider"
+    },
+    {
+      "uid": "10152",
+      "pid": 13463,
+      "ppid": 1903,
+      "name": "com.sec.android.app.soundalive"
+    },
+    {
+      "uid": "10357",
+      "pid": 13464,
+      "ppid": 1903,
+      "name": "com.twitter.android"
+    },
+    {
+      "uid": "0",
+      "pid": 13515,
+      "ppid": 2,
+      "name": "[kworker/2:1H-kblockd]"
+    },
+    {
+      "uid": "10398",
+      "pid": 13522,
+      "ppid": 1903,
+      "name": "com.samsung.android.oneconnect:Core"
+    },
+    {
+      "uid": "0",
+      "pid": 13523,
+      "ppid": 2,
+      "name": "[kworker/1:2H-kblockd]"
+    },
+    {
+      "uid": "10293",
+      "pid": 13702,
+      "ppid": 1903,
+      "name": "com.google.android.googlequicksearchbox:search"
+    },
+    {
+      "uid": "10292",
+      "pid": 14226,
+      "ppid": 1903,
+      "name": "com.google.android.apps.turbo"
+    },
+    {
+      "uid": "10134",
+      "pid": 14305,
+      "ppid": 1903,
+      "name": "com.sec.android.gallery3d"
+    },
+    {
+      "uid": "10295",
+      "pid": 14341,
+      "ppid": 1903,
+      "name": "com.android.chrome"
+    },
+    {
+      "uid": "10384",
+      "pid": 14344,
+      "ppid": 1903,
+      "name": "com.sec.android.app.voicenote"
+    },
+    {
+      "uid": "10072",
+      "pid": 14396,
+      "ppid": 1903,
+      "name": "com.samsung.android.callassistant"
+    },
+    {
+      "uid": "0",
+      "pid": 14505,
+      "ppid": 2,
+      "name": "[kworker/u35:2-mhi_offload_wq]"
+    },
+    {
+      "uid": "0",
+      "pid": 14528,
+      "ppid": 2,
+      "name": "[kworker/u33:21-memlat_wq]"
+    },
+    {
+      "uid": "0",
+      "pid": 14611,
+      "ppid": 2,
+      "name": "[kworker/5:2-pm]"
+    },
+    {
+      "uid": "10102",
+      "pid": 14720,
+      "ppid": 1903,
+      "name": "com.samsung.android.mdx"
+    },
+    {
+      "uid": "10056",
+      "pid": 14738,
+      "ppid": 1903,
+      "name": "com.samsung.android.app.routines"
+    },
+    {
+      "uid": "10297",
+      "pid": 15210,
+      "ppid": 1903,
+      "name": "com.google.android.gm"
+    },
+    {
+      "uid": "10391",
+      "pid": 15338,
+      "ppid": 1903,
+      "name": "com.samsung.android.ssco"
+    },
+    {
+      "uid": "99064",
+      "pid": 15354,
+      "ppid": 17727,
+      "name": "com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0"
+    },
+    {
+      "uid": "10326",
+      "pid": 15391,
+      "ppid": 1903,
+      "name": "com.google.android.adservices.api"
+    },
+    {
+      "uid": "5006",
+      "pid": 15475,
+      "ppid": 1903,
+      "name": "com.samsung.android.beaconmanager"
+    },
+    {
+      "uid": "10131",
+      "pid": 15551,
+      "ppid": 1903,
+      "name": "com.samsung.android.scs:text"
+    },
+    {
+      "uid": "5025",
+      "pid": 15581,
+      "ppid": 1903,
+      "name": "com.samsung.android.mdx.kit"
+    },
+    {
+      "uid": "10368",
+      "pid": 15687,
+      "ppid": 1903,
+      "name": "com.samsung.android.app.spage"
+    },
+    {
+      "uid": "10366",
+      "pid": 15965,
+      "ppid": 1903,
+      "name": "com.amazon.avod.thirdpartyclient"
+    },
+    {
+      "uid": "10108",
+      "pid": 16492,
+      "ppid": 1903,
+      "name": "com.samsung.mediasearch"
+    },
+    {
+      "uid": "10139",
+      "pid": 16507,
+      "ppid": 11010,
+      "name": "virtmgr_gestions:moneta"
+    },
+    {
+      "uid": "1000",
+      "pid": 16512,
+      "ppid": 1,
+      "name": "virtualizationservice"
+    },
+    {
+      "uid": "10080",
+      "pid": 16674,
+      "ppid": 1903,
+      "name": "com.samsung.drmboost"
+    },
+    {
+      "uid": "0",
+      "pid": 16980,
+      "ppid": 2,
+      "name": "[kworker/3:1H-kverityd]"
+    },
+    {
+      "uid": "10275",
+      "pid": 17168,
+      "ppid": 1903,
+      "name": "com.google.android.projection.gearhead:shared"
+    },
+    {
+      "uid": "10275",
+      "pid": 17222,
+      "ppid": 1903,
+      "name": "com.google.android.projection.gearhead:car"
+    },
+    {
+      "uid": "1000",
+      "pid": 17257,
+      "ppid": 1903,
+      "name": "com.sec.android.CcInfo"
+    },
+    {
+      "uid": "10383",
+      "pid": 17272,
+      "ppid": 1903,
+      "name": "com.amazon.dee.app:alexa_accessories"
+    },
+    {
+      "uid": "10383",
+      "pid": 17296,
+      "ppid": 1903,
+      "name": "com.amazon.dee.app:feature"
+    },
+    {
+      "uid": "10383",
+      "pid": 17298,
+      "ppid": 1903,
+      "name": "com.amazon.dee.app:alexa_authservice"
+    },
+    {
+      "uid": "99056",
+      "pid": 17375,
+      "ppid": 17727,
+      "name": "com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:1"
+    },
+    {
+      "uid": "10383",
+      "pid": 17566,
+      "ppid": 1903,
+      "name": "com.amazon.dee.app:alexa"
+    },
+    {
+      "uid": "1053",
+      "pid": 17727,
+      "ppid": 1903,
+      "name": "webview_zygote"
+    },
+    {
+      "uid": "10278",
+      "pid": 18132,
+      "ppid": 1903,
+      "name": "com.google.android.as"
+    },
+    {
+      "uid": "1000",
+      "pid": 18244,
+      "ppid": 1903,
+      "name": "com.samsung.android.bixby.wakeup"
+    },
+    {
+      "uid": "10139",
+      "pid": 18245,
+      "ppid": 1903,
+      "name": "com.samsung.android.smartsuggestions:search"
+    },
+    {
+      "uid": "10120",
+      "pid": 18246,
+      "ppid": 1903,
+      "name": "com.samsung.android.rubin.app"
+    },
+    {
+      "uid": "10315",
+      "pid": 18451,
+      "ppid": 1903,
+      "name": "com.google.android.mosey"
+    },
+    {
+      "uid": "5026",
+      "pid": 18733,
+      "ppid": 1903,
+      "name": "com.samsung.android.app.sharelive"
+    },
+    {
+      "uid": "10398",
+      "pid": 19177,
+      "ppid": 1903,
+      "name": "com.samsung.android.oneconnect:BeaconManagerControlService"
+    },
+    {
+      "uid": "10082",
+      "pid": 19178,
+      "ppid": 1903,
+      "name": "com.samsung.android.easysetup"
+    },
+    {
+      "uid": "10059",
+      "pid": 19344,
+      "ppid": 1903,
+      "name": "com.sec.hearingadjust"
+    },
+    {
+      "uid": "10284",
+      "pid": 19407,
+      "ppid": 1903,
+      "name": "com.google.android.partnersetup"
+    },
+    {
+      "uid": "0",
+      "pid": 19656,
+      "ppid": 2,
+      "name": "[kworker/u36:1-1994000.qcom,qup_uart]"
+    },
+    {
+      "uid": "10193",
+      "pid": 19754,
+      "ppid": 1903,
+      "name": "com.facebook.appmanager"
+    },
+    {
+      "uid": "10087",
+      "pid": 19800,
+      "ppid": 1903,
+      "name": "com.facebook.system"
+    },
+    {
+      "uid": "10321",
+      "pid": 19942,
+      "ppid": 1903,
+      "name": "com.google.android.gms"
+    },
+    {
+      "uid": "0",
+      "pid": 20140,
+      "ppid": 2,
+      "name": "[kworker/u35:1-mhi_offload_wq]"
+    },
+    {
+      "uid": "10321",
+      "pid": 20180,
+      "ppid": 1903,
+      "name": "com.google.android.gms.persistent"
+    },
+    {
+      "uid": "5017",
+      "pid": 20605,
+      "ppid": 1903,
+      "name": "com.samsung.android.samsungpositioning"
+    },
+    {
+      "uid": "10194",
+      "pid": 20618,
+      "ppid": 1903,
+      "name": "com.samsung.android.fast"
+    },
+    {
+      "uid": "10092",
+      "pid": 20782,
+      "ppid": 1903,
+      "name": "com.samsung.android.game.gos"
+    },
+    {
+      "uid": "10355",
+      "pid": 20811,
+      "ppid": 1903,
+      "name": "com.samsung.android.app.tips"
+    },
+    {
+      "uid": "10269",
+      "pid": 20839,
+      "ppid": 1903,
+      "name": "com.samsung.android.net.wifi.wifiguider"
+    },
+    {
+      "uid": "1000",
+      "pid": 20841,
+      "ppid": 1903,
+      "name": "com.samsung.android.wifi.ai"
+    },
+    {
+      "uid": "10259",
+      "pid": 20951,
+      "ppid": 1903,
+      "name": "com.sec.unifiedwfc"
+    },
+    {
+      "uid": "5959",
+      "pid": 21016,
+      "ppid": 1903,
+      "name": "com.samsung.android.kgclient"
+    },
+    {
+      "uid": "5009",
+      "pid": 21316,
+      "ppid": 1903,
+      "name": "com.samsung.android.scpm"
+    },
+    {
+      "uid": "0",
+      "pid": 21413,
+      "ppid": 2,
+      "name": "[kworker/u33:5-memlat_wq]"
+    },
+    {
+      "uid": "0",
+      "pid": 21420,
+      "ppid": 2,
+      "name": "[kworker/u33:13-kgsl-lockless-work]"
+    },
+    {
+      "uid": "10354",
+      "pid": 21529,
+      "ppid": 1903,
+      "name": "com.sec.android.app.shealth"
+    },
+    {
+      "uid": "0",
+      "pid": 21547,
+      "ppid": 2,
+      "name": "[kworker/1:3-pm]"
+    },
+    {
+      "uid": "10302",
+      "pid": 21562,
+      "ppid": 1903,
+      "name": "com.google.android.apps.photos"
+    },
+    {
+      "uid": "10290",
+      "pid": 21692,
+      "ppid": 1903,
+      "name": "com.google.android.as.oss"
+    },
+    {
+      "uid": "10388",
+      "pid": 21715,
+      "ppid": 1903,
+      "name": "com.google.android.inputmethod.latin"
+    },
+    {
+      "uid": "10316",
+      "pid": 21873,
+      "ppid": 1903,
+      "name": "com.google.android.setupwizard:remote"
+    },
+    {
+      "uid": "10273",
+      "pid": 21893,
+      "ppid": 1903,
+      "name": "com.google.android.aicore"
+    },
+    {
+      "uid": "0",
+      "pid": 21999,
+      "ppid": 2,
+      "name": "[kworker/0:1-pm]"
+    },
+    {
+      "uid": "10321",
+      "pid": 22324,
+      "ppid": 1903,
+      "name": "com.google.android.gms.unstable"
+    },
+    {
+      "uid": "10056",
+      "pid": 22691,
+      "ppid": 1903,
+      "name": "com.android.systemui:edgelighting"
+    },
+    {
+      "uid": "0",
+      "pid": 22844,
+      "ppid": 2,
+      "name": "[kworker/4:4-pm]"
+    },
+    {
+      "uid": "10289",
+      "pid": 23115,
+      "ppid": 1903,
+      "name": "com.android.vending"
+    },
+    {
+      "uid": "10082",
+      "pid": 23345,
+      "ppid": 1903,
+      "name": "com.samsung.android.easysetup:IcControlService"
+    },
+    {
+      "uid": "0",
+      "pid": 23505,
+      "ppid": 2,
+      "name": "[kworker/4:1H-kverityd]"
+    },
+    {
+      "uid": "10143",
+      "pid": 23530,
+      "ppid": 1903,
+      "name": "com.android.settings.intelligence"
+    },
+    {
+      "uid": "10320",
+      "pid": 23627,
+      "ppid": 1903,
+      "name": "com.qti.qcc"
+    },
+    {
+      "uid": "0",
+      "pid": 23660,
+      "ppid": 2,
+      "name": "[kworker/6:1-pm]"
+    },
+    {
+      "uid": "0",
+      "pid": 23751,
+      "ppid": 2,
+      "name": "[kworker/u37:0-hiprio_synx_cleanup_queue]"
+    },
+    {
+      "uid": "0",
+      "pid": 23758,
+      "ppid": 2,
+      "name": "[kworker/u36:0-hiprio_synx_cleanup_queue]"
+    },
+    {
+      "uid": "0",
+      "pid": 23759,
+      "ppid": 2,
+      "name": "[kworker/u37:3-crm_workq-a90200-ff0306]"
+    },
+    {
+      "uid": "0",
+      "pid": 24121,
+      "ppid": 2,
+      "name": "[kworker/5:3H-kverityd]"
+    },
+    {
+      "uid": "10293",
+      "pid": 24788,
+      "ppid": 1903,
+      "name": "com.google.android.googlequicksearchbox:interactor"
+    },
+    {
+      "uid": "99017",
+      "pid": 24837,
+      "ppid": 1903,
+      "name": "com.google.android.googlequicksearchbox:trusted_disable_art_image_:com.google.android.apps.gsa.hot"
+    },
+    {
+      "uid": "10066",
+      "pid": 25163,
+      "ppid": 1903,
+      "name": "com.samsung.android.bixby.agent"
+    },
+    {
+      "uid": "0",
+      "pid": 25374,
+      "ppid": 2,
+      "name": "[kworker/3:7H-fsverity_read_queue]"
+    },
+    {
+      "uid": "0",
+      "pid": 25379,
+      "ppid": 2,
+      "name": "[kworker/7:2H-kverityd]"
+    },
+    {
+      "uid": "0",
+      "pid": 25380,
+      "ppid": 2,
+      "name": "[kworker/7:3H-kverityd]"
+    },
+    {
+      "uid": "10413",
+      "pid": 25606,
+      "ppid": 1903,
+      "name": "com.fitbit.FitbitMobile"
+    },
+    {
+      "uid": "1000",
+      "pid": 25786,
+      "ppid": 1903,
+      "name": "com.samsung.sait.sohservice"
+    },
+    {
+      "uid": "10358",
+      "pid": 25819,
+      "ppid": 1903,
+      "name": "com.whatsapp"
+    },
+    {
+      "uid": "10307",
+      "pid": 25834,
+      "ppid": 1903,
+      "name": "com.google.android.youtube"
+    },
+    {
+      "uid": "10363",
+      "pid": 25835,
+      "ppid": 1903,
+      "name": "fr.leboncoin"
+    },
+    {
+      "uid": "10382",
+      "pid": 25863,
+      "ppid": 1903,
+      "name": "com.google.android.apps.walletnfcrel"
+    },
+    {
+      "uid": "1000",
+      "pid": 25937,
+      "ppid": 1903,
+      "name": "com.android.DeviceAsWebcam"
+    },
+    {
+      "uid": "10079",
+      "pid": 26056,
+      "ppid": 1903,
+      "name": "android.process.media"
+    },
+    {
+      "uid": "10105",
+      "pid": 26113,
+      "ppid": 1903,
+      "name": "com.samsung.android.ce"
+    },
+    {
+      "uid": "99067",
+      "pid": 26222,
+      "ppid": 17727,
+      "name": "com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0"
+    },
+    {
+      "uid": "10292",
+      "pid": 26340,
+      "ppid": 1903,
+      "name": "com.google.android.apps.turbo:aab"
+    },
+    {
+      "uid": "0",
+      "pid": 26547,
+      "ppid": 2,
+      "name": "[kworker/7:2-events_power_efficient]"
+    },
+    {
+      "uid": "1000",
+      "pid": 26744,
+      "ppid": 1,
+      "name": "vendor.qti.hardware.trustedui-aidl-service-qti"
+    },
+    {
+      "uid": "1000",
+      "pid": 26750,
+      "ppid": 1,
+      "name": "trusteduilistener"
+    },
+    {
+      "uid": "10306",
+      "pid": 26857,
+      "ppid": 1903,
+      "name": "com.google.android.webview:webview_service"
+    },
+    {
+      "uid": "10356",
+      "pid": 26883,
+      "ppid": 1903,
+      "name": "com.fullsix.android.labanquepostale.accountaccess"
+    },
+    {
+      "uid": "10106",
+      "pid": 26958,
+      "ppid": 1903,
+      "name": "com.samsung.mfcontents"
+    },
+    {
+      "uid": "10164",
+      "pid": 26959,
+      "ppid": 1903,
+      "name": "com.samsung.videoscan"
+    },
+    {
+      "uid": "10365",
+      "pid": 26971,
+      "ppid": 1903,
+      "name": "fr.laposte.lapostemobile"
+    },
+    {
+      "uid": "99068",
+      "pid": 27098,
+      "ppid": 17727,
+      "name": "com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0"
+    },
+    {
+      "uid": "10303",
+      "pid": 27138,
+      "ppid": 1903,
+      "name": "com.google.android.tts"
+    },
+    {
+      "uid": "10295",
+      "pid": 27174,
+      "ppid": 1903,
+      "name": "com.android.chrome:privileged_process0"
+    },
+    {
+      "uid": "10295",
+      "pid": 27188,
+      "ppid": 2245,
+      "name": "com.android.chrome_zygote_native"
+    },
+    {
+      "uid": "90048",
+      "pid": 27223,
+      "ppid": 27188,
+      "name": "com.android.chrome:sandboxed_process0:org.chromium.content.app.NativeOnlySandboxedProcessService0:1"
+    },
+    {
+      "uid": "2000",
+      "pid": 27442,
+      "ppid": 1,
+      "name": "adbd"
+    },
+    {
+      "uid": "0",
+      "pid": 27451,
+      "ppid": 2,
+      "name": "[irq/376-dwc3]"
+    },
+    {
+      "uid": "0",
+      "pid": 27613,
+      "ppid": 2,
+      "name": "[kworker/u32:3-ufs_clkscaling_0]"
+    },
+    {
+      "uid": "0",
+      "pid": 27982,
+      "ppid": 2,
+      "name": "[kworker/1:1-five_wq]"
+    },
+    {
+      "uid": "0",
+      "pid": 28047,
+      "ppid": 2,
+      "name": "[kworker/0:0-pm]"
+    },
+    {
+      "uid": "99070",
+      "pid": 28126,
+      "ppid": 17727,
+      "name": "com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:1"
+    },
+    {
+      "uid": "0",
+      "pid": 28768,
+      "ppid": 2,
+      "name": "[kworker/u35:3-mhi_offload_wq]"
+    },
+    {
+      "uid": "0",
+      "pid": 29000,
+      "ppid": 2,
+      "name": "[kworker/R-dsi_err_workq]"
+    },
+    {
+      "uid": "0",
+      "pid": 29073,
+      "ppid": 2,
+      "name": "[kworker/u32:1-adb]"
+    },
+    {
+      "uid": "0",
+      "pid": 29209,
+      "ppid": 2,
+      "name": "[kworker/2:0-events]"
+    },
+    {
+      "uid": "0",
+      "pid": 29261,
+      "ppid": 2,
+      "name": "[kworker/6:0-pm]"
+    },
+    {
+      "uid": "0",
+      "pid": 29305,
+      "ppid": 2,
+      "name": "[kworker/u33:0-memlat_wq]"
+    },
+    {
+      "uid": "0",
+      "pid": 29529,
+      "ppid": 2,
+      "name": "[kworker/u33:1-memlat_wq]"
+    },
+    {
+      "uid": "0",
+      "pid": 29621,
+      "ppid": 2,
+      "name": "[kworker/0:3-pm]"
+    },
+    {
+      "uid": "0",
+      "pid": 29996,
+      "ppid": 2,
+      "name": "[kworker/1:2-events]"
+    },
+    {
+      "uid": "10294",
+      "pid": 30205,
+      "ppid": 1903,
+      "name": "com.google.android.apps.bard"
+    },
+    {
+      "uid": "0",
+      "pid": 30224,
+      "ppid": 2,
+      "name": "[kworker/2:1-events]"
+    },
+    {
+      "uid": "0",
+      "pid": 30296,
+      "ppid": 2,
+      "name": "[kworker/5:0H-kverityd]"
+    },
+    {
+      "uid": "0",
+      "pid": 30302,
+      "ppid": 2,
+      "name": "[kworker/4:2H-events_highpri]"
+    },
+    {
+      "uid": "10364",
+      "pid": 30317,
+      "ppid": 1903,
+      "name": "com.samsung.android.voc"
+    },
+    {
+      "uid": "0",
+      "pid": 30411,
+      "ppid": 2,
+      "name": "[kworker/3:0-events]"
+    },
+    {
+      "uid": "0",
+      "pid": 30431,
+      "ppid": 2,
+      "name": "[kworker/5:1-events]"
+    },
+    {
+      "uid": "0",
+      "pid": 30445,
+      "ppid": 2,
+      "name": "[kworker/u34:0-kgsl-lockless-work]"
+    },
+    {
+      "uid": "0",
+      "pid": 30516,
+      "ppid": 2,
+      "name": "[kworker/4:0-five_wq]"
+    },
+    {
+      "uid": "0",
+      "pid": 30552,
+      "ppid": 2,
+      "name": "[kworker/5:3-pm]"
+    },
+    {
+      "uid": "0",
+      "pid": 30658,
+      "ppid": 2,
+      "name": "[kworker/u32:2-ufs_clkscaling_0]"
+    },
+    {
+      "uid": "10110",
+      "pid": 30906,
+      "ppid": 1903,
+      "name": "com.samsung.android.app.moments"
+    },
+    {
+      "uid": "10390",
+      "pid": 30909,
+      "ppid": 1903,
+      "name": "com.app.tgtg"
+    },
+    {
+      "uid": "0",
+      "pid": 30921,
+      "ppid": 2,
+      "name": "[kworker/u35:0]"
+    },
+    {
+      "uid": "0",
+      "pid": 30941,
+      "ppid": 2,
+      "name": "[kworker/7:0H-kverityd]"
+    },
+    {
+      "uid": "0",
+      "pid": 31048,
+      "ppid": 2,
+      "name": "[kworker/3:0H-kblockd]"
+    },
+    {
+      "uid": "0",
+      "pid": 31184,
+      "ppid": 2,
+      "name": "[kworker/7:0]"
+    },
+    {
+      "uid": "0",
+      "pid": 31188,
+      "ppid": 2,
+      "name": "[kworker/6:2-mm_percpu_wq]"
+    },
+    {
+      "uid": "0",
+      "pid": 31234,
+      "ppid": 2,
+      "name": "[kworker/2:2]"
+    },
+    {
+      "uid": "0",
+      "pid": 31249,
+      "ppid": 2,
+      "name": "[kworker/1:0]"
+    },
+    {
+      "uid": "0",
+      "pid": 31274,
+      "ppid": 2,
+      "name": "[kworker/u34:2-memlat_wq]"
+    },
+    {
+      "uid": "2000",
+      "pid": 31302,
+      "ppid": 1,
+      "name": "shizuku_server"
+    },
+    {
+      "uid": "10177",
+      "pid": 31322,
+      "ppid": 1903,
+      "name": "moe.shizuku.privileged.api"
+    },
+    {
+      "uid": "0",
+      "pid": 31337,
+      "ppid": 2,
+      "name": "[kworker/u34:3-memlat_wq]"
+    },
+    {
+      "uid": "10399",
+      "pid": 31377,
+      "ppid": 1903,
+      "name": "app.foldgpt.kernelqualification.v11"
+    },
+    {
+      "uid": "0",
+      "pid": 31513,
+      "ppid": 2,
+      "name": "[kworker/5:1H-kverityd]"
+    },
+    {
+      "uid": "0",
+      "pid": 31545,
+      "ppid": 2,
+      "name": "[kworker/u32:0-ufs_clkscaling_0]"
+    },
+    {
+      "uid": "0",
+      "pid": 31583,
+      "ppid": 2,
+      "name": "[kworker/4:1-pm]"
+    },
+    {
+      "uid": "0",
+      "pid": 31588,
+      "ppid": 2,
+      "name": "[kworker/0:2-events]"
+    },
+    {
+      "uid": "2000",
+      "pid": 31630,
+      "ppid": 1,
+      "name": "app.foldgpt.kernelqualification.v11:kernelqualificationv11"
+    },
+    {
+      "uid": "0",
+      "pid": 31655,
+      "ppid": 2,
+      "name": "[kworker/3:1]"
+    },
+    {
+      "uid": "0",
+      "pid": 31754,
+      "ppid": 1901,
+      "name": "[tc]"
+    },
+    {
+      "uid": "2000",
+      "pid": 31755,
+      "ppid": 27442,
+      "name": "ps"
+    }
+  ],
+  "processTableValid": true,
+  "expectedPidAbsence": {},
+  "packages": {
+    "app.foldgpt": {
+      "/data/app/~~5E59pSImRSmGlu92aovtbw==/app.foldgpt-yaFxXrtiXOjNFHnirC5pbw==/base.apk": "97cabf15011d15980a2d913a7fb42fa2e9a878fd9383e54233d5afc782b239f7"
+    },
+    "app.foldgpt.shizukuprobe": {
+      "/data/app/~~IqwCzu74D0U2fXYD3dH7TA==/app.foldgpt.shizukuprobe-KntqLBos0Lg9-yPpUPx8Bw==/base.apk": "46049fd8d2f381c2680023c12005a4d57cf4c9a51c829a447eb88642e6b3a6a4"
+    },
+    "app.foldgpt.kernelqualification.v11": {
+      "/data/app/~~CbjEFOzCuV1P05vmxMBJ8Q==/app.foldgpt.kernelqualification.v11-0tAbAL7yUWWW2eVlPTp6FQ==/base.apk": "1f8609c9a837d6923a464dda0a94153c874d6eaa5bda18cc7cf1d93245cdffd9"
+    }
+  },
+  "fixture": {
+    "workspace": "/data/local/tmp/foldgpt-bionic-supervisor-qualification-v3/workspace",
+    "sha256": {
+      "input": "c4248ab5c8ce52888cd24315ffa32480bbd0bd25b8572185780db830bd914b77",
+      "private/secret": "be3a4ca66e020d499c2c2ea49f759a92dcd7b0ef56fe9551dde0c1dc16286da4",
+      "directory/marker": "d4169ac586761c1e922c624e2655466dea2b3266c3c9af4c88b08908f8a12ce8"
+    },
+    "gitConfigAbsent": true
+  },
+  "bootIdAtEnd": "348d453e-f4e5-40e0-8ef0-030f4d5e38af",
+  "bootStableDuringCollection": true,
+  "observedStockIndicators": true,
+  "collectionComplete": true,
+  "scope": "Independent device snapshot only; ADB shell context is not a measurement of the Shizuku UserService or a native-execution pass"
+}

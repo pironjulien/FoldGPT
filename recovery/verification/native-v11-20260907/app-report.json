@@ -1,0 +1,187 @@
+{
+  "schema": "foldgpt.android-kernel-rpc.v1",
+  "nativeLibraryDir": "\/data\/app\/~~CbjEFOzCuV1P05vmxMBJ8Q==\/app.foldgpt.kernelqualification.v11-0tAbAL7yUWWW2eVlPTp6FQ==\/lib\/arm64",
+  "clientUid": 10399,
+  "shizukuServerUid": 2000,
+  "nativeEvidenceRequired": true,
+  "preflight": {
+    "schema": "foldgpt.executor-preflight.v1",
+    "nativeSpawnAttempted": false,
+    "admission": {
+      "schema": "foldgpt.executor-admission.v1",
+      "admitted": true,
+      "stage": "complete",
+      "subject": "",
+      "facts": {},
+      "error": null
+    },
+    "service": {
+      "state": "idle",
+      "admission": null,
+      "preflight": {
+        "schema": "foldgpt.executor-admission.v1",
+        "admitted": true,
+        "stage": "complete",
+        "subject": "",
+        "facts": {},
+        "error": null
+      }
+    },
+    "context": {
+      "serviceUid": 2000,
+      "servicePid": 31630,
+      "clientUid": 10399,
+      "installedVersion": 11,
+      "contextNativeLibraryDir": "\/data\/app\/~~CbjEFOzCuV1P05vmxMBJ8Q==\/app.foldgpt.kernelqualification.v11-0tAbAL7yUWWW2eVlPTp6FQ==\/lib\/arm64",
+      "contextSourceDir": "\/data\/app\/~~CbjEFOzCuV1P05vmxMBJ8Q==\/app.foldgpt.kernelqualification.v11-0tAbAL7yUWWW2eVlPTp6FQ==\/base.apk",
+      "packageManagerNativeLibraryDir": "\/data\/app\/~~CbjEFOzCuV1P05vmxMBJ8Q==\/app.foldgpt.kernelqualification.v11-0tAbAL7yUWWW2eVlPTp6FQ==\/lib\/arm64",
+      "packageManagerSourceDir": "\/data\/app\/~~CbjEFOzCuV1P05vmxMBJ8Q==\/app.foldgpt.kernelqualification.v11-0tAbAL7yUWWW2eVlPTp6FQ==\/base.apk",
+      "nativeDirectoryMatches": true,
+      "sourceDirectoryMatches": true
+    }
+  },
+  "read": {
+    "chunks": [
+      {
+        "seq": 2,
+        "stream": "stderr",
+        "chunk": "dW5hYmxlIHRvIHN0YXQgZWl0aGVyICIvcHJvYy9zZWxmL2V4ZSIgb3IgImtlcm5lbC1xdWFsaWZpY2F0aW9uIjogTm8gc3VjaCBmaWxlIG9yIGRpcmVjdG9yeQpsaWJjOiB1bmFibGUgdG8gc3RhdCBlaXRoZXIgIi9wcm9jL3NlbGYvZXhlIiBvciAia2VybmVsLXF1YWxpZmljYXRpb24iOiBObyBzdWNoIGZpbGUgb3IgZGlyZWN0b3J5Cg=="
+      }
+    ],
+    "nextSeq": 4,
+    "exited": true,
+    "exitCode": 127,
+    "closed": true,
+    "failure": null,
+    "sandboxDenied": false
+  },
+  "stdout": "",
+  "stderr": "unable to stat either \"\/proc\/self\/exe\" or \"kernel-qualification\": No such file or directory\nlibc: unable to stat either \"\/proc\/self\/exe\" or \"kernel-qualification\": No such file or directory\n",
+  "error": "JSONException: End of input at character 0 of ",
+  "serviceStatus": {
+    "schema": "foldgpt.shizuku.transport.v1",
+    "ready": true,
+    "cancelRequested": false,
+    "bootstrapReaped": false,
+    "cleanupComplete": false,
+    "ownerRetained": true,
+    "quarantined": false,
+    "refusedBeforeFork": false,
+    "setupError": null,
+    "transportFailed": false,
+    "waitStatus": -1,
+    "admission": {
+      "schema": "foldgpt.executor-admission.v1",
+      "admitted": true,
+      "stage": "complete",
+      "subject": "",
+      "facts": {},
+      "error": null
+    },
+    "preflight": {
+      "schema": "foldgpt.executor-admission.v1",
+      "admitted": true,
+      "stage": "complete",
+      "subject": "",
+      "facts": {},
+      "error": null
+    }
+  },
+  "transport": {
+    "schema": "foldgpt.shizuku.transport.v1",
+    "ready": true,
+    "cancelRequested": true,
+    "bootstrapReaped": true,
+    "cleanupComplete": true,
+    "ownerRetained": false,
+    "quarantined": false,
+    "refusedBeforeFork": false,
+    "setupError": null,
+    "transportFailed": false,
+    "waitStatus": 0
+  },
+  "rpcSuccess": false,
+  "transportCleanupComplete": true,
+  "state": "complete",
+  "frames": [
+    {
+      "id": 1,
+      "result": {
+        "sessionId": "53f5b165-96dc-45e8-b344-05d8371d929f",
+        "environmentInfo": {
+          "cwd": "file:\/\/\/data\/local\/tmp\/foldgpt-bionic-supervisor-qualification-v3\/workspace",
+          "userHomeDir": "file:\/\/\/data\/local\/tmp\/foldgpt-bionic-supervisor-qualification-v3\/workspace",
+          "platformOs": "android",
+          "shell": {
+            "name": "kernel-qualification",
+            "path": "kernel-qualification"
+          },
+          "capabilities": {
+            "capabilityDiscoverySandbox": false,
+            "environmentConfigRead": false,
+            "httpHeaderEnvVars": false,
+            "networkProxyLaunch": false,
+            "sandboxedFileStreaming": false,
+            "shellSnapshotV2": false
+          }
+        }
+      }
+    },
+    {
+      "id": 2,
+      "result": {
+        "processId": "kernel-qualification",
+        "sandboxType": "linuxSeccomp"
+      }
+    },
+    {
+      "method": "process\/exited",
+      "params": {
+        "processId": "kernel-qualification",
+        "seq": 1,
+        "exitCode": 127,
+        "sandboxDenied": false
+      }
+    },
+    {
+      "method": "process\/output",
+      "params": {
+        "processId": "kernel-qualification",
+        "seq": 2,
+        "stream": "stderr",
+        "chunk": "dW5hYmxlIHRvIHN0YXQgZWl0aGVyICIvcHJvYy9zZWxmL2V4ZSIgb3IgImtlcm5lbC1xdWFsaWZpY2F0aW9uIjogTm8gc3VjaCBmaWxlIG9yIGRpcmVjdG9yeQpsaWJjOiB1bmFibGUgdG8gc3RhdCBlaXRoZXIgIi9wcm9jL3NlbGYvZXhlIiBvciAia2VybmVsLXF1YWxpZmljYXRpb24iOiBObyBzdWNoIGZpbGUgb3IgZGlyZWN0b3J5Cg=="
+      }
+    },
+    {
+      "method": "process\/closed",
+      "params": {
+        "processId": "kernel-qualification",
+        "seq": 3
+      }
+    },
+    {
+      "id": 3,
+      "result": {
+        "chunks": [
+          {
+            "seq": 2,
+            "stream": "stderr",
+            "chunk": "dW5hYmxlIHRvIHN0YXQgZWl0aGVyICIvcHJvYy9zZWxmL2V4ZSIgb3IgImtlcm5lbC1xdWFsaWZpY2F0aW9uIjogTm8gc3VjaCBmaWxlIG9yIGRpcmVjdG9yeQpsaWJjOiB1bmFibGUgdG8gc3RhdCBlaXRoZXIgIi9wcm9jL3NlbGYvZXhlIiBvciAia2VybmVsLXF1YWxpZmljYXRpb24iOiBObyBzdWNoIGZpbGUgb3IgZGlyZWN0b3J5Cg=="
+          }
+        ],
+        "nextSeq": 4,
+        "exited": true,
+        "exitCode": 127,
+        "closed": true,
+        "failure": null,
+        "sandboxDenied": false
+      }
+    }
+  ],
+  "diagnosticVersion": 11,
+  "requestedAction": "app.foldgpt.kernelqualification.v11.KERNEL_RUN_FIXED_V11",
+  "packageName": "app.foldgpt.kernelqualification.v11",
+  "nativeBase": "\/data\/local\/tmp\/foldgpt-bionic-supervisor-qualification-v3",
+  "recordedWallTimeMs": 1788800571816,
+  "recordedElapsedRealtimeMs": 68978411
+}

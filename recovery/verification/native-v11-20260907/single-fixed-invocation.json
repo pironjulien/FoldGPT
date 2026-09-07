@@ -1,0 +1,6 @@
+{
+  "at": "2026-09-07T17:02:49.997150+00:00",
+  "exit": 0,
+  "stdout": "Starting: Intent { act=app.foldgpt.kernelqualification.v11.KERNEL_RUN_FIXED_V11 cmp=app.foldgpt.kernelqualification.v11/app.foldgpt.kernelqualification.QualificationActivity }\nStatus: ok\nLaunchState: WARM\nActivity: app.foldgpt.kernelqualification.v11/app.foldgpt.kernelqualification.QualificationActivity\nTotalTime: 32\nWaitTime: 37\nComplete\n",
+  "stderr": ""
+}

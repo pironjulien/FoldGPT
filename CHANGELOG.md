@@ -2,6 +2,16 @@
 
 ## Unreleased — 2026-09-06
 
+- Resume the authorized native qualification with stock SELinux enforced.
+  V11 authorization and admission pass; its actual Bionic worker exits 127
+  during executable identification, before kernel proofs. Native and JNI
+  cleanup, unchanged boot, fixture and APKs are independently verified.
+  Preserve the failed attempt and nine exact evidence files. Enable USB
+  stay-awake for the active work session and verify 35 seconds without input.
+- Compare the GNU ARM64 engine and companion against the collected Fold
+  libraries on PC: required libraries, symbol versions and strong imports
+  resolve statically. Device loading and ordinary execution remain unproven.
+
 - Publish recovery supplement v8 and verify its actual GitHub download,
   authenticated restoration and all 7,169 files (3,241,402,905 file bytes).
   All 27 published release assets match their recorded sizes and digests.

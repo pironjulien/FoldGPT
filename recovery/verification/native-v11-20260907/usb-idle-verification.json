@@ -1,0 +1,69 @@
+{
+  "before": {
+    "at": "2026-09-07T16:55:24.923031+00:00",
+    "values": {
+      "mWakefulness": [
+        "Awake",
+        "1"
+      ],
+      "mStayOn": [
+        "true"
+      ],
+      "mLastSleepTime": [
+        "45680697 (392123 ms ago)"
+      ],
+      "mLastSleepReason": [
+        "timeout",
+        "2"
+      ],
+      "mLastWakeTime": [
+        "45690378 (382442 ms ago)"
+      ],
+      "mStayOnWhilePluggedInSetting": [
+        "2"
+      ],
+      "mPlugType": [
+        "2"
+      ],
+      "showing": [
+        "false"
+      ]
+    }
+  },
+  "after": {
+    "at": "2026-09-07T16:56:00.024177+00:00",
+    "values": {
+      "mWakefulness": [
+        "Awake",
+        "1"
+      ],
+      "mStayOn": [
+        "true"
+      ],
+      "mLastSleepTime": [
+        "45680697 (427217 ms ago)"
+      ],
+      "mLastSleepReason": [
+        "timeout",
+        "2"
+      ],
+      "mLastWakeTime": [
+        "45690378 (417536 ms ago)"
+      ],
+      "mStayOnWhilePluggedInSetting": [
+        "2"
+      ],
+      "mPlugType": [
+        "2"
+      ],
+      "showing": [
+        "false"
+      ]
+    }
+  },
+  "observationSeconds": 35,
+  "inputInjected": false,
+  "stayedAwake": true,
+  "unlockedAtBothBoundaries": true,
+  "scope": "Boundary readings with unchanged last-sleep timestamp; no credential or lock-screen policy changed"
+}

@@ -5,7 +5,29 @@ Le dépôt de travail est **privé** : `pironjulien/FoldGPT-workspace`, branche
 sous-modules, moteur séparé et données locales. Le dépôt public `FoldGPT` est un
 ancien checkpoint ; il ne reçoit pas cette sauvegarde privée.
 
-## Session arrêtée à la demande de Julien, 7 septembre vers 07:16
+## Session reprise : résultat V11, 7 septembre vers 19:03
+
+Julien a repris le travail et reconnecté le Fold. Le maintien éveillé USB est
+activé et vérifié sans entrée injectée ; conserver ce réglage pendant la session
+active et rétablir sa valeur initiale0 à la fin, conformément au
+[rapport courant](../docs/research/native-v11-device-result-2026-09-07.md).
+
+L'autorisation Shizuku officielle et le préflight V11 passent. L'unique essai
+natif a lancé son processus, qui échoue au démarrage Bionic avec le code127 :
+`unable to stat either "/proc/self/exe" or "kernel-qualification"`.
+**La qualification n'est pas réussie** et aucun nouveau lancement V11 n'est
+admis. Le nettoyage natif et JNI est réel et complet, sans quarantaine V11.
+Le boot, la fixture, les APK et les indicateurs d'intégrité restent inchangés.
+Les preuves V10 restent conservées indépendamment. Lire le rapport et ses
+[preuves exactes](verification/native-v11-20260907/manifest.json) avant la suite.
+
+Prochaine analyse sur PC : identification de l'exécutable par Bionic dans la
+politique de fichiers du superviseur. Les mécanismes du worker et les commandes
+ordinaires restent à valider ; ne pas réactiver l'ancien diagnostic GNU/PRoot.
+La [comparaison statique ARM64](../docs/research/native-engine-arm64-library-compatibility-2026-09-07.md)
+a également été terminée sur PC ; elle ne prouve pas le chargement Android.
+
+## Historique de clôture à la demande de Julien, 7 septembre vers 07:16
 
 Julien part au travail et a demandé d'arrêter les essais, de tout consigner et
 de finaliser la sauvegarde pour reprendre sur l'autre PC. Aucun nouvel essai
@@ -43,7 +65,7 @@ la release correspondent à leurs tailles et empreintes. Les sources et cette
 reprise sont sur la branche `codex/foldgpt-beta`. Le build ARM64 et ses entrées
 exactes sont sous `downloads/engine-gnu-arm64-20260907` après restauration.
 
-## Point courant : V11 attend l'autorisation Shizuku
+## Historique avant reprise : V11 attendait l'autorisation Shizuku
 
 Le correctif des chemins runtime passe sur PC ; le superviseur figé courant
 est `foldgpt-bionic-supervisor-KvSGBnzP`. L'APK séparé

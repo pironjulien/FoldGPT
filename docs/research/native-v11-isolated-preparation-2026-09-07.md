@@ -1,5 +1,10 @@
 # Préparation native séparée après l'échec V10
 
+**Historique de préparation.** Le Fold a depuis été reconnecté et V11 a reçu
+son autorisation officielle, puis effectué son unique essai. Consulter le
+[résultat réel du 7 septembre](native-v11-device-result-2026-09-07.md) :
+démarrage du worker en échec, nettoyage complet vérifié, aucune réussite noyau.
+
 Le V10 reste une qualification échouée, avec propriétaire retenu. V11 est
 désormais compilé, installé et son runtime est vérifié. L'autorisation
 Shizuku est en attente derrière le verrouillage du Fold. Aucune tentative
