@@ -63,7 +63,8 @@ readlink, and O_NOFOLLOW semantics for the immutable runtime are preserved.
 Cancellation is a separate native socket, including EOF. The native owner kills
 the still-owned process group while the leader is unreaped and reaps adopted
 descendants. Timeout and output caps use the same lifecycle. A final trusted
-cleanup record is mandatory before the shared filesystem lease is released.
+cleanup record and actual native owner wait are mandatory before the shared
+filesystem lease is released.
 An unknown result quarantines the workspace; a delayed kernel cleanup retains
 the actual native owner and descriptors, without a permissive retry. The UID
 task RLIMIT includes observed same-UID tasks plus the configured budget; it is
@@ -83,7 +84,8 @@ supervisor loss quarantine. This is not yet a general command release:
 
 - Native `chdir` is refused; `fchdir` accepts already admitted directory FDs.
   Relative acquisitions pin the calling task's real cwd before policy checks.
-  A separate runtime shim is needed for libc chdir compatibility.
+  The separate [attested runtime shim](../bionic-cwd/README.md) provides real
+  Bash/Python libc chdir compatibility and is covered by host integration tests.
 - Namespace deletion/rename/link/symlink and mutation through directory FDs are
   refused. Arbitrary workspace executable files are not granted execute.
 - Workspace symlinks, hardlinks and gitdir/worktree aliases remain outside the
@@ -91,8 +93,12 @@ supervisor loss quarantine. This is not yet a general command release:
 - Runtime directories are an explicit bootstrap authority. A policy containing
   any explicit denial intersecting a required runtime is refused before spawn;
   the policy is never silently overwritten by that runtime mapping.
-- getdents64 duplicates the worker's FD with pidfd_getfd; support in the actual
-  Android SELinux domain, including multithreaded calls, is not host-proven.
+- getdents64 duplicates the exact calling thread's FD with
+  pidfd_open(PIDFD_THREAD)/pidfd_getfd. Main-thread and secondary-thread real
+  directory entries and shared offsets are host-proven. Android SELinux access
+  remains to be measured by the [fixed qualification](qualification.md).
+  Broker setup ENOENT is reported as EOPNOTSUPP because libc readdir can turn
+  ENOENT into false empty success; actual path open/stat ENOENT is preserved.
 - Network and TTY remain unsupported and denied. Resource limits are per
   process/UID kernel limits, not aggregate per-workspace quotas.
 - No phone qualification or production bubblewrap route replacement is claimed.

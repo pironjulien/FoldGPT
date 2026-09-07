@@ -2,6 +2,8 @@
 
 ## Unreleased — 2026-09-06
 
+- Independently reviewed the Bionic supervisor and corrected secondary-thread directory reads that could falsely report an empty directory, plus premature lease release before native supervisor reaping. The frozen corrected build passes 19 real process tests, two direct kernel tests and the fixed main/pthread qualification. Its Android ARM64 binaries compile with ELF checks; Android execution remains unmeasured. The exact next fixed device qualification is documented without activating the production route.
+
 - Added the actual Bionic libc cwd shim and immutable APK path/digest admission. Four real native-supervisor composition tests pass for Bash/Python cwd, relative policy, reserved preload and attestation; raw chdir stays denied. The updated signed debug APK contains the shim, preserves the installed certificate and passes package/ELF checks. Sixteen transport unit tests pass; no native deployment is activated and no phone is accessed by this work.
 
 - Preserved the separate engine's exact upstream base and complete source patch in private recovery. A fresh upstream clone restores an identical patch checksum. Added complete source/archive/hydration commands for another Windows PC; the archive's live GitHub restoration is verified separately before publishing its release.

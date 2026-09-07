@@ -275,7 +275,8 @@ class Processes(NativeProcessesBackend):
                 done, _ = await asyncio.wait((waiting,), timeout=6)
                 if not done:
                     retained = True
-            if record.native_result is not None and record.native_result["cleanupComplete"]:
+            if (record.native_result is not None and record.native_result["cleanupComplete"]
+                    and process is not None and process.returncode is not None):
                 clean = True
             if process is not None and not clean:
                 self.quarantined = True

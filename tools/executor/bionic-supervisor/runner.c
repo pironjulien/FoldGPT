@@ -7,6 +7,9 @@
 #include <dirent.h>
 #include <linux/capability.h>
 #include <linux/openat2.h>
+#ifdef __ANDROID__
+#include <linux/pidfd.h>
+#endif
 #include <linux/stat.h>
 #include <poll.h>
 #include <stdio.h>
@@ -27,6 +30,11 @@
 #endif
 
 #define MAX_FRAME 196608
+#ifndef PIDFD_THREAD
+/* Linux6.12.58 UAPI and NDK r29 linux/pidfd.h: older host headers may
+ * omit the name although the running kernel implements the exact flag. */
+#define PIDFD_THREAD O_EXCL
+#endif
 #define MAX_PATH 4096
 #define READ_FILE (1ULL<<2)
 #define READ_DIR (1ULL<<3)
@@ -325,7 +333,9 @@ static int pinned_worker_fd(int listener,const struct seccomp_notif *n,int numbe
   if(number<0){errno=EBADF;return -1;}
   int fd;
   if(shared_offset){
-    int identity=(int)syscall(SYS_pidfd_open,n->pid,0);if(identity<0)return -1;
+    /* Notification pid is a TID, including non-leader Python/Bionic threads.
+     * Pin precisely that task, never substitute its thread-group leader. */
+    int identity=(int)syscall(SYS_pidfd_open,n->pid,PIDFD_THREAD);if(identity<0)return -1;
     if(!valid(listener,n->id)){close(identity);errno=ESRCH;return -1;}
     fd=(int)syscall(SYS_pidfd_getfd,identity,number,0);int saved=errno;close(identity);errno=saved;
   }else{
@@ -334,15 +344,21 @@ static int pinned_worker_fd(int listener,const struct seccomp_notif *n,int numbe
   if(fd>=0&&!valid(listener,n->id)){close(fd);errno=ESRCH;return -1;}return fd;
 }
 static int authorize_directory(int listener,const struct seccomp_notif *n,int fd,const char *path);
+static int directory_setup_error(int listener,const struct seccomp_notif *n,int error) {
+  if(!valid(listener,n->id))return 0;
+  /* libc readdir may convert ENOENT into EOF. A broker setup failure must
+   * remain a real error; only the actual getdents syscall may report EOF. */
+  return reply(listener,n->id,0,error==ENOENT?EOPNOTSUPP:error);
+}
 static int directory_read(int listener,const struct seccomp_notif *n,int mem) {
   if(n->data.args[2]>65536||!n->data.args[2]||n->data.args[1]>INT64_MAX)return reply(listener,n->id,0,EINVAL);
   int fd=pinned_worker_fd(listener,n,(int)n->data.args[0],1);
-  if(fd<0)return errno==ESRCH?0:reply(listener,n->id,0,errno);
+  if(fd<0)return directory_setup_error(listener,n,errno);
   char proc[80],path[MAX_PATH],resolved[MAX_PATH];snprintf(proc,sizeof(proc),"/proc/self/fd/%d",fd);
-  ssize_t length=readlink(proc,path,sizeof(path)-1);if(length<0){int e=errno;close(fd);return reply(listener,n->id,0,e);}path[length]=0;
+  ssize_t length=readlink(proc,path,sizeof(path)-1);if(length<0){int e=errno;close(fd);return directory_setup_error(listener,n,e);}path[length]=0;
   if(runtime_path(path,resolved)!=1){
     int admitted=authorize_directory(listener,n,fd,path);int saved=errno;
-    if(admitted){close(fd);return admitted<0?-1:reply(listener,n->id,0,saved);}
+    if(admitted){close(fd);return admitted<0?-1:directory_setup_error(listener,n,saved);}
   }
   char *buffer=malloc((size_t)n->data.args[2]);if(!buffer){close(fd);return reply(listener,n->id,0,ENOMEM);}
   ssize_t got=syscall(SYS_getdents64,fd,buffer,(size_t)n->data.args[2]);int error=got<0?errno:0;
@@ -413,7 +429,7 @@ static int acquisition(int listener,const struct seccomp_notif *n) {
     case SYS_mkdir:kind=2;address=n->data.args[0];mode=n->data.args[1];break;
     case SYS_readlink:kind=3;address=n->data.args[0];output=n->data.args[1];mode=n->data.args[2];break;
 #endif
-    case SYS_getdents64:{int mem=memory(listener,n);if(mem<0)return errno==ESRCH?0:reply(listener,n->id,0,errno);
+    case SYS_getdents64:{int mem=memory(listener,n);if(mem<0)return directory_setup_error(listener,n,errno);
       int result=directory_read(listener,n,mem);close(mem);return result;}
     default:return reply(listener,n->id,0,ENOSYS);
   }

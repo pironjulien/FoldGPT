@@ -318,6 +318,67 @@ print('shim native cwd passed')
             factory(self.options)
         self.assertEqual(set(os.listdir("/proc/self/fd")), before)
 
+    async def test_17_thread_directory_listing_preserves_real_entries(self):
+        program = """import os,threading
+os.mkdir('project');open('project/value','w').write('actual')
+main=os.listdir('project');results=[];errors=[]
+def worker():
+ try:
+  results.append(os.listdir('project'))
+  assert open('project/value').read()=='actual'
+  assert os.stat('project/value').st_size==6
+ except BaseException as error: errors.append(repr(error))
+t=threading.Thread(target=worker);t.start();t.join()
+assert main==['value'] and results==[['value']] and not errors,(main,results,errors)
+print('exact thread directory entries')
+"""
+        result = await self.complete(await self.start("exec /usr/bin/python3 -I -B -c " + shlex.quote(program)))
+        self.assertEqual(result["exitCode"], 0, result)
+        self.assertEqual(self.output(result), b"exact thread directory entries\n")
+
+    @unittest.skipUnless(BUILD and (BUILD / "runner-after-final-stop").is_file(), "Host fault-injection supervisor absent")
+    async def test_18_final_record_without_owner_wait_keeps_quarantine(self):
+        await self.backend.close("test")
+        self.options["processRunner"] = str(BUILD / "runner-after-final-stop")
+        self.options["limits"]["wall_ms"] = 1000
+        self.backend = factory(self.options)
+        record = await self.start("printf real-worker-completed")
+        identity = os.pidfd_open(record.process.pid)
+        try:
+            await asyncio.wait_for(asyncio.shield(record.finished), 20)
+            self.assertTrue(record.native_result["cleanupComplete"])
+            self.assertIsNone(record.process.returncode)
+            self.assertTrue(self.backend.processes.quarantined)
+            self.assertFalse(record.closed)
+            self.assertTrue(self.backend.files.lock.locked())
+            self.assertIsNotNone(record.retained_owner)
+        finally:
+            # Recover only this intentionally stopped, still-owned host process
+            # through its pinned pidfd. No fault binary is built for Android.
+            signal.pidfd_send_signal(identity, signal.SIGCONT)
+            os.close(identity)
+            await asyncio.wait_for(record.process.wait(), 5)
+            for endpoint in record.retained_owner[3]:
+                endpoint.close()
+            record.command = None
+        self.assertEqual(record.process.returncode, 0)
+
+    @unittest.skipUnless(BUILD and (BUILD / "runner-getdents-memory-missing").is_file(), "Host fault-injection supervisor absent")
+    async def test_19_getdents_memory_denial_never_becomes_empty_listing(self):
+        await self.backend.close("test")
+        self.options["processRunner"] = str(BUILD / "runner-getdents-memory-missing")
+        self.backend = factory(self.options)
+        program = """import errno,os
+os.mkdir('project');open('project/value','w').write('actual')
+try: os.listdir('project')
+except OSError as error: assert error.errno==errno.EOPNOTSUPP,error
+else: raise AssertionError('broker memory denial became a successful listing')
+print('actual broker denial preserved')
+"""
+        result = await self.complete(await self.start("exec /usr/bin/python3 -I -B -c " + shlex.quote(program)))
+        self.assertEqual(result["exitCode"], 0, result)
+        self.assertEqual(self.output(result), b"actual broker denial preserved\n")
+
 
 if __name__ == "__main__":
     try:

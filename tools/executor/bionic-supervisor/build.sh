@@ -27,14 +27,39 @@ compiler=${ANDROID_NDK_HOME:-/opt/foldgpt/android-ndk-r29}/toolchains/llvm/prebu
 for program in runner native-files native-file-handle qualification-worker; do
     source="$source_dir/$program.c"
     if [ "$program" = runner ] || [ "$program" = qualification-worker ]; then source="$source_dir/bionic-supervisor/$program.c"; fi
-    gcc -std=c11 -O2 -Wall -Wextra -Werror -I"$source_dir" "$source" -o "$work/$program"
+    extra=(); if [ "$program" = qualification-worker ]; then extra=(-pthread); fi
+    gcc -std=c11 -O2 -Wall -Wextra -Werror "${extra[@]}" -I"$source_dir" "$source" -o "$work/$program"
     library="libfoldgpt_${program//-/_}.so"
     [ "$program" != runner ] || library=libfoldgpt_bionic_supervisor.so
-    "$compiler" -std=c11 -O2 -Wall -Wextra -Werror -fPIE -pie -I"$source_dir" \
+    "$compiler" -std=c11 -O2 -Wall -Wextra -Werror "${extra[@]}" -fPIE -pie -I"$source_dir" \
         -Wl,-z,max-page-size=16384,-z,common-page-size=16384,-z,relro,-z,now \
         "$source" -o "$work/$library"
     python3 -B "$work/check-elf.py" "$work/$library" > "$work/$library.elf.json"
 done
+python3 - "$source_dir/bionic-supervisor/runner.c" "$work/runner-after-final-stop.c" <<'PY'
+from pathlib import Path
+import sys
+source = Path(sys.argv[1]).read_text()
+anchor = '(void)packet(final,(size_t)length,1);return '
+assert source.count(anchor) == 1
+Path(sys.argv[2]).write_text(source.replace(anchor, '(void)packet(final,(size_t)length,1);raise(SIGSTOP);return '))
+PY
+gcc -std=c11 -O2 -Wall -Wextra -Werror -I"$source_dir" "$work/runner-after-final-stop.c" -o "$work/runner-after-final-stop"
+python3 - "$source_dir/bionic-supervisor/runner.c" "$work/runner-getdents-memory-missing.c" <<'PY'
+from pathlib import Path
+import sys
+source = Path(sys.argv[1]).read_text()
+anchor = 'case SYS_getdents64:{int mem=memory(listener,n);'
+assert source.count(anchor) == 1
+replacement = '''case SYS_getdents64:{
+      char fault_fd[96],fault_path[MAX_PATH];
+      snprintf(fault_fd,sizeof(fault_fd),"/proc/%u/fd/%d",n->pid,(int)n->data.args[0]);
+      ssize_t fault_len=readlink(fault_fd,fault_path,sizeof(fault_path)-1);
+      int fault_project=fault_len>=8&&!memcmp(fault_path+fault_len-8,"/project",8);
+      int mem=fault_project?-1:memory(listener,n);if(fault_project)errno=ENOENT;'''
+Path(sys.argv[2]).write_text(source.replace(anchor, replacement))
+PY
+gcc -std=c11 -O2 -Wall -Wextra -Werror -I"$source_dir" "$work/runner-getdents-memory-missing.c" -o "$work/runner-getdents-memory-missing"
 gcc -std=c11 -O2 -Wall -Wextra -Werror "$source_dir/native-process-fd-abi.c" -o "$work/native-process-fd-abi"
 "$compiler" -std=c11 -O2 -Wall -Wextra -Werror -fPIE -pie \
     -Wl,-z,max-page-size=16384,-z,common-page-size=16384,-z,relro,-z,now \
