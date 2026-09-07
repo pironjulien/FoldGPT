@@ -1693,7 +1693,7 @@ index 0ad2a7bd9af739e8acdc2703267b3257a9872a14..a03a718a0ba28f0d303f29496adc794a
  pub use loader::load_agent_roles;
 +pub use loader::load_agent_roles_with_project_fs;
 diff --git a/codex-rs/agent-roles/src/loader.rs b/codex-rs/agent-roles/src/loader.rs
-index a82649b8e10debe7a2b3c7e21e2e861d557ea3b7..d801de4f92a7092d421ab838656d749a8e58de9b 100644
+index a82649b8e10debe7a2b3c7e21e2e861d557ea3b7..f25cd53522fd6ff23b1bde5cd49f5ca6e0337a33 100644
 --- a/codex-rs/agent-roles/src/loader.rs
 +++ b/codex-rs/agent-roles/src/loader.rs
 @@ -4,7 +4,9 @@ use crate::agent_role_config::normalize_agent_role_description;
@@ -1715,7 +1715,7 @@ index a82649b8e10debe7a2b3c7e21e2e861d557ea3b7..d801de4f92a7092d421ab838656d749a
  use std::path::Path;
  use std::path::PathBuf;
  use toml::Value as TomlValue;
-@@ -26,13 +30,85 @@ pub async fn load_agent_roles(
+@@ -26,13 +30,89 @@ pub async fn load_agent_roles(
      config_layer_stack: &ConfigLayerStack,
      startup_warnings: &mut Vec<String>,
  ) -> std::io::Result<BTreeMap<String, AgentRoleConfig>> {
@@ -1760,11 +1760,15 @@ index a82649b8e10debe7a2b3c7e21e2e861d557ea3b7..d801de4f92a7092d421ab838656d749a
 +}
 +
 +impl RoleFileSystemErrors {
-+    fn must_propagate(self, error: &io::Error) -> bool {
-+        matches!(self, Self::Propagate)
-+            && error
++    fn provider_error_kind(self, error: &io::Error) -> Option<io::ErrorKind> {
++        if matches!(self, Self::Propagate) {
++            error
 +                .get_ref()
-+                .is_some_and(|source| source.is::<RoleFileSystemError>())
++                .and_then(|source| source.downcast_ref::<RoleFileSystemError>())
++                .map(|error| error.0.kind())
++        } else {
++            None
++        }
 +    }
 +}
 +
@@ -1802,17 +1806,17 @@ index a82649b8e10debe7a2b3c7e21e2e861d557ea3b7..d801de4f92a7092d421ab838656d749a
          let mut layer_roles: BTreeMap<String, AgentRoleConfig> = BTreeMap::new();
          let mut declared_role_files = BTreeSet::new();
          let config_folder = layer.config_folder();
-@@ -49,6 +125,9 @@ pub async fn load_agent_roles(
+@@ -49,6 +129,9 @@ pub async fn load_agent_roles(
                      match read_declared_role(fs, declared_role_name, role_toml).await {
                          Ok(role) => role,
                          Err(err) => {
-+                            if filesystem_errors.must_propagate(&err) {
-+                                return Err(err);
++                            if let Some(kind) = filesystem_errors.provider_error_kind(&err) {
++                                return Err(io::Error::new(kind, err));
 +                            }
                              push_agent_role_warning(startup_warnings, err);
                              continue;
                          }
-@@ -78,6 +157,7 @@ pub async fn load_agent_roles(
+@@ -78,6 +161,7 @@ pub async fn load_agent_roles(
                  &config_folder.join("agents"),
                  &declared_role_files,
                  startup_warnings,
@@ -1820,7 +1824,7 @@ index a82649b8e10debe7a2b3c7e21e2e861d557ea3b7..d801de4f92a7092d421ab838656d749a
              )
              .await?
              {
-@@ -98,6 +178,7 @@ pub async fn load_agent_roles(
+@@ -98,6 +182,7 @@ pub async fn load_agent_roles(
          }
  
          for (role_name, role) in layer_roles {
@@ -1828,7 +1832,7 @@ index a82649b8e10debe7a2b3c7e21e2e861d557ea3b7..d801de4f92a7092d421ab838656d749a
              let mut merged_role = role;
              if let Some(existing_role) = roles.get(&role_name) {
                  merge_missing_role_fields(&mut merged_role, existing_role);
-@@ -109,11 +190,17 @@ pub async fn load_agent_roles(
+@@ -109,11 +194,17 @@ pub async fn load_agent_roles(
                  push_agent_role_warning(startup_warnings, err);
                  continue;
              }
@@ -1847,7 +1851,7 @@ index a82649b8e10debe7a2b3c7e21e2e861d557ea3b7..d801de4f92a7092d421ab838656d749a
  }
  
  fn push_agent_role_warning(startup_warnings: &mut Vec<String>, err: std::io::Error) {
-@@ -224,7 +311,8 @@ async fn read_resolved_agent_role_file(
+@@ -224,7 +315,8 @@ async fn read_resolved_agent_role_file(
      let path_uri = PathUri::from_abs_path(path);
      let contents = fs
          .read_file_text(&path_uri, ReadFileOptions::default(), /*sandbox*/ None)
@@ -1857,24 +1861,31 @@ index a82649b8e10debe7a2b3c7e21e2e861d557ea3b7..d801de4f92a7092d421ab838656d749a
      let config_base_dir = path.parent().unwrap_or_else(|| path.clone());
      parse_agent_role_file_contents(
          &contents,
-@@ -266,13 +354,13 @@ async fn validate_agent_role_config_file(
+@@ -266,12 +358,17 @@ async fn validate_agent_role_config_file(
          )
          .await
          .map_err(|e| {
 -            std::io::Error::new(
 -                std::io::ErrorKind::InvalidInput,
-+            RoleFileSystemError::wrap(std::io::Error::new(
-+                e.kind(),
-                 format!(
-                     "agents.{role_name}.config_file must point to an existing file at {}: {e}",
-                     config_file.as_path().display()
-                 ),
--            )
-+            ))
+-                format!(
+-                    "agents.{role_name}.config_file must point to an existing file at {}: {e}",
+-                    config_file.as_path().display()
+-                ),
++            // The local configuration API historically reports invalid declarations
++            // as InvalidInput. Retain the real filesystem kind for split providers.
++            io::Error::new(
++                io::ErrorKind::InvalidInput,
++                RoleFileSystemError(io::Error::new(
++                    e.kind(),
++                    format!(
++                        "agents.{role_name}.config_file must point to an existing file at {}: {e}",
++                        config_file.as_path().display()
++                    ),
++                )),
+             )
          })?;
      if metadata.is_file {
-         Ok(())
-@@ -292,6 +380,7 @@ async fn discover_agent_roles_in_dir(
+@@ -292,6 +389,7 @@ async fn discover_agent_roles_in_dir(
      agents_dir: &AbsolutePathBuf,
      declared_role_files: &BTreeSet<PathBuf>,
      startup_warnings: &mut Vec<String>,
@@ -1882,16 +1893,28 @@ index a82649b8e10debe7a2b3c7e21e2e861d557ea3b7..d801de4f92a7092d421ab838656d749a
  ) -> std::io::Result<BTreeMap<String, AgentRoleConfig>> {
      let mut roles = BTreeMap::new();
  
-@@ -303,6 +392,9 @@ async fn discover_agent_roles_in_dir(
+@@ -303,6 +401,9 @@ async fn discover_agent_roles_in_dir(
              match read_resolved_agent_role_file(fs, &agent_file, /*role_name_hint*/ None).await {
                  Ok(parsed_file) => parsed_file,
                  Err(err) => {
-+                    if filesystem_errors.must_propagate(&err) {
-+                        return Err(err);
++                    if let Some(kind) = filesystem_errors.provider_error_kind(&err) {
++                        return Err(io::Error::new(kind, err));
 +                    }
                      push_agent_role_warning(startup_warnings, err);
                      continue;
                  }
+diff --git a/codex-rs/app-server/BUILD.bazel b/codex-rs/app-server/BUILD.bazel
+index ae19f195c344bf061fa233b71a852d3e57e176a4..9f2aed5192cc1cee1fd2a08b24ce73755980f5ec 100644
+--- a/codex-rs/app-server/BUILD.bazel
++++ b/codex-rs/app-server/BUILD.bazel
+@@ -13,6 +13,7 @@ codex_rust_crate(
+     ],
+     integration_test_timeout = "long",
+     run_tests_with_wine_exec = True,
++    test_data_extra = ["tests/suite/v2/native_app_server_fixture.py"],
+     test_shard_counts = {
+         # Note app-server-all-test has a large number of integration tests, so
+         # even a single shard can be quite slow. When there is a legitimate
 diff --git a/codex-rs/app-server/README.md b/codex-rs/app-server/README.md
 index a0aa92b7fcef8ee5fcc5c1810d7f2459429c8aad..05984e435ad879e6c3dc8639eaf55f7e88c902e0 100644
 --- a/codex-rs/app-server/README.md
@@ -1973,12 +1996,794 @@ index 0000000000000000000000000000000000000000..94f2a86ee7645194d465e39ddbd71916
 +        }
 +    }
 +}
+diff --git a/codex-rs/app-server/src/command_exec.rs b/codex-rs/app-server/src/command_exec.rs
+index 53449ac092bf676ce1cfb3f0e125c4ab65e1407c..85065563b8a14f6a87c2139737e4804856c3928b 100644
+--- a/codex-rs/app-server/src/command_exec.rs
++++ b/codex-rs/app-server/src/command_exec.rs
+@@ -44,6 +44,10 @@ use crate::outgoing_message::OutgoingMessageSender;
+ const EXEC_TIMEOUT_EXIT_CODE: i32 = 124;
+ const OUTPUT_CHUNK_SIZE_HINT: usize = 64 * 1024;
+ 
++#[path = "command_exec_executor.rs"]
++mod executor;
++pub(crate) use executor::StartExecutorCommandParams;
++
+ #[derive(Clone)]
+ pub(crate) struct CommandExecManager {
+     sessions: Arc<Mutex<HashMap<ConnectionProcessId, CommandExecSession>>>,
+diff --git a/codex-rs/app-server/src/command_exec_executor.rs b/codex-rs/app-server/src/command_exec_executor.rs
+new file mode 100644
+index 0000000000000000000000000000000000000000..d8e88b5037e8e94d6e0a4325a90271a1f5a6caf7
+--- /dev/null
++++ b/codex-rs/app-server/src/command_exec_executor.rs
+@@ -0,0 +1,361 @@
++use super::*;
++use codex_exec_server::ExecBackend;
++use codex_exec_server::ExecOutputStream;
++use codex_exec_server::ExecParams;
++use codex_exec_server::ExecProcess;
++use codex_exec_server::ExecProcessEvent;
++use codex_exec_server::WriteStatus;
++use tokio::sync::broadcast;
++
++pub(crate) struct StartExecutorCommandParams {
++    pub(crate) outgoing: Arc<OutgoingMessageSender>,
++    pub(crate) request_id: ConnectionRequestId,
++    pub(crate) process_id: Option<String>,
++    pub(crate) backend: Arc<dyn ExecBackend>,
++    pub(crate) exec_params: ExecParams,
++    pub(crate) expiration: ExecExpiration,
++    pub(crate) started_network_proxy: Option<StartedNetworkProxy>,
++    pub(crate) stream_stdin: bool,
++    pub(crate) stream_stdout_stderr: bool,
++    pub(crate) output_bytes_cap: Option<usize>,
++    pub(crate) size: Option<TerminalSize>,
++}
++
++impl CommandExecManager {
++    pub(crate) async fn start_on_executor(
++        &self,
++        params: StartExecutorCommandParams,
++    ) -> Result<(), JSONRPCErrorError> {
++        if params.process_id.is_none()
++            && (params.exec_params.tty || params.stream_stdin || params.stream_stdout_stderr)
++        {
++            return Err(invalid_request(
++                "command/exec tty or streaming requires a client-supplied processId",
++            ));
++        }
++        if params.size.is_some() {
++            return Err(invalid_request(
++                "the selected executor does not support command/exec terminal size",
++            ));
++        }
++        let process_key = ConnectionProcessId {
++            connection_id: params.request_id.connection_id,
++            process_id: params.process_id.clone().map_or_else(
++                || {
++                    InternalProcessId::Generated(
++                        self.next_generated_process_id
++                            .fetch_add(1, Ordering::Relaxed),
++                    )
++                },
++                InternalProcessId::Client,
++            ),
++        };
++        let (control_tx, control_rx) = mpsc::channel(32);
++        {
++            let mut sessions = self.sessions.lock().await;
++            if sessions.contains_key(&process_key) {
++                return Err(invalid_request(format!(
++                    "duplicate active command/exec process id: {}",
++                    process_key.process_id.error_repr(),
++                )));
++            }
++            sessions.insert(
++                process_key.clone(),
++                CommandExecSession::Active { control_tx },
++            );
++        }
++        let sessions = Arc::clone(&self.sessions);
++        // The task owns startup even if the request or connection disappears. Dropping
++        // a backend start future could otherwise abandon an already-created process.
++        tokio::spawn(async move {
++            let outgoing = Arc::clone(&params.outgoing);
++            let request_id = params.request_id.clone();
++            let result = run_executor_command(params, control_rx).await;
++            sessions.lock().await.remove(&process_key);
++            match result {
++                Ok(response) => outgoing.send_response(request_id, response).await,
++                Err(error) => outgoing.send_error(request_id, error).await,
++            }
++        });
++        Ok(())
++    }
++}
++
++async fn run_executor_command(
++    params: StartExecutorCommandParams,
++    mut control_rx: mpsc::Receiver<CommandControlRequest>,
++) -> Result<CommandExecResponse, JSONRPCErrorError> {
++    let StartExecutorCommandParams {
++        outgoing,
++        request_id,
++        process_id,
++        backend,
++        exec_params,
++        expiration,
++        started_network_proxy: _started_network_proxy,
++        stream_stdin,
++        stream_stdout_stderr,
++        output_bytes_cap,
++        size: _,
++    } = params;
++    let expiration = expiration.wait_with_outcome();
++    tokio::pin!(expiration);
++    let start = backend.start(exec_params);
++    tokio::pin!(start);
++    let mut expiration_outcome = None;
++    let mut startup_termination = None;
++    let mut terminate_after_start = false;
++    let started = loop {
++        tokio::select! {
++            started = &mut start => break started,
++            outcome = &mut expiration => {
++                expiration_outcome = Some(outcome);
++                terminate_after_start = true;
++                break start.await;
++            }
++            control = control_rx.recv() => {
++                match control {
++                    Some(CommandControlRequest { control: CommandControl::Terminate, response_tx }) => {
++                        startup_termination = response_tx;
++                        terminate_after_start = true;
++                        break start.await;
++                    }
++                    Some(CommandControlRequest { response_tx, .. }) => {
++                        if let Some(response_tx) = response_tx {
++                            let _ = response_tx.send(Err(invalid_request("command/exec process is starting")));
++                        }
++                    }
++                    None => {
++                        terminate_after_start = true;
++                        break start.await;
++                    }
++                }
++            }
++        }
++    };
++    let process = match started {
++        Ok(started) => started.process,
++        Err(error) => {
++            let error = internal_error(format!(
++                "selected executor failed to start command: {error}"
++            ));
++            if let Some(response_tx) = startup_termination {
++                let _ = response_tx.send(Err(error.clone()));
++            }
++            return Err(error);
++        }
++    };
++    let mut events = process.subscribe_events();
++    if terminate_after_start {
++        let result = process
++            .terminate()
++            .await
++            .map_err(|error| internal_error(format!("executor termination failed: {error}")));
++        if let Some(response_tx) = startup_termination {
++            let _ = response_tx.send(result.clone());
++        }
++        result?;
++    }
++    let mut stdout = ExecutorOutput::default();
++    let mut stderr = ExecutorOutput::default();
++    let mut exit_code = None;
++    let mut last_seq = 0;
++    let mut control_open = true;
++    // A cleanup failure may be available through process/read without a Closed
++    // event. Poll status independently while consuming the lossless event stream.
++    let mut status_interval = tokio::time::interval(Duration::from_secs(1));
++    status_interval.set_missed_tick_behavior(tokio::time::MissedTickBehavior::Skip);
++    let result = loop {
++        tokio::select! {
++            event = events.recv() => {
++                match event {
++                    Ok(ExecProcessEvent::Failed(error)) => break Err(internal_error(format!("executor process failed: {error}"))),
++                    Ok(event) => {
++                        let seq = match &event {
++                            ExecProcessEvent::Output(chunk) => chunk.seq,
++                            ExecProcessEvent::Exited { seq, .. } | ExecProcessEvent::Closed { seq } => *seq,
++                            ExecProcessEvent::Failed(_) => unreachable!(),
++                        };
++                        if seq <= last_seq {
++                            continue;
++                        }
++                        if seq != last_seq + 1 {
++                            break Err(internal_error("executor command output history is incomplete"));
++                        }
++                        last_seq = seq;
++                        match event {
++                            ExecProcessEvent::Output(chunk) => {
++                                let (output, stream) = match chunk.stream {
++                                    ExecOutputStream::Stdout | ExecOutputStream::Pty => (&mut stdout, CommandExecOutputStream::Stdout),
++                                    ExecOutputStream::Stderr => (&mut stderr, CommandExecOutputStream::Stderr),
++                                };
++                                if let Some((chunk, cap_reached)) = output.accept(&chunk.chunk.0, output_bytes_cap, stream_stdout_stderr)
++                                    && let Some(process_id) = &process_id
++                                {
++                                    outgoing.send_server_notification_to_connection_and_wait(
++                                        request_id.connection_id,
++                                        ServerNotification::CommandExecOutputDelta(CommandExecOutputDeltaNotification {
++                                            process_id: process_id.clone(), stream,
++                                            delta_base64: STANDARD.encode(chunk), cap_reached,
++                                        }),
++                                    ).await;
++                                }
++                            }
++                            ExecProcessEvent::Exited { exit_code: code, .. } => exit_code = Some(code),
++                            ExecProcessEvent::Closed { .. } => {
++                                break executor_status(process.as_ref()).await.and_then(|status| {
++                                    if !status.closed || !status.exited || status.exit_code != exit_code {
++                                        return Err(internal_error("executor cleanup and exit status are not confirmed"));
++                                    }
++                                    exit_code.ok_or_else(|| internal_error("executor closed without reporting an exit status"))
++                                });
++                            }
++                            ExecProcessEvent::Failed(_) => unreachable!(),
++                        }
++                    }
++                    Err(broadcast::error::RecvError::Lagged(_)) => break Err(internal_error("executor command output history is incomplete")),
++                    Err(broadcast::error::RecvError::Closed) => break Err(internal_error("executor command event stream closed before process cleanup")),
++                }
++            }
++            control = control_rx.recv(), if control_open => {
++                match control {
++                    Some(CommandControlRequest { control, response_tx }) => {
++                        let result = executor_control(process.as_ref(), control, stream_stdin).await;
++                        if let Some(response_tx) = response_tx {
++                            let _ = response_tx.send(result);
++                        } else if let Err(error) = result {
++                            break Err(error);
++                        }
++                    }
++                    None => {
++                        control_open = false;
++                        if let Err(error) = executor_control(process.as_ref(), CommandControl::Terminate, stream_stdin).await {
++                            break Err(error);
++                        }
++                    }
++                }
++            }
++            outcome = &mut expiration, if expiration_outcome.is_none() => {
++                expiration_outcome = Some(outcome);
++                if let Err(error) = executor_control(process.as_ref(), CommandControl::Terminate, stream_stdin).await {
++                    break Err(error);
++                }
++            }
++            _ = status_interval.tick() => {
++                if let Err(error) = executor_status(process.as_ref()).await {
++                    break Err(error);
++                }
++            }
++        }
++    };
++    let exit_code = match result {
++        Ok(code) => code,
++        Err(mut error) => {
++            if let Err(cleanup) = process.terminate().await {
++                error.message.push_str(&format!(
++                    "; executor cleanup could not be requested: {cleanup}"
++                ));
++            }
++            return Err(error);
++        }
++    };
++    Ok(CommandExecResponse {
++        exit_code: if expiration_outcome == Some(ExecExpirationOutcome::TimedOut) {
++            EXEC_TIMEOUT_EXIT_CODE
++        } else {
++            exit_code
++        },
++        stdout: bytes_to_string_smart(&stdout.buffer),
++        stderr: bytes_to_string_smart(&stderr.buffer),
++    })
++}
++
++async fn executor_status(
++    process: &dyn ExecProcess,
++) -> Result<codex_exec_server::ReadResponse, JSONRPCErrorError> {
++    let status = process
++        .read(Some(u64::MAX), Some(0), Some(0))
++        .await
++        .map_err(|error| internal_error(format!("executor process status failed: {error}")))?;
++    match &status.failure {
++        Some(error) => Err(internal_error(format!("executor process failed: {error}"))),
++        None => Ok(status),
++    }
++}
++
++async fn executor_control(
++    process: &dyn ExecProcess,
++    control: CommandControl,
++    stream_stdin: bool,
++) -> Result<(), JSONRPCErrorError> {
++    match control {
++        CommandControl::Terminate => process
++            .terminate()
++            .await
++            .map_err(|error| internal_error(format!("executor termination failed: {error}"))),
++        CommandControl::Resize { .. } => Err(invalid_request(
++            "the selected executor does not support command/exec/resize",
++        )),
++        CommandControl::Write { delta, close_stdin } => {
++            if !stream_stdin {
++                return Err(invalid_request(
++                    "stdin streaming is not enabled for this command/exec",
++                ));
++            }
++            if close_stdin {
++                return Err(invalid_request(
++                    "the selected executor does not support command/exec closeStdin",
++                ));
++            }
++            match process
++                .write(delta)
++                .await
++                .map_err(|error| internal_error(format!("executor stdin write failed: {error}")))?
++                .status
++            {
++                WriteStatus::Accepted => Ok(()),
++                WriteStatus::UnknownProcess => {
++                    Err(invalid_request("executor command no longer exists"))
++                }
++                WriteStatus::StdinClosed => Err(invalid_request("stdin is already closed")),
++                WriteStatus::Starting => Err(invalid_request("executor command is starting")),
++            }
++        }
++    }
++}
++
++#[derive(Default)]
++struct ExecutorOutput {
++    buffer: Vec<u8>,
++    observed: usize,
++    cap_reported: bool,
++}
++
++impl ExecutorOutput {
++    fn accept<'a>(
++        &mut self,
++        chunk: &'a [u8],
++        cap: Option<usize>,
++        stream: bool,
++    ) -> Option<(&'a [u8], bool)> {
++        let remaining = cap.map_or(chunk.len(), |cap| {
++            cap.saturating_sub(self.observed).min(chunk.len())
++        });
++        self.observed = self.observed.saturating_add(remaining);
++        let capped = &chunk[..remaining];
++        let cap_reached = cap == Some(self.observed);
++        if !stream {
++            self.buffer.extend_from_slice(capped);
++            return None;
++        }
++        if self.cap_reported {
++            return None;
++        }
++        self.cap_reported = cap_reached;
++        Some((capped, cap_reached))
++    }
++}
++
++#[cfg(all(test, unix))]
++#[path = "command_exec_executor_tests.rs"]
++mod tests;
+diff --git a/codex-rs/app-server/src/command_exec_executor_tests.rs b/codex-rs/app-server/src/command_exec_executor_tests.rs
+new file mode 100644
+index 0000000000000000000000000000000000000000..fbcddd72c2b05b1811e55ae9e7155761a798278b
+--- /dev/null
++++ b/codex-rs/app-server/src/command_exec_executor_tests.rs
+@@ -0,0 +1,391 @@
++use super::*;
++use crate::outgoing_message::OutgoingEnvelope;
++use anyhow::Context;
++use codex_app_server_protocol::RequestId;
++use codex_exec_server::Environment;
++use codex_exec_server::ExecBackendFuture;
++use codex_exec_server::ExecServerError;
++use codex_utils_path_uri::PathUri;
++use pretty_assertions::assert_eq;
++use serde_json::Value;
++use serde_json::json;
++use tokio::sync::Notify;
++use tokio::time::timeout;
++use tokio_util::sync::CancellationToken;
++
++struct Backend {
++    inner: Arc<dyn ExecBackend>,
++    params: Mutex<Vec<ExecParams>>,
++    before_start: Option<Arc<Notify>>,
++    reject: bool,
++    fail_cleanup_status: bool,
++}
++
++impl ExecBackend for Backend {
++    fn start(&self, params: ExecParams) -> ExecBackendFuture<'_> {
++        Box::pin(async move {
++            self.params.lock().await.push(params.clone());
++            if let Some(before_start) = &self.before_start {
++                before_start.notified().await;
++            }
++            if self.reject {
++                return Err(ExecServerError::Protocol("backend admission denied".into()));
++            }
++            let mut started = self.inner.start(params).await?;
++            if self.fail_cleanup_status {
++                started.process = Arc::new(FailedCleanupStatus(started.process));
++            }
++            Ok(started)
++        })
++    }
++}
++
++fn setup(
++    command: &str,
++) -> anyhow::Result<(
++    CommandExecManager,
++    StartExecutorCommandParams,
++    mpsc::Receiver<OutgoingEnvelope>,
++    Arc<Backend>,
++)> {
++    let backend = Arc::new(Backend {
++        inner: Environment::default_for_tests().get_exec_backend(),
++        params: Mutex::new(Vec::new()),
++        before_start: None,
++        reject: false,
++        fail_cleanup_status: false,
++    });
++    let (tx, rx) = mpsc::channel(32);
++    let params = StartExecutorCommandParams {
++        outgoing: Arc::new(OutgoingMessageSender::new(
++            tx,
++            codex_analytics::AnalyticsEventsClient::disabled(),
++        )),
++        request_id: request(1),
++        process_id: Some("command".into()),
++        backend: backend.clone(),
++        exec_params: ExecParams {
++            process_id: uuid::Uuid::new_v4().to_string().into(),
++            argv: vec!["/bin/sh".into(), "-c".into(), command.into()],
++            cwd: PathUri::from_host_native_path(std::env::current_dir()?)?,
++            env_policy: None,
++            shell_snapshot: None,
++            env: HashMap::new(),
++            tty: false,
++            pipe_stdin: false,
++            arg0: None,
++            sandbox: None,
++            enforce_managed_network: false,
++            managed_network: None,
++            network_proxy: None,
++        },
++        expiration: ExecExpiration::Cancellation(CancellationToken::new()),
++        started_network_proxy: None,
++        stream_stdin: false,
++        stream_stdout_stderr: false,
++        output_bytes_cap: None,
++        size: None,
++    };
++    Ok((CommandExecManager::default(), params, rx, backend))
++}
++
++fn request(connection: u64) -> ConnectionRequestId {
++    ConnectionRequestId {
++        connection_id: ConnectionId(connection),
++        request_id: RequestId::Integer(1),
++    }
++}
++
++async fn next(rx: &mut mpsc::Receiver<OutgoingEnvelope>) -> anyhow::Result<Value> {
++    let envelope = timeout(Duration::from_secs(10), rx.recv())
++        .await
++        .context("output before deadline")?
++        .context("open output channel")?;
++    let OutgoingEnvelope::ToConnection {
++        message,
++        write_complete_tx,
++        ..
++    } = envelope
++    else {
++        panic!("connection scoped message required")
++    };
++    if let Some(write_complete_tx) = write_complete_tx {
++        let _ = write_complete_tx.send(());
++    }
++    let mut value = serde_json::to_value(message)?;
++    value
++        .as_object_mut()
++        .context("outgoing message object")?
++        .remove("emittedAtMs");
++    Ok(value)
++}
++
++async fn ready(backend: &Backend) -> anyhow::Result<()> {
++    timeout(Duration::from_secs(10), async {
++        while backend.params.lock().await.is_empty() {
++            tokio::task::yield_now().await;
++        }
++    })
++    .await
++    .context("backend receives start before deadline")?;
++    Ok(())
++}
++
++// Transport fault injection around a real process: even a delivered Closed
++// event must not turn a contradictory retained cleanup result into success.
++struct FailedCleanupStatus(Arc<dyn ExecProcess>);
++
++impl ExecProcess for FailedCleanupStatus {
++    fn process_id(&self) -> &codex_exec_server::ProcessId {
++        self.0.process_id()
++    }
++    fn subscribe_wake(&self) -> watch::Receiver<u64> {
++        self.0.subscribe_wake()
++    }
++    fn subscribe_events(&self) -> codex_exec_server::ExecProcessEventReceiver {
++        self.0.subscribe_events()
++    }
++    fn read(
++        &self,
++        after_seq: Option<u64>,
++        max_bytes: Option<usize>,
++        wait_ms: Option<u64>,
++    ) -> codex_exec_server::ExecProcessFuture<'_, codex_exec_server::ReadResponse> {
++        Box::pin(async move {
++            let mut response = self.0.read(after_seq, max_bytes, wait_ms).await?;
++            if response.closed {
++                response.failure = Some("cleanup verification failed".into());
++            }
++            Ok(response)
++        })
++    }
++    fn write(
++        &self,
++        chunk: Vec<u8>,
++    ) -> codex_exec_server::ExecProcessFuture<'_, codex_exec_server::WriteResponse> {
++        self.0.write(chunk)
++    }
++    fn signal(
++        &self,
++        signal: codex_exec_server::ProcessSignal,
++    ) -> codex_exec_server::ExecProcessFuture<'_, ()> {
++        self.0.signal(signal)
++    }
++    fn terminate(&self) -> codex_exec_server::ExecProcessFuture<'_, ()> {
++        self.0.terminate()
++    }
++}
++
++#[tokio::test]
++async fn executor_command_cleanup_failure_never_becomes_a_successful_exit() {
++    let (manager, mut params, mut rx, mut backend) = setup("printf done; exit 0").unwrap();
++    params.backend = Environment::default_for_tests().get_exec_backend();
++    Arc::get_mut(&mut backend).unwrap().fail_cleanup_status = true;
++    params.backend = backend;
++    manager.start_on_executor(params).await.unwrap();
++    let response = next(&mut rx).await.unwrap();
++    assert!(
++        response["error"]["message"]
++            .as_str()
++            .unwrap()
++            .contains("cleanup verification failed")
++    );
++    assert!(response.get("result").is_none());
++}
++
++#[tokio::test]
++async fn executor_command_returns_real_stdout_stderr_and_exit_status() {
++    let (manager, params, mut rx, backend) =
++        setup("printf 'out\\377'; printf 'err' >&2; exit 23").unwrap();
++    let expected = params.exec_params.clone();
++    manager.start_on_executor(params).await.unwrap();
++    assert_eq!(
++        next(&mut rx).await.unwrap(),
++        json!({"id":1,"result":{"exitCode":23,"stdout":bytes_to_string_smart(b"out\xff"),"stderr":"err"}})
++    );
++    assert_eq!(*backend.params.lock().await, vec![expected]);
++    assert!(manager.sessions.lock().await.is_empty());
++}
++
++#[tokio::test]
++async fn executor_command_streams_binary_output_and_caps_each_stream_before_response() {
++    let (manager, mut params, mut rx, _) =
++        setup("printf 'abc\\377def'; printf '1234567' >&2").unwrap();
++    params.stream_stdout_stderr = true;
++    params.output_bytes_cap = Some(4);
++    manager.start_on_executor(params).await.unwrap();
++    let mut notifications = vec![next(&mut rx).await.unwrap(), next(&mut rx).await.unwrap()];
++    notifications.sort_by_key(|value| value["params"]["stream"].as_str().unwrap().to_owned());
++    assert_eq!(
++        notifications,
++        vec![
++            json!({"method":"command/exec/outputDelta","params":{"processId":"command","stream":"stderr","deltaBase64":STANDARD.encode(b"1234"),"capReached":true}}),
++            json!({"method":"command/exec/outputDelta","params":{"processId":"command","stream":"stdout","deltaBase64":STANDARD.encode(b"abc\xff"),"capReached":true}}),
++        ]
++    );
++    assert_eq!(
++        next(&mut rx).await.unwrap(),
++        json!({"id":1,"result":{"exitCode":0,"stdout":"","stderr":""}})
++    );
++}
++
++#[tokio::test]
++async fn executor_command_zero_cap_reports_cap_and_drains_until_closed() {
++    let (manager, mut params, mut rx, _) = setup("printf x; /bin/sleep 0.05; printf y").unwrap();
++    params.stream_stdout_stderr = true;
++    params.output_bytes_cap = Some(0);
++    manager.start_on_executor(params).await.unwrap();
++    assert_eq!(
++        next(&mut rx).await.unwrap(),
++        json!({"method":"command/exec/outputDelta","params":{"processId":"command","stream":"stdout","deltaBase64":"","capReached":true}})
++    );
++    assert_eq!(
++        next(&mut rx).await.unwrap(),
++        json!({"id":1,"result":{"exitCode":0,"stdout":"","stderr":""}})
++    );
++}
++
++#[tokio::test]
++async fn executor_command_stdin_write_is_real_and_unsupported_controls_do_not_mutate() {
++    let (manager, mut params, mut rx, _) =
++        setup("printf ready; read -r answer; printf '%s' \"$answer\"").unwrap();
++    params.stream_stdin = true;
++    params.stream_stdout_stderr = true;
++    params.exec_params.pipe_stdin = true;
++    manager.start_on_executor(params).await.unwrap();
++    assert_eq!(
++        next(&mut rx).await.unwrap()["params"]["deltaBase64"],
++        STANDARD.encode(b"ready")
++    );
++    let err = manager
++        .write(
++            request(1),
++            CommandExecWriteParams {
++                process_id: "command".into(),
++                delta_base64: Some(STANDARD.encode(b"bad\n")),
++                close_stdin: true,
++            },
++        )
++        .await
++        .unwrap_err();
++    assert!(err.message.contains("closeStdin"));
++    let err = manager
++        .resize(
++            request(1),
++            CommandExecResizeParams {
++                process_id: "command".into(),
++                size: CommandExecTerminalSize { rows: 24, cols: 80 },
++            },
++        )
++        .await
++        .unwrap_err();
++    assert!(err.message.contains("resize"));
++    manager
++        .write(
++            request(1),
++            CommandExecWriteParams {
++                process_id: "command".into(),
++                delta_base64: Some(STANDARD.encode(b"good\n")),
++                close_stdin: false,
++            },
++        )
++        .await
++        .unwrap();
++    assert_eq!(
++        next(&mut rx).await.unwrap()["params"]["deltaBase64"],
++        STANDARD.encode(b"good")
++    );
++    assert_eq!(next(&mut rx).await.unwrap()["result"]["exitCode"], 0);
++}
++
++#[tokio::test]
++async fn executor_command_timeout_terminates_real_process_and_waits_for_cleanup() {
++    let (manager, mut params, mut rx, _) = setup("printf ready; exec /bin/sleep 30").unwrap();
++    params.expiration = 100_u64.into();
++    manager.start_on_executor(params).await.unwrap();
++    assert_eq!(
++        next(&mut rx).await.unwrap(),
++        json!({"id":1,"result":{"exitCode":124,"stdout":"ready","stderr":""}})
++    );
++    assert!(manager.sessions.lock().await.is_empty());
++}
++
++#[tokio::test]
++async fn executor_command_disconnect_during_start_retains_ownership_then_terminates() {
++    let (manager, mut params, mut rx, mut backend) = setup("exec /bin/sleep 30").unwrap();
++    params.backend = Environment::default_for_tests().get_exec_backend();
++    let gate = Arc::new(Notify::new());
++    Arc::get_mut(&mut backend).unwrap().before_start = Some(gate.clone());
++    params.backend = backend.clone();
++    manager.start_on_executor(params).await.unwrap();
++    ready(&backend).await.unwrap();
++    manager.connection_closed(ConnectionId(1)).await;
++    gate.notify_one();
++    assert!(next(&mut rx).await.unwrap()["result"]["exitCode"].is_i64());
++    assert!(manager.sessions.lock().await.is_empty());
++}
++
++#[tokio::test]
++async fn executor_command_process_ids_are_connection_scoped() {
++    let (manager, mut params, mut rx, _) = setup("printf ready; exec /bin/sleep 30").unwrap();
++    params.stream_stdout_stderr = true;
++    manager.start_on_executor(params).await.unwrap();
++    assert_eq!(
++        next(&mut rx).await.unwrap()["params"]["deltaBase64"],
++        STANDARD.encode(b"ready")
++    );
++    assert!(
++        manager
++            .terminate(
++                request(2),
++                CommandExecTerminateParams {
++                    process_id: "command".into()
++                }
++            )
++            .await
++            .is_err()
++    );
++    manager
++        .terminate(
++            request(1),
++            CommandExecTerminateParams {
++                process_id: "command".into(),
++            },
++        )
++        .await
++        .unwrap();
++    assert!(next(&mut rx).await.unwrap()["result"]["exitCode"].is_i64());
++}
++
++#[tokio::test]
++async fn executor_command_backend_rejection_never_falls_back_to_controller() {
++    let (manager, mut params, mut rx, mut backend) = setup("printf should-not-run").unwrap();
++    params.backend = Environment::default_for_tests().get_exec_backend();
++    Arc::get_mut(&mut backend).unwrap().reject = true;
++    params.exec_params.tty = true;
++    params.backend = backend.clone();
++    manager.start_on_executor(params).await.unwrap();
++    assert!(
++        next(&mut rx).await.unwrap()["error"]["message"]
++            .as_str()
++            .unwrap()
++            .contains("backend admission denied")
++    );
++    assert!(backend.params.lock().await[0].tty);
++}
++
++#[tokio::test]
++async fn executor_command_initial_terminal_size_is_rejected_before_spawn() {
++    let (manager, mut params, _rx, backend) = setup("printf should-not-run").unwrap();
++    params.exec_params.tty = true;
++    params.size = Some(TerminalSize::default());
++    assert!(
++        manager
++            .start_on_executor(params)
++            .await
++            .unwrap_err()
++            .message
++            .contains("terminal size")
++    );
++    assert!(backend.params.lock().await.is_empty());
++}
 diff --git a/codex-rs/app-server/src/config_manager.rs b/codex-rs/app-server/src/config_manager.rs
-index f62118d2922ae3e24e6b4a30df0668c056dc4b9d..bdecd384976ba7105a608402e6eab566a6f7eccb 100644
+index f62118d2922ae3e24e6b4a30df0668c056dc4b9d..70739b253e8894873bab6f63a4bc1828ead40fc8 100644
 --- a/codex-rs/app-server/src/config_manager.rs
 +++ b/codex-rs/app-server/src/config_manager.rs
-@@ -5,9 +5,13 @@ use codex_config::ConfigLayerStack;
+@@ -3,15 +3,21 @@ use codex_cloud_config::cloud_config_bundle_loader;
+ use codex_config::CloudConfigBundleLoader;
+ use codex_config::ConfigLayerStack;
  use codex_config::LoaderOverrides;
++use codex_config::ProjectConfigFileSystem;
  use codex_config::ThreadConfigLoader;
  use codex_config::loader::load_config_layers_state;
 +use codex_config::loader::load_config_layers_state_with_project_filesystem;
@@ -1991,19 +2796,41 @@ index f62118d2922ae3e24e6b4a30df0668c056dc4b9d..bdecd384976ba7105a608402e6eab566
  use codex_exec_server::LOCAL_FS;
  use codex_features::feature_for_key;
  use codex_login::AuthManager;
-@@ -36,6 +40,7 @@ pub(crate) struct ConfigManager {
+ use codex_login::default_client::set_default_client_residency_requirement;
++use codex_protocol::protocol::TurnEnvironmentSelection;
+ use codex_utils_absolute_path::AbsolutePathBuf;
+ use codex_utils_json_to_toml::json_to_toml;
+ use std::collections::BTreeMap;
+@@ -25,6 +31,14 @@ use toml::Value as TomlValue;
+ use tracing::instrument;
+ use tracing::warn;
+ 
++/// A thread retains its chosen authority even when it is the controller. This
++/// prevents a reload from silently acquiring the injected local provider.
++#[derive(Clone)]
++enum ProjectConfigContext {
++    DefaultEnvironment,
++    Thread(Option<ProjectConfigFileSystem>),
++}
++
+ /// Shared app-server entry point for loading effective Codex configuration.
+ #[derive(Clone)]
+ pub(crate) struct ConfigManager {
+@@ -36,6 +50,8 @@ pub(crate) struct ConfigManager {
      cloud_config_bundle: Arc<RwLock<CloudConfigBundleLoader>>,
      arg0_paths: Arg0DispatchPaths,
      thread_config_loader: Arc<dyn ThreadConfigLoader>,
 +    project_environments: Option<Arc<EnvironmentManager>>,
++    project_config_context: ProjectConfigContext,
  }
  
  impl ConfigManager {
-@@ -57,13 +62,34 @@ impl ConfigManager {
+@@ -57,13 +73,76 @@ impl ConfigManager {
              cloud_config_bundle: Arc::new(RwLock::new(cloud_config_bundle)),
              arg0_paths,
              thread_config_loader,
 +            project_environments: None,
++            project_config_context: ProjectConfigContext::DefaultEnvironment,
          }
      }
  
@@ -2031,19 +2858,109 @@ index f62118d2922ae3e24e6b4a30df0668c056dc4b9d..bdecd384976ba7105a608402e6eab566
 +            .filter(|environment| environment.has_local_runtime())
 +    }
 +
++    /// Binds project loading to the primary environment selected by thread/start.
++    /// Cold resume/fork use the same default primary environment as core startup.
++    pub(crate) async fn for_thread_environments(
++        &self,
++        selections: Option<&[TurnEnvironmentSelection]>,
++    ) -> std::io::Result<Self> {
++        let environment = if let Some(manager) = self.project_environments.as_ref() {
++            let environment_id = match selections {
++                Some(selections) => selections
++                    .first()
++                    .map(|selection| selection.environment_id.as_str()),
++                None => manager.default_environment_id(),
++            };
++            environment_id
++                .map(|id| {
++                    manager.get_environment(id).ok_or_else(|| {
++                        std::io::Error::new(
++                            std::io::ErrorKind::NotFound,
++                            format!("selected project environment `{id}` is unavailable"),
++                        )
++                    })
++                })
++                .transpose()?
++        } else {
++            None
++        };
++        let project = match environment.filter(|environment| environment.has_local_runtime()) {
++            Some(environment) if !self.loader_overrides.ignore_project_config => {
++                environment
++                    .wait_until_ready()
++                    .await
++                    .map_err(std::io::Error::other)?;
++                environment.project_filesystem()
++            }
++            _ => None,
++        };
++        let mut manager = self.clone();
++        manager.project_config_context = ProjectConfigContext::Thread(project);
++        Ok(manager)
++    }
++
      pub(crate) fn user_config_path(&self) -> std::io::Result<AbsolutePathBuf> {
          self.loader_overrides.user_config_path(self.codex_home())
      }
-@@ -238,7 +264,7 @@ impl ConfigManager {
+@@ -157,6 +236,7 @@ impl ConfigManager {
+         thread_config: &Config,
+     ) -> std::io::Result<Config> {
+         let refreshed_config = self
++            .for_thread_config(thread_config)
+             .load_latest_config(Some(thread_config.cwd.to_path_buf()))
+             .await?;
+         let mut config = thread_config
+@@ -167,6 +247,15 @@ impl ConfigManager {
+         Ok(config)
+     }
+ 
++    /// Retains the thread's project authority, including an explicit controller
++    /// context, when resolving settings without a new environment selection.
++    pub(crate) fn for_thread_config(&self, thread_config: &Config) -> Self {
++        let mut manager = self.clone();
++        manager.project_config_context =
++            ProjectConfigContext::Thread(thread_config.project_filesystem.clone());
++        manager
++    }
++
+     pub(crate) async fn load_default_config(&self) -> std::io::Result<Config> {
+         let mut loader_overrides = self.loader_overrides.clone();
+         loader_overrides.ignore_user_config = true;
+@@ -238,7 +327,32 @@ impl ConfigManager {
                      .map(|(key, value)| (key, json_to_toml(value))),
              )
              .collect::<Vec<_>>();
 -        let mut config = codex_core::config::ConfigBuilder::default()
++        let project = if self.loader_overrides.ignore_project_config {
++            None
++        } else {
++            match &self.project_config_context {
++                ProjectConfigContext::Thread(project) => project.clone(),
++                ProjectConfigContext::DefaultEnvironment => {
++                    let manager = self.for_thread_environments(/*selections*/ None).await?;
++                    let ProjectConfigContext::Thread(project) = manager.project_config_context
++                    else {
++                        unreachable!(
++                            "thread scope always fixes the project configuration authority"
++                        );
++                    };
++                    project
++                }
++            }
++        };
++        // An authenticated bounded runtime supplies the only valid default cwd
++        // when the caller did not provide an execution path.
++        let fallback_cwd = fallback_cwd.or_else(|| {
++            project
++                .as_ref()
++                .and_then(ProjectConfigFileSystem::discovery_root)
++                .map(AbsolutePathBuf::to_path_buf)
++        });
 +        let mut builder = codex_core::config::ConfigBuilder::default()
              .codex_home(self.codex_home.clone())
              .cli_overrides(merged_cli_overrides)
              .loader_overrides(self.loader_overrides.clone())
-@@ -246,9 +272,17 @@ impl ConfigManager {
+@@ -246,9 +360,11 @@ impl ConfigManager {
              .harness_overrides(typesafe_overrides)
              .fallback_cwd(fallback_cwd)
              .cloud_config_bundle(self.current_cloud_config_bundle())
@@ -2051,20 +2968,14 @@ index f62118d2922ae3e24e6b4a30df0668c056dc4b9d..bdecd384976ba7105a608402e6eab566
 -            .build()
 -            .await?;
 +            .thread_config_loader(Arc::clone(&self.thread_config_loader));
-+        if let Some(environment) = self.injected_project_environment() {
-+            environment
-+                .wait_until_ready()
-+                .await
-+                .map_err(std::io::Error::other)?;
-+            if let Some(project) = environment.project_filesystem() {
-+                builder = builder.project_filesystem(project);
-+            }
++        if let Some(project) = project {
++            builder = builder.project_filesystem(project);
 +        }
 +        let mut config = builder.build().await?;
          self.apply_runtime_feature_enablement(&mut config);
          self.apply_arg0_paths(&mut config);
          Ok(config)
-@@ -265,6 +299,31 @@ impl ConfigManager {
+@@ -265,6 +381,31 @@ impl ConfigManager {
          &self,
          cwd: Option<AbsolutePathBuf>,
      ) -> std::io::Result<ConfigLayerStack> {
@@ -2096,7 +3007,7 @@ index f62118d2922ae3e24e6b4a30df0668c056dc4b9d..bdecd384976ba7105a608402e6eab566
          load_config_layers_state(
              LOCAL_FS.as_ref(),
              &self.codex_home,
-@@ -291,6 +350,19 @@ impl ConfigManager {
+@@ -291,6 +432,19 @@ impl ConfigManager {
              .unwrap_or_default()
      }
  
@@ -2116,7 +3027,7 @@ index f62118d2922ae3e24e6b4a30df0668c056dc4b9d..bdecd384976ba7105a608402e6eab566
      fn apply_arg0_paths(&self, config: &mut Config) {
          config.codex_self_exe = self.arg0_paths.codex_self_exe.clone();
          config.codex_linux_sandbox_exe = self.arg0_paths.codex_linux_sandbox_exe.clone();
-@@ -349,7 +421,19 @@ pub(crate) fn apply_runtime_feature_enablement(
+@@ -349,7 +503,19 @@ pub(crate) fn apply_runtime_feature_enablement(
      config: &mut Config,
      runtime_feature_enablement: &BTreeMap<String, bool>,
  ) {
@@ -2137,7 +3048,7 @@ index f62118d2922ae3e24e6b4a30df0668c056dc4b9d..bdecd384976ba7105a608402e6eab566
      for (name, enabled) in runtime_feature_enablement {
          if protected_features.contains(name) {
              continue;
-@@ -357,7 +441,7 @@ pub(crate) fn apply_runtime_feature_enablement(
+@@ -357,7 +523,7 @@ pub(crate) fn apply_runtime_feature_enablement(
          let Some(feature) = feature_for_key(name) else {
              continue;
          };
@@ -2146,6 +3057,235 @@ index f62118d2922ae3e24e6b4a30df0668c056dc4b9d..bdecd384976ba7105a608402e6eab566
              warn!(
                  feature = name,
                  error = %err,
+@@ -366,3 +532,7 @@ pub(crate) fn apply_runtime_feature_enablement(
+         }
+     }
+ }
++
++#[cfg(test)]
++#[path = "config_manager_project_tests.rs"]
++mod project_tests;
+diff --git a/codex-rs/app-server/src/config_manager_project_tests.rs b/codex-rs/app-server/src/config_manager_project_tests.rs
+new file mode 100644
+index 0000000000000000000000000000000000000000..c1a8d8f6b03a2d71222ff0699c69c4a80f2ff634
+--- /dev/null
++++ b/codex-rs/app-server/src/config_manager_project_tests.rs
+@@ -0,0 +1,215 @@
++use super::*;
++use anyhow::Result;
++use codex_exec_server::ControllerPathAccess;
++use codex_exec_server::EnvironmentInfo;
++use codex_exec_server::EnvironmentObservedStatus;
++use codex_exec_server::ExecBackend;
++use codex_exec_server::ExecProcessFuture;
++use codex_exec_server::ExecutorFileSystem;
++use codex_exec_server::LocalRuntime;
++use codex_exec_server::LocalSandboxOwnership;
++use codex_exec_server::SandboxOwner;
++use codex_http_client::HttpClientFactory;
++use codex_http_client::OutboundProxyPolicy;
++use codex_protocol::protocol::EnvironmentConfigState;
++use codex_utils_path_uri::PathUri;
++use pretty_assertions::assert_eq;
++use std::sync::atomic::AtomicUsize;
++use std::sync::atomic::Ordering;
++use tempfile::TempDir;
++
++struct Runtime {
++    environment: Environment,
++    project: ProjectConfigFileSystem,
++    waits: AtomicUsize,
++}
++
++impl LocalRuntime for Runtime {
++    fn exec_backend(&self) -> Arc<dyn ExecBackend> {
++        self.environment.get_exec_backend()
++    }
++    fn filesystem(&self) -> Arc<dyn ExecutorFileSystem> {
++        self.environment.get_filesystem()
++    }
++    fn project_filesystem(&self) -> Option<ProjectConfigFileSystem> {
++        Some(self.project.clone())
++    }
++    fn sandbox_ownership(&self) -> LocalSandboxOwnership {
++        LocalSandboxOwnership {
++            process: SandboxOwner::Controller,
++            filesystem: SandboxOwner::Controller,
++        }
++    }
++    fn controller_path_access(&self) -> ControllerPathAccess {
++        ControllerPathAccess::Shared
++    }
++    fn info(&self) -> ExecProcessFuture<'_, EnvironmentInfo> {
++        Box::pin(async { self.environment.info().await })
++    }
++    fn observed_status(&self) -> EnvironmentObservedStatus {
++        EnvironmentObservedStatus::Ready
++    }
++    fn wait_until_ready(&self) -> ExecProcessFuture<'_, ()> {
++        self.waits.fetch_add(1, Ordering::SeqCst);
++        Box::pin(async { Ok(()) })
++    }
++}
++
++fn project_fixture(home: &Path) -> Result<(AbsolutePathBuf, ProjectConfigFileSystem)> {
++    let root = AbsolutePathBuf::try_from(home.join("project"))?;
++    std::fs::create_dir_all(root.join(".codex"))?;
++    std::fs::write(
++        root.join(".codex/config.toml"),
++        "model = 'project-original'\n",
++    )?;
++    let key = toml::Value::String(root.to_string_lossy().into_owned());
++    std::fs::write(
++        home.join("config.toml"),
++        format!("model = 'user-model'\n[projects.{key}]\ntrust_level = 'trusted'\n"),
++    )?;
++    let project = ProjectConfigFileSystem::bounded(
++        Arc::clone(&LOCAL_FS) as Arc<dyn ExecutorFileSystem>,
++        root.clone(),
++    );
++    Ok((root, project))
++}
++
++#[tokio::test]
++async fn reload_keeps_the_thread_authority_and_refreshes_project_layers() -> Result<()> {
++    let home = TempDir::new()?;
++    let (root, project) = project_fixture(home.path())?;
++    let mut service = ConfigManager::without_managed_config_for_tests(home.path().to_path_buf());
++    service.project_config_context = ProjectConfigContext::Thread(Some(project.clone()));
++    let startup = service.load_latest_config(Some(root.to_path_buf())).await?;
++    let wrong_root = AbsolutePathBuf::try_from(home.path().join("other-project"))?;
++    service.project_config_context =
++        ProjectConfigContext::Thread(Some(ProjectConfigFileSystem::bounded(
++            Arc::clone(&LOCAL_FS) as Arc<dyn ExecutorFileSystem>,
++            wrong_root,
++        )));
++    std::fs::write(
++        root.join(".codex/config.toml"),
++        "model = 'project-refreshed'\n",
++    )?;
++    let refreshed = service.load_latest_config_for_thread(&startup).await?;
++    assert_eq!(
++        (refreshed.project_filesystem, refreshed.model.as_deref()),
++        (Some(project), Some("project-refreshed"))
++    );
++    Ok(())
++}
++
++#[tokio::test]
++async fn reload_of_controller_thread_does_not_acquire_an_injected_authority() -> Result<()> {
++    let home = TempDir::new()?;
++    let (root, _) = project_fixture(home.path())?;
++    let mut service = ConfigManager::without_managed_config_for_tests(home.path().to_path_buf());
++    let startup = service.load_latest_config(Some(root.to_path_buf())).await?;
++    let wrong_root = AbsolutePathBuf::try_from(home.path().join("other-project"))?;
++    service.project_config_context =
++        ProjectConfigContext::Thread(Some(ProjectConfigFileSystem::bounded(
++            Arc::clone(&LOCAL_FS) as Arc<dyn ExecutorFileSystem>,
++            wrong_root,
++        )));
++    let refreshed = service.load_latest_config_for_thread(&startup).await?;
++    assert_eq!(
++        (refreshed.project_filesystem, refreshed.model.as_deref()),
++        (None, Some("project-original"))
++    );
++    Ok(())
++}
++
++#[tokio::test]
++async fn bounded_runtime_supplies_default_cwd_and_non_project_load_stays_controller() -> Result<()>
++{
++    let home = TempDir::new()?;
++    let (root, project) = project_fixture(home.path())?;
++    let mut service = ConfigManager::without_managed_config_for_tests(home.path().to_path_buf());
++    service.project_config_context = ProjectConfigContext::Thread(Some(project.clone()));
++    let loaded = service.load_latest_config(/*fallback_cwd*/ None).await?;
++    assert_eq!(
++        (
++            loaded.cwd,
++            loaded.project_filesystem,
++            loaded.model.as_deref()
++        ),
++        (root, Some(project), Some("project-original"))
++    );
++    let controller = service.load_non_project_config().await?;
++    assert_eq!(
++        (controller.project_filesystem, controller.model.as_deref()),
++        (None, Some("user-model"))
++    );
++    Ok(())
++}
++
++#[tokio::test]
++async fn only_the_selected_primary_environment_can_supply_project_authority() -> Result<()> {
++    let home = TempDir::new()?;
++    let (root, project) = project_fixture(home.path())?;
++    // A real registered remote transport remains lazy. Configuration selection
++    // must not wait for it or borrow the available local runtime instead.
++    let listener = std::net::TcpListener::bind("127.0.0.1:0")?;
++    std::fs::write(
++        home.path().join("environments.toml"),
++        format!(
++            "default = 'remote'\ninclude_local = true\n[[environments]]\nid = 'remote'\nurl = 'ws://{}'\n",
++            listener.local_addr()?
++        ),
++    )?;
++    let runtime = Arc::new(Runtime {
++        environment: Environment::default_for_tests(),
++        project: project.clone(),
++        waits: AtomicUsize::new(0),
++    });
++    let environments = EnvironmentManager::prepare_from_codex_home(home.path())
++        .await?
++        .build_with_local_runtime(
++            runtime.clone(),
++            /*local_runtime_paths*/ None,
++            HttpClientFactory::new(OutboundProxyPolicy::ReqwestDefault),
++        )?;
++    let service = ConfigManager::without_managed_config_for_tests(home.path().to_path_buf())
++        .with_project_environments(Arc::new(environments));
++    let selection = |id: &str| TurnEnvironmentSelection {
++        environment_id: id.to_string(),
++        cwd: PathUri::from_abs_path(&root),
++        workspace_roots: Vec::new(),
++        config: EnvironmentConfigState::FromThread,
++    };
++    for selections in [
++        None,
++        Some(Vec::new()),
++        Some(vec![selection("remote"), selection("local")]),
++    ] {
++        let scoped = service
++            .for_thread_environments(selections.as_deref())
++            .await?;
++        let loaded = scoped.load_latest_config(Some(root.to_path_buf())).await?;
++        assert_eq!(
++            (
++                loaded.project_filesystem,
++                runtime.waits.load(Ordering::SeqCst)
++            ),
++            (None, 0)
++        );
++    }
++    let local = service
++        .for_thread_environments(Some(&[selection("local"), selection("remote")]))
++        .await?;
++    let loaded = local.load_latest_config(Some(root.to_path_buf())).await?;
++    assert_eq!(
++        (
++            loaded.project_filesystem,
++            runtime.waits.load(Ordering::SeqCst)
++        ),
++        (Some(project), 1)
++    );
++    let error = service
++        .for_thread_environments(Some(&[selection("missing")]))
++        .await
++        .err()
++        .expect("missing selection must not fall back to controller");
++    assert_eq!(error.kind(), std::io::ErrorKind::NotFound);
++    Ok(())
++}
 diff --git a/codex-rs/app-server/src/config_manager_service.rs b/codex-rs/app-server/src/config_manager_service.rs
 index b7016229e8ab6a534c2112bb344025b77923fb18..3551267075fd7f87ba0a7409bb124d59a340c680 100644
 --- a/codex-rs/app-server/src/config_manager_service.rs
@@ -2281,6 +3421,177 @@ index 0b4fe174936f9d8766f75b80b0f352da014aaf7d..f587cffd02e33b610146995af67959a6
  
      let otel = codex_core::otel_init::build_provider(
          &config,
+diff --git a/codex-rs/app-server/src/request_processors/command_exec_processor.rs b/codex-rs/app-server/src/request_processors/command_exec_processor.rs
+index fde1b9e89531f6da1d6dc91c55a2400b3dd8cdc8..94ee00ca3b19bec50ebb98a4eef2f7dbb3d83516 100644
+--- a/codex-rs/app-server/src/request_processors/command_exec_processor.rs
++++ b/codex-rs/app-server/src/request_processors/command_exec_processor.rs
+@@ -1,6 +1,11 @@
+ use super::*;
+ use codex_core::exec_env::inject_apply_patch_env;
++use codex_exec_server::FileSystemSandboxContext;
++use codex_exec_server::SandboxOwner;
+ use codex_protocol::shell_environment::is_non_inheritable_env_var;
++use codex_utils_path_uri::PathUri;
++
++use crate::command_exec::StartExecutorCommandParams;
+ 
+ #[derive(Clone)]
+ pub(crate) struct CommandExecRequestProcessor {
+@@ -104,6 +109,11 @@ impl CommandExecRequestProcessor {
+     ) -> Result<(), JSONRPCErrorError> {
+         tracing::debug!("ExecOneOffCommand params: {params:?}");
+ 
++        let local_environment = self
++            .environment_manager
++            .try_local_environment()
++            .ok_or_else(|| internal_error("local environment is not configured"))?;
++
+         let request = request_id.clone();
+ 
+         if params.command.is_empty() {
+@@ -214,8 +224,17 @@ impl CommandExecRequestProcessor {
+                 default_permissions: Some(permission_profile),
+                 ..Default::default()
+             };
+-            let config = self
++            let config_manager = self
+                 .config_manager
++                .for_thread_environments(Some(&[TurnEnvironmentSelection {
++                    environment_id: codex_exec_server::LOCAL_ENVIRONMENT_ID.to_string(),
++                    cwd: PathUri::from_abs_path(&cwd),
++                    workspace_roots: Vec::new(),
++                    config: EnvironmentConfigState::FromThread,
++                }]))
++                .await
++                .map_err(|err| invalid_request(format!("invalid permission profile: {err}")))?;
++            let config = config_manager
+                 .load_for_cwd(
+                     /*request_overrides*/ None,
+                     overrides,
+@@ -309,6 +328,79 @@ impl CommandExecRequestProcessor {
+             None => None,
+         };
+ 
++        if local_environment.has_local_runtime()
++            && local_environment.process_sandbox_owner() == SandboxOwner::Executor
++        {
++            let info = local_environment
++                .info()
++                .await
++                .map_err(|err| internal_error(format!("local executor is unavailable: {err}")))?;
++            let mut env = exec_params.env;
++            let managed_network = if let Some(network) = exec_params.network.as_ref() {
++                let prepared = network
++                    .prepare_for_optional_environment(
++                        env,
++                        Some(codex_exec_server::LOCAL_ENVIRONMENT_ID),
++                    )
++                    .map_err(|err| {
++                        internal_error(format!("failed to prepare executor network context: {err}"))
++                    })?;
++                env = prepared.env;
++                Some(prepared.sandbox_context)
++            } else {
++                None
++            };
++            let workspace_roots = if windows_sandbox_workspace_roots.is_empty() {
++                vec![PathUri::from_abs_path(&sandbox_cwd)]
++            } else {
++                windows_sandbox_workspace_roots
++                    .iter()
++                    .map(PathUri::from_abs_path)
++                    .collect()
++            };
++            let params = codex_exec_server::ExecParams {
++                process_id: uuid::Uuid::new_v4().to_string().into(),
++                argv: exec_params.command,
++                cwd: PathUri::from_abs_path(&exec_params.cwd),
++                env_policy: None,
++                shell_snapshot: None,
++                env,
++                tty,
++                pipe_stdin: tty || stream_stdin,
++                arg0: exec_params.arg0,
++                sandbox: Some(FileSystemSandboxContext {
++                    permissions: effective_permission_profile.into(),
++                    cwd: Some(PathUri::from_abs_path(&sandbox_cwd)),
++                    workspace_roots,
++                    user_home_dir: info.user_home_dir,
++                    temporary_directories: info.temporary_directories,
++                    windows_sandbox_level,
++                    windows_sandbox_private_desktop: exec_params.windows_sandbox_private_desktop,
++                    windows_sandbox_proxy_settings_mode: None,
++                    use_legacy_landlock,
++                }),
++                enforce_managed_network: managed_network.is_some(),
++                managed_network,
++                network_proxy: None,
++            };
++            return self
++                .command_exec_manager
++                .start_on_executor(StartExecutorCommandParams {
++                    outgoing,
++                    request_id: request_for_task,
++                    process_id,
++                    backend: local_environment.get_exec_backend(),
++                    exec_params: params,
++                    expiration: exec_params.expiration,
++                    started_network_proxy: started_network_proxy_for_task,
++                    stream_stdin: tty || stream_stdin,
++                    stream_stdout_stderr: tty || stream_stdout_stderr,
++                    output_bytes_cap,
++                    size,
++                })
++                .await;
++        }
++
+         let exec_request = codex_core::exec::build_exec_request(
+             exec_params,
+             &effective_permission_profile,
+@@ -318,6 +410,43 @@ impl CommandExecRequestProcessor {
+             use_legacy_landlock,
+         )
+         .map_err(|err| internal_error(format!("exec failed: {err}")))?;
++        if local_environment.has_local_runtime()
++            && exec_request.sandbox != codex_sandboxing::SandboxType::WindowsRestrictedToken
++        {
++            let params = codex_exec_server::ExecParams {
++                process_id: uuid::Uuid::new_v4().to_string().into(),
++                argv: exec_request.command,
++                cwd: exec_request.cwd,
++                env_policy: None,
++                shell_snapshot: None,
++                env: exec_request.env,
++                tty,
++                pipe_stdin: tty || stream_stdin,
++                arg0: exec_request.arg0,
++                // build_exec_request has already applied controller-owned sandbox
++                // and network wrappers. Do not request a second executor sandbox.
++                sandbox: None,
++                enforce_managed_network: false,
++                managed_network: None,
++                network_proxy: None,
++            };
++            return self
++                .command_exec_manager
++                .start_on_executor(StartExecutorCommandParams {
++                    outgoing,
++                    request_id: request_for_task,
++                    process_id,
++                    backend: local_environment.get_exec_backend(),
++                    exec_params: params,
++                    expiration: exec_request.expiration,
++                    started_network_proxy: started_network_proxy_for_task,
++                    stream_stdin: tty || stream_stdin,
++                    stream_stdout_stderr: tty || stream_stdout_stderr,
++                    output_bytes_cap,
++                    size,
++                })
++                .await;
++        }
+         self.command_exec_manager
+             .start(StartCommandExecParams {
+                 outgoing,
 diff --git a/codex-rs/app-server/src/request_processors/config_processor.rs b/codex-rs/app-server/src/request_processors/config_processor.rs
 index 278fc8e05061e82e2d65d0c179661e77cb750436..c1ca72fa6d0b9554b1c4c52037ac70731cc6b3a7 100644
 --- a/codex-rs/app-server/src/request_processors/config_processor.rs
@@ -2325,6 +3636,433 @@ index 278fc8e05061e82e2d65d0c179661e77cb750436..c1ca72fa6d0b9554b1c4c52037ac7073
                  );
              }
          }
+diff --git a/codex-rs/app-server/src/request_processors/thread_processor.rs b/codex-rs/app-server/src/request_processors/thread_processor.rs
+index 56eb6fdc9353b4ec79fe2ee2edcec0f8abd06ac3..85b3e18d32bfb9e6c9d52be5e96c54a1590c4a42 100644
+--- a/codex-rs/app-server/src/request_processors/thread_processor.rs
++++ b/codex-rs/app-server/src/request_processors/thread_processor.rs
+@@ -24,6 +24,9 @@ use codex_protocol::mcp::ClientMcpExtensions;
+ use codex_protocol::protocol::ThreadHistoryMode;
+ use codex_thread_store::PersistContext;
+ 
++#[path = "thread_project_trust.rs"]
++mod project_trust;
++
+ pub(super) const THREAD_LIST_DEFAULT_LIMIT: usize = 25;
+ pub(super) const THREAD_LIST_MAX_LIMIT: usize = 100;
+ const CODEX_TUI_CLIENT_NAME: &str = "codex-tui";
+@@ -1314,6 +1317,10 @@ impl ThreadRequestProcessor {
+     ) -> Result<(), JSONRPCErrorError> {
+         let thread_start_started_at = std::time::Instant::now();
+         let requested_cwd = typesafe_overrides.cwd.clone();
++        let config_manager = config_manager
++            .for_thread_environments(environment_selections.as_deref())
++            .await
++            .map_err(|err| config_load_error(&err))?;
+         let mut config = config_manager
+             .load_with_overrides(config_overrides.clone(), typesafe_overrides.clone())
+             .await
+@@ -1335,17 +1342,14 @@ impl ThreadRequestProcessor {
+             && config.active_project.trust_level.is_none()
+             && effective_permissions_trust_project
+         {
+-            let trust_target = resolve_root_git_project_for_trust(LOCAL_FS.as_ref(), &config.cwd)
++            let (trust_target, trust_key) = project_trust::trust_target(&config)
+                 .await
+-                .unwrap_or_else(|| config.cwd.clone());
++                .map_err(|err| config_load_error(&err))?;
+             let current_cli_overrides = config_manager.current_cli_overrides();
+             let cli_overrides_with_trust;
+             let cli_overrides_for_reload = if let Err(err) =
+-                codex_core::config::set_project_trust_level(
+-                    &listener_task_context.codex_home,
+-                    trust_target.as_path(),
+-                    TrustLevel::Trusted,
+-                ) {
++                project_trust::persist_trust(&listener_task_context.codex_home, trust_key.clone())
++            {
+                 warn!(
+                     "failed to persist trusted project state for {}; continuing with in-memory trust for this thread: {err}",
+                     trust_target.display()
+@@ -1356,10 +1360,7 @@ impl ThreadRequestProcessor {
+                     TomlValue::String("trusted".to_string()),
+                 );
+                 let mut projects = toml::map::Map::new();
+-                projects.insert(
+-                    project_trust_key(trust_target.as_path()),
+-                    TomlValue::Table(project),
+-                );
++                projects.insert(trust_key, TomlValue::Table(project));
+                 cli_overrides_with_trust = current_cli_overrides
+                     .iter()
+                     .cloned()
+@@ -2190,10 +2191,13 @@ impl ThreadRequestProcessor {
+         app_server_client_version: Option<String>,
+     ) -> Result<ThreadRevertResponse, JSONRPCErrorError> {
+         let ThreadRevertRuntimeSnapshot {
+-            config,
++            mut config,
+             settings,
+             client_mcp_extensions,
+         } = runtime_snapshot;
++        if let Some(environments) = settings.environments.as_ref() {
++            config.cwd = environments.legacy_fallback_cwd.clone();
++        }
+         let thread_id_string = thread_id.to_string();
+         let stored_thread = self
+             .read_stored_thread_for_resume(
+@@ -2213,12 +2217,18 @@ impl ThreadRequestProcessor {
+             ..
+         } = self
+             .thread_manager
+-            .resume_thread_with_history(
+-                config,
+-                thread_history,
++            .resume_thread_with_options(
++                StartThreadOptions {
++                    initial_history: thread_history,
++                    environments: settings
++                        .environments
++                        .as_ref()
++                        .map(|environments| environments.environments.clone()),
++                    parent_trace: self.request_trace_context(request_id).await,
++                    client_mcp_extensions,
++                    ..StartThreadOptions::new(config)
++                },
+                 self.auth_manager.clone(),
+-                self.request_trace_context(request_id).await,
+-                client_mcp_extensions,
+             )
+             .await
+             .map_err(|err| internal_error(format!("error reloading thread after revert: {err}")))?;
+diff --git a/codex-rs/app-server/src/request_processors/thread_project_trust.rs b/codex-rs/app-server/src/request_processors/thread_project_trust.rs
+new file mode 100644
+index 0000000000000000000000000000000000000000..d19c2c3abd07b44a5c3fbc7a0cce97230d6573f1
+--- /dev/null
++++ b/codex-rs/app-server/src/request_processors/thread_project_trust.rs
+@@ -0,0 +1,57 @@
++use super::TrustLevel;
++use codex_core::config::Config;
++use codex_core::config::edit::ConfigEdit;
++use codex_core::config::edit::ConfigEditsBuilder;
++use codex_utils_absolute_path::AbsolutePathBuf;
++use codex_utils_path_uri::PathUri;
++use std::io;
++use std::path::Path;
++
++/// Resolves a trust key with the same authority that loaded the project.
++/// Provider refusals must reach thread/start, never turn into local trust.
++pub(super) async fn trust_target(config: &Config) -> io::Result<(AbsolutePathBuf, String)> {
++    let Some(project) = config.project_filesystem.as_ref() else {
++        let target =
++            super::resolve_root_git_project_for_trust(super::LOCAL_FS.as_ref(), &config.cwd)
++                .await
++                .unwrap_or_else(|| config.cwd.clone());
++        let key = super::project_trust_key(target.as_path());
++        return Ok((target, key));
++    };
++    let target = project
++        .trust_root(&config.cwd)
++        .await?
++        .unwrap_or_else(|| config.cwd.clone());
++    let canonical = project
++        .filesystem()
++        .canonicalize(&PathUri::from_abs_path(&target), /*sandbox*/ None)
++        .await?;
++    let target = canonical.to_abs_path()?;
++    if project
++        .discovery_root()
++        .is_some_and(|root| !target.starts_with(root))
++    {
++        return Err(io::Error::new(
++            io::ErrorKind::PermissionDenied,
++            "project trust target escapes the bootstrap root",
++        ));
++    }
++    let key = target.to_string_lossy().into_owned();
++    let key = if cfg!(windows) {
++        key.to_ascii_lowercase()
++    } else {
++        key
++    };
++    Ok((target, key))
++}
++
++/// The key is already canonical in the execution filesystem. Serializing it as
++/// a config path prevents ConfigEditsBuilder from probing the controller again.
++pub(super) fn persist_trust(codex_home: &Path, key: String) -> anyhow::Result<()> {
++    ConfigEditsBuilder::new(codex_home)
++        .with_edits([ConfigEdit::SetPath {
++            segments: vec!["projects".to_string(), key, "trust_level".to_string()],
++            value: toml_edit::value(TrustLevel::Trusted.to_string()),
++        }])
++        .apply_blocking()
++}
+diff --git a/codex-rs/app-server/src/request_processors/turn_processor.rs b/codex-rs/app-server/src/request_processors/turn_processor.rs
+index 833475ff2974a04c36499a9a23f4461fa765fbba..ca4ccc460a9c9619c9165d48db3c6a218ad2a7a6 100644
+--- a/codex-rs/app-server/src/request_processors/turn_processor.rs
++++ b/codex-rs/app-server/src/request_processors/turn_processor.rs
+@@ -820,8 +820,17 @@ impl TurnRequestProcessor {
+                     main_execve_wrapper_exe: self.arg0_paths.main_execve_wrapper_exe.clone(),
+                     ..Default::default()
+                 };
+-                let config = self
+-                    .config_manager
++                let config_manager = match environments.as_ref() {
++                    Some(environments) => self
++                        .config_manager
++                        .for_thread_environments(Some(&environments.environments))
++                        .await
++                        .map_err(|err| config_load_error(&err))?,
++                    None => self
++                        .config_manager
++                        .for_thread_config(thread.config().await.as_ref()),
++                };
++                let config = config_manager
+                     .load_for_cwd(
+                         /*request_overrides*/ None,
+                         overrides,
+diff --git a/codex-rs/app-server/tests/suite/v2/injected_command_exec.rs b/codex-rs/app-server/tests/suite/v2/injected_command_exec.rs
+new file mode 100644
+index 0000000000000000000000000000000000000000..4c7a67d6f39d1587741dc03d019e71a0a98640f2
+--- /dev/null
++++ b/codex-rs/app-server/tests/suite/v2/injected_command_exec.rs
+@@ -0,0 +1,236 @@
++use anyhow::Result;
++use codex_exec_server::ExecParams;
++use codex_protocol::models::PermissionProfile;
++use codex_utils_path_uri::PathUri;
++use pretty_assertions::assert_eq;
++use serde_json::json;
++use tempfile::TempDir;
++
++use super::connection_handling_websocket::connect_websocket;
++use super::injected_local_runtime::initialize;
++use super::injected_local_runtime::rpc;
++use super::injected_local_runtime::spawn;
++
++#[test_case::test_case("executor"; "executor_owns_sandbox")]
++#[test_case::test_case("controller"; "controller_owns_sandbox")]
++#[tokio::test]
++async fn injected_command_exec_routes_real_command_to_selected_backend(owner: &str) -> Result<()> {
++    let home = TempDir::new()?;
++    std::fs::write(home.path().join("command-runtime"), owner)?;
++    std::fs::write(
++        home.path().join("config.toml"),
++        "default_permissions = ':danger-full-access'\n",
++    )?;
++    let (mut child, address) = spawn(home.path(), "injected").await?;
++    let mut client = connect_websocket(address).await?;
++    initialize(&mut client).await?;
++    let command = vec![
++        "/bin/sh",
++        "-c",
++        "printf '%s' \"$FOLDGPT_COMMAND_TEST\"; printf err >&2; exit 23",
++    ];
++    let response = rpc(
++        &mut client,
++        2,
++        "command/exec",
++        json!({
++            "command": command, "cwd": home.path(), "permissionProfile":":danger-full-access",
++            "env": {"FOLDGPT_COMMAND_TEST":"injected-real", "PATH":null},
++        }),
++    )
++    .await?;
++    assert_eq!(
++        response,
++        json!({"exitCode":23,"stdout":"injected-real","stderr":"err"})
++    );
++    let recorded: ExecParams =
++        serde_json::from_slice(&std::fs::read(home.path().join("command-record.json"))?)?;
++    assert_eq!(recorded.argv, command);
++    assert_eq!(recorded.cwd, PathUri::from_host_native_path(home.path())?);
++    assert_eq!(
++        recorded.env.get("FOLDGPT_COMMAND_TEST").map(String::as_str),
++        Some("injected-real")
++    );
++    assert!(!recorded.env.contains_key("PATH"));
++    assert!(recorded.env_policy.is_none());
++    if owner == "executor" {
++        let context = recorded
++            .sandbox
++            .expect("executor receives portable permissions");
++        assert_eq!(
++            PermissionProfile::try_from(context.permissions)?,
++            PermissionProfile::Disabled
++        );
++        assert_eq!(
++            context.user_home_dir,
++            Some(PathUri::from_host_native_path(
++                home.path().join("runtime-home")
++            )?)
++        );
++    } else {
++        assert!(recorded.sandbox.is_none());
++    }
++    child.kill().await?;
++    Ok(())
++}
++
++#[tokio::test]
++async fn injected_command_exec_preserves_complete_named_profile_and_backend_refusal() -> Result<()>
++{
++    let home = TempDir::new()?;
++    let project = home.path().join("project");
++    std::fs::create_dir(&project)?;
++    let denied = project.join("private");
++    std::fs::create_dir(&denied)?;
++    std::fs::write(home.path().join("command-runtime"), "executor")?;
++    std::fs::write(home.path().join("deny-command"), "")?;
++    std::fs::write(
++        home.path().join("config.toml"),
++        format!(
++            "default_permissions = ':read-only'\n[permissions.command.filesystem]\n':root' = 'read'\n':workspace_roots' = 'write'\n{:?} = 'deny'\n",
++            denied.to_string_lossy()
++        ),
++    )?;
++    let (mut child, address) = spawn(home.path(), "injected").await?;
++    let mut client = connect_websocket(address).await?;
++    initialize(&mut client).await?;
++    let command = vec!["/bin/sh", "-c", "printf wrong > should-not-exist"];
++    let error = rpc(
++        &mut client,
++        2,
++        "command/exec",
++        json!({
++            "command": command, "cwd":project, "permissionProfile":"command",
++        }),
++    )
++    .await
++    .expect_err("backend refusal must reach public caller");
++    assert!(
++        error
++            .to_string()
++            .contains("bootstrap command admission denied"),
++        "{error}"
++    );
++    assert!(!project.join("should-not-exist").exists());
++    let recorded: ExecParams =
++        serde_json::from_slice(&std::fs::read(home.path().join("command-record.json"))?)?;
++    assert_eq!(recorded.argv, command);
++    let context = recorded.sandbox.expect("full context");
++    assert_eq!(context.cwd, Some(PathUri::from_host_native_path(&project)?));
++    assert_eq!(
++        context.workspace_roots,
++        vec![PathUri::from_host_native_path(&project)?]
++    );
++    let profile = PermissionProfile::try_from(context.permissions)?;
++    assert_eq!(
++        profile.network_sandbox_policy(),
++        codex_protocol::permissions::NetworkSandboxPolicy::Restricted
++    );
++    let denied_path = codex_protocol::permissions::FileSystemPath::Path {
++        path: PathUri::from_host_native_path(&denied)?,
++    };
++    assert!(profile.file_system_sandbox_policy().entries.contains(
++        &codex_protocol::permissions::FileSystemSandboxEntry {
++            path: denied_path,
++            access: codex_protocol::permissions::FileSystemAccessMode::Deny,
++            missing_path_behavior: None,
++        }
++    ));
++    child.kill().await?;
++    Ok(())
++}
++
++#[tokio::test]
++async fn injected_command_exec_keeps_managed_network_context_and_enforcement() -> Result<()> {
++    let home = TempDir::new()?;
++    std::fs::write(home.path().join("command-runtime"), "executor")?;
++    std::fs::write(home.path().join("deny-command"), "")?;
++    std::fs::write(
++        home.path().join("config.toml"),
++        r#"
++default_permissions = ":read-only"
++[features]
++network_proxy = true
++[permissions.networked.filesystem]
++":root" = "read"
++[permissions.networked.network]
++enabled = true
++proxy_url = "http://127.0.0.1:0"
++enable_socks5 = false
++"#,
++    )?;
++    let (mut child, address) = spawn(home.path(), "injected").await?;
++    let mut client = connect_websocket(address).await?;
++    initialize(&mut client).await?;
++    let error = rpc(
++        &mut client,
++        2,
++        "command/exec",
++        json!({
++            "command":["/bin/sh"], "permissionProfile":"networked",
++        }),
++    )
++    .await
++    .expect_err("executor retains final network admission");
++    assert!(
++        error
++            .to_string()
++            .contains("bootstrap command admission denied"),
++        "{error}"
++    );
++    let recorded: ExecParams =
++        serde_json::from_slice(&std::fs::read(home.path().join("command-record.json"))?)?;
++    assert!(recorded.enforce_managed_network);
++    let managed = recorded
++        .managed_network
++        .expect("portable managed network context");
++    let proxy = url::Url::parse(
++        recorded
++            .env
++            .get("HTTPS_PROXY")
++            .expect("managed proxy environment"),
++    )?;
++    assert_eq!(
++        managed.loopback_ports,
++        vec![proxy.port().expect("listening proxy port")]
++    );
++    assert!(!managed.allow_local_binding);
++    child.kill().await?;
++    Ok(())
++}
++
++#[tokio::test]
++async fn injected_command_exec_forwards_tty_and_full_access_without_downgrading() -> Result<()> {
++    let home = TempDir::new()?;
++    std::fs::write(home.path().join("command-runtime"), "executor")?;
++    std::fs::write(home.path().join("deny-command"), "")?;
++    let (mut child, address) = spawn(home.path(), "injected").await?;
++    let mut client = connect_websocket(address).await?;
++    initialize(&mut client).await?;
++    let error = rpc(
++        &mut client,
++        2,
++        "command/exec",
++        json!({
++            "command":["/bin/sh"], "processId":"tty-command", "tty":true,
++            "permissionProfile":":danger-full-access",
++        }),
++    )
++    .await
++    .expect_err("executor refusal");
++    assert!(
++        error
++            .to_string()
++            .contains("bootstrap command admission denied"),
++        "{error}"
++    );
++    let recorded: ExecParams =
++        serde_json::from_slice(&std::fs::read(home.path().join("command-record.json"))?)?;
++    assert!(recorded.tty && recorded.pipe_stdin);
++    assert_eq!(
++        PermissionProfile::try_from(recorded.sandbox.unwrap().permissions)?,
++        PermissionProfile::Disabled
++    );
++    child.kill().await?;
++    Ok(())
++}
 diff --git a/codex-rs/app-server/tests/suite/v2/injected_local_runtime.rs b/codex-rs/app-server/tests/suite/v2/injected_local_runtime.rs
 new file mode 100644
 index 0000000000000000000000000000000000000000..9a0a6f9fde09151440732094217b58030e75d246
@@ -2637,10 +4375,10 @@ index 0000000000000000000000000000000000000000..9a0a6f9fde09151440732094217b5803
 +}
 diff --git a/codex-rs/app-server/tests/suite/v2/injected_local_runtime_fixture.rs b/codex-rs/app-server/tests/suite/v2/injected_local_runtime_fixture.rs
 new file mode 100644
-index 0000000000000000000000000000000000000000..2da5fb879bfe4426e364c15fa67d72023251f620
+index 0000000000000000000000000000000000000000..84e570c761514d5bb604ce70ed7f32ec567daf1d
 --- /dev/null
 +++ b/codex-rs/app-server/tests/suite/v2/injected_local_runtime_fixture.rs
-@@ -0,0 +1,223 @@
+@@ -0,0 +1,277 @@
 +use std::io;
 +use std::path::PathBuf;
 +use std::sync::Arc;
@@ -2681,7 +4419,14 @@ index 0000000000000000000000000000000000000000..2da5fb879bfe4426e364c15fa67d7202
 +
 +impl LocalRuntime for Runtime {
 +    fn exec_backend(&self) -> Arc<dyn ExecBackend> {
-+        self.environment.get_exec_backend()
++        if self.home.join("command-runtime").exists() {
++            Arc::new(CommandBackend {
++                inner: self.environment.get_exec_backend(),
++                home: self.home.clone(),
++            })
++        } else {
++            self.environment.get_exec_backend()
++        }
 +    }
 +
 +    fn filesystem(&self) -> Arc<dyn ExecutorFileSystem> {
@@ -2695,7 +4440,15 @@ index 0000000000000000000000000000000000000000..2da5fb879bfe4426e364c15fa67d7202
 +
 +    fn sandbox_ownership(&self) -> LocalSandboxOwnership {
 +        LocalSandboxOwnership {
-+            process: SandboxOwner::Controller,
++            process: if std::fs::read_to_string(self.home.join("command-runtime"))
++                .ok()
++                .as_deref()
++                == Some("executor")
++            {
++                SandboxOwner::Executor
++            } else {
++                SandboxOwner::Controller
++            },
 +            filesystem: SandboxOwner::Controller,
 +        }
 +    }
@@ -2733,6 +4486,45 @@ index 0000000000000000000000000000000000000000..2da5fb879bfe4426e364c15fa67d7202
 +
 +    fn wait_until_ready(&self) -> ExecProcessFuture<'_, ()> {
 +        Box::pin(async { self.info().await.map(|_| ()) })
++    }
++}
++
++struct CommandBackend {
++    inner: Arc<dyn ExecBackend>,
++    home: PathBuf,
++}
++
++impl ExecBackend for CommandBackend {
++    fn start(
++        &self,
++        mut params: codex_exec_server::ExecParams,
++    ) -> codex_exec_server::ExecBackendFuture<'_> {
++        Box::pin(async move {
++            let record = serde_json::to_vec(&params)
++                .map_err(|error| ExecServerError::Protocol(error.to_string()))?;
++            std::fs::write(self.home.join("command-record.json"), record)
++                .map_err(|error| ExecServerError::Protocol(error.to_string()))?;
++            if self.home.join("deny-command").exists() {
++                return Err(ExecServerError::Protocol(
++                    "bootstrap command admission denied".into(),
++                ));
++            }
++            // This PC fixture admits the explicitly requested Disabled policy.
++            // Other portable policies require a real configured sandbox backend.
++            // Android's executor has separate admission tests and refuses Disabled.
++            if let Some(context) = &params.sandbox
++                && codex_protocol::models::PermissionProfile::try_from(context.permissions.clone())
++                    .is_ok_and(|profile| {
++                        profile == codex_protocol::models::PermissionProfile::Disabled
++                    })
++                && !params.enforce_managed_network
++                && params.managed_network.is_none()
++                && params.network_proxy.is_none()
++            {
++                params.sandbox = None;
++            }
++            self.inner.start(params).await
++        })
 +    }
 +}
 +
@@ -2866,12 +4658,14 @@ index 0000000000000000000000000000000000000000..2da5fb879bfe4426e364c15fa67d7202
 +}
 diff --git a/codex-rs/app-server/tests/suite/v2/injected_project_config.rs b/codex-rs/app-server/tests/suite/v2/injected_project_config.rs
 new file mode 100644
-index 0000000000000000000000000000000000000000..c402dc7f01125daea61c27b67616a4607e7ad5d9
+index 0000000000000000000000000000000000000000..90764839f617513b44bddf57e4e512039d073c3a
 --- /dev/null
 +++ b/codex-rs/app-server/tests/suite/v2/injected_project_config.rs
-@@ -0,0 +1,348 @@
+@@ -0,0 +1,516 @@
 +use anyhow::Context;
 +use anyhow::Result;
++use app_test_support::MockResponsesConfig;
++use app_test_support::create_mock_responses_server_repeating_assistant;
 +use codex_app_server_protocol::ConfigLayerSource;
 +use codex_app_server_protocol::ConfigReadResponse;
 +use codex_config::ConfigLoadOptions;
@@ -3218,19 +5012,970 @@ index 0000000000000000000000000000000000000000..c402dc7f01125daea61c27b67616a460
 +    assert_eq!(error.path, path);
 +    Ok(())
 +}
++
++#[test_case::test_case("read", ".codex/config.toml"; "file_read")]
++#[test_case::test_case("canonicalize", ""; "canonicalization")]
++#[test_case::test_case("metadata", ".codex"; "metadata")]
++#[tokio::test]
++async fn injected_project_config_thread_start_preserves_provider_refusal(
++    operation: &str,
++    suffix: &str,
++) -> Result<()> {
++    let home = TempDir::new()?;
++    let (_, cwd) = fixture(home.path(), "trusted")?;
++    std::fs::write(
++        home.path().join(format!("deny-{operation}")),
++        PathUri::from_host_native_path(cwd.join(suffix))?.to_string(),
++    )?;
++    let (mut child, address) = spawn(home.path(), "injected").await?;
++    let mut client = connect_websocket(address).await?;
++    initialize(&mut client).await?;
++    let error = rpc(
++        &mut client,
++        2,
++        "thread/start",
++        json!({
++            "cwd": cwd,
++            "ephemeral": true,
++            "environments": [{"environmentId": "local", "cwd": cwd}]
++        }),
++    )
++    .await
++    .expect_err("the selected runtime's refusal must reach thread/start");
++    assert!(
++        error
++            .to_string()
++            .contains(&format!("bootstrap provider refused {operation}")),
++        "{error}"
++    );
++    child.kill().await?;
++    Ok(())
++}
++
++#[test_case::test_case(true; "explicit_empty_selection")]
++#[test_case::test_case(false; "default_has_no_primary")]
++#[tokio::test]
++async fn injected_project_config_thread_without_local_selection_uses_controller(
++    explicit: bool,
++) -> Result<()> {
++    let home = TempDir::new()?;
++    let (_, cwd) = fixture(home.path(), "trusted")?;
++    if !explicit {
++        std::fs::write(
++            home.path().join("environments.toml"),
++            "default = 'none'\ninclude_local = true\n",
++        )?;
++    }
++    std::fs::write(
++        home.path().join("deny-read"),
++        PathUri::from_host_native_path(cwd.join(".codex/config.toml"))?.to_string(),
++    )?;
++    let (mut child, address) = spawn(home.path(), "injected").await?;
++    let mut client = connect_websocket(address).await?;
++    initialize(&mut client).await?;
++    let mut params = json!({"cwd": cwd, "ephemeral": true});
++    if explicit {
++        params["environments"] = json!([]);
++    }
++    let response = rpc(&mut client, 2, "thread/start", params).await?;
++    assert_eq!(response["model"], json!("child-model"));
++    assert!(response["thread"]["id"].is_string());
++    child.kill().await?;
++    Ok(())
++}
++
++#[tokio::test]
++async fn injected_project_config_thread_start_persists_provider_trust() -> Result<()> {
++    let home = TempDir::new()?;
++    let (project, cwd) = fixture(home.path(), "trusted")?;
++    std::fs::write(home.path().join("config.toml"), "model = 'user-model'\n")?;
++    let (mut child, address) = spawn(home.path(), "injected").await?;
++    let mut client = connect_websocket(address).await?;
++    initialize(&mut client).await?;
++    let response = rpc(
++        &mut client,
++        2,
++        "thread/start",
++        json!({"cwd": cwd, "ephemeral": true, "sandbox": "workspace-write", "approvalPolicy": "never"}),
++    ).await?;
++    assert_eq!(response["model"], json!("child-model"));
++    let saved: toml::Value =
++        toml::from_str(&std::fs::read_to_string(home.path().join("config.toml"))?)?;
++    assert_eq!(
++        saved["projects"][project.to_string_lossy().as_ref()]["trust_level"].as_str(),
++        Some("trusted")
++    );
++    child.kill().await?;
++    Ok(())
++}
++
++#[test_case::test_case(false, None, false; "retain_controller")]
++#[test_case::test_case(true, None, true; "retain_provider")]
++#[test_case::test_case(false, Some(true), true; "select_provider")]
++#[test_case::test_case(true, Some(false), false; "select_controller")]
++#[tokio::test]
++async fn injected_project_config_permission_selection_uses_thread_authority(
++    initial_local: bool,
++    selected_local: Option<bool>,
++    expect_refusal: bool,
++) -> Result<()> {
++    let home = TempDir::new()?;
++    let (project, cwd) = fixture(home.path(), "trusted")?;
++    let server = create_mock_responses_server_repeating_assistant("Selected permissions").await;
++    let project_key = toml::Value::String(project.to_string_lossy().into_owned());
++    MockResponsesConfig::new(&server.uri())
++        .with_extra_config(&format!(
++            "[projects.{project_key}]\ntrust_level = 'trusted'\n"
++        ))
++        .write(home.path())?;
++    let local = json!([{"environmentId": "local", "cwd": cwd}]);
++    let (mut child, address) = spawn(home.path(), "injected").await?;
++    let mut client = connect_websocket(address).await?;
++    initialize(&mut client).await?;
++    let started = rpc(
++        &mut client,
++        2,
++        "thread/start",
++        json!({
++            "cwd": cwd,
++            "ephemeral": true,
++            "environments": if initial_local { local.clone() } else { json!([]) }
++        }),
++    )
++    .await?;
++    // The controller's readable copy remains present. The refusal is installed
++    // only after startup to isolate permission selection from thread creation.
++    let project_config = cwd.join(".codex/config.toml");
++    std::fs::write(
++        home.path().join("deny-read"),
++        PathUri::from_host_native_path(&project_config)?.to_string(),
++    )?;
++    let mut params = json!({"threadId": started["thread"]["id"], "permissions": ":workspace"});
++    let method = if let Some(selected_local) = selected_local {
++        params["environments"] = if selected_local { local } else { json!([]) };
++        params["input"] = json!([{"type": "text", "text": "Select the requested permissions"}]);
++        "turn/start"
++    } else {
++        "thread/settings/update"
++    };
++    let result = rpc(&mut client, 3, method, params).await;
++    if expect_refusal {
++        let error = result
++            .expect_err("selected project provider refusal must reach the public settings API");
++        assert!(
++            error
++                .to_string()
++                .contains("bootstrap provider refused read"),
++            "{error}"
++        );
++    } else {
++        result?;
++    }
++    assert_eq!(
++        std::fs::read_to_string(project_config)?,
++        "model = \"child-model\"\n"
++    );
++    child.kill().await?;
++    Ok(())
++}
 diff --git a/codex-rs/app-server/tests/suite/v2/mod.rs b/codex-rs/app-server/tests/suite/v2/mod.rs
-index c7578dbed9766d8db9e7f8449b6018d82bc360ed..9f06c0dcef5ae15ae6e00e16913ccd0ad47a3f57 100644
+index c7578dbed9766d8db9e7f8449b6018d82bc360ed..d4b780753a5b6190c7478115fc2307e1685cc2aa 100644
 --- a/codex-rs/app-server/tests/suite/v2/mod.rs
 +++ b/codex-rs/app-server/tests/suite/v2/mod.rs
-@@ -44,6 +44,8 @@ mod hooks_list;
+@@ -44,6 +44,10 @@ mod hooks_list;
  mod host_skills;
  mod imagegen_extension;
  mod initialize;
++#[cfg(unix)]
++mod injected_command_exec;
 +mod injected_local_runtime;
 +mod injected_project_config;
  mod marketplace_add;
  mod marketplace_remove;
  mod marketplace_upgrade;
+@@ -59,6 +63,8 @@ mod model_auto_review;
+ mod model_list;
+ mod model_provider_capabilities_read;
+ mod multi_agent_v2_developer_instructions;
++#[cfg(target_os = "linux")]
++mod native_app_server;
+ mod otel;
+ mod output_schema;
+ mod permission_profile_list;
+diff --git a/codex-rs/app-server/tests/suite/v2/native_app_server.rs b/codex-rs/app-server/tests/suite/v2/native_app_server.rs
+new file mode 100644
+index 0000000000000000000000000000000000000000..e2e59d722ae51107ca2ebb653a9830e9f27f29ff
+--- /dev/null
++++ b/codex-rs/app-server/tests/suite/v2/native_app_server.rs
+@@ -0,0 +1,398 @@
++//! Public app-server qualification with the real native factory. Responses SSE
++//! is a deterministic model fixture; filesystem and process operations are real.
++use std::os::unix::fs::DirBuilderExt;
++use std::path::Path;
++use std::path::PathBuf;
++use std::process::Stdio;
++use std::time::Duration;
++
++use anyhow::Context;
++use anyhow::Result;
++use anyhow::bail;
++use codex_app_server_protocol::JSONRPCMessage;
++use codex_app_server_protocol::RequestId;
++use core_test_support::responses;
++use core_test_support::responses::ev_apply_patch_custom_tool_call;
++use core_test_support::responses::ev_completed;
++use core_test_support::responses::ev_function_call;
++use core_test_support::responses::sse;
++use pretty_assertions::assert_eq;
++use serde_json::Value;
++use serde_json::json;
++use tokio::process::Command;
++use tokio::time::timeout;
++
++use super::connection_handling_websocket::WsClient;
++use super::connection_handling_websocket::connect_websocket;
++use super::connection_handling_websocket::read_jsonrpc_message;
++use super::connection_handling_websocket::send_request;
++use super::injected_local_runtime::initialize;
++
++#[path = "native_app_server_bootstrap.rs"]
++mod bootstrap;
++
++const WAIT: Duration = Duration::from_secs(60);
++const CREATE: &str = "*** Begin Patch\n*** Add File: app/core.py\n+def answer():\n+    return 41\n*** Add File: app/__main__.py\n+from core import answer\n+print(answer())\n*** Add File: tests/test_answer.py\n+import unittest\n+from app.core import answer\n+\n+class AnswerTests(unittest.TestCase):\n+    def test_answer(self):\n+        self.assertEqual(answer(), 42)\n+    def test_integer(self):\n+        self.assertIsInstance(answer(), int)\n+    def test_double(self):\n+        self.assertEqual(answer() + answer(), 84)\n*** End Patch\n";
++const EDIT: &str = "*** Begin Patch\n*** Update File: app/core.py\n@@\n-    return 41\n+    return 42\n*** End Patch\n";
++const DENIED_PATCH: &str =
++    "*** Begin Patch\n*** Add File: private/blocked.txt\n+must not be written\n*** End Patch\n";
++const TEST: &str = "python3 -B -m unittest discover -s tests -v";
++const BUILD: &str = "python3 -B -m zipapp app -o answer.pyz";
++const RUN: &str = "python3 -B answer.pyz";
++const DENIED: &str = "cat private/secret";
++const PROJECT_INSTRUCTIONS: &str =
++    "Native AGENTS provenance proof: validate the Python answer with three real tests.\n";
++
++#[tokio::test]
++#[ignore = "owned subprocess invoked only by real_native_app_server_python_project"]
++async fn bootstrap_child() -> Result<()> {
++    bootstrap::run().await
++}
++
++async fn request(
++    client: &mut WsClient,
++    id: i64,
++    method: &str,
++    params: Value,
++    events: &mut Vec<Value>,
++) -> Result<Value> {
++    send_request(client, method, id, Some(params)).await?;
++    timeout(WAIT, async {
++        loop {
++            let message = read_jsonrpc_message(client).await?;
++            events.push(serde_json::to_value(&message)?);
++            match message {
++                JSONRPCMessage::Response(response) if response.id == RequestId::Integer(id) => {
++                    return Ok(response.result);
++                }
++                JSONRPCMessage::Error(error) if error.id == RequestId::Integer(id) => {
++                    bail!("{}", error.error.message)
++                }
++                _ => {}
++            }
++        }
++    })
++    .await?
++}
++
++fn command(call: &str, text: &str) -> Value {
++    ev_function_call(
++        call,
++        "exec_command",
++        &json!({"cmd": text, "login": false, "yield_time_ms": 10000, "max_output_tokens": 3000})
++            .to_string(),
++    )
++}
++
++fn copy_tree(from: &Path, to: &Path) -> Result<()> {
++    std::fs::create_dir_all(to)
++        .with_context(|| format!("create evidence directory {}", to.display()))?;
++    for entry in std::fs::read_dir(from)? {
++        let entry = entry?;
++        let kind = entry.file_type()?;
++        anyhow::ensure!(!kind.is_symlink(), "unexpected evidence symlink");
++        if kind.is_dir() {
++            copy_tree(&entry.path(), &to.join(entry.file_name()))?;
++        } else {
++            // Evidence lives on the Windows project volume. Copy exact bytes
++            // without trying to apply Linux ownership/mode bits to that volume.
++            let mut source = std::fs::File::open(entry.path())?;
++            let mut target = std::fs::File::create(to.join(entry.file_name()))?;
++            std::io::copy(&mut source, &mut target).with_context(|| {
++                format!(
++                    "copy evidence {} to {}",
++                    entry.path().display(),
++                    to.display()
++                )
++            })?;
++        }
++    }
++    Ok(())
++}
++
++/// Requires supplied immutable helpers; never skips missing prerequisites or
++/// substitutes the ordinary PC Environment. No Android operations are involved.
++#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
++#[ignore = "requires real FOLDGPT_NATIVE_TEST_HELPERS, RUNNER and ARTIFACTS paths"]
++async fn real_native_app_server_python_project() -> Result<()> {
++    let helpers = PathBuf::from(
++        std::env::var_os("FOLDGPT_NATIVE_TEST_HELPERS").context("native helpers required")?,
++    );
++    let runner = PathBuf::from(
++        std::env::var_os("FOLDGPT_NATIVE_TEST_RUNNER").context("real native runner required")?,
++    );
++    let artifacts = PathBuf::from(
++        std::env::var_os("FOLDGPT_NATIVE_TEST_ARTIFACTS")
++            .context("persistent project evidence directory required")?,
++    );
++    std::fs::create_dir_all(&artifacts)?;
++    let output = tempfile::Builder::new()
++        .prefix("native-app-server-")
++        .tempdir_in(&artifacts)?
++        .keep();
++    let base = tempfile::Builder::new()
++        .prefix("foldgpt-native-app-")
++        .tempdir_in("/var/tmp")?;
++    let home = base.path().join("home");
++    let workspace = base.path().join("workspace");
++    for path in [&home, &workspace] {
++        std::fs::DirBuilder::new().mode(0o700).create(path)?;
++    }
++    std::fs::create_dir(workspace.join("private"))?;
++    std::fs::write(workspace.join("private/secret"), "native protected secret")?;
++    std::fs::write(workspace.join("shared-path-proof"), "shared-native-path")?;
++    std::fs::write(workspace.join("AGENTS.md"), PROJECT_INSTRUCTIONS)?;
++    std::fs::write(
++        home.join("environments.toml"),
++        "default = 'local'\ninclude_local = true\n",
++    )?;
++    let model = responses::start_mock_server().await;
++    let responses = responses::mount_sse_sequence(
++        &model,
++        vec![
++            sse(vec![
++                ev_apply_patch_custom_tool_call("create", CREATE),
++                ev_completed("created"),
++            ]),
++            sse(vec![
++                command("test-before", TEST),
++                ev_completed("before-tested"),
++            ]),
++            sse(vec![
++                ev_apply_patch_custom_tool_call("edit", EDIT),
++                ev_completed("edited"),
++            ]),
++            sse(vec![
++                command("test-after", TEST),
++                ev_completed("after-tested"),
++            ]),
++            sse(vec![command("build", BUILD), ev_completed("built")]),
++            sse(vec![command("run", RUN), ev_completed("ran")]),
++            sse(vec![
++                command("denied-read", DENIED),
++                ev_apply_patch_custom_tool_call("denied-patch", DENIED_PATCH),
++                ev_completed("refused"),
++            ]),
++            sse(vec![
++                responses::ev_assistant_message(
++                    "done",
++                    "Python project created, corrected, tested and built.",
++                ),
++                ev_completed("done"),
++            ]),
++        ],
++    )
++    .await;
++    let workspace_key = toml::Value::String(workspace.to_string_lossy().into_owned());
++    let private_key = toml::Value::String(workspace.join("private").to_string_lossy().into_owned());
++    std::fs::write(
++        home.join("config.toml"),
++        format!(
++            "model = 'gpt-5.4'\nmodel_provider = 'native-test-model'\napproval_policy = 'never'\ndefault_permissions = 'native-proof'\n\
++        [model_providers.native-test-model]\nname = 'Deterministic SSE model fixture'\nbase_url = '{}/v1'\nwire_api = 'responses'\nsupports_websockets = false\nrequest_max_retries = 0\nstream_max_retries = 0\n\
++        [projects.{workspace_key}]\ntrust_level = 'trusted'\n\
++        [permissions.native-proof.filesystem]\n{workspace_key} = 'write'\n{private_key} = 'deny'\n\
++        [permissions.native-proof.network]\nenabled = false\n",
++            model.uri()
++        ),
++    )?;
++    let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await?;
++    let address = listener.local_addr()?;
++    drop(listener);
++    let fixture =
++        codex_utils_cargo_bin::find_resource!("tests/suite/v2/native_app_server_fixture.py")?;
++    let mut owner = Command::new("/usr/bin/python3")
++        .args(["-I", "-B"])
++        .arg(fixture)
++        .arg(helpers.join("package"))
++        .arg(&helpers)
++        .arg(&runner)
++        .arg(std::env::current_exe()?)
++        .arg(&home)
++        .arg(&workspace)
++        .arg(&output)
++        .arg(format!("ws://{address}"))
++        .env_clear()
++        .env("PATH", "/usr/bin:/bin")
++        .env("HOME", &home)
++        .stdin(Stdio::null())
++        .stdout(std::fs::File::create(output.join("owner.stdout"))?)
++        .stderr(std::fs::File::create(output.join("owner.stderr"))?)
++        .spawn()?;
++    let owner_pid = owner.id().context("owned native owner PID")?;
++    let mut events = Vec::new();
++    let execution: Result<()> = async {
++        let mut client = connect_websocket(address).await?;
++        initialize(&mut client).await?;
++        let thread = request(&mut client, 2, "thread/start", json!({"cwd": workspace, "ephemeral": true, "permissions": "native-proof", "environments": [{"environmentId": "local", "cwd": workspace}]}), &mut events).await?;
++        let thread_id = thread["thread"]["id"].as_str().context("real thread ID")?;
++        request(&mut client, 3, "turn/start", json!({"threadId": thread_id, "input": [{"type": "text", "text": "Create the small Python project, demonstrate failing tests, fix it, test, build and run it; verify private access refusals."}]}), &mut events).await?;
++        timeout(WAIT, async {
++            loop {
++                if let Some(done) = events.iter().find(|event| event["method"] == "turn/completed") {
++                    anyhow::ensure!(done["params"]["turn"]["status"] == "completed", "turn failed: {done}");
++                    return Ok::<_, anyhow::Error>(());
++                }
++                events.push(serde_json::to_value(read_jsonrpc_message(&mut client).await?)?);
++            }
++        }).await??;
++        let requests = responses.requests();
++        anyhow::ensure!(requests.len() == 8, "expected eight model fixture requests, received {}", requests.len());
++        let first_request = requests[0].body_json().to_string();
++        anyhow::ensure!(first_request.contains("Native AGENTS provenance proof") && first_request.contains("# AGENTS.md instructions"), "actual project instructions did not reach the model");
++        let before = requests[2].function_call_output_text("test-before").context("real failing test output")?;
++        anyhow::ensure!(before.contains("Process exited with code 1") && before.contains("Ran 3 tests") && before.contains("FAILED (failures=2)"), "{before}");
++        let after = requests[4].function_call_output_text("test-after").context("real passing tests")?;
++        anyhow::ensure!(after.contains("Process exited with code 0") && after.contains("Ran 3 tests") && after.contains("OK"), "{after}");
++        let built = requests[5].function_call_output_text("build").context("real build output")?;
++        anyhow::ensure!(built.contains("Process exited with code 0"), "{built}");
++        let run = requests[6].function_call_output_text("run").context("real artifact output")?;
++        anyhow::ensure!(run.contains("Process exited with code 0") && run.lines().any(|line| line == "42"), "{run}");
++        let denied = requests[7].function_call_output_text("denied-read").context("real denied read")?;
++        anyhow::ensure!(denied.contains("Process exited with code 1") && denied.contains("Permission denied"), "{denied}");
++        let patch = requests[7].inputs_of_type("custom_tool_call_output").into_iter().find(|item| item["call_id"] == "denied-patch").context("denied patch output")?;
++        anyhow::ensure!(patch["output"] == "patch rejected: writing outside of the project; rejected by user approval settings", "{patch}");
++        anyhow::ensure!(std::fs::read(workspace.join("app/core.py"))? == b"def answer():\n    return 42\n", "corrected Python source differs");
++        anyhow::ensure!(std::fs::metadata(workspace.join("answer.pyz"))?.len() > 0);
++        anyhow::ensure!(!workspace.join("private/blocked.txt").exists());
++        let direct = request(&mut client, 4, "command/exec", json!({
++            "command": ["/usr/bin/bash", "-c", RUN], "cwd": workspace,
++            "permissionProfile": "native-proof",
++        }), &mut events).await?;
++        std::fs::write(output.join("command-exec-result.json"), serde_json::to_vec_pretty(&direct)?)?;
++        anyhow::ensure!(direct["exitCode"] == 0 && direct["stdout"] == "42\n", "public command/exec did not execute the real artifact: {direct}");
++        Ok(())
++    }.await;
++    let requests = responses.requests();
++    std::fs::write(
++        output.join("model-fixture-requests.json"),
++        serde_json::to_vec_pretty(
++            &requests
++                .iter()
++                .map(core_test_support::responses::ResponsesRequest::body_json)
++                .collect::<Vec<_>>(),
++        )?,
++    )?;
++    std::fs::write(
++        output.join("public-events.json"),
++        serde_json::to_vec_pretty(&events)?,
++    )?;
++    let ready: Value = serde_json::from_slice(&std::fs::read(output.join("owner-ready.json"))?)?;
++    assert_eq!(ready["ownerPid"], owner_pid);
++    // Request the application's normal graceful shutdown for the exact live
++    // child owned by this fixture. Native cleanup is independently awaited.
++    let status = Command::new("/usr/bin/kill")
++        .arg("-TERM")
++        .arg(ready["appServerPid"].to_string())
++        .status()
++        .await?;
++    anyhow::ensure!(status.success(), "could not request app-server shutdown");
++    let owner_status = timeout(WAIT, owner.wait()).await??;
++    let copied = copy_tree(&workspace, &output.join("workspace"));
++    let evidence: Value =
++        serde_json::from_slice(&std::fs::read(output.join("native-evidence.json"))?)?;
++    let mut summary = json!({"modelIsSseFixture": true, "sharedPaths": true, "phoneTest": false,
++        "qualificationStatus": if execution.is_err() { "failed" } else { "proof_pending" },
++        "executionError": execution.as_ref().err().map(ToString::to_string),
++        "copyError": copied.as_ref().err().map(|error| format!("{error:#}")), "ownerExit": owner_status.code(), "output": output});
++    std::fs::write(
++        output.join("summary.json"),
++        serde_json::to_vec_pretty(&summary)?,
++    )?;
++    println!("native app-server evidence: {}", output.display());
++    execution?;
++    copied?;
++    anyhow::ensure!(owner_status.success(), "native owner failed: {evidence}");
++    assert_eq!(
++        (
++            evidence["error"].clone(),
++            evidence["closeError"].clone(),
++            evidence["filesClosed"].clone(),
++            evidence["helperGone"].clone(),
++            evidence["quarantined"].clone()
++        ),
++        (
++            Value::Null,
++            Value::Null,
++            json!(true),
++            json!(true),
++            json!(false)
++        )
++    );
++    let agents_uri = format!("file://{}", workspace.join("AGENTS.md").display());
++    anyhow::ensure!(
++        evidence["bootstrapCalls"]
++            .as_array()
++            .context("bootstrap calls")?
++            .iter()
++            .any(|call| call["op"] == "readFile" && call["path"] == agents_uri),
++        "AGENTS was not read through the bound bootstrap authority"
++    );
++    let starts: Vec<_> = evidence["calls"]
++        .as_array()
++        .context("wire calls")?
++        .iter()
++        .filter(|call| call["method"] == "process/start")
++        .collect();
++    assert_eq!(starts.len(), 6);
++    assert_eq!(
++        starts[5]["params"]["argv"],
++        json!(["/usr/bin/bash", "-c", RUN])
++    );
++    assert_eq!(
++        starts[5]["params"]["cwd"],
++        format!("file://{}", workspace.display())
++    );
++    let direct_process_id = starts[5]["params"]["processId"].clone();
++    for start in starts {
++        assert_eq!(start["params"]["argv"][0], "/usr/bin/bash");
++        assert_eq!(start["params"]["sandbox"]["permissions"]["type"], "managed");
++        assert_eq!(
++            start["params"]["sandbox"]["permissions"]["network"],
++            "restricted"
++        );
++        assert_eq!(
++            start["params"]["sandbox"]["permissions"]["file_system"],
++            json!({"type": "restricted", "entries": [
++                {"access": "write", "path": {"type": "path", "path": format!("file://{}", workspace.display())}},
++                {"access": "deny", "path": {"type": "path", "path": format!("file://{}", workspace.join("private").display())}},
++            ]})
++        );
++    }
++    let records = evidence["records"].as_array().context("native records")?;
++    assert_eq!(records.len(), 6);
++    let direct_record = records
++        .iter()
++        .find(|record| record["key"] == direct_process_id)
++        .context("native record for public command/exec")?;
++    assert_eq!(direct_record["nativeResult"]["exitCode"], 0);
++    for record in records {
++        assert_eq!(record["nativeResult"]["cleanupComplete"], true);
++        assert_eq!(record["supervisorReturncode"], 0);
++    }
++    let protected_path_hex = workspace
++        .join("private/secret")
++        .as_os_str()
++        .as_encoded_bytes()
++        .iter()
++        .map(|byte| format!("{byte:02x}"))
++        .collect::<String>();
++    anyhow::ensure!(
++        evidence["nativeDecisions"]
++            .as_array()
++            .context("native policy decisions")?
++            .iter()
++            .any(|entry| entry["request"]["operation"] == "open"
++                && entry["request"]["pathHex"] == protected_path_hex
++                && entry["decision"]["error"] == 13),
++        "native private file denial was not observed"
++    );
++    anyhow::ensure!(!PathBuf::from(format!("/proc/{owner_pid}")).exists());
++    summary["qualificationStatus"] = json!("passed");
++    summary["publicCommandExecNativeProof"] = json!(true);
++    std::fs::write(
++        output.join("summary.json"),
++        serde_json::to_vec_pretty(&summary)?,
++    )?;
++    Ok(())
++}
+diff --git a/codex-rs/app-server/tests/suite/v2/native_app_server_bootstrap.rs b/codex-rs/app-server/tests/suite/v2/native_app_server_bootstrap.rs
+new file mode 100644
+index 0000000000000000000000000000000000000000..9dc765d262f912cb1f586fed072ea4a633f2b583
+--- /dev/null
++++ b/codex-rs/app-server/tests/suite/v2/native_app_server_bootstrap.rs
+@@ -0,0 +1,110 @@
++use std::collections::HashSet;
++use std::fs::File;
++use std::os::fd::FromRawFd;
++use std::os::fd::OwnedFd;
++use std::path::PathBuf;
++use std::sync::Arc;
++
++use anyhow::Context;
++use anyhow::Result;
++use codex_app_server::AppServerRuntimeOptions;
++use codex_app_server::AppServerTransport;
++use codex_app_server::AppServerWebsocketAuthSettings;
++use codex_app_server::PluginStartupTasks;
++use codex_app_server::RemoteControlStartupMode;
++use codex_app_server::run_main_with_transport_options;
++use codex_arg0::Arg0DispatchPaths;
++use codex_config::LoaderOverrides;
++use codex_config::ProjectConfigFileSystem;
++use codex_exec_server::BootstrapFileSystem;
++use codex_exec_server::BootstrapPeer;
++use codex_exec_server::ControllerPathAccess;
++use codex_exec_server::ExecServerLocalRuntime;
++use codex_http_client::HttpClientFactory;
++use codex_http_client::OutboundProxyPolicy;
++use codex_protocol::protocol::SessionSource;
++use codex_utils_absolute_path::AbsolutePathBuf;
++use codex_utils_cli::CliConfigOverrides;
++use tokio::io::AsyncBufReadExt;
++use tokio::io::BufReader;
++
++pub(super) async fn run() -> Result<()> {
++    let fds: [i32; 4] = serde_json::from_str(&std::env::var("FOLDGPT_NATIVE_TEST_FDS")?)?;
++    anyhow::ensure!(fds.iter().all(|fd| *fd >= 3) && fds.iter().collect::<HashSet<_>>().len() == 4);
++    let peer: [u32; 3] = serde_json::from_str(&std::env::var("FOLDGPT_NATIVE_TEST_PEER")?)?;
++    anyhow::ensure!(peer[0] > 0 && peer[1] > 0);
++    let workspace =
++        AbsolutePathBuf::from_absolute_path(std::env::var("FOLDGPT_NATIVE_TEST_WORKSPACE")?)?;
++    let output = PathBuf::from(std::env::var("FOLDGPT_NATIVE_TEST_OUTPUT")?);
++    // The owner transfers four unique descriptors with pass_fds. They are never
++    // selectable through app-server requests or production environment discovery.
++    let (reader, writer, bootstrap, session) = unsafe {
++        (
++            File::from_raw_fd(fds[0]),
++            File::from_raw_fd(fds[1]),
++            OwnedFd::from_raw_fd(fds[2]),
++            File::from_raw_fd(fds[3]),
++        )
++    };
++    let runtime = ExecServerLocalRuntime::connect(
++        tokio::fs::File::from_std(reader),
++        tokio::fs::File::from_std(writer),
++        ControllerPathAccess::Shared,
++        HttpClientFactory::new(OutboundProxyPolicy::ReqwestDefault),
++    )
++    .await?;
++    let mut session_id = String::new();
++    BufReader::new(tokio::fs::File::from_std(session))
++        .read_line(&mut session_id)
++        .await?;
++    let filesystem = BootstrapFileSystem::connect(
++        bootstrap,
++        BootstrapPeer {
++            pid: peer[0],
++            uid: peer[1],
++            gid: peer[2],
++        },
++        session_id.trim_end(),
++    )
++    .await?;
++    // Shared is factual: this exact process can read the same ordinary PC path.
++    anyhow::ensure!(std::fs::read(workspace.join("shared-path-proof"))? == b"shared-native-path");
++    let runtime = runtime.with_project_filesystem(ProjectConfigFileSystem::bounded(
++        filesystem.clone(),
++        workspace,
++    ))?;
++    let options = AppServerRuntimeOptions {
++        plugin_startup_tasks: PluginStartupTasks::Skip,
++        remote_control_startup_mode: RemoteControlStartupMode::DisabledEphemeral,
++        install_shutdown_signal_handler: true,
++        ..Default::default()
++    }
++    .with_local_runtime(Arc::clone(&runtime) as _);
++    let result = run_main_with_transport_options(
++        Arg0DispatchPaths {
++            codex_self_exe: Some(std::env::current_exe()?),
++            ..Default::default()
++        },
++        CliConfigOverrides::default(),
++        LoaderOverrides::without_managed_config_for_tests(),
++        /*strict_config*/ true,
++        /*default_analytics_enabled*/ false,
++        AppServerTransport::from_listen_url(&std::env::var("FOLDGPT_NATIVE_TEST_LISTEN")?)?,
++        SessionSource::VSCode,
++        AppServerWebsocketAuthSettings::default(),
++        options,
++    )
++    .await;
++    filesystem.disconnect();
++    let disconnect = runtime.disconnect().await;
++    std::fs::write(
++        output.join("app-server-result.json"),
++        serde_json::to_vec_pretty(&serde_json::json!({
++            "result": result.as_ref().err().map(ToString::to_string),
++            "disconnect": disconnect.as_ref().err().map(ToString::to_string), "sharedPathProved": true
++        }))?,
++    )?;
++    result.context("real native app-server")?;
++    disconnect?;
++    Ok(())
++}
+diff --git a/codex-rs/app-server/tests/suite/v2/native_app_server_fixture.py b/codex-rs/app-server/tests/suite/v2/native_app_server_fixture.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..dec4f3136f4bda54d8db5135eeec586f6bb4c09d
+--- /dev/null
++++ b/codex-rs/app-server/tests/suite/v2/native_app_server_fixture.py
+@@ -0,0 +1,248 @@
++"""PC test owner: real native factory and credentialed configuration channel.
++
++Only Responses SSE is supplied by a model test fixture. This owner observes and
++forwards actual requests; it neither implements commands nor changes policy.
++"""
++
++import asyncio
++import hashlib
++import importlib
++import json
++import os
++from pathlib import Path
++import socket
++import subprocess
++import sys
++
++package, helpers, runner, binary, home, workspace, output, address = sys.argv[1:]
++home, workspace, output = map(Path, (home, workspace, output))
++if os.getuid() == 0:
++    raise RuntimeError("Native app-server qualification requires a nonroot owner")
++manifest_path = Path(helpers) / "manifest.json"
++manifest_bytes = manifest_path.read_bytes()
++snapshot_files = json.loads(manifest_bytes)["files"]
++for entry in snapshot_files:
++    path = Path(helpers) / entry["path"]
++    data = path.read_bytes()
++    if (
++        len(data) != entry["bytes"]
++        or hashlib.sha256(data).hexdigest() != entry["sha256"]
++    ):
++        raise RuntimeError(f"Native helper snapshot mismatch: {path}")
++sys.path.insert(0, package)
++from tools.executor.exec_server import ExecServer, local_environment_info, serve_stdio
++from tools.executor.native_bootstrap_files import create_bootstrap_read_authority
++from tools.executor.native_bootstrap_channel import BootstrapReadChannel
++
++factory = importlib.import_module("tools.executor.bionic-supervisor.factory").factory
++process_module = importlib.import_module("tools.executor.bionic-supervisor.processes")
++native_decisions = []
++
++
++class ObservedPolicy(process_module.Policy):
++    def decide(self, request):
++        decision = super().decide(request)
++        native_decisions.append({"request": request, "decision": decision})
++        return decision
++
++
++process_module.Policy = ObservedPolicy
++backend = factory(
++    {
++        "helper": str(Path(helpers) / "native-files"),
++        "handleHelper": str(Path(helpers) / "native-file-handle"),
++        "processRunner": runner,
++        "workspace": str(workspace),
++        "executables": {"/usr/bin/bash": "/usr/bin/bash"},
++        "runtime": [
++            {"path": path, "execute": execute}
++            for path, execute in (
++                ("/usr", True),
++                ("/lib", True),
++                ("/lib64", True),
++                ("/etc/ld.so.cache", False),
++            )
++        ],
++        "parentEnvironment": {"PATH": "/usr/bin:/bin", "HOME": str(workspace)},
++    }
++)
++native_read, engine_write = os.pipe()
++engine_read, native_write = os.pipe()
++session_read, session_write = os.pipe()
++native_socket, engine_socket = socket.socketpair(socket.AF_UNIX, socket.SOCK_SEQPACKET)
++for endpoint in (native_socket, engine_socket):
++    endpoint.setsockopt(socket.SOL_SOCKET, socket.SO_PASSCRED, 1)
++
++environment = {
++    "PATH": "/usr/bin:/bin",
++    "HOME": str(home),
++    "CODEX_HOME": str(home),
++    "RUST_MIN_STACK": "8388608",
++    "FOLDGPT_NATIVE_TEST_LISTEN": address,
++    "FOLDGPT_NATIVE_TEST_WORKSPACE": str(workspace),
++    "FOLDGPT_NATIVE_TEST_OUTPUT": str(output),
++    "FOLDGPT_NATIVE_TEST_FDS": json.dumps(
++        [engine_read, engine_write, engine_socket.fileno(), session_read]
++    ),
++    "FOLDGPT_NATIVE_TEST_PEER": json.dumps([os.getpid(), os.getuid(), os.getgid()]),
++}
++child = subprocess.Popen(
++    [
++        binary,
++        "--ignored",
++        "--exact",
++        "suite::v2::native_app_server::bootstrap_child",
++        "--nocapture",
++    ],
++    pass_fds=(engine_read, engine_write, engine_socket.fileno(), session_read),
++    stdin=subprocess.DEVNULL,
++    stdout=(output / "app-server.stdout").open("wb"),
++    stderr=(output / "app-server.stderr").open("wb"),
++    env=environment,
++    cwd=home,
++)
++engine_socket.close()
++for descriptor in (engine_read, engine_write, session_read):
++    os.close(descriptor)
++with Path(binary).open("rb") as test_binary:
++    test_binary_hash = hashlib.file_digest(test_binary, "sha256").hexdigest()
++(output / "owner-ready.json").write_text(
++    json.dumps(
++        {
++            "ownerPid": os.getpid(),
++            "appServerPid": child.pid,
++            "uid": os.getuid(),
++            "gid": os.getgid(),
++            "fixtureSha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
++            "testBinarySha256": test_binary_hash,
++            "scope": "PC shared paths; real native execution; model responses are SSE fixtures",
++            "snapshotManifestSha256": hashlib.sha256(manifest_bytes).hexdigest(),
++            "snapshotFiles": snapshot_files,
++            "loadedPython": {
++                module.__file__: hashlib.sha256(
++                    Path(module.__file__).read_bytes()
++                ).hexdigest()
++                for module in tuple(sys.modules.values())
++                if getattr(module, "__file__", None)
++                and Path(module.__file__).is_relative_to(package)
++            },
++            "binaries": {
++                str(path): hashlib.sha256(Path(path).read_bytes()).hexdigest()
++                for path in (
++                    runner,
++                    str(Path(helpers) / "native-files"),
++                    str(Path(helpers) / "native-file-handle"),
++                )
++            },
++        }
++    )
++)
++
++
++class ObservedBackend:
++    supported_methods = backend.supported_methods
++    capabilities = backend.capabilities
++
++    def __init__(self):
++        self.calls, self.records, self.close_error = [], {}, None
++
++    async def handle(self, call, notify):
++        entry = {"method": call.method, "params": call.params}
++        self.calls.append(entry)
++        try:
++            result = await backend.handle(call, notify)
++            entry["result"] = result
++            return result
++        except BaseException as error:
++            entry["error"] = str(error)
++            raise
++        finally:
++            self.records.update(backend.processes.processes)
++
++    async def close(self, session_id):
++        try:
++            await backend.close(session_id)
++        except BaseException as error:
++            self.close_error = repr(error)
++            raise
++
++
++class ObservedChannel(BootstrapReadChannel):
++    async def _respond(self, request, phase):
++        bootstrap_calls.append(request)
++        await super()._respond(request, phase)
++
++
++class OwnedServer(ExecServer):
++    async def request(self, message):
++        result = await super().request(message)
++        if (
++            message.get("method") == "initialize"
++            and self.session_id
++            and not self.bootstrap_task
++        ):
++            authority = create_bootstrap_read_authority(
++                backend, session_id=self.session_id
++            )
++            channel = ObservedChannel(
++                native_socket, authority, peer=(child.pid, os.getuid(), os.getgid())
++            )
++            self.bootstrap_task = asyncio.create_task(channel.run())
++            with os.fdopen(session_write, "w") as pipe:
++                pipe.write(self.session_id + "\n")
++        return result
++
++    async def close(self):
++        if self.bootstrap_task is not None:
++            await self.bootstrap_task
++        await super().close()
++
++
++observed, bootstrap_calls = ObservedBackend(), []
++os.chdir(workspace)
++info = local_environment_info()
++info["shell"] = {"name": "bash", "path": "/usr/bin/bash"}
++server = OwnedServer(observed, environment_info=info)
++server.bootstrap_task = None
++error = None
++try:
++    with (
++        os.fdopen(native_read, "rb", buffering=0) as reader,
++        os.fdopen(native_write, "wb", buffering=0) as writer,
++    ):
++        asyncio.run(serve_stdio(server, reader, writer))
++except BaseException as failure:
++    error = repr(failure)
++    raise
++finally:
++    returncode = child.wait(timeout=30)
++    (output / "native-evidence.json").write_text(
++        json.dumps(
++            {
++                "ownerPid": os.getpid(),
++                "appServerPid": child.pid,
++                "appServerReturncode": returncode,
++                "error": error,
++                "closeError": observed.close_error,
++                "calls": observed.calls,
++                "bootstrapCalls": bootstrap_calls,
++                "nativeDecisions": native_decisions,
++                "filesClosed": backend.files.closed,
++                "helperGone": backend.files.process is None,
++                "quarantined": backend.processes.quarantined,
++                "records": [
++                    {
++                        "key": record.key,
++                        "nativeResult": record.native_result,
++                        "supervisorReturncode": None
++                        if record.process is None
++                        else record.process.returncode,
++                    }
++                    for record in observed.records.values()
++                ],
++            },
++            indent=2,
++        )
++    )
++if returncode:
++    raise SystemExit(returncode)
 diff --git a/codex-rs/config/src/config_toml.rs b/codex-rs/config/src/config_toml.rs
 index 5f0cc99a4740803805791250d7e87332673c6d85..797dc2f56c3c9c911608d83a158b8f1b36f9779c 100644
 --- a/codex-rs/config/src/config_toml.rs
@@ -4035,6 +6780,533 @@ index cb203776ed1dd81cbf32b04887316633d91ff4dd..6ecbabbb31f760d53ab70213dfe6b063
          let role_config_base = config_file
              .parent()
              .ok_or(anyhow!("No corresponding config content"))?;
+diff --git a/codex-rs/core/src/agents_md.rs b/codex-rs/core/src/agents_md.rs
+index 644407dd993356ce29842f6806857e2bf29bcbdc..3c0041b177277e2de3cccce3d33728f64fa63c36 100644
+--- a/codex-rs/core/src/agents_md.rs
++++ b/codex-rs/core/src/agents_md.rs
+@@ -19,16 +19,19 @@ use crate::config::Config;
+ use crate::context::UserInstructions as ContextUserInstructions;
+ use crate::environment_selection::TurnEnvironmentSnapshot;
+ use codex_config::ConfigLayerSource;
++use codex_config::ProjectConfigFileSystem;
+ use codex_config::default_project_root_markers;
+ use codex_config::merge_toml_values;
+ use codex_config::project_root_markers_from_config;
+ use codex_exec_server::ExecutorFileSystem;
+ use codex_exec_server::GetMetadataOptions;
++use codex_exec_server::LOCAL_ENVIRONMENT_ID;
+ use codex_exec_server::ReadFileOptions;
+ use codex_extension_api::Instructions;
+ use codex_file_system::FileSystemSandboxContext;
+ use codex_file_system::FindUpErrorPolicy;
+ use codex_file_system::find_nearest_ancestor_with_markers;
++use codex_file_system::find_nearest_native_ancestor_with_markers_within;
+ use codex_utils_absolute_path::AbsolutePathBuf;
+ use codex_utils_path_uri::PathUri;
+ use futures::StreamExt;
+@@ -91,7 +94,11 @@ pub(crate) async fn load_project_instructions(
+                 }
+             }
+             Ok(None) => {}
+-            Err(error) if sandbox.is_none() => {
++            Err(error)
++                if sandbox.is_none()
++                    && !(turn_environment.selection.environment_id == LOCAL_ENVIRONMENT_ID
++                        && config.project_filesystem.is_some()) =>
++            {
+                 error!(
+                     environment_id = turn_environment.selection.environment_id,
+                     "error trying to find AGENTS.md docs: {error:#}"
+@@ -130,7 +137,18 @@ async fn read_agents_md(
+         return Ok(None);
+     }
+ 
+-    let paths = agents_md_paths(config, cwd, fs, sandbox).await?;
++    // The bootstrap's project authority belongs only to the local environment.
++    // Instruction loading is a trusted configuration read; it does not replace
++    // the filesystem or sandbox context used by model tools.
++    let project = config
++        .project_filesystem
++        .as_ref()
++        .filter(|_| environment_id == LOCAL_ENVIRONMENT_ID);
++    let (fs, sandbox) = match project {
++        Some(project) => (project.filesystem(), None),
++        None => (fs, sandbox),
++    };
++    let paths = agents_md_paths(config, cwd, fs, sandbox, project).await?;
+     if paths.is_empty() {
+         return Ok(None);
+     }
+@@ -189,6 +207,7 @@ async fn agents_md_paths(
+     cwd: &PathUri,
+     fs: &dyn ExecutorFileSystem,
+     sandbox: Option<&FileSystemSandboxContext>,
++    project: Option<&ProjectConfigFileSystem>,
+ ) -> io::Result<Vec<PathUri>> {
+     let dir = cwd.clone();
+ 
+@@ -207,14 +226,32 @@ async fn agents_md_paths(
+             default_project_root_markers()
+         }
+     };
+-    let project_root = find_nearest_ancestor_with_markers(
+-        fs,
+-        &dir,
+-        project_root_markers,
+-        FindUpErrorPolicy::Ignore,
+-        sandbox,
+-    )
+-    .await?;
++    let discovery_root = project.and_then(ProjectConfigFileSystem::discovery_root);
++    let project_root = if let Some(root) = discovery_root {
++        find_nearest_native_ancestor_with_markers_within(
++            fs,
++            &dir.to_abs_path()?,
++            root,
++            project_root_markers,
++            sandbox,
++        )
++        .await?
++        .as_ref()
++        .map(PathUri::from_abs_path)
++    } else {
++        find_nearest_ancestor_with_markers(
++            fs,
++            &dir,
++            project_root_markers,
++            if project.is_some() {
++                FindUpErrorPolicy::Propagate
++            } else {
++                FindUpErrorPolicy::Ignore
++            },
++            sandbox,
++        )
++        .await?
++    };
+     let search_dirs = if let Some(root) = project_root {
+         let mut dirs = Vec::new();
+         let mut cursor = dir.clone();
+@@ -242,6 +279,17 @@ async fn agents_md_paths(
+                 let candidate = directory
+                     .join(name)
+                     .map_err(|err| io::Error::new(io::ErrorKind::InvalidInput, err))?;
++                if let Some(root) = discovery_root
++                    && !candidate
++                        .to_abs_path()?
++                        .as_path()
++                        .starts_with(root.as_path())
++                {
++                    return Err(io::Error::new(
++                        io::ErrorKind::PermissionDenied,
++                        "AGENTS.md candidate is outside discovery root",
++                    ));
++                }
+                 match fs
+                     .get_metadata(&candidate, GetMetadataOptions::default(), sandbox)
+                     .await
+diff --git a/codex-rs/core/src/agents_md_project_tests.rs b/codex-rs/core/src/agents_md_project_tests.rs
+new file mode 100644
+index 0000000000000000000000000000000000000000..dea7ad186b62d3f33bf7454c38d7f533124709df
+--- /dev/null
++++ b/codex-rs/core/src/agents_md_project_tests.rs
+@@ -0,0 +1,275 @@
++use super::*;
++use codex_config::ProjectConfigFileSystem;
++use pretty_assertions::assert_eq;
++
++#[tokio::test]
++async fn bootstrap_authority_does_not_admit_untrusted_project_instructions() {
++    let temp = tempfile::tempdir().unwrap();
++    fs::write(temp.path().join("AGENTS.md"), "untrusted instructions").unwrap();
++    let mut config = make_config(&temp, /*limit*/ 4096, Some("user instructions")).await;
++    config.active_project.trust_level = Some(codex_protocol::config_types::TrustLevel::Untrusted);
++    let calls = Arc::new(MetadataCallCounts::default());
++    config.project_filesystem = Some(ProjectConfigFileSystem::bounded(
++        Arc::new(FailingFileSystem {
++            path: config.cwd.clone(),
++            failure: InjectedFailure::BootstrapOnly,
++            metadata_calls: Arc::clone(&calls),
++        }),
++        config.cwd.clone(),
++    ));
++    let loaded = load_agents_md(&config).await.unwrap();
++    assert_eq!(
++        loaded,
++        LoadedAgentsMd {
++            user_instructions: config.user_instructions.clone(),
++            entries: vec![],
++        }
++    );
++    assert!(calls.paths.lock().unwrap().is_empty());
++}
++
++#[tokio::test]
++async fn bootstrap_discovery_stops_at_root_and_preserves_instruction_provenance() {
++    let outer = tempfile::tempdir().unwrap();
++    fs::create_dir(outer.path().join(".git")).unwrap();
++    fs::write(outer.path().join("AGENTS.md"), "outside authority").unwrap();
++    let root = outer.path().join("project").abs();
++    let cwd = root.join("nested");
++    fs::create_dir_all(&cwd).unwrap();
++    fs::write(root.join("AGENTS.md"), "project root").unwrap();
++    fs::write(cwd.join("AGENTS.md"), "nested instructions").unwrap();
++    let mut config = make_config(&outer, /*limit*/ 4096, Some("user instructions")).await;
++    config.cwd = cwd.clone();
++    let calls = Arc::new(MetadataCallCounts::default());
++    config.project_filesystem = Some(ProjectConfigFileSystem::bounded(
++        Arc::new(FailingFileSystem {
++            path: root.clone(),
++            failure: InjectedFailure::BootstrapOnly,
++            metadata_calls: Arc::clone(&calls),
++        }),
++        root.clone(),
++    ));
++    let environments = resolved_local_environments([("local", cwd.clone())]);
++    let environment = environments.turn_environments().next().unwrap();
++    let model_filesystem = environment.environment.get_filesystem();
++
++    // An outer repository marker does not expand the bootstrap discovery root.
++    let loaded = load_project_instructions(
++        &config.config,
++        config.user_instructions.clone(),
++        &environments,
++    )
++    .await
++    .unwrap()
++    .unwrap();
++    assert_eq!(
++        loaded,
++        LoadedAgentsMd {
++            user_instructions: config.user_instructions.clone(),
++            entries: vec![InstructionEntry {
++                contents: "nested instructions".to_owned(),
++                provenance: project_provenance(cwd.join("AGENTS.md"), cwd.clone()),
++            }],
++        }
++    );
++
++    fs::create_dir(root.join(".git")).unwrap();
++    // A supplied model sandbox must not become an authority credential.
++    let sandbox = environment.sandbox_context(/*additional_permissions*/ None);
++    let loaded = read_agents_md(
++        &config.config,
++        model_filesystem.as_ref(),
++        "local",
++        &PathUri::from_abs_path(&cwd),
++        config.project_doc_max_bytes,
++        Some(&sandbox),
++    )
++    .await
++    .unwrap()
++    .unwrap();
++    assert_eq!(
++        loaded,
++        LoadedAgentsMd {
++            user_instructions: None,
++            entries: vec![
++                InstructionEntry {
++                    contents: "project root".to_owned(),
++                    provenance: project_provenance(root.join("AGENTS.md"), cwd.clone()),
++                },
++                InstructionEntry {
++                    contents: "nested instructions".to_owned(),
++                    provenance: project_provenance(cwd.join("AGENTS.md"), cwd),
++                },
++            ],
++        }
++    );
++    let paths = calls.paths.lock().unwrap();
++    assert!(!paths.is_empty());
++    assert!(
++        paths
++            .iter()
++            .all(|path| path.to_abs_path().unwrap().starts_with(root.as_path()))
++    );
++    assert!(Arc::ptr_eq(
++        &model_filesystem,
++        &environment.environment.get_filesystem()
++    ));
++}
++
++#[tokio::test]
++async fn bootstrap_provider_refusals_abort_loading_without_model_sandbox() {
++    let temp = tempfile::tempdir().unwrap();
++    fs::create_dir(temp.path().join(".git")).unwrap();
++    fs::write(temp.path().join("AGENTS.md"), "controller can read this").unwrap();
++    let mut config = make_config(&temp, /*limit*/ 4096, /*instructions*/ None).await;
++    let environments = resolved_local_environments([("local", config.cwd.clone())]);
++    for bounded in [false, true] {
++        for kind in [io::ErrorKind::PermissionDenied, io::ErrorKind::BrokenPipe] {
++            for (name, failure) in [
++                (".git", InjectedFailure::Metadata(kind)),
++                ("AGENTS.md", InjectedFailure::Metadata(kind)),
++                ("AGENTS.md", InjectedFailure::Read(kind)),
++            ] {
++                let provider = Arc::new(FailingFileSystem {
++                    path: config.cwd.join(name),
++                    failure,
++                    metadata_calls: Arc::default(),
++                });
++                config.project_filesystem = Some(if bounded {
++                    ProjectConfigFileSystem::bounded(provider, config.cwd.clone())
++                } else {
++                    ProjectConfigFileSystem::shared(provider)
++                });
++                let error = load_project_instructions(
++                    &config.config,
++                    /*user_instructions*/ None,
++                    &environments,
++                )
++                .await
++                .expect_err("provider refusal must not become missing instructions");
++                assert_eq!(error.kind(), kind);
++                assert!(error.to_string().contains("environment `local`"));
++                assert_eq!(
++                    fs::read_to_string(temp.path().join("AGENTS.md")).unwrap(),
++                    "controller can read this"
++                );
++            }
++        }
++    }
++}
++
++#[tokio::test]
++async fn bootstrap_local_authority_is_not_used_for_another_environment() {
++    let local = tempfile::tempdir().unwrap();
++    let remote = tempfile::tempdir().unwrap();
++    fs::write(remote.path().join("AGENTS.md"), "other environment").unwrap();
++    let mut config = make_config(&local, /*limit*/ 4096, /*instructions*/ None).await;
++    let calls = Arc::new(MetadataCallCounts::default());
++    config.project_filesystem = Some(ProjectConfigFileSystem::bounded(
++        Arc::new(FailingFileSystem {
++            path: remote.abs().join("AGENTS.md"),
++            failure: InjectedFailure::Read(io::ErrorKind::PermissionDenied),
++            metadata_calls: Arc::clone(&calls),
++        }),
++        local.abs(),
++    ));
++    let environments = resolved_local_environments([("remote", remote.abs())]);
++    let loaded = load_project_instructions(
++        &config.config,
++        /*user_instructions*/ None,
++        &environments,
++    )
++    .await
++    .unwrap()
++    .unwrap();
++    assert_eq!(
++        loaded,
++        LoadedAgentsMd {
++            user_instructions: None,
++            entries: vec![InstructionEntry {
++                contents: "other environment".to_owned(),
++                provenance: InstructionProvenance::Project {
++                    source_path: PathUri::from_abs_path(&remote.abs().join("AGENTS.md")),
++                    environment_id: "remote".to_owned(),
++                    cwd: PathUri::from_abs_path(&remote.abs()),
++                },
++            }],
++        }
++    );
++    assert!(calls.paths.lock().unwrap().is_empty());
++}
++
++#[tokio::test]
++async fn bootstrap_rejects_outside_cwd_before_reads_even_with_empty_markers() {
++    let temp = tempfile::tempdir().unwrap();
++    let root = temp.abs().join("project");
++    fs::create_dir(&root).unwrap();
++    let mut config = make_config_with_project_root_markers(
++        &temp,
++        /*limit*/ 4096,
++        /*instructions*/ None,
++        &[],
++    )
++    .await;
++    let calls = Arc::new(MetadataCallCounts::default());
++    config.project_filesystem = Some(ProjectConfigFileSystem::bounded(
++        Arc::new(FailingFileSystem {
++            path: root.clone(),
++            failure: InjectedFailure::BootstrapOnly,
++            metadata_calls: Arc::clone(&calls),
++        }),
++        root,
++    ));
++    let environments = resolved_local_environments([("local", temp.abs())]);
++    let error = load_project_instructions(
++        &config.config,
++        /*user_instructions*/ None,
++        &environments,
++    )
++    .await
++    .unwrap_err();
++    assert_eq!(error.kind(), io::ErrorKind::InvalidInput);
++    assert!(calls.paths.lock().unwrap().is_empty());
++}
++
++#[tokio::test]
++async fn bootstrap_rejects_fallback_path_outside_discovery_root() {
++    let temp = tempfile::tempdir().unwrap();
++    let root = temp.abs().join("project");
++    fs::create_dir(&root).unwrap();
++    fs::write(temp.path().join("outside.md"), "outside instructions").unwrap();
++    let mut config = make_config_with_fallback(
++        &temp,
++        /*limit*/ 4096,
++        /*instructions*/ None,
++        &["../outside.md"],
++    )
++    .await;
++    config.cwd = root.clone();
++    let calls = Arc::new(MetadataCallCounts::default());
++    config.project_filesystem = Some(ProjectConfigFileSystem::bounded(
++        Arc::new(FailingFileSystem {
++            path: root.clone(),
++            failure: InjectedFailure::BootstrapOnly,
++            metadata_calls: Arc::clone(&calls),
++        }),
++        root.clone(),
++    ));
++    let environments = resolved_local_environments([("local", root.clone())]);
++    let error = load_project_instructions(
++        &config.config,
++        /*user_instructions*/ None,
++        &environments,
++    )
++    .await
++    .unwrap_err();
++    assert_eq!(error.kind(), io::ErrorKind::PermissionDenied);
++    assert!(
++        calls
++            .paths
++            .lock()
++            .unwrap()
++            .iter()
++            .all(|path| { path.to_abs_path().unwrap().starts_with(root.as_path()) })
++    );
++}
+diff --git a/codex-rs/core/src/agents_md_tests.rs b/codex-rs/core/src/agents_md_tests.rs
+index bfa1f8768a11d3b6a1ca09189679102b250013aa..f879f49419c372b80459b7e589bf7dfd2b08ca3b 100644
+--- a/codex-rs/core/src/agents_md_tests.rs
++++ b/codex-rs/core/src/agents_md_tests.rs
+@@ -51,6 +51,7 @@ use tokio::sync::Semaphore;
+ 
+ #[derive(Clone, Copy)]
+ enum InjectedFailure {
++    BootstrapOnly,
+     Metadata(io::ErrorKind),
+     MetadataBlocked,
+     MetadataBlockedByFilenamePrefix(&'static str),
+@@ -95,6 +96,12 @@ impl FailingFileSystem {
+         options: ReadFileOptions,
+         sandbox: Option<&FileSystemSandboxContext>,
+     ) -> io::Result<Vec<u8>> {
++        if let InjectedFailure::BootstrapOnly = self.failure {
++            assert!(
++                sandbox.is_none(),
++                "bootstrap reads must not receive model policy"
++            );
++        }
+         if path.to_abs_path()? == self.path
+             && let InjectedFailure::Read(kind) = self.failure
+         {
+@@ -136,6 +143,13 @@ impl FailingFileSystem {
+             .push(path.clone());
+         self.metadata_calls.started.notify_one();
+         match self.failure {
++            InjectedFailure::BootstrapOnly => {
++                assert!(
++                    sandbox.is_none(),
++                    "bootstrap metadata must not receive model policy"
++                );
++                LOCAL_FS.get_metadata(path, options, sandbox).await
++            }
+             InjectedFailure::Metadata(kind) if path_abs == self.path => {
+                 Err(io::Error::new(kind, "injected metadata failure"))
+             }
+@@ -201,6 +215,9 @@ impl FailingFileSystem {
+     }
+ }
+ 
++#[path = "agents_md_project_tests.rs"]
++mod project_filesystem;
++
+ impl ExecutorFileSystem for FailingFileSystem {
+     fn canonicalize<'a>(
+         &'a self,
+@@ -350,6 +367,7 @@ async fn agents_md_paths(config: &TestConfig) -> std::io::Result<Vec<PathUri>> {
+         &PathUri::from_abs_path(&config.cwd),
+         LOCAL_FS.as_ref(),
+         /*sandbox*/ None,
++        /*project*/ None,
+     )
+     .await
+ }
+@@ -814,7 +832,13 @@ async fn marker_search_does_not_wait_for_a_higher_ancestor() {
+ 
+     let paths = tokio::time::timeout(
+         std::time::Duration::from_secs(1),
+-        super::agents_md_paths(&config.config, &cwd, &fs, /*sandbox*/ None),
++        super::agents_md_paths(
++            &config.config,
++            &cwd,
++            &fs,
++            /*sandbox*/ None,
++            /*project*/ None,
++        ),
+     )
+     .await
+     .expect("nearest marker should complete")
+@@ -919,7 +943,13 @@ async fn project_root_marker_search_limits_concurrent_probes_and_preserves_order
+         metadata_calls.release.add_permits(max_probe_count);
+     };
+     let (paths, ()) = tokio::join!(
+-        super::agents_md_paths(&config.config, &cwd, &fs, /*sandbox*/ None),
++        super::agents_md_paths(
++            &config.config,
++            &cwd,
++            &fs,
++            /*sandbox*/ None,
++            /*project*/ None
++        ),
+         assertions
+     );
+     let paths = paths.expect("AGENTS.md discovery");
+@@ -966,7 +996,14 @@ async fn agents_md_search_starts_all_directory_probes() {
+         metadata_calls: Arc::clone(&metadata_calls),
+     };
+     let search = tokio::spawn(async move {
+-        super::agents_md_paths(&config.config, &cwd, &fs, /*sandbox*/ None).await
++        super::agents_md_paths(
++            &config.config,
++            &cwd,
++            &fs,
++            /*sandbox*/ None,
++            /*project*/ None,
++        )
++        .await
+     });
+     tokio::time::timeout(std::time::Duration::from_secs(5), async {
+         loop {
+@@ -1041,9 +1078,15 @@ async fn empty_project_root_markers_only_probe_cwd_candidates() {
+     };
+     let cwd = PathUri::from_abs_path(&config.cwd);
+ 
+-    let paths = super::agents_md_paths(&config.config, &cwd, &fs, /*sandbox*/ None)
+-        .await
+-        .expect("AGENTS.md discovery");
++    let paths = super::agents_md_paths(
++        &config.config,
++        &cwd,
++        &fs,
++        /*sandbox*/ None,
++        /*project*/ None,
++    )
++    .await
++    .expect("AGENTS.md discovery");
+ 
+     let override_path = cwd.join(LOCAL_AGENTS_MD_FILENAME).expect("override path");
+     let agents_path = cwd.join(DEFAULT_AGENTS_MD_FILENAME).expect("agents path");
 diff --git a/codex-rs/core/src/bounded_trust_tests.rs b/codex-rs/core/src/bounded_trust_tests.rs
 new file mode 100644
 index 0000000000000000000000000000000000000000..915536aab14ce71f4838348af3897d904252b32e
@@ -4380,7 +7652,7 @@ index 1a2b970021a0fd7838c9ac0947e88150719e74f9..7b4968ebef6ffec8a7f8b83eb055d67f
          configured_features: Features,
          feature_requirements: Option<Sourced<FeatureRequirementsToml>>,
 diff --git a/codex-rs/core/src/config/mod.rs b/codex-rs/core/src/config/mod.rs
-index dca329ab98ea218f7b96f1bd2d4cf25612a5fc1f..5f20a9e438c738b2ddfa4b72b830873dacefefff 100644
+index dca329ab98ea218f7b96f1bd2d4cf25612a5fc1f..faa8c2132efd217222f9f46da30c53200dd0cd5a 100644
 --- a/codex-rs/core/src/config/mod.rs
 +++ b/codex-rs/core/src/config/mod.rs
 @@ -8,7 +8,7 @@ use crate::unified_exec::MIN_EMPTY_YIELD_TIME_MS;
@@ -4488,7 +7760,20 @@ index dca329ab98ea218f7b96f1bd2d4cf25612a5fc1f..5f20a9e438c738b2ddfa4b72b830873d
              config_toml,
              harness_overrides,
              codex_home,
-@@ -1844,8 +1869,9 @@ impl Config {
+@@ -1807,6 +1832,12 @@ impl Config {
+         &self,
+         refreshed_config: &Config,
+     ) -> std::io::Result<Self> {
++        if self.project_filesystem != refreshed_config.project_filesystem {
++            return Err(std::io::Error::new(
++                ErrorKind::InvalidInput,
++                "cannot rebuild session configuration with a different project filesystem",
++            ));
++        }
+         let mut layers = refreshed_config
+             .config_layer_stack
+             .all_layers_low_to_high()
+@@ -1844,8 +1875,9 @@ impl Config {
              .map(AbsolutePathBuf::try_from)
              .transpose()?;
  
@@ -4499,7 +7784,7 @@ index dca329ab98ea218f7b96f1bd2d4cf25612a5fc1f..5f20a9e438c738b2ddfa4b72b830873d
              cfg,
              ConfigOverrides {
                  cwd: Some(self.cwd.to_path_buf()),
-@@ -2045,7 +2071,14 @@ pub fn validate_feature_requirements_for_config_toml(
+@@ -2045,7 +2077,14 @@ pub fn validate_feature_requirements_for_config_toml(
  
  fn load_catalog_json(path: &AbsolutePathBuf) -> std::io::Result<ModelsResponse> {
      let file_contents = std::fs::read_to_string(path)?;
@@ -4515,7 +7800,7 @@ index dca329ab98ea218f7b96f1bd2d4cf25612a5fc1f..5f20a9e438c738b2ddfa4b72b830873d
          std::io::Error::new(
              ErrorKind::InvalidData,
              format!(
-@@ -3143,6 +3176,25 @@ impl Config {
+@@ -3143,6 +3182,25 @@ impl Config {
  
      pub(crate) async fn load_config_with_layer_stack(
          fs: &dyn ExecutorFileSystem,
@@ -4541,7 +7826,7 @@ index dca329ab98ea218f7b96f1bd2d4cf25612a5fc1f..5f20a9e438c738b2ddfa4b72b830873d
          mut cfg: ConfigToml,
          overrides: ConfigOverrides,
          codex_home: AbsolutePathBuf,
-@@ -3364,13 +3416,13 @@ impl Config {
+@@ -3364,13 +3422,13 @@ impl Config {
              .into_iter()
              .map(|path| AbsolutePathBuf::resolve_path_against_base(path, resolved_cwd.as_path()))
              .collect();
@@ -4562,7 +7847,7 @@ index dca329ab98ea218f7b96f1bd2d4cf25612a5fc1f..5f20a9e438c738b2ddfa4b72b830873d
          let permission_config_syntax = resolve_permission_config_syntax(
              &config_layer_stack,
              &cfg,
-@@ -3707,8 +3759,9 @@ impl Config {
+@@ -3707,8 +3765,9 @@ impl Config {
              .unwrap_or_default();
          let terminal_resize_reflow = resolve_terminal_resize_reflow_config(&cfg);
  
@@ -4574,7 +7859,7 @@ index dca329ab98ea218f7b96f1bd2d4cf25612a5fc1f..5f20a9e438c738b2ddfa4b72b830873d
  
          let openai_base_url = cfg
              .openai_base_url
-@@ -3885,7 +3938,7 @@ impl Config {
+@@ -3885,7 +3944,7 @@ impl Config {
          // behaviour matches other path-like config values.
          let model_instructions_path = cfg.model_instructions_file.as_ref();
          let file_base_instructions = Self::try_read_non_empty_file(
@@ -4583,7 +7868,7 @@ index dca329ab98ea218f7b96f1bd2d4cf25612a5fc1f..5f20a9e438c738b2ddfa4b72b830873d
              model_instructions_path,
              "model instructions file",
          )
-@@ -3930,7 +3983,7 @@ impl Config {
+@@ -3930,7 +3989,7 @@ impl Config {
  
          let experimental_compact_prompt_path = cfg.experimental_compact_prompt_file.as_ref();
          let file_compact_prompt = Self::try_read_non_empty_file(
@@ -4592,7 +7877,7 @@ index dca329ab98ea218f7b96f1bd2d4cf25612a5fc1f..5f20a9e438c738b2ddfa4b72b830873d
              experimental_compact_prompt_path,
              "experimental compact prompt file",
          )
-@@ -3943,7 +3996,13 @@ impl Config {
+@@ -3943,7 +4002,13 @@ impl Config {
          let review_model = override_review_model.or(cfg.review_model);
  
          let check_for_update_on_startup = cfg.check_for_update_on_startup.unwrap_or(true);
@@ -4607,7 +7892,7 @@ index dca329ab98ea218f7b96f1bd2d4cf25612a5fc1f..5f20a9e438c738b2ddfa4b72b830873d
  
          let log_dir = cfg
              .log_dir
-@@ -4218,6 +4277,8 @@ impl Config {
+@@ -4218,6 +4283,8 @@ impl Config {
              agent_default_subagent_reasoning_effort,
              agent_max_depth,
              agent_roles,
@@ -4616,6 +7901,668 @@ index dca329ab98ea218f7b96f1bd2d4cf25612a5fc1f..5f20a9e438c738b2ddfa4b72b830873d
              max_goal_token_budget: cfg
                  .goals
                  .as_ref()
+@@ -4769,3 +4836,7 @@ mod tests;
+ #[cfg(test)]
+ #[path = "config_loader_tests.rs"]
+ mod config_loader_tests;
++
++#[cfg(test)]
++#[path = "project_filesystem_tests.rs"]
++mod project_filesystem_tests;
+diff --git a/codex-rs/core/src/config/project_filesystem_fixture.rs b/codex-rs/core/src/config/project_filesystem_fixture.rs
+new file mode 100644
+index 0000000000000000000000000000000000000000..82601f0a8ef08a993ec39869e1cad6638b1e4af0
+--- /dev/null
++++ b/codex-rs/core/src/config/project_filesystem_fixture.rs
+@@ -0,0 +1,147 @@
++use codex_exec_server::LOCAL_FS;
++use codex_file_system::*;
++use codex_utils_absolute_path::AbsolutePathBuf;
++use codex_utils_path_uri::PathUri;
++use std::collections::BTreeMap;
++use std::io;
++use std::path::PathBuf;
++use std::sync::Mutex;
++
++/// Uses real metadata/directory reads but distinct project bytes. Every access
++/// is recorded and constrained before delegation, including failed probes.
++pub(super) struct ProjectFiles {
++    pub root: AbsolutePathBuf,
++    pub contents: Mutex<BTreeMap<PathBuf, Vec<u8>>>,
++    pub denied: Mutex<Option<(String, PathBuf, io::ErrorKind)>>,
++    pub calls: Mutex<Vec<(String, PathBuf)>>,
++}
++
++impl ProjectFiles {
++    pub fn new(root: AbsolutePathBuf) -> Self {
++        Self {
++            root,
++            contents: Mutex::new(BTreeMap::new()),
++            denied: Mutex::new(None),
++            calls: Mutex::new(Vec::new()),
++        }
++    }
++
++    fn check(&self, operation: &str, uri: &PathUri) -> io::Result<PathBuf> {
++        let path = uri.to_abs_path()?.to_path_buf();
++        self.calls
++            .lock()
++            .unwrap()
++            .push((operation.into(), path.clone()));
++        if !path.starts_with(self.root.as_path()) {
++            return Err(io::Error::new(
++                io::ErrorKind::PermissionDenied,
++                "outside project root",
++            ));
++        }
++        if let Some((denied_operation, denied_path, kind)) = &*self.denied.lock().unwrap()
++            && denied_operation == operation
++            && denied_path == &path
++        {
++            return Err(io::Error::new(*kind, "project provider failure"));
++        }
++        Ok(path)
++    }
++}
++
++impl ExecutorFileSystem for ProjectFiles {
++    fn canonicalize<'a>(
++        &'a self,
++        path: &'a PathUri,
++        sandbox: Option<&'a FileSystemSandboxContext>,
++    ) -> ExecutorFileSystemFuture<'a, PathUri> {
++        Box::pin(async move {
++            self.check("canonicalize", path)?;
++            LOCAL_FS.canonicalize(path, sandbox).await
++        })
++    }
++    fn read_file<'a>(
++        &'a self,
++        path: &'a PathUri,
++        options: ReadFileOptions,
++        sandbox: Option<&'a FileSystemSandboxContext>,
++    ) -> ExecutorFileSystemFuture<'a, Vec<u8>> {
++        Box::pin(async move {
++            let path_buf = self.check("read", path)?;
++            let contents = self.contents.lock().unwrap().get(&path_buf).cloned();
++            match contents {
++                Some(contents) => Ok(contents),
++                None => LOCAL_FS.read_file(path, options, sandbox).await,
++            }
++        })
++    }
++    fn get_metadata<'a>(
++        &'a self,
++        path: &'a PathUri,
++        options: GetMetadataOptions,
++        sandbox: Option<&'a FileSystemSandboxContext>,
++    ) -> ExecutorFileSystemFuture<'a, FileMetadata> {
++        Box::pin(async move {
++            self.check("metadata", path)?;
++            LOCAL_FS.get_metadata(path, options, sandbox).await
++        })
++    }
++    fn read_directory<'a>(
++        &'a self,
++        path: &'a PathUri,
++        sandbox: Option<&'a FileSystemSandboxContext>,
++    ) -> ExecutorFileSystemFuture<'a, Vec<ReadDirectoryEntry>> {
++        Box::pin(async move {
++            self.check("directory", path)?;
++            LOCAL_FS.read_directory(path, sandbox).await
++        })
++    }
++    fn read_file_stream<'a>(
++        &'a self,
++        _: &'a PathUri,
++        _: Option<&'a FileSystemSandboxContext>,
++    ) -> ExecutorFileSystemFuture<'a, FileSystemReadStream> {
++        Box::pin(async { panic!("unexpected configuration stream") })
++    }
++    fn write_file<'a>(
++        &'a self,
++        _: &'a PathUri,
++        _: Vec<u8>,
++        _: WriteFileOptions,
++        _: Option<&'a FileSystemSandboxContext>,
++    ) -> ExecutorFileSystemFuture<'a, ()> {
++        Box::pin(async { panic!("unexpected configuration write") })
++    }
++    fn create_directory<'a>(
++        &'a self,
++        _: &'a PathUri,
++        _: CreateDirectoryOptions,
++        _: Option<&'a FileSystemSandboxContext>,
++    ) -> ExecutorFileSystemFuture<'a, ()> {
++        Box::pin(async { panic!("unexpected configuration mkdir") })
++    }
++    fn walk<'a>(
++        &'a self,
++        _: &'a PathUri,
++        _: WalkOptions,
++        _: Option<&'a FileSystemSandboxContext>,
++    ) -> ExecutorFileSystemFuture<'a, WalkOutcome> {
++        Box::pin(async { panic!("unexpected configuration walk") })
++    }
++    fn remove<'a>(
++        &'a self,
++        _: &'a PathUri,
++        _: RemoveOptions,
++        _: Option<&'a FileSystemSandboxContext>,
++    ) -> ExecutorFileSystemFuture<'a, ()> {
++        Box::pin(async { panic!("unexpected configuration remove") })
++    }
++    fn copy<'a>(
++        &'a self,
++        _: &'a PathUri,
++        _: &'a PathUri,
++        _: CopyOptions,
++        _: Option<&'a FileSystemSandboxContext>,
++    ) -> ExecutorFileSystemFuture<'a, ()> {
++        Box::pin(async { panic!("unexpected configuration copy") })
++    }
++}
+diff --git a/codex-rs/core/src/config/project_filesystem_tests.rs b/codex-rs/core/src/config/project_filesystem_tests.rs
+new file mode 100644
+index 0000000000000000000000000000000000000000..28e82c1a19d18db0ebf9428b1ddc21817e1333d9
+--- /dev/null
++++ b/codex-rs/core/src/config/project_filesystem_tests.rs
+@@ -0,0 +1,495 @@
++use super::ConfigBuilder;
++use super::ConfigOverrides;
++use crate::agent::role::apply_role_to_config;
++use codex_config::ConfigLayerSource;
++use codex_config::LoaderOverrides;
++use codex_config::ProjectConfigFileSystem;
++use codex_config::test_support::CloudConfigBundleFixture;
++use codex_models_manager::bundled_models_response;
++use codex_utils_absolute_path::AbsolutePathBuf;
++use pretty_assertions::assert_eq;
++use std::io;
++use std::path::Path;
++use std::path::PathBuf;
++use std::sync::Arc;
++use tempfile::TempDir;
++use toml::Value;
++
++#[path = "project_filesystem_fixture.rs"]
++mod fixture;
++use fixture::ProjectFiles;
++
++struct Fixture {
++    _temp: TempDir,
++    home: PathBuf,
++    project: AbsolutePathBuf,
++    provider: Arc<ProjectFiles>,
++    handle: ProjectConfigFileSystem,
++}
++
++impl Fixture {
++    fn new() -> anyhow::Result<Self> {
++        let temp = tempfile::tempdir()?;
++        let base = AbsolutePathBuf::from_absolute_path(temp.path())?.canonicalize()?;
++        let home = base.join("home").to_path_buf();
++        std::fs::create_dir(&home)?;
++        let project = base.join("project");
++        std::fs::create_dir_all(project.join(".codex"))?;
++        let provider = Arc::new(ProjectFiles::new(project.clone()));
++        let handle = ProjectConfigFileSystem::bounded(provider.clone(), project.clone());
++        let fixture = Self {
++            _temp: temp,
++            home,
++            project,
++            provider,
++            handle,
++        };
++        fixture.user("")?;
++        fixture.project_config("")?;
++        Ok(fixture)
++    }
++
++    fn user(&self, extra: &str) -> io::Result<()> {
++        let key = Value::String(self.project.to_string_lossy().into_owned());
++        std::fs::write(
++            self.home.join("config.toml"),
++            format!("{extra}\n[projects.{key}]\ntrust_level = 'trusted'\n"),
++        )
++    }
++
++    fn project_config(&self, contents: &str) -> io::Result<()> {
++        self.file(
++            ".codex/config.toml",
++            "model = 'wrong-controller-model'",
++            contents,
++        )
++        .map(|_| ())
++    }
++
++    fn file(&self, relative: &str, controller: &str, project: &str) -> io::Result<PathBuf> {
++        let path = self.project.join(relative).to_path_buf();
++        std::fs::create_dir_all(path.parent().unwrap())?;
++        std::fs::write(&path, controller)?;
++        self.provider
++            .contents
++            .lock()
++            .unwrap()
++            .insert(path.clone(), project.as_bytes().to_vec());
++        Ok(path)
++    }
++
++    fn builder(&self) -> ConfigBuilder {
++        ConfigBuilder::without_managed_config_for_tests()
++            .codex_home(self.home.clone())
++            .harness_overrides(ConfigOverrides {
++                cwd: Some(self.project.to_path_buf()),
++                ..Default::default()
++            })
++            .project_filesystem(self.handle.clone())
++    }
++
++    fn deny(&self, operation: &str, path: &Path, kind: io::ErrorKind) {
++        *self.provider.denied.lock().unwrap() = Some((operation.into(), path.to_path_buf(), kind));
++    }
++
++    fn assert_bounded(&self) {
++        assert!(
++            self.provider
++                .calls
++                .lock()
++                .unwrap()
++                .iter()
++                .all(|(_, path)| path.starts_with(self.project.as_path()))
++        );
++    }
++}
++
++fn quoted(path: &Path) -> Value {
++    Value::String(path.to_string_lossy().into_owned())
++}
++
++#[tokio::test]
++async fn project_filesystem_builder_reads_project_references_and_preserves_on_refresh()
++-> anyhow::Result<()> {
++    let fixture = Fixture::new()?;
++    let instructions = fixture.file(
++        "instructions.md",
++        "wrong controller instructions",
++        "native instructions",
++    )?;
++    let compact = fixture.file("compact.md", "wrong controller compact", "native compact")?;
++    let role = fixture.file(
++        "role.toml",
++        "description = 'wrong controller'\nmodel = 'wrong-controller-role'",
++        "description = 'native role'\nmodel = 'native-role-model'",
++    )?;
++    let mut catalog = bundled_models_response()?;
++    catalog.models.truncate(1);
++    let catalog_path = fixture.file(
++        "models.json",
++        "invalid controller catalog",
++        &serde_json::to_string(&catalog)?,
++    )?;
++    fixture.project_config(&format!("model_instructions_file = {}\nexperimental_compact_prompt_file = {}\nmodel_catalog_json = {}\n[agents.reviewer]\nconfig_file = {}\n", quoted(&instructions), quoted(&compact), quoted(&catalog_path), quoted(&role)))?;
++    let mut config = fixture.builder().build().await?;
++    assert_eq!(
++        (
++            config.base_instructions.as_deref(),
++            config.compact_prompt.as_deref(),
++            config.model_catalog.as_ref()
++        ),
++        (
++            Some("native instructions"),
++            Some("native compact"),
++            Some(&catalog)
++        )
++    );
++    assert_eq!(
++        config.agent_role_file_sources.get("reviewer"),
++        Some(&ConfigLayerSource::Project {
++            dot_codex_folder: fixture.project.join(".codex")
++        })
++    );
++    apply_role_to_config(&mut config, Some("reviewer"))
++        .await
++        .map_err(anyhow::Error::msg)?;
++    assert_eq!(config.model.as_deref(), Some("native-role-model"));
++    fixture.file(
++        "instructions.md",
++        "wrong controller instructions",
++        "refreshed native instructions",
++    )?;
++    let refreshed = fixture.builder().build().await?;
++    let mut rebuilt = config.rebuild_preserving_session_layers(&refreshed).await?;
++    assert_eq!(
++        (
++            rebuilt.project_filesystem.as_ref(),
++            rebuilt.base_instructions.as_deref(),
++            rebuilt.model.as_deref()
++        ),
++        (
++            Some(&fixture.handle),
++            Some("refreshed native instructions"),
++            Some("native-role-model")
++        )
++    );
++    fixture.file(
++        "role.toml",
++        "description = 'wrong controller'",
++        "description = 'native role'\nmodel = 'refreshed-role-model'",
++    )?;
++    apply_role_to_config(&mut rebuilt, Some("reviewer"))
++        .await
++        .map_err(anyhow::Error::msg)?;
++    assert_eq!(rebuilt.model.as_deref(), Some("refreshed-role-model"));
++    fixture.assert_bounded();
++    Ok(())
++}
++
++#[tokio::test]
++async fn project_filesystem_user_references_use_controller_even_inside_project()
++-> anyhow::Result<()> {
++    let fixture = Fixture::new()?;
++    let instructions = fixture.file(
++        "instructions.md",
++        "controller instructions",
++        "wrong project instructions",
++    )?;
++    let compact = fixture.file("compact.md", "controller compact", "wrong project compact")?;
++    let role = fixture.file(
++        "role.toml",
++        "description = 'controller role'\nmodel = 'controller-role-model'",
++        "description = 'wrong project'\nmodel = 'wrong-project-role'",
++    )?;
++    let mut catalog = bundled_models_response()?;
++    catalog.models.truncate(1);
++    let catalog_path = fixture.file(
++        "models.json",
++        &serde_json::to_string(&catalog)?,
++        "invalid project catalog",
++    )?;
++    fixture.user(&format!("model_instructions_file = {}\nexperimental_compact_prompt_file = {}\nmodel_catalog_json = {}\n[agents.reviewer]\nconfig_file = {}\n", quoted(&instructions), quoted(&compact), quoted(&catalog_path), quoted(&role)))?;
++    // The high layer changes only the role description: its file keeps the user origin.
++    fixture.project_config("[agents.reviewer]\ndescription = 'project description'\n")?;
++    let mut config = fixture.builder().build().await?;
++    assert_eq!(
++        (
++            config.base_instructions.as_deref(),
++            config.compact_prompt.as_deref(),
++            config.model_catalog.as_ref()
++        ),
++        (
++            Some("controller instructions"),
++            Some("controller compact"),
++            Some(&catalog)
++        )
++    );
++    assert_eq!(
++        config.agent_role_file_sources.get("reviewer"),
++        Some(&ConfigLayerSource::User {
++            file: AbsolutePathBuf::from_absolute_path(fixture.home.join("config.toml"))?,
++            profile: None
++        })
++    );
++    apply_role_to_config(&mut config, Some("reviewer"))
++        .await
++        .map_err(anyhow::Error::msg)?;
++    assert_eq!(config.model.as_deref(), Some("controller-role-model"));
++    let calls = fixture.provider.calls.lock().unwrap();
++    for path in [&instructions, &compact, &role, &catalog_path] {
++        assert!(
++            !calls
++                .iter()
++                .any(|(operation, read)| operation == "read" && read == path)
++        );
++    }
++    Ok(())
++}
++
++#[tokio::test]
++async fn project_filesystem_session_reference_uses_project_and_keeps_origin() -> anyhow::Result<()>
++{
++    let fixture = Fixture::new()?;
++    let instructions = fixture.file("session.md", "wrong controller", "session instructions")?;
++    let role = fixture.file(
++        "session.toml",
++        "invalid controller role",
++        "description = 'session role'\nmodel = 'session-role-model'",
++    )?;
++    let mut config = fixture
++        .builder()
++        .cli_overrides(vec![
++            ("model_instructions_file".into(), quoted(&instructions)),
++            ("agents.reviewer.config_file".into(), quoted(&role)),
++        ])
++        .build()
++        .await?;
++    assert_eq!(
++        config.base_instructions.as_deref(),
++        Some("session instructions")
++    );
++    assert_eq!(
++        config.agent_role_file_sources.get("reviewer"),
++        Some(&ConfigLayerSource::SessionFlags)
++    );
++    apply_role_to_config(&mut config, Some("reviewer"))
++        .await
++        .map_err(anyhow::Error::msg)?;
++    assert_eq!(config.model.as_deref(), Some("session-role-model"));
++    let refreshed = fixture.builder().build().await?;
++    let rebuilt = config.rebuild_preserving_session_layers(&refreshed).await?;
++    assert_eq!(
++        (
++            rebuilt.base_instructions.as_deref(),
++            rebuilt.agent_role_file_sources.get("reviewer")
++        ),
++        (
++            Some("session instructions"),
++            Some(&ConfigLayerSource::SessionFlags)
++        )
++    );
++    fixture.assert_bounded();
++    Ok(())
++}
++
++#[tokio::test]
++async fn project_filesystem_managed_catalog_is_controller_owned() -> anyhow::Result<()> {
++    let fixture = Fixture::new()?;
++    let mut catalog = bundled_models_response()?;
++    catalog.models.truncate(1);
++    let path = fixture.file(
++        "required-models.json",
++        &serde_json::to_string(&catalog)?,
++        "invalid provider catalog",
++    )?;
++    fixture.project_config("model_catalog_json = 'unused-project-models.json'")?;
++    let config = fixture
++        .builder()
++        .cloud_config_bundle(
++            CloudConfigBundleFixture::loader_with_enterprise_requirement(format!(
++                "model_catalog_json = {}",
++                quoted(&path)
++            )),
++        )
++        .build()
++        .await?;
++    assert_eq!(config.model_catalog, Some(catalog));
++    assert!(
++        !fixture
++            .provider
++            .calls
++            .lock()
++            .unwrap()
++            .iter()
++            .any(|(op, read)| op == "read" && read == &path)
++    );
++    Ok(())
++}
++
++#[tokio::test]
++async fn project_filesystem_legacy_managed_references_override_project_with_controller_bytes()
++-> anyhow::Result<()> {
++    let fixture = Fixture::new()?;
++    let instructions = fixture.file(
++        "managed.md",
++        "managed controller instructions",
++        "wrong project instructions",
++    )?;
++    let compact = fixture.file(
++        "managed-compact.md",
++        "managed controller compact",
++        "wrong project compact",
++    )?;
++    let role = fixture.file(
++        "managed-role.toml",
++        "description = 'managed role'\nmodel = 'managed-model'",
++        "invalid provider role",
++    )?;
++    let managed = fixture.home.join("managed.toml");
++    std::fs::write(
++        &managed,
++        format!(
++            "model_instructions_file = {}\nexperimental_compact_prompt_file = {}\n[agents.reviewer]\nconfig_file = {}",
++            quoted(&instructions),
++            quoted(&compact),
++            quoted(&role)
++        ),
++    )?;
++    fixture.project_config("model_instructions_file = 'unused.md'\nexperimental_compact_prompt_file = 'unused-compact.md'")?;
++    let mut config = fixture
++        .builder()
++        .loader_overrides(LoaderOverrides::with_managed_config_path_for_tests(
++            managed.clone(),
++        ))
++        .build()
++        .await?;
++    assert_eq!(
++        (
++            config.base_instructions.as_deref(),
++            config.compact_prompt.as_deref()
++        ),
++        (
++            Some("managed controller instructions"),
++            Some("managed controller compact")
++        )
++    );
++    assert_eq!(
++        config.agent_role_file_sources.get("reviewer"),
++        Some(&ConfigLayerSource::LegacyManagedConfigTomlFromFile {
++            file: AbsolutePathBuf::from_absolute_path(managed)?
++        })
++    );
++    apply_role_to_config(&mut config, Some("reviewer"))
++        .await
++        .map_err(anyhow::Error::msg)?;
++    assert_eq!(config.model.as_deref(), Some("managed-model"));
++    fixture.assert_bounded();
++    Ok(())
++}
++
++#[tokio::test]
++async fn project_filesystem_rebuild_rejects_changed_or_missing_authority() -> anyhow::Result<()> {
++    let fixture = Fixture::new()?;
++    let config = fixture.builder().build().await?;
++    let mut changed = config.clone();
++    changed.project_filesystem = None;
++    assert_eq!(
++        config
++            .rebuild_preserving_session_layers(&changed)
++            .await
++            .unwrap_err()
++            .kind(),
++        io::ErrorKind::InvalidInput
++    );
++    changed.project_filesystem = Some(ProjectConfigFileSystem::bounded(
++        Arc::new(ProjectFiles::new(fixture.project.clone())),
++        fixture.project.clone(),
++    ));
++    assert_eq!(
++        config
++            .rebuild_preserving_session_layers(&changed)
++            .await
++            .unwrap_err()
++            .kind(),
++        io::ErrorKind::InvalidInput
++    );
++    Ok(())
++}
++
++#[test_case::test_case("model_instructions_file", "instructions.md"; "instructions")]
++#[test_case::test_case("experimental_compact_prompt_file", "compact.md"; "compact")]
++#[test_case::test_case("model_catalog_json", "models.json"; "catalog")]
++#[tokio::test]
++async fn project_filesystem_reference_failure_never_uses_controller_copy(
++    key: &str,
++    name: &str,
++) -> anyhow::Result<()> {
++    let fixture = Fixture::new()?;
++    let path = fixture.file(name, "readable controller", "provider")?;
++    fixture.project_config(&format!("{key} = {}", quoted(&path)))?;
++    fixture.deny("read", &path, io::ErrorKind::ConnectionReset);
++    let error = fixture.builder().build().await.unwrap_err();
++    assert_eq!(error.kind(), io::ErrorKind::ConnectionReset);
++    assert!(
++        error.to_string().contains("project provider failure"),
++        "{error}"
++    );
++    Ok(())
++}
++
++#[test_case::test_case("read", io::ErrorKind::PermissionDenied; "read_denied")]
++#[test_case::test_case("read", io::ErrorKind::InvalidData; "transport_invalid_data")]
++#[test_case::test_case("directory", io::ErrorKind::ConnectionReset; "directory_disconnected")]
++#[tokio::test]
++async fn project_filesystem_discovered_role_failure_is_not_malformed_warning(
++    operation: &str,
++    kind: io::ErrorKind,
++) -> anyhow::Result<()> {
++    let fixture = Fixture::new()?;
++    let role = fixture.file(".codex/agents/reviewer.toml", "controller role", "name = 'reviewer'\ndescription = 'native role'\ndeveloper_instructions = 'review native code'")?;
++    let denied = if operation == "directory" {
++        role.parent().unwrap()
++    } else {
++        &role
++    };
++    fixture.deny(operation, denied, kind);
++    let error = fixture.builder().build().await.unwrap_err();
++    assert_eq!(error.kind(), kind);
++    assert!(
++        error.to_string().contains("project provider failure"),
++        "{error}"
++    );
++    *fixture.provider.denied.lock().unwrap() = None;
++    let config = fixture.builder().build().await?;
++    assert_eq!(
++        config.agent_roles["reviewer"].description.as_deref(),
++        Some("native role")
++    );
++    fixture.assert_bounded();
++    Ok(())
++}
++
++#[tokio::test]
++async fn project_filesystem_malformed_role_still_warns_but_declared_read_error_fails()
++-> anyhow::Result<()> {
++    let fixture = Fixture::new()?;
++    let role = fixture.file(".codex/agents/broken.toml", "controller", "invalid [ toml")?;
++    let config = fixture.builder().build().await?;
++    assert!(config.agent_roles.is_empty());
++    assert!(
++        config
++            .startup_warnings
++            .iter()
++            .any(|warning| warning.contains("Ignoring malformed agent role"))
++    );
++    fixture.project_config(&format!(
++        "[agents.reviewer]\nconfig_file = {}",
++        quoted(&role)
++    ))?;
++    fixture.deny("metadata", &role, io::ErrorKind::PermissionDenied);
++    assert_eq!(
++        fixture.builder().build().await.unwrap_err().kind(),
++        io::ErrorKind::PermissionDenied
++    );
++    Ok(())
++}
 diff --git a/codex-rs/core/src/environment_selection.rs b/codex-rs/core/src/environment_selection.rs
 index 3310867aeadc192173fe31b9b294fa2c5960cab6..493d5e0d992c3458b9190a155fad340eddc85ca8 100644
 --- a/codex-rs/core/src/environment_selection.rs
@@ -5321,6 +9268,171 @@ index 0000000000000000000000000000000000000000..c031060fef56543e0a5008b9dd420368
 +        }
 +    }
 +}
+diff --git a/codex-rs/core/src/thread_manager.rs b/codex-rs/core/src/thread_manager.rs
+index cfa619697f2be42c025fe8ba39912c61277c616e..cc295135202736723d0d5a59dc0e95fe56cea6fe 100644
+--- a/codex-rs/core/src/thread_manager.rs
++++ b/codex-rs/core/src/thread_manager.rs
+@@ -1089,26 +1089,42 @@ impl ThreadManager {
+         parent_trace: Option<W3cTraceContext>,
+         client_mcp_extensions: ClientMcpExtensions,
+     ) -> CodexResult<NewThread> {
+-        let agent_control = self.agent_control_for_config(&config);
+-        let (session_source, thread_source) = initial_history
++        self.resume_thread_with_options(
++            StartThreadOptions {
++                initial_history,
++                parent_trace,
++                client_mcp_extensions,
++                ..StartThreadOptions::new(config)
++            },
++            auth_manager,
++        )
++        .await
++    }
++
++    /// Resumes recorded history with caller-owned startup settings. Runtime
++    /// replacement supplies its current environments here so initial project
++    /// discovery and services never observe a different default environment.
++    #[instrument(level = "trace", skip_all)]
++    pub async fn resume_thread_with_options(
++        &self,
++        mut options: StartThreadOptions,
++        auth_manager: Arc<AuthManager>,
++    ) -> CodexResult<NewThread> {
++        let agent_control = self.agent_control_for_config(&options.config);
++        let (session_source, thread_source) = options
++            .initial_history
+             .get_resumed_session_sources()
+             .unwrap_or_else(|| (self.state.session_source.clone(), None));
+-        if let InitialHistory::Resumed(resumed) = &initial_history
+-            && initial_history.get_multi_agent_version() == Some(MultiAgentVersion::V2)
++        if let InitialHistory::Resumed(resumed) = &options.initial_history
++            && options.initial_history.get_multi_agent_version() == Some(MultiAgentVersion::V2)
+             && !session_source.is_non_root_agent()
+         {
+             agent_control
+-                .restore_v2_agent_metadata(&config, resumed.conversation_id)
++                .restore_v2_agent_metadata(&options.config, resumed.conversation_id)
+                 .await;
+         }
+-        let options = StartThreadOptions {
+-            initial_history,
+-            session_source: Some(session_source),
+-            thread_source,
+-            parent_trace,
+-            client_mcp_extensions,
+-            ..StartThreadOptions::new(config)
+-        };
++        options.session_source = Some(session_source);
++        options.thread_source = thread_source;
+         Box::pin(self.state.spawn_thread(ThreadSpawnRequest::new(
+             options,
+             auth_manager,
+diff --git a/codex-rs/core/src/thread_manager_tests.rs b/codex-rs/core/src/thread_manager_tests.rs
+index 74cdb32dc35cfb9f3b1f6e9f6bd06d7c8cb9b7ed..5760a54ceb0097df27daf2e64567913a53897870 100644
+--- a/codex-rs/core/src/thread_manager_tests.rs
++++ b/codex-rs/core/src/thread_manager_tests.rs
+@@ -1631,6 +1631,100 @@ async fn resume_and_fork_do_not_restore_thread_environments_from_rollout() {
+     );
+ }
+ 
++#[test_case::test_case(false; "explicit_empty")]
++#[test_case::test_case(true; "selected_cwd")]
++#[tokio::test]
++async fn runtime_replacement_resumes_with_current_environments_before_first_turn(local: bool) {
++    let temp_dir = tempdir().expect("tempdir");
++    let mut config = test_config().await;
++    config.codex_home = temp_dir.path().join("codex-home").abs();
++    config.cwd = config.codex_home.abs();
++    std::fs::create_dir_all(&config.codex_home).expect("create codex home");
++    let manager = ThreadManager::with_models_provider_and_home_for_tests(
++        CodexAuth::from_api_key("dummy"),
++        config.model_provider.clone(),
++        config.codex_home.to_path_buf(),
++        Arc::new(codex_exec_server::EnvironmentManager::default_for_tests()),
++    );
++    let source = manager
++        .start_thread(StartThreadOptions::new(config.clone()))
++        .await
++        .expect("start default local thread");
++    source.thread.ensure_rollout_materialized().await;
++    source
++        .thread
++        .flush_rollout()
++        .await
++        .expect("flush source rollout");
++    let rollout_path = source.thread.rollout_path().expect("materialized rollout");
++    source
++        .thread
++        .shutdown_and_wait()
++        .await
++        .expect("shutdown original runtime");
++    manager.remove_thread(&source.thread_id).await;
++
++    let selected_cwd = config.cwd.join("selected");
++    std::fs::create_dir_all(&selected_cwd).expect("create selected cwd");
++    let selections = if local {
++        vec![TurnEnvironmentSelection {
++            environment_id: "local".to_string(),
++            cwd: PathUri::from_abs_path(&selected_cwd),
++            workspace_roots: Vec::new(),
++            config: EnvironmentConfigState::FromThread,
++        }]
++    } else {
++        Vec::new()
++    };
++    let initial_history = manager
++        .initial_history_from_rollout_path(rollout_path)
++        .await
++        .expect("read recorded history");
++    let resumed = manager
++        .resume_thread_with_options(
++            StartThreadOptions {
++                initial_history,
++                environments: Some(selections.clone()),
++                ..StartThreadOptions::new(config)
++            },
++            Arc::clone(&manager.state.auth_manager),
++        )
++        .await
++        .expect("replace runtime");
++    // No restore_thread_settings call precedes either observation. Runtime
++    // startup and the first prepared turn must already use the chosen selection.
++    assert_eq!(
++        (
++            resumed.thread_id,
++            resumed.thread.environment_selections().await
++        ),
++        (source.thread_id, selections.clone())
++    );
++    let (turn, _) = resumed
++        .thread
++        .session
++        .new_turn_with_sub_id(
++            "replacement-turn".to_string(),
++            SessionSettingsUpdate::default(),
++            Default::default(),
++        )
++        .await
++        .expect("prepare first replacement turn");
++    let primary_cwd = turn
++        .environments
++        .primary()
++        .map(|environment| environment.cwd().clone());
++    assert_eq!(
++        primary_cwd,
++        selections.first().map(|selection| selection.cwd.clone())
++    );
++    resumed
++        .thread
++        .shutdown_and_wait()
++        .await
++        .expect("shutdown replacement runtime");
++}
++
+ #[tokio::test]
+ async fn explicit_installation_id_skips_codex_home_file() {
+     let temp_dir = tempdir().expect("tempdir");
 diff --git a/codex-rs/core/src/tools/handlers/unified_exec.rs b/codex-rs/core/src/tools/handlers/unified_exec.rs
 index 9f9f8a8cf1ea9fbd01f01813e9dcf1ccca6ab1e1..c59a311deb5e982dc949f678d5e02476f177fc05 100644
 --- a/codex-rs/core/src/tools/handlers/unified_exec.rs

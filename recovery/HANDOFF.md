@@ -1,11 +1,49 @@
-# Reprise technique du 7 septembre 2026
+# Reprise technique du 8 septembre 2026
 
 Le dépôt de travail est **privé** : `pironjulien/FoldGPT-workspace`, branche
 `codex/foldgpt-beta`. Commencer par [README.md](README.md) pour restaurer sources,
 sous-modules, moteur séparé et données locales. Le dépôt public `FoldGPT` est un
 ancien checkpoint ; il ne reçoit pas cette sauvegarde privée.
 
-## État courant : canal natif et configuration entre deux UID prouvés sur PC
+## État courant : projet Python complet via app-server natif prouvé sur PC
+
+Le test public `thread/start` puis `turn/start` utilise le vrai moteur Rust,
+la fabrique Python/native, le canal de configuration authentifié et six vrais
+processus supervisés. Il crée le projet, observe deux tests en échec sur trois,
+corrige 41 en 42, réussit les trois tests, construit le zipapp et l'exécute avec
+`42`. Le refus de lecture privée est relié à la vraie acquisition native avec
+errno13 ; le patch privé est refusé avant mutation. Les six superviseurs et
+le propriétaire terminent avec nettoyage complet. Seules les réponses du
+modèle sont une fixture SSE déterministe : aucune inférence cloud ni interface
+Android n'est qualifiée par cet essai.
+
+Preuve locale : `work/root-artifacts-20260907/native-app-server/native-app-server-1uzqJ1`,
+run nextest `9bb38527-42b7-445b-95b5-444f5ed94c52`. Le sixième processus est un
+vrai `command/exec` public, qui exécute le zipapp avec sortie42 et code0 en
+conservant la politique native. Le résultat v8 antérieur est conservé.
+Snapshot Python/helpers v3 :
+`downloads/native-app-server-host-v3-20260908`. Les échecs précédents restent
+conservés. Le dernier import Python échouait à cause d'une restriction indue
+sur le listing du parent d'un dossier refusé ; cette cause est corrigée sans
+accorder l'accès au dossier privé. 34 tests filesystem et18 tests natifs passent
+sous UID distinct du compilateur ; deux cas de shim optionnel non fournis sont
+explicitement ignorés. Les réglages Windows inactifs restent exactement transmis.
+
+Le raccordement `command/exec` à l'exécuteur sélectionné est maintenant écrit
+et qualifié sur PC (10 tests gestionnaire,5 tests publics,22 régressions). Sa
+preuve additionnelle avec la vraie fabrique native passe également (v9).
+Les droits de l'éditeur ont un composant Python et un canal distincts
+qualifiés30/30 ; le client Rust et son branchement restent à faire.
+L'éditeur officiel Linux lit les fichiers via
+`process/spawn` : raccorder seulement `fs/readFile` ne suffit pas.
+
+**Le projet n'est pas livré.** Le test courant partage réellement les chemins
+sur PC ; `ExecutorOnly` reste fermé. Les changements de contexte dynamiques,
+skills, commandes humaines, EOF/PTY, surveillance et lancement Android exigent
+encore leur raccordement. Le prochain résultat attendu demeure l'utilisation
+réelle depuis l'interface du Fold, pas un remplacement par une démonstration PC.
+
+## Acquis antérieur : canal natif et configuration entre deux UID prouvés sur PC
 
 Le [canal privé](../tools/executor/native-bootstrap-channel.md) relie maintenant
 le Rust du moteur à l'autorité Python/native. Les [preuves exactes](verification/native-bootstrap-channel-20260907/manifest.json)
@@ -17,11 +55,22 @@ via le canal. Le vrai chargeur borné conserve la provenance `Project` et le
 modèle attendu. Les refus restent des refus ; les deux processus terminent
 avec code0, sans helper survivant ni quarantaine.
 
-Le dernier export du moteur est un checkpoint de développement : le chargeur
-public et le canal sont qualifiés, mais les suites complètes du ConfigBuilder,
-les rôles, AGENTS et la sélection d'environnement sont encore en cours.
+Le dernier export du moteur est un checkpoint de développement qui inclut
+ConfigBuilder/rôles (55 tests), AGENTS (47), permissions/reprise (10),
+command/exec (37) et la preuve app-server native v9. `just fix` ciblé et
+`just fmt` global sont terminés. Patch vérifié sur la base exacte, SHA256
+`6facc6ae7d2eebc91236b0b1d508ad02ce57c8d74b44716665e92885d33d32ca`.
+La suite Rust complète est en cours. Son premier lancement a révélé la
+dépendance de compilation PC libcap-dev manquante ; elle est installée dans
+WSL Ubuntu-24.04. Aucun test n'a été supprimé pour contourner cet échec.
 `ExecutorOnly` reste fermé. Aucune tâche complète depuis l'interface n'est
 encore validée, et le canal n'est pas encore déployé sur Android.
+
+La piste UserService Shizuku → `run-as app.foldgpt` est en qualification :
+l'identité app existe, mais la chaîne complète, les primitives Bionic et le
+partage réel des fichiers avec le contrôleur restent à démontrer. Voir
+`work/root-artifacts-20260907/run-as-shared-native-audit.md`. Cette voie vise
+uniquement notre application debug ; elle ne modifie pas l'application officielle.
 
 Le moteur courant se trouve sous `C:\Dev\ChatgptFold\work\worktrees\FoldgptEngine`.
 Les anciens chemins `C:\Dev\FoldgptEngine` dans les preuves sont historiques.

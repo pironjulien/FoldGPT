@@ -2,6 +2,13 @@
 
 ## Unreleased — 2026-09-06
 
+- Qualify the actual native backend through public app-server thread/start,
+  turn/start and command/exec on PC: create Python code, observe failing tests,
+  edit, pass three tests, build and execute a zipapp, and enforce private-file
+  denials. Six real workers clean up completely. Model responses are fixtures;
+  phone UI and live inference remain unqualified. Export all matching engine
+  sources, including configuration provenance, AGENTS and permission authority.
+
 - Correct native directory enumeration to return the real immediate names and
   kinds of an admitted directory, even when a child is denied. The previous
   overrestriction prevented Python imports from the workspace. Child reads,
