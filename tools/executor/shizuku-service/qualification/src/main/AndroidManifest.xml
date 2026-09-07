@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-    <application android:allowBackup="false" android:label="FoldGPT kernel qualification"
+    <application android:allowBackup="false" android:label="FoldGPT kernel qualification V11"
         android:theme="@android:style/Theme.Material.Light.NoActionBar">
-        <activity android:name=".QualificationActivity" android:exported="true"
+        <activity android:name="app.foldgpt.kernelqualification.QualificationActivity" android:exported="true"
             android:permission="android.permission.DUMP"
             android:configChanges="orientation|keyboardHidden|screenSize|smallestScreenSize" />
     </application>

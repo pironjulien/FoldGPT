@@ -13,8 +13,7 @@ import shlex
 import subprocess
 import sys
 
-BASE = '/data/local/tmp/foldgpt-bionic-supervisor-qualification-v2'
-PACKAGE = 'app.foldgpt.kernelqualification'
+from qualification_identity import PACKAGES, resolve_identity
 PROOFS = frozenset({'memoryRead', 'memoryWrite', 'pidfdGetfd', 'sharedOffset',
     'privateReadDenied', 'protectedWriteDenied', 'rawChdirDenied', 'networkDenied',
     'ioctlDenied', 'binderDenied', 'threadMemory', 'threadPidfdGetfd'})
@@ -113,10 +112,15 @@ def main():
     parser.add_argument('--apk', required=True, type=Path)
     parser.add_argument('--before', required=True, type=Path)
     parser.add_argument('--output', required=True, type=Path)
-    parser.add_argument('--package', choices=(PACKAGE, 'app.foldgpt.shizukuprobe'), default=PACKAGE)
-    parser.add_argument('--lab-report-version', choices=(2, 3, 4, 5, 6), type=int, default=2,
-                        help='Fixed laboratory report generation; does not change the native fixture')
+    parser.add_argument('--package', choices=PACKAGES, required=True)
+    parser.add_argument('--base', required=True)
+    parser.add_argument('--report-version', '--lab-report-version', dest='report_version', type=int,
+                        help='Exact report generation for this package/base; V11 requires 11')
     args = parser.parse_args()
+    try:
+        fixture_identity = resolve_identity(args.package, args.base, args.report_version)
+    except ValueError as error:
+        parser.error(str(error))
     args.output.mkdir(parents=True, exist_ok=False)
     checks, collected = {}, {}
 
@@ -146,18 +150,17 @@ def main():
             collected[name] = {'collected': False, 'error': str(error)}
             return None
 
-    report_file = (f'files/kernel-v{args.lab_report_version}/report.json'
-                   if args.package == 'app.foldgpt.shizukuprobe' else 'files/report.json')
+    report_file = fixture_identity.report_file('report.json')
     app = read_json('app-report', ['run-as', args.package, 'base64', report_file])
-    native = read_json('native-evidence', ['base64', BASE + '/evidence.json'])
+    native = read_json('native-evidence', ['base64', fixture_identity.base + '/evidence.json'])
     # Do not traverse a workspace whose actual native ownership is unresolved.
-    clean = transport_clean(app, native)
+    clean = fixture_identity.matches_evidence(app, native) and transport_clean(app, native)
     command = [sys.executable, '-B', str(Path(__file__).with_name('snapshot-native-qualification.py')),
         '--adb', args.adb, '--serial', args.serial, '--output', str(args.output / 'after'),
         '--before', str(args.before), '--package', 'app.foldgpt', '--package', 'app.foldgpt.shizukuprobe',
         '--package', args.package]
     if clean:
-        command += ['--workspace', BASE + '/workspace']
+        command += ['--workspace', fixture_identity.workspace]
         for field in ('supervisorPid', 'bootstrapPid'):
             pid = native.get(field)
             if type(pid) is int and pid > 0:
@@ -183,6 +186,7 @@ def main():
         if not checks['recordsCollected']:
             raise ValueError('One or more actual evidence records are unavailable')
         before = strict(args.before.read_bytes())
+        checks['fixtureEvidenceIdentity'] = fixture_identity.matches_evidence(app, native)
         checks['beforeSnapshotValid'] = (before.get('schema') == 'foldgpt.native-device-snapshot.v1'
             and before.get('collectionComplete') is True and before.get('errors') == []
             and before.get('bootStableDuringCollection') is True and before.get('serial') == args.serial)
@@ -233,7 +237,7 @@ def main():
         checks['byteStreamsAgree'] = (not streams['stderr']
             and all(app[name].encode() == streams[name] and native[name].encode() == streams[name] for name in streams))
         checks['reportedByteCountsAgree'] = all(exact(result.get(name + 'Bytes'), len(streams[name])) for name in streams)
-        checks['nativeWorkspace'] = native.get('workspace') == BASE + '/workspace'
+        checks['nativeWorkspace'] = native.get('workspace') == fixture_identity.workspace
         checks['deviceSnapshotValid'] = (snapshot_returncode == 0 and after.get('collectionComplete') is True
             and after.get('schema') == 'foldgpt.native-device-snapshot.v1' and after.get('errors') == []
             and after.get('serial') == args.serial and after.get('bootStableDuringCollection') is True
@@ -262,6 +266,7 @@ def main():
     success = bool(checks) and all(value is True for value in checks.values()) and error is None
     report = {'schema': 'foldgpt.independent-kernel-qualification.v1', 'success': success,
               'checks': checks, 'collected': collected, 'error': error,
+              'package': fixture_identity.package, 'base': fixture_identity.base, 'reportVersion': fixture_identity.report_version,
               'scope': 'Fixed Shizuku/Bionic worker only; ordinary model commands are not validated'}
     (args.output / 'independent-verification.json').write_text(json.dumps(report, indent=2) + '\n', encoding='utf-8')
     print(json.dumps(report))

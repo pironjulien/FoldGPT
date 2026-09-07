@@ -5,6 +5,28 @@ Le dépôt de travail est **privé** : `pironjulien/FoldGPT-workspace`, branche
 sous-modules, moteur séparé et données locales. Le dépôt public `FoldGPT` est un
 ancien checkpoint ; il ne reçoit pas cette sauvegarde privée.
 
+## Point courant : V11 attend l'autorisation Shizuku
+
+Le correctif des chemins runtime passe sur PC ; le superviseur figé courant
+est `foldgpt-bionic-supervisor-KvSGBnzP`. L'APK séparé
+`app.foldgpt.kernelqualification.v11` est installé, son runtime V3 vérifié et
+la demande officielle Shizuku attend derrière le verrouillage du Fold.
+**Aucune commande native V11 n'est lancée.** Le V10 reste intact en quarantaine.
+
+Lire le [résultat V11](../docs/research/native-v11-isolated-preparation-2026-09-07.md)
+et le [plan de fixture indépendante](../docs/research/native-independent-fixture-plan-2026-09-07.md).
+Après déverrouillage et autorisation normale, contrôler `authorization.json`,
+puis exécuter le préflight V11 avant l'unique action `KERNEL_RUN_FIXED_V11`.
+Utiliser explicitement package V11, base
+`/data/local/tmp/foldgpt-bionic-supervisor-qualification-v3` et report-version11.
+Ne pas utiliser les commandes historiques V2 ci-dessous pour ce nouvel essai.
+
+APK : `tools/executor/shizuku-service/build/qualification-v11-independent/qualification-debug.apk`.
+SHA256 `1f8609c9a837d6923a464dda0a94153c874d6eaa5bda18cc7cf1d93245cdffd9`.
+Stage : `tools/executor/shizuku-service/build/qualification-stage-v11`.
+Les journaux `pc-v11-*`, `fixture-v11`, `python-v11` et
+`v11-awaiting-authorization` sont dans `downloads/native-kernel-trial`.
+
 ## Résultats réellement obtenus
 
 - Sur le Fold, l'essai fixe Shizuku/Bionic a créé et modifié un projet Python,

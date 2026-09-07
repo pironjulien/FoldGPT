@@ -12,6 +12,7 @@ import struct
 from tools.executor.exec_server import RpcError
 from tools.executor.native_processes import COMPLETED_SECONDS, NativeProcessesBackend, _finish, _packet, _receive
 from .policy import Policy
+from .runtime_paths import native_name, require_outside_workspace
 from .wire import envelope, seal
 
 
@@ -77,7 +78,7 @@ class Processes(NativeProcessesBackend):
                 raise ValueError("cwdShim requires its exact installed path and SHA256")
             self.cwd_shim = CwdShim(**cwd_shim)
             self.cwd_shim.verify()
-        self.runtime = tuple((str(Path(path).absolute()), execute) for path, execute in runtime)
+        self.runtime = tuple((native_name(path), execute) for path, execute in runtime)
         if self.cwd_shim is not None:
             self.runtime += ((self.cwd_shim.path, True),)
             if self.parent_environment is not None and "LD_PRELOAD" in self.parent_environment:
@@ -85,9 +86,7 @@ class Processes(NativeProcessesBackend):
         if not self.runtime or len(self.runtime) > 64 or any(type(execute) is not bool for _, execute in self.runtime):
             raise ValueError("Explicit bounded Bionic runtime grants are required")
         for path, _ in self.runtime:
-            for spelling in (Path(path), Path(path).resolve(strict=True)):
-                if spelling.is_relative_to(self.workspace) or Path(self.workspace).is_relative_to(spelling):
-                    raise ValueError("Runtime grants must not physically overlap the managed workspace")
+            require_outside_workspace(path, self.workspace)
 
     async def _control(self, record, endpoint):
         ready = False

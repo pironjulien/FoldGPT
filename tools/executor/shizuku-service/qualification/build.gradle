@@ -5,11 +5,11 @@ android {
     namespace 'app.foldgpt.kernelqualification'
     compileSdk 37
     defaultConfig {
-        applicationId 'app.foldgpt.kernelqualification'
+        applicationId 'app.foldgpt.kernelqualification.v11'
         minSdk 30
         targetSdk 37
-        versionCode 1
-        versionName '1.0-fixed-supervisor-qualification'
+        versionCode 11
+        versionName '11.0-independent-kernel-qualification'
         ndk { abiFilters 'arm64-v8a' }
     }
     buildFeatures { buildConfig true }
@@ -17,13 +17,26 @@ android {
     packaging { jniLibs { useLegacyPackaging true; keepDebugSymbols += ['**/*.so'] } }
     buildTypes { debug { debuggable true } }
 }
-def staged = rootProject.layout.buildDirectory.dir('qualification-stage')
+def staged = rootProject.layout.buildDirectory.dir('qualification-stage-v11')
 android.sourceSets.main.assets.srcDir(staged.get().dir('assets').asFile)
 android.sourceSets.main.jniLibs.srcDir(staged.get().dir('jniLibs').asFile)
 tasks.named('preBuild').configure {
     doFirst {
         if (!staged.get().file('build-inventory.json').asFile.isFile()) {
             throw new GradleException('Run stage-qualification.py with the reviewed frozen backend and interpreter first')
+        }
+        def deploymentFile = staged.get().file('assets/foldgpt-executor-deployment.json').asFile
+        if (!deploymentFile.isFile()) throw new GradleException('Independent V11 deployment is absent')
+        def deployment = new groovy.json.JsonSlurper().parse(deploymentFile)
+        def inventory = new groovy.json.JsonSlurper().parse(staged.get().file('build-inventory.json').asFile)
+        def base = '/data/local/tmp/foldgpt-bionic-supervisor-qualification-v3'
+        if (inventory.package != 'app.foldgpt.kernelqualification.v11' || inventory.base != base
+                || deployment.packageName != 'app.foldgpt.kernelqualification.v11'
+                || deployment.workspace != base + '/workspace'
+                || deployment.brokerDirectory != base + '/broker'
+                || deployment.pythonRuntime?.path != base + '/python'
+                || deployment.backendOptions?.workspace != base + '/workspace') {
+            throw new GradleException('V11 requires its separate application identity and v3 native fixture')
         }
     }
 }

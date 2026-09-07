@@ -2,6 +2,16 @@
 
 ## Unreleased — 2026-09-06
 
+- Resolve immutable runtime objects through verified descriptors without
+  inspecting every parent; retain workspace exclusions and policy denials.
+  The reviewed native build passes 16 resolver tests, C/kernel checks and
+  qualification on nonroot Linux. Prepare and install independent V11 with
+  verified Python files/aliases; its official Shizuku authorization is pending
+  behind the phone lock, with no native attempt started. Keep V10 quarantined.
+- Separate the shared transport module's Gradle outputs by root/project to
+  prevent colliding merger state. The V11 APK builds, its signature and complete
+  source/native inventories verify, and all 24 transport JVM tests pass.
+
 - Close the unused RPC input/output after a quarantined startup failure so
   initialize callers receive EOF/EPIPE while the real owner, lock and marker
   remain retained. Real nonroot startup/lifecycle tests and an independent

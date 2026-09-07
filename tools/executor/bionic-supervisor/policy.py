@@ -6,11 +6,11 @@ syscall boundary; this module authorizes only copied, normalized operations.
 """
 import errno
 import os
-from pathlib import Path
 import stat
 
 from tools.executor.policy_intent import prepare_policy_intent
 from tools.policy.managed_policy import Access, GuestPath, parse_context
+from .runtime_paths import runtime_spellings
 
 
 class Policy:
@@ -37,7 +37,7 @@ class Policy:
         exception: the whole immutable runtime mapping is a required ceiling.
         """
         for path, _ in runtime:
-            for spelling in {str(Path(path).absolute()), str(Path(path).resolve(strict=True))}:
+            for spelling in set(runtime_spellings(path)):
                 root = GuestPath.from_absolute(spelling)
                 if any(entry.access == Access.DENY and
                        (entry.path.contains(root) or root.contains(entry.path))

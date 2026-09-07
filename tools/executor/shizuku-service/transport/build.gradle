@@ -1,4 +1,8 @@
 plugins { id 'com.android.library' }
+// This module is included by several independent Gradle roots. Its task
+// identity differs between them, so incremental merger state must not share
+// the source directory's build folder across those roots.
+layout.buildDirectory = rootProject.layout.buildDirectory.dir('modules/' + project.name)
 def frozenTransportNative = providers.gradleProperty('foldgptFrozenTransportJni')
 android {
     namespace 'app.foldgpt.shizukuexec'

@@ -30,11 +30,10 @@ import rikka.shizuku.Shizuku;
 
 /** One fixed kernel diagnostic, through the production authenticated transport. */
 public final class QualificationActivity extends Activity {
-    private static final String REPORT_DIRECTORY = "kernel-v6";
     private static final String COLLECT_ACTION = ".KERNEL_COLLECT_INFO";
     // Android can restore the previous Activity Intent after a package update.
     // An earlier APK's launch action must never reserve this revision's trial.
-    private static final String RUN_ACTION = ".KERNEL_RUN_FIXED_V10";
+    private static final String AUTHORIZE_ACTION = ".KERNEL_AUTHORIZE";
     private static final String PREFLIGHT_ACTION = ".KERNEL_PREFLIGHT";
     private static final String OLD_STATUS_ACTION = ".KERNEL_STATUS_V3";
     private final Handler main = new Handler(Looper.getMainLooper());
@@ -46,7 +45,8 @@ public final class QualificationActivity extends Activity {
     private volatile boolean cancelRequested;
     private volatile boolean nativeOpenAttempted;
     private boolean bound, permissionRequested, finished, running;
-    private boolean preflightOnly, oldStatusOnly;
+    private boolean preflightOnly, oldStatusOnly, authorizeOnly, attemptReserved;
+    private QualificationProfile profile;
     private String reportName = "report.json";
     private String requestedAction;
     private Shizuku.UserServiceArgs args;
@@ -73,11 +73,14 @@ public final class QualificationActivity extends Activity {
         super.onCreate(state);
         requestedAction = getIntent().getAction();
         text = new TextView(this); text.setTextIsSelectable(true); text.setPadding(24, 24, 24, 24); setContentView(text);
+        try { profile = QualificationProfile.forPackage(getPackageName()); }
+        catch (SecurityException error) { text.setText(error.toString()); finished = true; return; }
         if ((getPackageName() + COLLECT_ACTION).equals(getIntent().getAction())) {
             try {
                 JSONObject info = new JSONObject().put("schema", "foldgpt.android-kernel-package.v1")
                     .put("nativeLibraryDir", getApplicationInfo().nativeLibraryDir).put("sourceDir", getApplicationInfo().sourceDir)
-                    .put("clientUid", android.os.Process.myUid());
+                    .put("clientUid", android.os.Process.myUid()).put("packageName", profile.packageName)
+                    .put("nativeBase", profile.base).put("diagnosticVersion", profile.diagnosticVersion);
                 File file = new File(reportDirectory(), "package-info.json");
                 try (FileOutputStream output = new FileOutputStream(file)) {
                     output.write((info.toString(2) + "\n").getBytes(StandardCharsets.UTF_8));
@@ -87,24 +90,30 @@ public final class QualificationActivity extends Activity {
             finished = true; return;
         }
         preflightOnly = (getPackageName() + PREFLIGHT_ACTION).equals(getIntent().getAction());
-        oldStatusOnly = (getPackageName() + OLD_STATUS_ACTION).equals(getIntent().getAction());
+        oldStatusOnly = !profile.independent && (getPackageName() + OLD_STATUS_ACTION).equals(getIntent().getAction());
+        authorizeOnly = profile.independent && (getPackageName() + AUTHORIZE_ACTION).equals(getIntent().getAction());
         if (preflightOnly) reportName = "preflight.json";
         if (oldStatusOnly) reportName = "previous-service-status.json";
-        if (!preflightOnly && !oldStatusOnly && !(getPackageName() + RUN_ACTION).equals(getIntent().getAction())) {
+        if (authorizeOnly) reportName = "authorization.json";
+        if (!preflightOnly && !oldStatusOnly && !authorizeOnly && !(getPackageName() + profile.runAction).equals(getIntent().getAction())) {
             fail("Only the fixed kernel actions are admitted"); return;
         }
         try {
-            if (!preflightOnly && !oldStatusOnly && !new File(reportDirectory(), "attempt-started").createNewFile()) {
+            if (profile.independent && !preflightOnly && !authorizeOnly
+                    && new File(reportDirectory(), "attempt-started").exists()) {
                 text.setText("An attempt was already reserved. Existing report and ownership are retained; no retry.");
                 finished = true; return;
             }
+            // Preserve the laboratory admission order. Independent V11 reserves
+            // only after official authorization, immediately before its bind.
+            if (!profile.independent && !preflightOnly && !oldStatusOnly && !reserveAttempt()) return;
             persist(new JSONObject().put("schema", "foldgpt.android-kernel-rpc.v1").put("state", "pending")
                 .put("nativeLibraryDir", getApplicationInfo().nativeLibraryDir).put("clientUid", android.os.Process.myUid()));
             text.setText("Waiting for official Shizuku authorization");
-            args = new Shizuku.UserServiceArgs(new ComponentName(this, ExecutorService.class))
-                .daemon(false).tag(oldStatusOnly ? "foldgpt-kernel-qualification-v3" : "foldgpt-kernel-qualification-v6")
-                .version(oldStatusOnly ? 3 : 6)
-                .processNameSuffix("kernelqualification").debuggable(false);
+            if (!authorizeOnly) args = new Shizuku.UserServiceArgs(new ComponentName(this, ExecutorService.class))
+                .daemon(false).tag(oldStatusOnly ? "foldgpt-kernel-qualification-v3" : profile.serviceTag)
+                .version(oldStatusOnly ? 3 : profile.serviceVersion)
+                .processNameSuffix(profile.processSuffix).debuggable(false);
             Shizuku.addBinderDeadListener(dead);
             Shizuku.addRequestPermissionResultListener(permission);
             Shizuku.addBinderReceivedListenerSticky(received);
@@ -113,12 +122,26 @@ public final class QualificationActivity extends Activity {
     private void bind() {
         if (finished || bound || !Shizuku.pingBinder()) return;
         try {
+            if (profile.independent && Shizuku.getUid() != 2000) {
+                throw new SecurityException("V11 requires nonroot Shizuku before any authorization request");
+            }
             if (Shizuku.checkSelfPermission() != PackageManager.PERMISSION_GRANTED) {
-                if (preflightOnly || oldStatusOnly) throw new SecurityException("Existing official Shizuku authorization is required for read-only inspection");
+                if (preflightOnly || oldStatusOnly || (profile.independent && !authorizeOnly)) {
+                    throw new SecurityException("Existing official Shizuku authorization is required; use KERNEL_AUTHORIZE first for V11");
+                }
                 if (!permissionRequested) { permissionRequested = true; Shizuku.requestPermission(1); }
                 return;
             }
             if (Shizuku.getUid() != 2000) throw new SecurityException("Only nonroot Shizuku UID 2000 is admitted");
+            if (authorizeOnly) {
+                complete(new JSONObject().put("schema", "foldgpt.android-shizuku-authorization.v1")
+                    .put("state", "complete").put("authorized", true).put("shizukuServerUid", Shizuku.getUid())
+                    .put("clientUid", android.os.Process.myUid()).put("nativeSpawnAttempted", false)
+                    .put("attemptReserved", false).put("userServiceBindAttempted", false)
+                    .put("transportCleanupComplete", false));
+                return;
+            }
+            if (profile.independent && !preflightOnly && !reserveAttempt()) return;
             bound = true;
             if (oldStatusOnly) {
                 // SDK NO_CREATE only attaches to an already-running old tag.
@@ -139,6 +162,15 @@ public final class QualificationActivity extends Activity {
             }, 30000);
         } catch (Exception error) { fail(error.toString()); }
     }
+    private boolean reserveAttempt() throws Exception {
+        if (attemptReserved) return true;
+        if (!new File(reportDirectory(), "attempt-started").createNewFile()) {
+            text.setText("An attempt was already reserved. Existing report and ownership are retained; no retry.");
+            finished = true; return false;
+        }
+        attemptReserved = true;
+        return true;
+    }
     private static JSONObject boundedServiceReport(String encoded) throws Exception {
         if (encoded == null || encoded.length() > 32768) throw new IllegalStateException("Service report exceeds bound");
         return new JSONObject(encoded);
@@ -147,7 +179,7 @@ public final class QualificationActivity extends Activity {
         JSONObject result = new JSONObject();
         try {
             result.put("schema", "foldgpt.android-service-inspection.v1").put("servicePresent", true)
-                .put("nativeSpawnAttempted", false).put("operation", oldStatusOnly ? "previous_v3_status" : "preflight_v6");
+                .put("nativeSpawnAttempted", false).put("operation", oldStatusOnly ? "previous_v3_status" : "preflight_v" + profile.serviceVersion);
             if (preflightOnly) result.put("preflight", boundedServiceReport(service.preflight()));
             result.put("serviceStatus", boundedServiceReport(service.status()));
         } catch (Exception error) {
@@ -300,7 +332,8 @@ public final class QualificationActivity extends Activity {
         }
     }
     private void persist(JSONObject report) throws Exception {
-        report.put("diagnosticVersion", 10).put("requestedAction", requestedAction)
+        report.put("diagnosticVersion", profile.diagnosticVersion).put("requestedAction", requestedAction)
+            .put("packageName", profile.packageName).put("nativeBase", profile.base)
             .put("recordedWallTimeMs", System.currentTimeMillis())
             .put("recordedElapsedRealtimeMs", SystemClock.elapsedRealtime());
         AtomicFile file = new AtomicFile(new File(reportDirectory(), reportName));
@@ -309,7 +342,7 @@ public final class QualificationActivity extends Activity {
         catch (Exception error) { file.failWrite(output); throw error; }
     }
     private File reportDirectory() throws Exception {
-        File directory = new File(getFilesDir().getCanonicalFile(), REPORT_DIRECTORY);
+        File directory = new File(getFilesDir().getCanonicalFile(), profile.reportDirectory);
         if ((!directory.isDirectory() && !directory.mkdir()) || !directory.getCanonicalFile().equals(directory)) {
             throw new SecurityException("Diagnostic report directory is not admitted");
         }

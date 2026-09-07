@@ -1,7 +1,7 @@
 """Stage and independently verify the fixed diagnostic Python runtime.
 
 Reads PackageManager information collected by the installed diagnostic app.
-Creates only the previously absent v2/python directory. No native worker runs.
+Creates only the selected, previously absent Python directory. No native worker runs.
 The shell-owned runtime is a verified diagnostic input, not an immutable
 production boundary against other processes sharing the shell UID.
 """
@@ -14,8 +14,7 @@ import shlex
 import subprocess
 import tarfile
 
-BASE = '/data/local/tmp/foldgpt-bionic-supervisor-qualification-v2'
-PACKAGE = 'app.foldgpt.kernelqualification'
+from qualification_identity import PACKAGES, V11_PACKAGE, resolve_identity
 
 
 def main():
@@ -24,12 +23,18 @@ def main():
     parser.add_argument('--serial', required=True)
     parser.add_argument('--stage', required=True, type=Path)
     parser.add_argument('--output', required=True, type=Path)
-    parser.add_argument('--package', choices=(PACKAGE, 'app.foldgpt.shizukuprobe'), default=PACKAGE)
-    parser.add_argument('--lab-report-version', choices=(2, 3, 4, 5, 6), type=int, default=2,
-                        help='Fixed laboratory report generation; does not change the native fixture')
+    parser.add_argument('--package', choices=PACKAGES, required=True)
+    parser.add_argument('--base', required=True)
+    parser.add_argument('--report-version', '--lab-report-version', dest='report_version', type=int,
+                        help='Exact report generation for this package/base; V11 requires 11')
     args = parser.parse_args()
+    try:
+        identity = resolve_identity(args.package, args.base, args.report_version)
+    except ValueError as error:
+        parser.error(str(error))
     args.output.mkdir(parents=True, exist_ok=False)
-    report = {'schema': 'foldgpt.fixed-kernel-python-staging.v1', 'verified': False, 'base': BASE}
+    report = {'schema': 'foldgpt.fixed-kernel-python-staging.v1', 'verified': False,
+              'base': identity.base, 'package': identity.package, 'reportVersion': identity.report_version}
     adb = [args.adb, '-s', args.serial]
 
     def run(name, command, input_bytes=None):
@@ -42,9 +47,12 @@ def main():
         return result.stdout
 
     try:
-        info_file = (f'files/kernel-v{args.lab_report_version}/package-info.json'
-                     if args.package == 'app.foldgpt.shizukuprobe' else 'files/package-info.json')
+        info_file = identity.report_file('package-info.json')
         info = json.loads(run('package-info', ['run-as', args.package, 'cat', info_file]))
+        if args.package == V11_PACKAGE and (info.get('packageName') != identity.package
+                or info.get('nativeBase') != identity.base or type(info.get('diagnosticVersion')) is not int
+                or info['diagnosticVersion'] != 11):
+            raise ValueError('Package information does not identify the independent V11 fixture')
         native_directory = info['nativeLibraryDir']
         if (not native_directory.startswith('/data/app/') or not native_directory.endswith('/lib/arm64')
                 or str(PurePosixPath(native_directory)) != native_directory or '..' in PurePosixPath(native_directory).parts
@@ -54,7 +62,9 @@ def main():
         stage = args.stage.resolve(strict=True)
         manifest = json.loads((stage / 'assets/foldgpt-python-runtime.json').read_text())
         config = json.loads((stage / 'assets/foldgpt-executor-deployment.json').read_text())
-        if config['pythonRuntime']['path'] != BASE + '/python' or config['packageName'] != args.package:
+        if (config['pythonRuntime']['path'] != identity.base + '/python' or config['packageName'] != args.package
+                or config['workspace'] != identity.workspace or config['brokerDirectory'] != identity.base + '/broker'
+                or config['backendOptions']['workspace'] != identity.workspace):
             raise ValueError('Staged Python data belong to a different diagnostic')
         files, aliases, directories = {}, {}, {'.'}
 
@@ -114,12 +124,12 @@ def main():
                 entry.type = tarfile.SYMTYPE
                 entry.linkname = target
                 archive.addfile(entry)
-        run('create-python', ['sh', '-c', 'umask 077\nmkdir -- ' + shlex.quote(BASE + '/python')])
+        run('create-python', ['sh', '-c', 'umask 077\nmkdir -- ' + shlex.quote(identity.base + '/python')])
         # ADB shell stdin truncated the compressed stream on the first device
         # preparation. The sync protocol preserves bytes; hash the remote file
         # before asking tar to read it. Never feed a binary runtime through sh.
         payload_hash = hashlib.file_digest(payload.open('rb'), 'sha256').hexdigest()
-        remote_archive = BASE + '/python-payload-' + payload_hash + '.tar.gz'
+        remote_archive = identity.base + '/python-payload-' + payload_hash + '.tar.gz'
         pushed = subprocess.run(adb + ['push', str(payload), remote_archive], capture_output=True, timeout=60)
         (args.output / 'push.stdout').write_bytes(pushed.stdout)
         (args.output / 'push.stderr').write_bytes(pushed.stderr)
@@ -128,9 +138,9 @@ def main():
         actual_hash = run('pushed-archive-hash', ['sha256sum', remote_archive]).decode().split()[0]
         if actual_hash != payload_hash:
             raise ValueError('Pushed runtime archive differs before extraction')
-        run('extract-python', ['tar', '-xzf', remote_archive, '-C', BASE + '/python'])
-        collected_archive = BASE + '/python-collected-' + payload_hash + '.tar.gz'
-        run('archive-installed-python', ['tar', '-czf', collected_archive, '-C', BASE + '/python', '.'])
+        run('extract-python', ['tar', '-xzf', remote_archive, '-C', identity.base + '/python'])
+        collected_archive = identity.base + '/python-collected-' + payload_hash + '.tar.gz'
+        run('archive-installed-python', ['tar', '-czf', collected_archive, '-C', identity.base + '/python', '.'])
         pulled = subprocess.run(adb + ['pull', collected_archive, str(args.output / 'python-collected.tar.gz')],
                                 capture_output=True, timeout=60)
         (args.output / 'pull.stdout').write_bytes(pulled.stdout)

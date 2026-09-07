@@ -1,0 +1,21 @@
+{
+  "schema": "foldgpt.reviewed-qualification-inputs.v1",
+  "package": "app.foldgpt.kernelqualification.v11",
+  "base": "/data/local/tmp/foldgpt-bionic-supervisor-qualification-v3",
+  "frozenName": "foldgpt-bionic-supervisor-KvSGBnzP",
+  "androidExecution": false,
+  "pythonCliSha256": "e2bee4972d388972bd629ff62b9cb9e67cba57433c5ba750e5f7147808ee40c1",
+  "frozenFiles": {
+    "SOURCES.sha256": "b46b405dd14b1c363dc58bc2c792fd466b3bf810bb28df93bd8c5fa651edd1f1",
+    "BINARIES.sha256": "8abae65ba764ec5827b512028db05ec85b8bbbd4628c649ed7a01f205aca41ab",
+    "qualification.json": "f238e83843af2ecc330fd8ba0cb7fe35a28c8ce0d48a68d700854295457a204c",
+    "libfoldgpt_bionic_supervisor.so": "879caa311b5a672a067514b50c5ffd37e9c06d66cafc7a30ff8acea0787d7c47",
+    "libfoldgpt_native_files.so": "20838f707db238213a46db6147a571b71a5f56c0af3dd4ad716e8d0203704cd7",
+    "libfoldgpt_native_file_handle.so": "b11d2559ed85093142edc2a01cf0eb4d99f75baf13b0af84344ccd6c5b9c2c40",
+    "libfoldgpt_qualification_worker.so": "1f7054085ecfd920626cdf24603687cd5e9812b445cf171a2f4cff8efbecd3aa",
+    "runtime-paths-python-tests.txt": "8fec9ded1b469816049b1404c7e2d8ffb5406c9990f648de05c16dde72e17766",
+    "runtime-paths-c-tests.txt": "7a9c26c03ddd059efee1ec26acfe1d7ef0542907b67f56a2f0235de773cd7196",
+    "factory-tests.txt": "540b8cd1321453fe02400af284f84a19bd86c5bab16386bdd180decdf1faf71e",
+    "kernel-tests.txt": "2de8aa7cab889d0c9d56b76dbeda1bcd5371d200736dd7bdc4960286be3de00e"
+  }
+}

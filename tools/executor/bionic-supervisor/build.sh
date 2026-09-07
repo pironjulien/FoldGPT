@@ -17,16 +17,17 @@ done
 cp "$repo/tools/policy/managed_policy.py" "$work/package/tools/policy/"
 cp "$repo/tools/executor/"{native-runner-seccomp.h,native-files.c,native-file-handle.c,native-process-fd-abi.c} "$source_dir/"
 cp "$repo/tools/executor/bionic-supervisor/"*.py "$source_dir/bionic-supervisor/"
-cp "$repo/tools/executor/bionic-supervisor/"{runner.c,qualification-worker.c} "$source_dir/bionic-supervisor/"
+cp "$repo/tools/executor/bionic-supervisor/"{runner.c,qualification-worker.c,test_runtime_paths.c} "$source_dir/bionic-supervisor/"
 cp "$repo/tools/executor/bionic-supervisor/build.sh" "$repo/tools/executor/bionic-supervisor/README.md" "$work/"
 cp "$repo/tools/executor/bionic-runtime/shizuku-check-elf.py" "$work/check-elf.py"
-for name in __init__ factory policy processes wire; do
+for name in __init__ factory policy processes runtime_paths wire; do
     cp "$source_dir/bionic-supervisor/$name.py" "$work/backend-sources/tools/executor/bionic-supervisor/"
 done
 compiler=${ANDROID_NDK_HOME:-/opt/foldgpt/android-ndk-r29}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android35-clang
-for program in runner native-files native-file-handle qualification-worker; do
+for program in runner native-files native-file-handle qualification-worker runtime-paths-test; do
     source="$source_dir/$program.c"
     if [ "$program" = runner ] || [ "$program" = qualification-worker ]; then source="$source_dir/bionic-supervisor/$program.c"; fi
+    if [ "$program" = runtime-paths-test ]; then source="$source_dir/bionic-supervisor/test_runtime_paths.c"; fi
     extra=(); if [ "$program" = qualification-worker ]; then extra=(-pthread); fi
     gcc -std=c11 -O2 -Wall -Wextra -Werror "${extra[@]}" -I"$source_dir" "$source" -o "$work/$program"
     library="libfoldgpt_${program//-/_}.so"
@@ -74,6 +75,8 @@ else
     run=()
 fi
 "${run[@]}" id > "$work/test-identity.txt"
+"${run[@]}" "$work/runtime-paths-test" 2>&1 | tee "$work/runtime-paths-c-tests.txt"
+"${run[@]}" python3 -I -S -B "$source_dir/bionic-supervisor/test_runtime_paths.py" "$work" 2>&1 | tee "$work/runtime-paths-python-tests.txt"
 "${run[@]}" python3 -B "$source_dir/bionic-supervisor/test_kernel.py" "$work/runner" 2>&1 | tee "$work/kernel-tests.txt"
 "${run[@]}" python3 -B "$source_dir/bionic-supervisor/test_factory.py" "$work" 2>&1 | tee "$work/factory-tests.txt"
 "${run[@]}" python3 -B "$source_dir/bionic-supervisor/qualification.py" "$work" 2>&1 | tee "$work/qualification-tests.txt"
@@ -87,7 +90,7 @@ shutil.copyfile(Path(rows[0]['evidence']) / 'qualification.json', 'qualification
 PY
 )
 (cd "$work" && find package backend-sources -type f -print0 | sort -z | xargs -0 sha256sum > SOURCES.sha256)
-(cd "$work" && sha256sum runner native-files native-file-handle qualification-worker *.so > BINARIES.sha256)
+(cd "$work" && sha256sum runner native-files native-file-handle qualification-worker runtime-paths-test *.so > BINARIES.sha256)
 destination="$repo/downloads/bionic-supervisor/$(basename "$work")"
 mkdir -p "$(dirname "$destination")"
 [ ! -e "$destination" ]

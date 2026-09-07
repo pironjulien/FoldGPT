@@ -313,18 +313,52 @@ static int actual_path(int listener,const struct seccomp_notif *n,char path[MAX_
 static int contained(const char *root,const char *path) {
   size_t n=strlen(root);return !strncmp(root,path,n)&&(!path[n]||path[n]=='/');
 }
+static int runtime_name(const char *path) {
+  size_t length=strlen(path);
+  if(!length||path[0]!='/'||(length>=10&&!strcmp(path+length-10," (deleted)")))return 0;
+  for(const char *p=path;*p;p++)if((unsigned char)*p<32||(unsigned char)*p==127)return 0;
+  if(length==1)return 1;
+  for(const char *p=path+1;*p;){
+    const char *end=strchr(p,'/');size_t n=end?(size_t)(end-p):strlen(p);
+    if(!n||(n==1&&p[0]=='.')||(n==2&&p[0]=='.'&&p[1]=='.')||(end&&!end[1]))return 0;
+    if(!end)break;
+    p=end+1;
+  }
+  return 1;
+}
+static int runtime_descriptor_path(int fd,int nofollow,char resolved[MAX_PATH]) {
+  struct stat original,actual;
+  if(fstat(fd,&original)<0)return -1;
+  if(!original.st_nlink){errno=ENOENT;return -1;}
+  char proc[80];snprintf(proc,sizeof(proc),"/proc/self/fd/%d",fd);
+  ssize_t length=readlink(proc,resolved,MAX_PATH-1);
+  if(length<0)return -1;
+  if(length>=MAX_PATH-1){errno=ENAMETOOLONG;return -1;}resolved[length]=0;
+  if(!runtime_name(resolved)){errno=EINVAL;return -1;}
+  struct open_how how={.flags=O_PATH|O_CLOEXEC|(nofollow?O_NOFOLLOW:0),
+    .resolve=RESOLVE_NO_MAGICLINKS|RESOLVE_NO_SYMLINKS};
+  int check=(int)syscall(SYS_openat2,AT_FDCWD,resolved,&how,sizeof(how));if(check<0)return -1;
+  int result=fstat(check,&actual),saved=errno;close(check);
+  if(result<0){errno=saved;return -1;}
+  if(original.st_dev!=actual.st_dev||original.st_ino!=actual.st_ino||
+     (original.st_mode&S_IFMT)!=(actual.st_mode&S_IFMT)){errno=ESTALE;return -1;}
+  char repeated[MAX_PATH];length=readlink(proc,repeated,sizeof(repeated)-1);
+  if(length<0)return -1;
+  if(length>=MAX_PATH-1){errno=ENAMETOOLONG;return -1;}repeated[length]=0;
+  if(strcmp(repeated,resolved)){errno=ESTALE;return -1;}return 0;
+}
+static int resolve_runtime_object(const char *path,int nofollow,char resolved[MAX_PATH]) {
+  /* Resolve the actual final object even for lstat/readlink/O_NOFOLLOW. Resolving
+   * its parent first requires getattr on /linkerconfig, denied by Samsung even
+   * when ld.config.txt itself is accessible. Never fall back after a refusal. */
+  struct open_how how={.flags=O_PATH|O_CLOEXEC|(nofollow?O_NOFOLLOW:0),.resolve=RESOLVE_NO_MAGICLINKS};
+  int fd=(int)syscall(SYS_openat2,AT_FDCWD,path,&how,sizeof(how));if(fd<0)return -1;
+  int result=runtime_descriptor_path(fd,nofollow,resolved),saved=errno;close(fd);errno=saved;return result;
+}
 static int runtime_object(const char *path,int nofollow,char resolved[MAX_PATH]) {
   int candidate=0;for(unsigned i=0;i<cfg.grants;i++)if(contained(cfg.runtime[i],path))candidate=1;
   if(!candidate)return 0;
-  if(nofollow&&path[0]&&path[strlen(path)-1]!='/'){
-    char parent[MAX_PATH],canonical[MAX_PATH];strcpy(parent,path);
-    char *last=strrchr(parent,'/');if(!last){errno=EINVAL;return -1;}
-    char name[MAX_PATH];strcpy(name,last+1);if(last==parent)last[1]=0;else *last=0;
-    if(!realpath(parent,canonical))return -1;
-    if(!strcmp(name,".")||!strcmp(name,"..")){if(!realpath(path,resolved))return -1;}
-    else{int length=snprintf(resolved,MAX_PATH,"%s%s%s",canonical,strcmp(canonical,"/")?"/":"",name);
-      if(length<0||length>=MAX_PATH){errno=ENAMETOOLONG;return -1;}}
-  }else if(!realpath(path,resolved))return -1;
+  if(resolve_runtime_object(path,nofollow,resolved)<0)return -1;
   for(unsigned i=0;i<cfg.grants;i++)if(contained(cfg.runtime[i],resolved))return 1;
   errno=EACCES;return -1;
 }

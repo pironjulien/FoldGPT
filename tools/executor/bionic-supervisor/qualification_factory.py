@@ -208,11 +208,17 @@ class QualificationBackend:
 
 def factory(options):
     """Fixed Android APK entry point; no RPC or option chooses the evidence path."""
+    return _factory(options, BASE)
+
+
+def _factory(options, base):
+    """The installed diagnostic module supplies its fixed base, never the RPC."""
+    workspace = base / "workspace"
     if sys.platform != "android" or os.getuid() != 2000 or os.geteuid() != 2000 or os.getgid() != 2000:
         raise ValueError("Kernel qualification factory requires actual Android shell identity")
     required = {"helper", "handleHelper", "processRunner", "workspace", "executables", "runtime", "limits"}
     if (type(options) is not dict or not required <= set(options) or set(options) - required - {"parentEnvironment"}
-            or options["workspace"] != str(WORKSPACE) or canonical(options["limits"]) != canonical(LIMITS)
+            or options["workspace"] != str(workspace) or canonical(options["limits"]) != canonical(LIMITS)
             or options.get("parentEnvironment", {}) != {} or set(options["executables"]) != {"kernel-qualification"}):
         raise ValueError("Kernel qualification requires its exact fixed deployment")
     installed = Path(sys.executable).parent
@@ -229,7 +235,7 @@ def factory(options):
     if (type(options["runtime"]) is not list or
             sorted(map(canonical, options["runtime"])) != sorted(map(canonical, runtime))):
         raise ValueError("Qualification requires its exact fixed Bionic runtime grants")
-    descriptor = open_evidence(EVIDENCE)
+    descriptor = open_evidence(base / "evidence.json")
     try:
         return QualificationBackend(native_factory(options), descriptor)
     except BaseException:

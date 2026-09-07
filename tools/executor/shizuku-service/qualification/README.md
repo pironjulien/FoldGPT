@@ -1,9 +1,43 @@
 # Fixed Android supervisor qualification
 
-The frozen standalone APK documented here retains its original actions and
-report paths. Current shared Activity source is also included in laboratory v7,
-with fixed KERNEL_* actions and isolated kernel-v3 report storage; see
-`../../shizuku-lab/KERNEL-QUALIFICATION.md` for that additive update.
+The current standalone `:qualification` source targets the independent package
+`app.foldgpt.kernelqualification.v11`, version11, native base
+`/data/local/tmp/foldgpt-bionic-supervisor-qualification-v3`, reports
+`files/kernel-v11`, UserService tag `foldgpt-kernel-qualification-v11` and
+service version11. It must never replace `app.foldgpt.shizukuprobe` or reuse
+that retained V10 session's V2 base. The Java namespace remains
+`app.foldgpt.kernelqualification`; the manifest uses the full Activity name.
+
+This is prepared source, not an Android qualification result. The complete
+[PC build and independent fixture plan](../../../../docs/research/native-independent-fixture-plan-2026-09-07.md)
+records the inputs, checks and pending validation. The shared Activity preserves
+the existing laboratory V10 profile when compiled for `app.foldgpt.shizukuprobe`;
+the laboratory Gradle project and every frozen APK remain unchanged.
+
+V11's fixed actions, prefixed by its application ID, are:
+
+- `.KERNEL_COLLECT_INFO`: actual package paths and fixture identity only.
+- `.KERNEL_AUTHORIZE`: ordinary SDK authorization only; no reservation,
+  UserService bind, native open or command. Result: `authorization.json`.
+- `.KERNEL_PREFLIGHT`: requires actual authorization, then read-only service
+  admission. Result: `preflight.json`; no native attempt reservation.
+- `.KERNEL_RUN_FIXED_V11`: requires existing authorization, reserves the fixed
+  attempt before binding and runs only the fixed kernel worker.
+
+No earlier run action or earlier service-status action is admitted in V11.
+Unknown profiles and crossed package/base/report identities are refused.
+Authorization denial or a missing Binder never becomes approval or a run.
+
+The Gradle source sets read `build/qualification-stage-v11`. Before packaging,
+Gradle checks the deployment's package, Python home, workspace and broker base.
+The operator staging and collection scripts require explicit `--package`,
+`--base` and, for V11, `--report-version 11`. They refuse V11 with a V2 path.
+
+## Historical standalone package and frozen evidence
+
+Everything below describes the earlier standalone APK, its original actions
+and its V2 base. These historical commands must not be replayed on the retained
+V10 fixture. The new V11 package uses the contract above.
 
 Separate package: `app.foldgpt.kernelqualification`. This APK includes the
 existing authenticated Shizuku UserService/JNI/bootstrap transport and the
