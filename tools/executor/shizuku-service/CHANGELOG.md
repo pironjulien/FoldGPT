@@ -2,6 +2,32 @@
 
 ## 2026-09-07
 
+- Add explicit runtime V2 alongside preserved V1. Its separate package/base,
+  report/attempt/service identities and output directory select a fixed
+  APK-owned factory wrapper. The reviewed CLI carries the actual V2 Python
+  dependency directory in DT_RUNPATH; request payload and protections stay
+  unchanged. PC packaging, operator identity and independent collection reject
+  crossed versions and retain V1 packages/evidence. Seven JVM parser tests,
+  eight packaging, six staging and nineteen collector tests pass on the PC.
+
+- Prepare independent runtime qualification V1 with its own package, native
+  home, service/attempt identities, fixed Bash/Python request and runtime-only
+  parser. Receive real RPC stdin, create/edit/test/build the small Python
+  project and read its material result over the authenticated file RPC. Pin
+  the reviewed native inputs, verify the complete separate APK on the PC and
+  independently collect native/RPC/material evidence without retrying work.
+  Five direct JVM parser tests, five packaging checks and seventeen synthetic
+  collector checks pass; the Activity compiles against API 37. These PC checks
+  are not Android execution evidence.
+
+- Prepare independent qualification V12 with package/base/report/service
+  identities separate from V10 and V11. Pin the reviewed PHREPY0u supervisor
+  and newly compiled Python CLI for the v4 home. Shared staging and APK
+  verification select only reviewed versions; V12 Gradle outputs use a new
+  directory, and the historical V11 verifier remains an explicit wrapper.
+  Thirteen PC identity/packaging checks pass; all 2,557 staged file hashes
+  verify. This preparation builds no APK and executes no phone code.
+
 - Split persistent session ownership from Unix socket transport after the real
   Shizuku bootstrap failed at bind. Authenticated stdio retains the shared
   flock, pinned directory, persistent marker and stale-socket refusal; the

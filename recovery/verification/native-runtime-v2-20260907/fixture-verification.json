@@ -1,0 +1,110 @@
+{
+  "schema": "foldgpt.native-fixture-staging.v1",
+  "base": "/data/local/tmp/foldgpt-bionic-runtime-qualification-v2",
+  "serial": "R3GL808JN4A",
+  "payloadSha256": "62c134d19eb0c46da9a8d060c476547a09e1e6c8cfadab1158c344d154a0df35",
+  "files": {
+    "workspace/private/secret": "be3a4ca66e020d499c2c2ea49f759a92dcd7b0ef56fe9551dde0c1dc16286da4"
+  },
+  "verified": true,
+  "verifyOnly": false,
+  "commands": [
+    {
+      "name": "identity",
+      "argv": [
+        "id",
+        "-u"
+      ],
+      "returncode": 0
+    },
+    {
+      "name": "create",
+      "argv": [
+        "sh",
+        "-c",
+        "umask 077\nmkdir -- /data/local/tmp/foldgpt-bionic-runtime-qualification-v2"
+      ],
+      "returncode": 0
+    },
+    {
+      "name": "extract",
+      "argv": [
+        "tar",
+        "-xf",
+        "-",
+        "-C",
+        "/data/local/tmp/foldgpt-bionic-runtime-qualification-v2"
+      ],
+      "returncode": 0
+    },
+    {
+      "name": "directory-metadata",
+      "argv": [
+        "stat",
+        "-c",
+        "%u:%g:%a:%F",
+        "/data/local/tmp/foldgpt-bionic-runtime-qualification-v2",
+        "/data/local/tmp/foldgpt-bionic-runtime-qualification-v2/broker",
+        "/data/local/tmp/foldgpt-bionic-runtime-qualification-v2/workspace",
+        "/data/local/tmp/foldgpt-bionic-runtime-qualification-v2/workspace/private",
+        "/data/local/tmp/foldgpt-bionic-runtime-qualification-v2/workspace/directory",
+        "/data/local/tmp/foldgpt-bionic-runtime-qualification-v2/workspace/.git"
+      ],
+      "returncode": 0
+    },
+    {
+      "name": "file-0",
+      "argv": [
+        "base64",
+        "/data/local/tmp/foldgpt-bionic-runtime-qualification-v2/workspace/private/secret"
+      ],
+      "returncode": 0
+    },
+    {
+      "name": "file-metadata-0",
+      "argv": [
+        "stat",
+        "-c",
+        "%u:%g:%a:%F",
+        "/data/local/tmp/foldgpt-bionic-runtime-qualification-v2/workspace/private/secret"
+      ],
+      "returncode": 0
+    },
+    {
+      "name": "directory-entries-0",
+      "argv": [
+        "ls",
+        "-1A",
+        "/data/local/tmp/foldgpt-bionic-runtime-qualification-v2/workspace"
+      ],
+      "returncode": 0
+    },
+    {
+      "name": "directory-entries-1",
+      "argv": [
+        "ls",
+        "-1A",
+        "/data/local/tmp/foldgpt-bionic-runtime-qualification-v2/workspace/private"
+      ],
+      "returncode": 0
+    },
+    {
+      "name": "directory-entries-2",
+      "argv": [
+        "ls",
+        "-1A",
+        "/data/local/tmp/foldgpt-bionic-runtime-qualification-v2/workspace/directory"
+      ],
+      "returncode": 0
+    },
+    {
+      "name": "directory-entries-3",
+      "argv": [
+        "ls",
+        "-1A",
+        "/data/local/tmp/foldgpt-bionic-runtime-qualification-v2/workspace/.git"
+      ],
+      "returncode": 0
+    }
+  ]
+}

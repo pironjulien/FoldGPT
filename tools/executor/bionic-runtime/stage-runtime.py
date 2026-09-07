@@ -91,7 +91,7 @@ def main():
             'python': 'nativeLibraryDir/libfoldgpt_python_cli.so',
             'defaultPythonHome': 'Explicit build-time deployment-prefix.txt; must match admitted extracted assets/bionic-python directory',
             'PYTHONHOME': 'Optional ordinary CPython override, subject to the original managed policy',
-            'linker': 'Python CLI DT_RUNPATH=$ORIGIN and direct DT_NEEDED for all four primary Python libraries; LD_LIBRARY_PATH is not required by this design',
+            'linker': 'Python CLI DT_RUNPATH starts with its explicit deployment-prefix/lib, followed by $ORIGIN; direct DT_NEEDED for all four primary Python libraries. Verify the ELF matches the deployed prefix; an ORIGIN-only CLI fails under the admitted Samsung loader path.',
             'PATH': 'admitted command aliases resolving to APK-owned executables',
             'policy': 'Parent must apply original complete file/network policy before executing target',
         },

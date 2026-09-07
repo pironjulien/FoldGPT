@@ -1,0 +1,151 @@
+
+/mnt/c/Dev/ChatgptFold/downloads/native-kernel-trial/python-cli-v12/samsung-linker64:	file format elf64-littleaarch64
+
+Disassembly of section .text:
+
+0000000000075268 <__dl__Z13resolve_pathsRNSt3__16vectorINS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEENS4_IS6_EEEEPS8_>:
+   75268: d503233f     	paciasp
+   7526c: d10203ff     	sub	sp, sp, #0x80
+   75270: a9027bfd     	stp	x29, x30, [sp, #0x20]
+   75274: a9036ffc     	stp	x28, x27, [sp, #0x30]
+   75278: a90467fa     	stp	x26, x25, [sp, #0x40]
+   7527c: a9055ff8     	stp	x24, x23, [sp, #0x50]
+   75280: a90657f6     	stp	x22, x21, [sp, #0x60]
+   75284: a9074ff4     	stp	x20, x19, [sp, #0x70]
+   75288: 910083fd     	add	x29, sp, #0x20
+   7528c: a9402434     	ldp	x20, x9, [x1]
+   75290: aa0103f3     	mov	x19, x1
+   75294: eb09029f     	cmp	x20, x9
+   75298: 540000c0     	b.eq	0x752b0 <__dl__Z13resolve_pathsRNSt3__16vectorINS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEENS4_IS6_EEEEPS8_+0x48>
+   7529c: aa0903f5     	mov	x21, x9
+   752a0: 385e8ea8     	ldrb	w8, [x21, #-0x18]!
+   752a4: 37000d28     	tbnz	w8, #0x0, 0x75448 <__dl__Z13resolve_pathsRNSt3__16vectorINS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEENS4_IS6_EEEEPS8_+0x1e0>
+   752a8: eb15029f     	cmp	x20, x21
+   752ac: 54000de1     	b.ne	0x75468 <__dl__Z13resolve_pathsRNSt3__16vectorINS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEENS4_IS6_EEEEPS8_+0x200>
+   752b0: f9000674     	str	x20, [x19, #0x8]
+   752b4: a9406414     	ldp	x20, x25, [x0]
+   752b8: eb19029f     	cmp	x20, x25
+   752bc: 54000a80     	b.eq	0x7540c <__dl__Z13resolve_pathsRNSt3__16vectorINS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEENS4_IS6_EEEEPS8_+0x1a4>
+   752c0: b201f3f6     	mov	x22, #-0x5555555555555556 // =-6148914691236517206
+   752c4: b201f3fb     	mov	x27, #-0x5555555555555556 // =-6148914691236517206
+   752c8: b200f3fc     	mov	x28, #0x5555555555555555 // =6148914691236517205
+   752cc: f2e15556     	movk	x22, #0xaaa, lsl #48
+   752d0: f295557b     	movk	x27, #0xaaab
+   752d4: d2800038     	mov	x24, #0x1               // =1
+   752d8: 927ee79c     	and	x28, x28, #0xffffffffffffffc
+   752dc: 39400288     	ldrb	w8, [x20]
+   752e0: 36000368     	tbz	w8, #0x0, 0x7534c <__dl__Z13resolve_pathsRNSt3__16vectorINS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEENS4_IS6_EEEEPS8_+0xe4>
+   752e4: f9400688     	ldr	x8, [x20, #0x8]
+   752e8: b40002a8     	cbz	x8, 0x7533c <__dl__Z13resolve_pathsRNSt3__16vectorINS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEENS4_IS6_EEEEPS8_+0xd4>
+   752ec: 910023e8     	add	x8, sp, #0x8
+   752f0: aa1403e0     	mov	x0, x20
+   752f4: a900ffff     	stp	xzr, xzr, [sp, #0x8]
+   752f8: f9000fff     	str	xzr, [sp, #0x18]
+   752fc: 97fff542     	bl	0x72804 <__dl__Z12resolve_pathRKNSt3__112basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEE>
+   75300: 394023e8     	ldrb	w8, [sp, #0x8]
+   75304: f9400be9     	ldr	x9, [sp, #0x10]
+   75308: d341fd0a     	lsr	x10, x8, #1
+   7530c: 7200011f     	tst	w8, #0x1
+   75310: 9a890149     	csel	x9, x10, x9, eq
+   75314: b40008e9     	cbz	x9, 0x75430 <__dl__Z13resolve_pathsRNSt3__16vectorINS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEENS4_IS6_EEEEPS8_+0x1c8>
+   75318: a940a668     	ldp	x8, x9, [x19, #0x8]
+   7531c: eb09011f     	cmp	x8, x9
+   75320: 540001a2     	b.hs	0x75354 <__dl__Z13resolve_pathsRNSt3__16vectorINS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEENS4_IS6_EEEEPS8_+0xec>
+   75324: 3cc083e0     	ldur	q0, [sp, #0x8]
+   75328: f9400fe9     	ldr	x9, [sp, #0x18]
+   7532c: 9100611a     	add	x26, x8, #0x18
+   75330: 3d800100     	str	q0, [x8]
+   75334: f9000909     	str	x9, [x8, #0x10]
+   75338: f900067a     	str	x26, [x19, #0x8]
+   7533c: 91006294     	add	x20, x20, #0x18
+   75340: eb19029f     	cmp	x20, x25
+   75344: 54000640     	b.eq	0x7540c <__dl__Z13resolve_pathsRNSt3__16vectorINS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEENS4_IS6_EEEEPS8_+0x1a4>
+   75348: 17ffffe5     	b	0x752dc <__dl__Z13resolve_pathsRNSt3__16vectorINS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEENS4_IS6_EEEEPS8_+0x74>
+   7534c: d341fd08     	lsr	x8, x8, #1
+   75350: 17ffffe6     	b	0x752e8 <__dl__Z13resolve_pathsRNSt3__16vectorINS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEENS4_IS6_EEEEPS8_+0x80>
+   75354: f9400275     	ldr	x21, [x19]
+   75358: cb150117     	sub	x23, x8, x21
+   7535c: 9343fee8     	asr	x8, x23, #3
+   75360: 9b1b6108     	madd	x8, x8, x27, x24
+   75364: eb16011f     	cmp	x8, x22
+   75368: 540009c8     	b.hi	0x754a0 <__dl__Z13resolve_pathsRNSt3__16vectorINS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEENS4_IS6_EEEEPS8_+0x238>
+   7536c: cb150136     	sub	x22, x9, x21
+   75370: b201f3fa     	mov	x26, #-0x5555555555555556 // =-6148914691236517206
+   75374: 9343fec9     	asr	x9, x22, #3
+   75378: f2e1555a     	movk	x26, #0xaaa, lsl #48
+   7537c: 9b1b7d29     	mul	x9, x9, x27
+   75380: eb1c013f     	cmp	x9, x28
+   75384: 540000a8     	b.hi	0x75398 <__dl__Z13resolve_pathsRNSt3__16vectorINS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEENS4_IS6_EEEEPS8_+0x130>
+   75388: d37ff929     	lsl	x9, x9, #1
+   7538c: eb08013f     	cmp	x9, x8
+   75390: 9a88813a     	csel	x26, x9, x8, hi
+   75394: b400089a     	cbz	x26, 0x754a4 <__dl__Z13resolve_pathsRNSt3__16vectorINS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEENS4_IS6_EEEEPS8_+0x23c>
+   75398: 8b1a0748     	add	x8, x26, x26, lsl #1
+   7539c: d37df100     	lsl	x0, x8, #3
+   753a0: 9404f214     	bl	0x1b1bf0 <__dl___start___lcxx_override>
+   753a4: aa0003f8     	mov	x24, x0
+   753a8: 52800308     	mov	w8, #0x18               // =24
+   753ac: 3cc083e0     	ldur	q0, [sp, #0x8]
+   753b0: f9400fe9     	ldr	x9, [sp, #0x18]
+   753b4: d503201f     	nop
+   753b8: 9b08635c     	madd	x28, x26, x8, x24
+   753bc: 8b170308     	add	x8, x24, x23
+   753c0: aa1803e0     	mov	x0, x24
+   753c4: aa1503e1     	mov	x1, x21
+   753c8: aa1703e2     	mov	x2, x23
+   753cc: 3d800100     	str	q0, [x8]
+   753d0: f9000909     	str	x9, [x8, #0x10]
+   753d4: 9100611a     	add	x26, x8, #0x18
+   753d8: 9404f398     	bl	0x1b2238 <__dl_FEAT_SME2_BIT+0x1b21ff>
+   753dc: a9006a78     	stp	x24, x26, [x19]
+   753e0: f9000a7c     	str	x28, [x19, #0x10]
+   753e4: b4000095     	cbz	x21, 0x753f4 <__dl__Z13resolve_pathsRNSt3__16vectorINS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEENS4_IS6_EEEEPS8_+0x18c>
+   753e8: aa1503e0     	mov	x0, x21
+   753ec: aa1603e1     	mov	x1, x22
+   753f0: 97ffe763     	bl	0x6f17c <__dl__ZdlPvm>
+   753f4: b201f3f6     	mov	x22, #-0x5555555555555556 // =-6148914691236517206
+   753f8: b200f3fc     	mov	x28, #0x5555555555555555 // =6148914691236517205
+   753fc: d2800038     	mov	x24, #0x1               // =1
+   75400: f2e15556     	movk	x22, #0xaaa, lsl #48
+   75404: 927ee79c     	and	x28, x28, #0xffffffffffffffc
+   75408: 17ffffcc     	b	0x75338 <__dl__Z13resolve_pathsRNSt3__16vectorINS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEENS4_IS6_EEEEPS8_+0xd0>
+   7540c: a9474ff4     	ldp	x20, x19, [sp, #0x70]
+   75410: a94657f6     	ldp	x22, x21, [sp, #0x60]
+   75414: a9455ff8     	ldp	x24, x23, [sp, #0x50]
+   75418: a94467fa     	ldp	x26, x25, [sp, #0x40]
+   7541c: a9436ffc     	ldp	x28, x27, [sp, #0x30]
+   75420: a9427bfd     	ldp	x29, x30, [sp, #0x20]
+   75424: 910203ff     	add	sp, sp, #0x80
+   75428: d50323bf     	autiasp
+   7542c: d65f03c0     	ret
+   75430: 3607f868     	tbz	w8, #0x0, 0x7533c <__dl__Z13resolve_pathsRNSt3__16vectorINS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEENS4_IS6_EEEEPS8_+0xd4>
+   75434: f94007e8     	ldr	x8, [sp, #0x8]
+   75438: f9400fe0     	ldr	x0, [sp, #0x18]
+   7543c: 927ff901     	and	x1, x8, #0xfffffffffffffffe
+   75440: 97ffe74f     	bl	0x6f17c <__dl__ZdlPvm>
+   75444: 17ffffbe     	b	0x7533c <__dl__Z13resolve_pathsRNSt3__16vectorINS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEENS4_IS6_EEEEPS8_+0xd4>
+   75448: f85f8128     	ldur	x8, [x9, #-0x8]
+   7544c: f85e8129     	ldur	x9, [x9, #-0x18]
+   75450: aa0003f6     	mov	x22, x0
+   75454: 927ff921     	and	x1, x9, #0xfffffffffffffffe
+   75458: aa0803e0     	mov	x0, x8
+   7545c: 97ffe748     	bl	0x6f17c <__dl__ZdlPvm>
+   75460: aa1603e0     	mov	x0, x22
+   75464: 17ffff91     	b	0x752a8 <__dl__Z13resolve_pathsRNSt3__16vectorINS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEENS4_IS6_EEEEPS8_+0x40>
+   75468: aa1503f6     	mov	x22, x21
+   7546c: 385e8ec8     	ldrb	w8, [x22, #-0x18]!
+   75470: 36000108     	tbz	w8, #0x0, 0x75490 <__dl__Z13resolve_pathsRNSt3__16vectorINS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEENS4_IS6_EEEEPS8_+0x228>
+   75474: f85f82a8     	ldur	x8, [x21, #-0x8]
+   75478: f85e82a9     	ldur	x9, [x21, #-0x18]
+   7547c: aa0003f5     	mov	x21, x0
+   75480: 927ff921     	and	x1, x9, #0xfffffffffffffffe
+   75484: aa0803e0     	mov	x0, x8
+   75488: 97ffe73d     	bl	0x6f17c <__dl__ZdlPvm>
+   7548c: aa1503e0     	mov	x0, x21
+   75490: eb1402df     	cmp	x22, x20
+   75494: aa1603f5     	mov	x21, x22
+   75498: 54fffea1     	b.ne	0x7546c <__dl__Z13resolve_pathsRNSt3__16vectorINS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEENS4_IS6_EEEEPS8_+0x204>
+   7549c: 17ffff85     	b	0x752b0 <__dl__Z13resolve_pathsRNSt3__16vectorINS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEENS4_IS6_EEEEPS8_+0x48>
+   754a0: 97ffeb4a     	bl	0x701c8 <__dl__ZNSt3__16vectorImNS_9allocatorImEEE20__throw_length_errorB8nn220000Ev>
+   754a4: aa1f03f8     	mov	x24, xzr
+   754a8: 17ffffc0     	b	0x753a8 <__dl__Z13resolve_pathsRNSt3__16vectorINS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEENS4_IS6_EEEEPS8_+0x140>

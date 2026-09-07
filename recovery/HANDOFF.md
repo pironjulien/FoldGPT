@@ -5,7 +5,28 @@ Le dépôt de travail est **privé** : `pironjulien/FoldGPT-workspace`, branche
 sous-modules, moteur séparé et données locales. Le dépôt public `FoldGPT` est un
 ancien checkpoint ; il ne reçoit pas cette sauvegarde privée.
 
-## État courant : Python runtime V1 échoue au chargement, 7 septembre vers 20:49
+## État courant : projet Python natif V2 réussi sur le Fold, 7 septembre vers 21:07
+
+Le [rapport V2](../docs/research/native-runtime-v2-device-result-2026-09-07.md)
+et ses [preuves exactes](verification/native-runtime-v2-20260907/manifest.json)
+conservent création/modification du projet, trois tests, zipapp construit et
+exécuté, flux binaires, environnement enfant vide et refus réels. Les 20
+contrôles indépendants passent. Nettoyage natif/JNI complet, propriétaires 2636
+et 2676 absents ; boot/APK/fixture inchangés, aucun redémarrage pendant l'essai.
+
+La correction RUNPATH fonctionne sur le Fold. Package
+`app.foldgpt.runtimequalification.v2`, base
+`/data/local/tmp/foldgpt-bionic-runtime-qualification-v2`, gel `qKM94iHA`.
+APK vérifié : `downloads/runtime-qualification/apk-v2-independent/runtimequalification-debug.apk`,
+SHA256 `8572ecc3ed975e6eb8dc98e1df5247931e5354aa6dd737f400c4e7c699674b2c`.
+Action `.RUNTIME_RUN_FIXED_V2` consommée : ne pas rejouer ni effacer marker.
+
+Poursuivre le raccordement des chemins/autorités et du lancement du moteur à
+l'interface habituelle. Les changements Rust configuration projet/trust sont
+en cours, pas encore exportés à ce checkpoint. Aucun succès ordinaire UI.
+Le maintien éveillé USB reste activé durant la session active.
+
+## Historique : Python runtime V1 échoue au chargement, 7 septembre vers 20:49
 
 Le [rapport runtime V1](../docs/research/native-runtime-v1-device-result-2026-09-07.md)
 et ses [preuves exactes](verification/native-runtime-v1-20260907/manifest.json)

@@ -1,5 +1,22 @@
 # Fixed Android supervisor qualification
 
+## V12 preparation, PC only
+
+Use `-PfoldgptQualificationVersion=12` to select the new independent V12
+application and the v4 native base. The default remains V11. V12 uses
+`build/qualification-v12/qualification-stage-v12`; both its application and
+transport build outputs stay under `build/qualification-v12/modules`.
+Staging authenticates `qualification-inputs-v12.json`, including the PHREPY0u
+supervisor and the Python CLI built for the v4 home. The shared verifier is
+`verify-qualification.py --version 12 --output <new directory>`; the historical
+V11 entry point still accepts only V11.
+
+The [V12 preparation record](../../../../docs/research/native-v12-isolated-preparation-2026-09-07.md)
+contains exact inputs, completed PC checks, build commands and pending loader
+review. No V12 APK or Android worker result is claimed by this preparation.
+
+## V11 historical identity
+
 The current standalone `:qualification` source targets the independent package
 `app.foldgpt.kernelqualification.v11`, version11, native base
 `/data/local/tmp/foldgpt-bionic-supervisor-qualification-v3`, reports

@@ -104,7 +104,7 @@ public final class QualificationActivity extends Activity {
                 text.setText("An attempt was already reserved. Existing report and ownership are retained; no retry.");
                 finished = true; return;
             }
-            // Preserve the laboratory admission order. Independent V11 reserves
+            // Preserve the laboratory admission order. Independent profiles reserve
             // only after official authorization, immediately before its bind.
             if (!profile.independent && !preflightOnly && !oldStatusOnly && !reserveAttempt()) return;
             persist(new JSONObject().put("schema", "foldgpt.android-kernel-rpc.v1").put("state", "pending")
@@ -123,11 +123,11 @@ public final class QualificationActivity extends Activity {
         if (finished || bound || !Shizuku.pingBinder()) return;
         try {
             if (profile.independent && Shizuku.getUid() != 2000) {
-                throw new SecurityException("V11 requires nonroot Shizuku before any authorization request");
+                throw new SecurityException("Independent qualification requires nonroot Shizuku before any authorization request");
             }
             if (Shizuku.checkSelfPermission() != PackageManager.PERMISSION_GRANTED) {
                 if (preflightOnly || oldStatusOnly || (profile.independent && !authorizeOnly)) {
-                    throw new SecurityException("Existing official Shizuku authorization is required; use KERNEL_AUTHORIZE first for V11");
+                    throw new SecurityException("Existing official Shizuku authorization is required; use KERNEL_AUTHORIZE first");
                 }
                 if (!permissionRequested) { permissionRequested = true; Shizuku.requestPermission(1); }
                 return;

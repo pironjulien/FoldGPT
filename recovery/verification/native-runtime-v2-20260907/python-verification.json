@@ -1,0 +1,22 @@
+{
+  "schema": "foldgpt.fixed-kernel-python-staging.v1",
+  "verified": true,
+  "base": "/data/local/tmp/foldgpt-bionic-runtime-qualification-v2",
+  "package": "app.foldgpt.runtimequalification.v2",
+  "reportVersion": 2,
+  "packageInfo": {
+    "schema": "foldgpt.android-runtime-package.v1",
+    "nativeLibraryDir": "/data/app/~~fmwwo9WOv5TrpcGQWboBQA==/app.foldgpt.runtimequalification.v2-ug71aUl9rFTJkC5TVnHhOQ==/lib/arm64",
+    "sourceDir": "/data/app/~~fmwwo9WOv5TrpcGQWboBQA==/app.foldgpt.runtimequalification.v2-ug71aUl9rFTJkC5TVnHhOQ==/base.apk",
+    "clientUid": 10403,
+    "packageName": "app.foldgpt.runtimequalification.v2",
+    "nativeBase": "/data/local/tmp/foldgpt-bionic-runtime-qualification-v2",
+    "diagnosticVersion": 2
+  },
+  "nativeLibraries": 84,
+  "dataFiles": 2447,
+  "aliases": 81,
+  "directories": 209,
+  "payloadSha256": "cc85b78b0320298156d7dc43950c12d1b3e6c6af1fd9d5e9c82ff5e1ff1da9ea",
+  "scope": "Actual diagnostic runtime bytes and aliases; no native command launched"
+}

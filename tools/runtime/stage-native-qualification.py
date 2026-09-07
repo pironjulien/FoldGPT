@@ -13,11 +13,11 @@ import re
 import shlex
 import subprocess
 import tarfile
-from runtime_qualification_identity import BASE as RUNTIME_BASE, DIRECTORIES, FILES, ENTRIES
+from runtime_qualification_identity import BASES as RUNTIME_BASES, DIRECTORIES, FILES, ENTRIES
 
 
 def fixture(base):
-    if base == RUNTIME_BASE:
+    if base in RUNTIME_BASES:
         return dict(FILES), {name: set(values) for name, values in ENTRIES.items()}
     if not re.fullmatch(r'/data/local/tmp/foldgpt-bionic-supervisor-qualification-[A-Za-z0-9_-]+', base):
         raise ValueError('Expected a dedicated kernel base or the exact independent runtime base')

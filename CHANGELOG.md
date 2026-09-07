@@ -2,6 +2,13 @@
 
 ## Unreleased — 2026-09-06
 
+- Qualify the real native Bash/Python project on the Fold in isolated runtime
+  V2: source creation/edit, three tests, zipapp build/execution, binary streams,
+  empty child environments and actual denials pass. All 20 independent checks
+  pass with actual cleanup and unchanged boot/APKs/protected fixture. Correct
+  the Python CLI RUNPATH with its attested deployment prefix. Preserve failed
+  V1 and consumed markers; ordinary UI execution remains an integration task.
+
 - Preserve the real Android runtime V1 failure: Bash starts but Python cannot
   resolve libpython3.14.so. Retain complete native/JNI cleanup and unchanged
   boot/package/fixture evidence; no Python success is claimed. Prepare a

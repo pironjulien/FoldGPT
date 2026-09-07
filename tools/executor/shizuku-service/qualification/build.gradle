@@ -1,15 +1,30 @@
 plugins { id 'com.android.application' }
 apply from: '../../../recovery/android-signing.gradle'
 
+def qualificationVersion = providers.gradleProperty('foldgptQualificationVersion').getOrElse('11')
+def qualificationBases = [
+    '11': '/data/local/tmp/foldgpt-bionic-supervisor-qualification-v3',
+    '12': '/data/local/tmp/foldgpt-bionic-supervisor-qualification-v4'
+]
+if (!qualificationBases.containsKey(qualificationVersion)) {
+    throw new GradleException('Unknown independent qualification version')
+}
+def qualificationPackage = 'app.foldgpt.kernelqualification.v' + qualificationVersion
+def qualificationBase = qualificationBases[qualificationVersion]
+if (qualificationVersion != '11') {
+    layout.buildDirectory = rootProject.layout.buildDirectory.dir('modules/' + project.name)
+}
+
 android {
     namespace 'app.foldgpt.kernelqualification'
     compileSdk 37
     defaultConfig {
-        applicationId 'app.foldgpt.kernelqualification.v11'
+        applicationId qualificationPackage
         minSdk 30
         targetSdk 37
-        versionCode 11
-        versionName '11.0-independent-kernel-qualification'
+        versionCode qualificationVersion.toInteger()
+        versionName qualificationVersion + '.0-independent-kernel-qualification'
+        manifestPlaceholders = [qualificationLabel: 'FoldGPT kernel qualification V' + qualificationVersion]
         ndk { abiFilters 'arm64-v8a' }
     }
     buildFeatures { buildConfig true }
@@ -17,7 +32,7 @@ android {
     packaging { jniLibs { useLegacyPackaging true; keepDebugSymbols += ['**/*.so'] } }
     buildTypes { debug { debuggable true } }
 }
-def staged = rootProject.layout.buildDirectory.dir('qualification-stage-v11')
+def staged = rootProject.layout.buildDirectory.dir('qualification-stage-v' + qualificationVersion)
 android.sourceSets.main.assets.srcDir(staged.get().dir('assets').asFile)
 android.sourceSets.main.jniLibs.srcDir(staged.get().dir('jniLibs').asFile)
 tasks.named('preBuild').configure {
@@ -26,17 +41,18 @@ tasks.named('preBuild').configure {
             throw new GradleException('Run stage-qualification.py with the reviewed frozen backend and interpreter first')
         }
         def deploymentFile = staged.get().file('assets/foldgpt-executor-deployment.json').asFile
-        if (!deploymentFile.isFile()) throw new GradleException('Independent V11 deployment is absent')
+        if (!deploymentFile.isFile()) throw new GradleException('Independent deployment is absent')
         def deployment = new groovy.json.JsonSlurper().parse(deploymentFile)
         def inventory = new groovy.json.JsonSlurper().parse(staged.get().file('build-inventory.json').asFile)
-        def base = '/data/local/tmp/foldgpt-bionic-supervisor-qualification-v3'
-        if (inventory.package != 'app.foldgpt.kernelqualification.v11' || inventory.base != base
-                || deployment.packageName != 'app.foldgpt.kernelqualification.v11'
+        def base = qualificationBase
+        if (inventory.package != qualificationPackage || inventory.base != base
+                || deployment.packageName != qualificationPackage
                 || deployment.workspace != base + '/workspace'
                 || deployment.brokerDirectory != base + '/broker'
                 || deployment.pythonRuntime?.path != base + '/python'
-                || deployment.backendOptions?.workspace != base + '/workspace') {
-            throw new GradleException('V11 requires its separate application identity and v3 native fixture')
+                || deployment.backendOptions?.workspace != base + '/workspace'
+                || deployment.backendFactory != 'tools.executor.bionic-supervisor.qualification_factory_v' + qualificationVersion + ':factory') {
+            throw new GradleException('The version requires its separate application identity and native fixture')
         }
     }
 }

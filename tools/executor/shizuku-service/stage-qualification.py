@@ -5,13 +5,14 @@ import json
 from pathlib import Path
 import shutil
 
+from qualification_profiles import BY_PACKAGE
+
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parents[2]
 PACKAGE = "app.foldgpt.kernelqualification"
-ISOLATED_PACKAGE = "app.foldgpt.kernelqualification.v11"
 BASES = {PACKAGE: "/data/local/tmp/foldgpt-bionic-supervisor-qualification-v2",
          "app.foldgpt.shizukuprobe": "/data/local/tmp/foldgpt-bionic-supervisor-qualification-v2",
-         ISOLATED_PACKAGE: "/data/local/tmp/foldgpt-bionic-supervisor-qualification-v3"}
+         **{package: profile.base for package, profile in BY_PACKAGE.items()}}
 MODULES = ("exec_server", "native_executor_backend", "native_file_streams", "native_files", "native_processes",
            "native_process_policy", "native_environment", "native_environment_unicode", "policy_intent", "private_exec_broker")
 
@@ -25,13 +26,14 @@ def main():
     parser.add_argument("--frozen", type=Path, required=True)
     parser.add_argument("--python-cli", type=Path, required=True)
     parser.add_argument("--package", choices=tuple(BASES), required=True)
-    parser.add_argument("--output", type=Path, default=HERE / "build/qualification-stage")
+    parser.add_argument("--output", type=Path)
     args = parser.parse_args()
     base = BASES[args.package]
     frozen = args.frozen.resolve(strict=True)
-    isolated = args.package == ISOLATED_PACKAGE
+    profile = BY_PACKAGE.get(args.package)
+    isolated = profile is not None
     if isolated:
-        pin = json.loads((HERE / "qualification-inputs-v11.json").read_text())
+        pin = json.loads(profile.inputs.read_text())
         if pin["package"] != args.package or pin["base"] != base or frozen.name != pin["frozenName"]:
             raise ValueError("Isolated qualification inputs differ from their reviewed identity")
         for name, expected in pin["frozenFiles"].items():
@@ -60,7 +62,9 @@ def main():
     proof = json.loads((frozen / "qualification.json").read_text())
     if proof.get("success") is not True or proof.get("androidExecution") is not False:
         raise ValueError("Frozen host evidence is absent or mislabeled")
-    root = args.output.resolve()
+    root = (args.output or (profile.stage if isolated else HERE / "build/qualification-stage")).resolve()
+    if isolated and root != profile.stage.resolve():
+        raise ValueError("Independent staging must use its own reviewed build directory")
     root.mkdir(parents=True, exist_ok=False)
     assets = root / "assets"
     jni = root / "jniLibs/arm64-v8a"
@@ -114,7 +118,7 @@ def main():
             "manifestAsset": "foldgpt-python-runtime.json", "manifestSha256": digest(runtime_bytes)},
         "workspace": workspace, "brokerDirectory": base + "/broker",
         "backendFactory": "tools.executor.bionic-supervisor." +
-            ("qualification_factory_v11" if isolated else "qualification_factory") + ":factory", "backendOptions": options,
+            (profile.factory_module if isolated else "qualification_factory") + ":factory", "backendOptions": options,
         "environmentInfo": {"cwd": "file://" + workspace, "userHomeDir": "file://" + workspace,
             "platformOs": "android", "shell": {"name": "kernel-qualification", "path": "kernel-qualification"}}}
     (assets / "foldgpt-executor-deployment.json").write_text(json.dumps(deployment, indent=2) + "\n")
@@ -124,7 +128,7 @@ def main():
         directory = target / package
         directory.mkdir(parents=True, exist_ok=True)
         (directory / "__init__.py").write_bytes(b"")
-    # V11 takes its complete native backend from one reviewed frozen build.
+    # Independent versions take their backend from one reviewed frozen build.
     # Historical V10 used the current stdio session owner over the old build.
     sources = [((REPO / "tools/executor" if not isolated and name == "private_exec_broker" else
                  frozen / "package/tools/executor") / (name + ".py"),
@@ -135,8 +139,8 @@ def main():
                             (("runtime_paths",) if isolated else ())]
     sources += [(REPO / "tools/executor/bionic-supervisor/qualification_factory.py", "tools/executor/bionic-supervisor/qualification_factory.py")]
     if isolated:
-        sources += [(REPO / "tools/executor/bionic-supervisor/qualification_factory_v11.py",
-                     "tools/executor/bionic-supervisor/qualification_factory_v11.py")]
+        sources += [(REPO / "tools/executor/bionic-supervisor" / (profile.factory_module + ".py"),
+                     "tools/executor/bionic-supervisor/" + profile.factory_module + ".py")]
     # Bootstrap is provided by the transport AAR; record it without duplicating its asset.
     bootstrap = HERE / "transport/src/main/assets/foldgpt-executor/foldgpt_shizuku_bootstrap.py"
     manifest = [{"path": "foldgpt_shizuku_bootstrap.py", "sha256": digest(bootstrap.read_bytes())}]

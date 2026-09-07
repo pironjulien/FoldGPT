@@ -1,0 +1,959 @@
+{
+  "schema": "foldgpt.python-runpath.static-review.v1",
+  "androidExecution": false,
+  "cliSha256": "b0709f801f95739b1a6988d51f22d8df1373316595ce19df8ce329d5c84628f2",
+  "cliElf": {
+    "machine": "AArch64",
+    "loads": [
+      {
+        "flags": 4,
+        "alignment": 16384,
+        "fileSize": 2784,
+        "memorySize": 2784
+      },
+      {
+        "flags": 5,
+        "alignment": 16384,
+        "fileSize": 1088,
+        "memorySize": 1088
+      },
+      {
+        "flags": 6,
+        "alignment": 16384,
+        "fileSize": 640,
+        "memorySize": 12480
+      },
+      {
+        "flags": 6,
+        "alignment": 16384,
+        "fileSize": 24,
+        "memorySize": 32
+      }
+    ],
+    "interpreter": "/system/bin/linker64",
+    "needed": [
+      "libpython3.14.so",
+      "libcrypto_python.so",
+      "libssl_python.so",
+      "libsqlite3_python.so",
+      "libc.so"
+    ],
+    "runpath": [
+      "/data/local/tmp/foldgpt-bionic-runtime-qualification-v2/python/lib:$ORIGIN"
+    ]
+  },
+  "samsungLinkerSha256": "d61b3a85c1f46fc71a179ba3f0de94c1ed6d9dedaae2eebdbcb1530ff1704ff1",
+  "verifiedNativeElfCount": 79,
+  "allNeeded": [
+    "libc.so",
+    "libcrypto_python.so",
+    "libdl.so",
+    "liblog.so",
+    "libm.so",
+    "libpython3.14.so",
+    "libsqlite3_python.so",
+    "libssl_python.so",
+    "libz.so"
+  ],
+  "primaryAliases": [
+    {
+      "path": "lib/libcrypto_python.so",
+      "nativeLibrary": "libcrypto_python.so",
+      "sha256": "a0dd60d620cd61bac7306a8293bcb82103971a4dcfc8c11fd55be3653beb42c4"
+    },
+    {
+      "path": "lib/libpython3.14.so",
+      "nativeLibrary": "libpython3.14.so",
+      "sha256": "ec0b46cd65f228fb2a750303227f83e9e8eed83bbb95dd1b746bff61199907b5"
+    },
+    {
+      "path": "lib/libsqlite3_python.so",
+      "nativeLibrary": "libsqlite3_python.so",
+      "sha256": "6b0f0012ffff95d2420e88fd420d0d65dc4d63d943c1011567978f6203d118dd"
+    },
+    {
+      "path": "lib/libssl_python.so",
+      "nativeLibrary": "libssl_python.so",
+      "sha256": "123743cc94922308a44a5a7d98854ca51fc708529d73f48ac1a380d7b7f04a2f"
+    }
+  ],
+  "nativeDependencies": [
+    {
+      "name": "libpython3.14.so",
+      "sha256": "ec0b46cd65f228fb2a750303227f83e9e8eed83bbb95dd1b746bff61199907b5",
+      "needed": [
+        "libm.so",
+        "libdl.so",
+        "liblog.so",
+        "libc.so"
+      ],
+      "runpath": []
+    },
+    {
+      "name": "libcrypto_python.so",
+      "sha256": "a0dd60d620cd61bac7306a8293bcb82103971a4dcfc8c11fd55be3653beb42c4",
+      "needed": [
+        "libm.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "runpath": []
+    },
+    {
+      "name": "libssl_python.so",
+      "sha256": "123743cc94922308a44a5a7d98854ca51fc708529d73f48ac1a380d7b7f04a2f",
+      "needed": [
+        "libm.so",
+        "libcrypto_python.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "runpath": []
+    },
+    {
+      "name": "libsqlite3_python.so",
+      "sha256": "6b0f0012ffff95d2420e88fd420d0d65dc4d63d943c1011567978f6203d118dd",
+      "needed": [
+        "libm.so",
+        "libz.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "runpath": [
+        "/usr/local/lib"
+      ]
+    },
+    {
+      "name": "libpython3.so",
+      "sha256": "dc03985487f45969d02010cf6ae1b2796d22f0df7685b66cdf4227928bf88eb7",
+      "needed": [
+        "libm.so",
+        "libpython3.14.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "runpath": []
+    },
+    {
+      "name": "libfoldgpt_py_f0d68aa8e3875b317acea5ff.so",
+      "sha256": "f0d68aa8e3875b317acea5ff8610eda9ac042076a4768bfe17de85591aa36861",
+      "needed": [
+        "libm.so",
+        "libcrypto_python.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "runpath": []
+    },
+    {
+      "name": "libfoldgpt_py_d007096a850434ecc75d00a9.so",
+      "sha256": "d007096a850434ecc75d00a9bfc81f2ef23c53681e4201470c69990f546b5b1a",
+      "needed": [
+        "libm.so",
+        "libcrypto_python.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "runpath": []
+    },
+    {
+      "name": "libfoldgpt_py_b20fe600a2097436e80c9c08.so",
+      "sha256": "b20fe600a2097436e80c9c08371d021bafc834673cdcc77fe259a1cc859f23df",
+      "needed": [
+        "libm.so",
+        "libcrypto_python.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "runpath": []
+    },
+    {
+      "name": "libfoldgpt_py_0776694bc2ab17dad56f7bb3.so",
+      "sha256": "0776694bc2ab17dad56f7bb3712e4cdc6f207f4d6ab327a2b98d471f76d11b2e",
+      "needed": [
+        "libm.so",
+        "libcrypto_python.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "runpath": []
+    },
+    {
+      "name": "libfoldgpt_py_f5f8125c2551f8b2a7d4cc0b.so",
+      "sha256": "f5f8125c2551f8b2a7d4cc0b743b250fef3770aefda567d4ae36ea7acef600fc",
+      "needed": [
+        "libm.so",
+        "libcrypto_python.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "runpath": []
+    },
+    {
+      "name": "libfoldgpt_py_fd5b0fa9c824288704349253.so",
+      "sha256": "fd5b0fa9c824288704349253f2102027e74f357ec276d24e810df6a945999622",
+      "needed": [
+        "libm.so",
+        "libpython3.14.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "runpath": []
+    },
+    {
+      "name": "libfoldgpt_py_9b885de1c1d9469d6c0287aa.so",
+      "sha256": "9b885de1c1d9469d6c0287aa8b2bf256ed5b9815d60e4be146e0568ccdebfc36",
+      "needed": [
+        "libm.so",
+        "libpython3.14.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "runpath": []
+    },
+    {
+      "name": "libfoldgpt_py_f95be1b3c73ea116d829a3f7.so",
+      "sha256": "f95be1b3c73ea116d829a3f7a10ddb4d5bd28dfdbfb029dd330f89fa9aeebd83",
+      "needed": [
+        "libm.so",
+        "libpython3.14.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "runpath": []
+    },
+    {
+      "name": "libfoldgpt_py_934d178edb046dd6c026d4fc.so",
+      "sha256": "934d178edb046dd6c026d4fc728abf8501d3a46abf7ddc6f948312e21e85b4f9",
+      "needed": [
+        "libm.so",
+        "libpython3.14.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "runpath": []
+    },
+    {
+      "name": "libfoldgpt_py_dd51c920e577b57c1e799bed.so",
+      "sha256": "dd51c920e577b57c1e799bedb17537e1a512aacf830ce4afca8e3fb9e63653ab",
+      "needed": [
+        "libm.so",
+        "libpython3.14.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "runpath": []
+    },
+    {
+      "name": "libfoldgpt_py_df437ff6eba53cd252f745cc.so",
+      "sha256": "df437ff6eba53cd252f745cce6166adfeb4b58dc7a66a9e6c55847406b32b633",
+      "needed": [
+        "libm.so",
+        "libpython3.14.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "runpath": []
+    },
+    {
+      "name": "libfoldgpt_py_fec7673fe1718c84cd9a1c1e.so",
+      "sha256": "fec7673fe1718c84cd9a1c1e5d3b9e4654ff32cddb7b0ce6835b5da6e0ebae1a",
+      "needed": [
+        "libm.so",
+        "libpython3.14.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "runpath": []
+    },
+    {
+      "name": "libfoldgpt_py_46fd0b62d48c93c90f63a899.so",
+      "sha256": "46fd0b62d48c93c90f63a89982a83c4197fe989c9b3b322fb4751a0ae58c4004",
+      "needed": [
+        "libm.so",
+        "libpython3.14.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "runpath": []
+    },
+    {
+      "name": "libfoldgpt_py_7941c483c6e5a494d2dcaaf7.so",
+      "sha256": "7941c483c6e5a494d2dcaaf724d067610aa774046603b3a9d2dead45f0d67c91",
+      "needed": [
+        "libm.so",
+        "libpython3.14.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "runpath": []
+    },
+    {
+      "name": "libfoldgpt_py_11d9dd2ae3a1d5a34db96c67.so",
+      "sha256": "11d9dd2ae3a1d5a34db96c675f2db43ce489d3d302e7d6bc1f0d492964480f5c",
+      "needed": [
+        "libm.so",
+        "libpython3.14.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "runpath": []
+    },
+    {
+      "name": "libfoldgpt_py_a7c069e95f552c843c79984d.so",
+      "sha256": "a7c069e95f552c843c79984d19c83dec30905e1e50aa898fa567df75d03af76b",
+      "needed": [
+        "libm.so",
+        "libpython3.14.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "runpath": []
+    },
+    {
+      "name": "libfoldgpt_py_34ae3582fd453f85e6039b81.so",
+      "sha256": "34ae3582fd453f85e6039b8134d144b71e4f37aa2b2f9101382bf780440becad",
+      "needed": [
+        "libm.so",
+        "libdl.so",
+        "libpython3.14.so",
+        "libc.so"
+      ],
+      "runpath": []
+    },
+    {
+      "name": "libfoldgpt_py_60bf5ab15142fd87c1001d7d.so",
+      "sha256": "60bf5ab15142fd87c1001d7dd5565ed179a7f558f7a93df353cee65a32e9394c",
+      "needed": [
+        "libm.so",
+        "libpython3.14.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "runpath": []
+    },
+    {
+      "name": "libfoldgpt_py_74ec3163f186206e8e533f75.so",
+      "sha256": "74ec3163f186206e8e533f75f0c23c97eb37b5a22f81aa2463394641e787e666",
+      "needed": [
+        "libm.so",
+        "libpython3.14.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "runpath": []
+    },
+    {
+      "name": "libfoldgpt_py_c467f77cc9fd8a4ce73f82d0.so",
+      "sha256": "c467f77cc9fd8a4ce73f82d00f0ac139e5743f9b18160fce0e60319a3d060d50",
+      "needed": [
+        "libm.so",
+        "libpython3.14.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "runpath": []
+    },
+    {
+      "name": "libfoldgpt_py_1a6194fea12e95b84dfc3440.so",
+      "sha256": "1a6194fea12e95b84dfc344019d6635fc908415a41b13d1c250f2f435d9675a7",
+      "needed": [
+        "libm.so",
+        "libcrypto_python.so",
+        "libpython3.14.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "runpath": []
+    },
+    {
+      "name": "libfoldgpt_py_44f18f29c2838592d9850f6f.so",
+      "sha256": "44f18f29c2838592d9850f6f68eb68d357fdab72dea5017f1bc8f87ed051275b",
+      "needed": [
+        "libm.so",
+        "libpython3.14.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "runpath": []
+    },
+    {
+      "name": "libfoldgpt_py_3260d0606b09773a2952f27f.so",
+      "sha256": "3260d0606b09773a2952f27f04411723e4cda75b653c97a7a14495f5e91ffe9c",
+      "needed": [
+        "libm.so",
+        "libpython3.14.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "runpath": []
+    },
+    {
+      "name": "libfoldgpt_py_8280d4347519c03131ca3bcc.so",
+      "sha256": "8280d4347519c03131ca3bcc671d17ec3578cf57a176d78e40ec208c6f09986f",
+      "needed": [
+        "libm.so",
+        "libpython3.14.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "runpath": []
+    },
+    {
+      "name": "libfoldgpt_py_ac1726f2dbc135db99206233.so",
+      "sha256": "ac1726f2dbc135db9920623364667769e12ba2c6fe6f344b324918e7becc989f",
+      "needed": [
+        "libm.so",
+        "libpython3.14.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "runpath": []
+    },
+    {
+      "name": "libfoldgpt_py_659c4d2814ce6efe06f4fc99.so",
+      "sha256": "659c4d2814ce6efe06f4fc990d599cda5e70f26862b968a6641526c42f5aacd2",
+      "needed": [
+        "libm.so",
+        "libpython3.14.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "runpath": []
+    },
+    {
+      "name": "libfoldgpt_py_160aac8cc6f07f0147f69ce0.so",
+      "sha256": "160aac8cc6f07f0147f69ce0798d4b1f0a0db37b7cfee043514ea35ae4492a30",
+      "needed": [
+        "libm.so",
+        "libpython3.14.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "runpath": []
+    },
+    {
+      "name": "libfoldgpt_py_0abacb9dbbb64585856e9e22.so",
+      "sha256": "0abacb9dbbb64585856e9e22eda9ae9bd346bfa7d2839cca146beb2c7a6bad42",
+      "needed": [
+        "libm.so",
+        "libpython3.14.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "runpath": []
+    },
+    {
+      "name": "libfoldgpt_py_68acd8c38b4eaf08cdbe4ddb.so",
+      "sha256": "68acd8c38b4eaf08cdbe4ddb01dd8368ca3b50b4237a93050cb7a5bd19f776b8",
+      "needed": [
+        "libm.so",
+        "libpython3.14.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "runpath": []
+    },
+    {
+      "name": "libfoldgpt_py_9179e755633278091c20479a.so",
+      "sha256": "9179e755633278091c20479aa3a34877d44afb63998cf9643971f5697bc2ff1c",
+      "needed": [
+        "libm.so",
+        "libpython3.14.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "runpath": []
+    },
+    {
+      "name": "libfoldgpt_py_7e285dae588f3fa7cb1e1f7b.so",
+      "sha256": "7e285dae588f3fa7cb1e1f7b8bac0bbd3fad5afd0d81cc327b81fe31374df921",
+      "needed": [
+        "libm.so",
+        "libpython3.14.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "runpath": []
+    },
+    {
+      "name": "libfoldgpt_py_2aa3f00c35d90d0ae63c2e7d.so",
+      "sha256": "2aa3f00c35d90d0ae63c2e7d1fae1fc880bc427bb3377dd61f62064553afb8ce",
+      "needed": [
+        "libm.so",
+        "libpython3.14.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "runpath": []
+    },
+    {
+      "name": "libfoldgpt_py_42c54874c0a323d5e290ccab.so",
+      "sha256": "42c54874c0a323d5e290ccabc32a7e8e74385a03179f5631f7f8a5f43b6d402e",
+      "needed": [
+        "libm.so",
+        "libpython3.14.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "runpath": []
+    },
+    {
+      "name": "libfoldgpt_py_ded4f84ab893a47edab6a4d5.so",
+      "sha256": "ded4f84ab893a47edab6a4d5f2db4213c9c1356937b741043e5465783556a64c",
+      "needed": [
+        "libm.so",
+        "libpython3.14.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "runpath": []
+    },
+    {
+      "name": "libfoldgpt_py_fadc8223ec2fe2d496c5c646.so",
+      "sha256": "fadc8223ec2fe2d496c5c64635857524412209580edd48feddd52914c64f7441",
+      "needed": [
+        "libm.so",
+        "libpython3.14.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "runpath": []
+    },
+    {
+      "name": "libfoldgpt_py_cd40e4573ab1d611e01e8546.so",
+      "sha256": "cd40e4573ab1d611e01e85466b7ce3339a13fd94699e4a59c5cb0fd2a65106e0",
+      "needed": [
+        "libm.so",
+        "libpython3.14.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "runpath": []
+    },
+    {
+      "name": "libfoldgpt_py_76ecb7e716c2cc0e0d2ff1b7.so",
+      "sha256": "76ecb7e716c2cc0e0d2ff1b78339c19b06cf09eb99b49ee8cd33f42e5e648f6a",
+      "needed": [
+        "libm.so",
+        "libpython3.14.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "runpath": []
+    },
+    {
+      "name": "libfoldgpt_py_553b92792b1ef030a51a64bf.so",
+      "sha256": "553b92792b1ef030a51a64bf84ab6bd8f1b821318953535229f15fed3490bd98",
+      "needed": [
+        "libm.so",
+        "libpython3.14.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "runpath": []
+    },
+    {
+      "name": "libfoldgpt_py_ad4a9d85586a65ecefbe84e9.so",
+      "sha256": "ad4a9d85586a65ecefbe84e9d27b53e5ae37e1ff95627baf1771c80afeb61f91",
+      "needed": [
+        "libm.so",
+        "libpython3.14.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "runpath": []
+    },
+    {
+      "name": "libfoldgpt_py_c8bce8544fd1b1de5944ae69.so",
+      "sha256": "c8bce8544fd1b1de5944ae692b96e87a31bb0fa49e0fd5cad0dff8f844305707",
+      "needed": [
+        "libm.so",
+        "libpython3.14.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "runpath": []
+    },
+    {
+      "name": "libfoldgpt_py_a0229a18abe9f25fe0f28201.so",
+      "sha256": "a0229a18abe9f25fe0f28201c6e89fc8e39c4adb560545d6f3a5bcfbc40c3435",
+      "needed": [
+        "libm.so",
+        "libsqlite3_python.so",
+        "libpython3.14.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "runpath": []
+    },
+    {
+      "name": "libfoldgpt_py_f9d0e896ca551a221177dfde.so",
+      "sha256": "f9d0e896ca551a221177dfde9c27332a338782c0ba1f2e7d2163247bcd63d838",
+      "needed": [
+        "libm.so",
+        "libssl_python.so",
+        "libcrypto_python.so",
+        "libpython3.14.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "runpath": []
+    },
+    {
+      "name": "libfoldgpt_py_88293699b20f6d3109011941.so",
+      "sha256": "88293699b20f6d31090119411e7d9c5aa66a3765fb968694a449eeacafe0c174",
+      "needed": [
+        "libm.so",
+        "libpython3.14.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "runpath": []
+    },
+    {
+      "name": "libfoldgpt_py_77ad83a2ca7f87e06a876302.so",
+      "sha256": "77ad83a2ca7f87e06a876302decfe0e807b33790ad65ef7c716e6f0418f3a2c4",
+      "needed": [
+        "libm.so",
+        "libpython3.14.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "runpath": []
+    },
+    {
+      "name": "libfoldgpt_py_dfb64b74bc6bb317029e3d38.so",
+      "sha256": "dfb64b74bc6bb317029e3d387fccacbf9ad371d96a9965ef7fe63e7d52a18262",
+      "needed": [
+        "libm.so",
+        "libpython3.14.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "runpath": []
+    },
+    {
+      "name": "libfoldgpt_py_e3647095dc4206114daa54ec.so",
+      "sha256": "e3647095dc4206114daa54ec3f5759ca6045d8b925b4c962aacfbb52d0f839f5",
+      "needed": [
+        "libm.so",
+        "libpython3.14.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "runpath": []
+    },
+    {
+      "name": "libfoldgpt_py_cf17db862d319469ce9effa9.so",
+      "sha256": "cf17db862d319469ce9effa9fe71f07b13205e3cf592716b8378c5f94778b9c9",
+      "needed": [
+        "libm.so",
+        "libpython3.14.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "runpath": []
+    },
+    {
+      "name": "libfoldgpt_py_96f09c3f14468bbc7e554f4d.so",
+      "sha256": "96f09c3f14468bbc7e554f4d7cf25035307639c994c83d442be0bb6111b87fe7",
+      "needed": [
+        "libm.so",
+        "libpython3.14.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "runpath": []
+    },
+    {
+      "name": "libfoldgpt_py_bb05f5ddaec2090d07bc520b.so",
+      "sha256": "bb05f5ddaec2090d07bc520ba63cb2b83ef22db63e9a0b166eed3c31d1317d74",
+      "needed": [
+        "libm.so",
+        "libpython3.14.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "runpath": []
+    },
+    {
+      "name": "libfoldgpt_py_0fdd6d98b8c9b81dedf07a24.so",
+      "sha256": "0fdd6d98b8c9b81dedf07a244bceac1d75e2820b93b1eca593ed0a33561375d6",
+      "needed": [
+        "libm.so",
+        "libpython3.14.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "runpath": []
+    },
+    {
+      "name": "libfoldgpt_py_1460baee6f7da64693b4dd4d.so",
+      "sha256": "1460baee6f7da64693b4dd4d9870401fa4818b5368b2a685f654322b30829a9a",
+      "needed": [
+        "libm.so",
+        "libpython3.14.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "runpath": []
+    },
+    {
+      "name": "libfoldgpt_py_aaef9131e72e95dc9f44a146.so",
+      "sha256": "aaef9131e72e95dc9f44a146c9301f39854a62cfea6a113027ac2c49b00a585b",
+      "needed": [
+        "libm.so",
+        "libpython3.14.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "runpath": []
+    },
+    {
+      "name": "libfoldgpt_py_850d05a06212629dca669c2b.so",
+      "sha256": "850d05a06212629dca669c2b49c40496e4440a8ce6ba0c64ceeab78b6601e79d",
+      "needed": [
+        "libm.so",
+        "libpython3.14.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "runpath": []
+    },
+    {
+      "name": "libfoldgpt_py_92c79672bf77fa2f9bdadd60.so",
+      "sha256": "92c79672bf77fa2f9bdadd60b8701fefaa7925cfe13cb143e4c552d4f3974d79",
+      "needed": [
+        "libm.so",
+        "libpython3.14.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "runpath": []
+    },
+    {
+      "name": "libfoldgpt_py_971ca431f13a370dcfb4e06a.so",
+      "sha256": "971ca431f13a370dcfb4e06a7f0226fc992ecaae7a10acdde59d89ed610c3cd3",
+      "needed": [
+        "libm.so",
+        "libpython3.14.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "runpath": []
+    },
+    {
+      "name": "libfoldgpt_py_c420110fad2f59d2be5466cb.so",
+      "sha256": "c420110fad2f59d2be5466cb3e55c42204abee8131da4bd621757075556db09c",
+      "needed": [
+        "libm.so",
+        "libpython3.14.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "runpath": []
+    },
+    {
+      "name": "libfoldgpt_py_ae6e0aa750a118f4dbef201b.so",
+      "sha256": "ae6e0aa750a118f4dbef201b52bdbbb10aaca6ec665df061bc17876f343cf20f",
+      "needed": [
+        "libm.so",
+        "libpython3.14.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "runpath": []
+    },
+    {
+      "name": "libfoldgpt_py_d90b13e67647f6828ec93a44.so",
+      "sha256": "d90b13e67647f6828ec93a441e14507a8ce7ba708d4fc94b92124f5b178dcdb0",
+      "needed": [
+        "libm.so",
+        "libz.so",
+        "libpython3.14.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "runpath": []
+    },
+    {
+      "name": "libfoldgpt_py_28fe3bd5cfb3b7edd5e8c684.so",
+      "sha256": "28fe3bd5cfb3b7edd5e8c6846702421633ae2f3c3c7263914b1c0bf22712f792",
+      "needed": [
+        "libm.so",
+        "libpython3.14.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "runpath": []
+    },
+    {
+      "name": "libfoldgpt_py_00544ebb34a9d7872ca7201a.so",
+      "sha256": "00544ebb34a9d7872ca7201af170392e246a7877315a9d351bc3139d3fb0677a",
+      "needed": [
+        "libm.so",
+        "libpython3.14.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "runpath": []
+    },
+    {
+      "name": "libfoldgpt_py_373b3bdc168a7d2b1d9b87d9.so",
+      "sha256": "373b3bdc168a7d2b1d9b87d91da90bc2a19ee9b547fd8ff5ca685c122441284f",
+      "needed": [
+        "libm.so",
+        "libpython3.14.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "runpath": []
+    },
+    {
+      "name": "libfoldgpt_py_d3acd703a3d4ca7699dd05be.so",
+      "sha256": "d3acd703a3d4ca7699dd05be7d518646d10f573e3f612386ba30f694ba419577",
+      "needed": [
+        "libm.so",
+        "libpython3.14.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "runpath": []
+    },
+    {
+      "name": "libfoldgpt_py_76962934927e5b73d96d743b.so",
+      "sha256": "76962934927e5b73d96d743be944249a6821b13bf6c3fd8591f4ac8857106fa5",
+      "needed": [
+        "libm.so",
+        "libpython3.14.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "runpath": []
+    },
+    {
+      "name": "libfoldgpt_py_e96e5bef2c6cc553bf414845.so",
+      "sha256": "e96e5bef2c6cc553bf4148453198879c8e6a94aa243b4993d5c7095332a3748c",
+      "needed": [
+        "libm.so",
+        "libpython3.14.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "runpath": []
+    },
+    {
+      "name": "libfoldgpt_py_83082513ac140b7d9a2966b8.so",
+      "sha256": "83082513ac140b7d9a2966b88e6ef2f08d8b29796e66c33ae9c28786ba5db336",
+      "needed": [
+        "libm.so",
+        "libpython3.14.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "runpath": []
+    },
+    {
+      "name": "libfoldgpt_py_38f30364553113e75decb9f9.so",
+      "sha256": "38f30364553113e75decb9f9ad6f298ecc543181a6d46dcc5f247bfa33d5bbe3",
+      "needed": [
+        "libm.so",
+        "libpython3.14.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "runpath": []
+    },
+    {
+      "name": "libfoldgpt_py_08dc631a6e93236f339e2628.so",
+      "sha256": "08dc631a6e93236f339e26284dafcedf573a5f97eb32f07860ce7b381dae7b93",
+      "needed": [
+        "libm.so",
+        "libpython3.14.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "runpath": []
+    },
+    {
+      "name": "libfoldgpt_py_1068318bf8dc933497793d87.so",
+      "sha256": "1068318bf8dc933497793d878a1a0098cbdb6769ea4c99057355bf4f94e092b5",
+      "needed": [
+        "libm.so",
+        "libpython3.14.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "runpath": []
+    },
+    {
+      "name": "libfoldgpt_py_24521eae69c20c997cf95fa6.so",
+      "sha256": "24521eae69c20c997cf95fa68a8d12895d064abd8ab66be199bd46b443f1e66e",
+      "needed": [
+        "libm.so",
+        "libpython3.14.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "runpath": []
+    },
+    {
+      "name": "libfoldgpt_py_b7da8e474bdfe350721b7df8.so",
+      "sha256": "b7da8e474bdfe350721b7df825ff2a1033a72e18ecaca99c3a29533ddbaa9ada",
+      "needed": [
+        "libm.so",
+        "libpython3.14.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "runpath": []
+    },
+    {
+      "name": "libfoldgpt_py_6d0b0f5e8909ae2d176f9b73.so",
+      "sha256": "6d0b0f5e8909ae2d176f9b731a0997dd06da6959f082777533500ef193a25fe9",
+      "needed": [
+        "libm.so",
+        "libpython3.14.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "runpath": []
+    },
+    {
+      "name": "libfoldgpt_py_f07859d9032977ef9d471ada.so",
+      "sha256": "f07859d9032977ef9d471ada7192dc66ed893091a0c910d3ea822bba6edd592a",
+      "needed": [
+        "libm.so",
+        "libz.so",
+        "libpython3.14.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "runpath": []
+    },
+    {
+      "name": "libfoldgpt_python_cli.so",
+      "sha256": "59764775b36447c06cd008557449d1a3ac825c2abe9df5628338aaf417119c1d",
+      "needed": [
+        "libpython3.14.so",
+        "libcrypto_python.so",
+        "libssl_python.so",
+        "libsqlite3_python.so",
+        "libc.so"
+      ],
+      "runpath": [
+        "$ORIGIN"
+      ]
+    },
+    {
+      "name": "libfoldgpt_bash.so",
+      "sha256": "534ae27932f116448e1d8775a5a145795be2f340526452497575f01f50257ff0",
+      "needed": [
+        "libdl.so",
+        "libc.so"
+      ],
+      "runpath": []
+    }
+  ]
+}

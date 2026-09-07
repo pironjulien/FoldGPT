@@ -1,0 +1,34 @@
+{
+  "schema": "foldgpt.independent-runtime-qualification.v1",
+  "success": true,
+  "checks": {
+    "runtimeIdentity": true,
+    "actualCleanOwnership": true,
+    "nativeAndroidIdentity": true,
+    "actualShellContext": true,
+    "nativeResult": true,
+    "transportWait": true,
+    "rpcSuccess": true,
+    "actualWorkerResult": true,
+    "actualRpcRequestsLifecycleAndBytes": true,
+    "byteCounts": true,
+    "allStreamsAgree": true,
+    "materialResultMatches": true,
+    "materialSourcesAndArchive": true,
+    "beforeSnapshot": true,
+    "afterSnapshot": true,
+    "bootAndStockIndicators": true,
+    "retainedPackagesUnchanged": true,
+    "installedApk": true,
+    "fixtureUnchanged": true,
+    "reportedOwnersAbsent": true
+  },
+  "error": null,
+  "package": "app.foldgpt.runtimequalification.v2",
+  "base": "/data/local/tmp/foldgpt-bionic-runtime-qualification-v2",
+  "scope": "Fixed interpreted Python project through dynamic native backend; ordinary model UI remains separate",
+  "collected": {
+    "app-report": true,
+    "native-evidence": true
+  }
+}

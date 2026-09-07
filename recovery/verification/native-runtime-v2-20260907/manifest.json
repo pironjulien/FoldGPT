@@ -1,0 +1,233 @@
+{
+  "scope": "Exact successful runtime V2 Android fixed project evidence; ordinary model UI remains unqualified",
+  "files": [
+    {
+      "path": "authorization.json",
+      "source": "downloads/runtime-qualification/admission-v2/authorization.json",
+      "size": 608,
+      "sha256": "76efdf4ec8dad4f664d4617115cb7cb82c15b5582290b9e66bfba7aa18c22c2a"
+    },
+    {
+      "path": "preflight.json",
+      "source": "downloads/runtime-qualification/admission-v2/preflight.json",
+      "size": 2152,
+      "sha256": "1a9735613ce53050cfb9efb97f733ead90a6fcb824ae270de5e8806b352da954"
+    },
+    {
+      "path": "package-info.json",
+      "source": "downloads/runtime-qualification/admission-v2/package-info.json",
+      "size": 505,
+      "sha256": "8a86b5cb942ee74384f5897186848abba0d3ce454540b3c895fa085caf403dcd"
+    },
+    {
+      "path": "before.json",
+      "source": "downloads/runtime-qualification/before-fixed-v2/snapshot.json",
+      "size": 142993,
+      "sha256": "ef777a523ca21fa6b783ee27af2eadcc7c28038ef4fac252fccec012d9aa1322"
+    },
+    {
+      "path": "after.json",
+      "source": "downloads/runtime-qualification/fixed-collection-v2/after/snapshot.json",
+      "size": 143443,
+      "sha256": "48a5bd2fffa8b903e802eb4d43666ee5a58e5dc3758efe46cd59ec41069bd618"
+    },
+    {
+      "path": "app-report.json",
+      "source": "downloads/runtime-qualification/fixed-collection-v2/app-report.json",
+      "size": 36064,
+      "sha256": "4d5026a2d3f38ec18ec15b34038a571fa1407b508f20120d9f7100a7b5e255b5"
+    },
+    {
+      "path": "native-evidence.json",
+      "source": "downloads/runtime-qualification/fixed-collection-v2/native-evidence.json",
+      "size": 9507,
+      "sha256": "d10515322c1ad5d1c143eecf4617a05f578ebaf17ca286a7f2bba02645c5ae14"
+    },
+    {
+      "path": "independent-verification.json",
+      "source": "downloads/runtime-qualification/fixed-collection-v2/independent-verification.json",
+      "size": 1094,
+      "sha256": "5126fb0e1d0f983c71f875d86f3d49a47cd9356f94d380139bcd40ba85648d76"
+    },
+    {
+      "path": "launch.stdout",
+      "source": "downloads/runtime-qualification/fixed-launch-v2/launch.stdout",
+      "size": 364,
+      "sha256": "293b7c25d016e51e16860cde38f2b08fae9a9ed5d565643daa7c52614d06a0a8"
+    },
+    {
+      "path": "launch.stderr",
+      "source": "downloads/runtime-qualification/fixed-launch-v2/launch.stderr",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "apk-provenance.json",
+      "source": "downloads/runtime-qualification/apk-v2-independent/provenance.json",
+      "size": 9575,
+      "sha256": "9eb68c626ac4225dd72b6b247a7710f642e22c66154576e3ffaffa4ada333ace"
+    },
+    {
+      "path": "apk-signature.txt",
+      "source": "downloads/runtime-qualification/apk-v2-independent/signature.txt",
+      "size": 972,
+      "sha256": "d66132c8dce446d47e0b7b5854a9ac139107ace7436e4260b52535618de0e5d7"
+    },
+    {
+      "path": "fixture-verification.json",
+      "source": "downloads/runtime-qualification/fixture-v2/staging.json",
+      "size": 2925,
+      "sha256": "efb9cf22506f095ca82dfef2c3f41048bef9f22d3fe2378ce9c93a7bb3e11e50"
+    },
+    {
+      "path": "python-verification.json",
+      "source": "downloads/runtime-qualification/python-v2/verification.json",
+      "size": 1024,
+      "sha256": "28a5e9a36a5f0bf4ae86fbdab7c677ad598e94237ffe45dffb617f26103a8b5f"
+    },
+    {
+      "path": "workspace/directory/dist/calculator.pyz",
+      "source": "downloads/runtime-qualification/fixed-collection-v2/workspace/directory/dist/calculator.pyz",
+      "size": 606,
+      "sha256": "6a5780c6a644760ec91823b33a6f89456232d2c00d08ed0c919de9a29cb4fcc0"
+    },
+    {
+      "path": "workspace/directory/project/__main__.py",
+      "source": "downloads/runtime-qualification/fixed-collection-v2/workspace/directory/project/__main__.py",
+      "size": 46,
+      "sha256": "223726b08f3671c415d997b5a8f1cf86be2dc7ed011496fdfe03677da1a5f932"
+    },
+    {
+      "path": "workspace/directory/project/calculator.py",
+      "source": "downloads/runtime-qualification/fixed-collection-v2/workspace/directory/project/calculator.py",
+      "size": 61,
+      "sha256": "5ff5bcc7b86709dce8de9f46da4f5c682863251ba74c45f48412c144a1efcdce"
+    },
+    {
+      "path": "workspace/directory/project/test_calculator.py",
+      "source": "downloads/runtime-qualification/fixed-collection-v2/workspace/directory/project/test_calculator.py",
+      "size": 349,
+      "sha256": "7304c93304cea56813eb9fc006dbeaf5e90152ad05082aceb09c5475edd9dead"
+    },
+    {
+      "path": "workspace/private/secret",
+      "source": "downloads/runtime-qualification/fixed-collection-v2/workspace/private/secret",
+      "size": 24,
+      "sha256": "be3a4ca66e020d499c2c2ea49f759a92dcd7b0ef56fe9551dde0c1dc16286da4"
+    },
+    {
+      "path": "workspace/qualification-result.json",
+      "source": "downloads/runtime-qualification/fixed-collection-v2/workspace/qualification-result.json",
+      "size": 2056,
+      "sha256": "bddec2a085287dbbf6ad310cd53b3ac45774403ba47d3e311c2c773d2a5fc45a"
+    },
+    {
+      "path": "runpath-review/host/admission.c",
+      "source": "downloads/runtime-qualification/runpath-review-v2/host/admission.c",
+      "size": 579,
+      "sha256": "398f00c38ee9eccc58132db08b0d4706c9a3da038576ecae250388fced0a4d17"
+    },
+    {
+      "path": "runpath-review/host/explicit-direct-all.dynamic.txt",
+      "source": "downloads/runtime-qualification/runpath-review-v2/host/explicit-direct-all.dynamic.txt",
+      "size": 1717,
+      "sha256": "95f41b82d7ab5b16935e8b6c382c2aad254c30cf816d56d5cad79a56b02c0058"
+    },
+    {
+      "path": "runpath-review/host/explicit-transitive-not-direct.dynamic.txt",
+      "source": "downloads/runtime-qualification/runpath-review-v2/host/explicit-transitive-not-direct.dynamic.txt",
+      "size": 1640,
+      "sha256": "e0abf6f589b96cdf655a8ce4543ecabbb9d76ad657f3b7ed31d547661f767107"
+    },
+    {
+      "path": "runpath-review/host/leaf.c",
+      "source": "downloads/runtime-qualification/runpath-review-v2/host/leaf.c",
+      "size": 34,
+      "sha256": "77ab60eb1f99faaa0543119fe5ce3fe0eb2b83c1f3310e7e46f847b1a459d43f"
+    },
+    {
+      "path": "runpath-review/host/main.c",
+      "source": "downloads/runtime-qualification/runpath-review-v2/host/main.c",
+      "size": 1101,
+      "sha256": "248144f3a279848c4964bac62cf5363bf7a141ff4d3ce261044dcbb3a513a579"
+    },
+    {
+      "path": "runpath-review/host/mediated.py",
+      "source": "downloads/runtime-qualification/runpath-review-v2/host/mediated.py",
+      "size": 2649,
+      "sha256": "426f85f66c6baa8ee9d1e9ee588593909c88e7a0a0c084c9685cf2f3fd49d382"
+    },
+    {
+      "path": "runpath-review/host/mediated.stderr",
+      "source": "downloads/runtime-qualification/runpath-review-v2/host/mediated.stderr",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "runpath-review/host/mediated.stdout",
+      "source": "downloads/runtime-qualification/runpath-review-v2/host/mediated.stdout",
+      "size": 1126,
+      "sha256": "38cbf2c384ff610351f457432b365b39c7edc8f0725ee6bc6f0f906f9f5f0645"
+    },
+    {
+      "path": "runpath-review/host/origin-only.dynamic.txt",
+      "source": "downloads/runtime-qualification/runpath-review-v2/host/origin-only.dynamic.txt",
+      "size": 1664,
+      "sha256": "961ccdb8cb6192751aa3eb17dffa34ca90f3339ff16e4e73398b7045ad2c0b3c"
+    },
+    {
+      "path": "runpath-review/host/plugin.c",
+      "source": "downloads/runtime-qualification/runpath-review-v2/host/plugin.c",
+      "size": 83,
+      "sha256": "335cf48b21cb2e20eb75ee716abf989487138fc6d08895851defafd8c4a51b89"
+    },
+    {
+      "path": "runpath-review/host/primary.c",
+      "source": "downloads/runtime-qualification/runpath-review-v2/host/primary.c",
+      "size": 80,
+      "sha256": "3ba7d79417e20dbb3f244b57e57c99035f14e7e022ae54143d6d531fa5f4121e"
+    },
+    {
+      "path": "runpath-review/host/report.json",
+      "source": "downloads/runtime-qualification/runpath-review-v2/host/report.json",
+      "size": 1690,
+      "sha256": "5a56ba7b93b9c9bea45914e0f0dd870351199e550bcfca964a7e38270b7a2826"
+    },
+    {
+      "path": "runpath-review/inventory.json",
+      "source": "downloads/runtime-qualification/runpath-review-v2/inventory.json",
+      "size": 3911,
+      "sha256": "038e52f04a0c3fc7390aef59cb5d09ae7b9be533909a51533caed78fe377f3b7"
+    },
+    {
+      "path": "runpath-review/mediated-report.json",
+      "source": "downloads/runtime-qualification/runpath-review-v2/mediated-report.json",
+      "size": 1378,
+      "sha256": "83454f7bcab17d8ae0c2aa69839ac6756616bbf3f4ffefa80f992d15ca91d632"
+    },
+    {
+      "path": "runpath-review/samsung-resolve-path.txt",
+      "source": "downloads/runtime-qualification/runpath-review-v2/samsung-resolve-path.txt",
+      "size": 36149,
+      "sha256": "582bfc4659483cb4f36b078fefef66a134394f308d5886eb321c1b128c866788"
+    },
+    {
+      "path": "runpath-review/samsung-resolve-paths.txt",
+      "source": "downloads/runtime-qualification/runpath-review-v2/samsung-resolve-paths.txt",
+      "size": 9609,
+      "sha256": "2ee6a195f724a5673aaa332751f5e06539f18038fbfc0b63b6c6a0194c54ffc1"
+    },
+    {
+      "path": "runpath-review/samsung-runpath.txt",
+      "source": "downloads/runtime-qualification/runpath-review-v2/samsung-runpath.txt",
+      "size": 12899,
+      "sha256": "34d1c12b547351bc905e6cbdc1a5f7fb130a1d98a37e0e02fa97bd1975eacdd4"
+    },
+    {
+      "path": "runpath-review/static-review.json",
+      "source": "downloads/runtime-qualification/runpath-review-v2/static-review.json",
+      "size": 24895,
+      "sha256": "d3b50d06a17825fbe77827bbf155e2a371c195d4348a96cb612f5d29f56efbd1"
+    }
+  ]
+}

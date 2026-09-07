@@ -1,0 +1,42 @@
+{
+  "schema": "foldgpt.explicit-runpath.host-review.v1",
+  "androidExecution": false,
+  "loader": "glibc on Linux host; does not qualify Samsung Bionic",
+  "uid": 65534,
+  "success": true,
+  "observations": [
+    {
+      "case": "origin-only",
+      "argv": [
+        "/var/tmp/foldgpt-runpath-review-0w3u5wxr/launch/origin-only"
+      ],
+      "environment": {},
+      "returncode": 127,
+      "stdout": "",
+      "stderr": "/var/tmp/foldgpt-runpath-review-0w3u5wxr/launch/origin-only: error while loading shared libraries: libreview_primary.so: cannot open shared object file: No such file or directory\n",
+      "exeSha256": "3278986823c42bb1b838e5da08466f7e1ce57f54a26f0de08dba64cbf3a08093"
+    },
+    {
+      "case": "explicit-transitive-not-direct",
+      "argv": [
+        "/var/tmp/foldgpt-runpath-review-0w3u5wxr/launch/explicit-transitive-not-direct"
+      ],
+      "environment": {},
+      "returncode": 127,
+      "stdout": "",
+      "stderr": "/var/tmp/foldgpt-runpath-review-0w3u5wxr/launch/explicit-transitive-not-direct: error while loading shared libraries: libreview_leaf.so: cannot open shared object file: No such file or directory\n",
+      "exeSha256": "23b5012ca53f1360d435acd2cdbfd19f801fdab25ee3fdd8988dbd94d1ffb858"
+    },
+    {
+      "case": "explicit-direct-all",
+      "argv": [
+        "/var/tmp/foldgpt-runpath-review-0w3u5wxr/launch/explicit-direct-all"
+      ],
+      "environment": {},
+      "returncode": 0,
+      "stdout": "child empty-environment dynamic+transitive+dlopen=42\nparent empty-environment dynamic+transitive+dlopen=42\n",
+      "stderr": "",
+      "exeSha256": "3a5e3bc9a42d6856d406f40e4d35ac1a14aa9d391b3cb68823316e8dabf0c488"
+    }
+  ]
+}

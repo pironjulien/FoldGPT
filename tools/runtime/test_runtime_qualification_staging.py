@@ -10,7 +10,7 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-from runtime_qualification_identity import BASE, PACKAGE, SENTINEL, resolve_runtime_identity
+from runtime_qualification_identity import BASE, PACKAGE, SENTINEL, runtime_identity, resolve_runtime_identity
 
 HERE = Path(__file__).resolve().parent
 
@@ -23,6 +23,27 @@ def script(name):
 
 
 class RuntimeStagingTests(unittest.TestCase):
+    def test_explicit_v2_identity_retains_v1_and_refuses_crossed_parts(self):
+        first, second = runtime_identity(1), runtime_identity(2)
+        self.assertEqual(second.report_file('report.json'), 'files/runtime-v2/report.json')
+        self.assertEqual(second.report_version, 2)
+        self.assertIn(first.package, second.retained_packages)
+        self.assertEqual(resolve_runtime_identity(second.package, second.base, 2), second)
+        for package, base, version in ((first.package, second.base, 2), (second.package, first.base, 2),
+                                       (second.package, second.base, 1), (second.package, second.base, True)):
+            with self.assertRaises(ValueError): resolve_runtime_identity(package, base, version)
+
+    def test_v2_operators_select_only_its_exact_fixture(self):
+        stage, snapshot = script('stage-native-qualification.py'), script('snapshot-native-qualification.py')
+        second = runtime_identity(2)
+        files, entries = stage.fixture(second.base)
+        self.assertEqual(files, {'workspace/private/secret': SENTINEL})
+        self.assertEqual(entries['workspace/directory'], set())
+        self.assertEqual(snapshot.fixture_names(second.workspace), ('private/secret',))
+        for alias in (second.base + '/', second.base + '/../', second.base + '-new'):
+            with self.assertRaises(ValueError): stage.fixture(alias)
+            with self.assertRaises(ValueError): snapshot.fixture_names(alias + '/workspace')
+
     def test_other_identities_and_aliases_fail_before_adb_or_output_creation(self):
         module = script('stage-kernel-python.py')
         for base, version in ((BASE + '/', 1), (BASE + '/../foldgpt-bionic-supervisor-qualification-v4', 1),

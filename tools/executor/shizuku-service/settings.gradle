@@ -3,3 +3,4 @@ dependencyResolutionManagement { repositoriesMode.set(RepositoriesMode.FAIL_ON_P
 rootProject.name = 'FoldGPTShizukuTransport'
 include ':transport'
 include ':qualification'
+include ':runtimequalification'

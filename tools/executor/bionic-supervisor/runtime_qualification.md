@@ -1,5 +1,12 @@
 # Small Python project through the native executor
 
+Current Android result: **V2 passes all 20 independent checks on the real Fold**.
+See [the device report](../../../docs/research/native-runtime-v2-device-result-2026-09-07.md).
+Frozen qKM94iHA and the Python CLI with deployment-prefix RUNPATH are qualified
+for this fixed project. Failed V1 remains preserved. Ordinary UI execution is
+still an integration requirement. The preparation history below does not
+supersede this result.
+
 The independent Android package is `app.foldgpt.runtimequalification.v1` and
 its sole deployment base is
 `/data/local/tmp/foldgpt-bionic-runtime-qualification-v1`. The selected backend

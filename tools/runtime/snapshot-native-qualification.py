@@ -14,11 +14,11 @@ from pathlib import Path
 import re
 import shlex
 import subprocess
-from runtime_qualification_identity import BASE as RUNTIME_BASE
+from runtime_qualification_identity import BASES as RUNTIME_BASES
 
 
 def fixture_names(workspace):
-    if workspace == RUNTIME_BASE + '/workspace':
+    if workspace in tuple(base + '/workspace' for base in RUNTIME_BASES):
         return ('private/secret',)
     if re.fullmatch(r'/data/local/tmp/foldgpt-bionic-supervisor-qualification-[A-Za-z0-9_-]+/workspace', workspace):
         return ('input', 'private/secret', 'directory/marker')

@@ -125,11 +125,18 @@ class RuntimeQualificationBackend(QualificationBackend):
 
 
 def factory(options):
+    return _factory(options, BASE)
+
+
+def _factory(options, base):
+    """Internal shared admission; only fixed APK-owned wrappers select a base."""
+    if str(base) not in {str(BASE), "/data/local/tmp/foldgpt-bionic-runtime-qualification-v2"}:
+        raise ValueError("Unknown APK-owned runtime qualification base")
     if sys.platform != "android" or os.getuid() != 2000 or os.geteuid() != 2000 or os.getgid() != 2000:
         raise ValueError("Runtime qualification requires actual Android shell identity")
     required = {"helper", "handleHelper", "processRunner", "workspace", "executables", "runtime",
                 "limits", "cwdShim"}
-    workspace = BASE / "workspace"
+    workspace = base / "workspace"
     if (type(options) is not dict or not required <= set(options) or set(options) - required - {"parentEnvironment"}
             or options["workspace"] != str(workspace) or canonical(options["limits"]) != canonical(LIMITS)
             or options.get("parentEnvironment", {}) != {}):
@@ -145,7 +152,7 @@ def factory(options):
             or options["cwdShim"]["path"] != str(installed / "libfoldgpt_bionic_cwd.so")):
         raise ValueError("Runtime code must come from the actual attested installed native directory")
     runtime = [{"path": str(path), "execute": execute} for path, execute in
-               ((bash, True), (python, True), (BASE / "python", False), *SYSTEM_RUNTIME)]
+               ((bash, True), (python, True), (base / "python", False), *SYSTEM_RUNTIME)]
     if (type(options["runtime"]) is not list or
             sorted(map(canonical, options["runtime"])) != sorted(map(canonical, runtime))):
         raise ValueError("Runtime qualification requires its exact fixed runtime grants")
@@ -153,7 +160,7 @@ def factory(options):
     # executable determines this immutable directory; neither RPC nor a marker
     # supplies it. Required Python extension libraries reside beside that ELF.
     native_options = dict(options, runtime=runtime + [{"path": str(installed), "execute": True}])
-    descriptor = open_evidence(BASE / "evidence.json")
+    descriptor = open_evidence(base / "evidence.json")
     try:
         return RuntimeQualificationBackend(native_factory(native_options), descriptor, python, "android")
     except BaseException:

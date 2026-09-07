@@ -13,10 +13,12 @@ ENTRIES = {'workspace': {'.git', 'directory', 'private'}, 'workspace/private': {
 
 @dataclass(frozen=True)
 class RuntimeQualificationIdentity:
-    package: str = PACKAGE
-    base: str = BASE
-    report_version: int = VERSION
-    report_directory: str = 'files/runtime-v1'
+    package: str
+    base: str
+    report_version: int
+    report_directory: str
+    backend_factory: str
+    run_action: str
 
     @property
     def workspace(self):
@@ -24,8 +26,9 @@ class RuntimeQualificationIdentity:
 
     @property
     def retained_packages(self):
-        return ('app.foldgpt', 'app.foldgpt.shizukuprobe',
-                'app.foldgpt.kernelqualification.v11', 'app.foldgpt.kernelqualification.v12')
+        common = ('app.foldgpt', 'app.foldgpt.shizukuprobe',
+                  'app.foldgpt.kernelqualification.v11', 'app.foldgpt.kernelqualification.v12')
+        return common + ((PACKAGE,) if self.report_version == 2 else ())
 
     def report_file(self, name):
         if name not in {'package-info.json', 'report.json'}:
@@ -33,7 +36,25 @@ class RuntimeQualificationIdentity:
         return self.report_directory + '/' + name
 
 
+PROFILES = {
+    1: RuntimeQualificationIdentity(PACKAGE, BASE, 1, 'files/runtime-v1',
+        'tools.executor.bionic-supervisor.runtime_qualification_factory:factory', '.RUNTIME_RUN_FIXED_V1'),
+    2: RuntimeQualificationIdentity('app.foldgpt.runtimequalification.v2',
+        '/data/local/tmp/foldgpt-bionic-runtime-qualification-v2', 2, 'files/runtime-v2',
+        'tools.executor.bionic-supervisor.runtime_qualification_factory_v2:factory', '.RUNTIME_RUN_FIXED_V2'),
+}
+PACKAGES = tuple(identity.package for identity in PROFILES.values())
+BASES = tuple(identity.base for identity in PROFILES.values())
+
+
+def runtime_identity(version):
+    if type(version) is not int or version not in PROFILES:
+        raise ValueError('Only reviewed runtime qualification versions 1 and 2 are admitted')
+    return PROFILES[version]
+
+
 def resolve_runtime_identity(package, base, version):
-    if package != PACKAGE or base != BASE or type(version) is not int or version != VERSION:
+    identity = runtime_identity(version)
+    if package != identity.package or base != identity.base:
         raise ValueError('Runtime qualification requires its exact independent package/base/version')
-    return RuntimeQualificationIdentity()
+    return identity

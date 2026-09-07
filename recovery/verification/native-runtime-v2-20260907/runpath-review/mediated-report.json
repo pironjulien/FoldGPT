@@ -1,0 +1,53 @@
+{
+  "schema": "foldgpt.runpath-mediated-host-review.v1",
+  "success": true,
+  "androidExecution": false,
+  "uid": 65534,
+  "loader": "glibc; real production supervisor mediation; not Samsung Bionic execution",
+  "observations": [
+    {
+      "name": "runpath",
+      "result": {
+        "type": "result",
+        "outcome": "exited",
+        "exitCode": 0,
+        "signal": 0,
+        "cleanupComplete": true,
+        "started": true,
+        "grants": 15,
+        "denials": 20,
+        "stdoutBytes": 107,
+        "stderrBytes": 0,
+        "stage": 0,
+        "errno": 0
+      },
+      "closed": true,
+      "quarantined": false,
+      "supervisorReturncode": 0,
+      "stdout": "child empty-environment dynamic+transitive+dlopen=42\nparent empty-environment dynamic+transitive+dlopen=42\n",
+      "stderr": ""
+    },
+    {
+      "name": "admission",
+      "result": {
+        "type": "result",
+        "outcome": "exited",
+        "exitCode": 0,
+        "signal": 0,
+        "cleanupComplete": true,
+        "started": true,
+        "grants": 3,
+        "denials": 1,
+        "stdoutBytes": 70,
+        "stderrBytes": 0,
+        "stage": 0,
+        "errno": 0
+      },
+      "closed": true,
+      "quarantined": false,
+      "supervisorReturncode": 0,
+      "stdout": "actual O_PATH errno=95; directory stat dev=2096 ino=900879 mode=40755\n",
+      "stderr": ""
+    }
+  ]
+}

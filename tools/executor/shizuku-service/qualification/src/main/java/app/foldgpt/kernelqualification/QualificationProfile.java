@@ -3,6 +3,7 @@ package app.foldgpt.kernelqualification;
 /** APK/application identity selects one fixed diagnostic, never Intent extras. */
 final class QualificationProfile {
     static final String V11_PACKAGE = "app.foldgpt.kernelqualification.v11";
+    static final String V12_PACKAGE = "app.foldgpt.kernelqualification.v12";
     final String packageName, base, reportDirectory, runAction, serviceTag, processSuffix;
     final int diagnosticVersion, serviceVersion;
     final boolean independent;
@@ -17,6 +18,11 @@ final class QualificationProfile {
     }
 
     static QualificationProfile forPackage(String packageName) {
+        if (V12_PACKAGE.equals(packageName)) {
+            return new QualificationProfile(packageName,
+                "/data/local/tmp/foldgpt-bionic-supervisor-qualification-v4", "kernel-v12",
+                ".KERNEL_RUN_FIXED_V12", "foldgpt-kernel-qualification-v12", "kernelqualificationv12", 12, 12, true);
+        }
         if (V11_PACKAGE.equals(packageName)) {
             return new QualificationProfile(packageName,
                 "/data/local/tmp/foldgpt-bionic-supervisor-qualification-v3", "kernel-v11",

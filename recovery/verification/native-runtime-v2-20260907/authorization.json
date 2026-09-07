@@ -1,0 +1,17 @@
+{
+  "schema": "foldgpt.android-shizuku-authorization.v1",
+  "state": "complete",
+  "authorized": true,
+  "shizukuServerUid": 2000,
+  "clientUid": 10403,
+  "nativeSpawnAttempted": false,
+  "attemptReserved": false,
+  "userServiceBindAttempted": false,
+  "transportCleanupComplete": false,
+  "diagnosticVersion": 2,
+  "requestedAction": "app.foldgpt.runtimequalification.v2.RUNTIME_AUTHORIZE",
+  "packageName": "app.foldgpt.runtimequalification.v2",
+  "nativeBase": "\/data\/local\/tmp\/foldgpt-bionic-runtime-qualification-v2",
+  "recordedWallTimeMs": 1788808031240,
+  "recordedElapsedRealtimeMs": 76437834
+}

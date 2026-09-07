@@ -1,0 +1,126 @@
+{
+  "schema": "foldgpt.runpath-review-evidence.v1",
+  "androidExecution": false,
+  "files": [
+    {
+      "path": "host/admission.c",
+      "sha256": "398f00c38ee9eccc58132db08b0d4706c9a3da038576ecae250388fced0a4d17",
+      "bytes": 579
+    },
+    {
+      "path": "host/explicit-direct-all.dynamic.txt",
+      "sha256": "95f41b82d7ab5b16935e8b6c382c2aad254c30cf816d56d5cad79a56b02c0058",
+      "bytes": 1717
+    },
+    {
+      "path": "host/explicit-transitive-not-direct.dynamic.txt",
+      "sha256": "e0abf6f589b96cdf655a8ce4543ecabbb9d76ad657f3b7ed31d547661f767107",
+      "bytes": 1640
+    },
+    {
+      "path": "host/installed/libreview_leaf.so",
+      "sha256": "0f00024a3326a5f889f995d7c9f653a1511520308bbfa8f225a17b773aa76e74",
+      "bytes": 15112
+    },
+    {
+      "path": "host/installed/libreview_plugin.so",
+      "sha256": "aec60519e8afae266e5b1a333f25f5e325fe0908dcafb681d569a612f07adbd0",
+      "bytes": 15312
+    },
+    {
+      "path": "host/installed/libreview_primary.so",
+      "sha256": "be1c9969ac8331b44aa149909d4b3b3c4c31acb2610017e08c98922640b98a9b",
+      "bytes": 15312
+    },
+    {
+      "path": "host/launch/admission",
+      "sha256": "cfb9bbc66b2f6468afd10279de6fcc51b3e4e001aa3841231e8a0b0e3070d954",
+      "bytes": 16200
+    },
+    {
+      "path": "host/launch/explicit-direct-all",
+      "sha256": "3a5e3bc9a42d6856d406f40e4d35ac1a14aa9d391b3cb68823316e8dabf0c488",
+      "bytes": 16544
+    },
+    {
+      "path": "host/launch/explicit-transitive-not-direct",
+      "sha256": "23b5012ca53f1360d435acd2cdbfd19f801fdab25ee3fdd8988dbd94d1ffb858",
+      "bytes": 16544
+    },
+    {
+      "path": "host/launch/origin-only",
+      "sha256": "3278986823c42bb1b838e5da08466f7e1ce57f54a26f0de08dba64cbf3a08093",
+      "bytes": 16544
+    },
+    {
+      "path": "host/leaf.c",
+      "sha256": "77ab60eb1f99faaa0543119fe5ce3fe0eb2b83c1f3310e7e46f847b1a459d43f",
+      "bytes": 34
+    },
+    {
+      "path": "host/main.c",
+      "sha256": "248144f3a279848c4964bac62cf5363bf7a141ff4d3ce261044dcbb3a513a579",
+      "bytes": 1101
+    },
+    {
+      "path": "host/mediated.py",
+      "sha256": "426f85f66c6baa8ee9d1e9ee588593909c88e7a0a0c084c9685cf2f3fd49d382",
+      "bytes": 2649
+    },
+    {
+      "path": "host/mediated.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "host/mediated.stdout",
+      "sha256": "38cbf2c384ff610351f457432b365b39c7edc8f0725ee6bc6f0f906f9f5f0645",
+      "bytes": 1126
+    },
+    {
+      "path": "host/origin-only.dynamic.txt",
+      "sha256": "961ccdb8cb6192751aa3eb17dffa34ca90f3339ff16e4e73398b7045ad2c0b3c",
+      "bytes": 1664
+    },
+    {
+      "path": "host/plugin.c",
+      "sha256": "335cf48b21cb2e20eb75ee716abf989487138fc6d08895851defafd8c4a51b89",
+      "bytes": 83
+    },
+    {
+      "path": "host/primary.c",
+      "sha256": "3ba7d79417e20dbb3f244b57e57c99035f14e7e022ae54143d6d531fa5f4121e",
+      "bytes": 80
+    },
+    {
+      "path": "host/report.json",
+      "sha256": "5a56ba7b93b9c9bea45914e0f0dd870351199e550bcfca964a7e38270b7a2826",
+      "bytes": 1690
+    },
+    {
+      "path": "mediated-report.json",
+      "sha256": "83454f7bcab17d8ae0c2aa69839ac6756616bbf3f4ffefa80f992d15ca91d632",
+      "bytes": 1378
+    },
+    {
+      "path": "samsung-resolve-path.txt",
+      "sha256": "582bfc4659483cb4f36b078fefef66a134394f308d5886eb321c1b128c866788",
+      "bytes": 36149
+    },
+    {
+      "path": "samsung-resolve-paths.txt",
+      "sha256": "2ee6a195f724a5673aaa332751f5e06539f18038fbfc0b63b6c6a0194c54ffc1",
+      "bytes": 9609
+    },
+    {
+      "path": "samsung-runpath.txt",
+      "sha256": "34d1c12b547351bc905e6cbdc1a5f7fb130a1d98a37e0e02fa97bd1975eacdd4",
+      "bytes": 12899
+    },
+    {
+      "path": "static-review.json",
+      "sha256": "d3b50d06a17825fbe77827bbf155e2a371c195d4348a96cb612f5d29f56efbd1",
+      "bytes": 24895
+    }
+  ]
+}
