@@ -4,7 +4,7 @@
   "defaultBranch": "codex/foldgpt-beta",
   "release": "https://github.com/pironjulien/FoldGPT-workspace/releases/tag/recovery-2026-09-07",
   "published": true,
-  "verifiedAssetCount": 23,
+  "verifiedAssetCount": 25,
   "assets": [
     {
       "name": "manifest.json",
@@ -120,7 +120,17 @@
       "name": "native-checkpoint-v6.tar.gz.age.part001",
       "bytes": 1323849,
       "sha256": "609c235e281a35a543f62800d9fa3f829f28c77b2d606dbf15460fb4dc56a81d"
+    },
+    {
+      "name": "native-checkpoint-v7-manifest.json",
+      "bytes": 632,
+      "sha256": "74ec434c38722d587908b0e2e2379b22c52c90ae2fbb2ad1661ee36e831c80ac"
+    },
+    {
+      "name": "native-checkpoint-v7.tar.gz.age.part001",
+      "bytes": 54505580,
+      "sha256": "28c5064af2f2b7e9b249086bc6a8c3ede07a55163355840bc7e97c8bc133e736"
     }
   ],
-  "currentSupplement": "native-checkpoint-v6-manifest.json"
+  "currentSupplement": "native-checkpoint-v7-manifest.json"
 }

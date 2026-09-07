@@ -2,6 +2,11 @@
 
 ## Unreleased — 2026-09-06
 
+- Published private recovery supplement v7: 2,819 files downloaded,
+  authenticated and restored, then 2,818 project files independently verified
+  after additive merge into the Windows clone. All 25 release assets match
+  their recorded size and digest; current source and handoff are on GitHub.
+
 - Resolve immutable runtime objects through verified descriptors without
   inspecting every parent; retain workspace exclusions and policy denials.
   The reviewed native build passes 16 resolver tests, C/kernel checks and

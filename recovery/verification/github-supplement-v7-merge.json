@@ -1,0 +1,13 @@
+{
+  "verified": true,
+  "sourceCommit": "df4559be11a3c56177ae1afd41b7639719d0693d",
+  "sourceFilesOverwritten": false,
+  "existingDataReplaced": false,
+  "filesVerified": 2818,
+  "linksVerified": 0,
+  "fileBytesVerified": 106366822,
+  "destination": "C:\\Dev\\FoldGPT-recovery\\fresh-lf-clone-20260907",
+  "archiveMetadataExcluded": [
+    "CHECKPOINT.json"
+  ]
+}

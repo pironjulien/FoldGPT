@@ -155,7 +155,7 @@ L'APK v9 figé est `tools/executor/shizuku-lab/build/kernel-v9-launch/app-debug.
 Les sources courantes peuvent avoir progressé depuis cet APK ; lire le
 [point de reprise](HANDOFF.md) avant tout nouveau build ou essai.
 
-## Dernier complément v5 : APK v10 et session conservée
+## Complément v5 : APK v10 et session conservée
 
 Le complément **`native-checkpoint-v5*`** ajoute le stage et l'APK v10, les
 12 tests nonroot de propriété de session, ainsi que les rapports réels de cet
@@ -208,6 +208,35 @@ wsl --distribution Ubuntu-24.04 --exec python3 /mnt/c/Dev/ChatgptFold/tools/reco
 La fusion v6 a également été exécutée sur le clone Windows : **467 fichiers
 du projet exacts**, sans écrasement ; le fichier de checkpoint reste à part.
 Voir la [preuve de fusion](verification/github-supplement-v6-merge.json).
+
+## Dernier complément v7 : préparation native V11
+
+Le complément **`native-checkpoint-v7*`** conserve le superviseur corrigé
+`KvSGBnzP`, le stage et l'APK V11, ses tests PC et les preuves d'installation
+du runtime séparé sur le Fold. L'autorisation Shizuku attend derrière le
+verrouillage du téléphone ; aucune tentative native V11 n'est lancée.
+Lire le [rapport V11](../docs/research/native-v11-isolated-preparation-2026-09-07.md).
+
+Ses **54 505 580 octets chiffrés** ont été retéléchargés depuis GitHub,
+authentifiés et restaurés : **2 819 fichiers vérifiés**, soit 106 367 838
+octets. SHA256 :
+`28c5064af2f2b7e9b249086bc6a8c3ede07a55163355840bc7e97c8bc133e736`.
+Voir la [preuve de restauration](verification/github-supplement-v7-restoration.json).
+
+Après la fusion du v6, utiliser des dossiers neufs :
+
+```powershell
+wsl --distribution Ubuntu-24.04 --exec python3 /mnt/c/Dev/ChatgptFold/tools/recovery/restore-archive.py --assets /mnt/c/Dev/FoldGPT-recovery/downloaded --manifest native-checkpoint-v7-manifest.json --identity $foldRecoveryKeyLinux --destination /var/tmp/foldgpt-native-v7 --report /mnt/c/Dev/FoldGPT-recovery/native-v7-verification.json
+wsl --distribution Ubuntu-24.04 --exec python3 /mnt/c/Dev/ChatgptFold/tools/recovery/merge-supplement.py --snapshot /var/tmp/foldgpt-native-v7/foldgpt-native-artifacts-v7-20260907 --project /mnt/c/Dev/ChatgptFold --report /mnt/c/Dev/FoldGPT-recovery/native-v7-merge.json
+```
+
+Les sources actuelles restent celles de Git. Les APK et stages historiques
+ne sont ni remplacés ni rejoués par cette restauration.
+
+La fusion v7 a également été réalisée sur le clone Windows : **2 818 fichiers
+du projet vérifiés indépendamment**, sans modification des sources ni
+remplacement de données. Le fichier de checkpoint reste dans le snapshot.
+Voir la [preuve de fusion](verification/github-supplement-v7-merge.json).
 
 ## Récupérer le moteur séparé
 

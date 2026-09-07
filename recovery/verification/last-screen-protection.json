@@ -1,16 +1,35 @@
-{
-  "timestamp": "2026-09-07T06:07:33.9629797+02:00",
-  "activatedNow": true,
-  "displayOffRequestAccepted": true,
-  "saverPids": [],
-  "desktop": {
-    "ScreenSaveActive": "1",
-    "ScreenSaveTimeOut": "180",
-    "SCRNSAVE.EXE": "C:\\WINDOWS\\System32\\scrnsave.scr"
-  },
-  "androidPower": [
-    "  mWakefulness=Dozing",
-    "  mStayOn=false",
-    "mWakefulness=3"
-  ]
+﻿{
+    "timestamp":  "2026-09-07T06:43:41.9328653+02:00",
+    "activatedNow":  true,
+    "displayOffRequestAccepted":  true,
+    "saverPids":  [
+
+                  ],
+    "desktop":  {
+                    "ScreenSaveActive":  "1",
+                    "ScreenSaveTimeOut":  "180",
+                    "SCRNSAVE.EXE":  "C:\\WINDOWS\\System32\\scrnsave.scr"
+                },
+    "videoIdle":  [
+                      "GUID du mode de gestion de l’alimentation : ad8c1557-d464-489f-ad7a-d6ce812ffed3  (Performances optimales)",
+                      "  GUID du sous-groupe : 7516b95f-f776-4464-8c53-06167f40cc99  (Affichage)",
+                      "    Alias de GUID : SUB_VIDEO",
+                      "    GUID du paramètre d’alimentation : 3c0bc021-c8a8-4e07-a973-6b14cbcb2b7e  (Éteindre l’affichage après)",
+                      "      Alias de GUID : VIDEOIDLE",
+                      "      Valeur minimale possible : 0x00000000",
+                      "      Valeur maximale possible : 0xffffffff",
+                      "      Incrément possible des paramètres : 0x00000001",
+                      "      Unités possibles des paramètres : secondes",
+                      "    Index actuel du paramètre de courant alternatif : 0x000000b4",
+                      "    Index actuel du paramètre de courant continu : 0x000000b4",
+                      ""
+                  ],
+    "androidStayOn":  [
+                          "0"
+                      ],
+    "androidPower":  [
+                         "  mWakefulness=Dozing",
+                         "  mStayOn=false",
+                         "mWakefulness=3"
+                     ]
 }
