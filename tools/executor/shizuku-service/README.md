@@ -231,6 +231,24 @@ supplied by the actual qualified runtime integration; the transport does not
 silently select the failed legacy Android process route when it is absent.
 `open` refuses missing deployment/interpreter inputs before native fork.
 
+For the attested cwd compatibility library, the installed backend option is:
+
+```json
+{"cwdShim":{"path":"@nativeLibraryDir/libfoldgpt_bionic_cwd.so","sha256":"ACTUAL_PACKAGED_SHA256"}}
+```
+
+The example digest is deliberately not valid deployment evidence. CMake
+compiles this library from `../bionic-cwd` into our APK's extracted native
+libraries. `InstalledLibrary` resolves the fixed basename under PackageManager's
+canonical `nativeLibraryDir` and checks its actual SHA-256 before fork. An
+absolute deployment-supplied path, another filename or a traversal is refused.
+The bootstrap independently resolves it beside the actual `/proc/self/exe`,
+matches sys.executable and the configured interpreter basename, rejects aliases
+and verifies its digest before constructing the backend. Only then is the
+resolved absolute `cwdShim.path` supplied to the native process factory.
+Package updates can change `/data/app` paths without rebuilding a path into the
+deployment JSON. The packaged shim digest still needs exact build qualification.
+
 The backend must implement `supported_methods`, `capabilities`, `mount.uri`, `files.root`,
 `handle`, `close`, and `processes.quarantined`, matching
 `NativeExecutorBackend`. Full nested policy data is passed to `ExecServer`
@@ -258,6 +276,13 @@ Verified on PC on 2026-09-07:
   malformed/coerced/duplicate reports, quarantine and pre-fork admission.
 - Two real bounded-pipe adapter tests pass: a further 1 MiB binary transfer
   under backpressure with EOF and an output failure propagated as an error.
+- Four installed-library Java tests pass: exact packaged bytes, bad/missing
+  digests/files, fixed marker and traversal/alternate-path rejection.
+- `verify-deployment-host.py` launches a real copied Python ELF in a changing
+  test package directory and checks the production resolver: actual executable
+  identity, fixed path, preserved options, wrong digest, symlink, missing file,
+  writable file and malformed schema. This proves PC admission semantics, not
+  Android package-manager or SELinux behavior.
 - `verify-native-host.py`, run in Linux as UID 65534, compiles and executes the
   actual JNI C/Java launcher with one explicitly host-only UID admission. A
   real Python child preserves 1 MiB of arbitrary binary input/output, distinct

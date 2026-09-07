@@ -4,6 +4,7 @@ This module hosts an installed, qualified backend factory. It does not implement
 or loosen that backend's sandbox. No execution configuration comes from RPC.
 """
 import asyncio
+import hashlib
 import importlib
 import json
 import os
@@ -15,6 +16,8 @@ import zipfile
 
 SCHEMA = "foldgpt.shizuku.session.v1"
 ASSET = "assets/foldgpt-executor-deployment.json"
+CWD_NAME = "libfoldgpt_bionic_cwd.so"
+CWD_PATH = "@nativeLibraryDir/" + CWD_NAME
 
 
 def report(event, **fields):
@@ -57,6 +60,43 @@ def read_deployment(apk):
     return config
 
 
+def installed_backend_options(config):
+    """Resolve the one fixed cwd library alongside the actual installed ELF.
+
+    Java already checked PackageManager.nativeLibraryDir before spawning this
+    interpreter. Never trust a deployment-provided /data/app path, environment
+    variable or an RPC argument for this relocatable package location.
+    """
+    options = dict(config["backendOptions"])
+    if "cwdShim" not in options:
+        return options
+    shim = options["cwdShim"]
+    if (type(shim) is not dict or set(shim) != {"path", "sha256"} or shim["path"] != CWD_PATH or
+            type(shim["sha256"]) is not str or re.fullmatch(r"[0-9a-f]{64}", shim["sha256"]) is None):
+        raise ValueError("cwdShim must identify the fixed installed library and its digest")
+    executable = os.readlink("/proc/self/exe")
+    if (not executable.startswith("/") or os.path.realpath(executable) != executable or
+            sys.executable != executable or os.path.basename(executable) != config["pythonLibrary"]):
+        raise ValueError("Actual bootstrap executable differs from its installed interpreter")
+    path = os.path.join(os.path.dirname(executable), CWD_NAME)
+    if os.path.realpath(path) != path:
+        raise ValueError("Installed cwd library has an alias")
+    fd = os.open(path, os.O_RDONLY | os.O_CLOEXEC | os.O_NOFOLLOW)
+    try:
+        info = os.fstat(fd)
+        if not stat.S_ISREG(info.st_mode) or info.st_mode & 0o022 or info.st_size > 16777216:
+            raise ValueError("Installed cwd library must be a bounded ordinary package file")
+        digest = hashlib.sha256()
+        while data := os.read(fd, 65536):
+            digest.update(data)
+        if digest.hexdigest() != shim["sha256"]:
+            raise ValueError("Installed cwd library digest mismatch")
+    finally:
+        os.close(fd)
+    options["cwdShim"] = {"path": path, "sha256": shim["sha256"]}
+    return options
+
+
 async def run_session(apk, control_fd=3):
     from tools.executor.exec_server import ExecServer, serve_stdio
     from tools.executor.private_exec_broker import PrivateListener
@@ -85,6 +125,7 @@ async def run_session(apk, control_fd=3):
     serving = stopping = None
     try:
         config = read_deployment(apk)
+        options = installed_backend_options(config)
         owner = PrivateListener(config["brokerDirectory"])
         owner.begin_process_session(config["workspace"])
         module_name, function_name = config["backendFactory"].split(":")
@@ -98,7 +139,7 @@ async def run_session(apk, control_fd=3):
             raise ValueError("Installed backend factory is not callable")
         # Constructor failures after entering trusted backend code cannot prove
         # that no child/resource exists. Keep the persistent marker on failure.
-        backend = factory(config["backendOptions"])
+        backend = factory(options)
         declared = os.stat(config["workspace"], follow_symlinks=False)
         pinned = os.fstat(backend.files.root)
         if not stat.S_ISDIR(pinned.st_mode) or (declared.st_dev, declared.st_ino) != (pinned.st_dev, pinned.st_ino):

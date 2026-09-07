@@ -22,3 +22,7 @@
 - Main signed debug APK builds and passes content/certificate checks. The
   existing HTTPS test cannot compile in the Android Gradle unit-test task;
   independent JVM exit-gate tests and library tests pass. No phone access occurred.
+- Package the native cwd compatibility library and admit its exact installed
+  nativeLibraryDir basename/SHA before fork. Resolve the fixed marker against
+  the actual running interpreter before backend construction, with four Java
+  tests and real process-path PC checks. No deployment is enabled by bundling it.

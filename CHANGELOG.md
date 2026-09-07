@@ -2,6 +2,8 @@
 
 ## Unreleased — 2026-09-06
 
+- Added the actual Bionic libc cwd shim and immutable APK path/digest admission. Four real native-supervisor composition tests pass for Bash/Python cwd, relative policy, reserved preload and attestation; raw chdir stays denied. The updated signed debug APK contains the shim, preserves the installed certificate and passes package/ELF checks. Sixteen transport unit tests pass; no native deployment is activated and no phone is accessed by this work.
+
 - Preserved the separate engine's exact upstream base and complete source patch in private recovery. A fresh upstream clone restores an identical patch checksum. Added complete source/archive/hydration commands for another Windows PC; the archive's live GitHub restoration is verified separately before publishing its release.
 
 - Added the authenticated Shizuku transport and app-private AF_UNIX adapter, then wired an explicitly selected native-executor owner into FoldGPT's real `:runtime` service. Qualified deployment/source/evidence hashes are mandatory; the default launcher remains unchanged. Runtime destruction now waits for verified native cleanup across service generations. The main signed debug APK builds and passes content/certificate checks; 12 library tests, four JVM ownership tests and real host JNI/ExecServer stream/EOF/cancellation checks pass. The existing HTTPS Gradle test compilation issue is recorded separately. No phone installation or launch was performed for this integration.

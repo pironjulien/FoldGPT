@@ -4,10 +4,8 @@ import android.content.Context;
 import org.json.JSONObject;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
 
 /** All execution inputs come from the installed APK, never from Binder/RPC. */
 public final class Deployment {
@@ -32,23 +30,9 @@ public final class Deployment {
             throw new SecurityException("Deployment does not identify this installed application");
         }
         String name = config.getString("pythonLibrary");
-        if (!name.matches("lib[A-Za-z0-9_]+\\.so")) throw new SecurityException("Invalid packaged interpreter");
         File directory = new File(context.getApplicationInfo().nativeLibraryDir).getCanonicalFile();
-        File file = new File(directory, name);
-        if (!file.getCanonicalFile().equals(file) || !file.isFile()) {
-            throw new SecurityException("Interpreter is not an ordinary packaged library");
-        }
-        String expected = config.getString("pythonSha256");
-        if (!expected.matches("[0-9a-f]{64}")) throw new SecurityException("Interpreter digest is missing");
-        MessageDigest digest = MessageDigest.getInstance("SHA-256");
-        try (InputStream input = new FileInputStream(file)) {
-            byte[] bytes = new byte[65536];
-            int count;
-            while ((count = input.read(bytes)) >= 0) digest.update(bytes, 0, count);
-        }
-        StringBuilder actual = new StringBuilder();
-        for (byte value : digest.digest()) actual.append(String.format(java.util.Locale.ROOT, "%02x", value & 255));
-        if (!expected.contentEquals(actual)) throw new SecurityException("Packaged interpreter digest mismatch");
+        File file = InstalledLibrary.verify(directory, name, config.getString("pythonSha256"));
+        InstalledLibrary.verifyCwd(config.getJSONObject("backendOptions"), directory);
         executable = file.getPath();
         argv = new String[] {executable, "-I", "-S", "-u", "-c", ENTRY, context.getApplicationInfo().sourceDir};
         transportLibrary = new File(directory, "libfoldgpt_shizuku_transport.so").getPath();
