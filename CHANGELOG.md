@@ -2,6 +2,12 @@
 
 ## Unreleased — 2026-09-06
 
+- Add a separate native file authority and credentialed private transport for
+  human UI operations. Complete write framing and commit precede mutation;
+  operations share the actual worker lease and quarantine. Thirty nonroot PC
+  tests pass, including real 16 MiB transfers, credential rejection, cancellation
+  and helper cleanup. Engine wiring and Android qualification remain pending.
+
 - Qualify the actual native backend through public app-server thread/start,
   turn/start and command/exec on PC: create Python code, observe failing tests,
   edit, pass three tests, build and execute a zipapp, and enforce private-file
