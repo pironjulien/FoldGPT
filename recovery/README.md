@@ -55,7 +55,7 @@ sur le PC pour conserver les liens Linux de l'archive. Les destinations doivent
 déchiffrement avant extraction, compare l'inventaire et contrôle les octets de
 chaque fichier effectivement restauré. La clé n'est jamais affichée.
 
-Le même téléchargement récupère aussi le complément actuel `native-checkpoint-v2*`.
+Le même téléchargement récupère aussi le complément `native-checkpoint-v2*`.
 Il conserve l'APK et les builds natifs figés après l'archive principale. Sa
 restauration, également vérifiée après retéléchargement GitHub, s'effectue dans
 un dossier distinct :
@@ -92,6 +92,39 @@ Les liens absolus sont conservés avec leur cible originale ; les sorties de
 build dépendant d'un ancien chemin doivent être reconstruites, pas exécutées
 aveuglément. `android/local.properties` conserve le chemin SDK du premier PC :
 le régénérer si l'emplacement du SDK diffère sur le second.
+
+## Dernier complément : qualification Android v6/v7
+
+Le complément **`native-checkpoint-v3*`** ajoute les stages Python/APK,
+le superviseur figé, les petits builds Python provenant de WSL, les tests PC
+et toutes les preuves des derniers essais Android. Il complète l'archive
+principale et v2. SHA-256 chiffré :
+`7f4b00b2963d7f5e39e28b5ca077697f7c4e0a9519ce1082644aa97d9aeb8c5b`.
+Les 224 870 091 octets ont été retéléchargés depuis GitHub, déchiffrés puis
+extraits : **8 462 fichiers et un lien vérifiés**, soit 385 929 107 octets de
+fichiers. Voir le [rapport de restauration](verification/github-supplement-v3-restoration.json).
+
+Après l'hydratation principale, restaurer ce complément dans un autre dossier,
+puis ajouter ses fichiers ignorés au clone. Le rapport doit être un fichier neuf
+hors du clone et du snapshot ; aucune donnée différente n'est écrasée.
+
+```powershell
+wsl --distribution Ubuntu-24.04 --exec python3 /mnt/c/Dev/ChatgptFold/tools/recovery/restore-archive.py --assets /mnt/c/Dev/FoldGPT-recovery/downloaded --manifest native-checkpoint-v3-manifest.json --identity $foldRecoveryKeyLinux --destination /var/tmp/foldgpt-native-v3 --report /mnt/c/Dev/FoldGPT-recovery/native-v3-verification.json
+wsl --distribution Ubuntu-24.04 --exec python3 /mnt/c/Dev/ChatgptFold/tools/recovery/merge-supplement.py --snapshot /var/tmp/foldgpt-native-v3/foldgpt-native-artifacts-v3-20260907 --project /mnt/c/Dev/ChatgptFold --report /mnt/c/Dev/FoldGPT-recovery/native-v3-merge.json
+```
+
+Le runtime Python recompilé et ses preuves sont alors sous
+`downloads/kernel-python-builds/foldgpt-bionic-python-rsemaYBI`.
+Le dernier APK du laboratoire est `tools/executor/shizuku-lab/build/kernel-v7-setup/app-debug.apk`.
+Les anciens APK restent associés à leurs propres preuves. Le v7 installé a
+rencontré un refus Java d'admission ; il ne valide pas le worker natif. Lire
+[HANDOFF.md](HANDOFF.md) et le rapport Android avant toute opération sur le Fold.
+
+Cette fusion a été exécutée sur le clone Windows déjà hydraté puis vérifiée
+indépendamment : **8 461 fichiers du projet et un lien, tous exacts**, sans
+modification des sources Git ni remplacement de données. Le fichier d'identité
+de l'archive `CHECKPOINT.json` reste dans le snapshot. Voir la
+[preuve de fusion](verification/github-supplement-v3-merge.json).
 
 ## Récupérer le moteur séparé
 

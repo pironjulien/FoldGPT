@@ -2,6 +2,8 @@
 
 ## Unreleased — 2026-09-06
 
+- Published the private v3 recovery supplement and verified its actual GitHub download, authenticated decryption and all 8,462 restored files plus one link. Merged its 8,461 project files and link into the already hydrated Windows clone, independently rechecked every byte/link and confirmed no tracked source change. The remaining file is archive identity metadata kept outside Git.
+
 - Added a versioned diagnostic APK reusing the existing Shizuku laboratory authorization. The real v6 bootstrap was reaped with exit70 before native worker execution; v7 preserves that evidence and adds bounded setup errors, but its actual attempt stopped earlier at Java admission. Neither result qualifies the kernel. Added additive Git recovery with real conflict, tracked-path and exclusive-report checks; all five regressions pass.
 
 - Added exclusive staging and independent device snapshots for the fixed native kernel qualification. The actual v2 Fold fixture is verified for exact bytes, ownership and permissions; the collector preserves remote exit status and transfers file bytes as base64 to avoid this Windows ADB build's stdout newline conversion. Earlier invalid collection attempts are preserved and explicitly superseded. This prepares the trial without claiming native execution.
