@@ -47,26 +47,28 @@ def emit_event(event, **fields):
         pass
 
 
-class PrivateListener:
-    """Pin a private directory and never remove somebody else's socket/file."""
+class PrivateSessionOwner:
+    """Own a fixed endpoint independently of the authenticated RPC transport.
+
+    The stdio host and Unix listener share the same pinned directory, flock and
+    persistent process marker. Stdio does not need a filesystem socket, but must
+    still refuse one left by a previous listener with unverified cleanup.
+    """
     def __init__(self, directory):
         self.directory = Path(directory).absolute()
-        self.fd = self.lock = self.listener = self.identity = None
+        self.fd = self.lock = None
         self.process_identity = None
         self.quarantined = False
         self.retained_backend = None
-        self.path = self.directory / SOCKET_NAME
         try:
             if os.getuid() == 0 or os.getuid() != os.geteuid():
                 raise PermissionError("Broker requires an ordinary non-root application UID")
             if self.directory != self.directory.resolve(strict=True):
-                raise ValueError("Socket directory aliases are unsupported")
-            if len(os.fsencode(self.path)) >= 108:
-                raise ValueError("Unix socket path exceeds sockaddr_un capacity")
+                raise ValueError("Broker directory aliases are unsupported")
             self.fd = os.open(self.directory, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW | os.O_CLOEXEC)
             info = os.fstat(self.fd)
             if info.st_uid != os.getuid() or stat.S_IMODE(info.st_mode) & 0o077:
-                raise PermissionError("Socket directory must be owned and private")
+                raise PermissionError("Broker directory must be owned and private")
             self.lock = os.open("broker.lock", os.O_RDWR | os.O_CREAT | os.O_NOFOLLOW | os.O_CLOEXEC,
                                 0o600, dir_fd=self.fd)
             lock_info = os.fstat(self.lock)
@@ -88,18 +90,8 @@ class PrivateListener:
                 pass
             else:
                 raise FileExistsError("Broker socket path already exists")
-            self.listener = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-            self.listener.set_inheritable(False)
-            self.listener.bind(str(self.path))
-            info = os.stat(SOCKET_NAME, dir_fd=self.fd, follow_symlinks=False)
-            self.identity = (info.st_dev, info.st_ino)
-            if not stat.S_ISSOCK(info.st_mode) or info.st_uid != os.getuid():
-                raise PermissionError("Bound socket ownership differs")
-            os.chmod(SOCKET_NAME, 0o600, dir_fd=self.fd, follow_symlinks=False)
-            self.listener.listen(1)
-            self.listener.setblocking(False)
         except BaseException:
-            self.close()
+            PrivateSessionOwner.close(self)
             raise
 
     def begin_process_session(self, workspace):
@@ -141,6 +133,38 @@ class PrivateListener:
         self.process_identity = None
 
     def close(self):
+        if self.lock is not None:
+            os.close(self.lock)
+            self.lock = None
+        if self.fd is not None:
+            os.close(self.fd)
+            self.fd = None
+
+
+class PrivateListener(PrivateSessionOwner):
+    """Add an actual Unix listener to the shared persistent endpoint owner."""
+    def __init__(self, directory):
+        self.listener = self.identity = None
+        super().__init__(directory)
+        try:
+            self.path = self.directory / SOCKET_NAME
+            if len(os.fsencode(self.path)) >= 108:
+                raise ValueError("Unix socket path exceeds sockaddr_un capacity")
+            self.listener = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+            self.listener.set_inheritable(False)
+            self.listener.bind(str(self.path))
+            info = os.stat(SOCKET_NAME, dir_fd=self.fd, follow_symlinks=False)
+            self.identity = (info.st_dev, info.st_ino)
+            if not stat.S_ISSOCK(info.st_mode) or info.st_uid != os.getuid():
+                raise PermissionError("Bound socket ownership differs")
+            os.chmod(SOCKET_NAME, 0o600, dir_fd=self.fd, follow_symlinks=False)
+            self.listener.listen(1)
+            self.listener.setblocking(False)
+        except BaseException:
+            self.close()
+            raise
+
+    def close(self):
         if self.listener is not None:
             self.listener.close()
             self.listener = None
@@ -152,12 +176,7 @@ class PrivateListener:
             except FileNotFoundError:
                 pass
             self.identity = None
-        if self.lock is not None:
-            os.close(self.lock)
-            self.lock = None
-        if self.fd is not None:
-            os.close(self.fd)
-            self.fd = None
+        super().close()
 
 
 async def serve_connection(connection, identity, helper, workspace, guest_workspace, handle_helper=None,

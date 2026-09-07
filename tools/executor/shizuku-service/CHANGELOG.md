@@ -2,6 +2,15 @@
 
 ## 2026-09-07
 
+- Split persistent session ownership from Unix socket transport after the real
+  Shizuku bootstrap failed at bind. Authenticated stdio retains the shared
+  flock, pinned directory, persistent marker and stale-socket refusal; the
+  existing Unix listener still authenticates actual peer credentials. Twelve
+  nonroot process/filesystem tests and the real bootstrap lifecycle pass.
+  Native policy and cleanup requirements are unchanged. Diagnostic staging
+  includes the current reviewed owner while keeping native implementation
+  inputs frozen; source hashes identify that exact composition.
+
 - Preserve bounded actual admission causes/stages in authenticated service
   status, including pre-session failures; add a read-only preflight that runs
   identical installed-input checks in the real UserService without loading JNI

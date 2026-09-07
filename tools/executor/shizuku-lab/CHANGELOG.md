@@ -2,6 +2,21 @@
 
 ## 2026-09-07
 
+- Version10 hosts the authenticated stdio bootstrap with PrivateSessionOwner.
+  It retains the pinned directory, flock, stale-socket refusal and persistent
+  marker without opening an unused listener. All84 native ELF and deployment
+  bytes match v9; only broker/bootstrap assets and their manifest change.
+  Twelve real nonroot owner tests and actual bootstrap lifecycle checks pass.
+  The Activity pins report action identity and rejects a new Intent while its
+  Java worker still runs, including after a reporting deadline. Reports use
+  kernel-v6 and only KERNEL_RUN_FIXED_V10 reserves this revision. These are
+  PC/build results; the phone evidence is recorded separately.
+
+- Version9's explicit launch reached a real bootstrap bind refusal, errno13,
+  with JNI wait/cleanup complete and no kernel worker launched. Its inherited
+  old Intent was rejected before a reservation. V7/v8 admission reports came
+  from automatic update replay before restaging, not explicit later trials.
+
 - Version8 adds an authenticated read-only UserService preflight and bounded
   actual admission stage/cause reporting after v7 lost its pre-session error
   across Binder. Fixed read-only actions inspect the previous v3 service with

@@ -93,7 +93,7 @@ build dépendant d'un ancien chemin doivent être reconstruites, pas exécutées
 aveuglément. `android/local.properties` conserve le chemin SDK du premier PC :
 le régénérer si l'emplacement du SDK diffère sur le second.
 
-## Dernier complément : qualification Android v6/v7
+## Complément v3 : qualification Android v6/v7
 
 Le complément **`native-checkpoint-v3*`** ajoute les stages Python/APK,
 le superviseur figé, les petits builds Python provenant de WSL, les tests PC
@@ -115,7 +115,7 @@ wsl --distribution Ubuntu-24.04 --exec python3 /mnt/c/Dev/ChatgptFold/tools/reco
 
 Le runtime Python recompilé et ses preuves sont alors sous
 `downloads/kernel-python-builds/foldgpt-bionic-python-rsemaYBI`.
-Le dernier APK du laboratoire est `tools/executor/shizuku-lab/build/kernel-v7-setup/app-debug.apk`.
+L'APK v7 de ce complément est `tools/executor/shizuku-lab/build/kernel-v7-setup/app-debug.apk`.
 Les anciens APK restent associés à leurs propres preuves. Le v7 installé a
 rencontré un refus Java d'admission ; il ne valide pas le worker natif. Lire
 [HANDOFF.md](HANDOFF.md) et le rapport Android avant toute opération sur le Fold.
@@ -125,6 +125,35 @@ indépendamment : **8 461 fichiers du projet et un lien, tous exacts**, sans
 modification des sources Git ni remplacement de données. Le fichier d'identité
 de l'archive `CHECKPOINT.json` reste dans le snapshot. Voir la
 [preuve de fusion](verification/github-supplement-v3-merge.json).
+
+## Complément v4 : diagnostics Android v8/v9
+
+Le complément **`native-checkpoint-v4*`** ajoute les APK v8/v9, le stage v8
+et les preuves réelles : ancien Intent rejeté sans réservation v9, préflight
+admis après préparation, puis refus de `bind` au démarrage du bootstrap.
+Il complète les archives principale, v2 et v3. Aucun worker noyau n'a été lancé.
+
+Les **86 998 467 octets chiffrés** ont été retéléchargés depuis GitHub,
+authentifiés puis extraits : **2 928 fichiers vérifiés**, soit 141 071 743 octets.
+SHA-256 chiffré :
+`e35e7e59659929b55e9b432cab1e496f40640ab993501d04f8f509e8ed0648a1`.
+Voir la [preuve de restauration](verification/github-supplement-v4-restoration.json).
+
+Après la fusion du v3, suivre la même procédure additive dans des dossiers neufs :
+
+```powershell
+wsl --distribution Ubuntu-24.04 --exec python3 /mnt/c/Dev/ChatgptFold/tools/recovery/restore-archive.py --assets /mnt/c/Dev/FoldGPT-recovery/downloaded --manifest native-checkpoint-v4-manifest.json --identity $foldRecoveryKeyLinux --destination /var/tmp/foldgpt-native-v4 --report /mnt/c/Dev/FoldGPT-recovery/native-v4-verification.json
+wsl --distribution Ubuntu-24.04 --exec python3 /mnt/c/Dev/ChatgptFold/tools/recovery/merge-supplement.py --snapshot /var/tmp/foldgpt-native-v4/foldgpt-native-artifacts-v4-20260907 --project /mnt/c/Dev/ChatgptFold --report /mnt/c/Dev/FoldGPT-recovery/native-v4-merge.json
+```
+
+Cette fusion a été exécutée sur le clone Windows déjà hydraté : **2 927 fichiers
+du projet vérifiés indépendamment**, sans modification des sources ni écrasement
+de données. `CHECKPOINT.json` reste dans le snapshot. Voir la
+[preuve de fusion](verification/github-supplement-v4-merge.json).
+
+L'APK v9 figé est `tools/executor/shizuku-lab/build/kernel-v9-launch/app-debug.apk`.
+Les sources courantes peuvent avoir progressé depuis cet APK ; lire le
+[point de reprise](HANDOFF.md) avant tout nouveau build ou essai.
 
 ## Récupérer le moteur séparé
 

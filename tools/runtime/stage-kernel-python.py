@@ -25,7 +25,7 @@ def main():
     parser.add_argument('--stage', required=True, type=Path)
     parser.add_argument('--output', required=True, type=Path)
     parser.add_argument('--package', choices=(PACKAGE, 'app.foldgpt.shizukuprobe'), default=PACKAGE)
-    parser.add_argument('--lab-report-version', choices=(2, 3, 4, 5), type=int, default=2,
+    parser.add_argument('--lab-report-version', choices=(2, 3, 4, 5, 6), type=int, default=2,
                         help='Fixed laboratory report generation; does not change the native fixture')
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=False)

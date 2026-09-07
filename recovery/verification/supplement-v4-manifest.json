@@ -1,0 +1,25 @@
+{
+  "format": 1,
+  "startedUtc": "2026-09-07T03:41:07.457448+00:00",
+  "completedUtc": "2026-09-07T03:41:09.969786+00:00",
+  "roots": [
+    "foldgpt-native-artifacts-v4-20260907"
+  ],
+  "entries": 3229,
+  "uncompressedFileBytes": 141071743,
+  "excludedDirectoryNames": [
+    ".cxx",
+    ".git",
+    ".gradle",
+    "__pycache__",
+    "target"
+  ],
+  "encryptedSha256": "e35e7e59659929b55e9b432cab1e496f40640ab993501d04f8f509e8ed0648a1",
+  "parts": [
+    {
+      "name": "native-checkpoint-v4.tar.gz.age.part001",
+      "bytes": 86998467,
+      "sha256": "e35e7e59659929b55e9b432cab1e496f40640ab993501d04f8f509e8ed0648a1"
+    }
+  ]
+}

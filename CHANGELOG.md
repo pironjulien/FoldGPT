@@ -2,9 +2,19 @@
 
 ## Unreleased — 2026-09-06
 
+- Published and restored the private v4 supplement from GitHub: 2,928 exact
+  files, including v8/v9 artifacts and real phone reports. Its 2,927 project
+  files also merge exactly into the hydrated Windows clone. Track the root
+  handoff so restoration cannot revive the obsolete completion claims.
+- Separated persistent session ownership from the authenticated stdio host
+  after v9 identified the real bind refusal. Twelve nonroot owner tests and
+  actual bootstrap lifecycle checks pass; lab v10 builds with unchanged native
+  code and deployment. This PC verification does not qualify Android execution.
+
 - Published the private v3 recovery supplement and verified its actual GitHub download, authenticated decryption and all 8,462 restored files plus one link. Merged its 8,461 project files and link into the already hydrated Windows clone, independently rechecked every byte/link and confirmed no tracked source change. The remaining file is archive identity metadata kept outside Git.
 
-- Added a versioned diagnostic APK reusing the existing Shizuku laboratory authorization. The real v6 bootstrap was reaped with exit70 before native worker execution; v7 preserves that evidence and adds bounded setup errors, but its actual attempt stopped earlier at Java admission. Neither result qualifies the kernel. Added additive Git recovery with real conflict, tracked-path and exclusive-report checks; all five regressions pass.
+- Corrected the v7/v8 diagnostic chronology: their retained admission reports were generated automatically by restored Activity Intents during APK updates, before Python aliases were restaged, and do not prove later explicit executions. The v8 preflight identifies the stale alias and passes after restaging. V9 rejects the inherited unversioned run action without reserving an attempt and requires `KERNEL_RUN_FIXED_V9`, with separate kernel-v5 reports and service version5. Its later explicit trial passes admission but confirms `PermissionError` errno13 at the broker's AF_UNIX bind, before any native worker. The bootstrap is reaped with exit70 and complete transport cleanup; independent inspection confirms the service PID absent, only the empty broker lock, and unchanged fixture, boot, integrity indicators and package hashes. Native evidence remains absent and the collector retains `success:false`; Android `/proc/TID/mem` and `pidfd_getfd` are still unmeasured. Documented the limited Activity lifecycle review: a reporting deadline can precede worker completion, so the Activity must not be reused after timeout. Replaced the obsolete root handoff with current private recovery pointers.
+- Added diagnostic APKs reusing the existing Shizuku laboratory authorization. The real v6 bootstrap was reaped with exit70 before native worker execution; later versions preserve that evidence and add bounded setup/admission diagnostics. These observations do not qualify the kernel. Added additive Git recovery with real conflict, tracked-path and exclusive-report checks; all five regressions pass.
 
 - Added exclusive staging and independent device snapshots for the fixed native kernel qualification. The actual v2 Fold fixture is verified for exact bytes, ownership and permissions; the collector preserves remote exit status and transfers file bytes as base64 to avoid this Windows ADB build's stdout newline conversion. Earlier invalid collection attempts are preserved and explicitly superseded. This prepares the trial without claiming native execution.
 

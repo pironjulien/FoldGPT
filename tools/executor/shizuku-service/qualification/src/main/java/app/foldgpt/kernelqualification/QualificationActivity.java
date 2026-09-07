@@ -30,11 +30,11 @@ import rikka.shizuku.Shizuku;
 
 /** One fixed kernel diagnostic, through the production authenticated transport. */
 public final class QualificationActivity extends Activity {
-    private static final String REPORT_DIRECTORY = "kernel-v5";
+    private static final String REPORT_DIRECTORY = "kernel-v6";
     private static final String COLLECT_ACTION = ".KERNEL_COLLECT_INFO";
     // Android can restore the previous Activity Intent after a package update.
     // An earlier APK's launch action must never reserve this revision's trial.
-    private static final String RUN_ACTION = ".KERNEL_RUN_FIXED_V9";
+    private static final String RUN_ACTION = ".KERNEL_RUN_FIXED_V10";
     private static final String PREFLIGHT_ACTION = ".KERNEL_PREFLIGHT";
     private static final String OLD_STATUS_ACTION = ".KERNEL_STATUS_V3";
     private final Handler main = new Handler(Looper.getMainLooper());
@@ -48,6 +48,7 @@ public final class QualificationActivity extends Activity {
     private boolean bound, permissionRequested, finished, running;
     private boolean preflightOnly, oldStatusOnly;
     private String reportName = "report.json";
+    private String requestedAction;
     private Shizuku.UserServiceArgs args;
     private final Shizuku.OnBinderReceivedListener received = () -> main.post(this::bind);
     private final Shizuku.OnBinderDeadListener dead = () -> main.post(() -> fail("Shizuku Binder lost; no retry"));
@@ -70,6 +71,7 @@ public final class QualificationActivity extends Activity {
     };
     @Override protected void onCreate(Bundle state) {
         super.onCreate(state);
+        requestedAction = getIntent().getAction();
         text = new TextView(this); text.setTextIsSelectable(true); text.setPadding(24, 24, 24, 24); setContentView(text);
         if ((getPackageName() + COLLECT_ACTION).equals(getIntent().getAction())) {
             try {
@@ -100,8 +102,8 @@ public final class QualificationActivity extends Activity {
                 .put("nativeLibraryDir", getApplicationInfo().nativeLibraryDir).put("clientUid", android.os.Process.myUid()));
             text.setText("Waiting for official Shizuku authorization");
             args = new Shizuku.UserServiceArgs(new ComponentName(this, ExecutorService.class))
-                .daemon(false).tag(oldStatusOnly ? "foldgpt-kernel-qualification-v3" : "foldgpt-kernel-qualification-v5")
-                .version(oldStatusOnly ? 3 : 5)
+                .daemon(false).tag(oldStatusOnly ? "foldgpt-kernel-qualification-v3" : "foldgpt-kernel-qualification-v6")
+                .version(oldStatusOnly ? 3 : 6)
                 .processNameSuffix("kernelqualification").debuggable(false);
             Shizuku.addBinderDeadListener(dead);
             Shizuku.addRequestPermissionResultListener(permission);
@@ -145,7 +147,7 @@ public final class QualificationActivity extends Activity {
         JSONObject result = new JSONObject();
         try {
             result.put("schema", "foldgpt.android-service-inspection.v1").put("servicePresent", true)
-                .put("nativeSpawnAttempted", false).put("operation", oldStatusOnly ? "previous_v3_status" : "preflight_v4");
+                .put("nativeSpawnAttempted", false).put("operation", oldStatusOnly ? "previous_v3_status" : "preflight_v6");
             if (preflightOnly) result.put("preflight", boundedServiceReport(service.preflight()));
             result.put("serviceStatus", boundedServiceReport(service.status()));
         } catch (Exception error) {
@@ -270,6 +272,8 @@ public final class QualificationActivity extends Activity {
     }
     private void complete(JSONObject result) {
         // Late real cleanup evidence is valuable even after the reporting deadline.
+        // This callback follows actual worker completion, unlike fail(deadline).
+        running = false;
         finished = true;
         try { persist(result); text.setText(result.toString(2)); } catch (Exception error) { text.setText(error.toString()); }
         releaseIfClean();
@@ -296,7 +300,7 @@ public final class QualificationActivity extends Activity {
         }
     }
     private void persist(JSONObject report) throws Exception {
-        report.put("diagnosticVersion", 9).put("requestedAction", getIntent().getAction())
+        report.put("diagnosticVersion", 10).put("requestedAction", requestedAction)
             .put("recordedWallTimeMs", System.currentTimeMillis())
             .put("recordedElapsedRealtimeMs", SystemClock.elapsedRealtime());
         AtomicFile file = new AtomicFile(new File(reportDirectory(), reportName));
@@ -315,7 +319,7 @@ public final class QualificationActivity extends Activity {
         super.onNewIntent(intent);
         // Explicit am start may deliver to the existing top Activity. Previously
         // this was ignored and the caller unknowingly read an older report.
-        if (!finished || (nativeOpenAttempted && !cleanupComplete)) {
+        if (!finished || running || (nativeOpenAttempted && !cleanupComplete)) {
             text.append("\nNew action refused while prior work or ownership remains unresolved.");
             return;
         }

@@ -137,6 +137,7 @@ def run():
                     continue
                 assert read_line(process.stderr)["event"] == "ready"
                 assert (broker / "process-session.json").exists()
+                assert not (broker / "exec.sock").exists(), "Authenticated stdio must not bind an unused socket"
                 process.stdin.write(b'{"id":1,"method":"initialize","params":{"clientName":"transport-host"}}\n')
                 assert "result" in read_line(process.stdout)
                 process.stdin.write(b'{"method":"initialized"}\n')

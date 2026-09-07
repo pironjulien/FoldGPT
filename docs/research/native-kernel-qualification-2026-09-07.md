@@ -98,28 +98,82 @@ ChatGPT et FoldGPT restent intacts. Aucun réglage Shizuku, verrou du téléphon
 ou mécanisme de sécurité Android n'a été modifié. La mesure effective des
 mécanismes noyau reste à effectuer.
 
-## Laboratoire v7 : refus d'admission avant retour de la session
+## Laboratoires v7/v8 : rapports automatiques avant restaging
 
 L'APK v7 `0f7a673f8b5ec14f09368ebd31d974bbc5d0540617ff91e7d433fe65a072c82d`
 ajoute un diagnostic bootstrap privé borné. Les 84 ELF et le déploiement sont
 identiques à v6 ; vingt tests JVM et les vrais tests bootstrap PC passent. La
 revue indépendante a contrôlé APK, signature, sources et manifeste.
 
-Après mise à jour normale, les anciens rapports ont gardé leurs empreintes.
-Le runtime a été récupéré et revérifié contre le nouveau chemin réel d'APK
-(2 447 fichiers, 81 alias, 82 empreintes). L'unique action v7 a pourtant été
-refusée par `ExecutorService.open` avec `Executor admission failed`, avant
-retour de la session : aucun transport, frame RPC ou rapport natif n'est fourni.
-Le rapport ne revendique donc pas de nettoyage (`transportCleanupComplete:false`).
-Les preuves sont dans `downloads/native-kernel-trial/lab-v7-admission-refusal`.
-Le marqueur `files/kernel-v3/attempt-started` reste conservé.
+Les rapports v7/v8 conservés ont été produits automatiquement pendant les
+mises à jour, par restauration de l'ancien Intent de l'Activity, **avant le
+restaging des alias Python vers le nouvel APK**. Ils ne prouvent donc pas de
+nouveaux essais explicites après restaging. La chronologie est conservée dans
+`downloads/native-kernel-trial/lab-v8-inspection/report-times.txt` ; notamment
+la réservation et le rapport v8 précèdent son préflight ultérieur.
 
-La cause Java est actuellement masquée par l'exception Binder générique ; cette
-mesure ne confirme pas l'hypothèse de socket. Le UserService PID6162 est encore
-présent au dernier contrôle. Ses maps référencent le véritable APK v7, sans
-bibliothèque `libfoldgpt` visible, et son contexte lu est shell UID/GID2000,
-capEff0, seccomp0. Le broker ne contient toujours que le verrou vide, sans
-socket ni marqueur de session. L'état exact du service doit être lu avant sa
-fermeture ; la simple absence de worker n'est pas une preuve de nettoyage.
-Prochaine étape : diagnostic d'admission Java et contrôle préalable en lecture
-seule dans le vrai UserService. Aucun nouvel essai identique ne doit être lancé.
+Le rapport v7 porte `Executor admission failed` avant retour de session, sans
+frame RPC ni preuve native et avec `transportCleanupComplete:false`. Il reste
+dans `lab-v7-admission-refusal`, avec la réservation `files/kernel-v3` intacte.
+Son erreur Binder générique ne révèle pas la cause imbriquée. PID6162 et ses
+maps v7 étaient des observations de cette collecte historique, pas un état
+actuel. Le statut de l'ancien service, lu ensuite sans le créer, le trouve
+absent mais conserve `ownershipEstablished:false` : cela ne prouve pas son
+nettoyage précédent.
+
+V8 (`76f58714ac9900c7162b291822cd8b620916766c87945bdcf9e607beee26fee4`)
+ajoute le diagnostic Java d'admission. Son premier préflight refuse
+`python_aliases` : `lib/engines-3/afalg.so` cible l'ancien chemin d'APK.
+Après reconstruction des alias, `lab-v8-inspection/preflight-restaged.json`
+passe dans le véritable UserService UID2000, version installée8, état idle,
+avec `nativeSpawnAttempted:false`. L'admission des entrées est ainsi vérifiée ;
+elle ne constitue pas une exécution du worker. Conserver aussi `files/kernel-v4`.
+
+## Laboratoire v9 : rejeu refusé puis blocage bind réellement identifié
+
+L'APK v9
+`7fa98c225e88dc912620cc37fe178713c753a5168ee393b2f5feaa1edfb19819`
+conserve les 84 ELF et les 27 assets du v8. Sa signature, son manifeste, les
+82 empreintes natives, 22 sources empaquetées et 13 sources figées ont été
+vérifiés indépendamment sur PC. Les 24 résultats JVM sont réutilisés du v8 ;
+ils ne qualifient pas le nouveau comportement Android de lancement.
+
+Seule l'action `KERNEL_RUN_FIXED_V9` peut réserver un essai v9, dans
+`files/kernel-v5`, avec le service tag `foldgpt-kernel-qualification-v5`,
+version5. Le téléphone a réellement restauré l'ancien `KERNEL_RUN_FIXED` :
+`lab-v9-inspection/inherited-intent-refusal.json` enregistre son refus et la
+version9 ; `inherited-intent-directory.txt` constate l'absence de réservation
+à ce stade. Tous ces chemins de preuves sont sous `downloads/native-kernel-trial`.
+
+L'action v9 explicite exécutée ensuite est distincte de ce rejeu. Son rapport
+enregistre l'action versionnée et les heures civile/monotone. Le préflight
+réel passe en version9, UID2000, PID9798, état idle. Le libellé `preflight_v4`
+est seulement historique ; il ne change ni la version installée ni le service
+cible. Le bootstrap échoue ensuite à `broker_open`, avec `PermissionError`,
+errno13, dans `private_exec_broker.py:93` : c'est l'appel `bind()` AF_UNIX.
+Cette opération en échec est désormais identifiée ; la règle Android à
+l'origine du refus reste à déterminer.
+
+Le transport n'atteint pas `ready`, ne produit aucune frame et ne lance aucun
+worker. `bootstrapReaped=true`, `cleanupComplete=true`, `waitStatus=17920`
+(sortie70), `ownerRetained=false` et `quarantined=false` sont réellement
+rapportés. Le contrôle indépendant constate PID9798 absent, la fixture, le
+boot, les indicateurs d'intégrité et les APK inchangés. Le broker ne contient
+que `broker.lock`, vide ; la réservation v9 reste conservée. Les preuves sont
+`lab-v9-bootstrap-refusal/app-report.json`,
+`lab-v9-bootstrap-refusal/independent-verification.json`,
+`lab-v9-cleanup-inspection/snapshot.json` et
+`lab-v9-cleanup-inspection/broker-and-marker-listing.txt`.
+
+Le collecteur conserve correctement `success:false` : aucun `evidence.json`
+natif n'existe. `/proc/TID/mem`, `pidfd_getfd` et leurs variantes depuis un
+thread secondaire restent **non mesurés dans ce worker Android**. La prochaine
+étape porte sur le refus de `bind()` dans le contexte réel, sans modifier
+SELinux, le noyau ou les protections du téléphone.
+
+`onNewIntent` évite de laisser silencieusement un ancien rapport lors d'une
+nouvelle action. Sa revue de cycle de vie reste limitée : `finished` peut être
+fixé par le délai de rapport avant la fin du worker Java. Ne pas réutiliser
+l'Activity après timeout, ni assimiler ce drapeau à une fin d'opération ou à
+un nettoyage. L'essai v9 étant réservé, aucun rejeu ni effacement de marqueur
+n'est autorisé par cette procédure.

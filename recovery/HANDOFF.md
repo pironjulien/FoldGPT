@@ -39,18 +39,36 @@ ancien checkpoint ; il ne reçoit pas cette sauvegarde privée.
 
 ## Suite concrète
 
-1. Le diagnostic Android est désormais installé dans le laboratoire autorisé
-   `app.foldgpt.shizukuprobe` v7. V6 a réellement lancé le bootstrap UID2000,
-   sorti70 avant `ready` et avant le worker, avec attente JNI et nettoyage
-   complets. V7 ajoute les erreurs bootstrap précises, mais son essai a rencontré
-   un refus Java d'admission avant retour de session. Le service PID6162 reste
-   présent au dernier contrôle, sans preuve de cleanup v7. Conserver les rapports
-   et réservations `files/kernel-v2` et `files/kernel-v3`. Prochaine étape :
-   diagnostic Java/préflight en lecture seule et lecture du statut de l'ancien
-   service avant toute fermeture ou nouvelle tentative. Voir le
-   [rapport actuel](../docs/research/native-kernel-qualification-2026-09-07.md).
-   Les chemins APK et les 81 alias Python ont été résolus et vérifiés contre le
-   vrai `nativeLibraryDir`. Il faut les recalculer après chaque installation.
+1. Le laboratoire autorisé `app.foldgpt.shizukuprobe` est passé au v9. V6 a
+   réellement lancé le bootstrap UID2000, sorti70 avant `ready` et avant le
+   worker, avec attente JNI et nettoyage complets. Les rapports de refus v7/v8
+   ont été produits automatiquement lors des mises à jour, par restauration
+   de l'ancien Intent **avant le restaging des alias**. Ils ne prouvent pas de
+   nouveaux essais explicites après ce restaging. Les dates conservées dans
+   `downloads/native-kernel-trial/lab-v8-inspection/report-times.txt` établissent
+   cette distinction. Le préflight v8 après restaging passe ; son premier refus
+   identifiait un alias Python pointant vers l'ancien APK.
+   V9 refuse réellement l'ancien `KERNEL_RUN_FIXED` restauré, sans créer
+   `attempt-started` : voir `lab-v9-inspection/inherited-intent-refusal.json`
+   et `inherited-intent-directory.txt` sous le même dossier de preuves.
+   Son préflight passe également, sans lancement natif. Seule l'action explicite
+   `KERNEL_RUN_FIXED_V9` peut réserver l'essai, dans `files/kernel-v5`, avec le
+   service tag/version5. Cet essai explicite a ensuite réellement atteint le
+   bootstrap : `broker_open` échoue avec `PermissionError`, errno13, sur le
+   `bind()` AF_UNIX de `private_exec_broker.py:93`, avant tout worker. Le bootstrap
+   a été attendu et nettoyé (`waitStatus=17920`, `bootstrapReaped` et
+   `cleanupComplete` vrais, sans owner retenu ni quarantaine). La collecte
+   `lab-v9-cleanup-inspection` constate PID9798 absent, broker.lock seul, fixture,
+   boot, indicateurs et APK inchangés. Le collecteur reste `success:false` faute
+   de preuve native. Résoudre ce refus de bind avant de qualifier le noyau.
+   Conserver toutes les réservations et preuves v2/v3/v4/v5. Voir le
+   [rapport actuel](../docs/research/native-kernel-qualification-2026-09-07.md)
+   et la [procédure v9](../tools/executor/shizuku-lab/ADMISSION-DIAGNOSTIC.md).
+   Recalculer les 81 alias contre le vrai `nativeLibraryDir` après chaque
+   installation. Le libellé RPC `preflight_v4` est historique ; il ne désigne
+   pas la version installée. Ne pas réutiliser l'Activity après un timeout :
+   `finished` peut être fixé par le délai avant la fin du worker Java et ne
+   constitue pas une preuve de fin des opérations ou du nettoyage natif.
 2. Après résolution de ce démarrage, qualifier `/proc/TID/mem`, `pidfd_getfd` et les mêmes accès depuis un thread
    secondaire dans le **véritable UserService Shizuku**. La
    [qualification minimale](../tools/executor/bionic-supervisor/qualification.md)
@@ -87,7 +105,7 @@ version plus ancienne dans l'archive.
 - Le SDK Shizuku ne recrée pas les droits ADB après un reboot. Le démarrage
   automatique modifiant la durée de confiance ADB n'a pas été activé.
 
-Dernière inspection du téléphone, en lecture seule le 7 septembre vers 03:27 :
+Inspection archivée du téléphone, en lecture seule le 7 septembre vers 03:27 :
 boot `348d453e-f4e5-40e0-8ef0-030f4d5e38af` inchangé, warranty bit 0,
 verified boot green, flash locked 1, SELinux Enforcing. Mémoire totale visible
 11 351 456 kB, disponible à cet instant 4 663 908 kB ; ce dernier chiffre varie.

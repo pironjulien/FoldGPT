@@ -91,7 +91,11 @@ def main():
         directory = target / package
         directory.mkdir(parents=True, exist_ok=True)
         (directory / "__init__.py").write_bytes(b"")
-    sources = [(frozen / "package/tools/executor" / (name + ".py"), "tools/executor/" + name + ".py") for name in MODULES]
+    # The fixed native implementation remains frozen. Session ownership is
+    # supplied by the reviewed current broker shared with the stdio bootstrap.
+    sources = [((REPO / "tools/executor" if name == "private_exec_broker" else
+                 frozen / "package/tools/executor") / (name + ".py"),
+                "tools/executor/" + name + ".py") for name in MODULES]
     sources += [(frozen / "package/tools/policy/managed_policy.py", "tools/policy/managed_policy.py")]
     sources += [(frozen / "package/tools/executor/bionic-supervisor" / (name + ".py"), "tools/executor/bionic-supervisor/" + name + ".py")
                 for name in ("factory", "policy", "processes", "wire", "qualification")]

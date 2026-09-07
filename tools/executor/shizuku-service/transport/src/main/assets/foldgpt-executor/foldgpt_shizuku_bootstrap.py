@@ -178,7 +178,7 @@ async def run_session(apk, control_fd=3):
     stage = "imports"
     try:
         from tools.executor.exec_server import ExecServer, serve_stdio
-        from tools.executor.private_exec_broker import PrivateListener
+        from tools.executor.private_exec_broker import PrivateSessionOwner
         stage = "control"
         os.set_inheritable(control_fd, False)
         os.set_blocking(control_fd, False)
@@ -191,7 +191,7 @@ async def run_session(apk, control_fd=3):
         stage = "native_inventory"
         options = installed_backend_options(config)
         stage = "broker_open"
-        owner = PrivateListener(config["brokerDirectory"])
+        owner = PrivateSessionOwner(config["brokerDirectory"])
         stage = "workspace_claim"
         owner.begin_process_session(config["workspace"])
         module_name, function_name = config["backendFactory"].split(":")
