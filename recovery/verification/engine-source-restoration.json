@@ -1,0 +1,8 @@
+{
+  "restored": true,
+  "freshUpstreamClone": true,
+  "base": "3d2ee51ca2d5db578f328aa75e20aa22c0197c9a",
+  "restoredPatchSha256": "3faa158299889a52991943eafec401eba0e7d490a8d0b70315c6020deae42878",
+  "exactPatchMatch": true,
+  "destination": "C:\\Dev\\FoldGPT-recovery\\restored-engine-20260907"
+}

@@ -1,0 +1,71 @@
+{
+  "format": 1,
+  "startedUtc": "2026-09-07T00:28:33.043886+00:00",
+  "completedUtc": "2026-09-07T00:57:34.284563+00:00",
+  "roots": [
+    "ChatgptFold",
+    "FoldgptEngine"
+  ],
+  "entries": 127425,
+  "uncompressedFileBytes": 13639569361,
+  "excludedDirectoryNames": [
+    ".cxx",
+    ".git",
+    ".gradle",
+    "__pycache__",
+    "target"
+  ],
+  "encryptedSha256": "002f1e0bc3a6a9d2d95091b419413475212a1e51696f0bb37e33028bfc7271b0",
+  "parts": [
+    {
+      "name": "workspace.tar.gz.age.part001",
+      "bytes": 1073741824,
+      "sha256": "dfc1420c96529388f436df959878a5843488f291489a7969c40f89674bad82d9"
+    },
+    {
+      "name": "workspace.tar.gz.age.part002",
+      "bytes": 1073741824,
+      "sha256": "c1f91ecdc812bf94bbbe0fcddd6435763164df2a35d1d1ac894f8dc8f31cc858"
+    },
+    {
+      "name": "workspace.tar.gz.age.part003",
+      "bytes": 1073741824,
+      "sha256": "f32ebd06623aab8b66e4f30cc050b60d35bd55441f376de76774dc54e54e028f"
+    },
+    {
+      "name": "workspace.tar.gz.age.part004",
+      "bytes": 1073741824,
+      "sha256": "55ca528c67ba89436c487a446d4f6e9008324654131440bb4b038a300ea31f70"
+    },
+    {
+      "name": "workspace.tar.gz.age.part005",
+      "bytes": 1073741824,
+      "sha256": "2f161631a0d294c930ac9e3ac1c8d01d4f7ce3c389d760d221a44b8ffe1d4548"
+    },
+    {
+      "name": "workspace.tar.gz.age.part006",
+      "bytes": 1073741824,
+      "sha256": "efcaecd19c997d2e11deab2ebb5ca82a2dcf29d15720f2ab2d422c15ac27a9be"
+    },
+    {
+      "name": "workspace.tar.gz.age.part007",
+      "bytes": 1073741824,
+      "sha256": "07e5bd7f401a2377c36ce82102b0cdd7cd1351fcbd52291b858c660bfbf0d5da"
+    },
+    {
+      "name": "workspace.tar.gz.age.part008",
+      "bytes": 1073741824,
+      "sha256": "7a5b5d7311f9aac5d205bcfe092b1a4cefec85bffad8d62b97be89823075d392"
+    },
+    {
+      "name": "workspace.tar.gz.age.part009",
+      "bytes": 1073741824,
+      "sha256": "3919bad6e2a6942e95c895fed615a904884ce86a4ae89c27026b0e8ceb63d4d5"
+    },
+    {
+      "name": "workspace.tar.gz.age.part010",
+      "bytes": 208827377,
+      "sha256": "9ce8d42cf2418703ccf1a4d714aad2c78a2e2ad91bf3a5d6f39979782ed5bd33"
+    }
+  ]
+}

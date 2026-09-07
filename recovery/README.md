@@ -26,6 +26,14 @@ et 9 872 503 793 octets chiffrés répartis en dix morceaux. SHA-256 de
 l'ensemble chiffré :
 `002f1e0bc3a6a9d2d95091b419413475212a1e51696f0bb37e33028bfc7271b0`.
 
+Le 7 septembre 2026, les dix morceaux ont été retéléchargés depuis GitHub,
+déchiffrés et réellement extraits dans un dossier neuf : **113 900 fichiers
+vérifiés octet par octet et 441 liens symboliques contrôlés**. Le
+[rapport conservé](verification/github-archive-restoration.json) et le
+[manifeste de l'archive](verification/archive-manifest.json) fixent ce résultat.
+La récupération du moteur à partir d'un clone neuf a également reproduit
+[exactement le patch exporté](verification/engine-source-restoration.json).
+
 ## Récupérer les données locales
 
 Depuis PowerShell, avec GitHub CLI connecté au compte ayant accès au dépôt :
