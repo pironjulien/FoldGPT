@@ -1,6 +1,10 @@
 # Environnement de compilation du checkpoint
 
-Projets locaux : `C:\Dev\ChatgptFold` et `C:\Dev\FoldgptEngine`.
+Projet local : `C:\Dev\ChatgptFold` ; moteur séparé sous
+`C:\Dev\ChatgptFold\work\worktrees\FoldgptEngine`.
+Les productions et rapports Windows restent dans ce projet. Les emplacements
+Linux `/opt/foldgpt` et `/var/tmp` décrits ci-dessous sont ceux de l'environnement
+WSL existant, nécessaire aux permissions et liens Linux des tests.
 Les sources sont dans Git ; l'archive privée conserve les dépendances et les
 résultats locaux. Les installations globales suivantes se réinstallent sur le
 PC de reprise et ne font pas partie de l'archive du projet.

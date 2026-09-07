@@ -1,5 +1,6 @@
 """Real Git/filesystem regressions for additive recovery on PC/Linux."""
 import importlib.util
+import json
 import os
 from pathlib import Path
 import subprocess
@@ -20,7 +21,7 @@ class MergeTests(unittest.TestCase):
         self.project, self.source = self.base / 'project', self.base / 'source'
         self.project.mkdir(); self.source.mkdir()
         self.git('init', '-q')
-        (self.project / '.gitignore').write_text('data/\n')
+        (self.project / '.gitignore').write_text('data/\nwork/\n')
         (self.project / 'source.py').write_text('current\n')
         self.git('add', '.')
         self.git('-c', 'user.name=Recovery test', '-c', 'user.email=local@example.invalid',
@@ -85,6 +86,32 @@ class MergeTests(unittest.TestCase):
             self.assertNotEqual(result.returncode, 0)
             self.assertEqual(report.read_bytes(), before)
             self.assertFalse((self.project / 'data').exists())
+
+    def test_report_inside_ignored_work_directory_preserves_recovered_bytes(self):
+        report = self.project / 'work/FoldGPT-recovery/verification.json'
+        result = subprocess.run([sys.executable, '-B', str(Path(module.__file__)),
+            '--snapshot', str(self.source), '--project', str(self.project), '--report', str(report)],
+            capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(json.loads(report.read_text())['addedPaths'], ['data/a'])
+        self.assertEqual((self.project / 'data/a').read_bytes(), b'actual bytes\0\xff')
+        self.assertEqual((self.project / 'source.py').read_text(), 'current\n')
+        self.assertEqual(self.git('status', '--porcelain'), b'')
+
+    def test_new_report_cannot_collide_with_supplement_or_untracked_sources(self):
+        collision = self.source / 'work/FoldGPT-recovery/verification.json'
+        collision.parent.mkdir(parents=True)
+        collision.write_text('existing supplemental evidence')
+        for report in (self.project / collision.relative_to(self.source),
+                       self.project / 'new-source.py', self.source / 'new-report.json'):
+            with self.subTest(report=report):
+                result = subprocess.run([sys.executable, '-B', str(Path(module.__file__)),
+                    '--snapshot', str(self.source), '--project', str(self.project), '--report', str(report)],
+                    capture_output=True)
+                self.assertNotEqual(result.returncode, 0)
+                self.assertFalse(report.exists())
+                self.assertFalse((self.project / 'data').exists())
+        self.assertEqual(collision.read_text(), 'existing supplemental evidence')
 
 
 if __name__ == '__main__':

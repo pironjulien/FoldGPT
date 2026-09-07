@@ -116,8 +116,20 @@ def main():
     if any(parent.is_symlink() for parent in report_path.parents):
         raise ValueError('Recovery report parents must not be symbolic links')
     report_path = report_path.resolve()
-    if any(report_path.is_relative_to(root.resolve(strict=True)) for root in (args.snapshot, args.project)):
-        raise ValueError('Recovery report must be outside the snapshot and Git project')
+    source = args.snapshot.resolve(strict=True)
+    project = args.project.resolve(strict=True)
+    if report_path.is_relative_to(source):
+        raise ValueError('Recovery report must be outside the snapshot')
+    if report_path.is_relative_to(project):
+        relative = report_path.relative_to(project)
+        ignored = subprocess.run(
+            ['git', '-C', str(project), 'check-ignore', '--quiet', '--', relative.as_posix()]
+        )
+        if relative.parts[0] != 'work' or ignored.returncode != 0:
+            raise ValueError('In-project reports must be ignored files under work/')
+        snapshot_report = source / relative
+        if snapshot_report.exists() or snapshot_report.is_symlink():
+            raise ValueError('Recovery report conflicts with a supplemental path')
     report_path.parent.mkdir(parents=True, exist_ok=True)
     # Reserve the report before any merge and never overwrite a prior result.
     with report_path.open('x', encoding='utf-8') as output:

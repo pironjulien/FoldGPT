@@ -20,7 +20,9 @@ def main():
     git = ["git", "-C", str(args.engine.resolve(strict=True))]
     if subprocess.check_output(git + ["rev-parse", "HEAD"], text=True).strip() != BASE:
         raise RuntimeError("Engine base differs; update the reviewed recovery contract first")
-    with tempfile.TemporaryDirectory(prefix="foldgpt-engine-index-") as directory:
+    temporary_root = project / "work" / "recovery-tmp"
+    temporary_root.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory(prefix="foldgpt-engine-index-", dir=temporary_root) as directory:
         environment = dict(os.environ, GIT_INDEX_FILE=str(Path(directory) / "index"))
         subprocess.run(git + ["read-tree", BASE], env=environment, check=True)
         subprocess.run(git + ["add", "-A"], env=environment, check=True, capture_output=True)

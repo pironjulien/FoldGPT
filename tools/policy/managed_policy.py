@@ -221,6 +221,7 @@ class ManagedPolicy:
     temporary_directories: tuple[GuestPath, ...] | None
     entries: tuple[Entry, ...]
     resolved_entries: tuple[ResolvedEntry, ...]
+    windows_sandbox_private_desktop: bool
 
     def decide(self, absolute_guest_path):
         return self._decide(GuestPath.from_absolute(absolute_guest_path))
@@ -266,7 +267,7 @@ class ManagedPolicy:
             "cwd": self.cwd.uri,
             "workspaceRoots": [path.uri for path in self.workspace_roots],
             "windowsSandboxLevel": "disabled",
-            "windowsSandboxPrivateDesktop": False,
+            "windowsSandboxPrivateDesktop": self.windows_sandbox_private_desktop,
             "useLegacyLandlock": False,
         }
         if self.user_home_dir is not None:
@@ -347,7 +348,13 @@ def parse_context(document):
     }, ("permissions", "cwd", "windowsSandboxLevel"))
     if context["windowsSandboxLevel"] != "disabled":
         raise PolicyError("$.windowsSandboxLevel", "only disabled Windows settings are accepted for this POSIX resolver")
-    _false_option(context.get("windowsSandboxPrivateDesktop", False), "$.windowsSandboxPrivateDesktop")
+    # Core defaults this preference to true on every platform. Upstream uses
+    # it only when launching the Windows sandbox; disabled Windows enforcement
+    # above makes it inert on this POSIX executor. Retain the exact preference
+    # in the handoff instead of rejecting it or silently rewriting it to false.
+    private_desktop = context.get("windowsSandboxPrivateDesktop", False)
+    if type(private_desktop) is not bool:
+        raise PolicyError("$.windowsSandboxPrivateDesktop", "expected a boolean")
     _only_null(context.get("windowsSandboxProxySettingsMode"), "$.windowsSandboxProxySettingsMode")
     _false_option(context.get("useLegacyLandlock", False), "$.useLegacyLandlock")
     permissions = _object(context["permissions"], "$.permissions", {"type", "file_system", "network"}, ("type",))
@@ -385,4 +392,4 @@ def parse_context(document):
         else:  # The parser permits exactly one remaining special: slash_tmp.
             targets = (GuestPath(("tmp",)),)
         resolved.extend(ResolvedEntry(path, entry.access, index) for path in targets)
-    return ManagedPolicy(cwd, roots, home, temps, entries, tuple(resolved))
+    return ManagedPolicy(cwd, roots, home, temps, entries, tuple(resolved), private_desktop)

@@ -56,7 +56,7 @@ def main():
         raise RuntimeError("Unsupported recovery format")
     if args.destination and args.destination.exists():
         raise RuntimeError("Destination must not exist; restore never overwrites a working project")
-    with tempfile.TemporaryDirectory(prefix="foldgpt-recovery-") as temporary:
+    with tempfile.TemporaryDirectory(prefix="foldgpt-recovery-", dir=assets) as temporary:
         combined = Path(temporary) / "workspace.age"
         digest = hashlib.sha256()
         with combined.open("xb") as destination:

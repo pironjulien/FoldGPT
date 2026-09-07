@@ -2,6 +2,16 @@
 
 ## Unreleased — 2026-09-06
 
+- Keep Windows recovery reports, downloads and temporary Git indexes inside
+  the project. Permit new ignored recovery reports under work/ with collision
+  checks; seven real Git/filesystem recovery tests pass. Save and verify the
+  existing Codex project root as C:\Dev\ChatgptFold.
+
+- Preserve the upstream Windows private-desktop preference in native policy
+  handoffs when Windows enforcement is disabled. Core's default true value is
+  inert on POSIX and must not prevent real native app-server execution. Enabled
+  Windows enforcement, invalid types and unsupported protections remain refused.
+
 - Connect the separate Rust engine to the native bootstrap read authority over
   an anonymous, credential-checked channel. Seventeen Rust protocol/socket
   tests and 108 Python/native regression executions pass. A real PC test with

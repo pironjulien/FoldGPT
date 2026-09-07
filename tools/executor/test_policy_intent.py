@@ -57,6 +57,23 @@ class PolicyIntentTests(unittest.TestCase):
         with self.assertRaises(FrozenInstanceError):
             intent.method = "process/spawn"
 
+    def test_inactive_windows_desktop_preference_survives_native_handoff(self):
+        baseline = parse_context(context())
+        for value in (False, True):
+            with self.subTest(private_desktop=value):
+                original = context()
+                original["windowsSandboxPrivateDesktop"] = value
+                intent = prepare(original)
+                self.assertEqual(json.loads(intent.context_json)["windowsSandboxPrivateDesktop"], value)
+                restored = parse_context(intent.context_json)
+                self.assertEqual(restored.to_context_dict(), parse_context(original).to_context_dict())
+                for path in ("/workspace/value", "/workspace/private/secret", "/workspace/.git/config"):
+                    self.assertEqual(restored.decide(path), baseline.decide(path))
+                original["windowsSandboxLevel"] = "restrictedToken"
+                with self.assertRaises(PolicyError) as error:
+                    prepare(original)
+                self.assertEqual(error.exception.field, "$.windowsSandboxLevel")
+
     def test_digest_and_utf8_round_trip(self):
         original = context()
         original["cwd"] = "file:///workspace/caf%C3%A9"

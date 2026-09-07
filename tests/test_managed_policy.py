@@ -203,7 +203,7 @@ class StrictInputTests(unittest.TestCase):
             ("permissions.type", "external"), ("permissions.type", "disabled"),
             ("permissions.file_system.type", "unrestricted"), ("permissions.network", "enabled"),
             ("permissions.file_system.glob_scan_max_depth", 4),
-            ("windowsSandboxLevel", "restrictedToken"), ("windowsSandboxPrivateDesktop", True),
+            ("windowsSandboxLevel", "restrictedToken"),
             ("windowsSandboxProxySettingsMode", "proxyOnly"), ("useLegacyLandlock", True),
         ]
         for dotted, value in modifications:

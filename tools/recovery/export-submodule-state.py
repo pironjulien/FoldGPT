@@ -11,7 +11,9 @@ def export(project: Path, destination: Path) -> None:
     submodule = project / "vendor/termux-x11"
     destination.mkdir(parents=True, exist_ok=True)
     base = subprocess.check_output(["git", "-C", str(submodule), "rev-parse", "HEAD"], text=True).strip()
-    with tempfile.TemporaryDirectory(prefix="foldgpt-index-") as directory:
+    temporary_root = project / "work" / "recovery-tmp"
+    temporary_root.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory(prefix="foldgpt-index-", dir=temporary_root) as directory:
         environment = dict(os.environ, GIT_INDEX_FILE=str(Path(directory) / "index"))
         command = ["git", "-C", str(submodule)]
         subprocess.run(command + ["read-tree", "HEAD"], env=environment, check=True)
