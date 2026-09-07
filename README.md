@@ -7,6 +7,13 @@ et la [procédure de récupération complète](recovery/README.md). Elle conserv
 modifications en cours, le moteur séparé, les dépendances locales et les preuves
 chiffrées, au-delà du checkpoint publié dans le dépôt public d'origine.
 
+**Avance native du 7 septembre :** un vrai projet Python a été créé, testé et
+construit sur le Fold par la qualification fixe Shizuku/Bionic. Le moteur Rust
+communique désormais avec l'exécuteur Python/C dans un test réel sur PC. Le
+branchement complet et les commandes ordinaires sur le téléphone restent à
+valider. L'[état de reprise](recovery/HANDOFF.md) distingue ces résultats et les
+prochaines étapes.
+
 **Status: working desktop interface in a development prototype; not a public beta.** The integrated `app.foldgpt` APK runs the unmodified client and Codex interface in its own Android app storage and UID, with native ARM64 execution and Adreno acceleration. The reproduced settings-menu corruption is fixed, selected integrated-browser operations pass, and the private guest-to-Android file bridge is verified. Native managed acquisition also passes 17 tests and 46 process observations with the GUI running. Inactive v3 installation and independent native inspection pass. Complete protected local task execution, an autonomous installer, Remote, updates and sustained background reliability remain unfinished or unverified. See [PUBLICATION.md](PUBLICATION.md) for the tested scope.
 
 ## What works
