@@ -7,3 +7,4 @@ recovery/verification/engine-arm64-static-compatibility-20260907.json -text whit
 recovery/verification/native-executable-metadata-20260907/* -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 recovery/verification/native-v12-20260907/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 recovery/verification/native-runtime-pc-20260907/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+recovery/verification/native-runtime-v1-20260907/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol

@@ -1,0 +1,73 @@
+{
+  "scope": "Exact runtime V1 Android failure: libpython3.14.so loading failed; no Python workload success",
+  "observationChecks": {
+    "bootId": true,
+    "indicators": true,
+    "packages": true,
+    "fixture": true,
+    "ownersAbsent": true,
+    "snapshotsComplete": true
+  },
+  "files": [
+    {
+      "path": "authorization.json",
+      "source": "downloads/runtime-qualification/admission-v1/authorization.json",
+      "size": 608,
+      "sha256": "07b312f1464118ebb33aa229113edf398ae3ee4405c3b79ebf50034635412059"
+    },
+    {
+      "path": "preflight.json",
+      "source": "downloads/runtime-qualification/admission-v1/preflight.json",
+      "size": 2153,
+      "sha256": "b6bee2bcafc62db5bc31cc2bb9f7e0f7150334c8055c9c14b4d050a55968bbe7"
+    },
+    {
+      "path": "package-info.json",
+      "source": "downloads/runtime-qualification/admission-v1/package-info.json",
+      "size": 505,
+      "sha256": "d90838f799044ab9de38708036f868d081853d8fe15b0f73c2ceead31f54534a"
+    },
+    {
+      "path": "before.json",
+      "source": "downloads/runtime-qualification/before-fixed-v1/snapshot.json",
+      "size": 141633,
+      "sha256": "0f3b19d442bfb1f9b5e26d6505d87e86dfd49ee553a5413f69e41838f3fd8c34"
+    },
+    {
+      "path": "after.json",
+      "source": "downloads/runtime-qualification/fixed-collection-v1-reviewed/after/snapshot.json",
+      "size": 141018,
+      "sha256": "bf878db9318fbef1c293673fefd289f8068130bbc257328f4da763ed02e3358c"
+    },
+    {
+      "path": "app-report.json",
+      "source": "downloads/runtime-qualification/fixed-collection-v1-reviewed/app-report.json",
+      "size": 17522,
+      "sha256": "33ffedf53a67862d19c2fd95f84a141db89a9fafb145f018689c74749f809446"
+    },
+    {
+      "path": "native-evidence.json",
+      "source": "downloads/runtime-qualification/fixed-collection-v1-reviewed/native-evidence.json",
+      "size": 2799,
+      "sha256": "c853b729204fa4bfdacd756ca7c966a252e5291e46f955163708e4cc7ea90c93"
+    },
+    {
+      "path": "independent-verification.json",
+      "source": "downloads/runtime-qualification/fixed-collection-v1-reviewed/independent-verification.json",
+      "size": 1577,
+      "sha256": "3c56f4d679cac3e95a5d265f85a57514298a4f37c1d354df79908d531c101f95"
+    },
+    {
+      "path": "apk-provenance.json",
+      "source": "downloads/runtime-qualification/apk-v1-independent/provenance.json",
+      "size": 8652,
+      "sha256": "f8981bab105d45f3d26622d1f934e5084c9b02fb0c515d91fb7280dafb9058c4"
+    },
+    {
+      "path": "apk-signature.txt",
+      "source": "downloads/runtime-qualification/apk-v1-independent/signature.txt",
+      "size": 972,
+      "sha256": "d66132c8dce446d47e0b7b5854a9ac139107ace7436e4260b52535618de0e5d7"
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "schema": "foldgpt.independent-runtime-qualification.v1",
+  "success": false,
+  "error": "Actual runtime reported failure; clean ownership does not imply a successful Python workload",
+  "package": "app.foldgpt.runtimequalification.v1",
+  "base": "/data/local/tmp/foldgpt-bionic-runtime-qualification-v1",
+  "checks": {
+    "actualCleanOwnership": true
+  },
+  "observedRuntimeFailure": {
+    "nativeResult": {
+      "cleanupComplete": true,
+      "denials": 36,
+      "errno": 0,
+      "exitCode": 1,
+      "grants": 19,
+      "outcome": "exited",
+      "signal": 0,
+      "stage": 0,
+      "started": true,
+      "stderrBytes": 454,
+      "stdoutBytes": 0,
+      "type": "result"
+    },
+    "nativeError": "ValueError: Real supervisor did not prove bounded clean runtime completion",
+    "nativeStderr": "linker: CANNOT LINK EXECUTABLE \"/data/app/~~UGQdmPgPcW-6kqfr8uZzkQ==/app.foldgpt.runtimequalification.v1-Zq3LT4MvPA7E1A9Gg6blLg==/lib/arm64/libfoldgpt_python_cli.so\": library \"libpython3.14.so\" not found: needed by main executable\nCANNOT LINK EXECUTABLE \"/data/app/~~UGQdmPgPcW-6kqfr8uZzkQ==/app.foldgpt.runtimequalification.v1-Zq3LT4MvPA7E1A9Gg6blLg==/lib/arm64/libfoldgpt_python_cli.so\": library \"libpython3.14.so\" not found: needed by main executable\n",
+    "appError": "IllegalStateException: RPC refusal: {\"code\":-32004,\"message\":\"Requested file or its parent does not exist\"}",
+    "nativeSuccess": false,
+    "rpcSuccess": false
+  },
+  "collected": {
+    "app-report": true,
+    "native-evidence": true
+  }
+}

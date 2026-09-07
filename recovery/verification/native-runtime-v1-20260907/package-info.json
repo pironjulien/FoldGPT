@@ -1,0 +1,9 @@
+{
+  "schema": "foldgpt.android-runtime-package.v1",
+  "nativeLibraryDir": "\/data\/app\/~~UGQdmPgPcW-6kqfr8uZzkQ==\/app.foldgpt.runtimequalification.v1-Zq3LT4MvPA7E1A9Gg6blLg==\/lib\/arm64",
+  "sourceDir": "\/data\/app\/~~UGQdmPgPcW-6kqfr8uZzkQ==\/app.foldgpt.runtimequalification.v1-Zq3LT4MvPA7E1A9Gg6blLg==\/base.apk",
+  "clientUid": 10401,
+  "packageName": "app.foldgpt.runtimequalification.v1",
+  "nativeBase": "\/data\/local\/tmp\/foldgpt-bionic-runtime-qualification-v1",
+  "diagnosticVersion": 1
+}

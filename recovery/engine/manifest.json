@@ -4,6 +4,6 @@
   "base": "3d2ee51ca2d5db578f328aa75e20aa22c0197c9a",
   "branch": "codex/android-native-engine",
   "patch": "engine.patch",
-  "sha256": "7a6bc3eee46510e237f7e9bddbf07e8cd849b046b4ce83fdab9c88f8fae11f07",
+  "sha256": "a06bd0d7e6fdade497563939bdf323ebfa3dd371820c44c77e00100a2b124eaa",
   "appliesToCleanBase": true
 }

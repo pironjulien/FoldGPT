@@ -5,7 +5,26 @@ Le dépôt de travail est **privé** : `pironjulien/FoldGPT-workspace`, branche
 sous-modules, moteur séparé et données locales. Le dépôt public `FoldGPT` est un
 ancien checkpoint ; il ne reçoit pas cette sauvegarde privée.
 
-## État courant : V12 réussit sur le Fold, 7 septembre vers 19:49
+## État courant : Python runtime V1 échoue au chargement, 7 septembre vers 20:49
+
+Le [rapport runtime V1](../docs/research/native-runtime-v1-device-result-2026-09-07.md)
+et ses [preuves exactes](verification/native-runtime-v1-20260907/manifest.json)
+conservent le test réel : Bash démarre, puis le chargement de `libpython3.14.so`
+échoue. Nettoyage natif/JNI complet, propriétaires absents, boot/APK/fixture
+inchangés. L'action V1 est consommée : ne pas la rejouer ni effacer son marker.
+
+La correction candidate ajoute au RUNPATH le vrai préfixe des bibliothèques.
+Le CLI V2 est compilé sous `downloads/runtime-qualification/python-cli-v2`,
+SHA256 `b0709f801f95739b1a6988d51f22d8df1373316595ce19df8ce329d5c84628f2`.
+La revue et le packaging V2 séparé sont en cours ; aucun résultat Android V2.
+Le bootstrap app-server passe six nouveaux tests réels et29 régressions API sur
+PC. Il est exporté dans le patch moteur. Les couches projet/autorités restent à
+raccorder, et `ExecutorOnly` reste refusé jusqu'à leur preuve réelle.
+
+Priorité inchangée : un projet Python créé et testé depuis l'interface habituelle.
+Le maintien éveillé USB reste activé pendant la session de travail.
+
+## Historique : V12 réussit sur le Fold, 7 septembre vers 19:49
 
 La qualification fixe Shizuku/Bionic V12 réussit, avec les 24 vérifications
 indépendantes, nettoyage réel et boot/APK/fixture inchangés. Lire le

@@ -1,12 +1,16 @@
 diff --git a/CHANGELOG.md b/CHANGELOG.md
-index 2eb564c560a4c85507169a26637f6bce59f7e1fb..54d3225a2b856ee1612de4ae175ee094650701c0 100644
+index 2eb564c560a4c85507169a26637f6bce59f7e1fb..c113c9c2d172dc267b41041e76a3efd95bf36ab4 100644
 --- a/CHANGELOG.md
 +++ b/CHANGELOG.md
-@@ -1 +1,22 @@
+@@ -1 +1,26 @@
  The changelog can be found on the [releases page](https://github.com/openai/codex/releases).
 +
 +## FoldGPT auxiliary engine — unreleased
 +
++- Connect a trusted, already-authenticated local runtime to effective app-server
++  startup through a Rust-only bootstrap value, preserving ordinary startup and
++  refusing incompatible configuration without fallback. Project config filesystem
++  routing and Android activation remain unimplemented.
 +- Resolve injected local runtime metadata and shell from the provider, preserve
 +  missing optional metadata, and refuse failed metadata or unknown shells without
 +  controller fallback. Select the reported executable and keep controller V1
@@ -27,10 +31,10 @@ index 2eb564c560a4c85507169a26637f6bce59f7e1fb..54d3225a2b856ee1612de4ae175ee094
 +  `FOLDGPT-INTEGRATION.md`; no phone activation is included.
 diff --git a/FOLDGPT-INTEGRATION.md b/FOLDGPT-INTEGRATION.md
 new file mode 100644
-index 0000000000000000000000000000000000000000..9182b1a33c1f6b60f9974a2b7a540a69afa6d1c2
+index 0000000000000000000000000000000000000000..02ea196c5bf061499ae621f75f32cde0668177c4
 --- /dev/null
 +++ b/FOLDGPT-INTEGRATION.md
-@@ -0,0 +1,207 @@
+@@ -0,0 +1,242 @@
 +# FoldGPT auxiliary engine: local runtime boundary
 +
 +Base: `rust-v0.153.4`, commit `3d2ee51ca2d5db578f328aa75e20aa22c0197c9a`.
@@ -47,6 +51,16 @@ index 0000000000000000000000000000000000000000..9182b1a33c1f6b60f9974a2b7a540a69
 +and keeps `Environment::is_remote()` false. The default, local lookup and registry
 +lookup share one `Environment` instance. A configuration excluding local
 +execution, including a Noise-only configuration, is rejected.
++
++The effective app-server startup now accepts the trusted Rust bootstrap value
++returned by `AppServerRuntimeOptions::with_local_runtime`. It discovers the
++configured environments and calls `build_with_local_runtime` before exposing the
++server transport. Ordinary options preserve the default construction path. A
++registration error aborts startup; no client request or serialized config field
++can supply this runtime. User-config suppression retains its existing environment
++discovery behavior. Application-owned configuration is still loaded on the
++controller before this boundary; this does not route project config files through
++the provider or admit `ExecutorOnly` paths.
 +
 +The provider owns `ExecBackend`, `ExecutorFileSystem`, metadata and readiness.
 +Process sandbox ownership, filesystem sandbox ownership and direct controller
@@ -119,7 +133,8 @@ index 0000000000000000000000000000000000000000..9182b1a33c1f6b60f9974a2b7a540a69
 +The following are explicit limits of this increment, not supported Android paths:
 +
 +- Authenticate, start and monitor the native service in the real application
-+  bootstrap, then register the provider. No production activation path exists.
++  bootstrap, then supply it to the Rust entry point. No deployed application
++  activation path exists.
 +- Qualify the native factory behind `ExecServerLocalRuntime` on Android and
 +  complete its unsupported request semantics. The same actual factory and C
 +  supervisor are connected in the PC test, but this does not prove Android rights.
@@ -230,6 +245,30 @@ index 0000000000000000000000000000000000000000..9182b1a33c1f6b60f9974a2b7a540a69
 +For this follow-up, `just fix -p codex-core -p codex-exec-server --lib --locked`
 +and `just fmt` both completed successfully. The unrelated pre-existing unused
 +`body_json` import was preserved, and the scoped `git diff --check` passed.
++
++The effective app-server bootstrap follow-up passed six integration cases through
++the public JSON-RPC transport: initialize, local environment metadata, exact binary
++file reads, provider admission refusal, reported provider disconnection, ordinary startup,
++user-config suppression and startup rejection for no-local, Noise-only and
++`ExecutorOnly` configuration. Each child runs the actual app-server entry point
++with isolated process startup state. The injected Rust fixture delegates real PC
++filesystem operations and records reads; the ordinary control can read the same
++file that the provider refuses. This proves routing and refusal propagation, not
++Android enforcement, native cleanup or the native factory behind app-server.
++
++The existing initialize, environment-info/status and filesystem API selections
++also passed all 29 cases, including remote environment behavior, disabled-local
++refusal and file-watch operations. Commands:
++
++- `just test -p codex-app-server --test all injected_local_runtime --locked`
++- `just test -p codex-app-server --test all -E 'test(suite::v2::initialize::) | test(suite::v2::environment_info::) | test(suite::v2::environment_status::) | test(suite::v2::fs::)' --locked`
++
++Evidence: `C:/Dev/foldgpt-engine-app-bootstrap-tests.log` and
++`C:/Dev/foldgpt-engine-app-bootstrap-regression.log`, using the same unprivileged
++WSL build user and existing target directory. Full workspace tests were not run.
++Scoped `just fix` completed, followed by a warning-free `just clippy` check for
++`codex-app-server` and successful `just fmt`. The scoped whitespace check passed;
++the preservation snapshot found no changes outside this increment.
 +
 +## Release lockfile normalization
 +
@@ -1563,6 +1602,649 @@ index e217b702497e6ff02969a51046f7ba887024f487..ca93c945c9a5d608944d81bc0c12f6df
  dependencies = [
   "anyhow",
   "codex-login",
+diff --git a/codex-rs/app-server/README.md b/codex-rs/app-server/README.md
+index a0aa92b7fcef8ee5fcc5c1810d7f2459429c8aad..1a2e191dc448763e4ebe9e96745ce9a51fb8a1f1 100644
+--- a/codex-rs/app-server/README.md
++++ b/codex-rs/app-server/README.md
+@@ -4,6 +4,7 @@
+ 
+ ## Table of Contents
+ 
++- [Trusted local runtime embedding](#trusted-local-runtime-embedding)
+ - [Protocol](#protocol)
+ - [Message Schema](#message-schema)
+ - [Core Primitives](#core-primitives)
+@@ -17,6 +18,18 @@
+ - [Auth endpoints](#auth-endpoints)
+ - [Experimental API Opt-in](#experimental-api-opt-in)
+ 
++## Trusted local runtime embedding
++
++Rust embedders of this auxiliary engine may pass
++`runtime_options.with_local_runtime(authenticated_runtime)` to
++`run_main_with_transport_options`. The bootstrap owns runtime authentication,
++lifecycle and native cleanup. App-server registers it as the actual local
++environment using the discovered environment configuration; registration failure
++aborts startup. Ordinary `AppServerRuntimeOptions` retain the default behavior.
++This capability has no JSON-RPC selector, CLI flag or network endpoint. Providers
++with controller-invisible paths remain rejected. Controller configuration loading
++and project configuration filesystem routing are not changed by this entry point.
++
+ ## Protocol
+ 
+ Similar to [MCP](https://modelcontextprotocol.io/), `codex app-server` supports bidirectional communication using JSON-RPC 2.0 messages (with the `"jsonrpc":"2.0"` header omitted on the wire).
+diff --git a/codex-rs/app-server/src/bootstrap.rs b/codex-rs/app-server/src/bootstrap.rs
+new file mode 100644
+index 0000000000000000000000000000000000000000..94f2a86ee7645194d465e39ddbd719161283d5a3
+--- /dev/null
++++ b/codex-rs/app-server/src/bootstrap.rs
+@@ -0,0 +1,38 @@
++use std::sync::Arc;
++
++use codex_exec_server::LocalRuntime;
++
++use crate::AppServerRuntimeOptions;
++
++/// Process-local startup state supplied by a trusted app-server embedder.
++///
++/// This is a Rust bootstrap boundary, not a serialized option or a client request.
++/// Ordinary runtime options preserve the official environment discovery path.
++#[derive(Clone)]
++pub struct AppServerBootstrapOptions {
++    pub(crate) runtime_options: AppServerRuntimeOptions,
++    pub(crate) local_runtime: Option<Arc<dyn LocalRuntime>>,
++}
++
++impl From<AppServerRuntimeOptions> for AppServerBootstrapOptions {
++    fn from(runtime_options: AppServerRuntimeOptions) -> Self {
++        Self {
++            runtime_options,
++            local_runtime: None,
++        }
++    }
++}
++
++impl AppServerRuntimeOptions {
++    /// Supplies an already-authenticated runtime for the real local environment.
++    ///
++    /// The bootstrap retains authentication and native process-cleanup ownership.
++    /// Startup rejects incompatible environment configuration or unsupported path
++    /// visibility; failure never selects the ordinary controller runtime instead.
++    pub fn with_local_runtime(self, runtime: Arc<dyn LocalRuntime>) -> AppServerBootstrapOptions {
++        AppServerBootstrapOptions {
++            runtime_options: self,
++            local_runtime: Some(runtime),
++        }
++    }
++}
+diff --git a/codex-rs/app-server/src/lib.rs b/codex-rs/app-server/src/lib.rs
+index 0b4fe174936f9d8766f75b80b0f352da014aaf7d..0abb77cbd59dfa83c9c76bbaf0e45ff1b55868a0 100644
+--- a/codex-rs/app-server/src/lib.rs
++++ b/codex-rs/app-server/src/lib.rs
+@@ -96,6 +96,8 @@ mod app_server_tracing;
+ mod attestation;
+ mod auth_mode;
+ mod bespoke_event_handling;
++mod bootstrap;
++pub use bootstrap::AppServerBootstrapOptions;
+ mod code_mode_host;
+ mod codex_home_metrics;
+ mod command_exec;
+@@ -466,8 +468,12 @@ pub async fn run_main_with_transport_options(
+     transport: AppServerTransport,
+     session_source: SessionSource,
+     auth: AppServerWebsocketAuthSettings,
+-    runtime_options: AppServerRuntimeOptions,
++    runtime_options: impl Into<AppServerBootstrapOptions>,
+ ) -> IoResult<()> {
++    let AppServerBootstrapOptions {
++        runtime_options,
++        local_runtime,
++    } = runtime_options.into();
+     let loader_overrides = loader_overrides_with_test_user_config_file(
+         loader_overrides,
+         test_user_config_file_from_env(),
+@@ -570,15 +576,21 @@ pub async fn run_main_with_transport_options(
+                 ))
+             }
+         };
+-    let environment_manager = if ignore_user_config {
+-        EnvironmentManager::from_env(Some(local_runtime_paths), config.http_client_factory()).await
++    let prepared_environments = if ignore_user_config {
++        EnvironmentManager::prepare_from_env().await
+     } else {
+-        EnvironmentManager::from_codex_home(
+-            codex_home.clone(),
++        EnvironmentManager::prepare_from_codex_home(&codex_home).await
++    }
++    .map_err(std::io::Error::other)?;
++    let environment_manager = match local_runtime {
++        Some(runtime) => prepared_environments.build_with_local_runtime(
++            runtime,
+             Some(local_runtime_paths),
+             config.http_client_factory(),
+-        )
+-        .await
++        ),
++        None => {
++            prepared_environments.build(Some(local_runtime_paths), config.http_client_factory())
++        }
+     }
+     .map(Arc::new)
+     .map_err(std::io::Error::other)?;
+diff --git a/codex-rs/app-server/tests/suite/v2/injected_local_runtime.rs b/codex-rs/app-server/tests/suite/v2/injected_local_runtime.rs
+new file mode 100644
+index 0000000000000000000000000000000000000000..1a560470e39b0716eaba122b2a839a2d2844d6c7
+--- /dev/null
++++ b/codex-rs/app-server/tests/suite/v2/injected_local_runtime.rs
+@@ -0,0 +1,298 @@
++use std::path::Path;
++use std::path::PathBuf;
++use std::process::Stdio;
++use std::sync::Arc;
++use std::time::Duration;
++
++use anyhow::Context;
++use anyhow::Result;
++use anyhow::bail;
++use base64::Engine;
++use base64::engine::general_purpose::STANDARD;
++use codex_app_server::AppServerRuntimeOptions;
++use codex_app_server::AppServerTransport;
++use codex_app_server::AppServerWebsocketAuthSettings;
++use codex_app_server::PluginStartupTasks;
++use codex_app_server::RemoteControlStartupMode;
++use codex_app_server::run_main_with_transport_options;
++use codex_app_server_protocol::JSONRPCMessage;
++use codex_app_server_protocol::JSONRPCNotification;
++use codex_app_server_protocol::RequestId;
++use codex_arg0::Arg0DispatchPaths;
++use codex_config::LoaderOverrides;
++use codex_exec_server::ControllerPathAccess;
++use codex_exec_server::Environment;
++use codex_protocol::protocol::SessionSource;
++use codex_utils_cli::CliConfigOverrides;
++use codex_utils_path_uri::PathUri;
++use pretty_assertions::assert_eq;
++use serde_json::Value;
++use serde_json::json;
++use tempfile::TempDir;
++use tokio::net::TcpListener;
++use tokio::process::Child;
++use tokio::process::Command;
++use tokio::time::timeout;
++
++use super::connection_handling_websocket::WsClient;
++use super::connection_handling_websocket::connect_websocket;
++use super::connection_handling_websocket::read_jsonrpc_message;
++use super::connection_handling_websocket::send_jsonrpc;
++use super::connection_handling_websocket::send_request;
++
++#[path = "injected_local_runtime_fixture.rs"]
++mod fixture;
++
++const MODE_ENV: &str = "FOLDGPT_TEST_APP_BOOTSTRAP";
++const LISTEN_ENV: &str = "FOLDGPT_TEST_APP_LISTEN";
++const RPC_TIMEOUT: Duration = Duration::from_secs(30);
++
++// The subprocess receives isolated startup state. No test mutates its parent
++// process environment, and no test-only runtime selector enters production code.
++#[tokio::test]
++#[ignore = "bootstrap subprocess invoked only by injected_local_runtime integration cases"]
++async fn bootstrap_child() -> Result<()> {
++    let mode = std::env::var(MODE_ENV).context("missing isolated bootstrap mode")?;
++    let home = PathBuf::from(std::env::var_os("CODEX_HOME").context("missing test home")?);
++    let mut loader = LoaderOverrides::without_managed_config_for_tests();
++    loader.ignore_user_config = mode == "ignore-config";
++    let options = AppServerRuntimeOptions {
++        plugin_startup_tasks: PluginStartupTasks::Skip,
++        remote_control_startup_mode: RemoteControlStartupMode::DisabledEphemeral,
++        install_shutdown_signal_handler: false,
++        ..Default::default()
++    };
++    let options = if mode == "official" {
++        options.into()
++    } else {
++        options.with_local_runtime(Arc::new(fixture::Runtime {
++            home: home.clone(),
++            path_access: if mode == "executor-only" {
++                ControllerPathAccess::ExecutorOnly
++            } else {
++                ControllerPathAccess::Shared
++            },
++            environment: Environment::default_for_tests(),
++        }))
++    };
++    let result = run_main_with_transport_options(
++        Arg0DispatchPaths {
++            codex_self_exe: Some(std::env::current_exe()?),
++            ..Default::default()
++        },
++        CliConfigOverrides::default(),
++        loader,
++        /*strict_config*/ true,
++        /*default_analytics_enabled*/ false,
++        AppServerTransport::from_listen_url(&std::env::var(LISTEN_ENV)?)?,
++        SessionSource::VSCode,
++        AppServerWebsocketAuthSettings::default(),
++        options,
++    )
++    .await;
++    if let Err(error) = result {
++        std::fs::write(home.join("startup-error"), error.to_string())?;
++    }
++    Ok(())
++}
++
++async fn spawn(home: &Path, mode: &str) -> Result<(Child, std::net::SocketAddr)> {
++    let listener = TcpListener::bind("127.0.0.1:0").await?;
++    let address = listener.local_addr()?;
++    drop(listener);
++    std::fs::create_dir_all(home.join("runtime-home"))?;
++    std::fs::write(home.join("allowed.txt"), b"real runtime bytes\0\xff")?;
++    std::fs::write(home.join("denied.txt"), b"controller can read this")?;
++    let mut command = Command::new(std::env::current_exe()?);
++    command
++        .args([
++            "--ignored",
++            "--exact",
++            "suite::v2::injected_local_runtime::bootstrap_child",
++            "--nocapture",
++        ])
++        .env("CODEX_HOME", home)
++        .env(MODE_ENV, mode)
++        .env(LISTEN_ENV, format!("ws://{address}"))
++        .env_remove("CODEX_EXEC_SERVER_URL")
++        .env_remove("CODEX_EXEC_SERVER_NOISE_REGISTRY_URL")
++        .env_remove("CODEX_EXEC_SERVER_NOISE_ENVIRONMENT_ID")
++        .env_remove("CODEX_EXEC_SERVER_NOISE_AUTH_TOKEN")
++        .env_remove("CODEX_EXEC_SERVER_NOISE_CHATGPT_ACCOUNT_ID")
++        .current_dir(home)
++        .stdout(Stdio::null())
++        .stderr(Stdio::inherit())
++        .kill_on_drop(true);
++    if mode == "noise" {
++        command
++            .env(
++                "CODEX_EXEC_SERVER_NOISE_REGISTRY_URL",
++                "https://registry.invalid",
++            )
++            .env("CODEX_EXEC_SERVER_NOISE_ENVIRONMENT_ID", "test-environment")
++            .env("CODEX_EXEC_SERVER_NOISE_AUTH_TOKEN", "test-token");
++    }
++    Ok((command.spawn()?, address))
++}
++
++async fn rpc(client: &mut WsClient, id: i64, method: &str, params: Value) -> Result<Value> {
++    send_request(client, method, id, Some(params)).await?;
++    timeout(RPC_TIMEOUT, async {
++        loop {
++            match read_jsonrpc_message(client).await? {
++                JSONRPCMessage::Response(response) if response.id == RequestId::Integer(id) => {
++                    return Ok(response.result);
++                }
++                JSONRPCMessage::Error(error) if error.id == RequestId::Integer(id) => {
++                    bail!("{}", error.error.message)
++                }
++                _ => {}
++            }
++        }
++    })
++    .await?
++}
++
++async fn initialize(client: &mut WsClient) -> Result<()> {
++    let response = rpc(
++        client,
++        1,
++        "initialize",
++        json!({
++            "clientInfo": { "name": "codex-app-server-tests", "version": "1.0" },
++            "capabilities": { "experimentalApi": true }
++        }),
++    )
++    .await?;
++    assert!(response["userAgent"].is_string());
++    send_jsonrpc(
++        client,
++        JSONRPCMessage::Notification(JSONRPCNotification {
++            method: "initialized".into(),
++            params: None,
++        }),
++    )
++    .await
++}
++
++#[test_case::test_case("injected"; "configured_runtime")]
++#[test_case::test_case("ignore-config"; "environment_discovery_without_user_config")]
++#[tokio::test]
++async fn injected_local_runtime_serves_public_protocol_and_preserves_refusals(
++    mode: &str,
++) -> Result<()> {
++    let home = TempDir::new()?;
++    let config = if mode == "ignore-config" {
++        "default = \"none\"\ninclude_local = false\n"
++    } else {
++        "default = \"local\"\ninclude_local = true\n"
++    };
++    std::fs::write(home.path().join("environments.toml"), config)?;
++    let (mut child, address) = spawn(home.path(), mode).await?;
++    let mut client = connect_websocket(address).await?;
++    initialize(&mut client).await?;
++    let info = rpc(
++        &mut client,
++        2,
++        "environment/info",
++        json!({ "environmentId": "local" }),
++    )
++    .await?;
++    assert_eq!(
++        info["cwd"],
++        json!(PathUri::from_host_native_path(
++            home.path().join("runtime-home")
++        )?)
++    );
++    let path = home.path().join("allowed.txt");
++    let read = rpc(&mut client, 3, "fs/readFile", json!({ "path": path })).await?;
++    assert_eq!(
++        STANDARD.decode(read["dataBase64"].as_str().context("missing bytes")?)?,
++        std::fs::read(&path)?
++    );
++    assert_eq!(
++        std::fs::read_to_string(home.path().join("provider-read"))?,
++        PathUri::from_host_native_path(&path)?.to_string()
++    );
++    let denied = home.path().join("denied.txt");
++    let error = rpc(&mut client, 4, "fs/readFile", json!({ "path": denied }))
++        .await
++        .expect_err("provider admission refusal must reach the client");
++    assert!(
++        error
++            .to_string()
++            .contains("bootstrap provider refused read"),
++        "{error}"
++    );
++    assert_eq!(std::fs::read(&denied)?, b"controller can read this");
++    std::fs::write(home.path().join("disconnected"), "closed")?;
++    let error = rpc(
++        &mut client,
++        5,
++        "environment/info",
++        json!({ "environmentId": "local" }),
++    )
++    .await
++    .expect_err("disconnected metadata must not fall back to the controller");
++    assert!(
++        error.to_string().contains("bootstrap runtime disconnected"),
++        "{error}"
++    );
++    let error = rpc(&mut client, 6, "fs/readFile", json!({ "path": path }))
++        .await
++        .expect_err("disconnected filesystem must not fall back to the controller");
++    assert!(
++        error
++            .to_string()
++            .contains("bootstrap provider refused read"),
++        "{error}"
++    );
++    child.kill().await?;
++    Ok(())
++}
++
++#[tokio::test]
++async fn injected_local_runtime_absent_keeps_official_local_filesystem() -> Result<()> {
++    let home = TempDir::new()?;
++    let (mut child, address) = spawn(home.path(), "official").await?;
++    let mut client = connect_websocket(address).await?;
++    initialize(&mut client).await?;
++    let read = rpc(
++        &mut client,
++        2,
++        "fs/readFile",
++        json!({ "path": home.path().join("denied.txt") }),
++    )
++    .await?;
++    assert_eq!(
++        STANDARD.decode(read["dataBase64"].as_str().context("missing bytes")?)?,
++        b"controller can read this"
++    );
++    assert!(!home.path().join("provider-read").exists());
++    child.kill().await?;
++    Ok(())
++}
++
++#[test_case::test_case("no-local", "requires a configured local environment"; "no_local")]
++#[test_case::test_case("executor-only", "executor-only local paths require"; "executor_only")]
++#[test_case::test_case("noise", "incompatible with a Noise-only environment"; "noise")]
++#[tokio::test]
++async fn injected_local_runtime_startup_refuses_incompatible_configuration(
++    mode: &str,
++    expected: &str,
++) -> Result<()> {
++    let home = TempDir::new()?;
++    if mode == "no-local" {
++        std::fs::write(
++            home.path().join("environments.toml"),
++            "default = \"none\"\ninclude_local = false\n",
++        )?;
++    }
++    let (mut child, address) = spawn(home.path(), mode).await?;
++    assert!(timeout(RPC_TIMEOUT, child.wait()).await??.success());
++    let error = std::fs::read_to_string(home.path().join("startup-error"))?;
++    assert!(error.contains(expected), "{error}");
++    assert!(tokio::net::TcpStream::connect(address).await.is_err());
++    assert!(!home.path().join("provider-read").exists());
++    Ok(())
++}
+diff --git a/codex-rs/app-server/tests/suite/v2/injected_local_runtime_fixture.rs b/codex-rs/app-server/tests/suite/v2/injected_local_runtime_fixture.rs
+new file mode 100644
+index 0000000000000000000000000000000000000000..e4c0d83dd6c10100ecdc316bda8a93cf97e4eae0
+--- /dev/null
++++ b/codex-rs/app-server/tests/suite/v2/injected_local_runtime_fixture.rs
+@@ -0,0 +1,191 @@
++use std::io;
++use std::path::PathBuf;
++use std::sync::Arc;
++
++use codex_exec_server::ControllerPathAccess;
++use codex_exec_server::CopyOptions;
++use codex_exec_server::CreateDirectoryOptions;
++use codex_exec_server::Environment;
++use codex_exec_server::EnvironmentInfo;
++use codex_exec_server::EnvironmentObservedStatus;
++use codex_exec_server::ExecBackend;
++use codex_exec_server::ExecProcessFuture;
++use codex_exec_server::ExecServerError;
++use codex_exec_server::ExecutorFileSystem;
++use codex_exec_server::ExecutorFileSystemFuture;
++use codex_exec_server::FileMetadata;
++use codex_exec_server::FileSystemReadStream;
++use codex_exec_server::FileSystemSandboxContext;
++use codex_exec_server::GetMetadataOptions;
++use codex_exec_server::LocalRuntime;
++use codex_exec_server::LocalSandboxOwnership;
++use codex_exec_server::ReadDirectoryEntry;
++use codex_exec_server::ReadFileOptions;
++use codex_exec_server::RemoveOptions;
++use codex_exec_server::SandboxOwner;
++use codex_exec_server::WalkOptions;
++use codex_exec_server::WalkOutcome;
++use codex_exec_server::WriteFileOptions;
++use codex_utils_path_uri::PathUri;
++
++/// Real PC filesystem provider with explicit test admission and no path remapping.
++/// This fixture does not claim Android enforcement or controller-invisible paths.
++pub(super) struct Runtime {
++    pub home: PathBuf,
++    pub path_access: ControllerPathAccess,
++    pub environment: Environment,
++}
++
++impl LocalRuntime for Runtime {
++    fn exec_backend(&self) -> Arc<dyn ExecBackend> {
++        self.environment.get_exec_backend()
++    }
++
++    fn filesystem(&self) -> Arc<dyn ExecutorFileSystem> {
++        Arc::new(Files {
++            inner: self.environment.get_filesystem(),
++            denied: PathUri::from_host_native_path(self.home.join("denied.txt"))
++                .expect("temporary test file has an absolute native path"),
++            home: self.home.clone(),
++        })
++    }
++
++    fn sandbox_ownership(&self) -> LocalSandboxOwnership {
++        LocalSandboxOwnership {
++            process: SandboxOwner::Controller,
++            filesystem: SandboxOwner::Controller,
++        }
++    }
++
++    fn controller_path_access(&self) -> ControllerPathAccess {
++        self.path_access
++    }
++
++    fn info(&self) -> ExecProcessFuture<'_, EnvironmentInfo> {
++        Box::pin(async {
++            if self.home.join("disconnected").exists() {
++                return Err(ExecServerError::Protocol(
++                    "bootstrap runtime disconnected".into(),
++                ));
++            }
++            let mut info = self.environment.info().await?;
++            info.user_home_dir = Some(
++                PathUri::from_host_native_path(self.home.join("runtime-home"))
++                    .map_err(|err| ExecServerError::Protocol(err.to_string()))?,
++            );
++            info.cwd = info.user_home_dir.clone();
++            Ok(info)
++        })
++    }
++
++    fn observed_status(&self) -> EnvironmentObservedStatus {
++        if self.home.join("disconnected").exists() {
++            EnvironmentObservedStatus::Disconnected {
++                error: "bootstrap runtime disconnected".into(),
++            }
++        } else {
++            EnvironmentObservedStatus::Ready
++        }
++    }
++
++    fn wait_until_ready(&self) -> ExecProcessFuture<'_, ()> {
++        Box::pin(async { self.info().await.map(|_| ()) })
++    }
++}
++
++struct Files {
++    inner: Arc<dyn ExecutorFileSystem>,
++    denied: PathUri,
++    home: PathBuf,
++}
++
++impl ExecutorFileSystem for Files {
++    fn canonicalize<'a>(
++        &'a self,
++        path: &'a PathUri,
++        sandbox: Option<&'a FileSystemSandboxContext>,
++    ) -> ExecutorFileSystemFuture<'a, PathUri> {
++        self.inner.canonicalize(path, sandbox)
++    }
++    fn read_file<'a>(
++        &'a self,
++        path: &'a PathUri,
++        options: ReadFileOptions,
++        sandbox: Option<&'a FileSystemSandboxContext>,
++    ) -> ExecutorFileSystemFuture<'a, Vec<u8>> {
++        Box::pin(async move {
++            std::fs::write(self.home.join("provider-read"), path.to_string())?;
++            if path == &self.denied || self.home.join("disconnected").exists() {
++                return Err(io::Error::new(
++                    io::ErrorKind::PermissionDenied,
++                    "bootstrap provider refused read",
++                ));
++            }
++            self.inner.read_file(path, options, sandbox).await
++        })
++    }
++    fn read_file_stream<'a>(
++        &'a self,
++        path: &'a PathUri,
++        sandbox: Option<&'a FileSystemSandboxContext>,
++    ) -> ExecutorFileSystemFuture<'a, FileSystemReadStream> {
++        self.inner.read_file_stream(path, sandbox)
++    }
++    fn write_file<'a>(
++        &'a self,
++        path: &'a PathUri,
++        contents: Vec<u8>,
++        options: WriteFileOptions,
++        sandbox: Option<&'a FileSystemSandboxContext>,
++    ) -> ExecutorFileSystemFuture<'a, ()> {
++        self.inner.write_file(path, contents, options, sandbox)
++    }
++    fn create_directory<'a>(
++        &'a self,
++        path: &'a PathUri,
++        options: CreateDirectoryOptions,
++        sandbox: Option<&'a FileSystemSandboxContext>,
++    ) -> ExecutorFileSystemFuture<'a, ()> {
++        self.inner.create_directory(path, options, sandbox)
++    }
++    fn get_metadata<'a>(
++        &'a self,
++        path: &'a PathUri,
++        options: GetMetadataOptions,
++        sandbox: Option<&'a FileSystemSandboxContext>,
++    ) -> ExecutorFileSystemFuture<'a, FileMetadata> {
++        self.inner.get_metadata(path, options, sandbox)
++    }
++    fn read_directory<'a>(
++        &'a self,
++        path: &'a PathUri,
++        sandbox: Option<&'a FileSystemSandboxContext>,
++    ) -> ExecutorFileSystemFuture<'a, Vec<ReadDirectoryEntry>> {
++        self.inner.read_directory(path, sandbox)
++    }
++    fn walk<'a>(
++        &'a self,
++        path: &'a PathUri,
++        options: WalkOptions,
++        sandbox: Option<&'a FileSystemSandboxContext>,
++    ) -> ExecutorFileSystemFuture<'a, WalkOutcome> {
++        self.inner.walk(path, options, sandbox)
++    }
++    fn remove<'a>(
++        &'a self,
++        path: &'a PathUri,
++        options: RemoveOptions,
++        sandbox: Option<&'a FileSystemSandboxContext>,
++    ) -> ExecutorFileSystemFuture<'a, ()> {
++        self.inner.remove(path, options, sandbox)
++    }
++    fn copy<'a>(
++        &'a self,
++        source: &'a PathUri,
++        destination: &'a PathUri,
++        options: CopyOptions,
++        sandbox: Option<&'a FileSystemSandboxContext>,
++    ) -> ExecutorFileSystemFuture<'a, ()> {
++        self.inner.copy(source, destination, options, sandbox)
++    }
++}
+diff --git a/codex-rs/app-server/tests/suite/v2/mod.rs b/codex-rs/app-server/tests/suite/v2/mod.rs
+index c7578dbed9766d8db9e7f8449b6018d82bc360ed..8bb5728acc4f9f96acb4371a7f5c67df30d85139 100644
+--- a/codex-rs/app-server/tests/suite/v2/mod.rs
++++ b/codex-rs/app-server/tests/suite/v2/mod.rs
+@@ -44,6 +44,7 @@ mod hooks_list;
+ mod host_skills;
+ mod imagegen_extension;
+ mod initialize;
++mod injected_local_runtime;
+ mod marketplace_add;
+ mod marketplace_remove;
+ mod marketplace_upgrade;
 diff --git a/codex-rs/core/src/environment_selection.rs b/codex-rs/core/src/environment_selection.rs
 index 3310867aeadc192173fe31b9b294fa2c5960cab6..493d5e0d992c3458b9190a155fad340eddc85ca8 100644
 --- a/codex-rs/core/src/environment_selection.rs

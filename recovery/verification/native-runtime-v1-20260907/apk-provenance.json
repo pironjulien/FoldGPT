@@ -1,0 +1,183 @@
+{
+  "schema": "foldgpt.runtime-qualification-apk.v1",
+  "verified": true,
+  "androidExecution": false,
+  "package": "app.foldgpt.runtimequalification.v1",
+  "base": "/data/local/tmp/foldgpt-bionic-runtime-qualification-v1",
+  "versionCode": 1,
+  "apkSha256": "e39c89f536f2d31a676a2c5d9fdcce51c9e22c0e69cef9ea215c044a3142b73b",
+  "certificateSha256": "30930ffce7c10b673e95e69f2d78bb9e60aa71132db3c21cdc15cf56df77fa16",
+  "nativeHashesVerified": 84,
+  "sourceHashesVerified": 25,
+  "stageInventorySha256": "23058a2ea8353f974be0208a2a2bf05cfd9aa8bc966b75f60d887e1aa7948ef9",
+  "jvmTests": [
+    {
+      "module": "transport",
+      "name": "app.foldgpt.shizukuexec.AdmissionTraceTest",
+      "tests": 4,
+      "sha256": "3ad58c00050fdcaf139c584fbf5c1895e72e8a10e7b8f21fe4adb113f54a7554"
+    },
+    {
+      "module": "transport",
+      "name": "app.foldgpt.shizukuexec.AppSocketBridgeTest",
+      "tests": 2,
+      "sha256": "7eb1e63ebb59a4058e7aa9ac2f60936873d51ed2c301c8543fb9e5e5e4f8b9ac"
+    },
+    {
+      "module": "transport",
+      "name": "app.foldgpt.shizukuexec.InstalledLibraryTest",
+      "tests": 5,
+      "sha256": "6ba28ec7d0ef7add30e2818f0ec894ba0099474fdf4c9475345cd91be49bb90b"
+    },
+    {
+      "module": "transport",
+      "name": "app.foldgpt.shizukuexec.SessionStateTest",
+      "tests": 13,
+      "sha256": "eb38903847a0007df701e1f397ed0113f68cdefd9918b022502e05025927bfd7"
+    },
+    {
+      "module": "runtimequalification",
+      "name": "app.foldgpt.runtimequalification.RuntimeContractTest",
+      "tests": 5,
+      "sha256": "ce326eb16b7205c15e61313d8c4548619e2b0664f5b0dd90085cd10e1775471a"
+    }
+  ],
+  "diagnosticSources": [
+    {
+      "path": "tools/executor/shizuku-service/build.gradle",
+      "sha256": "be79a2858e07ccdd4e8446959f210f316871327705f12d780f8f327d89050cf1"
+    },
+    {
+      "path": "tools/executor/shizuku-service/runtime_qualification_profile.py",
+      "sha256": "21c77d168b04d71e4c36e003c3709242ab0979e84a223c52af7fc53a968f935e"
+    },
+    {
+      "path": "tools/executor/shizuku-service/runtimequalification/build.gradle",
+      "sha256": "903af11c500e1af21df2bad7b8dbf11977ca3eb2a5754dac5e2c212c87b608ab"
+    },
+    {
+      "path": "tools/executor/shizuku-service/runtimequalification/src/main/AndroidManifest.xml",
+      "sha256": "b5e50e0e2d958140fd2c844f083033c53a895f92830ff7bbb7afc502ce04b7f5"
+    },
+    {
+      "path": "tools/executor/shizuku-service/runtimequalification/src/main/java/app/foldgpt/runtimequalification/RuntimeContract.java",
+      "sha256": "12ab5157eee86d44fc3412d28cd9229d72193d51f41b16293d985d52c65133e7"
+    },
+    {
+      "path": "tools/executor/shizuku-service/runtimequalification/src/main/java/app/foldgpt/runtimequalification/RuntimeProfile.java",
+      "sha256": "74f64f383fd8db72727329ebb9f01f778ae3ec6ce68e32f5f44c526a0248c0be"
+    },
+    {
+      "path": "tools/executor/shizuku-service/runtimequalification/src/main/java/app/foldgpt/runtimequalification/RuntimeQualificationActivity.java",
+      "sha256": "095dc171a161e6c6e5b07e42b0226f7195456768d829a38d24b9e5b95b3ab4f7"
+    },
+    {
+      "path": "tools/executor/shizuku-service/runtimequalification/src/test/java/app/foldgpt/runtimequalification/RuntimeContractTest.java",
+      "sha256": "810c5e4a225cab88315aabd3309e83c95111d9b856927fe2e7b682c5e1009390"
+    },
+    {
+      "path": "tools/executor/shizuku-service/runtimequalification-inputs-v1.json",
+      "sha256": "fedc8b05f1507dc8b3b61a147886bb190f7759d9310376d90dfc1af0b0034556"
+    },
+    {
+      "path": "tools/executor/shizuku-service/settings.gradle",
+      "sha256": "2ab15077455e7c97291c6f19770b2440fa805fbb3d77c484f03b9f729b571c95"
+    },
+    {
+      "path": "tools/executor/shizuku-service/stage-runtime-qualification.py",
+      "sha256": "aae614c312800064610b8a2d4129ea692a78626491ec9adab2f5fd14ac78e92f"
+    },
+    {
+      "path": "tools/executor/shizuku-service/test_runtime_qualification_packaging.py",
+      "sha256": "c936b982b459373a5e3343214e2b4ba55698bbfb93b21ba6e503f81f70bd6f88"
+    },
+    {
+      "path": "tools/executor/shizuku-service/transport/build.gradle",
+      "sha256": "811380efa479b86d32d9fed90c5d58a5ab491ac8819b9640b58ca74f2dddc439"
+    },
+    {
+      "path": "tools/executor/shizuku-service/transport/src/main/aidl/app/foldgpt/shizukuexec/IExecutorService.aidl",
+      "sha256": "213c951f8067a41f4f64cfe5c95d924cb1a22f3ed7f63f12b047bd3b3bb815e9"
+    },
+    {
+      "path": "tools/executor/shizuku-service/transport/src/main/aidl/app/foldgpt/shizukuexec/IExecutorSession.aidl",
+      "sha256": "d31045d19655ef53e7ebb6e48567e8b2587d3285ea6c1b95591c742ab0f29131"
+    },
+    {
+      "path": "tools/executor/shizuku-service/transport/src/main/AndroidManifest.xml",
+      "sha256": "90f7644e9f3976f113feea41c39f90e7c09490d2f7eb7be0b08d4b65bb891d7a"
+    },
+    {
+      "path": "tools/executor/shizuku-service/transport/src/main/assets/foldgpt-executor/foldgpt_shizuku_bootstrap.py",
+      "sha256": "fbdb1ead062d928254020d3eb6b3191b43dd4333203e0b6e8fa75cea79b4d5e7"
+    },
+    {
+      "path": "tools/executor/shizuku-service/transport/src/main/cpp/CMakeLists.txt",
+      "sha256": "69f52c2e476d377fa0da5f6e440aeba9265ecb7443b9f32f63ff70a0791de13e"
+    },
+    {
+      "path": "tools/executor/shizuku-service/transport/src/main/cpp/spawn.c",
+      "sha256": "b382805db6af6c604e10074b8146636b0737134ea207b6e322658c94ca71807a"
+    },
+    {
+      "path": "tools/executor/shizuku-service/transport/src/main/java/app/foldgpt/shizukuexec/AdmissionTrace.java",
+      "sha256": "95c8862a9f2f4b3af9ec7c6ace7af26b5897b0f07fcabd5c52ce2903e653fcfd"
+    },
+    {
+      "path": "tools/executor/shizuku-service/transport/src/main/java/app/foldgpt/shizukuexec/AppSocketBridge.java",
+      "sha256": "bcbf8f958fc95fc67513abdf8adaae6a5391cff4f609c7cf7e8dc60a3d6025bc"
+    },
+    {
+      "path": "tools/executor/shizuku-service/transport/src/main/java/app/foldgpt/shizukuexec/Deployment.java",
+      "sha256": "13aec85665fb2e832eef7fa71b964efd649e7023bfc4403744c1f53cda1ea927"
+    },
+    {
+      "path": "tools/executor/shizuku-service/transport/src/main/java/app/foldgpt/shizukuexec/ExecutorProvider.java",
+      "sha256": "1615ed121a20dcc8ace36c6f7c6888d512bc9a42361733a2740f8a90ee1ba32d"
+    },
+    {
+      "path": "tools/executor/shizuku-service/transport/src/main/java/app/foldgpt/shizukuexec/ExecutorService.java",
+      "sha256": "366000cc3aad8d47d26684f601201dd73cd046b9ed34a91f18c9814b5af9d09b"
+    },
+    {
+      "path": "tools/executor/shizuku-service/transport/src/main/java/app/foldgpt/shizukuexec/InstalledLibrary.java",
+      "sha256": "fa8fe999471a100855d8ba651283750f52ef08fc01bab4ff232049a3fd0fdac5"
+    },
+    {
+      "path": "tools/executor/shizuku-service/transport/src/main/java/app/foldgpt/shizukuexec/NativeSpawn.java",
+      "sha256": "e290121ea103131e8398fc9d7da004cad2a411d1913eb6817078bfdaf6ff2b2c"
+    },
+    {
+      "path": "tools/executor/shizuku-service/transport/src/main/java/app/foldgpt/shizukuexec/PythonRuntime.java",
+      "sha256": "51049bfc734226af4d2c04f1dd0a17604a78bc174969a2d65b0eb69652695e3c"
+    },
+    {
+      "path": "tools/executor/shizuku-service/transport/src/main/java/app/foldgpt/shizukuexec/SessionState.java",
+      "sha256": "ad3b774e9a164440b2ce73f9555968ac063176910254416a62cf55373ec05801"
+    },
+    {
+      "path": "tools/executor/shizuku-service/transport/src/test/java/app/foldgpt/shizukuexec/AdmissionTraceTest.java",
+      "sha256": "0b03f0d9e550a4254220fc4d0b05b2be64523c8c572d1adc33b6ee0c7262be80"
+    },
+    {
+      "path": "tools/executor/shizuku-service/transport/src/test/java/app/foldgpt/shizukuexec/AppSocketBridgeTest.java",
+      "sha256": "0a3e6774c06ad07ea0b03c3e6d38ce54eea10bbe9c65e36628aab6587263a6d7"
+    },
+    {
+      "path": "tools/executor/shizuku-service/transport/src/test/java/app/foldgpt/shizukuexec/InstalledLibraryTest.java",
+      "sha256": "d44dd61869108d112a1c0ebb40fa61d3a25ff886296ac19bcad884899b98e61f"
+    },
+    {
+      "path": "tools/executor/shizuku-service/transport/src/test/java/app/foldgpt/shizukuexec/SessionStateTest.java",
+      "sha256": "85dbfe9e8c7e9fa33888cbf82e51a7762b6e964f6b9e228650ceb5c660b5406e"
+    },
+    {
+      "path": "tools/executor/shizuku-service/verify-runtime-qualification.py",
+      "sha256": "f907fc79b2873089c8cc88bb7515603db1bfc32de8d113173e8555518461a4dc"
+    },
+    {
+      "path": "tools/runtime/collect-runtime-qualification.py",
+      "sha256": "ad6f36eeef8b2b2f33e5ab6af38ad25968084ce783c5396c4b1d863c4fc34b89"
+    }
+  ]
+}

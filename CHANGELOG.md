@@ -2,6 +2,14 @@
 
 ## Unreleased — 2026-09-06
 
+- Preserve the real Android runtime V1 failure: Bash starts but Python cannot
+  resolve libpython3.14.so. Retain complete native/JNI cleanup and unchanged
+  boot/package/fixture evidence; no Python success is claimed. Prepare a
+  separately versioned runtime prefix RUNPATH correction for review and testing.
+- Export the app-server native-runtime bootstrap with six real JSON-RPC tests
+  and 29 API regressions passing on PC. Preserve official startup and explicit
+  runtime refusal behavior; executor-only project routing remains incomplete.
+
 - Qualify the fixed Shizuku/Bionic V12 worker on the real Fold: all 24
   independent checks pass, including real main/pthread operations, byte streams,
   owner waits and complete cleanup. Preserve exact evidence and unchanged
