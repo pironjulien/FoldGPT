@@ -12,12 +12,13 @@ chmod 777 "$work/evidence"
 for name in native-managed-runner.c native-managed-filter.h native-managed-fixture.c \
     native-runner.c native-runner-seccomp.h native-runner-memory-contract.h \
     native-process-fixture.c native_processes.py native_process_policy.py \
+    native_environment.py native_environment_unicode.py \
     native_files.py native-files.c exec_server.py policy_intent.py native-managed-test.py \
     test_native_processes_live.py native-process-build.sh native-process-lifecycle.md native-process-fd-abi.c; do
     cp "$repo/tools/executor/$name" "$work/sources/"
 done
 cp "$repo/tools/policy/managed_policy.py" "$work/sources/"
-cp "$work"/sources/{native_processes.py,native_process_policy.py,native_files.py,exec_server.py,policy_intent.py,native-managed-test.py,test_native_processes_live.py} "$work/python/tools/executor/"
+cp "$work"/sources/{native_processes.py,native_process_policy.py,native_environment.py,native_environment_unicode.py,native_files.py,exec_server.py,policy_intent.py,native-managed-test.py,test_native_processes_live.py} "$work/python/tools/executor/"
 cp "$work/sources/managed_policy.py" "$work/python/tools/policy/"
 uname -a > "$work/environment.txt"
 gcc --version >> "$work/environment.txt"
@@ -36,6 +37,7 @@ cp "$sysroot/linux/memfd.h" "$work/abi/ndk-linux-memfd.h"
 cp "$sysroot/linux/fcntl.h" "$work/abi/ndk-linux-fcntl.h"
 cp "$sysroot/asm-generic/fcntl.h" "$work/abi/ndk-asm-generic-fcntl.h"
 cp "$sysroot/sys/mman.h" "$work/abi/ndk-sys-mman.h"
+cp "$sysroot/sys/pidfd.h" "$work/abi/ndk-sys-pidfd.h"
 "$work/linux/fd-abi" > "$work/abi/host-observed.json"
 python3 -B - "$work/python" "$work/abi/host-observed.json" <<'PY'
 import json, sys

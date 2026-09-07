@@ -1,15 +1,17 @@
 """Official process wire over the private static native acquisition profile.
 
-This backend is opt-in and requires the native --process-v1 supervisor mode.
+This backend is opt-in and requires the native --process-v2 supervisor mode.
 It does not activate Desktop, translate managed policies to additive grants,
 provide a shell, or admit TTY/network/dynamic executables. Runtime mappings and
 resource allowances are executor-owned constructor inputs, never RPC fields.
 """
 import asyncio
+import array
 import base64
 from collections import OrderedDict, deque
 import ctypes
 from dataclasses import dataclass, field
+import errno
 import json
 import os
 from pathlib import Path
@@ -19,6 +21,7 @@ import stat
 from types import MappingProxyType
 
 from tools.executor.exec_server import RpcError, validate_operation
+from tools.executor.native_environment import process_environment, snapshot_environment
 from tools.executor.native_process_policy import NativeProcessPolicy, strict_json
 
 METHODS = frozenset({"process/start", "process/read", "process/write", "process/signal", "process/terminate"})
@@ -29,9 +32,6 @@ COMPLETED_SECONDS = 30
 # Explicit private-profile capacity limits; output history above matches upstream.
 STDIN_BYTES = 1024 * 1024
 NOTIFICATION_CAPACITY = 128
-NON_INHERITABLE = frozenset({"CODEX_EXEC_SERVER_NOISE_AUTH_TOKEN", "NODE_REPL_AUTH_TOKEN",
-    "OPENAI_FEDERATION_RULE_ID", "OPENAI_IDENTITY_TOKEN_FILE", "OPENAI_WORKLOAD_IDENTITY_CONTEXT"})
-EOF_CONTROL = "CODEX_EXEC_SERVER_EXIT_ON_STDIN_CLOSE"
 # Linux UAPI, verified against NDK r29 linux/memfd.h, linux/fcntl.h and
 # asm-generic/fcntl.h by native-process-fd-abi.c in the frozen build. CPython
 # Android need not expose os.memfd_create or any Python F_*_SEALS constant.
@@ -45,6 +45,58 @@ _MEMFD_CREATE.restype = ctypes.c_int
 _FCNTL_INT = _LIBC.fcntl
 _FCNTL_INT.argtypes = [ctypes.c_int, ctypes.c_int, ctypes.c_int]
 _FCNTL_INT.restype = ctypes.c_int
+_PIDFD_SEND_SIGNAL = _LIBC.pidfd_send_signal
+_PIDFD_SEND_SIGNAL.argtypes = [ctypes.c_int, ctypes.c_int, ctypes.c_void_p, ctypes.c_uint]
+_PIDFD_SEND_SIGNAL.restype = ctypes.c_int
+
+
+def _signal_pidfd(fd, signum):
+    if _PIDFD_SEND_SIGNAL(fd, signum, None, 0) == 0:
+        return True
+    number = ctypes.get_errno()
+    if number == errno.ESRCH:
+        return False
+    raise OSError(number, os.strerror(number))
+
+
+async def _receive_supervisor(endpoint, expected_pid):
+    """Accept only the native supervisor's pinned pidfd, before acknowledging it."""
+    descriptors = []
+    try:
+        while True:
+            try:
+                payload, ancillary, flags, _ = endpoint.recvmsg(512, socket.CMSG_SPACE(4 * array.array("i").itemsize), socket.MSG_CMSG_CLOEXEC)
+                break
+            except BlockingIOError:
+                await _fd_ready(endpoint.fileno())
+        valid = len(ancillary) == 1
+        for level, kind, data in ancillary:
+            if level == socket.SOL_SOCKET and kind == socket.SCM_RIGHTS:
+                values = array.array("i")
+                values.frombytes(data[:len(data) - len(data) % values.itemsize])
+                descriptors.extend(values)
+                valid = valid and len(data) == values.itemsize
+            else:
+                valid = False
+        if not valid or len(descriptors) != 1 or flags & (socket.MSG_TRUNC | socket.MSG_CTRUNC):
+            raise RpcError(-32603, "Native supervisor did not transfer exactly one pinned process identity")
+        message = strict_json(payload)
+        if (type(message) is not dict or type(message.get("pid")) is not int
+                or message != {"type": "supervisor", "pid": expected_pid, "profile": "managed-process-v2"}):
+            raise RpcError(-32603, "Native supervisor identity message differs")
+        fd = descriptors[0]
+        if os.get_inheritable(fd):
+            raise RpcError(-32603, "Native supervisor identity is inheritable")
+        with open(f"/proc/self/fdinfo/{fd}", "rb") as source:
+            info = source.read(4097)
+        observed = [line.split(b":", 1)[1].strip() for line in info.splitlines() if line.startswith(b"Pid:")]
+        if len(info) > 4096 or observed != [str(expected_pid).encode()] or not _signal_pidfd(fd, 0):
+            raise RpcError(-32603, "Native pidfd does not identify the expected live supervisor")
+        descriptors.clear()
+        return fd, {**message, "closeOnExec": True, "identityRoute": "native-self-pidfd/SCM_RIGHTS", "waitOwner": "asyncio"}
+    finally:
+        for fd in descriptors:
+            os.close(fd)
 
 
 def _native_fcntl(fd, command, value=0):
@@ -55,11 +107,22 @@ def _native_fcntl(fd, command, value=0):
     return result
 
 
+async def _wait_owned(future):
+    """Observe an already-owned future without transferring its cancellation.
+
+    The lifecycle owner retains the future and retrieves its terminal result.
+    Unlike shield(), wait() does not attach a second exception-reporting owner
+    when a caller stops waiting (notably Python 3.14's shield callback).
+    """
+    await asyncio.wait((future,))
+    return future.result()
+
+
 async def _finish(task):
     """Do not abandon process ownership on repeated transport cancellation."""
     while True:
         try:
-            return await asyncio.shield(task)
+            return await _wait_owned(task)
         except asyncio.CancelledError:
             if task.done():
                 return task.result()
@@ -98,21 +161,6 @@ async def _receive(endpoint):
             return strict_json(payload) if payload else None
         except BlockingIOError:
             await _fd_ready(endpoint.fileno())
-
-
-def _environment(params):
-    if params.get("envPolicy") is not None:
-        raise RpcError(-32602, "The static native profile currently accepts exact explicit environments only")
-    result = {}
-    for name, value in params["env"].items():
-        if type(name) is not str or not name or "=" in name or "\0" in name or "\0" in value:
-            raise RpcError(-32602, "Invalid explicit process environment")
-        if name != EOF_CONTROL and name.upper() not in NON_INHERITABLE:
-            result[name] = value
-    encoded = b"".join((name + "=" + value).encode("utf-8") + b"\0" for name, value in result.items())
-    if len(result) > 128 or len(encoded) > 65536:
-        raise RpcError(-32602, "Explicit environment exceeds the admitted native bounds")
-    return encoded
 
 
 def _sealed_environment(encoded):
@@ -209,6 +257,9 @@ class _Process:
     native_started: object = None
     native_result: object = None
     setup_diagnostic: bytes = b""
+    supervisor_fd: int = -1
+    supervisor_identity: object = None
+    supervisor_signals: object = field(default_factory=list)
     byte_counts: object = field(default_factory=lambda: {"stdout": 0, "stderr": 0})
 
 
@@ -217,10 +268,11 @@ class NativeProcessesBackend:
     capabilities = frozenset()
 
     def __init__(self, runner, workspace, *, executables, guest_workspace="/workspace", limits=None,
-                 mutation_lease=None, files_backend=None):
+                 mutation_lease=None, files_backend=None, parent_environment=None):
         self.runner = str(Path(runner).resolve(strict=True))
         self.workspace = str(Path(workspace).absolute())
         self.guest_workspace = guest_workspace
+        self.parent_environment = snapshot_environment(parent_environment)
         self.executables = MappingProxyType({name: NativeExecutable.admit(value) for name, value in executables.items()})
         if not self.executables or any(type(name) is not str or not name for name in self.executables):
             raise ValueError("An explicit immutable native runtime mapping is required")
@@ -296,7 +348,7 @@ class NativeProcessesBackend:
         arg0 = params.get("arg0")
         if arg0 is not None and "\0" in arg0:
             raise RpcError(-32602, "Invalid native argv0")
-        environment = _environment(params)
+        environment = process_environment(params, self.parent_environment)
         if params.get("sandbox") is None or params["cwd"] != params["sandbox"].get("cwd"):
             raise RpcError(-32602, "Native launch requires its complete matching portable sandbox context")
         key = (call.session_id, params["processId"])
@@ -312,7 +364,7 @@ class NativeProcessesBackend:
         self.processes[key] = record
         record.task = asyncio.create_task(self._run(record))
         try:
-            await asyncio.shield(record.started)
+            await _wait_owned(record.started)
             return {"processId": record.key, "sandboxType": "linuxSeccomp"}
         except asyncio.CancelledError:
             self._terminate(record)
@@ -333,10 +385,17 @@ class NativeProcessesBackend:
                 # The supervisor remains the owned asyncio child. Its existing
                 # SIGTERM path is the same cancellation/descendant cleanup path.
                 if record.process is not None and record.process.returncode is None:
-                    try:
-                        record.process.terminate()
-                    except ProcessLookupError:
-                        pass
+                    self._signal_supervisor(record, signal.SIGTERM)
+
+    def _signal_supervisor(self, record, signum):
+        # asyncio alone reaps its direct child. Popen.send_signal calls poll(),
+        # which can steal waitpid from its watcher and invent returncode 255.
+        # The received pidfd cannot refer to a later process reusing that PID.
+        if record.supervisor_fd < 0:
+            return False
+        delivered = _signal_pidfd(record.supervisor_fd, signum)
+        record.supervisor_signals.append({"signal": signum, "delivered": delivered, "route": "libc.pidfd_send_signal"})
+        return delivered
 
     async def _notify(self, record):
         try:
@@ -474,12 +533,15 @@ class NativeProcessesBackend:
             if sum(record.byte_counts.values()) > self.limits.output_bytes + 4096:
                 raise RpcError(-32603, "Native process exceeded its output contract")
             try:
-                await asyncio.shield(record.started)
+                await _wait_owned(record.started)
             except RpcError:
                 continue  # Drain setup diagnostics without a false process notification.
             self._event(record, "process/output", {"stream": name, "chunk": base64.b64encode(data).decode("ascii")})
 
     async def _control(self, record, endpoint):
+        record.supervisor_fd, record.supervisor_identity = await _receive_supervisor(endpoint, record.process.pid)
+        await _packet(endpoint, b"P")
+        record.supervisor_identity["acknowledgedBeforeWorker"] = True
         while True:
             message = await _receive(endpoint)
             if message is None:
@@ -492,7 +554,7 @@ class NativeProcessesBackend:
             if kind == "open":
                 work = asyncio.create_task(asyncio.to_thread(record.policy.decide, message))
                 try:
-                    reply = await asyncio.shield(work)
+                    reply = await _wait_owned(work)
                 except asyncio.CancelledError:
                     await _finish(work)
                     raise
@@ -505,7 +567,7 @@ class NativeProcessesBackend:
                 if record.native_started is not None or record.native_result is not None:
                     raise RpcError(-32603, "Native process emitted duplicate or late startup")
                 required = {"type", "pid", "profile", "uidTasksObserved", "uidTaskBudget", "uidNprocLimit", "inheritedNprocSoft", "inheritedNprocHard"}
-                if set(message) != required or message["profile"] != "managed-process-v1" or any(type(message[key]) is not int or message[key] < 0 for key in required - {"type", "profile"}):
+                if set(message) != required or message["profile"] != "managed-process-v2" or any(type(message[key]) is not int or message[key] < 0 for key in required - {"type", "profile"}):
                     raise RpcError(-32603, "Native process startup contract differs")
                 record.native_started = message
                 if record.termination_requested:
@@ -566,7 +628,7 @@ class NativeProcessesBackend:
                 params["sandbox"], session_id=record.session, request_id=type(record.request_id).__name__ + ":" + str(record.request_id),
                 guest_workspace=self.guest_workspace, backend=self.files_backend))
             try:
-                record.policy = await asyncio.shield(preparing)
+                record.policy = await _wait_owned(preparing)
             except asyncio.CancelledError:
                 record.policy = await _finish(preparing)
                 raise
@@ -590,11 +652,11 @@ class NativeProcessesBackend:
             limits = self.limits
             arguments = [self.runner, str(record.policy.root), str(peer.fileno()), record.executable.path,
                 str(limits.wall_ms), str(limits.address_space_bytes), str(limits.output_bytes), str(limits.uid_task_budget),
-                "--process-v1", str(read_fd), str(command_peer.fileno()), str(env_fd), "--", *record.argv]
+                "--process-v2", str(read_fd), str(command_peer.fileno()), str(env_fd), "--", *record.argv]
             spawning = asyncio.create_task(asyncio.create_subprocess_exec(*arguments,
                 stdin=asyncio.subprocess.DEVNULL, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE,
                 close_fds=True, pass_fds=(record.policy.root, peer.fileno(), command_peer.fileno(), read_fd, env_fd), env={}))
-            process = await asyncio.shield(spawning); record.process = process
+            process = await _wait_owned(spawning); record.process = process
             peer.close(); command_peer.close()
             for fd in descriptors:
                 os.close(fd)
@@ -606,7 +668,7 @@ class NativeProcessesBackend:
             if writer is not None:
                 children.append(writer)
             communication = asyncio.gather(*children[:3], process.wait())
-            await asyncio.wait_for(asyncio.shield(communication), limits.wall_ms / 1000 + 8)
+            await asyncio.wait_for(_wait_owned(communication), limits.wall_ms / 1000 + 8)
             result = record.native_result
             required = {"type", "outcome", "exitCode", "signal", "cleanupComplete", "started", "grants", "denials", "stdoutBytes", "stderrBytes", "stage", "errno"}
             if type(result) is not dict or set(result) != required or result["cleanupComplete"] is not True:
@@ -650,8 +712,11 @@ class NativeProcessesBackend:
                 try:
                     await asyncio.wait_for(asyncio.shield(process.wait()), 7)
                 except asyncio.TimeoutError:
-                    process.kill()
-                    await process.wait()
+                    self._signal_supervisor(record, signal.SIGKILL)
+                    try:
+                        await asyncio.wait_for(asyncio.shield(process.wait()), 3)
+                    except asyncio.TimeoutError:
+                        pass  # Retain ownership/quarantine; no invented reaping.
                     record.failure = "Native supervisor lost; descendant cleanup is unknown"
             if record.native_result is not None and record.native_result.get("cleanupComplete") is True:
                 clean = True
@@ -670,6 +735,8 @@ class NativeProcessesBackend:
             for endpoint in endpoints:
                 endpoint.close()
             record.command = None
+            if record.supervisor_fd >= 0 and process is not None and process.returncode is not None:
+                os.close(record.supervisor_fd); record.supervisor_fd = -1
             for fd in descriptors:
                 os.close(fd)
             if process is not None and not clean:

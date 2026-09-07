@@ -1,0 +1,10 @@
+{
+  "vendor/termux-x11": {
+    "base": "9df8b767645aa0d0a2f2576767449df55b41962f",
+    "patch": "termux-x11.patch",
+    "sha256": "9e2fd8613d385f697a6a7e3d590525531405df99ce0756c13e2f931571114f1e"
+  },
+  "vendor/proot": {
+    "base": "7266fb3e8516535682f5a9c8f3a7e70f6506eddb"
+  }
+}

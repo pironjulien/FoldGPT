@@ -1,0 +1,31 @@
+{
+  "observed_at": "2026-09-07T00:17:00Z",
+  "upstream_commit": "3d2ee51ca2d5db578f328aa75e20aa22c0197c9a",
+  "original_checkout_head": "008bbd5884122dc95aaece19ecfe0fc6a59dcf36",
+  "original_checkout_clean": true,
+  "patch_sha256": "5101ab29c2daa5ac43af10ec3837b044344c33dee042c016fb35a5a88805c009",
+  "rustc": "1.97.0 (2d8144b78 2026-07-07)",
+  "host": "x86_64-pc-windows-msvc",
+  "tests": {
+    "command": "cargo test --manifest-path tools/executor/android-engine/pty-prototype/Cargo.toml --test owned_driver --locked",
+    "passed": 2,
+    "failed": 0,
+    "actual_child_process": true,
+    "stdout_bytes": 771006,
+    "stderr_bytes": 385500,
+    "exact_binary_comparison": true,
+    "child_exit_code": 23,
+    "one_chunk_channel_backpressure": true,
+    "stdin_eof": true,
+    "real_waiting_child_terminated_and_reaped": true,
+    "unsupported_controls_return_error": true
+  },
+  "android_typecheck": {
+    "command": "cargo check --manifest-path tools/executor/android-engine/pty-prototype/Cargo.toml --lib --target aarch64-linux-android --locked",
+    "passed": true,
+    "linked": false,
+    "phone_execution": false
+  },
+  "full_engine_build": false,
+  "native_backend_implemented_by_this_prototype": false
+}

@@ -1,0 +1,11 @@
+{
+  "package": "procps",
+  "version": "2:4.0.4-9",
+  "sourceArchiveSha256": "b06d96d663ca4df7e5ff7e0b66d92970edb6ef1c9fa53d2086aaa89409cd5727",
+  "sourceArchiveScope": "Existing Debian trixie authenticated corresponding-source bundle; extraction rechecks each procps member below",
+  "files": [
+    {"name": "procps_4.0.4-9.dsc", "bytes": 2124, "sha256": "0ea43605b8d5d7ac4306af0dcd2d01e237cbaba6603b0cf248dd7cfd4364ac7a"},
+    {"name": "procps_4.0.4.orig.tar.xz", "bytes": 1401540, "sha256": "22870d6feb2478adb617ce4f09a787addaf2d260c5a8aa7b17d889a962c5e42e"},
+    {"name": "procps_4.0.4-9.debian.tar.xz", "bytes": 45932, "sha256": "4821ca009f83b05522bc97ddac82661898938323ef0808416bca7830ce19bd97"}
+  ]
+}

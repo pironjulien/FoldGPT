@@ -6,6 +6,18 @@ backends. These components are not yet a complete protected Android executor.
 The default server refuses process/file operations until a backend is supplied.
 See [native filesystem integration](native-files.md) for the actual tests,
 official-client handshake and remaining admission limits.
+
+Current incremental evidence (6 September 2026): the Android/Bionic composite
+passes all nine file/process/stream transport cases with independent collection.
+The separate [GNU runtime proof](gnu-runtime/collection.md) now executes Bash and
+GNU Python on the Fold, creates/edits/tests/packages a real small project and
+passes eight denial assertions under native Landlock/seccomp before strict
+PRoot. Its independent collector verifies the project bytes, exact APK/runtime
+identities and all 6,200 installed official client files against the historical
+package. Neither proof is a normal model command. [Environment policy](native-environment.md)
+and [explicit app-server routing](app-server-routing.md) are additional pieces;
+the complete GNU managed backend and normal Desktop route are still unfinished.
+
 The native file backend implements nine methods, including metadata,
 canonicalization, directory listing/walking, copy and remove; its streaming
 subclass adds open/readBlock/close with session-bound descriptors. The

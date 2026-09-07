@@ -1,0 +1,27 @@
+{
+  "schema": "foldgpt.arm64-declared-capabilities.v1",
+  "scope": "Declared NDK ARM64 syscall numbers and HWCAP dictionary; HWCAP values announced to the observed shell process. No syscall permission or instruction exercise is inferred.",
+  "ndk_revision": "29.0.14206865",
+  "observation_utc": "2026-09-06T22:52:19Z",
+  "observation_path": "downloads/runtime/capabilities-20260907-v2/inventory.json",
+  "observation_sha256": "6c37597ffdb58299bfdad3aeebb652580aefcb6ff375ba8cb7288926933e182d",
+  "catalogs": [
+    {
+      "path": "arm64-syscalls-ndk-r29.csv",
+      "rows": 318,
+      "sha256": "758782f691b634c8cd459dc109f261dea13e51931c90f75f2986c260162d8c7c",
+      "source": "sysroot/usr/include/aarch64-linux-android/asm/unistd_64.h",
+      "source_sha256": "c20aeb2e83c223a11acbde8505309333c60f122d23e719c4b569298a1d7c38ec",
+      "extraction": "Integer __NR_* definitions in the NDK ARM64 header; no invocation"
+    },
+    {
+      "path": "arm64-hwcaps-ndk-r29.csv",
+      "rows": 96,
+      "announced": 55,
+      "sha256": "603360752f2eb7420564366970f26c4bb285d63abf195e935fa99f42b012018c",
+      "source": "sysroot/usr/include/aarch64-linux-android/asm/hwcap.h",
+      "source_sha256": "d359c663ba6a4b5a26fa0019e3bc325bf1ad140ace61d6b8294f43f057ae7c54",
+      "extraction": "All HWCAP_* and HWCAP2_* shift definitions; bit mask AND observed auxv value"
+    }
+  ]
+}

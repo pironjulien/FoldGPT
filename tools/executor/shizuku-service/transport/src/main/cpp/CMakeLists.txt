@@ -1,0 +1,6 @@
+cmake_minimum_required(VERSION 3.22.1)
+project(foldgpt_shizuku_transport C)
+add_library(foldgpt_shizuku_transport SHARED spawn.c)
+target_compile_features(foldgpt_shizuku_transport PRIVATE c_std_11)
+target_compile_options(foldgpt_shizuku_transport PRIVATE -Wall -Wextra -Werror -fstack-protector-strong)
+target_link_options(foldgpt_shizuku_transport PRIVATE -Wl,-z,relro,-z,now,-z,noexecstack,-z,max-page-size=16384)

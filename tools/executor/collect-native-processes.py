@@ -22,14 +22,27 @@ SOURCES = ('tools/executor/exec_server.py', 'tools/executor/native_files.py',
     'tools/executor/policy_intent.py', 'tools/policy/managed_policy.py',
     'tools/executor/native_files_rpc_fixture.py', 'tools/executor/native_process_policy.py',
     'tools/executor/native_processes.py', 'tools/executor/test_native_processes_live.py',
+    'tools/executor/native_environment.py', 'tools/executor/native_environment_unicode.py',
     'tools/executor/native_processes_android_fixture.py')
+BACKEND_SOURCE = 'tools/executor/native_processes.py'
+ENVIRONMENT_SOURCES = ('tools/executor/native_environment.py', 'tools/executor/native_environment_unicode.py')
+# Canonical AST identities of the retained original and reviewed envPolicy case.
+# Derive the expected error from the bound source, never from observed RPC text.
+CASE11_CONTRACTS = {
+    '787a5c249b05a1e1e46dab10aae07efa9bf56a56edf984055416bb14be76ed94': 'explicit-only-v1',
+    '50c18486733ae9beedfb1089320b2defda6058384b7eaea16e445456ebda5b7b': 'exec-env-policy-v1',
+}
+ENVIRONMENT_ERRORS = {
+    'explicit-only-v1': 'The static native profile currently accepts exact explicit environments only',
+    'exec-env-policy-v1': 'Environment policy requires the complete supported wire fields',
+}
 SUITE = 'tools/executor/test_native_processes_live.py'
 WRAPPER = 'tools/executor/native_processes_android_fixture.py'
 METHODS = {'process/start', 'process/read', 'process/write', 'process/signal', 'process/terminate'}
 PASS_COUNTS = {1: 3, 2: 12, 3: 6, 4: 10, 5: 5, 6: 3, 7: 12, 8: 10, 9: 3,
-    10: 3, 11: 4, 12: 6, 13: 3, 14: 1, 15: 6, 16: 6, 17: 4, 18: 3, 19: 3, 20: 1}
+    10: 3, 11: 4, 12: 6, 13: 3, 14: 1, 15: 6, 16: 6, 17: 4, 18: 3, 19: 3, 20: 1, 21: 3, 22: 1, 23: 1}
 NATIVE_COUNTS = {1: 1, 2: 1, 3: 1, 4: 2, 5: 1, 6: 1, 7: 4, 8: 2, 9: 0,
-    10: 1, 11: 0, 12: 1, 13: 1, 14: 0, 15: 2, 16: 1, 17: 1, 18: 0, 19: 0, 20: 0}
+    10: 1, 11: 0, 12: 1, 13: 1, 14: 0, 15: 2, 16: 1, 17: 1, 18: 0, 19: 0, 20: 0, 21: 1, 22: 0, 23: 0}
 UID_FIELDS = {'uidTasksObserved', 'uidTaskBudget', 'uidNprocLimit', 'inheritedNprocSoft', 'inheritedNprocHard'}
 NATIVE_FD_ABI = {'MFD_CLOEXEC': 1, 'MFD_ALLOW_SEALING': 2, 'F_ADD_SEALS': 1033,
     'F_GET_SEALS': 1034, 'F_SEAL_SEAL': 1, 'F_SEAL_SHRINK': 2, 'F_SEAL_GROW': 4, 'F_SEAL_WRITE': 8}
@@ -42,6 +55,45 @@ def require(value, message):
 
 def sha(data):
     return hashlib.sha256(data).hexdigest()
+
+
+def environment_contract(suite_source):
+    cases = [node for node in ast.walk(ast.parse(suite_source))
+        if isinstance(node, ast.AsyncFunctionDef) and node.name == 'test_11_unsupported_profile_fails_before_exec']
+    require(len(cases) == 1, 'Missing or duplicate environment admission case')
+    # ast.dump changed empty-field formatting in Python 3.13. Canonicalize the
+    # semantic fields so historical sources retain one identity across hosts.
+    def canonical(value):
+        if isinstance(value, ast.AST):
+            return [type(value).__name__, {key: canonical(item) for key, item in ast.iter_fields(value)
+                if item is not None and item != []}]
+        if isinstance(value, list):
+            return [canonical(item) for item in value]
+        return value
+    identity = sha(json.dumps(canonical(cases[0]), sort_keys=True, separators=(',', ':')).encode('utf-8'))
+    require(identity in CASE11_CONTRACTS, 'Environment admission case changed and needs independent review')
+    return CASE11_CONTRACTS[identity]
+
+
+def source_closure(sources, backend_source, suite_source):
+    """Choose the reviewed closure from APK-bound imports and admission contract."""
+    contract = environment_contract(suite_source)
+    tree = ast.parse(backend_source)
+    imports = [node for node in tree.body if isinstance(node, ast.ImportFrom)
+        and node.module == 'tools.executor.native_environment']
+    if contract == 'exec-env-policy-v1':
+        require(len(imports) == 1 and imports[0].level == 0
+            and {(item.name, item.asname) for item in imports[0].names}
+                == {('process_environment', None), ('snapshot_environment', None)},
+            'envPolicy suite lacks its reviewed native environment import')
+        require(all(name in sources for name in ENVIRONMENT_SOURCES), 'Environment closure definition is incomplete')
+        return tuple(sources)
+    require(not imports, 'Legacy environment case is paired with the new backend')
+    helpers = [node for node in tree.body if isinstance(node, ast.FunctionDef) and node.name == '_environment']
+    require(len(helpers) == 1 and any(isinstance(node, ast.Constant)
+        and node.value == ENVIRONMENT_ERRORS[contract] for node in ast.walk(helpers[0])),
+        'Legacy backend lacks its reviewed explicit-environment rejection')
+    return tuple(name for name in sources if name not in ENVIRONMENT_SOURCES)
 
 
 def strict_json(data):
@@ -122,7 +174,7 @@ def expected_starts(number):
         15: [start('timeout', ('sleep',)), start('limited', ('output',))],
         16: [start(args=('sleep',), pipeStdin=True)], 17: [start(args=('sleep',))],
         18: [start(args=('sleep',)), start('refused-after-loss', ('eof',), error=True)],
-        19: [start(args=('sleep',))], 20: [],
+        19: [start(args=('sleep',))], 20: [], 21: [start(args=('sleep',))], 22: [], 23: [],
     }
     return plans[number]
 
@@ -131,7 +183,17 @@ def stream_bytes(chunks, stream='stdout'):
     return b''.join(decode_chunk(item['chunk']) for item in chunks if item['stream'] == stream)
 
 
-def inspect_native_groups(entries):
+def inspect_supervisor_identity(value, acknowledged):
+    fields = {'type', 'pid', 'profile', 'closeOnExec', 'identityRoute', 'waitOwner'}
+    require(type(value) is dict and set(value) == fields | ({'acknowledgedBeforeWorker'} if acknowledged else set())
+        and value['type'] == 'supervisor' and type(value['pid']) is int and value['pid'] > 0
+        and value['profile'] == 'managed-process-v2' and value['closeOnExec'] is True
+        and value['identityRoute'] == 'native-self-pidfd/SCM_RIGHTS' and value['waitOwner'] == 'asyncio'
+        and (not acknowledged or value['acknowledgedBeforeWorker'] is True),
+        'Pinned supervisor identity or unique wait-owner evidence differs')
+
+
+def inspect_native_groups(entries, generation=1):
     """Use cumulative notification prefixes once; never sum repeated snapshots."""
     completions, notifications = [], []
     for index, entry in enumerate(entries):
@@ -181,7 +243,7 @@ def inspect_native_groups(entries):
     for (entry, preceding), group in zip(completions, generations):
         started, final, read = entry['nativeStarted'], entry['nativeResult'], preceding['result']
         require(set(started) == {'type', 'pid', 'profile'} | UID_FIELDS
-            and started['type'] == 'started' and started['profile'] == 'managed-process-v1'
+            and started['type'] == 'started' and started['profile'] == 'managed-process-v' + str(generation)
             and type(started['pid']) is int and started['pid'] > 0, 'Missing actual native exec event')
         require(all(type(started[key]) is int and 0 <= started[key] <= (1 << 64) - 1 for key in UID_FIELDS)
             and started['uidTasksObserved'] > 0 and started['uidTaskBudget'] == 128
@@ -213,20 +275,83 @@ def inspect_native_groups(entries):
         stdout, stderr = stream_bytes(chunks), stream_bytes(chunks, 'stderr')
         require(final['stdoutBytes'] == len(stdout) and final['stderrBytes'] == len(stderr),
             'Native counters differ from unique actual output bytes')
+        if generation == 2:
+            inspect_supervisor_identity(entry['supervisorIdentity'], True)
+            require(entry['supervisorIdentity']['pid'] != started['pid']
+                and type(entry['supervisorReturncode']) is int
+                and entry['supervisorReturncode'] == (0 if final['outcome'] == 'exited' else 1),
+                'Supervisor and worker identity/actual wait status are inconsistent')
+            require(type(entry['supervisorSignals']) is list and len(entry['supervisorSignals']) <= 128,
+                'Unbounded supervisor signal evidence')
+            for item in entry['supervisorSignals']:
+                require(type(item) is dict and set(item) == {'signal', 'delivered', 'route'}
+                    and type(item['signal']) is int and item['signal'] in (9, 15)
+                    and type(item['delivered']) is bool and item['route'] == 'libc.pidfd_send_signal',
+                    'Supervisor signal bypassed the pinned pidfd route')
         native_bytes += len(stdout) + len(stderr)
         records.append({'native': final, 'stdout': stdout, 'stderr': stderr, 'read': read,
             'session': preceding['session'], 'processId': preceding['params']['processId']})
     return records, native_bytes, len(notifications)
 
 
-def inspect_passing_case(entries, number, uid):
+def inspect_child_snapshot(value, uid, parent_pid=None, expected_children=None):
+    require(type(value) is dict and set(value) == {'route', 'observerPid', 'observerUid', 'parent',
+        'visiblePids', 'readableProcesses', 'vanishedPids', 'inaccessibleForeignProcesses', 'children'}
+        and value['route'] == 'proc-status-ppid' and value['observerUid'] == uid,
+        'Child observation is not the actual proc status inventory')
+
+    def pid_list(items):
+        require(type(items) is list and all(type(pid) is int and pid > 0 for pid in items)
+            and items == sorted(set(items)), 'Proc PID inventory is not ordered and unique')
+
+    def identity(item, parent=False):
+        require(type(item) is dict and set(item) == {'pid', 'ppid', 'uids'} | ({'startTimeTicks'} if parent else set())
+            and type(item['pid']) is int and item['pid'] > 0 and type(item['ppid']) is int and item['ppid'] >= 0
+            and type(item['uids']) is list and len(item['uids']) == 4
+            and all(type(number) is int and number >= 0 for number in item['uids']), 'Malformed observed proc identity')
+        if parent:
+            require(type(item['startTimeTicks']) is int and item['startTimeTicks'] > 0,
+                'Missing pinned parent starttime observation')
+
+    for key in ('visiblePids', 'vanishedPids', 'children'):
+        pid_list(value[key])
+    identity(value['parent'], True)
+    parent = value['parent']
+    require(parent['uids'] == [uid] * 4 and (parent_pid is None or parent['pid'] == parent_pid),
+        'Proc inventory targets another UID or parent')
+    require(type(value['readableProcesses']) is list, 'Missing readable proc identities')
+    for item in value['readableProcesses']:
+        identity(item)
+    readable = [item['pid'] for item in value['readableProcesses']]
+    pid_list(readable)
+    require(type(value['inaccessibleForeignProcesses']) is list, 'Missing classified foreign proc denials')
+    for item in value['inaccessibleForeignProcesses']:
+        require(type(item) is dict and set(item) == {'pid', 'ownerUid'} and type(item['ownerUid']) is int
+            and item['ownerUid'] >= 0 and item['ownerUid'] != uid, 'Unreadable same-UID process was ignored')
+    foreign = [item['pid'] for item in value['inaccessibleForeignProcesses']]
+    pid_list(foreign)
+    partition = readable + foreign + value['vanishedPids']
+    require(len(set(partition)) == len(partition) and sorted(partition) == value['visiblePids'],
+        'Visible proc candidates are missing or multiply classified')
+    records = {item['pid']: item for item in value['readableProcesses']}
+    require(type(value['observerPid']) is int and value['observerPid'] in records
+        and records[value['observerPid']]['uids'] == [uid] * 4 and parent['pid'] in records
+        and records[parent['pid']] == {key: parent[key] for key in ('pid', 'ppid', 'uids')},
+        'Actual parent or observer missing from proc inventory')
+    inferred = sorted(pid for pid, item in records.items() if item['ppid'] == parent['pid'])
+    require(value['children'] == inferred and all(records[pid]['uids'] == [uid] * 4 for pid in inferred)
+        and (expected_children is None or inferred == expected_children),
+        'Observed child list contradicts actual PPid identities or native protocol')
+
+
+def inspect_passing_case(entries, number, uid, generation=1, child_inventory=False, environment_policy='explicit-only-v1'):
     actual_starts = [entry for entry in entries if entry.get('method') == 'process/start']
     plans = expected_starts(number)
     require(len(actual_starts) == len(plans), 'Missing or extra actual process/start')
     for entry, (session, params, error) in zip(actual_starts, plans):
         require(entry['session'] == session and entry['params'] == params and ('error' in entry) is error,
             'Actual launch input/session/admission differs from reviewed case')
-    records, native_bytes, notifications = inspect_native_groups(entries)
+    records, native_bytes, notifications = inspect_native_groups(entries, generation)
     require(len(records) == NATIVE_COUNTS[number], 'Wrong actual native completion count')
     if records:
         require([(record['session'], record['processId']) for record in records]
@@ -238,7 +363,7 @@ def inspect_passing_case(entries, number, uid):
         8: [(-32600, 'Process id already exists in this session')],
         9: [(-32603, 'Native process supervision failed')],
         11: [(-32602, 'TTY, shell snapshots and managed networking are outside the static native profile'),
-            (-32602, 'The static native profile currently accepts exact explicit environments only'),
+            (-32602, ENVIRONMENT_ERRORS[environment_policy]),
             (-32602, 'TTY, shell snapshots and managed networking are outside the static native profile'),
             (-32602, 'Native launch requires its complete matching portable sandbox context')],
         12: [(-32603, 'Failed to write to process stdin')],
@@ -275,7 +400,7 @@ def inspect_passing_case(entries, number, uid):
         == expected_terminated, 'Real terminate/session semantics differ')
     for index, record in enumerate(records):
         final, stdout, stderr, read = (record[key] for key in ('native', 'stdout', 'stderr', 'read'))
-        expected_outcome = 'cancelled' if number in (12, 16, 17) or number in (4, 8) and index == (1 if number == 4 else 0) else (
+        expected_outcome = 'cancelled' if number in (12, 16, 17, 21) or number in (4, 8) and index == (1 if number == 4 else 0) else (
             ('timeout', 'output_limit')[index] if number == 15 else 'exited')
         expected_exit = 137 if expected_outcome != 'exited' else {1: 17, 4: 42, 5: 17, 10: 19}.get(number, 0)
         require(final['outcome'] == expected_outcome and read['exitCode'] == expected_exit
@@ -337,6 +462,53 @@ def inspect_passing_case(entries, number, uid):
             and value['writeShrinkGrowResealDenied'] is True and set(value['pythonConstants']) == set(NATIVE_FD_ABI)
             and all(item is None or type(item) is int and item == NATIVE_FD_ABI[key]
                 for key, item in value['pythonConstants'].items()), 'Real libc memfd/seal/denial evidence differs')
+    elif number == 21:
+        require({'signal': 15, 'delivered': True, 'route': 'libc.pidfd_send_signal'} in entries[-1]['supervisorSignals'],
+            'No actual pinned supervisor SIGTERM was delivered')
+    elif number == 22:
+        value = entries[0]
+        require(set(value) == {'test', 'supervisorIdentity', 'noWorkerBeforeAcknowledgement', 'nativeStarted',
+            'nativeEvents', 'supervisorReturncode', 'postReapSignalReturnedESRCH', 'waitOwner', 'signalRoute'}
+            | ({'childSnapshots'} if child_inventory else set()),
+            'Raw native identity gate evidence fields differ')
+        inspect_supervisor_identity(value['supervisorIdentity'], False)
+        started = value['nativeStarted']
+        require(set(started) == {'type', 'pid', 'profile'} | UID_FIELDS
+            and started['type'] == 'started' and started['profile'] == 'managed-process-v2'
+            and type(started['pid']) is int and started['pid'] > 0
+            and started['pid'] != value['supervisorIdentity']['pid']
+            and all(type(started[key]) is int and started[key] >= 0 for key in UID_FIELDS)
+            and started['uidTaskBudget'] == 128
+            and started['uidNprocLimit'] == min(started['uidTasksObserved'] + 128,
+                started['inheritedNprocSoft'], started['inheritedNprocHard']), 'Raw gate native worker identity differs')
+        require(value['noWorkerBeforeAcknowledgement'] is True and value['postReapSignalReturnedESRCH'] is True
+            and value['waitOwner'] == 'asyncio' and value['signalRoute'] == 'libc.pidfd_send_signal'
+            and type(value['supervisorReturncode']) is int and value['supervisorReturncode'] == 1,
+            'Raw gate acknowledgement, post-reap pin or wait ownership proof differs')
+        if child_inventory:
+            snapshots = value['childSnapshots']
+            require(type(snapshots) is list and len(snapshots) == 3,
+                'Native acknowledgement gate needs two pre-ACK inventories and one actual worker inventory')
+            for snapshot, expected in zip(snapshots, ([], [], [started['pid']])):
+                inspect_child_snapshot(snapshot, uid, value['supervisorIdentity']['pid'], expected)
+            require(all(snapshot['parent'] == snapshots[0]['parent']
+                and snapshot['observerPid'] == snapshots[0]['observerPid'] for snapshot in snapshots),
+                'Acknowledgement observations did not retain one parent and observer identity')
+        events = value['nativeEvents']
+        require(type(events) is list and len(events) == 2 and type(events[1]) is dict
+            and type(events[1].get('denials')) is int and events[1]['denials'] >= 0,
+            'Raw identity gate native event shape differs')
+        require(events == [ {'type': 'exited', 'exitCode': -1, 'signal': 9},
+            {'type': 'result', 'outcome': 'cancelled', 'exitCode': -1, 'signal': 9,
+                'cleanupComplete': True, 'started': True, 'grants': 0,
+                'stdoutBytes': 0, 'stderrBytes': 0, 'stage': 0, 'errno': 0, 'denials': events[1]['denials']}],
+            'Raw identity gate lacks the actual complete cancellation result')
+    elif number == 23:
+        value = entries[0]
+        require(set(value) == {'test', 'realScmRightsRefusals', 'wrongPidPipeExtraTruncatedMissingRejected',
+            'actualDescriptorCountsUnchanged'} and type(value['realScmRightsRefusals']) is int
+            and value['realScmRightsRefusals'] == 5 and value['wrongPidPipeExtraTruncatedMissingRejected'] is True
+            and value['actualDescriptorCountsUnchanged'] is True, 'Descriptor-transfer refusal/leak checks differ')
     return {'uniqueNativeOutputBytes': native_bytes, 'nativeCompletions': len(records),
         'uniqueNotifications': notifications,
         'nativeGrants': sum(record['native']['grants'] for record in records),
@@ -348,19 +520,27 @@ def inspect_matrix(matrix, output, suite_source, absolute):
         and matrix['schema'] == 'foldgpt.native-process-lifecycle.v1'
         and type(matrix['successful']) is bool and type(matrix['uid']) is int and matrix['uid'] > 0,
         'Wrong lifecycle conformance schema or native UID')
-    classes = [node for node in ast.parse(suite_source.decode('utf-8')).body
+    source_ast = ast.parse(suite_source.decode('utf-8'))
+    environment_policy = environment_contract(suite_source)
+    child_inventory = any(isinstance(node, ast.FunctionDef) and node.name == 'process_children_snapshot'
+        for node in source_ast.body)
+    classes = [node for node in source_ast.body
         if isinstance(node, ast.ClassDef) and node.name == 'NativeProcessTests']
     require(len(classes) == 1, 'Missing packaged lifecycle test class')
     tests = sorted(node.name for node in classes[0].body
         if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and node.name.startswith('test_'))
-    require(len(tests) in (19, 20) and [int(name[5:7]) for name in tests] == list(range(1, len(tests) + 1)),
+    require(len(tests) in (19, 20, 23) and [int(name[5:7]) for name in tests] == list(range(1, len(tests) + 1)),
         'Packaged lifecycle suite changed and needs independent review')
+    generation = 2 if len(tests) == 23 else 1
     statuses = re.findall(r'^(test_[a-zA-Z0-9_]+) \(__main__\.NativeProcessTests\.\1\) \.\.\. (ok|FAIL|ERROR|skipped[^\n]*)$', output, re.M)
     require([name for name, _ in statuses] == tests, 'Unittest output does not cover the packaged suite exactly once')
     runs = re.findall(r'^Ran ([0-9]+) tests in [0-9.]+s$', output, re.M)
     require(runs == [str(len(tests))], 'Missing or inconsistent unittest completion count')
     failures = [name for name, status in statuses if status != 'ok']
     require(matrix['successful'] is (not failures), 'Unittest status contradicts lifecycle matrix')
+    if generation == 2 and matrix['successful']:
+        require('exit status already read' not in output and 'will report returncode 255' not in output,
+            'Passing v2 output contains the unresolved child-watcher race')
     require(bool(re.search(r'^OK$', output, re.M)) if not failures else bool(re.search(r'^FAILED \(', output, re.M)),
         'Missing successful/failed unittest terminator')
     observations = matrix['observations']
@@ -411,8 +591,15 @@ def inspect_matrix(matrix, output, suite_source, absolute):
                     require(value == {}, 'Invalid process/signal response')
         elif 'memfdRoute' in entry:
             require(name.startswith('test_20_'), 'Memfd evidence assigned to another testcase')
+        elif 'noWorkerBeforeAcknowledgement' in entry:
+            require(generation == 2 and name.startswith('test_22_'), 'Pidfd gate evidence assigned to another testcase')
+        elif 'realScmRightsRefusals' in entry:
+            require(generation == 2 and name.startswith('test_23_'), 'Pidfd transfer evidence assigned to another testcase')
         else:
-            require(set(entry) == {'test', 'nativeStarted', 'nativeResult', 'notifications'}, 'Invalid native completion envelope')
+            fields = {'test', 'nativeStarted', 'nativeResult', 'notifications'}
+            if generation == 2:
+                fields |= {'supervisorIdentity', 'supervisorSignals', 'supervisorReturncode'}
+            require(set(entry) == fields, 'Invalid native completion envelope')
     native_summary = {'uniqueNativeOutputBytes': 0, 'nativeCompletions': 0, 'uniqueNotifications': 0,
         'nativeGrants': 0, 'nativeDenials': 0}
     for name, status in statuses:
@@ -421,10 +608,13 @@ def inspect_matrix(matrix, output, suite_source, absolute):
         if status == 'ok':
             require(PASS_COUNTS[number] <= counts[name] <= PASS_COUNTS[number] + (29 if number == 4 else 0),
                 'Passing testcase lacks reviewed lifecycle observation coverage')
-            inspected = inspect_passing_case(grouped[name], number, matrix['uid'])
+            inspected = inspect_passing_case(grouped[name], number, matrix['uid'], generation, child_inventory, environment_policy)
             for key in native_summary:
                 native_summary[key] += inspected[key]
     return {'testsRun': len(tests), 'passed': len(tests) - len(failures), 'failedTests': failures,
+        'nativeProcessProfile': 'managed-process-v' + str(generation),
+        'environmentPolicyContract': environment_policy,
+        'childWatcherWarningObserved': 'exit status already read' in output or 'will report returncode 255' in output,
         'observations': len(observations), 'methodCounts': dict(methods),
         **native_summary,
         'caseCoverage': {name: {'status': status, 'observations': counts[name],
@@ -518,9 +708,10 @@ def main():
     with zipfile.ZipFile(args.apk) as apk:
         require(len(apk.namelist()) == len(set(apk.namelist())), 'Duplicate APK entries')
         prefix = 'assets/process-rpc-probe/'
-        require({name[len(prefix):] for name in apk.namelist() if name.startswith(prefix) and not name.endswith('/')} == set(SOURCES),
+        expected_sources = source_closure(SOURCES, apk.read(prefix + BACKEND_SOURCE), apk.read(prefix + SUITE))
+        require({name[len(prefix):] for name in apk.namelist() if name.startswith(prefix) and not name.endswith('/')} == set(expected_sources),
             'Packaged lifecycle diagnostic source set differs')
-        for name in SOURCES:
+        for name in expected_sources:
             source_data[name] = read_fixed('sources/' + name)
             require(source_data[name] == apk.read(prefix + name), 'Private executed source differs from APK: ' + name)
         for entry in apk.namelist():
@@ -542,6 +733,9 @@ def main():
         report = strict_json(optional_data['report.json'])
         require(report.get('schema') == 'foldgpt.native-processes-android.v1' and report.get('status') == 'PASS'
             and report['uid'] == uid and report['observations'] == coverage['observations'], 'Incomplete wrapper PASS report')
+        if coverage['testsRun'] == 23:
+            require(report.get('testsRun') == 23 and report.get('nativeProcessProfile') == 'managed-process-v2',
+                'V2 wrapper does not bind the 23-test pidfd lifecycle profile')
         require(optional_data['android-completion.txt'] == f'PASS uid={uid}\n'.encode(), 'Invalid Android completion')
         require(report['runnerSha256'] == libraries['libfoldgpt-native-process-runner.so']
             and report['fixtureSha256'] == libraries['libfoldgpt-native-process-fixture.so']

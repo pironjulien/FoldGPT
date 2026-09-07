@@ -67,6 +67,7 @@ for path in sorted(runtime.iterdir()):
     if path.name == "libproot.so":
         require({"libtalloc.so.2", "libandroid-shmem.so"}.issubset(needed), "missing required PRoot libraries")
         require(b"/foldgpt/runtime" in data and a.proot.encode() in data, "missing PRoot build identity/options")
+        require(b"--strict-sandbox" in data, "missing explicit PRoot strict mode")
     if path.name == "libtalloc.so":
         require(soname == ["libtalloc.so.2"], "incorrect talloc ABI soname")
     if path.name == "libandroid-shmem.so":

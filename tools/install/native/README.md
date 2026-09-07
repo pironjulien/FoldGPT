@@ -57,7 +57,7 @@ replace review of the complete APK's distribution obligations. In particular,
 retain corresponding sources, modifications and build materials with any binary
 distribution and preserve the applicable LGPL replacement/relinking rights.
 
-Four local source fixes are applied only to extracted snapshots:
+Five local source fixes are applied only to extracted snapshots:
 
 - `proot-string-header.patch` includes `<string.h>` for existing `strcmp` and
   `memset` calls. No compiler diagnostics are disabled.
@@ -77,6 +77,13 @@ Four local source fixes are applied only to extracted snapshots:
   a PID or forcibly killing the tracer. Guest processes receive SIGKILL, as in
   upstream's existing `--kill-on-exit` cleanup: cancellation is not a filesystem
   rollback or graceful completion of a package installation.
+- `proot-strict-sandbox.patch` adds an explicit `--strict-sandbox` launcher
+  option. It preserves actual namespace and mount results, clone namespace
+  flags, proc user mappings and kernel `no_new_privs`, while keeping GNU ABI
+  and filesystem translation. The default remains the existing compatibility
+  mode. This option supplies no kernel isolation by itself; its precise scope,
+  explicit unsupported requests and independent host evidence are documented in
+  [proot-strict-sandbox.md](proot-strict-sandbox.md).
 - `android-shmem-tmpdir.patch` replaces Termux's unavailable `_PATH_TMP` macro
   with the process's absolute private `TMPDIR`. It checks path length and returns
   filesystem errors rather than looping on errors other than `EEXIST`. The

@@ -88,6 +88,7 @@ def syncProcessRpcProbeAssets = tasks.register('syncProcessRpcProbeAssets', Nati
                 'tools/executor/policy_intent.py', 'tools/policy/managed_policy.py',
                 'tools/executor/native_files_rpc_fixture.py', 'tools/executor/native_process_policy.py',
                 'tools/executor/native_processes.py', 'tools/executor/test_native_processes_live.py',
+                'tools/executor/native_environment.py', 'tools/executor/native_environment_unicode.py',
                 'tools/executor/native_processes_android_fixture.py'
         into 'process-rpc-probe'
     }
@@ -96,6 +97,69 @@ def syncProcessRpcProbeAssets = tasks.register('syncProcessRpcProbeAssets', Nati
 }
 androidComponents.onVariants(androidComponents.selector().withBuildType('debug')) { variant ->
     variant.sources.assets.addGeneratedSourceDirectory(syncProcessRpcProbeAssets) { it.outputDir }
+}
+
+def nativeExecutorProbeAssets = layout.buildDirectory.dir('generated/nativeExecutorProbeAssets')
+def syncNativeExecutorProbeAssets = tasks.register('syncNativeExecutorProbeAssets', NativeFilesRpcAssets) {
+    from(rootProject.file('..')) {
+        include 'tools/executor/exec_server.py', 'tools/executor/native_files.py',
+                'tools/executor/policy_intent.py', 'tools/policy/managed_policy.py',
+                'tools/executor/native_files_rpc_fixture.py', 'tools/executor/native_process_policy.py',
+                'tools/executor/native_processes.py', 'tools/executor/native_file_streams.py',
+                'tools/executor/native_environment.py', 'tools/executor/native_environment_unicode.py',
+                'tools/executor/native_executor_backend.py', 'tools/executor/private_exec_broker.py',
+                'tools/executor/test_native_processes_live.py', 'tools/executor/test_native_executor_transport.py',
+                'tools/executor/native_executor_android_fixture.py'
+        into 'native-executor-probe'
+    }
+    outputDir.set(nativeExecutorProbeAssets)
+    into outputDir
+}
+androidComponents.onVariants(androidComponents.selector().withBuildType('debug')) { variant ->
+    variant.sources.assets.addGeneratedSourceDirectory(syncNativeExecutorProbeAssets) { it.outputDir }
+}
+
+def gnuManagedProbeAssets = layout.buildDirectory.dir('generated/gnuManagedProbeAssets')
+def syncGnuManagedProbeAssets = tasks.register('syncGnuManagedProbeAssets', NativeFilesRpcAssets) {
+    from(rootProject.file('..')) {
+        include 'tools/executor/exec_server.py', 'tools/executor/native_files.py',
+                'tools/executor/policy_intent.py', 'tools/policy/managed_policy.py',
+                'tools/executor/native_files_rpc_fixture.py', 'tools/executor/native_process_policy.py',
+                'tools/executor/native_processes.py', 'tools/executor/native_environment.py',
+                'tools/executor/native_environment_unicode.py',
+                'tools/executor/gnu-runtime/gnu_process_adapter.py',
+                'tools/executor/gnu-runtime/gnu_runtime_capacity.py',
+                'tools/executor/gnu-runtime/gnu_runtime_address.py',
+                'tools/executor/gnu-runtime/test_gnu_process_adapter.py',
+                'tools/executor/gnu-runtime/managed_android_fixture.py'
+        into 'gnu-managed-probe'
+    }
+    outputDir.set(gnuManagedProbeAssets)
+    into outputDir
+}
+androidComponents.onVariants(androidComponents.selector().withBuildType('debug')) { variant ->
+    variant.sources.assets.addGeneratedSourceDirectory(syncGnuManagedProbeAssets) { it.outputDir }
+}
+
+def gnuExecutorAssets = layout.buildDirectory.dir('generated/gnuExecutorAssets')
+def syncGnuExecutorAssets = tasks.register('syncGnuExecutorAssets', NativeFilesRpcAssets) {
+    from(rootProject.file('..')) {
+        include 'tools/executor/exec_server.py', 'tools/executor/native_files.py',
+                'tools/executor/policy_intent.py', 'tools/policy/managed_policy.py',
+                'tools/executor/native_process_policy.py', 'tools/executor/native_processes.py',
+                'tools/executor/native_file_streams.py', 'tools/executor/native_environment.py',
+                'tools/executor/native_environment_unicode.py', 'tools/executor/native_executor_backend.py',
+                'tools/executor/private_exec_broker.py', 'tools/executor/gnu-runtime/gnu_process_adapter.py',
+                'tools/executor/gnu-runtime/gnu_runtime_capacity.py',
+                'tools/executor/gnu-runtime/gnu_runtime_address.py',
+                'tools/executor/gnu-runtime/gnu_executor_broker.py'
+        into 'gnu-executor'
+    }
+    outputDir.set(gnuExecutorAssets)
+    into outputDir
+}
+androidComponents.onVariants(androidComponents.selector().withBuildType('debug')) { variant ->
+    variant.sources.assets.addGeneratedSourceDirectory(syncGnuExecutorAssets) { it.outputDir }
 }
 
 // Local native outputs are ignored by Git. A stale diagnostic must never enter

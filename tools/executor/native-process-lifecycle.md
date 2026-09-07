@@ -12,7 +12,7 @@ networking, shell snapshots, directory metadata or namespace mutation support.
 The original acquisition CLI remains supported. Lifecycle uses:
 
 ```
-native-managed-runner ROOT_FD POLICY_FD STATIC_ELF WALL_MS ADDRESS_BYTES OUTPUT_BYTES UID_TASK_BUDGET --process-v1 STDIN_FD COMMAND_FD ENV_FD -- ARGV...
+native-managed-runner ROOT_FD POLICY_FD STATIC_ELF WALL_MS ADDRESS_BYTES OUTPUT_BYTES UID_TASK_BUDGET --process-v2 STDIN_FD COMMAND_FD ENV_FD -- ARGV...
 ```
 
 `STDIN_FD` is a distinct owned read-only pipe; it becomes target descriptor 0.
@@ -25,6 +25,20 @@ socket. Its one-byte `I` and `T` commands request real SIGINT to the owned comma
 group and native termination respectively. It is polled during syscall policy
 waits, launch waits and stdout/stderr backpressure. The supervisor does not
 signal a leader PID after reaping can release that PID for reuse.
+
+Before forking a worker, v2 opens a pidfd for **itself**, transfers that actual
+descriptor over the authenticated policy socket with `SCM_RIGHTS`, and waits for
+the parent's `P` acknowledgement. The Python owner validates one CLOEXEC pidfd,
+its actual `/proc/self/fdinfo` PID and signal-zero identity before acknowledging.
+No parent-side lookup of a potentially recycled numeric PID selects the target.
+The ordinary control socket remains the primary cancellation route. Fallback
+SIGTERM and final SIGKILL use only `libc.pidfd_send_signal` on the retained pidfd.
+It stays owned until asyncio has observed supervisor exit; no `Popen.kill`,
+`Popen.terminate`, `Popen.poll` or additional parent `waitpid` competes with
+asyncio's child watcher. The native supervisor separately owns all worker and
+descendant waits. NDK r29 declares both pidfd libc symbols from Android API 31;
+the authenticated Bionic runtime must expose these real symbols and kernel APIs.
+The earlier v1 native mode is retained for its frozen historical callers.
 
 `ENV_FD` is a bounded sealed memfd holding NUL-terminated `NAME=value` entries.
 The Python parent calls the actual `libc.memfd_create` and integer `libc.fcntl`
@@ -42,7 +56,7 @@ admission until its exact pattern and ordering semantics are implemented.
 `arg0` changes target argv0 independently of runtime executable selection.
 
 All private descriptors close before actual exec. The native started profile is
-`managed-process-v1`, still emitted only following real `PTRACE_EVENT_EXEC`.
+`managed-process-v2`, still emitted only following real `PTRACE_EVENT_EXEC`.
 A separate native `exited` frame records the leader's actual wait status before
 reaping; final `result` follows descendant reaping and pipe drain. Native claims
 are checked against actual received output counts and the observed leader status.
@@ -123,7 +137,7 @@ acquisition tests and the lifecycle suite as actual nonroot processes, and recor
 raw native observations and hashes. Host results and Android compilation do not
 establish Android execution; that requires an independently collected device run.
 
-The lifecycle suite has 20 tests, including actual exec permission failure,
+The lifecycle suite has 23 tests, including actual exec permission failure,
 binary streams, genuine pipe input and EOF, concurrent duplicate writes and
 cancelled writes under backpressure, real interrupt versus terminate, cursor
 budgets, environment/argv0, same-inode policy transitions, cross-session IDs,
@@ -140,3 +154,42 @@ use the identical existing native-files helper already packaged by the owner.
 The libc memfd test reads back real bytes/seals and proves that kernel write,
 shrink, grow and reseal attempts fail with EPERM. Its report records which Python
 APIs/constants are exposed on the actual interpreter, alongside the libc route.
+
+Two pidfd tests establish actual supervisor SIGTERM with the correct asyncio
+return code and no child-watcher warning, and a raw protocol run that observes
+zero children while acknowledgement is withheld. After acknowledgement the
+actual worker appears, native cleanup passes, and the still-open original pidfd
+returns ESRCH after reaping instead of selecting a recycled PID.
+Another real SCM_RIGHTS test refuses wrong-PID, pipe, duplicate, truncated and
+missing descriptor transfers while independently checking that no FD leaked.
+
+The 6 September v2 host snapshot `foldgpt-native-process-build-tyYOXDCt` passes
+all 23 lifecycle tests (109 observations) and 17 acquisition regressions as UID
+65534. ARM64 static compilation and the Scudo geometry check pass. Its runner
+SHA-256 is `bfe9cdfea084d7a5a8a664826b5a68359fadfc1051fba5be5ab540124ef8177a`.
+This snapshot does not replace the earlier Android execution evidence at commit
+`ca152ac`/APK `1a54dd8c`; the v2 Android rerun and independent collection remain
+separate requirements. The [composite transport](native-executor-transport.md)
+also retains the actual pre-fix child-watcher failure and the corrected run.
+
+Android v2 initially completed 22 of 23 tests: its kernel does not expose
+`/proc/PID/task/PID/children`. The raw gate observer now inventories actual
+`/proc/PID/status` PPid/UID identities instead. It records two pre-ACK empty
+inventories and the post-ACK native worker, verifies parent starttime before and
+after each inventory, and refuses unreadable same-UID candidates. Foreign-UID
+denials and actually vanished PIDs are explicitly classified. Composite cleanup
+and runner/worker tests share this observer; missing proc files never imply an
+empty family. The portable host snapshot `foldgpt-native-process-build-XyjPqBoX`
+passes 23 lifecycle and 17 acquisition tests with the unchanged native runner.
+The collector selects this observation shape from the packaged suite source,
+retaining compatibility with historical v1 and pre-portability v2 evidence.
+Seventeen offline integrity checks pass, including the genuine 22/23 Android
+failure and altered-copy refusals for missing or contradictory proc inventories.
+
+The independently retained Android `android-23c8555b/collected-pass-v2` and
+`android-6c802375/collected-pass-v2` both record 23/23 PASS and 109 observations.
+The latter includes `_wait_owned`: already-owned asyncio futures are observed
+with `asyncio.wait` followed by `result()`. This retains cancellation and cleanup
+ownership without Python 3.14 `shield` installing an additional exception logger
+when another waiter is cancelled. It does not disable logging or conceal an
+unretrieved future. The motivating composite 8/9 failure remains preserved.

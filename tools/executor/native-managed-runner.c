@@ -9,6 +9,7 @@
 #undef main
 #include "native-managed-filter.h"
 #include <sys/un.h>
+#include <sys/pidfd.h>
 
 #define MG_FRAME 16384
 static int mg_channel=-1, mg_root=-1, mg_exec=-1;
@@ -17,6 +18,7 @@ static uint64_t mg_grants, mg_denials;
 static int64_t mg_deadline;
 static uint64_t mg_uid_tasks,mg_uid_budget,mg_nproc_soft,mg_nproc_hard,mg_nproc_limit;
 static int mg_process_mode,mg_input=-1,mg_command=-1,mg_leader=-1,mg_started,mg_reaped,mg_reporting;
+static int mg_identity_gate;
 
 /* A separate trusted control socket never competes with an open decision.
  * The single-threaded supervisor signals only while it still owns the leader
@@ -112,6 +114,29 @@ static int mg_receive(int fd,char *data,size_t capacity) {
         struct pollfd p={.fd=fd,.events=POLLIN};
         if(poll(&p,1,20)<0&&errno!=EINTR) return -1;
     }
+}
+/* Pin our own identity, pass that actual pidfd, then wait for its parent's
+ * acknowledgement before creating any worker. No parent-side numeric PID
+ * lookup races asyncio's unique waitpid owner. The descriptor still denotes
+ * this exact supervisor after exit and returns ESRCH when it is gone.
+ */
+static int mg_supervisor_identity(void) {
+    int identity=pidfd_open(getpid(),0);if(identity<0)return -1;
+    char data[128];int length=snprintf(data,sizeof(data),
+        "{\"type\":\"supervisor\",\"pid\":%d,\"profile\":\"managed-process-v2\"}",getpid());
+    union {struct cmsghdr aligned;unsigned char bytes[CMSG_SPACE(sizeof(int))];} control={0};
+    struct iovec vec={.iov_base=data,.iov_len=(size_t)length};
+    struct msghdr message={.msg_iov=&vec,.msg_iovlen=1,.msg_control=control.bytes,.msg_controllen=sizeof(control.bytes)};
+    struct cmsghdr *header=CMSG_FIRSTHDR(&message);
+    header->cmsg_level=SOL_SOCKET;header->cmsg_type=SCM_RIGHTS;header->cmsg_len=CMSG_LEN(sizeof(int));
+    memcpy(CMSG_DATA(header),&identity,sizeof(identity));
+    ssize_t sent;
+    do {sent=sendmsg(mg_channel,&message,MSG_NOSIGNAL);}while(sent<0&&errno==EINTR);
+    int saved=errno;close(identity);errno=saved;
+    if(sent!=length)return -1;
+    char acknowledgement[2];int received=mg_receive(mg_channel,acknowledgement,sizeof(acknowledgement));
+    if(received!=1||acknowledgement[0]!='P'){if(received>=0)errno=EPROTO;return -1;}
+    return 0;
 }
 static int mg_send_listener(int channel,int listener) {
     char byte='L';
@@ -375,7 +400,7 @@ static int mg_supervise(struct config *c) {
                     } else if(traced&&((unsigned)status>>16)==PTRACE_EVENT_EXEC) {
                         if(ptrace(PTRACE_DETACH,pid,NULL,NULL)<0)goto startup_failed;
                         mg_started=1;
-                        char message[512];int n=snprintf(message,sizeof(message),"{\"type\":\"started\",\"pid\":%d,\"profile\":\"%s\",\"uidTasksObserved\":%"PRIu64",\"uidTaskBudget\":%"PRIu64",\"uidNprocLimit\":%"PRIu64",\"inheritedNprocSoft\":%"PRIu64",\"inheritedNprocHard\":%"PRIu64"}",pid,mg_process_mode?"managed-process-v1":"managed-acquisition-v1",mg_uid_tasks,mg_uid_budget,mg_nproc_limit,mg_nproc_soft,mg_nproc_hard);
+                        char message[512];int n=snprintf(message,sizeof(message),"{\"type\":\"started\",\"pid\":%d,\"profile\":\"%s\",\"uidTasksObserved\":%"PRIu64",\"uidTaskBudget\":%"PRIu64",\"uidNprocLimit\":%"PRIu64",\"inheritedNprocSoft\":%"PRIu64",\"inheritedNprocHard\":%"PRIu64"}",pid,mg_identity_gate?"managed-process-v2":mg_process_mode?"managed-process-v1":"managed-acquisition-v1",mg_uid_tasks,mg_uid_budget,mg_nproc_limit,mg_nproc_soft,mg_nproc_hard);
                         if(mg_packet(mg_channel,message,(size_t)n)<0)goto startup_failed;
                         started=1;
                     } else if(ptrace(PTRACE_CONT,pid,NULL,(void *)(uintptr_t)WSTOPSIG(status))<0)goto startup_failed;
@@ -462,9 +487,10 @@ runtime_failed:
 }
 int main(int argc,char **argv) {
     /* All roots and native FD numbers are supplied by the trusted parent. */
-    if(argc<10){fprintf(stderr,"usage: managed ROOT_FD CONTROL_FD STATIC_ELF WALL_MS ADDRESS_BYTES OUTPUT_BYTES UID_TASK_BUDGET [--process-v1 STDIN_FD COMMAND_FD ENV_FD] -- ARGV...\n");return 2;}
+    if(argc<10){fprintf(stderr,"usage: managed ROOT_FD CONTROL_FD STATIC_ELF WALL_MS ADDRESS_BYTES OUTPUT_BYTES UID_TASK_BUDGET [--process-v2 STDIN_FD COMMAND_FD ENV_FD] -- ARGV...\n");return 2;}
     int arg_start=9,env_fd=-1;
-    if(!strcmp(argv[8],"--process-v1")) {
+    if(!strcmp(argv[8],"--process-v1")||!strcmp(argv[8],"--process-v2")) {
+        mg_identity_gate=!strcmp(argv[8],"--process-v2");
         if(argc<14||strcmp(argv[12],"--"))return 2;
         int *fields[]={&mg_input,&mg_command,&env_fd};
         for(int i=0;i<3;i++) {
@@ -536,5 +562,6 @@ int main(int argc,char **argv) {
     if(sigaction(SIGTERM,&action,NULL)<0||sigaction(SIGINT,&action,NULL)<0)return fail("managed-signals");
     signal(SIGPIPE,SIG_IGN);umask(0077);(void)set_nonblock(1);(void)set_nonblock(2);
     mg_deadline=now_ms()+(int64_t)wall;
+    if(mg_identity_gate&&mg_supervisor_identity()<0)return fail("managed-supervisor-identity");
     int result=mg_supervise(&c);free(environment);close(mg_exec);close(mg_root);close(mg_channel);return result;
 }

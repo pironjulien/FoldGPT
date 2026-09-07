@@ -27,6 +27,7 @@ public final class NativeProcessRpcProbeService extends Service {
         "tools/executor/policy_intent.py", "tools/policy/managed_policy.py",
         "tools/executor/native_files_rpc_fixture.py", "tools/executor/native_process_policy.py",
         "tools/executor/native_processes.py", "tools/executor/test_native_processes_live.py",
+        "tools/executor/native_environment.py", "tools/executor/native_environment_unicode.py",
         "tools/executor/native_processes_android_fixture.py"
     };
     private static final long ADDRESS_SPACE_BYTES=(33L+1L)<<28;

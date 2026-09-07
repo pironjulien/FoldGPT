@@ -1,5 +1,25 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application>
+        <service android:name="app.foldgpt.NativeGnuExecutorService" android:process=":gnuExecutor"
+            android:exported="true" android:permission="android.permission.DUMP" android:foregroundServiceType="specialUse">
+            <property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Explicit debug native GNU executor for the official environment protocol with complete incoming permissions" />
+        </service>
+        <service android:name="app.foldgpt.NativeGnuManagedProbeService" android:process=":gnuManagedProbe"
+            android:exported="true" android:permission="android.permission.DUMP" android:foregroundServiceType="specialUse">
+            <property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="ADB-only fixed GNU command and complete-policy diagnostic in private workspaces" />
+        </service>
+        <service android:name="app.foldgpt.NativeGnuProjectProbeService" android:process=":gnuProjectProbe"
+            android:exported="true" android:permission="android.permission.DUMP" android:foregroundServiceType="specialUse">
+            <property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="ADB-only fixed GNU Python project under native kernel restrictions, in a private fixture" />
+        </service>
+        <service android:name="app.foldgpt.NativeExecutorProbeService" android:process=":nativeExecutorProbe"
+            android:exported="true" android:permission="android.permission.DUMP" android:foregroundServiceType="specialUse">
+            <property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="ADB-only fixed Bionic native file/process composite and GNU PRoot bridge conformance in private workspaces" />
+        </service>
         <service android:name="app.foldgpt.NativeProcessRpcProbeService" android:process=":processRpcProbe"
             android:exported="true" android:permission="android.permission.DUMP" android:foregroundServiceType="specialUse">
             <property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"

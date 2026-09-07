@@ -1,0 +1,143 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>FoldGPT renderer verification</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #fff; font: 16px sans-serif; color: #1a1c1f; }
+  header { padding: 16px; }
+  #list { height: 70vh; overflow: auto; background: rgb(246,246,246); padding: 8px; }
+  .row { height: 31px; border-radius: 9px; margin-bottom: 1px; padding: 5px 12px;
+    overflow: hidden; position: relative; background: rgb(246,246,246); }
+  .text { display: block; width: 50%; white-space: nowrap; overflow: hidden;
+    mask-image: linear-gradient(to right, black 75%, transparent); }
+  .selected { background: rgb(234,234,234); }
+  #status { padding: 16px; }
+  #scene { position: relative; background: rgb(246,246,246); }
+  #overlay { position: absolute; z-index: 1; background: #fff; border: 1px solid #333; }
+  #overlay[hidden] { display: none; }
+  .partial #list { width: 276.1428680419922px; padding: 8px; }
+  .partial #rows { padding-top: .952392578125px; }
+  .partial .row { width: 244.1428680419922px; height: 30px; background: transparent;
+    display: flex; align-items: center; gap: 8px; padding: 5px 12px; font-size: 14px; }
+  .partial .selected, .partial .hovered { background: rgba(26,28,31,.055); }
+  .partial .icon { width: 16px; height: 16px; flex: none; }
+  .partial .text { width: 50%; }
+</style>
+<header>FoldGPT — test réel du rendu GPU</header>
+<div id="scene"><div id="list"><div id="rows"></div></div><div id="overlay" hidden></div></div>
+<div id="status">Défilement, sélection, masques de texte et angles arrondis.</div>
+<script>
+  const mode = new URLSearchParams(location.search).get('mode') || 'basic';
+  if (!['basic', 'partial'].includes(mode)) throw new Error('Unknown fixture mode');
+  document.documentElement.classList.toggle('partial', mode === 'partial');
+  const elements = () => ({scene:document.getElementById('scene'),
+    list:document.getElementById('list'), rows:document.getElementById('rows'),
+    overlay:document.getElementById('overlay')});
+  const settle = () => new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+  const pair = [4, 5];
+  let stimulus = {kind:'initial', changedRows:[]};
+  for (let i=0; i<128; ++i) {
+    const row = document.createElement('div');
+    row.className = 'row';
+    const text = document.createElement('span');
+    text.className = 'text';
+    text.textContent = `Ligne ${i} — texte avec un masque progressif`;
+    if (mode === 'partial') {
+      const icon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      icon.classList.add('icon');
+      icon.setAttribute('viewBox', '0 0 16 16');
+      const shape = document.createElementNS(icon.namespaceURI, i%2 ? 'circle' : 'rect');
+      for (const [key,value] of Object.entries(i%2 ? {cx:8,cy:8,r:5} : {x:3,y:3,width:10,height:10,rx:2})) {
+        shape.setAttribute(key, value);
+      }
+      shape.setAttribute('fill', 'none');
+      shape.setAttribute('stroke', 'currentColor');
+      icon.append(shape);
+      row.append(icon);
+    }
+    row.append(text);
+    elements().rows.append(row);
+  }
+  function snapshot(frame, phase) {
+    if (document.visibilityState !== 'visible') throw new Error('Diagnostic pane is not visible');
+    const {scene,list,rows,overlay} = elements();
+    const view = list.getBoundingClientRect();
+    if (!overlay.hidden) throw new Error('Overlay still covers the diagnostic rows');
+    const all = [...rows.children];
+    const samples = all.flatMap((row,index)=>{
+      const r=row.getBoundingClientRect();
+      if (r.top<view.top+8 || r.bottom>view.bottom-8 || r.right>innerWidth) return [];
+      const selected=row.classList.contains('selected') || row.classList.contains('hovered');
+      return [{row:index,x:r.left+r.width*.75,y:r.top+8,w:r.width*.15,h:r.height-16,
+        rgb:selected?[234,234,234]:[246,246,246],
+        background:getComputedStyle(row).backgroundColor}];
+    });
+    if (mode==='partial' && !pair.every(index=>samples.some(s=>s.row===index))) {
+      throw new Error('Diagnostic viewport is too small to sample both changing rows');
+    }
+    return {formatVersion:2,mode,frame,phase,dpr:devicePixelRatio,stimulus,samples,
+      state:{html:scene.outerHTML,scrollTop:list.scrollTop,viewport:[innerWidth,innerHeight],
+        dpr:devicePixelRatio,scene:scene.getBoundingClientRect().toJSON(),
+        list:view.toJSON(),rows:all.map(row=>({rect:row.getBoundingClientRect().toJSON(),
+          background:getComputedStyle(row).backgroundColor,
+          mask:getComputedStyle(row.querySelector('.text')).maskImage}))}};
+  }
+  window.foldgptRendererProbe = {
+    mode,
+    async snapshot(frame=-1, phase='baseline') {
+      await document.fonts.ready;
+      await settle();
+      return snapshot(frame,phase);
+    },
+    async step(frame) {
+      if (!Number.isInteger(frame) || frame<0) throw new Error('Invalid frame');
+      const {scene,list,rows,overlay} = elements();
+      const all = [...rows.children];
+      if (mode==='basic') {
+        for (let i=0; i<all.length; ++i) all[i].classList.toggle('selected', (i+frame)%8<2);
+        list.scrollTop=(frame*31)%(list.scrollHeight-list.clientHeight);
+        stimulus={kind:'opaque-scroll',changedRows:'all'};
+      } else {
+        const selected=frame%4;
+        const changed=[];
+        pair.forEach((index,position)=>{
+          const row=all[index], before=row.className;
+          row.classList.toggle('selected', selected===position+1 || (selected===3 && position===1));
+          row.classList.toggle('hovered', selected===3 && position===0);
+          if (row.className!==before) changed.push(index);
+        });
+        const requestedScroll=31*(Math.floor(frame/16)%2)+[0,.25,.5,.75][Math.floor(frame/4)%4];
+        const previousScroll=list.scrollTop;
+        list.scrollTop=requestedScroll;
+        await settle();
+        const occluded=frame%4===3;
+        let overlayBounds=null;
+        if (occluded) {
+          const a=all[pair[0]].getBoundingClientRect(), b=all[pair[1]].getBoundingClientRect();
+          const parent=scene.getBoundingClientRect();
+          overlayBounds={x:a.left-parent.left,y:a.top-parent.top,w:a.width,h:b.bottom-a.top};
+          Object.assign(overlay.style,{left:overlayBounds.x+'px',top:overlayBounds.y+'px',
+            width:overlayBounds.w+'px',height:overlayBounds.h+'px'});
+          overlay.hidden=false;
+          await settle();
+          overlay.hidden=true;
+        }
+        stimulus={kind:'translucent-partial',selectionState:selected,changedRows:changed,
+          pair,requestedScroll,previousScroll,actualScroll:list.scrollTop,occluded,overlayBounds};
+      }
+      await settle();
+      return snapshot(frame,'partial');
+    },
+    async repaint(frame) {
+      if (mode!=='partial') throw new Error('Subtree repaint is only a partial-mode diagnostic');
+      const {scene,list}=elements();
+      const oldScroll=list.scrollTop;
+      // Fresh nodes discard this fixture subtree's retained layout/paint objects.
+      // Its serialized DOM, styles, scroll and geometry must match afterwards.
+      scene.replaceWith(scene.cloneNode(true));
+      elements().list.scrollTop=oldScroll;
+      await settle();
+      return snapshot(frame,'full');
+    }
+  };
+</script>

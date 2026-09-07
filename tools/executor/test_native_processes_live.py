@@ -20,6 +20,76 @@ ADDRESS_SPACE = 256 * 1024 * 1024
 OBSERVATIONS = []
 
 
+def process_children_snapshot(pid):
+    """Observe real same-UID children using proc status on Linux and Android.
+
+    Android need not expose CONFIG_PROC_CHILDREN. A missing or unreadable
+    same-UID status is therefore an observation failure, never an empty family.
+    Foreign-UID access denials and processes that actually vanish are recorded.
+    The parent is checked before and after the inventory to reject PID reuse.
+    """
+    uid, observer = os.getuid(), os.getpid()
+
+    def status(target):
+        with (Path('/proc') / str(target) / 'status').open('rb') as stream:
+            data = stream.read(65537)
+        if len(data) > 65536:
+            raise RuntimeError('Unbounded proc status')
+        fields = {}
+        for line in data.splitlines():
+            key, separator, value = line.partition(b':')
+            if separator and key in (b'Pid', b'PPid', b'Uid'):
+                if key in fields:
+                    raise RuntimeError('Duplicate proc identity field')
+                fields[key] = [int(part) for part in value.split()]
+        if set(fields) != {b'Pid', b'PPid', b'Uid'} or fields[b'Pid'] != [target] \
+                or len(fields[b'PPid']) != 1 or len(fields[b'Uid']) != 4:
+            raise RuntimeError('Incomplete proc identity')
+        return {'pid': target, 'ppid': fields[b'PPid'][0], 'uids': fields[b'Uid']}
+
+    def parent_identity():
+        value = status(pid)
+        # comm may contain spaces or parentheses; starttime is stat field 22.
+        data = (Path('/proc') / str(pid) / 'stat').read_bytes()
+        tail = data.rsplit(b')', 1)[1].split()
+        value['startTimeTicks'] = int(tail[19])
+        if value['uids'] != [uid] * 4:
+            raise RuntimeError('Child inventory parent is outside the observer UID')
+        return value
+
+    before = parent_identity()
+    visible = sorted(int(path.name) for path in Path('/proc').iterdir() if path.name.isdecimal())
+    readable, vanished, foreign = [], [], []
+    for target in visible:
+        try:
+            readable.append(status(target))
+        except FileNotFoundError:
+            if (Path('/proc') / str(target)).exists():
+                raise RuntimeError(f'Live process {target} has no readable status')
+            vanished.append(target)
+        except PermissionError:
+            try:
+                owner = (Path('/proc') / str(target)).stat().st_uid
+            except FileNotFoundError:
+                vanished.append(target)
+                continue
+            if owner == uid or target in (pid, observer):
+                raise RuntimeError(f'Cannot inspect same-UID process {target}')
+            foreign.append({'pid': target, 'ownerUid': owner})
+    after = parent_identity()
+    identities = {value['pid']: value for value in readable}
+    if before != after or pid not in identities or observer not in identities \
+            or identities[pid] != {key: before[key] for key in ('pid', 'ppid', 'uids')} \
+            or identities[observer]['uids'] != [uid] * 4:
+        raise RuntimeError('Proc inventory lost the actual parent or observer identity')
+    children = sorted(value['pid'] for value in readable if value['ppid'] == pid)
+    if any(identities[child]['uids'] != [uid] * 4 for child in children):
+        raise RuntimeError('Unexpected child outside the observer UID')
+    return {'route': 'proc-status-ppid', 'observerPid': observer, 'observerUid': uid,
+        'parent': before, 'visiblePids': visible, 'readableProcesses': readable,
+        'vanishedPids': vanished, 'inaccessibleForeignProcesses': foreign, 'children': children}
+
+
 def context(access="write"):
     return {"permissions": {"type": "managed", "file_system": {"type": "restricted", "entries": [
         {"path": {"type": "path", "path": "file:///workspace"}, "access": access},
@@ -89,7 +159,9 @@ class NativeProcessTests(unittest.IsolatedAsyncioTestCase):
         self.assertTrue(result["exited"], result)
         self.assertTrue(record.native_result["cleanupComplete"], record.native_result)
         OBSERVATIONS.append({"test": self.id(), "nativeStarted": record.native_started,
-            "nativeResult": record.native_result, "notifications": list(self.notifications)})
+            "nativeResult": record.native_result, "notifications": list(self.notifications),
+            "supervisorIdentity": record.supervisor_identity, "supervisorSignals": record.supervisor_signals,
+            "supervisorReturncode": record.process.returncode})
         return result
 
     @staticmethod
@@ -206,8 +278,10 @@ class NativeProcessTests(unittest.IsolatedAsyncioTestCase):
 
     async def test_11_unsupported_profile_fails_before_exec(self):
         for extra in ({"tty": True}, {"envPolicy": {"inherit": "none"}}, {"managedNetwork": {}}, {"sandbox": None}):
-            with self.assertRaises(RpcError):
+            with self.assertRaises(RpcError) as refused:
                 await self.start(**extra)
+            if "envPolicy" in extra:
+                self.assertIn("complete supported wire fields", str(refused.exception))
         self.assertFalse(self.backend.processes)
         self.assertFalse(self.notifications)
 
@@ -363,6 +437,117 @@ class NativeProcessTests(unittest.IsolatedAsyncioTestCase):
                 "writeShrinkGrowResealDenied": True})
         finally:
             os.close(fd)
+
+    async def test_21_pinned_supervisor_signal_preserves_asyncio_wait_status(self):
+        await self.start(args=("sleep",))
+        record = self.backend.processes[("session-one", "process")]
+        self.assertEqual(record.supervisor_identity["pid"], record.process.pid)
+        self.assertTrue(record.supervisor_identity["acknowledgedBeforeWorker"])
+        self.assertFalse(os.get_inheritable(record.supervisor_fd))
+        with self.assertNoLogs("asyncio", level="WARNING"):
+            self.assertTrue(self.backend._signal_supervisor(record, 15))
+            response = await self.completed()
+        self.assertEqual(response["exitCode"], 137)
+        self.assertEqual(record.process.returncode, 1)
+        self.assertEqual(record.supervisor_fd, -1)
+        self.assertIn({"signal": 15, "delivered": True, "route": "libc.pidfd_send_signal"}, record.supervisor_signals)
+
+    async def test_22_native_identity_gate_blocks_fork_until_ack_and_pidfd_survives_reap(self):
+        import socket
+        from tools.executor.native_process_policy import NativeProcessPolicy
+        from tools.executor.native_processes import _receive_supervisor, _receive, _packet, _sealed_environment, _signal_pidfd
+        policy = NativeProcessPolicy(RUNNER, self.root, context())
+        control, native_control = socket.socketpair(socket.AF_UNIX, socket.SOCK_SEQPACKET)
+        command, native_command = socket.socketpair(socket.AF_UNIX, socket.SOCK_SEQPACKET)
+        control.setblocking(False); command.setblocking(False)
+        read_fd, write_fd = os.pipe2(os.O_CLOEXEC)
+        env_fd = _sealed_environment(b"")
+        pidfd = -1
+        process = None
+        try:
+            arguments = [str(RUNNER), str(policy.root), str(native_control.fileno()), str(FIXTURE),
+                "3000", str(ADDRESS_SPACE), "67108864", "128", "--process-v2", str(read_fd),
+                str(native_command.fileno()), str(env_fd), "--", "native-fixture", "sleep"]
+            process = await asyncio.create_subprocess_exec(*arguments, stdin=asyncio.subprocess.DEVNULL,
+                stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE, env={}, close_fds=True,
+                pass_fds=(policy.root, native_control.fileno(), native_command.fileno(), read_fd, env_fd))
+            native_control.close(); native_command.close()
+            pidfd, identity = await asyncio.wait_for(_receive_supervisor(control, process.pid), 2)
+            child_snapshots = [process_children_snapshot(process.pid)]
+            self.assertEqual(child_snapshots[-1]['children'], [])
+            await asyncio.sleep(0.05)
+            child_snapshots.append(process_children_snapshot(process.pid))
+            self.assertEqual(child_snapshots[-1]['children'], [])
+            self.assertIsNone(process.returncode)
+            await _packet(control, b"P")
+            started = await asyncio.wait_for(_receive(control), 2)
+            self.assertEqual(started["type"], "started")
+            self.assertEqual(started["profile"], "managed-process-v2")
+            child_snapshots.append(process_children_snapshot(process.pid))
+            self.assertEqual(child_snapshots[-1]['children'], [started["pid"]])
+            with self.assertNoLogs("asyncio", level="WARNING"):
+                self.assertTrue(_signal_pidfd(pidfd, 15))
+                events = []
+                while (event := await asyncio.wait_for(_receive(control), 3)) is not None:
+                    events.append(event)
+                stdout, stderr = await asyncio.wait_for(process.communicate(), 3)
+            self.assertEqual(stdout, b""); self.assertEqual(stderr, b"")
+            self.assertEqual(process.returncode, 1)
+            self.assertEqual(events[-1]["type"], "result")
+            self.assertTrue(events[-1]["cleanupComplete"])
+            self.assertEqual(events[-1]["signal"], 9)
+            # This still-open pidfd retains the original dead supervisor's
+            # identity; it cannot signal another process with a recycled PID.
+            self.assertFalse(_signal_pidfd(pidfd, 0))
+            self.assertFalse(_signal_pidfd(pidfd, 15))
+            OBSERVATIONS.append({"test": self.id(), "supervisorIdentity": identity,
+                "noWorkerBeforeAcknowledgement": True, "nativeStarted": started, "nativeEvents": events,
+                "supervisorReturncode": process.returncode, "postReapSignalReturnedESRCH": True,
+                "waitOwner": "asyncio", "signalRoute": "libc.pidfd_send_signal",
+                "childSnapshots": child_snapshots})
+        finally:
+            if process is not None and process.returncode is None and pidfd >= 0:
+                _signal_pidfd(pidfd, 9)
+                await asyncio.wait_for(process.communicate(), 3)
+            if pidfd >= 0:
+                os.close(pidfd)
+            for endpoint in (control, native_control, command, native_command):
+                endpoint.close()
+            for descriptor in (read_fd, write_fd, env_fd):
+                os.close(descriptor)
+            policy.close()
+
+    async def test_23_real_pidfd_transfer_refuses_wrong_or_extra_descriptors_without_leaks(self):
+        import array
+        import ctypes
+        import socket
+        from tools.executor.native_processes import _receive_supervisor
+        libc = ctypes.CDLL(None, use_errno=True)
+        libc.pidfd_open.argtypes = [ctypes.c_int, ctypes.c_uint]
+        libc.pidfd_open.restype = ctypes.c_int
+        identity = libc.pidfd_open(os.getpid(), 0)
+        self.assertGreaterEqual(identity, 0)
+        read_fd, write_fd = os.pipe2(os.O_CLOEXEC)
+        try:
+            payload = encode_message({"type": "supervisor", "pid": os.getpid(), "profile": "managed-process-v2"})
+            cases = [([identity], os.getpid() + 1), ([read_fd], os.getpid()),
+                ([identity, identity], os.getpid()), ([identity] * 8, os.getpid()), ([], os.getpid())]
+            for descriptors, expected_pid in cases:
+                receiver, sender = socket.socketpair(socket.AF_UNIX, socket.SOCK_SEQPACKET)
+                receiver.setblocking(False)
+                try:
+                    before = len(os.listdir("/proc/self/fd"))
+                    ancillary = [(socket.SOL_SOCKET, socket.SCM_RIGHTS, array.array("i", descriptors))] if descriptors else []
+                    self.assertEqual(sender.sendmsg([payload], ancillary), len(payload))
+                    with self.assertRaises(RpcError):
+                        await _receive_supervisor(receiver, expected_pid)
+                    self.assertEqual(len(os.listdir("/proc/self/fd")), before)
+                finally:
+                    receiver.close(); sender.close()
+            OBSERVATIONS.append({"test": self.id(), "realScmRightsRefusals": len(cases),
+                "wrongPidPipeExtraTruncatedMissingRejected": True, "actualDescriptorCountsUnchanged": True})
+        finally:
+            os.close(identity); os.close(read_fd); os.close(write_fd)
 
     async def test_19_shared_filesystem_quarantine_blocks_actual_write_after_supervisor_loss(self):
         import ctypes

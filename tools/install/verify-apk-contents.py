@@ -17,6 +17,10 @@ DEBUG_CLASSES = (b"RootfsProbeService", b"ProotStorageProbeService", b"NativeRun
                  b"NativeManagedProcessProbeService", b"NativeProbeFiles",
                  b"NativeHttpsAcquisitionProbeService",
                  b"NativeProcessRpcProbeService",
+                 b"NativeExecutorProbeService",
+                 b"NativeGnuProjectProbeService",
+                 b"NativeGnuManagedProbeService",
+                 b"NativeGnuExecutorService",
                  b"CombinedPreparationProbeService", b"CombinedPreparationFixture",
                  b"CodexProbeService", b"LandlockProbeReceiver")
 
@@ -74,13 +78,56 @@ def verify(apk, debug):
                 'tools/executor/policy_intent.py', 'tools/policy/managed_policy.py',
                 'tools/executor/native_files_rpc_fixture.py', 'tools/executor/native_process_policy.py',
                 'tools/executor/native_processes.py', 'tools/executor/test_native_processes_live.py',
+                'tools/executor/native_environment.py', 'tools/executor/native_environment_unicode.py',
                 'tools/executor/native_processes_android_fixture.py')}
             if process_assets != (expected_process if debug else set()):
                 raise ValueError('Wrong native process lifecycle probe asset separation')
             for name in ('libfoldgpt-native-process-runner.so', 'libfoldgpt-native-process-fixture.so'):
                 if ('lib/arm64-v8a/' + name in libraries) != debug:
                     raise ValueError('Wrong native process lifecycle diagnostic separation')
+            composite_assets = {name for name in names if name.startswith('assets/native-executor-probe/') and not name.endswith('/')}
+            expected_composite = {'assets/native-executor-probe/' + name for name in (
+                'tools/executor/exec_server.py', 'tools/executor/native_files.py',
+                'tools/executor/policy_intent.py', 'tools/policy/managed_policy.py',
+                'tools/executor/native_files_rpc_fixture.py', 'tools/executor/native_process_policy.py',
+                'tools/executor/native_processes.py', 'tools/executor/native_file_streams.py',
+                'tools/executor/native_environment.py', 'tools/executor/native_environment_unicode.py',
+                'tools/executor/native_executor_backend.py', 'tools/executor/private_exec_broker.py',
+                'tools/executor/test_native_processes_live.py', 'tools/executor/test_native_executor_transport.py',
+                'tools/executor/native_executor_android_fixture.py')}
+            if composite_assets != (expected_composite if debug else set()):
+                raise ValueError('Wrong native composite executor asset separation')
             android_python = {name for name in names if name.startswith("assets/native-python/") and not name.endswith("/")}
+            gnu_managed_assets = {name for name in names if name.startswith('assets/gnu-managed-probe/') and not name.endswith('/')}
+            expected_gnu_managed = {'assets/gnu-managed-probe/' + name for name in (
+                'tools/executor/exec_server.py', 'tools/executor/native_files.py',
+                'tools/executor/policy_intent.py', 'tools/policy/managed_policy.py',
+                'tools/executor/native_files_rpc_fixture.py', 'tools/executor/native_process_policy.py',
+                'tools/executor/native_processes.py', 'tools/executor/native_environment.py',
+                'tools/executor/native_environment_unicode.py',
+                'tools/executor/gnu-runtime/gnu_process_adapter.py',
+                'tools/executor/gnu-runtime/gnu_runtime_capacity.py',
+                'tools/executor/gnu-runtime/gnu_runtime_address.py',
+                'tools/executor/gnu-runtime/test_gnu_process_adapter.py',
+                'tools/executor/gnu-runtime/managed_android_fixture.py')}
+            if gnu_managed_assets != (expected_gnu_managed if debug else set()):
+                raise ValueError('Wrong GNU managed process source separation')
+            gnu_executor_assets = {name for name in names if name.startswith('assets/gnu-executor/') and not name.endswith('/')}
+            expected_gnu_executor = {'assets/gnu-executor/' + name for name in (
+                'tools/executor/exec_server.py', 'tools/executor/native_files.py',
+                'tools/executor/policy_intent.py', 'tools/policy/managed_policy.py',
+                'tools/executor/native_process_policy.py', 'tools/executor/native_processes.py',
+                'tools/executor/native_file_streams.py', 'tools/executor/native_environment.py',
+                'tools/executor/native_environment_unicode.py', 'tools/executor/native_executor_backend.py',
+                'tools/executor/private_exec_broker.py', 'tools/executor/gnu-runtime/gnu_process_adapter.py',
+                'tools/executor/gnu-runtime/gnu_runtime_capacity.py',
+                'tools/executor/gnu-runtime/gnu_runtime_address.py',
+                'tools/executor/gnu-runtime/gnu_executor_broker.py')}
+            if gnu_executor_assets != (expected_gnu_executor if debug else set()):
+                raise ValueError('Wrong GNU executor integration source separation')
+            for name in ('libfoldgpt-gnu-managed.so', 'libfoldgpt-strict-proot.so', 'libfoldgpt-gnu-project.so'):
+                if ('lib/arm64-v8a/' + name in libraries) != debug:
+                    raise ValueError('Wrong native GNU diagnostic separation: ' + name)
             python_notices = {name for name in names if name.startswith("assets/native-python-notices/") and not name.endswith("/")}
             python_libs = {"lib/arm64-v8a/" + name for name in (
                 "libfoldgpt_python.so", "libpython3.14.so", "libcrypto_python.so", "libssl_python.so", "libsqlite3_python.so")}

@@ -1,4 +1,4 @@
-"""App-private Unix socket transport for the native filesystem exec-server.
+"""App-private Unix socket transport for the native exec-server.
 
 The supervisor supplies fixed paths and the allowed Android UID. Peer credentials
 authenticate that UID, not a particular executable within it. This is a transport
@@ -19,10 +19,11 @@ import sys
 if __package__ in (None, ""):
     sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from tools.executor.exec_server import ExecServer, ProtocolClosed, local_environment_info, serve_stdio
+from tools.executor.exec_server import ExecServer, ProtocolClosed, RpcError, local_environment_info, serve_stdio
 from tools.executor.native_files import NativeFilesBackend
 
 SOCKET_NAME = "exec.sock"
+PROCESS_SESSION = "process-session.json"
 
 
 def peer_identity(connection):
@@ -51,6 +52,9 @@ class PrivateListener:
     def __init__(self, directory):
         self.directory = Path(directory).absolute()
         self.fd = self.lock = self.listener = self.identity = None
+        self.process_identity = None
+        self.quarantined = False
+        self.retained_backend = None
         self.path = self.directory / SOCKET_NAME
         try:
             if os.getuid() == 0 or os.getuid() != os.geteuid():
@@ -70,6 +74,12 @@ class PrivateListener:
                     or lock_info.st_nlink != 1 or stat.S_IMODE(lock_info.st_mode) & 0o077):
                 raise PermissionError("Invalid broker ownership lock")
             fcntl.flock(self.lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            try:
+                os.stat(PROCESS_SESSION, dir_fd=self.fd, follow_symlinks=False)
+            except FileNotFoundError:
+                pass
+            else:
+                raise FileExistsError("A previous native process session lacks verified cleanup")
             # A stale socket is an explicit supervisor recovery condition. Never
             # delete an existing path based only on its name or reported owner.
             try:
@@ -92,6 +102,44 @@ class PrivateListener:
             self.close()
             raise
 
+    def begin_process_session(self, workspace):
+        """Persist ownership before any process RPC can arrive.
+
+        A broker crash or unverified close leaves this marker. Restart never
+        erases it based on PID absence; recovery requires independent cleanup
+        evidence from the supervisor that owns this fixed endpoint.
+        """
+        if self.process_identity is not None or self.quarantined:
+            raise RuntimeError("Native process session already owns this endpoint")
+        root = os.stat(workspace, follow_symlinks=False)
+        fd = os.open(PROCESS_SESSION, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW | os.O_CLOEXEC,
+                     0o600, dir_fd=self.fd)
+        try:
+            info = os.fstat(fd)
+            self.process_identity = (info.st_dev, info.st_ino)
+            data = json.dumps({"version": 1, "brokerPid": os.getpid(), "uid": os.getuid(),
+                "workspaceDevice": root.st_dev, "workspaceInode": root.st_ino}, separators=(",", ":")).encode() + b"\n"
+            view = memoryview(data)
+            while view:
+                count = os.write(fd, view)
+                if count <= 0:
+                    raise OSError("Native session ownership write failed")
+                view = view[count:]
+            os.fsync(fd)
+            os.fsync(self.fd)
+        finally:
+            os.close(fd)
+
+    def finish_process_session(self):
+        if self.process_identity is None or self.quarantined:
+            raise RuntimeError("Cannot release an unverified native process session")
+        info = os.stat(PROCESS_SESSION, dir_fd=self.fd, follow_symlinks=False)
+        if not stat.S_ISREG(info.st_mode) or (info.st_dev, info.st_ino) != self.process_identity:
+            raise RuntimeError("Native process session ownership changed")
+        os.unlink(PROCESS_SESSION, dir_fd=self.fd)
+        os.fsync(self.fd)
+        self.process_identity = None
+
     def close(self):
         if self.listener is not None:
             self.listener.close()
@@ -112,32 +160,60 @@ class PrivateListener:
             self.fd = None
 
 
-async def serve_connection(connection, identity, helper, workspace, guest_workspace, handle_helper=None):
+async def serve_connection(connection, identity, helper, workspace, guest_workspace, handle_helper=None,
+                           process_config=None, owner=None, environment_info=None):
     backend = server = reader = writer = None
     try:
         # This task exclusively owns its workspace lease and protocol session.
-        if handle_helper is None:
+        if process_config is not None:
+            from tools.executor.native_executor_backend import NativeExecutorBackend
+            backend = NativeExecutorBackend(helper, workspace, handle_helper=handle_helper,
+                guest_workspace=guest_workspace, **process_config)
+            owner.begin_process_session(workspace)
+        elif handle_helper is None:
             backend = NativeFilesBackend(helper, workspace, guest_workspace=guest_workspace)
         else:
             from tools.executor.native_file_streams import NativeFileStreamsBackend
             backend = NativeFileStreamsBackend(helper, workspace, handle_helper=handle_helper,
                                                guest_workspace=guest_workspace)
-        info = local_environment_info()
-        info["cwd"] = backend.mount.uri
+        if environment_info is None:
+            info = local_environment_info()
+            info["cwd"] = backend.mount.uri
+        else:
+            # Runtime adapters describe their own guest namespace. Resolving
+            # the broker host's shell/home/temp would misidentify a GNU guest
+            # when this broker itself runs under Android's Bionic Python.
+            info = environment_info
+            if info.get("cwd") != backend.mount.uri:
+                raise ValueError("Runtime metadata cwd differs from the pinned workspace")
         server = ExecServer(backend, environment_info=info)
         connection.setblocking(True)
         reader = connection.makefile("rb")
         writer = connection.makefile("wb", buffering=0)
         emit_event("session-open", peer=identity)
         await serve_stdio(server, reader, writer)
-    except (ProtocolClosed, OSError, ValueError):
+    except (ProtocolClosed, RpcError, OSError, ValueError):
         emit_event("session-failed", peer=identity)
     finally:
         try:
-            if server is not None:
-                await server.close()
-            elif backend is not None:
-                await backend.close(None)
+            try:
+                if server is not None:
+                    await server.close()
+                elif backend is not None:
+                    await backend.close(None)
+                # serve_stdio may already have attempted ExecServer.close;
+                # its idempotent wrapper does not replay backend failures.
+                if process_config is not None and backend is not None:
+                    await backend.close(server.session_id if server is not None else None)
+                    if owner.process_identity is not None:
+                        owner.finish_process_session()
+            except Exception:
+                if process_config is not None and backend is not None:
+                    owner.quarantined = True
+                    owner.retained_backend = backend
+                    emit_event("session-quarantined", peer=identity)
+                else:
+                    raise
         finally:
             # Release blocked pipe workers before closing their buffered files.
             try:
@@ -149,10 +225,12 @@ async def serve_connection(connection, identity, helper, workspace, guest_worksp
                     stream.close()
             connection.close()
             emit_event("session-closed", peer=identity,
-                       sessionId=server.session_id if server is not None else None)
+                       sessionId=server.session_id if server is not None else None,
+                       workspaceQuarantined=owner.quarantined if process_config is not None else False)
 
 
-async def run(directory, helper, workspace, guest_workspace, expected_uid, handle_helper=None):
+async def run(directory, helper, workspace, guest_workspace, expected_uid, handle_helper=None,
+              process_config=None, environment_info=None):
     if expected_uid <= 0 or expected_uid >= 2**31:
         raise ValueError("Expected peer UID must be a positive signed 32-bit integer")
     listener = PrivateListener(directory)
@@ -183,6 +261,10 @@ async def run(directory, helper, workspace, guest_workspace, expected_uid, handl
                 connection.close()
                 emit_event("peer-rejected")
                 continue
+            if listener.quarantined:
+                connection.close()
+                emit_event("quarantine-rejected", peer=identity)
+                continue
             if active is not None:
                 if not active.done():
                     connection.close()
@@ -190,7 +272,8 @@ async def run(directory, helper, workspace, guest_workspace, expected_uid, handl
                     continue
                 await active
                 active = None
-            active = asyncio.create_task(serve_connection(connection, identity, helper, workspace, guest_workspace, handle_helper))
+            active = asyncio.create_task(serve_connection(connection, identity, helper, workspace, guest_workspace,
+                handle_helper, process_config, listener, environment_info))
     finally:
         for pending in (accepting, stopping):
             if pending is not None:
@@ -213,8 +296,32 @@ def main():
     parser.add_argument("--workspace", type=Path, required=True)
     parser.add_argument("--guest-workspace", required=True)
     parser.add_argument("--peer-uid", type=int, required=True)
+    parser.add_argument("--process-runner", type=Path)
+    parser.add_argument("--executable", nargs=2, action="append", metavar=("NAME", "NATIVE_PATH"))
+    parser.add_argument("--process-wall-ms", type=int)
+    parser.add_argument("--process-address-space-bytes", type=int)
+    parser.add_argument("--process-output-bytes", type=int)
+    parser.add_argument("--process-uid-task-budget", type=int)
     args = parser.parse_args()
-    asyncio.run(run(args.socket_dir, args.helper, args.workspace, args.guest_workspace, args.peer_uid, args.handle_helper))
+    limits = {name: getattr(args, "process_" + name) for name in
+              ("wall_ms", "address_space_bytes", "output_bytes", "uid_task_budget")
+              if getattr(args, "process_" + name) is not None}
+    process_config = None
+    if args.process_runner is None:
+        if args.executable or limits:
+            parser.error("Process mappings and limits require --process-runner")
+    else:
+        if not args.handle_helper or not args.executable:
+            parser.error("The composite requires --handle-helper and explicit --executable mappings")
+        mappings = dict(args.executable)
+        if len(mappings) != len(args.executable):
+            parser.error("Duplicate native executable mapping")
+        from types import MappingProxyType
+        from tools.executor.native_processes import NativeProcessLimits
+        process_config = MappingProxyType({"process_runner": args.process_runner,
+            "executables": MappingProxyType(mappings), "limits": NativeProcessLimits(**limits)})
+    asyncio.run(run(args.socket_dir, args.helper, args.workspace, args.guest_workspace, args.peer_uid,
+                    args.handle_helper, process_config))
 
 
 if __name__ == "__main__":

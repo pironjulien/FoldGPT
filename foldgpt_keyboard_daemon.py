@@ -7,11 +7,11 @@ import time
 import urllib.request
 import websockets
 
-def trigger_soft_keyboard():
+def toggle_keyboard():
     os.system("/system/bin/am broadcast -a com.termux.x11.ACTION_CUSTOM -p com.termux.x11 --es what swipeUp >/dev/null 2>&1")
 
-async def monitor_focus():
-    print("[*] FoldGPT Keyboard Daemon started.")
+async def run():
+    print("[*] Starting FoldGPT Keyboard Bridge (v2 - Debounced)...")
     sys.stdout.flush()
 
     while True:
@@ -32,23 +32,18 @@ async def monitor_focus():
             if not target_ws:
                 await asyncio.sleep(1)
 
-        print(f"[+] Connected to ChatGPT CDP: {target_ws}")
+        print(f"[+] Connected to: {target_ws}")
         sys.stdout.flush()
 
-        keyboard_active = False
+        keyboard_state = False
 
         try:
             async with websockets.connect(target_ws, ping_interval=10, ping_timeout=10) as ws:
-                # Enable Runtime events
                 await ws.send(json.dumps({"id": 1, "method": "Runtime.enable"}))
                 await ws.recv()
 
-                # Inject Universal DOM Focus Hook
                 hook_code = """
                 (() => {
-                    if (window.__foldgpt_hooked) return "active";
-                    window.__foldgpt_hooked = true;
-
                     function isTextInput(node) {
                         if (!node) return false;
                         const tag = node.tagName;
@@ -59,53 +54,62 @@ async def monitor_focus():
                         return false;
                     }
 
+                    let focusedInput = null;
+
                     document.addEventListener('focusin', (e) => {
                         if (isTextInput(e.target)) {
+                            focusedInput = e.target;
                             console.log('__FOLDGPT_FOCUS_IN__');
                         }
                     }, true);
 
                     document.addEventListener('focusout', (e) => {
-                        if (isTextInput(e.target)) {
-                            console.log('__FOLDGPT_FOCUS_OUT__');
-                        }
+                        setTimeout(() => {
+                            const current = document.activeElement;
+                            if (!isTextInput(current)) {
+                                focusedInput = null;
+                                console.log('__FOLDGPT_FOCUS_OUT__');
+                            }
+                        }, 500);
                     }, true);
 
-                    return "ready";
+                    return "ready_v2";
                 })()
                 """
                 await ws.send(json.dumps({"id": 2, "method": "Runtime.evaluate", "params": {"expression": hook_code}}))
                 await ws.recv()
-                print("[+] Universal text focus hook successfully armed.")
+                print("[+] Debounced focus hook armed.")
                 sys.stdout.flush()
+
+                last_toggle_time = 0
 
                 while True:
                     msg = await ws.recv()
                     data = json.loads(msg)
                     if data.get("method") == "Runtime.consoleAPICalled":
-                        params = data.get("params", {})
-                        args = params.get("args", [])
+                        args = data.get("params", {}).get("args", [])
                         if args:
-                            event_type = args[0].get("value")
-                            if event_type == "__FOLDGPT_FOCUS_IN__":
-                                if not keyboard_active:
-                                    print("[⚡] Input focus detected -> Opening Samsung Keyboard")
+                            val = args[0].get("value")
+                            now = time.time()
+                            if val == "__FOLDGPT_FOCUS_IN__":
+                                if not keyboard_state and (now - last_toggle_time > 1.0):
+                                    print("[⚡] Real focus on text box -> Opening Keyboard")
                                     sys.stdout.flush()
-                                    trigger_soft_keyboard()
-                                    keyboard_active = True
-                            elif event_type == "__FOLDGPT_FOCUS_OUT__":
-                                if keyboard_active:
-                                    # Grace period before closing
-                                    await asyncio.sleep(0.15)
-                                    print("[💤] Input blur detected -> Closing Samsung Keyboard")
+                                    toggle_keyboard()
+                                    keyboard_state = True
+                                    last_toggle_time = now
+                            elif val == "__FOLDGPT_FOCUS_OUT__":
+                                if keyboard_state and (now - last_toggle_time > 1.0):
+                                    print("[💤] Real blur -> Closing Keyboard")
                                     sys.stdout.flush()
-                                    trigger_soft_keyboard()
-                                    keyboard_active = False
+                                    toggle_keyboard()
+                                    keyboard_state = False
+                                    last_toggle_time = now
 
         except Exception as e:
-            print(f"[!] WebSocket disconnected: {e}. Reconnecting...")
+            print(f"[!] Reconnecting in 2s: {e}")
             sys.stdout.flush()
             await asyncio.sleep(2)
 
 if __name__ == "__main__":
-    asyncio.run(monitor_focus())
+    asyncio.run(run())

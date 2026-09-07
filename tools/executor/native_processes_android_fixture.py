@@ -4,6 +4,7 @@ This is backend conformance, not a model request or a Desktop-routing proof.
 The service supplies APK-owned sources/programs and a new private directory.
 """
 import argparse
+import ast
 import json
 import os
 from pathlib import Path
@@ -57,9 +58,16 @@ def main():
     require(matrix.get("schema") == "foldgpt.native-process-lifecycle.v1"
             and matrix.get("successful") is True and matrix.get("uid") == args.uid
             and matrix.get("observations"), "Lifecycle suite evidence is incomplete")
+    classes = [node for node in ast.parse(suite.read_text()).body
+               if isinstance(node, ast.ClassDef) and node.name == "NativeProcessTests"]
+    tests = sorted(node.name for node in classes[0].body
+                   if isinstance(node, ast.AsyncFunctionDef) and node.name.startswith("test_")) if len(classes) == 1 else []
+    require(len(tests) == 23 and {entry["test"].removeprefix("__main__.NativeProcessTests.")
+            for entry in matrix["observations"]} == set(tests), "The packaged v2 suite did not cover all 23 tests")
     require(not list(parent.iterdir()), "Lifecycle suite left private case directories")
     report = {"schema": "foldgpt.native-processes-android.v1", "status": "PASS",
               "uid": args.uid, "observations": len(matrix["observations"]),
+              "testsRun": 23, "nativeProcessProfile": "managed-process-v2",
               "runnerSha256": file_hash(args.runner), "fixtureSha256": file_hash(args.fixture),
               "filesHelperSha256": file_hash(args.files_helper),
               "suiteSha256": file_hash(suite),

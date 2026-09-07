@@ -1,0 +1,92 @@
+"""Compose the real native file, stream and process backends for one session.
+
+The constructor owns runtime mappings and limits. A request cannot choose native
+programs or replace a process's complete policy. This composition does not select
+a Desktop environment or expand the process profile's admitted operations.
+"""
+import asyncio
+import os
+
+from tools.executor.exec_server import RpcError
+from tools.executor.native_file_streams import NativeFileStreamsBackend
+from tools.executor.native_processes import METHODS, NativeProcessesBackend, _finish
+
+
+class NativeExecutorBackend:
+    def __init__(self, helper, workspace, *, handle_helper, process_runner,
+                 executables=None, guest_workspace="/workspace", limits=None,
+                 parent_environment=None, process_factory=None):
+        if process_factory is not None and (not callable(process_factory) or executables is not None):
+            raise ValueError("An alternate process factory must be callable and own its executable mapping")
+        self.files = NativeFileStreamsBackend(helper, workspace,
+            handle_helper=handle_helper, guest_workspace=guest_workspace)
+        try:
+            factory = NativeProcessesBackend if process_factory is None else process_factory
+            options = {"executables": executables} if process_factory is None else {}
+            self.processes = factory(process_runner, workspace, **options,
+                guest_workspace=guest_workspace,
+                limits=limits, files_backend=self.files, parent_environment=parent_environment)
+        except BaseException:
+            # No operation or streaming handle exists during construction.
+            os.close(self.files.root)
+            self.files.closed = True
+            raise
+        self.supported_methods = frozenset(self.files.supported_methods | self.processes.supported_methods)
+        self.capabilities = frozenset(self.files.capabilities | self.processes.capabilities)
+        self.mount = self.files.mount
+        self.session = None
+        self.closing = False
+        self._close_task = None
+
+    def _bind(self, session):
+        if self.session is None:
+            self.session = session
+        elif self.session != session:
+            raise RpcError(-32000, "Native executor belongs to a different session")
+
+    async def handle(self, call, notify):
+        self._bind(call.session_id)
+        if self.closing:
+            raise RpcError(-32600, "Native executor session is closing")
+        if call.method in METHODS and call.method != "process/start":
+            return await self.processes.handle(call, notify)
+        if call.method != "process/start" and call.method not in self.files.supported_methods:
+            raise RpcError(-32601, "Unsupported native executor method")
+        if self.processes.quarantined:
+            raise RpcError(-32603, "Native process cleanup is unknown; filesystem access is quarantined")
+        backend = self.processes if call.method == "process/start" else self.files
+        operation = asyncio.create_task(backend.handle(call, notify))
+        quarantined = asyncio.create_task(self.processes.quarantine_event.wait())
+        try:
+            await asyncio.wait((operation, quarantined), return_when=asyncio.FIRST_COMPLETED)
+            # The shared lock excludes file operations for the entire process
+            # lifetime. A completed operation here preceded that ownership.
+            if operation.done():
+                return operation.result()
+            operation.cancel()
+            await asyncio.gather(operation, return_exceptions=True)
+            raise RpcError(-32603, "Native process cleanup is unknown; pending filesystem access was refused")
+        finally:
+            if not operation.done():
+                operation.cancel()
+            quarantined.cancel()
+            await _finish(asyncio.gather(operation, quarantined, return_exceptions=True))
+
+    async def close(self, session_id):
+        self._bind(session_id)
+        self.closing = True
+        if self._close_task is None:
+            self._close_task = asyncio.create_task(self._close(session_id))
+        # Preserve the same failure on every close. The process backend may
+        # remove completed records while refusing unknown cleanup; retrying its
+        # close and then waiting on the deliberately retained lock would hang.
+        await _finish(self._close_task)
+
+    async def _close(self, session_id):
+        # Unknown process cleanup deliberately leaves the pinned root/lease
+        # owned. Closing its file backend would release the kernel flock and
+        # allow a new connection to race surviving workers.
+        await self.processes.close(session_id)
+        if self.processes.quarantined:
+            raise RpcError(-32603, "Native executor cannot release an unknown process workspace")
+        await self.files.close(session_id)

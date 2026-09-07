@@ -1,0 +1,6 @@
+.gradle/
+build/
+transport/build/
+transport/.cxx/
+local.properties
+__pycache__/

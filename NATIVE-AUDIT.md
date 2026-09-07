@@ -1,5 +1,27 @@
 # Audit du démarrage natif — 5 septembre 2026
 
+## Point de contrôle du 6 septembre 2026
+
+Les sections suivantes conservent les observations historiques. La recherche
+actuelle sur le noyau réel et les documentations Samsung/Qualcomm/Android/Knox
+est dans [contraintes natives](docs/research/android-native-constraints-2026-09-06.md).
+Le noyau ne compile ni USER_NS ni PID_NS : réinstaller Bubblewrap ne suffit pas.
+
+La [preuve GNU indépendante](tools/executor/gnu-runtime/collection.md) passe
+désormais sur le Fold sous UID applicatif : Bash et Python ARM64 créent,
+modifient, testent et empaquettent un petit projet sous Landlock/seccomp posés
+avant PRoot strict. La collecte vérifie dix artefacts, trois tests, huit refus,
+le paquet exécuté et les 6 200 fichiers du client officiel face au paquet de
+référence. Les indicateurs lus restent Knox 0, Verified Boot green, verrouillage
+actif et SELinux Enforcing. Cette mesure ne constitue pas une promesse de
+garantie contractuelle.
+
+Le transport composite natif passe également neuf cas Android avec collecte
+indépendante. La correction des commandes ordinaires reste en cours : ces tests
+fixes ne prouvent ni le routage normal du modèle ni la disparition de l'erreur
+`bwrap` dans l'interface. Le travail utilise l'interface d'environnement du
+client officiel ; aucun MCP/plugin n'est activé pour le remplacer.
+
 ## Résultat
 
 Le client ChatGPT s'affiche réellement sous PRoot sur le Fold, avec la bibliothèque `libfake_userns.so` chargée dans le processus principal et un renderer inspectés. Aucun processus QEMU n'était présent lors de cet audit. Ce résultat confirme un démarrage ARM64 sans émulation CPU ; il ne mesure pas les performances et ne valide pas les tâches, le navigateur ou Remote.
