@@ -4,7 +4,7 @@
   "defaultBranch": "codex/foldgpt-beta",
   "release": "https://github.com/pironjulien/FoldGPT-workspace/releases/tag/recovery-2026-09-07",
   "published": true,
-  "verifiedAssetCount": 19,
+  "verifiedAssetCount": 23,
   "assets": [
     {
       "name": "manifest.json",
@@ -100,7 +100,27 @@
       "name": "native-checkpoint-v4.tar.gz.age.part001",
       "bytes": 86998467,
       "sha256": "e35e7e59659929b55e9b432cab1e496f40640ab993501d04f8f509e8ed0648a1"
+    },
+    {
+      "name": "native-checkpoint-v5-manifest.json",
+      "bytes": 632,
+      "sha256": "72b9b2d6dd3b145827d67cac6e26f2c30d43e967c40def050a458d6404f7beb7"
+    },
+    {
+      "name": "native-checkpoint-v5.tar.gz.age.part001",
+      "bytes": 54234188,
+      "sha256": "2455b1fba1fe1f39c73cd19c6e1b459f618502b2ee4392f5a2da6da54a7f3559"
+    },
+    {
+      "name": "native-checkpoint-v6-manifest.json",
+      "bytes": 628,
+      "sha256": "acfea8abe7b43424145c6075759a15f2f5090541057e8345c615d89251e2cfaa"
+    },
+    {
+      "name": "native-checkpoint-v6.tar.gz.age.part001",
+      "bytes": 1323849,
+      "sha256": "609c235e281a35a543f62800d9fa3f829f28c77b2d606dbf15460fb4dc56a81d"
     }
   ],
-  "currentSupplement": "native-checkpoint-v4-manifest.json"
+  "currentSupplement": "native-checkpoint-v6-manifest.json"
 }

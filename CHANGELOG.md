@@ -2,6 +2,12 @@
 
 ## Unreleased — 2026-09-06
 
+- Published the v5/v6 recovery supplements and independently verified their
+  GitHub download, authenticated restoration and additive Windows merge.
+  All23 remote assets match their size/digest. The v10 diagnostic passes socket
+  initialization but retains quarantine after the actual linkerconfig path
+  refusal; its current owner, marker and negative results remain preserved.
+
 - Published and restored the private v4 supplement from GitHub: 2,928 exact
   files, including v8/v9 artifacts and real phone reports. Its 2,927 project
   files also merge exactly into the hydrated Windows clone. Track the root
