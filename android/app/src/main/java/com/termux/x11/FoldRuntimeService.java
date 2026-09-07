@@ -8,6 +8,7 @@ import android.system.ErrnoException;
 import android.system.OsConstants;
 import android.util.Log;
 import app.foldgpt.FoldActivity;
+import app.foldgpt.FoldExecutorRuntime;
 import app.foldgpt.KeyringVault;
 import app.foldgpt.install.GuestIdentity;
 import java.io.*;
@@ -25,6 +26,11 @@ public final class FoldRuntimeService extends Service {
     private boolean destroyed;
     private boolean xReady;
     private int latestStartId;
+    private FoldExecutorRuntime executorRuntime;
+    @Override public void onCreate() {
+        super.onCreate();
+        executorRuntime = new FoldExecutorRuntime(this);
+    }
     @Override public IBinder onBind(Intent intent) { return null; }
     @Override public int onStartCommand(Intent intent, int flags, int startId) {
         latestStartId = startId;
@@ -39,6 +45,19 @@ public final class FoldRuntimeService extends Service {
         startForeground(1, new Notification.Builder(this, "workspace").setSmallIcon(android.R.drawable.ic_menu_manage)
             .setContentTitle("FoldGPT").setContentText("Espace Linux actif").setContentIntent(open)
             .addAction(new Notification.Action.Builder(null, "Arrêter", stop).build()).setOngoing(true).build());
+        if (FoldExecutorRuntime.ACTION_PREPARE.equals(intent == null ? null : intent.getAction())) {
+            // Deliberate native preparation command. Its failure is explicit;
+            // it never starts the old launcher as an implicit fallback.
+            executorRuntime.prepare().whenComplete((endpoint, error) -> mainHandler.post(() -> {
+                if (error != null) {
+                    Log.e("FoldGPT", "Selected native executor is unavailable", error);
+                    if (worker == null) stopSelfResult(startId);
+                } else {
+                    Log.i("FoldGPT", "Authenticated native executor endpoint prepared; desktop launcher unchanged");
+                }
+            }));
+            return START_NOT_STICKY;
+        }
         if (stopping) restartRequested = true;
         else if (worker == null) launchWorkspace();
         return START_NOT_STICKY;
@@ -53,6 +72,7 @@ public final class FoldRuntimeService extends Service {
         }
     }
     private void requestStop() {
+        if (executorRuntime != null) executorRuntime.requestStop();
         java.lang.Process running;
         Thread startingThread;
         synchronized (lifecycleLock) {
@@ -206,9 +226,10 @@ public final class FoldRuntimeService extends Service {
             wakeLock = null;
         }
         super.onDestroy();
-        // The X server has native worker threads. This dedicated service process owns
-        // them. Normal stop waits for Linux first; killing synchronously here prevents
-        // an old delayed shutdown from killing a newly created service instance.
-        android.os.Process.killProcess(android.os.Process.myPid());
+        // Retain the process and Shizuku binding until native cleanup is proven.
+        // The process-wide owner registry also prevents an older asynchronous
+        // shutdown from killing a newer runtime service instance or an older
+        // instance whose native children are still being cleaned up.
+        executorRuntime.shutdownAfterCleanup(() -> android.os.Process.killProcess(android.os.Process.myPid()));
     }
 }

@@ -10,14 +10,17 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 
 /** All execution inputs come from the installed APK, never from Binder/RPC. */
-final class Deployment {
+public final class Deployment {
     static final String ASSET = "foldgpt-executor-deployment.json";
     // -I excludes caller env/cwd; -S excludes site initialization; -u avoids
     // interpreter shutdown flushing a disconnected RPC channel indefinitely.
     private static final String ENTRY = "import sys;sys.path.insert(0,sys.argv[1]+'/assets/foldgpt-executor');"
             + "from foldgpt_shizuku_bootstrap import main;main(sys.argv[1])";
     final String executable;
+    final String transportLibrary;
     final String[] argv;
+    /** Read-only admission for an application owner before selecting Shizuku. */
+    public static void verifyInstalledInputs(Context context) throws Exception { new Deployment(context); }
 
     Deployment(Context context) throws Exception {
         JSONObject config;
@@ -48,7 +51,7 @@ final class Deployment {
         if (!expected.contentEquals(actual)) throw new SecurityException("Packaged interpreter digest mismatch");
         executable = file.getPath();
         argv = new String[] {executable, "-I", "-S", "-u", "-c", ENTRY, context.getApplicationInfo().sourceDir};
-        NativeSpawn.load(new File(directory, "libfoldgpt_shizuku_transport.so").getPath());
+        transportLibrary = new File(directory, "libfoldgpt_shizuku_transport.so").getPath();
     }
     static byte[] readBounded(InputStream input, int limit) throws Exception {
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();

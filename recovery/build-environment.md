@@ -17,6 +17,9 @@ PC de reprise et ne font pas partie de l'archive du projet.
 | Rust du moteur séparé | 1.95.0, avec rustfmt et clippy |
 | just Linux | 1.58.0 |
 | cargo-nextest Linux | 0.9.143 |
+| Bazel Linux | 9.0.0, imposé par le moteur |
+| uv Linux | 0.12.10 |
+| DotSlash Linux | 0.5.9 |
 | age Windows / Ubuntu | 1.3.1 / 1.1.1 |
 | gitleaks | 8.30.1 |
 
@@ -31,6 +34,10 @@ sudo apt-get install build-essential cmake pkg-config libssl-dev libdbus-1-dev l
 
 Le build actuel utilise le NDK officiel sous `/opt/foldgpt/android-ndk-r29`,
 `RUSTUP_HOME=/opt/foldgpt/rustup` et `CARGO_HOME=/opt/foldgpt/cargo`.
+Les binaires Bazel, uv et DotSlash sont sous `/opt/foldgpt/tools/bin` ; leurs
+archives ont été comparées aux SHA-256 des releases officielles GitHub.
+Les tests du moteur sont exécutés sous le compte Linux non privilégié
+`foldgpt-build`, avec le véritable Bubblewrap 0.9.0 sur le PC.
 Les scripts et manifestes sous `tools/install/native`,
 `tools/executor/bionic-runtime` et `tools/executor/shizuku-service` décrivent les
 entrées figées et les vérifications ELF. Les répertoires de caches `.gradle`,

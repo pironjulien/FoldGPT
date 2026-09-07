@@ -7,14 +7,17 @@ supplies a privileged executable, service argv, environment, native pathname or
 backend selection. The command and full policy remain structured ExecServer RPC
 inputs to the installed backend.
 
-No main FoldGPT files, Shizuku lab files or official ChatGPT files are modified
-by this project. Building it does not install or launch anything on the phone.
+The main FoldGPT project now includes this library and an explicitly selected
+application owner. The Shizuku lab and official ChatGPT files remain separate.
+Building either artifact does not install or launch anything on the phone.
 
 ## Boundary and interface
 
 `ExecutorService` is an official Shizuku `UserService`, constructed with its
-installed application Context. It requires UID 2000 and authenticates every
-Binder operation against the actual application UID. The provider disables
+installed application Context. The native launch requires matching real,
+effective and saved UID/GID 2000 with zero effective/permitted/inheritable
+capabilities (therefore zero ambient capabilities). The service authenticates
+every Binder operation against the actual application UID. The provider disables
 automatic Sui initialization before its superclass starts. There is no root
 backend, arbitrary `exec(String)`, ADB bootstrap, wireless-debugging setting,
 WRITE_SECURE_SETTINGS grant or expiration change.
@@ -24,8 +27,11 @@ ExecutorService.class))`, `.daemon(false)`, an application-version-specific
 tag/version, and `.debuggable(false)`. Only bind after the ordinary official
 Shizuku permission is already granted and `Shizuku.getUid() == 2000`. Retain the
 binding until `status.cleanupComplete` is true; destroying an active service
-requests cancellation and refuses destruction while native ownership remains.
+requests cancellation and defers destruction while native ownership remains.
 An application Activity's destruction is not permission to destroy the owner.
+Shizuku removes its service record when issuing its one-way destroy request.
+The retained observer therefore finishes that request after verified cleanup,
+without requiring a second call from a client which may already be dead.
 
 `IExecutorService.open(IBinder owner)` returns one `IExecutorSession`:
 
@@ -63,6 +69,132 @@ workspace lease and marker after unknown cleanup. Session cancellation is
 independent of stalled client stdin and stdout. No PID-based forced destruction
 or automatic restart is used. `waitpid` reaps only the actual direct child.
 
+## App-side connection for the GNU engine
+
+`AppSocketBridge.java` runs in the ordinary FoldGPT app process and owns a real
+filesystem AF_UNIX socket beneath `context.getDir("foldgpt_exec", MODE_PRIVATE)`.
+It checks the directory's canonical path, type, UID and 0700 privacy, creates an
+exclusive random socket name, then checks its inode and applies mode 0600.
+Every accepted connection must have kernel `SO_PEERCRED.uid == Process.myUid()`
+and a valid PID before a Binder session can be opened. UID 2000 is not admitted
+to this app endpoint. The existing native client independently checks the
+server's exact app UID.
+
+After an already authorized official Shizuku binding completes, the containing
+application constructs:
+
+```java
+IExecutorService remote = IExecutorService.Stub.asInterface(serviceBinder);
+AppSocketBridge bridge = new AppSocketBridge(applicationContext, remote, listener);
+String socketPath = bridge.socketPath();
+int serverUid = bridge.peerUid();
+```
+
+The existing `tools/executor/private-exec-bridge.c` already accepts this exact
+endpoint. The engine's trusted environment definition launches its packaged
+native bridge with the literal argument vector:
+
+```text
+<packaged-private-exec-bridge> --socket <bridge.socketPath()> --peer-uid <bridge.peerUid()>
+```
+
+No shell parses that argument vector. The kernel UID remains the app UID even
+when the caller is the existing GNU engine. No TCP port, world-readable socket,
+shell-UID endpoint or client-chosen backend is introduced. Binder transports
+only descriptors/control; the two copy directions preserve arbitrary RPC bytes
+with bounded buffers, half-close and EOF. The final stdout pipe is fully drained
+before cleanup closes the client socket, even if native `waitpid` arrived first.
+
+Hold the bridge and `UserServiceArgs`/`ServiceConnection` in FoldGPT's existing
+long-lived service/controller. `bridge.close()` stops new connections and
+requests native cancellation; do not unbind/remove the UserService until
+`bridge.cleanupComplete()` or the `onSessionClosed` callback confirms cleanup.
+A disconnected Shizuku Binder closes admission and leaves unknown ownership
+visible. The adapter does not automatically bind again or replay a request.
+
+The socket's path is a physical app-private Android path. It is unrelated to
+the worker cwd. The backend deployment independently supplies its real workspace,
+pins its device/inode and advertises the matching policy/environment URIs. The
+adapter never substitutes `/home`, rewrites a cwd prefix, chooses a fictitious
+workspace or suppresses the incoming sandbox context. Kernel/SELinux validation
+of the app-side socket and Binder-FD path on the Fold is still required.
+
+The source dependency is now included in `android/settings.gradle` as
+`:shizukuTransport`, and the app declares `implementation project(':shizukuTransport')`.
+Package the reviewed generated assets and required runtime libraries
+in the existing runtime source set. The main app already uses
+`extractNativeLibs=true` and `jniLibs.useLegacyPackaging true`, which are needed
+for the fixed native interpreter pathname. Keep those settings. Build the APK
+with the project's normal pipeline, then inspect its merged manifest, deployed
+config, native hashes and assets before any installation.
+
+## Current main-APK wiring
+
+`android/app/src/main/java/app/foldgpt/FoldExecutorRuntime.java` is created by
+the existing `com.termux.x11.FoldRuntimeService` in `:runtime`. Its constructor
+checks that actual process name. The protected Shizuku provider stays in
+`app.foldgpt`; the runtime explicitly calls the SDK's multi-process Binder
+request API, with Sui initialization disabled in both contexts.
+
+Only the package-internal service action
+`app.foldgpt.action.PREPARE_NATIVE_EXECUTOR` selects native preparation. It
+does not launch the existing GNU desktop after a failure. Ordinary starts keep
+their existing launcher, and no generated qualified deployment is packaged by
+default. A missing/unqualified deployment produces a failed preparation future,
+an explicit log and app-private `native-executor-status.json` with reason
+`qualified_native_deployment_unavailable`; no Shizuku bind has occurred then.
+That status explicitly states `officialLauncherReplaced=false`.
+
+The optional main build property `-PfoldgptExecutorAssets=<reviewed assets dir>`
+requires all four deployment files before packaging. Runtime admission then
+checks exact SHA-256 for deployment, the complete source manifest and the
+actual qualification evidence. It checks every source, rejects unmanifested
+files, requires the real factory, and verifies the packaged interpreter. The
+qualification asset contract is:
+
+```json
+{
+  "schema": "foldgpt.shizuku.qualification.v1",
+  "scope": "host-native-executor",
+  "deploymentSha256": "<actual deployment asset SHA-256>",
+  "sourceManifestSha256": "<actual source manifest asset SHA-256>",
+  "evidenceSha256": "<actual evidence asset SHA-256>"
+}
+```
+
+This is documentation of required fields, not a deployable qualification file.
+`foldgpt-executor-evidence.json` must record `success=true` as an actual Boolean
+and the same `host-native-executor` scope, backed by the completed qualification
+for those exact sources and inputs. No such claim or file is generated by the
+transport packager. Host qualification does not claim phone or official-client
+acceptance. The packaging script includes `foldgpt-executor-manifest.json` but
+leaves generation of genuine qualification evidence to the completed backend
+validation.
+
+The old unconditional `killProcess` in `FoldRuntimeService.onDestroy` is now
+behind actual native cleanup and a process-wide `RuntimeExitGate`. Four real
+JVM tests verify normal release, older unresolved ownership, newer Service
+generations, and rejection of invented/double cleanup. The latest service
+cannot kill older pending native work; an older delayed callback cannot kill a
+new service. Official Shizuku bindings are detached only after cleanup, with
+`remove=false` so another active connection is not removed. If a Binder never
+reached this owner, no RPC session or worker could have been started by it; a
+late callback only observes its closing state.
+
+The main debug APK builds and verifies under the preserved signing certificate
+SHA-256 `30930ffce7c10b673e95e69f2d78bb9e60aa71132db3c21cdc15cf56df77fa16`.
+Its content separation check passes. The merged manifest has the protected
+provider in the main process and the non-exported runtime service in `:runtime`.
+The existing `WRITE_SECURE_SETTINGS` declaration comes from Termux:X11; this
+integration neither grants it nor adds a settings-writing startup path.
+
+The main Gradle unit-test task currently cannot compile the existing
+`TrustedHttpsArtifactTest` against the Android test bootclasspath because
+`com.sun.net.httpserver` is unavailable there. The four new exit-gate tests were
+compiled from their actual source and passed with the normal JDK 21/JUnit
+runner. This limitation is separate from the successful main APK build and the
+12 passing transport-library tests.
+
 ## Immutable deployment inputs
 
 The application must package the native library from this AAR and its real
@@ -99,13 +231,15 @@ supplied by the actual qualified runtime integration; the transport does not
 silently select the failed legacy Android process route when it is absent.
 `open` refuses missing deployment/interpreter inputs before native fork.
 
-The backend must implement `supported_methods`, `capabilities`, `mount.uri`,
+The backend must implement `supported_methods`, `capabilities`, `mount.uri`, `files.root`,
 `handle`, `close`, and `processes.quarantined`, matching
 `NativeExecutorBackend`. Full nested policy data is passed to `ExecServer`
 without reinterpretation or removal. A factory that raises after entry is
 quarantined because partially created processes cannot be ruled out. It must
 therefore perform its validation before acquiring resources and reliably own
 any resources it does acquire.
+The bootstrap checks the pinned root's device/inode against the workspace
+identity persisted before factory entry.
 
 `PrivateListener` supplies existing lock, socket and persistent session-marker
 semantics. No connection is accepted on that socket: all RPC travels through
@@ -122,11 +256,18 @@ Verified on PC on 2026-09-07:
 - Ten actual production-state reducer tests pass: caller authentication,
   independent report/wait evidence, death without cleanup, cancellation,
   malformed/coerced/duplicate reports, quarantine and pre-fork admission.
+- Two real bounded-pipe adapter tests pass: a further 1 MiB binary transfer
+  under backpressure with EOF and an output failure propagated as an error.
 - `verify-native-host.py`, run in Linux as UID 65534, compiles and executes the
   actual JNI C/Java launcher with one explicitly host-only UID admission. A
   real Python child preserves 1 MiB of arbitrary binary input/output, distinct
   stderr, real stdin EOF, independent cancellation with stdin left open, exit
   23 and `waitpid`, and closes inherited FD 128.
+- `verify-bootstrap-host.py` executes the real bootstrap and ExecServer with a
+  recording/refusing test backend. Complete nested policy survives unchanged;
+  the test refuses command execution. A separate real diagnostic child is
+  reaped on stdin EOF and service EOF with stdin still open. An injected
+  cleanup-reporting failure retains the live bootstrap and persistent marker.
 
 These are transport checks. No Binder/SELinux qualification or general backend
 policy run on the Fold is claimed. The successful fixed Shizuku/Bionic lab is
@@ -144,6 +285,7 @@ Build and tests:
 ```powershell
 gradle :transport:testDebugUnitTest :transport:assembleDebug --console=plain
 wsl.exe -e /usr/sbin/runuser -u nobody -- python3 /mnt/c/Dev/ChatgptFold/tools/executor/shizuku-service/verify-native-host.py
+wsl.exe -e /usr/sbin/runuser -u nobody -- python3 /mnt/c/Dev/ChatgptFold/tools/executor/shizuku-service/verify-bootstrap-host.py
 ```
 
 Use Gradle 9.7.1 and the installed Android SDK. The Gradle dependency hashes are

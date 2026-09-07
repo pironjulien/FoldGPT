@@ -1,4 +1,5 @@
 apply plugin: 'com.android.application'
+apply from: '../../tools/recovery/android-signing.gradle'
 android {
     namespace 'app.foldgpt'
     compileSdk 37
@@ -20,10 +21,25 @@ android {
 }
 dependencies {
     implementation project(':lorie')
+    implementation project(':shizukuTransport')
     implementation 'androidx.appcompat:appcompat:1.7.1'
     implementation 'androidx.window:window-java:1.5.0'
     implementation 'org.apache.commons:commons-compress:1.28.0'
     testImplementation 'junit:junit:4.13.2'
+}
+
+// Explicit reviewed deployment only. Merely linking the transport must never
+// select it or embed an obsolete local staging directory by accident.
+def qualifiedExecutorAssets = providers.gradleProperty('foldgptExecutorAssets')
+if (qualifiedExecutorAssets.isPresent()) {
+    def supplied = file(qualifiedExecutorAssets.get()).canonicalFile
+    if (!supplied.isDirectory() || !new File(supplied, 'foldgpt-executor-deployment.json').isFile()
+            || !new File(supplied, 'foldgpt-executor-qualification.json').isFile()
+            || !new File(supplied, 'foldgpt-executor-evidence.json').isFile()
+            || !new File(supplied, 'foldgpt-executor-manifest.json').isFile()) {
+        throw new GradleException('Selected executor assets lack the explicit deployment, source manifest or qualification evidence')
+    }
+    android.sourceSets.main.assets.srcDir(supplied)
 }
 
 // The native file transport fixture executes only these APK-owned public source

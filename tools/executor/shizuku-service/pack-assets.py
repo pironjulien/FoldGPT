@@ -6,10 +6,8 @@ files remain under this independent project's build directory.
 """
 import argparse
 import hashlib
-import importlib.util
 import json
 from pathlib import Path
-import shutil
 
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parents[2]
@@ -31,16 +29,17 @@ def main():
     files = [(HERE / "transport/src/main/assets/foldgpt-executor/foldgpt_shizuku_bootstrap.py", Path("foldgpt_shizuku_bootstrap.py"))]
     files.extend((REPO / "tools/executor" / (name + ".py"), Path("tools/executor") / (name + ".py")) for name in MODULES)
     files.append((REPO / "tools/policy/managed_policy.py", Path("tools/policy/managed_policy.py")))
+    manifest = []
     for package in ("tools", "tools/executor", "tools/policy"):
         target = destination / package
         target.mkdir(parents=True, exist_ok=True)
         (target / "__init__.py").write_text("", encoding="utf-8")
+        manifest.append({"path": package + "/__init__.py", "sha256": hashlib.sha256(b"").hexdigest()})
     source_root = args.backend_sources.resolve(strict=True)
     for path in sorted(source_root.rglob("*.py")):
         if path.is_symlink() or not path.resolve().is_relative_to(source_root):
             raise ValueError("Backend source alias is not admitted")
         files.append((path, path.relative_to(source_root)))
-    manifest = []
     for source, relative in files:
         target = destination / relative
         if target.exists():
@@ -55,6 +54,7 @@ def main():
         raise ValueError("Configured backend factory is absent from installed sources")
     (root / "foldgpt-executor-deployment.json").write_text(json.dumps(config, indent=2) + "\n", encoding="utf-8")
     (HERE / "build/installed-assets-manifest.json").write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
+    (root / "foldgpt-executor-manifest.json").write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
     print(root)
 
 

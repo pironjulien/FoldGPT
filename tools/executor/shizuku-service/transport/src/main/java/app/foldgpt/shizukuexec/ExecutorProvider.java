@@ -4,6 +4,7 @@ package app.foldgpt.shizukuexec;
 public final class ExecutorProvider extends rikka.shizuku.ShizukuProvider {
     @Override public boolean onCreate() {
         rikka.shizuku.ShizukuProvider.disableAutomaticSuiInitialization();
+        rikka.shizuku.ShizukuProvider.enableMultiProcessSupport(true);
         return super.onCreate();
     }
 }

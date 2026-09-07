@@ -15,6 +15,7 @@ public final class ExecutorService extends IExecutorService.Stub {
     private final int clientUid;
     private final Context context;
     private Session current;
+    private boolean destroyRequested;
 
     public ExecutorService(Context context) {
         this.context = context;
@@ -26,19 +27,21 @@ public final class ExecutorService extends IExecutorService.Stub {
     }
     @Override public synchronized IExecutorSession open(IBinder owner) {
         authenticate();
+        if (destroyRequested) throw new IllegalStateException("Service destruction is already pending");
         if (owner == null || !owner.isBinderAlive()) throw new IllegalArgumentException("A live client owner is required");
         if (current != null && !current.state.releasable()) {
             throw new IllegalStateException("Existing session retains native ownership");
         }
         try {
             Deployment deployment = new Deployment(context);
+            NativeSpawn.load(deployment.transportLibrary);
             Session session = new Session(owner);
             // Publish owner before native fork so destroy/death cannot race an
             // unregistered native child. Failed launch remains explicit.
             current = session;
             session.launch(deployment);
             return session;
-        } catch (Exception error) { throw new IllegalStateException("Executor admission failed", error); }
+        } catch (Exception | LinkageError error) { throw new IllegalStateException("Executor admission failed", error); }
     }
     @Override public synchronized String status() {
         authenticate();
@@ -47,11 +50,20 @@ public final class ExecutorService extends IExecutorService.Stub {
     @Override public synchronized void destroy() {
         int caller = Binder.getCallingUid();
         if (caller != clientUid && caller != 2000) throw new SecurityException("Unauthorized service destruction");
+        destroyRequested = true;
         if (current != null && !current.state.releasable()) {
             current.requestCancel();
-            throw new IllegalStateException("Cleanup is pending; retaining the UserService");
+            // Shizuku removes its record and invokes destroy as one-way. The
+            // observer must complete this request later; no second call is
+            // guaranteed after the client process disappears.
+            return;
         }
         android.os.Process.killProcess(android.os.Process.myPid());
+    }
+    private synchronized void finishDestroy() {
+        if (destroyRequested && current != null && current.state.releasable()) {
+            android.os.Process.killProcess(android.os.Process.myPid());
+        }
     }
 
     private final class Session extends IExecutorSession.Stub implements IBinder.DeathRecipient {
@@ -131,6 +143,7 @@ public final class ExecutorService extends IExecutorService.Stub {
             if (state.releasable()) {
                 synchronized (this) { closeOne(control); control = null; closeOne(input); input = null; }
                 owner.unlinkToDeath(this, 0);
+                finishDestroy();
             }
         }
     }

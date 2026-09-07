@@ -56,10 +56,11 @@ public final class SessionStateTest {
         assertThrows(IllegalArgumentException.class, () -> state.report(CLEAN));
         assertThrows(IllegalArgumentException.class, () -> state.report(READY));
     }
-    @Test public void quarantineCannotBeConvertedToSuccess() {
+    @Test public void quarantineCannotBeConvertedToSuccess() throws Exception {
         SessionState state = state();
         state.report(PREFIX + "quarantined\",\"cleanupComplete\":false}");
         state.reaped(0); assertFalse(state.releasable());
+        assertTrue(new org.json.JSONObject(state.json()).getBoolean("quarantined"));
         assertThrows(IllegalArgumentException.class, () -> state.report(CLEAN));
     }
     @Test public void transportFailureRemainsVisibleDespiteCleanNativeExit() {

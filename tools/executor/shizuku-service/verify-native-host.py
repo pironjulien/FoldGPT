@@ -6,11 +6,9 @@ the Android CMake build never sets FOLDGPT_TRANSPORT_HOST_TEST.
 import concurrent.futures
 import os
 from pathlib import Path
-import selectors
 import shutil
 import subprocess
 import tempfile
-import time
 
 HERE = Path(__file__).resolve().parent
 JAVA = r'''

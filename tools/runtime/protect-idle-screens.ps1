@@ -32,6 +32,9 @@ using System.Runtime.InteropServices;
 public static class FoldGptScreenProtection {
     [DllImport("user32.dll", SetLastError=true)]
     public static extern bool SystemParametersInfo(uint action, uint parameter, IntPtr value, uint flags);
+    [DllImport("user32.dll", SetLastError=true)]
+    public static extern IntPtr SendMessageTimeout(IntPtr window, uint message, UIntPtr parameter,
+        IntPtr value, uint flags, uint timeout, out UIntPtr result);
 }
 '@
 }
@@ -51,6 +54,7 @@ if ($LASTEXITCODE -ne 0) { throw 'Setting the display idle timeout failed' }
 # This developer setting only controls keeping the display awake while charging.
 & $adbPath -s $Serial shell -T settings put global stay_on_while_plugged_in 0
 if ($LASTEXITCODE -ne 0) { throw 'Restoring the Fold display idle policy failed' }
+$displayOffRequestAccepted = $false
 if ($ActivateNow) {
     & $adbPath -s $Serial shell -T input keyevent 223
     if ($LASTEXITCODE -ne 0) { throw 'Putting the Fold display to sleep failed' }
@@ -58,10 +62,17 @@ if ($ActivateNow) {
     if (!(Get-Process -Name scrnsave -ErrorAction SilentlyContinue)) {
         Start-Process -FilePath $saverPath -ArgumentList '/s' -WindowStyle Normal
     }
+    # Request display standby as well; background builds continue. This is an
+    # OS acknowledgement, not an independent measurement of the physical panel.
+    [UIntPtr]$messageResult = [UIntPtr]::Zero
+    $displayOffRequestAccepted = [FoldGptScreenProtection]::SendMessageTimeout(
+        [IntPtr]0xffff, 0x0112, [UIntPtr]::new([UInt64]0xf170), [IntPtr]2, 2, 1000,
+        [ref]$messageResult) -ne [IntPtr]::Zero
 }
 $after = [ordered]@{
     timestamp = (Get-Date).ToString('o')
     activatedNow = [bool]$ActivateNow
+    displayOffRequestAccepted = $displayOffRequestAccepted
     saverPids = @(Get-Process -Name scrnsave -ErrorAction SilentlyContinue | ForEach-Object Id)
     desktop = Get-ItemProperty -LiteralPath $desktopPath | Select-Object ScreenSaveActive,ScreenSaveTimeOut,'SCRNSAVE.EXE'
     videoIdle = @(& powercfg /query SCHEME_CURRENT SUB_VIDEO VIDEOIDLE)

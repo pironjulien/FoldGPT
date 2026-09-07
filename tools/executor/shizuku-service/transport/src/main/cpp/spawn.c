@@ -6,6 +6,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <limits.h>
+#include <linux/capability.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/syscall.h>
@@ -18,6 +19,22 @@
 #define EXPECTED_UID 2000
 #endif
 
+static int admitted_identity(void) {
+    uid_t real, effective, saved;
+    gid_t greal, geffective, gsaved;
+    struct __user_cap_header_struct header = {.version = _LINUX_CAPABILITY_VERSION_3};
+    struct __user_cap_data_struct capabilities[2] = {{0}, {0}};
+    if (getresuid(&real, &effective, &saved) < 0 || getresgid(&greal, &geffective, &gsaved) < 0 ||
+            real != EXPECTED_UID || effective != real || saved != real ||
+            greal != EXPECTED_UID || geffective != greal || gsaved != greal ||
+            syscall(__NR_capget, &header, capabilities) < 0) return 0;
+    for (int i = 0; i < 2; ++i) {
+        if (capabilities[i].effective || capabilities[i].permitted || capabilities[i].inheritable) return 0;
+    }
+    /* Ambient caps must be subsets of both permitted and inheritable caps. */
+    return 1;
+}
+
 static void failure(JNIEnv *env, const char *message) {
     jclass type = (*env)->FindClass(env, "java/io/IOException");
     if (type != NULL) (*env)->ThrowNew(env, type, message);
@@ -27,7 +44,7 @@ JNIEXPORT jint JNICALL Java_app_foldgpt_shizukuexec_NativeSpawn_launch(
         JNIEnv *env, jclass cls, jstring executable, jobjectArray arguments,
         jint input, jint output, jint report, jint control) {
     (void)cls;
-    if (getuid() != EXPECTED_UID || geteuid() != EXPECTED_UID) {
+    if (!admitted_identity()) {
         failure(env, "The executor requires non-root shell UID 2000"); return -1;
     }
     jsize count = (*env)->GetArrayLength(env, arguments);

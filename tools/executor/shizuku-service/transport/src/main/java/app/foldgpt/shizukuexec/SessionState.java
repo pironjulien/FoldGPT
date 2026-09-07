@@ -47,6 +47,7 @@ final class SessionState {
             return new JSONObject().put("schema", "foldgpt.shizuku.transport.v1")
                 .put("ready", ready).put("cancelRequested", cancelled).put("bootstrapReaped", reaped)
                 .put("cleanupComplete", releasable()).put("ownerRetained", !releasable())
+                .put("quarantined", terminal && !clean)
                 .put("refusedBeforeFork", refusedBeforeFork)
                 .put("transportFailed", failed).put("waitStatus", waitStatus).toString();
         } catch (Exception error) { throw new IllegalStateException(error); }

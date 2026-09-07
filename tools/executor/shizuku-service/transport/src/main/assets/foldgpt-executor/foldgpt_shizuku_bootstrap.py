@@ -9,6 +9,7 @@ import json
 import os
 import re
 import signal
+import stat
 import sys
 import zipfile
 
@@ -50,7 +51,7 @@ def read_deployment(apk):
         if type(value) is not str or not value.startswith("/") or os.path.realpath(value) != value:
             raise ValueError("Deployment paths must be canonical and absolute")
     if (type(config["backendFactory"]) is not str or
-            re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*(?:\.[A-Za-z_][A-Za-z0-9_]*)*:[A-Za-z_][A-Za-z0-9_]*", config["backendFactory"]) is None or
+            re.fullmatch(r"[A-Za-z_][A-Za-z0-9_-]*(?:\.[A-Za-z_][A-Za-z0-9_-]*)*:[A-Za-z_][A-Za-z0-9_]*", config["backendFactory"]) is None or
             type(config["backendOptions"]) is not dict or type(config["environmentInfo"]) is not dict):
         raise ValueError("Invalid installed backend contract")
     return config
@@ -87,6 +88,7 @@ async def run_session(apk, control_fd=3):
         owner = PrivateListener(config["brokerDirectory"])
         owner.begin_process_session(config["workspace"])
         module_name, function_name = config["backendFactory"].split(":")
+        factory_entered = True
         module = importlib.import_module(module_name)
         prefix = apk + "/assets/foldgpt-executor/"
         if not getattr(module, "__file__", "").startswith(prefix):
@@ -96,8 +98,11 @@ async def run_session(apk, control_fd=3):
             raise ValueError("Installed backend factory is not callable")
         # Constructor failures after entering trusted backend code cannot prove
         # that no child/resource exists. Keep the persistent marker on failure.
-        factory_entered = True
         backend = factory(config["backendOptions"])
+        declared = os.stat(config["workspace"], follow_symlinks=False)
+        pinned = os.fstat(backend.files.root)
+        if not stat.S_ISDIR(pinned.st_mode) or (declared.st_dev, declared.st_ino) != (pinned.st_dev, pinned.st_ino):
+            raise ValueError("Backend root differs from the persisted workspace identity")
         if config["environmentInfo"].get("cwd") != backend.mount.uri:
             raise ValueError("Deployment cwd differs from pinned backend workspace")
         server = ExecServer(backend, environment_info=config["environmentInfo"])
@@ -144,7 +149,7 @@ async def run_session(apk, control_fd=3):
             # Never destroy the native owner, delete a marker, or auto-retry.
             await asyncio.Event().wait()
         report("closed", cleanupComplete=True, exitCode=exit_code)
-        return exit_code
+    return exit_code
 
 
 def main(apk):
