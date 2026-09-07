@@ -1,8 +1,8 @@
 diff --git a/CHANGELOG.md b/CHANGELOG.md
-index 2eb564c560a4c85507169a26637f6bce59f7e1fb..f1e24a4ad040b972a8f2f78a6fdfec7addc1fa11 100644
+index 2eb564c560a4c85507169a26637f6bce59f7e1fb..461785d0087762719980053a052e01b52db73e7b 100644
 --- a/CHANGELOG.md
 +++ b/CHANGELOG.md
-@@ -1 +1,11 @@
+@@ -1 +1,13 @@
  The changelog can be found on the [releases page](https://github.com/openai/codex/releases).
 +
 +## FoldGPT auxiliary engine — unreleased
@@ -12,14 +12,16 @@ index 2eb564c560a4c85507169a26637f6bce59f7e1fb..f1e24a4ad040b972a8f2f78a6fdfec7a
 +- Route model unified execution and apply-patch sandbox intent to the selected
 +  runtime and preserve required-policy refusals.
 +- Add a bounded owned-process output/control adapter and PC integration tests.
++- Allow native providers to supply exclusively owned, bounded process events
++  without a mandatory broadcast hop; verify real child output under backpressure.
 +- Record incomplete Android bootstrap and host filesystem routes in
 +  `FOLDGPT-INTEGRATION.md`; no phone activation is included.
 diff --git a/FOLDGPT-INTEGRATION.md b/FOLDGPT-INTEGRATION.md
 new file mode 100644
-index 0000000000000000000000000000000000000000..3a3472c996521609a872ba0120a8b5e93b20a531
+index 0000000000000000000000000000000000000000..52e75e09f5bbecb1787d3aa52e0dfcd1b68ddc38
 --- /dev/null
 +++ b/FOLDGPT-INTEGRATION.md
-@@ -0,0 +1,109 @@
+@@ -0,0 +1,129 @@
 +# FoldGPT auxiliary engine: local runtime boundary
 +
 +Base: `rust-v0.153.4`, commit `3d2ee51ca2d5db578f328aa75e20aa22c0197c9a`.
@@ -60,6 +62,14 @@ index 0000000000000000000000000000000000000000..3a3472c996521609a872ba0120a8b5e9
 +request is not proof of cleanup; the runtime must attest cleanup separately. This
 +adapter is not yet selected by the unified execution injection route, which uses
 +the existing `ExecProcess` API.
++
++`ExecProcessEventReceiver::from_owned_receiver` now admits a bounded, exclusively
++owned event stream from a runtime outside the exec-server crate. This removes the
++mandatory broadcast hop at that public boundary. The producer must apply
++backpressure and retain control independently of event consumption. A dropped
++transport does not become a fabricated successful exit; `Exited`, `Closed` and
++`Failed` remain distinct. This is available to an actual native `ExecProcess`
++implementation, which still must supply its retained reads and native controls.
 +
 +## Integration still required
 +
@@ -121,6 +131,18 @@ index 0000000000000000000000000000000000000000..3a3472c996521609a872ba0120a8b5e9
 +`just bazel-lock-update` completed under Bazel 9.0.0 without changing
 +`MODULE.bazel.lock`. Its existing dependency-version and crate-annotation warnings
 +were retained; no dependencies were upgraded to silence them.
++The final `just clippy` check for the same three crates completed with only the
++pre-existing unused `body_json` import warning in `openai_file_mcp.rs`.
++
++The follow-up `just test -p codex-exec-server --test owned_process_events --locked`
++passed both tests. An external-crate `ExecProcess` fixture launches a real compiled
++child, sends binary stdin and preserves all 1,156,506 stdout/stderr bytes plus the
++actual exit 23 through a one-event queue. Retained reads and transport-failure
++reporting are also exercised. The fixture uses PC pipe control and a fixed 2 MiB
++retention limit for its known output; it is not a production native backend or a
++new application/model qualification.
++The matching `process::tests` library selection also passed all 15 cases,
++including retained replay, late output and process lifecycle regressions.
 +
 +## Release lockfile normalization
 +
@@ -2522,6 +2544,486 @@ index f0e23038bbd8a2f992592e8ba39ebfaed36a31bb..b2844e1dfe57ac11b69cf1a5be59994d
  pub use environment_bootstrap::PreparedEnvironmentManager;
  pub use environment_provider::DefaultEnvironmentProvider;
  pub use environment_provider::EnvironmentProvider;
+diff --git a/codex-rs/exec-server/src/process.rs b/codex-rs/exec-server/src/process.rs
+index 726c8a63928b2b5cc67dbab26ab4a386a4f188e6..660343ef34f78702142dff2ea96231fb575942f8 100644
+--- a/codex-rs/exec-server/src/process.rs
++++ b/codex-rs/exec-server/src/process.rs
+@@ -7,6 +7,7 @@ use std::sync::Mutex as StdMutex;
+ use codex_network_proxy::NetworkPolicyDecider;
+ use codex_sandboxing::SandboxType;
+ use tokio::sync::broadcast;
++use tokio::sync::mpsc;
+ use tokio::sync::watch;
+ 
+ use crate::ExecServerError;
+@@ -151,27 +152,52 @@ impl ExecProcessEventLog {
+         let replay = history.events.iter().cloned().collect();
+ 
+         ExecProcessEventReceiver {
+-            replay,
+-            live_rx,
+-            _keepalive: None,
++            source: ExecProcessEventSource::Broadcast {
++                replay,
++                live_rx,
++                _keepalive: None,
++            },
+         }
+     }
+ }
+ 
+ pub struct ExecProcessEventReceiver {
+-    replay: VecDeque<ExecProcessEvent>,
+-    live_rx: broadcast::Receiver<ExecProcessEvent>,
+-    _keepalive: Option<broadcast::Sender<ExecProcessEvent>>,
++    source: ExecProcessEventSource,
++}
++
++enum ExecProcessEventSource {
++    Broadcast {
++        replay: VecDeque<ExecProcessEvent>,
++        live_rx: broadcast::Receiver<ExecProcessEvent>,
++        _keepalive: Option<broadcast::Sender<ExecProcessEvent>>,
++    },
++    Owned(mpsc::Receiver<ExecProcessEvent>),
+ }
+ 
+ impl ExecProcessEventReceiver {
++    /// Consume the bounded event stream of a process owned by a local runtime.
++    ///
++    /// This transfers exclusive stream ownership without a broadcast hop or a
++    /// replay-buffer eviction. The producer must await capacity, bound individual
++    /// event sizes and retain process control if the consumer disconnects. It must
++    /// send real `Exited` and `Closed` events independently; dropping the sender
++    /// without `Closed` remains a transport failure. Retained `ExecProcess::read`
++    /// requests and additional subscribers remain the runtime's responsibility.
++    pub fn from_owned_receiver(receiver: mpsc::Receiver<ExecProcessEvent>) -> Self {
++        Self {
++            source: ExecProcessEventSource::Owned(receiver),
++        }
++    }
++
+     /// Returns a receiver that remains open without yielding events.
+     pub fn empty() -> Self {
+         let (live_tx, live_rx) = broadcast::channel(1);
+         Self {
+-            replay: VecDeque::new(),
+-            live_rx,
+-            _keepalive: Some(live_tx),
++            source: ExecProcessEventSource::Broadcast {
++                replay: VecDeque::new(),
++                live_rx,
++                _keepalive: Some(live_tx),
++            },
+         }
+     }
+ 
+@@ -181,11 +207,20 @@ impl ExecProcessEventReceiver {
+     /// caller should recover through [`ExecProcess::read`] using the last
+     /// delivered sequence number, then continue receiving pushed events.
+     pub async fn recv(&mut self) -> Result<ExecProcessEvent, broadcast::error::RecvError> {
+-        if let Some(event) = self.replay.pop_front() {
+-            return Ok(event);
++        match &mut self.source {
++            ExecProcessEventSource::Broadcast {
++                replay, live_rx, ..
++            } => {
++                if let Some(event) = replay.pop_front() {
++                    return Ok(event);
++                }
++                live_rx.recv().await
++            }
++            ExecProcessEventSource::Owned(receiver) => receiver
++                .recv()
++                .await
++                .ok_or(broadcast::error::RecvError::Closed),
+         }
+-
+-        self.live_rx.recv().await
+     }
+ }
+ 
+diff --git a/codex-rs/exec-server/tests/owned_process_events.rs b/codex-rs/exec-server/tests/owned_process_events.rs
+new file mode 100644
+index 0000000000000000000000000000000000000000..a47edaf41ae43c2981f6eb7d0acc3dfe9f6c3264
+--- /dev/null
++++ b/codex-rs/exec-server/tests/owned_process_events.rs
+@@ -0,0 +1,375 @@
++#![allow(clippy::expect_used)]
++
++use std::collections::HashMap;
++use std::io::Read;
++use std::io::Write;
++use std::sync::Arc;
++use std::sync::Mutex;
++use std::time::Duration;
++
++use anyhow::Result;
++use codex_exec_server::ExecOutputStream;
++use codex_exec_server::ExecProcess;
++use codex_exec_server::ExecProcessEvent;
++use codex_exec_server::ExecProcessEventReceiver;
++use codex_exec_server::ExecProcessFuture;
++use codex_exec_server::ExecServerError;
++use codex_exec_server::ProcessId;
++use codex_exec_server::ProcessOutputChunk;
++use codex_exec_server::ProcessSignal;
++use codex_exec_server::ReadResponse;
++use codex_exec_server::WriteResponse;
++use codex_exec_server::WriteStatus;
++use codex_utils_pty::ProcessHandle;
++use codex_utils_pty::SpawnedProcess;
++use pretty_assertions::assert_eq;
++use tokio::sync::mpsc;
++use tokio::sync::watch;
++
++const CHILD_ARG: &str = "--owned-process-events-child";
++const FIXTURE_OUTPUT_LIMIT: usize = 2 * 1024 * 1024;
++
++// A real compiled subprocess avoids a Python/shell dependency in this transport test.
++#[ctor::ctor]
++fn run_child_fixture() {
++    if std::env::args().nth(1).as_deref() != Some(CHILD_ARG) {
++        return;
++    }
++    let result = (|| -> std::io::Result<()> {
++        let mut input = [0_u8; 6];
++        std::io::stdin().read_exact(&mut input)?;
++        let mut stdout = std::io::stdout().lock();
++        stdout.write_all(&input)?;
++        for index in 0..3000 {
++            stdout.write_all(&[(index % 251) as u8; 257])?;
++        }
++        stdout.flush()?;
++        let mut stderr = std::io::stderr().lock();
++        for index in 0..1500 {
++            stderr.write_all(&[(250 - index % 251) as u8; 257])?;
++        }
++        stderr.flush()
++    })();
++    std::process::exit(if result.is_ok() { 23 } else { 24 });
++}
++
++struct State {
++    chunks: Vec<ProcessOutputChunk>,
++    retained_bytes: usize,
++    next_seq: u64,
++    exit_code: Option<i32>,
++    closed: bool,
++}
++
++// This fixture lives outside the exec-server crate and uses its public runtime API.
++// Its retained output has a strict fixture-size cap; it is not an Android backend.
++struct PipeProcess {
++    id: ProcessId,
++    session: Arc<ProcessHandle>,
++    receiver: Mutex<Option<mpsc::Receiver<ExecProcessEvent>>>,
++    state: Arc<Mutex<State>>,
++    wake_tx: watch::Sender<u64>,
++}
++
++impl PipeProcess {
++    async fn spawn() -> Result<Self> {
++        let SpawnedProcess {
++            session,
++            mut stdout_rx,
++            mut stderr_rx,
++            mut exit_rx,
++        } = codex_utils_pty::spawn_pipe_process(
++            std::env::current_exe()?,
++            &[CHILD_ARG.to_owned()],
++            &std::env::current_dir()?,
++            &std::env::vars().collect::<HashMap<_, _>>(),
++            &None,
++            &[],
++        )
++        .await?;
++        let (events_tx, receiver) = mpsc::channel(1);
++        let (wake_tx, _) = watch::channel(0);
++        let state = Arc::new(Mutex::new(State {
++            chunks: Vec::new(),
++            retained_bytes: 0,
++            next_seq: 1,
++            exit_code: None,
++            closed: false,
++        }));
++        let retained = Arc::clone(&state);
++        let producer_wake = wake_tx.clone();
++        tokio::spawn(async move {
++            let mut stdout_open = true;
++            let mut stderr_open = true;
++            let mut exited = false;
++            loop {
++                let event = if !stdout_open && !stderr_open && exited {
++                    let mut state = retained.lock().expect("fixture state is available");
++                    state.closed = true;
++                    let seq = state.next_seq;
++                    state.next_seq += 1;
++                    ExecProcessEvent::Closed { seq }
++                } else {
++                    let mut output = None;
++                    let mut exit_code = None;
++                    tokio::select! {
++                        chunk = stdout_rx.recv(), if stdout_open => {
++                            stdout_open = chunk.is_some();
++                            output = chunk.map(|chunk| (ExecOutputStream::Stdout, chunk));
++                        }
++                        chunk = stderr_rx.recv(), if stderr_open => {
++                            stderr_open = chunk.is_some();
++                            output = chunk.map(|chunk| (ExecOutputStream::Stderr, chunk));
++                        }
++                        code = &mut exit_rx, if !exited => {
++                            exited = true;
++                            exit_code = Some(code.expect("actual child exit is available"));
++                        }
++                    };
++                    let mut state = retained.lock().expect("fixture state is available");
++                    let seq = state.next_seq;
++                    if let Some((stream, bytes)) = output {
++                        state.retained_bytes += bytes.len();
++                        assert!(state.retained_bytes <= FIXTURE_OUTPUT_LIMIT);
++                        let chunk = ProcessOutputChunk {
++                            seq,
++                            stream,
++                            chunk: bytes.into(),
++                        };
++                        state.chunks.push(chunk.clone());
++                        state.next_seq += 1;
++                        ExecProcessEvent::Output(chunk)
++                    } else if let Some(exit_code) = exit_code {
++                        state.exit_code = Some(exit_code);
++                        state.next_seq += 1;
++                        ExecProcessEvent::Exited {
++                            seq,
++                            exit_code,
++                            sandbox_denied: Some(false),
++                        }
++                    } else {
++                        continue;
++                    }
++                };
++                let closed = matches!(event, ExecProcessEvent::Closed { .. });
++                producer_wake.send_replace(
++                    retained
++                        .lock()
++                        .expect("fixture state is available")
++                        .next_seq,
++                );
++                if events_tx.send(event).await.is_err() || closed {
++                    break;
++                }
++            }
++        });
++        Ok(Self {
++            id: ProcessId::from("owned-real-child"),
++            session: Arc::new(session),
++            receiver: Mutex::new(Some(receiver)),
++            state,
++            wake_tx,
++        })
++    }
++}
++
++impl ExecProcess for PipeProcess {
++    fn process_id(&self) -> &ProcessId {
++        &self.id
++    }
++
++    fn subscribe_wake(&self) -> watch::Receiver<u64> {
++        self.wake_tx.subscribe()
++    }
++
++    fn subscribe_events(&self) -> ExecProcessEventReceiver {
++        let receiver = self
++            .receiver
++            .lock()
++            .expect("fixture receiver is available")
++            .take()
++            .expect("fixture has one output owner");
++        ExecProcessEventReceiver::from_owned_receiver(receiver)
++    }
++
++    fn read(
++        &self,
++        after_seq: Option<u64>,
++        max_bytes: Option<usize>,
++        wait_ms: Option<u64>,
++    ) -> ExecProcessFuture<'_, ReadResponse> {
++        Box::pin(async move {
++            let mut wake = self.subscribe_wake();
++            if let Some(wait_ms) = wait_ms.filter(|wait| *wait > 0) {
++                let should_wait = {
++                    let state = self.state.lock().expect("fixture state is available");
++                    !state.closed && state.next_seq <= after_seq.unwrap_or(0).saturating_add(1)
++                };
++                if should_wait {
++                    let _ =
++                        tokio::time::timeout(Duration::from_millis(wait_ms), wake.changed()).await;
++                }
++            }
++            let state = self.state.lock().expect("fixture state is available");
++            let mut chunks = Vec::new();
++            let mut bytes = 0;
++            for chunk in state
++                .chunks
++                .iter()
++                .filter(|chunk| chunk.seq > after_seq.unwrap_or(0))
++            {
++                if max_bytes.is_some_and(|limit| bytes >= limit) {
++                    break;
++                }
++                bytes += chunk.chunk.0.len();
++                chunks.push(chunk.clone());
++            }
++            let next_seq = if bytes < state.retained_bytes && max_bytes.is_some() {
++                chunks
++                    .last()
++                    .map_or(after_seq.unwrap_or(0).saturating_add(1), |chunk| {
++                        chunk.seq + 1
++                    })
++            } else {
++                state.next_seq
++            };
++            Ok(ReadResponse {
++                chunks,
++                next_seq,
++                exited: state.exit_code.is_some(),
++                exit_code: state.exit_code,
++                closed: state.closed,
++                failure: None,
++                sandbox_denied: false,
++            })
++        })
++    }
++
++    fn write(&self, chunk: Vec<u8>) -> ExecProcessFuture<'_, WriteResponse> {
++        Box::pin(async move {
++            self.session
++                .writer_sender()
++                .send(chunk)
++                .await
++                .map_err(|error| ExecServerError::Protocol(error.to_string()))?;
++            Ok(WriteResponse {
++                status: WriteStatus::Accepted,
++            })
++        })
++    }
++
++    fn signal(&self, signal: ProcessSignal) -> ExecProcessFuture<'_, ()> {
++        Box::pin(async move {
++            match signal {
++                ProcessSignal::Interrupt => self
++                    .session
++                    .signal(codex_utils_pty::ProcessSignal::Interrupt),
++            }
++            .map_err(|error| ExecServerError::Protocol(error.to_string()))
++        })
++    }
++
++    fn terminate(&self) -> ExecProcessFuture<'_, ()> {
++        Box::pin(async move {
++            self.session
++                .try_request_terminate()
++                .map_err(|error| ExecServerError::Protocol(error.to_string()))
++        })
++    }
++}
++
++#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
++async fn owned_events_preserve_real_process_bytes_under_backpressure() -> Result<()> {
++    let process = PipeProcess::spawn().await?;
++    let input = vec![0, 255, 13, 10, 0, 128];
++    assert_eq!(
++        process.write(input.clone()).await?,
++        WriteResponse {
++            status: WriteStatus::Accepted
++        }
++    );
++    let mut events = process.subscribe_events();
++    tokio::time::sleep(Duration::from_millis(50)).await;
++    // With a one-event queue, the producer cannot run ahead into unbounded storage.
++    assert!(process.state.lock().unwrap().next_seq <= 3);
++    let mut stdout = Vec::new();
++    let mut stderr = Vec::new();
++    let mut last_seq = 0;
++    let mut exit_code = None;
++    tokio::time::timeout(Duration::from_secs(15), async {
++        loop {
++            match events.recv().await.unwrap() {
++                ExecProcessEvent::Output(chunk) => {
++                    assert_eq!(chunk.seq, last_seq + 1);
++                    last_seq = chunk.seq;
++                    match chunk.stream {
++                        ExecOutputStream::Stdout => stdout.extend(chunk.chunk.0),
++                        ExecOutputStream::Stderr => stderr.extend(chunk.chunk.0),
++                        ExecOutputStream::Pty => panic!("pipe fixture emitted PTY bytes"),
++                    }
++                }
++                ExecProcessEvent::Exited {
++                    seq,
++                    exit_code: code,
++                    sandbox_denied,
++                } => {
++                    assert_eq!((seq, sandbox_denied), (last_seq + 1, Some(false)));
++                    last_seq = seq;
++                    exit_code = Some(code);
++                }
++                ExecProcessEvent::Closed { seq } => {
++                    assert_eq!(seq, last_seq + 1);
++                    break;
++                }
++                ExecProcessEvent::Failed(error) => panic!("real fixture failed: {error}"),
++            }
++        }
++    })
++    .await?;
++    let mut expected_stdout = input;
++    for index in 0..3000 {
++        expected_stdout.extend([(index % 251) as u8; 257]);
++    }
++    let mut expected_stderr = Vec::new();
++    for index in 0..1500 {
++        expected_stderr.extend([(250 - index % 251) as u8; 257]);
++    }
++    assert_eq!(
++        (stdout, stderr, exit_code),
++        (expected_stdout, expected_stderr, Some(23))
++    );
++    let retained = process.read(None, None, Some(0)).await?;
++    assert_eq!(
++        (retained.exited, retained.exit_code, retained.closed),
++        (true, Some(23), true)
++    );
++    assert_eq!(
++        retained
++            .chunks
++            .iter()
++            .map(|chunk| chunk.chunk.0.len())
++            .sum::<usize>(),
++        1_156_506
++    );
++    assert!(process.session.has_exited());
++    Ok(())
++}
++
++#[tokio::test]
++async fn owned_event_transport_failure_is_not_an_exit_status() {
++    let (sender, receiver) = mpsc::channel(1);
++    let mut events = ExecProcessEventReceiver::from_owned_receiver(receiver);
++    sender
++        .send(ExecProcessEvent::Failed("native connection lost".into()))
++        .await
++        .unwrap();
++    drop(sender);
++    assert_eq!(
++        events.recv().await.unwrap(),
++        ExecProcessEvent::Failed("native connection lost".into())
++    );
++    assert!(matches!(
++        events.recv().await,
++        Err(tokio::sync::broadcast::error::RecvError::Closed)
++    ));
++}
 diff --git a/codex-rs/utils/pty/src/lib.rs b/codex-rs/utils/pty/src/lib.rs
 index 1200c1143803145682180c4b351d9e8f96b74c3e..a840b669bbb8704b4ab07fb7d9165013bdaeaf0a 100644
 --- a/codex-rs/utils/pty/src/lib.rs
