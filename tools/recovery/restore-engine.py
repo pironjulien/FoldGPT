@@ -17,15 +17,17 @@ def main():
     patch = records / manifest["patch"]
     if hashlib.sha256(patch.read_bytes()).hexdigest() != manifest["sha256"]:
         raise RuntimeError("Engine recovery patch checksum failed")
-    subprocess.run(["git", "clone", "--depth", "1", "--branch", manifest["tag"],
+    subprocess.run(["git", "clone", "-c", "core.autocrlf=false", "--depth", "1", "--branch", manifest["tag"],
                     manifest["upstream"], str(args.destination)], check=True)
     git = ["git", "-C", str(args.destination)]
     actual = subprocess.check_output(git + ["rev-parse", "HEAD"], text=True).strip()
     if actual != manifest["base"]:
         raise RuntimeError(f"Upstream tag moved: received {actual}")
     subprocess.run(git + ["switch", "-c", manifest["branch"]], check=True)
-    subprocess.run(git + ["apply", "--check", str(patch)], check=True)
-    subprocess.run(git + ["apply", str(patch)], check=True)
+    subprocess.run(git + ["apply", "--index", "--check", str(patch)], check=True)
+    # Track every restored source in the index, including newly added files.
+    # Hydration must distinguish these sources from ignored archived assets.
+    subprocess.run(git + ["apply", "--index", str(patch)], check=True)
     # The upstream remote is for fetching. Publish local changes through the
     # private FoldGPT workspace recovery export, never to the public upstream.
     subprocess.run(git + ["remote", "set-url", "--push", "origin", "DISABLED-PUBLIC-UPSTREAM"], check=True)

@@ -32,17 +32,28 @@ def main():
     pending = [source]
     selections = []
     while pending:
-        directory = pending.pop()
-        for path in sorted(directory.iterdir()):
+        paths = [path for directory in pending for path in sorted(directory.iterdir())]
+        pending = []
+        candidates = []
+        for path in paths:
             relative = path.relative_to(source).as_posix()
             if path.name == ".git" or relative in submodules:
                 continue
             directory_entry = path.is_dir() and not path.is_symlink()
             probe = relative + "/" if directory_entry else relative
-            ignored = subprocess.run(git + ["check-ignore", "-q", "--", probe], capture_output=True)
-            if ignored.returncode not in (0, 1):
-                raise RuntimeError(f"Cannot classify archive entry: {relative}")
-            if ignored.returncode == 0 and relative not in tracked_boundaries:
+            candidates.append((path, relative, directory_entry, probe))
+        if not candidates:
+            continue
+        # One binary-safe Git request per directory depth avoids thousands of
+        # Windows-mounted process launches while preserving Git's own rules.
+        probes = b"".join(os.fsencode(row[3]) + b"\0" for row in candidates)
+        classified = subprocess.run(git + ["check-ignore", "-z", "--stdin"],
+                                    input=probes, capture_output=True)
+        if classified.returncode not in (0, 1):
+            raise RuntimeError("Cannot classify archive entries: " + os.fsdecode(classified.stderr))
+        ignored = {os.fsdecode(value) for value in classified.stdout.split(b"\0") if value}
+        for path, relative, directory_entry, probe in candidates:
+            if probe in ignored and relative not in tracked_boundaries:
                 destination = project / relative
                 if destination.exists() or destination.is_symlink():
                     raise RuntimeError(f"Existing asset preserved; hydrate only a fresh clone: {relative}")

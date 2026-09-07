@@ -42,12 +42,16 @@ def extract_verified_archive(plaintext, destination):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--assets", type=Path, required=True)
+    parser.add_argument("--manifest", default="manifest.json",
+                        help="Manifest filename within assets (for supplemental archives)")
     parser.add_argument("--identity", type=Path, required=True)
     parser.add_argument("--destination", type=Path)
     parser.add_argument("--report", type=Path, required=True)
     args = parser.parse_args()
     assets = args.assets.resolve(strict=True)
-    manifest = json.loads((assets / "manifest.json").read_text(encoding="utf-8"))
+    if Path(args.manifest).name != args.manifest:
+        raise RuntimeError("Manifest must be a filename within the assets directory")
+    manifest = json.loads((assets / args.manifest).read_text(encoding="utf-8"))
     if manifest.get("format") != 1:
         raise RuntimeError("Unsupported recovery format")
     if args.destination and args.destination.exists():

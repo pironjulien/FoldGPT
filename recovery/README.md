@@ -54,6 +54,21 @@ sur le PC pour conserver les liens Linux de l'archive. Les destinations doivent
 déchiffrement avant extraction, compare l'inventaire et contrôle les octets de
 chaque fichier effectivement restauré. La clé n'est jamais affichée.
 
+Le même téléchargement récupère aussi le complément `native-checkpoint*`.
+Il conserve l'APK et les builds natifs figés après l'archive principale. Sa
+restauration, également vérifiée après retéléchargement GitHub, s'effectue dans
+un dossier distinct :
+
+```powershell
+wsl --distribution Ubuntu-24.04 --exec python3 /mnt/c/Dev/ChatgptFold/tools/recovery/restore-archive.py --assets /mnt/c/Dev/FoldGPT-recovery/downloaded --manifest native-checkpoint-manifest.json --identity $foldRecoveryKeyLinux --destination /var/tmp/foldgpt-native-recovered --report /mnt/c/Dev/FoldGPT-recovery/native-verification.json
+```
+
+Ce complément contient 105 fichiers vérifiés et l'APK debug de FoldGPT
+`c9a83886ebdfeba7f28ecbc37a383252cc91ad6e5c3ad3dc7189cc81e35694a1`,
+compilé et signé, **pas installé sur le téléphone**. Il reste séparé de
+l'ancienne sortie APK de l'archive principale. Voir le
+[rapport de restauration](verification/github-supplement-restoration.json).
+
 L'archive est un instantané réalisé pendant le développement. **Les sources
 les plus récentes sont celles de la branche Git**, pas celles de l'archive.
 Hydrater ensuite le clone neuf avec seulement ses données ignorées par Git :
@@ -82,7 +97,10 @@ wsl --distribution Ubuntu-24.04 --exec python3 /mnt/c/Dev/ChatgptFold/tools/reco
 ```
 
 Le script récupère la release officielle, vérifie son commit, applique le patch
-contrôlé et interdit les pushes vers le dépôt public amont. Les caches Rust
+contrôlé dans les fichiers et l'index Git, puis interdit les pushes vers le dépôt
+public amont. Les nouveaux fichiers du patch sont donc protégés eux aussi lors
+de l'hydratation. Le clone du moteur utilise les fins de ligne LF pour les outils
+Linux du PC. Les caches Rust
 `target`, Gradle `.gradle`/`.cxx`, Python `__pycache__` et métadonnées `.git`
 ne sont pas archivés ; ils sont régénérables. Les dépendances globales du PC
 restent à installer selon le document d'environnement.
