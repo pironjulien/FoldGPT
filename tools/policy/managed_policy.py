@@ -222,6 +222,7 @@ class ManagedPolicy:
     entries: tuple[Entry, ...]
     resolved_entries: tuple[ResolvedEntry, ...]
     windows_sandbox_private_desktop: bool
+    windows_sandbox_proxy_settings_mode: str | None
 
     def decide(self, absolute_guest_path):
         return self._decide(GuestPath.from_absolute(absolute_guest_path))
@@ -272,6 +273,8 @@ class ManagedPolicy:
         }
         if self.user_home_dir is not None:
             result["userHomeDir"] = self.user_home_dir.uri
+        if self.windows_sandbox_proxy_settings_mode is not None:
+            result["windowsSandboxProxySettingsMode"] = self.windows_sandbox_proxy_settings_mode
         if self.temporary_directories is not None:
             result["temporaryDirectories"] = [path.uri for path in self.temporary_directories]
         return result
@@ -355,7 +358,9 @@ def parse_context(document):
     private_desktop = context.get("windowsSandboxPrivateDesktop", False)
     if type(private_desktop) is not bool:
         raise PolicyError("$.windowsSandboxPrivateDesktop", "expected a boolean")
-    _only_null(context.get("windowsSandboxProxySettingsMode"), "$.windowsSandboxProxySettingsMode")
+    proxy_mode = context.get("windowsSandboxProxySettingsMode")
+    if proxy_mode is not None and (type(proxy_mode) is not str or proxy_mode not in ("reconcile", "preserve")):
+        raise PolicyError("$.windowsSandboxProxySettingsMode", "expected null or a supported Windows proxy preference")
     _false_option(context.get("useLegacyLandlock", False), "$.useLegacyLandlock")
     permissions = _object(context["permissions"], "$.permissions", {"type", "file_system", "network"}, ("type",))
     if permissions["type"] != "managed":
@@ -392,4 +397,4 @@ def parse_context(document):
         else:  # The parser permits exactly one remaining special: slash_tmp.
             targets = (GuestPath(("tmp",)),)
         resolved.extend(ResolvedEntry(path, entry.access, index) for path in targets)
-    return ManagedPolicy(cwd, roots, home, temps, entries, tuple(resolved), private_desktop)
+    return ManagedPolicy(cwd, roots, home, temps, entries, tuple(resolved), private_desktop, proxy_mode)

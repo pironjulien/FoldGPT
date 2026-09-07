@@ -2,6 +2,11 @@
 
 ## Unreleased — 2026-09-06
 
+- Preserve the upstream reconcile/preserve Windows proxy preferences in native
+  POSIX handoffs too. Real app-server process requests include reconcile even
+  on Linux; known inactive preferences must survive without blocking execution.
+  Unknown values and enabled Windows enforcement remain rejected.
+
 - Keep Windows recovery reports, downloads and temporary Git indexes inside
   the project. Permit new ignored recovery reports under work/ with collision
   checks; seven real Git/filesystem recovery tests pass. Save and verify the

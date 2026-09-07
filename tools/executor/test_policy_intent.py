@@ -74,6 +74,30 @@ class PolicyIntentTests(unittest.TestCase):
                     prepare(original)
                 self.assertEqual(error.exception.field, "$.windowsSandboxLevel")
 
+    def test_inactive_windows_proxy_preferences_keep_native_policy_intact(self):
+        baseline = parse_context(context())
+        for mode in (None, "reconcile", "preserve"):
+            with self.subTest(mode=mode):
+                original = context()
+                original["windowsSandboxPrivateDesktop"] = True
+                original["windowsSandboxProxySettingsMode"] = mode
+                intent = prepare(original)
+                actual = json.loads(intent.context_json)
+                self.assertEqual(actual.get("windowsSandboxProxySettingsMode"), mode)
+                restored = parse_context(intent.context_json)
+                for path in ("/workspace/value", "/workspace/private/secret", "/workspace/.git/config"):
+                    self.assertEqual(restored.decide(path), baseline.decide(path))
+                original["windowsSandboxLevel"] = "elevated"
+                with self.assertRaises(PolicyError):
+                    prepare(original)
+        for invalid in (0, True, [], {}, "proxyOnly", "future-mode"):
+            with self.subTest(invalid=invalid):
+                original = context()
+                original["windowsSandboxProxySettingsMode"] = invalid
+                with self.assertRaises(PolicyError) as error:
+                    prepare(original)
+                self.assertEqual(error.exception.field, "$.windowsSandboxProxySettingsMode")
+
     def test_digest_and_utf8_round_trip(self):
         original = context()
         original["cwd"] = "file:///workspace/caf%C3%A9"

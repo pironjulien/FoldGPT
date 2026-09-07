@@ -70,7 +70,7 @@ the input dict or a returned normalized dict cannot change its decisions.
 | Special paths | `root` with read/deny, `project_roots`, `tmpdir`, `slash_tmp`. The upstream alias `current_working_directory` means **all supplied project roots**, not only cwd. Empty/missing project or temporary roots add no grants. |
 | Project subpath | Relative native text, with empty and `.` components ignored. Parent traversal and absolute subpaths are rejected. Percent signs here are literal filename characters, not URI escapes. |
 | Symbolic metadata | The exact `metadata_write_denial` rule for `.git`, `.agents`, `.codex`, preserving entry order, descendant checks and explicit writable exceptions. This protects `.git` itself as well as descendants; `.gitignore` is a different path. |
-| Context | Explicit POSIX cwd is required for this API. Workspace roots, optional home, and executor temporary roots are retained. Windows enforcement must be disabled. The boolean private-desktop preference is retained but has no effect without Windows enforcement. Windows proxy settings must be null/default, and `useLegacyLandlock` must be false/default. |
+| Context | Explicit POSIX cwd is required for this API. Workspace roots, optional home, and executor temporary roots are retained. Windows enforcement must be disabled. The boolean private-desktop preference and optional `reconcile`/`preserve` Windows proxy preference are retained but have no effect without Windows enforcement. `useLegacyLandlock` must be false/default. |
 
 Core defaults `windowsSandboxPrivateDesktop` to true on all platforms
 (`core/src/windows_sandbox.rs`, `resolve_windows_sandbox_private_desktop`).
@@ -79,6 +79,10 @@ Upstream consumes it only for a Windows sandbox launch
 The native POSIX parser therefore accepts and preserves either boolean while
 still rejecting enabled Windows enforcement. This does not change filesystem
 decisions or the native process protections.
+The same rule applies to `WindowsSandboxProxySettingsMode` from
+`protocol/src/config_types.rs`: `reconcile` and `preserve` affect only the
+Windows launcher. Process requests normally carry `reconcile` even on Linux.
+Both values survive the immutable handoff; unknown values are refused.
 
 The following are explicitly unsupported: globs and scan depth, `minimal` and
 unknown special tokens, non-null missing-path behavior, the **special** full-disk
