@@ -39,6 +39,23 @@ ancien checkpoint ; il ne reçoit pas cette sauvegarde privée.
 
 ## Suite concrète
 
+**Dernier état : v10 installé, session en quarantaine conservée.** Le démarrage
+stdio dépasse le refus de socket. Le statut authentifié du service PID11821
+confirme `factory_construct`, `PermissionError`, errno13, refus de
+`/linkerconfig`. Le bootstrap PID11978 reste vivant ; son nettoyage n'est pas
+établi. `evidence.json` est vide, `broker/process-session.json` et
+`files/kernel-v6/attempt-started` restent en place. Ne pas réinstaller, tuer
+l'ancien propriétaire, effacer le marqueur ou rejouer cette fixture.
+
+L'APK figé est `tools/executor/shizuku-lab/build/kernel-v10-stdio/app-debug.apk`,
+SHA-256 `46049fd8d2f381c2680023c12005a4d57cf4c9a51c829a447eb88642e6b3a6a4`.
+Le stage est `kernel-stage-v10`. Lire le
+[rapport v10 et la prochaine correction](../docs/research/native-v10-retained-session-2026-09-07.md).
+La vérification des chemins runtime doit être adaptée aux parents interdits
+sans retirer le contrôle du chevauchement avec le workspace. Les mécanismes
+noyau du worker restent non mesurés. Les étapes v6 à v9 ci-dessous sont
+historiques et ne doivent pas être rejouées après la quarantaine v10.
+
 1. Le laboratoire autorisé `app.foldgpt.shizukuprobe` est passé au v9. V6 a
    réellement lancé le bootstrap UID2000, sorti70 avant `ready` et avant le
    worker, avec attente JNI et nettoyage complets. Les rapports de refus v7/v8

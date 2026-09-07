@@ -1,5 +1,10 @@
 # Laboratory v9 admission and explicit-launch diagnostic
 
+**Historical v9 procedure.** The installed v10 trial now retains quarantine
+after a real `/linkerconfig` refusal. Read the
+[v10 report](../../../docs/research/native-v10-retained-session-2026-09-07.md)
+before any device action; do not replay this earlier procedure.
+
 This separate signed update makes real UserService admission failures observable.
 It does not change the fixed native worker, supervisor, broker, bootstrap or any
 native lifetime rule. All previous artifacts, reports and attempt reservations
