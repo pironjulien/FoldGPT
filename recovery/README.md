@@ -27,6 +27,15 @@ Le code du moteur séparé est développé sous `C:\Dev\FoldgptEngine`, à parti
 commit Codex `3d2ee51ca2d5db578f328aa75e20aa22c0197c9a` (`rust-v0.153.4`).
 Son état de travail sera inclus dans la même reprise.
 
+La clé de signature Android de FoldGPT est également conservée dans le coffre,
+fichier `android-debug.keystore` à côté de `recovery.agekey`. Le build principal
+la sélectionne depuis OneDrive, ou depuis `FOLDGPT_SIGNING_KEYSTORE`, puis
+contrôle son certificat. Cela permet de mettre à jour l'application déjà
+installée sans changer d'identité de signature sur l'autre PC. Un coffre absent
+ou une autre clé produit une erreur explicite ; aucune nouvelle identité n'est
+créée silencieusement. Cette clé concerne FoldGPT, pas l'application officielle
+ChatGPT.
+
 État technique vérifié au début de cette sauvegarde : le test fixe
 Shizuku/Bionic crée, teste et construit réellement un projet Python sur le
 Fold. L'intégration aux commandes, fichiers et sessions ordinaires est en cours.

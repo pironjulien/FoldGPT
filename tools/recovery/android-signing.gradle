@@ -1,0 +1,30 @@
+// Retain the installed FoldGPT debug identity when building from another PC.
+// Private key material lives in NexusSecure, never in the source repository.
+def configuredKey = System.getenv('FOLDGPT_SIGNING_KEYSTORE')
+def oneDriveRoot = System.getenv('OneDrive')
+if (!configuredKey && oneDriveRoot) {
+    configuredKey = new File(oneDriveRoot,
+        'Documents/NexusSecure/projects/FoldGPT/android-debug.keystore').absolutePath
+}
+android.signingConfigs.debug {
+    if (configuredKey) storeFile new File(configuredKey)
+    storePassword 'android'
+    keyAlias 'androiddebugkey'
+    keyPassword 'android'
+}
+// Non-signing work (source checks, tests, unsigned releases) needs no private key.
+// Before AGP can generate/use a default key, require the preserved identity.
+tasks.matching { it.name == 'validateSigningDebug' }.configureEach {
+    doFirst {
+        if (!configuredKey || !new File(configuredKey).isFile()) {
+            throw new GradleException('FoldGPT signing identity unavailable. Sync NexusSecure or set FOLDGPT_SIGNING_KEYSTORE to the preserved android-debug.keystore; see recovery/README.md.')
+        }
+        def keyStore = java.security.KeyStore.getInstance(new File(configuredKey), 'android'.toCharArray())
+        def certificate = keyStore.getCertificate('androiddebugkey')
+        def fingerprint = certificate == null ? null : java.security.MessageDigest.getInstance('SHA-256')
+            .digest(certificate.encoded).encodeHex().toString()
+        if (fingerprint != '30930ffce7c10b673e95e69f2d78bb9e60aa71132db3c21cdc15cf56df77fa16') {
+            throw new GradleException('The supplied FoldGPT signing key differs from the installed application identity.')
+        }
+    }
+}
