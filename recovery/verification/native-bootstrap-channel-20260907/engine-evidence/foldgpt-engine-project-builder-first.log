@@ -1,0 +1,66 @@
+RUST_MIN_STACK=8388608 NEXTEST_PROFILE=local cargo nextest run --no-fail-fast "$@"
+   Compiling codex-file-system v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/file-system)
+   Compiling codex-git-utils v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/git-utils)
+   Compiling codex-exec-server-protocol v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/exec-server-protocol)
+   Compiling codex-config v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/config)
+   Compiling codex-secrets v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/secrets)
+   Compiling codex-rollout v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/rollout)
+   Compiling codex-utils-git-discovery v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/utils/git-discovery)
+   Compiling codex-prompts v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/prompts)
+   Compiling codex-app-server-protocol v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/app-server-protocol)
+   Compiling codex-exec-server v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/exec-server)
+   Compiling codex-login v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/login)
+   Compiling codex-agent-roles v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/agent-roles)
+   Compiling codex-feedback v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/feedback)
+   Compiling codex-models-manager v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/models-manager)
+   Compiling codex-model-provider v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/model-provider)
+   Compiling codex-backend-client v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/backend-client)
+   Compiling codex-utils-plugins v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/utils/plugins)
+   Compiling codex-rmcp-client v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/rmcp-client)
+   Compiling codex-apply-patch v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/apply-patch)
+   Compiling codex-plugin v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/plugin)
+   Compiling codex-arg0 v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/arg0)
+   Compiling codex-connectors v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/connectors)
+   Compiling codex-hooks v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/hooks)
+   Compiling codex-analytics v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/analytics)
+   Compiling codex-thread-store v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/thread-store)
+   Compiling codex-tools v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/tools)
+   Compiling codex-mcp v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/codex-mcp)
+   Compiling codex-extension-api v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/ext/extension-api)
+   Compiling codex-core-plugins v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/core-plugins)
+   Compiling codex-skills-extension v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/ext/skills)
+   Compiling codex-home v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/codex-home)
+   Compiling codex-git-attribution v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/ext/git-attribution)
+   Compiling codex-connectors-extension v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/ext/connectors)
+   Compiling codex-core v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/core)
+   Compiling codex-memories-write v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/memories/write)
+   Compiling codex-memories-extension v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/ext/memories)
+   Compiling codex-web-search-extension v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/ext/web-search)
+   Compiling codex-chatgpt v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/chatgpt)
+   Compiling codex-guardian-v2 v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/ext/guardian-v2)
+   Compiling codex-mcp-extension v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/ext/mcp)
+   Compiling codex-goal-extension v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/ext/goal)
+   Compiling codex-cloud-config v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/cloud-config)
+   Compiling codex-queue-extension v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/ext/queue)
+   Compiling codex-app-server-transport v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/app-server-transport)
+   Compiling codex-agent-extension v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/ext/agent)
+   Compiling codex-image-generation-extension v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/ext/image-generation)
+   Compiling codex-history-notes-extension v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/ext/history-notes)
+   Compiling core_test_support v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/core/tests/common)
+   Compiling codex-external-agent-migration v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/external-agent-migration)
+   Compiling app_test_support v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/app-server/tests/common)
+   Compiling codex-app-server v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/app-server)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2m 54s
+────────────
+ Nextest run ID e8e6c5f9-9aaa-42cf-9fa9-6f821dc4700f with nextest profile: local
+    Starting 8 tests across 1 binary (1153 tests skipped)
+        PASS [   0.025s] (1/8) codex-app-server::all suite::v2::injected_project_config::injected_project_config_diagnostics_use_captured_provider_text
+        PASS [   0.030s] (2/8) codex-app-server::all suite::v2::injected_project_config::injected_project_config_real_loader_preserves_managed_and_session_precedence
+        PASS [   0.468s] (3/8) codex-app-server::all suite::v2::injected_project_config::injected_project_config_public_features_use_the_same_provider_read
+        PASS [   0.483s] (4/8) codex-app-server::all suite::v2::injected_project_config::injected_project_config_feature_requirements_and_runtime_precedence
+        PASS [   0.487s] (5/8) codex-app-server::all suite::v2::injected_project_config::injected_project_config_public_read_keeps_sources_precedence_and_trust
+        PASS [   0.468s] (6/8) codex-app-server::all suite::v2::injected_project_config::injected_project_config_refusal_never_reads_controller_copy::canonical_refusal
+        PASS [   0.464s] (7/8) codex-app-server::all suite::v2::injected_project_config::injected_project_config_refusal_never_reads_controller_copy::metadata_refusal
+        PASS [   0.460s] (8/8) codex-app-server::all suite::v2::injected_project_config::injected_project_config_refusal_never_reads_controller_copy::read_refusal
+────────────
+     Summary [   0.948s] 8 tests run: 8 passed, 1153 skipped

@@ -6,9 +6,9 @@ checkpoint ne signifie pas que les commandes ordinaires fonctionnent déjà sur
 le téléphone.
 
 **Session reprise le 7 septembre après la clôture de nuit :** lire d'abord
-[HANDOFF.md](HANDOFF.md) pour le résultat téléphone V11 et le correctif PC.
-Le complément v8 décrit ci-dessous ajoute le build GNU ARM64 achevé et ses
-entrées exactes ; il ne valide pas son exécution sur le Fold.
+[HANDOFF.md](HANDOFF.md). Le projet Python natif V2 a réussi sur le Fold ;
+le canal de lecture et le chargeur de configuration ont ensuite réussi sur PC
+entre deux UID distincts. L'intégration à une tâche complète reste en cours.
 
 ```powershell
 gh repo clone pironjulien/FoldGPT-workspace C:\Dev\ChatgptFold -- -c core.autocrlf=false
@@ -308,14 +308,15 @@ commandes ordinaires de l'interface reste en développement.
 
 ## Récupérer le moteur séparé
 
-Le code du moteur séparé est développé sous `C:\Dev\FoldgptEngine`, à partir du
+Le code du moteur séparé est développé sous
+`C:\Dev\ChatgptFold\work\worktrees\FoldgptEngine`, à partir du
 commit Codex `3d2ee51ca2d5db578f328aa75e20aa22c0197c9a` (`rust-v0.153.4`).
 Son état de travail est exporté dans `recovery/engine/engine.patch` avec le
 commit officiel exact et le SHA-256 du patch dans `manifest.json` :
 
 ```powershell
-python tools/recovery/restore-engine.py --destination C:\Dev\FoldgptEngine
-wsl --distribution Ubuntu-24.04 --exec python3 /mnt/c/Dev/ChatgptFold/tools/recovery/hydrate-project.py --snapshot /var/tmp/foldgpt-recovered/FoldgptEngine --project /mnt/c/Dev/FoldgptEngine --report /mnt/c/Dev/FoldGPT-recovery/engine-hydration.json
+python tools/recovery/restore-engine.py --destination C:\Dev\ChatgptFold\work\worktrees\FoldgptEngine
+wsl --distribution Ubuntu-24.04 --exec python3 /mnt/c/Dev/ChatgptFold/tools/recovery/hydrate-project.py --snapshot /var/tmp/foldgpt-recovered/FoldgptEngine --project /mnt/c/Dev/ChatgptFold/work/worktrees/FoldgptEngine --report /mnt/c/Dev/ChatgptFold/work/FoldGPT-recovery/engine-hydration.json
 ```
 
 Le script récupère la release officielle, vérifie son commit, applique le patch

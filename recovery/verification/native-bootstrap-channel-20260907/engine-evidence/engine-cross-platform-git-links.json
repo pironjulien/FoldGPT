@@ -1,0 +1,12 @@
+[
+  {
+    "path": "C:\\Dev\\ChatgptFold\\work\\worktrees\\FoldgptEngine\\.git",
+    "before": "gitdir: C:/Dev/ChatgptFold/downloads/isolation-codex/.git/worktrees/FoldgptEngine\n",
+    "after": "gitdir: ../../../downloads/isolation-codex/.git/worktrees/FoldgptEngine\n"
+  },
+  {
+    "path": "C:\\Dev\\ChatgptFold\\downloads\\isolation-codex\\.git\\worktrees\\FoldgptEngine\\gitdir",
+    "before": "C:/Dev/ChatgptFold/work/worktrees/FoldgptEngine/.git\n",
+    "after": "../../../../../work/worktrees/FoldgptEngine/.git\n"
+  }
+]

@@ -1,0 +1,37 @@
+{
+  "clientReturncode": 0,
+  "serverReturncode": 0,
+  "clientPid": 616,
+  "serverPid": 615,
+  "output": "/var/tmp/foldgpt-bootstrap-isolation-otdri1q3",
+  "clientExecutableSha256": "e614894b8fa544db9a54a67f26df603aeac160b28185417c2be8e08528710cce",
+  "helpers": {
+    "native-files": "7321038029d8955ce89a0cddca020bfad7d7d1d91823ea057f9d97921c9cb506",
+    "native-file-handle": "048fe3ae381185db33603d547451d960037e0560854769e8e36e5ecc221c1244"
+  },
+  "client": {
+    "binaryBytes": 70000,
+    "boundedConfigLoader": true,
+    "controllerReadError": "PermissionDenied",
+    "controllerUid": 1000,
+    "executorUid": 65534,
+    "nativeCanonicalization": true,
+    "nativeDirectory": true,
+    "nativeMetadata": true,
+    "outsideRootDenied": true,
+    "projectModel": "native-project-model",
+    "realNotFound": true,
+    "scope": "PC bootstrap channel and real config loader; no app-server/UI/Android claim",
+    "verified": true
+  },
+  "owner": {
+    "error": null,
+    "filesClosed": true,
+    "helperGone": true,
+    "quarantined": false,
+    "uid": 65534,
+    "pid": 615
+  },
+  "independentBinarySha256": "0c6c96cc20d3f906e54f1f1296e8878c1ac39262fb587cd56235c3aa9103d837",
+  "verified": true
+}

@@ -1,0 +1,3 @@
+cargo clippy --fix --tests --allow-dirty {args}
+error: no VCS found for this package and `cargo fix` can potentially perform destructive changes; if you'd like to suppress this error pass `--allow-no-vcs`
+error: recipe `fix` failed on line 58 with exit code 101

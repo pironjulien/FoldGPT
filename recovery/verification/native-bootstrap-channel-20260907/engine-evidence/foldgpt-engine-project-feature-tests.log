@@ -1,0 +1,48 @@
+RUST_MIN_STACK=8388608 NEXTEST_PROFILE=local cargo nextest run --no-fail-fast "$@"
+   Compiling codex-app-server v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/app-server)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 32.33s
+────────────
+ Nextest run ID 852b4011-d6b4-48c4-8e5d-8e3e5fc4fced with nextest profile: local
+    Starting 40 tests across 1 binary (1121 tests skipped)
+        PASS [   0.435s] ( 1/40) codex-app-server::all suite::v2::config_rpc::config_batch_write_rejects_legacy_profile_tables
+        PASS [   0.448s] ( 2/40) codex-app-server::all suite::v2::config_rpc::config_batch_write_applies_multiple_edits
+        PASS [   0.449s] ( 3/40) codex-app-server::all suite::v2::config_rpc::config_batch_write_round_trips_browser_and_computer_use_config
+        PASS [   0.450s] ( 4/40) codex-app-server::all suite::v2::config_rpc::config_batch_write_updates_multiple_desktop_settings
+        PASS [   0.408s] ( 5/40) codex-app-server::all suite::v2::config_rpc::config_read_accepts_forced_chatgpt_workspace_id_list
+        PASS [   0.408s] ( 6/40) codex-app-server::all suite::v2::config_rpc::config_read_accepts_legacy_forced_chatgpt_workspace_id
+        PASS [   0.415s] ( 7/40) codex-app-server::all suite::v2::config_rpc::config_read_disables_guardian_v2_when_managed_config_requires_guardian_v1
+        PASS [   0.416s] ( 8/40) codex-app-server::all suite::v2::config_rpc::config_read_after_pipelined_write_sees_written_value
+        PASS [   0.402s] ( 9/40) codex-app-server::all suite::v2::config_rpc::config_read_ignores_bool_web_search_tool_config
+        PASS [   0.435s] (10/40) codex-app-server::all suite::v2::config_rpc::config_read_includes_apps
+        PASS [   0.426s] (11/40) codex-app-server::all suite::v2::config_rpc::config_read_includes_desktop_settings
+        PASS [   0.432s] (12/40) codex-app-server::all suite::v2::config_rpc::config_read_includes_browser_and_computer_use_config
+        PASS [   0.402s] (13/40) codex-app-server::all suite::v2::config_rpc::config_read_includes_nested_web_search_tool_config
+        PASS [   0.405s] (14/40) codex-app-server::all suite::v2::config_rpc::config_read_includes_system_layer_and_overrides
+        PASS [   0.401s] (15/40) codex-app-server::all suite::v2::config_rpc::config_read_includes_tools
+        PASS [   0.427s] (16/40) codex-app-server::all suite::v2::config_rpc::config_read_includes_project_layers_for_cwd
+        PASS [   0.412s] (17/40) codex-app-server::all suite::v2::config_rpc::config_read_respects_managed_project_root_markers
+        PASS [   0.400s] (18/40) codex-app-server::all suite::v2::config_rpc::config_requirements_read_includes_browser_and_computer_use_schema
+        PASS [   0.413s] (19/40) codex-app-server::all suite::v2::config_rpc::config_read_returns_effective_and_layers
+        PASS [   0.400s] (20/40) codex-app-server::all suite::v2::config_rpc::config_requirements_read_includes_in_app_updates_policy
+        PASS [   0.419s] (21/40) codex-app-server::all suite::v2::config_rpc::config_requirements_read_includes_managed_model_policy_and_instructions
+        PASS [   0.421s] (22/40) codex-app-server::all suite::v2::config_rpc::config_value_write_rejects_version_conflict
+        PASS [   0.434s] (23/40) codex-app-server::all suite::v2::config_rpc::config_requirements_read_includes_remote_control_and_managed_hooks
+        PASS [   0.440s] (24/40) codex-app-server::all suite::v2::config_rpc::config_value_write_replaces_value
+        PASS [   0.476s] (25/40) codex-app-server::all suite::v2::config_rpc::config_value_write_updates_desktop_settings
+        PASS [   0.499s] (26/40) codex-app-server::all suite::v2::injected_local_runtime::injected_local_runtime_absent_keeps_official_local_filesystem
+        PASS [   0.510s] (27/40) codex-app-server::all suite::v2::config_rpc::managed_auth_settings_are_exposed_enforced_and_read_only
+        PASS [   0.506s] (28/40) codex-app-server::all suite::v2::injected_local_runtime::injected_local_runtime_serves_public_protocol_and_preserves_refusals::configured_runtime
+        PASS [   0.036s] (29/40) codex-app-server::all suite::v2::injected_local_runtime::injected_local_runtime_startup_refuses_incompatible_configuration::executor_only
+        PASS [   0.036s] (30/40) codex-app-server::all suite::v2::injected_local_runtime::injected_local_runtime_startup_refuses_incompatible_configuration::no_local
+        PASS [   0.022s] (31/40) codex-app-server::all suite::v2::injected_project_config::injected_project_config_diagnostics_use_captured_provider_text
+        PASS [   0.041s] (32/40) codex-app-server::all suite::v2::injected_local_runtime::injected_local_runtime_startup_refuses_incompatible_configuration::noise
+        PASS [   0.452s] (33/40) codex-app-server::all suite::v2::injected_local_runtime::injected_local_runtime_serves_public_protocol_and_preserves_refusals::environment_discovery_without_user_config
+        PASS [   0.022s] (34/40) codex-app-server::all suite::v2::injected_project_config::injected_project_config_real_loader_preserves_managed_and_session_precedence
+        PASS [   0.451s] (35/40) codex-app-server::all suite::v2::injected_project_config::injected_project_config_public_features_use_the_same_provider_read
+        PASS [   0.471s] (36/40) codex-app-server::all suite::v2::injected_project_config::injected_project_config_feature_requirements_and_runtime_precedence
+        PASS [   0.470s] (37/40) codex-app-server::all suite::v2::injected_project_config::injected_project_config_public_read_keeps_sources_precedence_and_trust
+        PASS [   0.457s] (38/40) codex-app-server::all suite::v2::injected_project_config::injected_project_config_refusal_never_reads_controller_copy::canonical_refusal
+        PASS [   0.453s] (39/40) codex-app-server::all suite::v2::injected_project_config::injected_project_config_refusal_never_reads_controller_copy::metadata_refusal
+        PASS [   0.452s] (40/40) codex-app-server::all suite::v2::injected_project_config::injected_project_config_refusal_never_reads_controller_copy::read_refusal
+────────────
+     Summary [   4.003s] 40 tests run: 40 passed, 1121 skipped

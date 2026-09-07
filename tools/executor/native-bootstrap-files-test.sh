@@ -21,7 +21,7 @@ cd "$work/package"
   FOLDGPT_NATIVE_HANDLES="$work/native-file-handle" FOLDGPT_NATIVE_RUNNER="$runner" \
   FOLDGPT_NATIVE_FILE_HANDLE="$work/native-file-handle" \
   FOLDGPT_PAUSED_HELPER="$work/paused-helper" python3 -B -m unittest \
-  tools.executor.test_native_bootstrap_files tools.executor.test_native_files_live \
+  tools.executor.test_native_bootstrap_files tools.executor.test_native_bootstrap_channel tools.executor.test_native_files_live \
   tools.executor.test_native_file_streams tools.executor.test_exec_server -v > "$work/tests.txt" 2>&1 || { cat "$work/tests.txt"; exit 1; }
 (cd "$work" && find package -type f -print0 | sort -z | xargs -0 sha256sum > SOURCES.sha256)
 (cd "$work" && sha256sum native-files native-file-handle paused-helper > BINARIES.sha256)

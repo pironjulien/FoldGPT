@@ -1,0 +1,297 @@
+RUST_MIN_STACK=8388608 NEXTEST_PROFILE=local cargo nextest run --no-fail-fast "$@"
+   Compiling proc-macro2 v1.0.106
+   Compiling unicode-ident v1.0.22
+   Compiling quote v1.0.45
+   Compiling typenum v1.20.0
+   Compiling zeroize v1.8.2
+   Compiling getrandom v0.2.17
+   Compiling rustix v1.1.4
+   Compiling linux-raw-sys v0.12.1
+   Compiling heck v0.5.0
+   Compiling serde_json v1.0.149
+   Compiling arrayvec v0.7.6
+   Compiling fixedbitset v0.5.7
+   Compiling prettyplease v0.2.37
+   Compiling hashbrown v0.15.5
+   Compiling rustls-pki-types v1.14.0
+   Compiling aws-lc-rs v1.16.2
+   Compiling ring v0.17.14
+   Compiling rustls-native-certs v0.8.3
+   Compiling webpki-roots v1.0.5
+   Compiling generic-array v0.14.7
+   Compiling syn v2.0.117
+   Compiling syn v1.0.109
+   Compiling petgraph v0.8.3
+   Compiling const_format_proc_macros v0.2.34
+   Compiling block-buffer v0.10.4
+   Compiling crypto-common v0.1.7
+   Compiling digest v0.10.7
+   Compiling const_format v0.2.35
+   Compiling sha1 v0.10.6
+   Compiling sha2 v0.10.9
+   Compiling blake3 v1.8.2
+   Compiling sha1-checked v0.10.0
+   Compiling headers v0.4.1
+   Compiling rustls-webpki v0.103.13
+   Compiling tempfile v3.27.0
+   Compiling fd-lock v4.0.4
+   Compiling gethostname v1.1.0
+   Compiling rustls v0.23.36
+   Compiling derivative v2.2.0
+   Compiling tonic-build v0.14.3
+   Compiling synstructure v0.13.2
+   Compiling serde_derive_internals v0.29.1
+   Compiling logos-codegen v0.15.1
+   Compiling darling_core v0.21.3
+   Compiling serde_derive v1.0.228
+   Compiling thiserror-impl v2.0.18
+   Compiling tokio-macros v2.7.0
+   Compiling tracing-attributes v0.1.31
+   Compiling futures-macro v0.3.32
+   Compiling displaydoc v0.2.5
+   Compiling zerofrom-derive v0.1.6
+   Compiling yoke-derive v0.8.2
+   Compiling zerovec-derive v0.11.3
+   Compiling async-trait v0.1.89
+   Compiling rama-macros v0.3.0-alpha.4
+   Compiling openssl-macros v0.1.1
+   Compiling bytemuck_derive v1.10.2
+   Compiling ts-rs-macros v11.1.0
+   Compiling asn1-rs-impl v0.2.0
+   Compiling ref-cast-impl v1.0.25
+   Compiling asn1-rs-derive v0.6.0
+   Compiling enum-as-inner v0.6.1
+   Compiling dupe_derive v0.9.1
+   Compiling strong_hash_derive v0.1.0
+   Compiling serde_repr v0.1.20
+   Compiling allocative_derive v0.3.6
+   Compiling pagable_derive v0.4.1
+   Compiling derive_more-impl v1.0.0
+   Compiling openssl v0.10.75
+   Compiling schemars_derive v0.8.22
+   Compiling clap_derive v4.5.55
+   Compiling dupe v0.9.1
+   Compiling prost-derive v0.14.3
+   Compiling enumflags2_derive v0.7.12
+   Compiling strum_macros v0.28.0
+   Compiling ref-cast v1.0.25
+   Compiling starlark_derive v0.14.2
+   Compiling pin-project-internal v1.1.10
+   Compiling thiserror-impl v1.0.69
+   Compiling strong_hash v0.1.0
+   Compiling futures-util v0.3.32
+   Compiling maybe-async v0.2.10
+   Compiling enumflags2 v0.7.12
+   Compiling thiserror v2.0.18
+   Compiling logos-derive v0.15.1
+   Compiling zerofrom v0.1.6
+   Compiling tracing v0.1.44
+   Compiling gix-path v0.11.2
+   Compiling wildcard v0.3.0
+   Compiling cobs v0.3.0
+   Compiling asn1-rs v0.7.1
+   Compiling gix-packetline v0.21.2
+   Compiling landlock v0.4.4
+   Compiling bytemuck v1.25.0
+   Compiling yoke v0.8.2
+   Compiling ts-rs v11.1.0
+   Compiling opentelemetry v0.31.0
+   Compiling logos v0.15.1
+   Compiling zerovec v0.11.6
+   Compiling zerotrie v0.2.4
+   Compiling gix-url v0.35.2
+   Compiling pin-project v1.1.10
+   Compiling gix-command v0.8.0
+   Compiling gix-config-value v0.17.1
+   Compiling image v0.25.9
+   Compiling codex-utils-rustls-provider v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/utils/rustls-provider)
+   Compiling tungstenite v0.27.0 (https://github.com/openai-oss-forks/tungstenite-rs?rev=4fffad30fe373adbdcffab9545e9e9bf4f2fc19f#4fffad30)
+   Compiling thiserror v1.0.69
+   Compiling filedescriptor v0.8.3
+   Compiling prost v0.14.3
+   Compiling darling_macro v0.21.3
+   Compiling portable-pty v0.9.0
+   Compiling clap v4.5.58
+   Compiling darling v0.21.3
+   Compiling serde_with_macros v3.17.0
+   Compiling prost-types v0.14.3
+   Compiling serde v1.0.228
+   Compiling oid-registry v0.8.1
+   Compiling tinystr v0.8.3
+   Compiling potential_utf v0.1.4
+   Compiling icu_collections v2.2.0
+   Compiling icu_locale_core v2.2.0
+   Compiling serde_with v3.17.0
+   Compiling schemafy_core v0.5.2
+   Compiling smallvec v1.15.1
+   Compiling num-bigint v0.4.6
+   Compiling schemars v0.8.22
+   Compiling serde_urlencoded v0.7.1
+   Compiling heapless v0.7.17
+   Compiling triomphe v0.1.15
+   Compiling chrono v0.4.43
+   Compiling multimap v0.10.1
+   Compiling lsp-types v0.97.0
+   Compiling erased-serde v0.3.31
+   Compiling codex-utils-string v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/utils/string)
+   Compiling quick-xml v0.41.0
+   Compiling schemafy_lib v0.5.2
+   Compiling os_info v3.14.0
+   Compiling parking_lot_core v0.9.12
+   Compiling nibble_vec v0.1.0
+   Compiling gix-date v0.15.1
+   Compiling tracing-subscriber v0.3.22
+   Compiling fixed_decimal v0.7.2
+   Compiling derive_more v1.0.0
+   Compiling radix_trie v0.3.0
+   Compiling radix_trie v0.2.1
+   Compiling prost-build v0.14.3
+   Compiling parking_lot v0.12.5
+   Compiling dashmap v6.1.0
+   Compiling gix-actor v0.40.0
+   Compiling rustyline v14.0.0
+   Compiling native-tls v0.2.14
+   Compiling tokio v1.52.3
+   Compiling prodash v31.0.0
+   Compiling moka v0.12.13
+   Compiling lock_free_hashtable v0.1.4
+   Compiling postcard v1.1.3
+   Compiling schemafy v0.5.2
+   Compiling static_interner v0.1.2
+   Compiling futures-executor v0.3.32
+   Compiling gix-features v0.46.2
+   Compiling futures v0.3.31
+   Compiling icu_provider v2.2.0
+   Compiling tonic-prost-build v0.14.3
+   Compiling codex-utils-absolute-path v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/utils/absolute-path)
+   Compiling codex-utils-redacted-string v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/utils/redacted-string)
+   Compiling debugserver-types v0.5.0
+   Compiling allocative v0.3.6
+   Compiling der-parser v10.0.0
+   Compiling gix-hash v0.23.0
+   Compiling gix-fs v0.19.2
+   Compiling gix-glob v0.24.0
+   Compiling gix-transport v0.55.1
+   Compiling codex-utils-home-dir v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/utils/home-dir)
+   Compiling codex-extension-items v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/ext/items)
+   Compiling codex-utils-path v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/utils/path-utils)
+   Compiling icu_normalizer v2.2.0
+   Compiling icu_properties v2.2.0
+   Compiling tracing-opentelemetry v0.32.1
+   Compiling icu_locale v2.2.0
+   Compiling opentelemetry-appender-tracing v0.31.1
+   Compiling gix-hashtable v0.13.0
+   Compiling gix-commitgraph v0.35.0
+   Compiling gix-tempfile v21.0.2
+   Compiling pagable v0.4.1
+   Compiling gix-object v0.58.0
+   Compiling x509-parser v0.18.1
+   Compiling gix-lock v21.0.2
+   Compiling gix-shallow v0.10.0
+   Compiling icu_decimal v2.2.0
+   Compiling idna_adapter v1.2.1
+   Compiling starlark_map v0.14.2
+   Compiling idna v1.1.0
+   Compiling gix-ref v0.61.0
+   Compiling gix-revwalk v0.29.0
+   Compiling gix-pack v0.68.0
+   Compiling gix-diff v0.61.0
+   Compiling gix-revision v0.43.0
+   Compiling gix-traverse v0.55.0
+   Compiling rcgen v0.14.7
+   Compiling url v2.5.8
+   Compiling publicsuffix v2.3.0
+   Compiling gix-refspec v0.39.0
+   Compiling cookie_store v0.22.1
+   Compiling codex-utils-path-uri v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/utils/path-uri)
+   Compiling gix-odb v0.78.0
+   Compiling gix-discover v0.49.0
+   Compiling gix-config v0.54.0
+   Compiling gix-protocol v0.59.0
+   Compiling gix v0.81.0
+   Compiling tokio-util v0.7.18
+   Compiling rama-utils v0.3.0-alpha.4
+   Compiling tokio-graceful v0.2.2
+   Compiling tokio-rustls v0.26.4
+   Compiling tokio-stream v0.1.18
+   Compiling tokio-native-tls v0.3.1
+   Compiling hickory-proto v0.25.2
+   Compiling codex-utils-cache v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/utils/cache)
+   Compiling codex-utils-pty v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/utils/pty)
+   Compiling codex-utils-image v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/utils/image)
+   Compiling tokio-tungstenite v0.28.0 (https://github.com/openai-oss-forks/tokio-tungstenite?rev=0e5b2d73aa18dd9f0a50ee9ff199d5aef7594186#0e5b2d73)
+   Compiling tokio-test v0.4.5
+   Compiling opentelemetry_sdk v0.31.0
+   Compiling h2 v0.4.16
+   Compiling rama-core v0.3.0-alpha.4
+   Compiling tower v0.5.3
+   Compiling codex-async-utils v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/async-utils)
+   Compiling tower-http v0.6.8
+   Compiling axum v0.8.8
+   Compiling hickory-resolver v0.25.2
+   Compiling rama-http-types v0.3.0-alpha.4
+   Compiling starlark_syntax v0.14.2
+   Compiling hyper v1.8.1
+   Compiling rama-net v0.3.0-alpha.4
+   Compiling hyper-util v0.1.20
+   Compiling starlark v0.14.2
+   Compiling hyper-rustls v0.27.7
+   Compiling hyper-tls v0.6.0
+   Compiling hyper-timeout v0.5.2
+   Compiling tonic v0.14.3
+   Compiling reqwest v0.12.28
+   Compiling codex-http-client v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/http-client)
+   Compiling opentelemetry-http v0.31.0
+   Compiling tonic-prost v0.14.3
+   Compiling rama-dns v0.3.0-alpha.4
+   Compiling rama-http-headers v0.3.0-alpha.4
+   Compiling rama-udp v0.3.0-alpha.4
+   Compiling rama-unix v0.3.0-alpha.4
+   Compiling rama-tls-rustls v0.3.0-alpha.4
+   Compiling opentelemetry-proto v0.31.0
+   Compiling codex-client v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/codex-client)
+   Compiling codex-websocket-client v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/websocket-client)
+   Compiling rama-http v0.3.0-alpha.4
+   Compiling opentelemetry-otlp v0.31.0
+   Compiling rama-tcp v0.3.0-alpha.4
+   Compiling rama-socks5 v0.3.0-alpha.4
+   Compiling rama-http-core v0.3.0-alpha.4
+   Compiling codex-execpolicy v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/execpolicy)
+   Compiling rama-http-backend v0.3.0-alpha.4
+   Compiling codex-network-proxy v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/network-proxy)
+   Compiling codex-protocol v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/protocol)
+   Compiling codex-api v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/codex-api)
+   Compiling codex-file-system v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/file-system)
+   Compiling codex-git-utils v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/git-utils)
+   Compiling codex-otel v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/otel)
+   Compiling codex-model-provider-info v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/model-provider-info)
+   Compiling codex-features v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/features)
+   Compiling codex-config v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/config)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1m 02s
+────────────
+ Nextest run ID 65162dc1-8811-4832-bf18-50267d32d9b1 with nextest profile: local
+    Starting 22 tests across 1 binary (262 tests skipped)
+        PASS [   0.006s] ( 1/22) codex-config loader::tests::disabled_credential_broker_preserves_project_shell_settings
+        PASS [   0.006s] ( 2/22) codex-config loader::tests::project_config_cannot_change_configured_credential_broker_state
+        PASS [   0.006s] ( 3/22) codex-config loader::unit_tests::legacy_managed_config_backfill_allows_user_when_guardian_is_required
+        PASS [   0.006s] ( 4/22) codex-config loader::tests::project_environment_filters_preserve_credential_host_bindings
+        PASS [   0.007s] ( 5/22) codex-config loader::tests::local_layer_projection_preserves_override_blockers_and_cloud_position
+        PASS [   0.009s] ( 6/22) codex-config loader::tests::profile_v2_rejects_matching_legacy_profile_selector_in_base_user_config
+        PASS [   0.009s] ( 7/22) codex-config loader::tests::managed_browser_import_denial_survives_user_and_session_config
+        PASS [   0.009s] ( 8/22) codex-config loader::tests::ignoring_login_requirements_preserves_local_auth_backend_requirements
+        PASS [   0.011s] ( 9/22) codex-config loader::tests::local_layers_keep_raw_paths_order_and_legacy_requirements
+        PASS [   0.019s] (10/22) codex-config loader::project_discovery::tests::managed_project_discovery_uses_managed_project_trust
+        PASS [   0.006s] (11/22) codex-config loader::tests::project_config_cannot_override_configured_credential_broker_hosts
+        PASS [   0.051s] (12/22) codex-config loader::unit_tests::ensure_resolve_relative_paths_in_config_toml_preserves_all_fields
+        PASS [   0.051s] (13/22) codex-config loader::tests::project_environment_filters_preserve_only_trusted_credential_host_bindings
+        PASS [   0.051s] (14/22) codex-config loader::unit_tests::legacy_managed_config_backfill_preserves_user_only_approvals_reviewer
+        PASS [   0.008s] (15/22) codex-config loader::tests::project_config_cannot_bind_permission_shortcuts
+        PASS [   0.008s] (16/22) codex-config loader::unit_tests::legacy_managed_config_backfill_includes_read_only_sandbox_mode
+        PASS [   0.009s] (17/22) codex-config loader::tests::missing_packaged_defaults_file_returns_an_error
+        PASS [   0.010s] (18/22) codex-config loader::tests::profile_v2_allows_unrelated_legacy_profiles_in_base_user_config
+        PASS [   0.010s] (19/22) codex-config loader::tests::profile_v2_rejects_matching_legacy_profile_in_base_user_config
+        PASS [   0.010s] (20/22) codex-config loader::tests::packaged_defaults_have_lower_precedence_than_existing_config_layers
+        PASS [   0.021s] (21/22) codex-config loader::project_discovery::tests::managed_project_discovery_ignores_incomplete_nested_git_directory
+        PASS [   0.022s] (22/22) codex-config loader::project_discovery::tests::managed_project_discovery_uses_file_markers_without_changing_precedence
+────────────
+     Summary [   0.067s] 22 tests run: 22 passed, 262 skipped

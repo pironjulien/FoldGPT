@@ -9,13 +9,14 @@ that FD's device/inode and is bound to the existing executor session. It is
 immutable and explicitly refuses serialization. It is not registered with
 ExecServer and has no `handle` method.
 
-Three operations are available:
+Four operations are available:
 
 | Internal operation | Result | Actual native route |
 | --- | --- | --- |
 | `read_file(canonical_uri)` | Exact bounded bytes | Existing `native-files` read and pinned ordinary-file FD |
 | `get_metadata(canonical_uri, follow_symlinks=bool)` | Existing strict metadata dictionary | Existing `statx` metadata helper |
 | `canonicalize(canonical_uri)` | Canonical file URI after successful lookup | Existing `openat2` descriptor resolver |
+| `read_directory(canonical_uri)` | Actual direct children | Existing native tree helper validates the complete descriptor snapshot before returning entries |
 
 The same structural admission checks owners, private root, ordinary files and
 directories, link counts, aliases and tree bounds. Symlinks, hard links, special
@@ -47,9 +48,10 @@ configuration remains on the controller's own filesystem. A linked worktree
 whose common directory lies elsewhere requires a separately designed explicit
 authority; this API does not infer or grant it from file contents.
 
-The current config/read phase needs these three methods. Later instruction or
-agent-role discovery would require separately reviewed read-directory/walk
-operations. No RPC route or Android packaging change is included here.
+The current config/read and role discovery phases use these four methods.
+Walk and mutations are not granted by this read authority. The separate private
+[bootstrap channel](native-bootstrap-channel.md) carries these reads to Rust;
+the model ExecServer interface and its mandatory policy remain unchanged.
 
 ## PC evidence
 
@@ -67,3 +69,10 @@ nonroot run `foldgpt-bootstrap-files-F2hzb4gY` passed all 90 tests; its source
 and binary inventories were preserved and rechecked under
 `downloads/bootstrap-files/foldgpt-bootstrap-files-F2hzb4gY`. These PC checks are not an
 Android execution or model-driven configuration integration claim.
+
+The subsequent channel/listing increment passes 108 actual nonroot tests in
+`foldgpt-bootstrap-files-ybowoamr`, including all previous regressions, real
+directory absence/alias/kind checks, credential/FD rejection, and helper
+reaping after EOF or an illegal overlapping request. The suite includes 11
+inherited authority cases in its channel fixture; 108 is the total execution
+count, not 108 newly added tests.

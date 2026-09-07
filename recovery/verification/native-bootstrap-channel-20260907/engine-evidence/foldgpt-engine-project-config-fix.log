@@ -1,0 +1,517 @@
+cargo clippy --fix --tests --allow-dirty {args}
+   Compiling proc-macro2 v1.0.106
+   Compiling codex-windows-sandbox v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/windows-sandbox-rs)
+    Checking codex-utils-template v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/utils/template)
+    Checking codex-collaboration-mode-templates v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/collaboration-mode-templates)
+    Checking codex-diagnostics v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/diagnostics)
+   Compiling codex-app-server-protocol-noop-macros v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/app-server-protocol-noop-macros)
+   Compiling codex-skills v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/skills)
+    Checking codex-utils-stream-parser v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/utils/stream-parser)
+   Compiling codex-linux-sandbox v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/linux-sandbox)
+    Checking codex-process-hardening v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/process-hardening)
+    Checking unicode-ident v1.0.22
+    Checking codex-utils-json-to-toml v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/utils/json-to-toml)
+    Checking fixedbitset v0.5.7
+    Checking heck v0.5.0
+    Checking petgraph v0.8.3
+    Checking quote v1.0.45
+    Checking syn v2.0.117
+   Compiling syn v1.0.109
+   Compiling syn v3.0.3
+   Compiling const_format_proc_macros v0.2.34
+   Compiling proc-macro-error-attr2 v2.0.0
+   Compiling include_dir_macros v0.7.4
+    Checking include_dir v0.7.4
+    Checking const_format v0.2.35
+    Checking prettyplease v0.2.37
+   Compiling derivative v2.2.0
+   Compiling thiserror-impl-no-std v2.0.2
+    Checking tonic-build v0.14.3
+    Checking thiserror-no-std v2.0.2
+   Compiling darling_core v0.24.0
+   Compiling synstructure v0.13.2
+   Compiling serde_derive_internals v0.29.1
+   Compiling logos-codegen v0.15.1
+   Compiling darling_core v0.21.3
+   Compiling zvariant_utils v2.1.0
+   Compiling proc-macro-error2 v2.0.1
+   Compiling darling_core v0.20.11
+   Compiling test-case-core v3.3.1
+   Compiling serde_derive v1.0.228
+   Compiling zeroize_derive v1.4.3
+   Compiling thiserror-impl v2.0.18
+   Compiling displaydoc v0.2.5
+   Compiling zerofrom-derive v0.1.6
+   Compiling yoke-derive v0.8.2
+   Compiling zerovec-derive v0.11.3
+   Compiling tokio-macros v2.7.0
+   Compiling tracing-attributes v0.1.31
+   Compiling futures-macro v0.3.32
+   Compiling async-trait v0.1.89
+   Compiling bytemuck_derive v1.10.2
+   Compiling rama-macros v0.3.0-alpha.4
+   Compiling openssl-macros v0.1.1
+   Compiling serde_repr v0.1.20
+   Compiling ref-cast-impl v1.0.25
+   Compiling ts-rs-macros v11.1.0
+   Compiling enumflags2_derive v0.7.12
+   Compiling dupe_derive v0.9.1
+   Compiling enum-as-inner v0.6.1
+   Compiling asn1-rs-derive v0.6.0
+    Checking openssl v0.10.75
+   Compiling schemars_derive v0.8.22
+   Compiling asn1-rs-impl v0.2.0
+   Compiling allocative_derive v0.3.6
+   Compiling strong_hash_derive v0.1.0
+    Checking dupe v0.9.1
+    Checking zeroize v1.8.2
+   Compiling pagable_derive v0.4.1
+   Compiling derive_more-impl v1.0.0
+   Compiling clap_derive v4.5.55
+   Compiling strum_macros v0.27.2
+    Checking ref-cast v1.0.25
+   Compiling starlark_derive v0.14.2
+    Checking generic-array v0.14.7
+    Checking rustls-pki-types v1.14.0
+    Checking futures-util v0.3.32
+    Checking aws-lc-rs v1.16.2
+    Checking arrayvec v0.7.6
+   Compiling strum_macros v0.28.0
+   Compiling thiserror-impl v1.0.69
+   Compiling pin-project-internal v1.1.10
+    Checking strong_hash v0.1.0
+    Checking rustls-native-certs v0.8.3
+    Checking webpki-roots v1.0.5
+   Compiling maybe-async v0.2.10
+   Compiling curve25519-dalek-derive v0.1.1
+    Checking der v0.7.10
+   Compiling zvariant_derive v4.2.0
+   Compiling aws-smithy-runtime-api-macros v1.0.0
+    Checking bytemuck v1.25.0
+    Checking zerofrom v0.1.6
+    Checking tracing v0.1.44
+    Checking thiserror v2.0.18
+   Compiling logos-derive v0.15.1
+    Checking crypto-common v0.1.7
+    Checking block-buffer v0.10.4
+    Checking yoke v0.8.2
+    Checking image v0.25.9
+    Checking gix-path v0.11.2
+    Checking wildcard v0.3.0
+    Checking digest v0.10.7
+    Checking asn1-rs v0.7.1
+    Checking opentelemetry v0.31.0
+    Checking cobs v0.3.0
+    Checking zerovec v0.11.6
+    Checking zerotrie v0.2.4
+    Checking gix-url v0.35.2
+    Checking logos v0.15.1
+    Checking sha2 v0.10.9
+    Checking sha1 v0.10.6
+    Checking blake3 v1.8.2
+    Checking ts-rs v11.1.0
+    Checking block-padding v0.3.3
+    Checking hmac v0.12.1
+    Checking sha1-checked v0.10.0
+    Checking headers v0.4.1
+    Checking rustls-webpki v0.103.13
+    Checking inout v0.1.4
+    Checking universal-hash v0.5.1
+    Checking gix-command v0.8.0
+    Checking gix-packetline v0.21.2
+    Checking gix-config-value v0.17.1
+    Checking pin-project v1.1.10
+    Checking cipher v0.4.4
+    Checking aead v0.5.2
+    Checking curve25519-dalek v4.1.3
+    Checking spki v0.7.3
+    Checking thiserror v1.0.69
+    Checking poly1305 v0.8.0
+   Compiling rust-embed-impl v8.11.0
+    Checking hkdf v0.12.4
+   Compiling zbus_macros v4.4.0
+   Compiling fluent-syntax v0.11.1
+    Checking filedescriptor v0.8.3
+    Checking pkcs8 v0.10.2
+    Checking pbkdf2 v0.12.2
+    Checking aes v0.8.4
+    Checking salsa20 v0.10.2
+    Checking chacha20 v0.9.1
+    Checking portable-pty v0.9.0
+    Checking cbc v0.1.2
+    Checking rust-embed-utils v8.11.0
+    Checking signature v2.2.0
+   Compiling windows-implement v0.58.0
+    Checking rustls v0.23.36
+   Compiling windows-interface v0.58.0
+    Checking secrecy v0.10.3
+    Checking scrypt v0.11.0
+    Checking polyval v0.6.2
+    Checking chacha20poly1305 v0.10.1
+    Checking ctr v0.9.2
+    Checking sha3 v0.10.9
+    Checking clap v4.5.58
+   Compiling darling_macro v0.21.3
+    Checking kem v0.3.0-pre.0
+    Checking tinystr v0.8.3
+    Checking potential_utf v0.1.4
+    Checking ed25519 v2.2.3
+    Checking crypto_secretbox v0.1.1
+    Checking blake2 v0.10.6
+    Checking ghash v0.5.1
+    Checking sec1 v0.7.3
+    Checking oid-registry v0.8.1
+    Checking crypto-bigint v0.5.5
+    Checking icu_collections v2.2.0
+   Compiling darling_macro v0.24.0
+    Checking aes-gcm v0.10.3
+   Compiling rust-embed v8.11.0
+    Checking strum v0.27.2
+    Checking icu_locale_core v2.2.0
+    Checking unic-langid-impl v0.9.6
+    Checking ml-kem v0.2.3
+    Checking codex-terminal-detection v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/terminal-detection)
+    Checking rfc6979 v0.4.0
+   Compiling schemars_derive v1.2.1
+   Compiling codex-experimental-api-macros v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/codex-experimental-api-macros)
+   Compiling darling_macro v0.20.11
+   Compiling darling v0.21.3
+    Checking zip v2.4.2
+    Checking codex-utils-cargo-bin v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/utils/cargo-bin)
+    Checking unic-langid v0.9.6
+   Compiling serde_with_macros v3.17.0
+    Checking fluent-langneg v0.13.1
+    Checking intl_pluralrules v7.0.2
+    Checking intl-memoizer v0.5.3
+   Compiling darling v0.24.0
+   Compiling test-case-macros v3.3.1
+   Compiling serial_test_derive v3.3.1
+    Checking x25519-dalek v2.0.1
+    Checking ed25519-dalek v2.2.0
+    Checking crypto_box v0.9.1
+    Checking native-tls v0.2.14
+   Compiling rmcp-macros v3.1.3
+    Checking windows-core v0.58.0
+   Compiling darling v0.20.11
+    Checking serde v1.0.228
+   Compiling cached_proc_macro v0.25.0
+    Checking test-case v3.3.1
+    Checking futures-executor v0.3.32
+    Checking sse-stream v0.2.5
+    Checking windows v0.58.0
+    Checking futures v0.3.31
+    Checking cookie-factory v0.3.3
+    Checking clatter v2.2.0
+    Checking icu_provider v2.2.0
+    Checking smallvec v1.15.1
+    Checking either v1.15.0
+    Checking num-bigint v0.4.6
+    Checking chrono v0.4.43
+    Checking serde_urlencoded v0.7.1
+    Checking schemars v0.8.22
+    Checking tracing-serde v0.2.0
+    Checking enumflags2 v0.7.12
+    Checking heapless v0.7.17
+    Checking triomphe v0.1.15
+    Checking multimap v0.10.1
+    Checking lsp-types v0.97.0
+    Checking erased-serde v0.3.31
+   Compiling schemafy_core v0.5.2
+    Checking serde_with v3.17.0
+    Checking codex-utils-string v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/utils/string)
+    Checking quick-xml v0.41.0
+    Checking os_info v3.14.0
+   Compiling schemafy_lib v0.5.2
+    Checking landlock v0.4.4
+    Checking itertools v0.14.0
+    Checking derive_more v1.0.0
+    Checking display_container v0.9.0
+    Checking parking_lot_core v0.9.12
+    Checking nibble_vec v0.1.0
+    Checking tracing-subscriber v0.3.22
+    Checking fixed_decimal v0.7.2
+    Checking gix-date v0.15.1
+    Checking bytes-utils v0.1.4
+    Checking icu_properties v2.2.0
+    Checking icu_normalizer v2.2.0
+    Checking radix_trie v0.3.0
+    Checking radix_trie v0.2.1
+    Checking icu_locale v2.2.0
+    Checking parking_lot v0.12.5
+    Checking dashmap v6.1.0
+   Compiling toml v0.5.11
+    Checking aws-smithy-types v1.4.7
+   Compiling basic-toml v0.1.10
+    Checking zvariant v4.2.0
+    Checking gix-actor v0.40.0
+    Checking rustyline v14.0.0
+    Checking tokio v1.52.3
+    Checking moka v0.12.13
+    Checking lock_free_hashtable v0.1.4
+    Checking postcard v1.1.3
+    Checking prodash v31.0.0
+    Checking static_interner v0.1.2
+    Checking fluent-bundle v0.15.3
+    Checking codex-utils-absolute-path v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/utils/absolute-path)
+    Checking codex-utils-redacted-string v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/utils/redacted-string)
+    Checking age-core v0.11.0
+    Checking gix-features v0.46.2
+   Compiling i18n-config v0.4.8
+    Checking debugid v0.8.0
+    Checking allocative v0.3.6
+    Checking der-parser v10.0.0
+    Checking icu_decimal v2.2.0
+    Checking num-rational v0.4.2
+    Checking fluent v0.16.1
+    Checking codex-utils-home-dir v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/utils/home-dir)
+    Checking codex-extension-items v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/ext/items)
+   Compiling schemafy v0.5.2
+    Checking codex-utils-path v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/utils/path-utils)
+    Checking simple_asn1 v0.6.4
+    Checking aws-smithy-json v0.61.9
+    Checking gix-hash v0.23.0
+    Checking gix-fs v0.19.2
+    Checking gix-glob v0.24.0
+    Checking gix-transport v0.55.1
+    Checking tracing-opentelemetry v0.32.1
+    Checking opentelemetry-appender-tracing v0.31.1
+    Checking tracing-appender v0.2.4
+    Checking jsonwebtoken v9.3.1
+    Checking idna_adapter v1.2.1
+    Checking elliptic-curve v0.13.8
+    Checking aws-smithy-query v0.60.9
+    Checking num v0.4.3
+    Checking gix-hashtable v0.13.0
+    Checking gix-tempfile v21.0.2
+    Checking gix-commitgraph v0.35.0
+    Checking schemars v1.2.1
+    Checking codex-install-context v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/install-context)
+    Checking idna v1.1.0
+    Checking futures-intrusive v0.5.0
+    Checking x509-parser v0.18.1
+   Compiling find-crate v0.6.3
+    Checking gix-object v0.58.0
+    Checking symphonia-core v0.6.0
+    Checking rayon v1.11.0
+    Checking sorted_vector_map v0.2.1
+    Checking serde_yaml v0.9.34+deprecated
+    Checking cached v0.56.0
+    Checking gix-lock v21.0.2
+    Checking rust-stemmers v1.2.0
+    Checking debugserver-types v0.5.0
+    Checking assert-json-diff v2.0.2
+    Checking serial_test v3.3.1
+    Checking ecdsa v0.16.9
+    Checking url v2.5.8
+    Checking publicsuffix v2.3.0
+    Checking primeorder v0.13.6
+    Checking gix-shallow v0.10.0
+    Checking pagable v0.4.1
+    Checking codex-backend-openapi-models v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/codex-backend-openapi-models)
+    Checking codex-utils-rustls-provider v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/utils/rustls-provider)
+    Checking tungstenite v0.27.0 (https://github.com/openai-oss-forks/tungstenite-rs?rev=4fffad30fe373adbdcffab9545e9e9bf4f2fc19f#4fffad30)
+   Compiling prost-derive v0.14.3
+   Compiling i18n-embed-impl v0.8.4
+    Checking p256 v0.13.2
+   Compiling i18n-embed v0.15.4
+    Checking cookie_store v0.22.1
+    Checking codex-utils-path-uri v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/utils/path-uri)
+    Checking sentry-types v0.46.1
+    Checking webbrowser v1.2.4
+    Checking zbus_names v3.0.0
+    Checking gix-revwalk v0.29.0
+    Checking gix-ref v0.61.0
+    Checking gix-pack v0.68.0
+    Checking gix-diff v0.61.0
+    Checking rcgen v0.14.7
+    Checking gix-revision v0.43.0
+    Checking gix-traverse v0.55.0
+    Checking bm25 v2.3.2
+    Checking starlark_map v0.14.2
+    Checking zbus v4.4.0
+   Compiling i18n-embed-fl v0.9.4
+    Checking prost v0.14.3
+    Checking gix-refspec v0.39.0
+    Checking symphonia-metadata v0.6.0
+    Checking symphonia-bundle-mp3 v0.6.0
+    Checking prost-types v0.14.3
+    Checking symphonia-common v0.6.0
+    Checking symphonia-format-riff v0.6.0
+    Checking gix-odb v0.78.0
+    Checking gix-discover v0.49.0
+    Checking gix-config v0.54.0
+    Checking gix-protocol v0.59.0
+   Compiling sqlx-core v0.9.0
+    Checking symphonia-format-ogg v0.6.0
+    Checking symphonia-format-isomp4 v0.6.0
+    Checking symphonia-format-mkv v0.6.0
+    Checking age v0.11.2
+    Checking nucleo v0.5.0 (https://github.com/helix-editor/nucleo.git?rev=4253de9faabb4e5c6d81d946a5e35a90f87347ee#4253de9f)
+    Checking symphonia v0.6.0
+    Checking prost-build v0.14.3
+    Checking gix v0.81.0
+    Checking tonic-prost-build v0.14.3
+    Checking sentry-core v0.46.1
+    Checking tokio-util v0.7.18
+    Checking tokio-rustls v0.26.4
+    Checking tokio-graceful v0.2.2
+    Checking rama-utils v0.3.0-alpha.4
+    Checking tokio-stream v0.1.18
+    Checking tokio-native-tls v0.3.1
+    Checking hickory-proto v0.25.2
+    Checking codex-utils-cache v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/utils/cache)
+    Checking codex-utils-pty v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/utils/pty)
+    Checking aws-smithy-async v1.2.14
+    Checking process-wrap v9.0.1
+    Checking codex-file-search v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/file-search)
+    Checking deadpool v0.12.3
+    Checking codex-uds v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/uds)
+    Checking codex-file-watcher v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/file-watcher)
+    Checking sentry-backtrace v0.46.1
+    Checking sentry-contexts v0.46.1
+    Checking sentry-debug-images v0.46.1
+    Checking codex-utils-image v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/utils/image)
+    Checking tokio-tungstenite v0.28.0 (https://github.com/openai-oss-forks/tokio-tungstenite?rev=0e5b2d73aa18dd9f0a50ee9ff199d5aef7594186#0e5b2d73)
+    Checking sentry-panic v0.46.1
+    Checking aws-smithy-runtime-api v1.12.0
+   Compiling codex-code-mode-protocol v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/code-mode-protocol)
+    Checking tokio-test v0.4.5
+    Checking opentelemetry_sdk v0.31.0
+    Checking h2 v0.4.16
+    Checking tower v0.5.3
+    Checking rama-core v0.3.0-alpha.4
+    Checking codex-async-utils v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/async-utils)
+    Checking aws-smithy-http v0.62.6
+    Checking aws-credential-types v1.2.11
+    Checking aws-smithy-observability v0.1.5
+   Compiling sqlx-sqlite v0.9.0
+    Checking aws-types v1.3.11
+    Checking aws-sigv4 v1.3.7
+    Checking tower-http v0.6.8
+    Checking hickory-resolver v0.25.2
+    Checking secret-service v4.0.0
+    Checking rama-http-types v0.3.0-alpha.4
+   Compiling sqlx-macros-core v0.9.0
+    Checking keyring v3.6.3
+    Checking starlark_syntax v0.14.2
+    Checking codex-keyring-store v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/keyring-store)
+    Checking hyper v1.8.1
+   Compiling sqlx-macros v0.9.0
+    Checking rama-net v0.3.0-alpha.4
+    Checking starlark v0.14.2
+    Checking sqlx v0.9.0
+    Checking hyper-util v0.1.20
+    Checking hyper-rustls v0.27.7
+    Checking hyper-tls v0.6.0
+    Checking hyper-timeout v0.5.2
+    Checking axum v0.8.8
+    Checking reqwest v0.13.4
+    Checking wiremock v0.6.5
+    Checking reqwest v0.12.28
+    Checking aws-smithy-http-client v1.1.12
+    Checking aws-smithy-runtime v1.9.5
+    Checking codex-http-client v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/http-client)
+    Checking opentelemetry-http v0.31.0
+    Checking oauth2 v5.0.0
+    Checking sentry v0.46.1
+    Checking rmcp v3.1.3
+    Checking rama-http-headers v0.3.0-alpha.4
+    Checking rama-dns v0.3.0-alpha.4
+    Checking rama-unix v0.3.0-alpha.4
+    Checking rama-udp v0.3.0-alpha.4
+    Checking rama-tls-rustls v0.3.0-alpha.4
+    Checking codex-client v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/codex-client)
+    Checking codex-websocket-client v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/websocket-client)
+    Checking codex-workload-identity v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/workload-identity)
+    Checking aws-runtime v1.5.17
+    Checking tonic v0.14.3
+    Checking aws-sdk-sts v1.95.0
+    Checking aws-sdk-sso v1.91.0
+    Checking aws-sdk-ssooidc v1.93.0
+    Checking aws-sdk-signin v1.2.0
+    Checking rama-http v0.3.0-alpha.4
+    Checking tonic-prost v0.14.3
+    Checking opentelemetry-proto v0.31.0
+    Checking aws-config v1.8.12
+    Checking rama-tcp v0.3.0-alpha.4
+    Checking rama-socks5 v0.3.0-alpha.4
+    Checking opentelemetry-otlp v0.31.0
+    Checking codex-aws-auth v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/aws-auth)
+    Checking codex-execpolicy v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/execpolicy)
+    Checking rama-http-core v0.3.0-alpha.4
+    Checking rama-http-backend v0.3.0-alpha.4
+    Checking codex-network-proxy v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/network-proxy)
+    Checking codex-protocol v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/protocol)
+    Checking codex-api v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/codex-api)
+    Checking codex-file-system v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/file-system)
+    Checking codex-shell-command v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/shell-command)
+    Checking codex-agent-identity v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/agent-identity)
+    Checking codex-utils-output-truncation v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/utils/output-truncation)
+    Checking codex-history v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/history)
+    Checking codex-context-fragments v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/context-fragments)
+    Checking codex-shell-escalation v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/shell-escalation)
+    Checking codex-guardian-context v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/guardian-context)
+    Checking codex-utils-audio v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/utils/audio)
+    Checking codex-git-utils v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/git-utils)
+    Checking codex-state v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/state)
+    Checking codex-exec-server-protocol v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/exec-server-protocol)
+    Checking codex-memories-read v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/memories/read)
+    Checking codex-utils-cli v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/utils/cli)
+    Checking codex-secrets v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/secrets)
+    Checking codex-utils-git-discovery v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/utils/git-discovery)
+    Checking codex-prompts v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/prompts)
+    Checking codex-otel v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/otel)
+    Checking codex-model-provider-info v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/model-provider-info)
+    Checking codex-response-debug-context v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/response-debug-context)
+    Checking codex-agent-graph-store v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/agent-graph-store)
+    Checking codex-features v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/features)
+    Checking codex-code-mode v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/code-mode)
+    Checking codex-rollout v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/rollout)
+    Checking codex-sandboxing v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/sandboxing)
+    Checking codex-config v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/config)
+    Checking codex-rollout-trace v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/rollout-trace)
+    Checking codex-app-server-protocol v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/app-server-protocol)
+    Checking codex-exec-server v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/exec-server)
+    Checking codex-login v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/login)
+    Checking codex-agent-roles v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/agent-roles)
+    Checking codex-models-manager v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/models-manager)
+    Checking codex-feedback v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/feedback)
+    Checking codex-model-provider v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/model-provider)
+    Checking codex-backend-client v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/backend-client)
+    Checking codex-utils-plugins v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/utils/plugins)
+    Checking codex-rmcp-client v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/rmcp-client)
+    Checking codex-apply-patch v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/apply-patch)
+    Checking codex-plugin v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/plugin)
+    Checking codex-arg0 v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/arg0)
+    Checking codex-connectors v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/connectors)
+    Checking codex-hooks v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/hooks)
+    Checking codex-tools v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/tools)
+    Checking codex-mcp v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/codex-mcp)
+    Checking codex-analytics v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/analytics)
+    Checking codex-thread-store v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/thread-store)
+    Checking codex-extension-api v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/ext/extension-api)
+    Checking codex-home v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/codex-home)
+    Checking codex-git-attribution v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/ext/git-attribution)
+    Checking codex-core-plugins v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/core-plugins)
+    Checking codex-skills-extension v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/ext/skills)
+    Checking codex-core v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/core)
+    Checking codex-connectors-extension v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/ext/connectors)
+    Checking codex-memories-write v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/memories/write)
+    Checking codex-mcp-extension v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/ext/mcp)
+    Checking codex-cloud-config v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/cloud-config)
+    Checking codex-web-search-extension v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/ext/web-search)
+    Checking codex-goal-extension v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/ext/goal)
+    Checking codex-guardian-v2 v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/ext/guardian-v2)
+    Checking codex-chatgpt v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/chatgpt)
+    Checking codex-history-notes-extension v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/ext/history-notes)
+    Checking codex-memories-extension v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/ext/memories)
+    Checking codex-image-generation-extension v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/ext/image-generation)
+    Checking codex-agent-extension v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/ext/agent)
+    Checking core_test_support v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/core/tests/common)
+    Checking codex-app-server-transport v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/app-server-transport)
+    Checking codex-queue-extension v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/ext/queue)
+    Checking app_test_support v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/app-server/tests/common)
+    Checking codex-external-agent-migration v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/external-agent-migration)
+    Checking codex-app-server v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/app-server)
+       Fixed app-server/tests/suite/v2/injected_project_config.rs (2 fixes)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 2m 24s

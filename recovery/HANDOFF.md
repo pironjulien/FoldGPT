@@ -5,7 +5,31 @@ Le dépôt de travail est **privé** : `pironjulien/FoldGPT-workspace`, branche
 sous-modules, moteur séparé et données locales. Le dépôt public `FoldGPT` est un
 ancien checkpoint ; il ne reçoit pas cette sauvegarde privée.
 
-## État courant : projet Python natif V2 réussi sur le Fold, 7 septembre vers 21:07
+## État courant : canal natif et configuration entre deux UID prouvés sur PC
+
+Le [canal privé](../tools/executor/native-bootstrap-channel.md) relie maintenant
+le Rust du moteur à l'autorité Python/native. Les [preuves exactes](verification/native-bootstrap-channel-20260907/manifest.json)
+conservent 17 tests Rust, 108 exécutions de régression Python/native et le
+[rapport entre deux UID](verification/native-bootstrap-channel-20260907/isolation/report.json).
+Le contrôleur UID1000 reçoit un vrai `PermissionDenied` en accès direct au
+projet UID65534, puis lit les 70 000 octets attendus et la configuration projet
+via le canal. Le vrai chargeur borné conserve la provenance `Project` et le
+modèle attendu. Les refus restent des refus ; les deux processus terminent
+avec code0, sans helper survivant ni quarantaine.
+
+Le dernier export du moteur est un checkpoint de développement : le chargeur
+public et le canal sont qualifiés, mais les suites complètes du ConfigBuilder,
+les rôles, AGENTS et la sélection d'environnement sont encore en cours.
+`ExecutorOnly` reste fermé. Aucune tâche complète depuis l'interface n'est
+encore validée, et le canal n'est pas encore déployé sur Android.
+
+Le moteur courant se trouve sous `C:\Dev\ChatgptFold\work\worktrees\FoldgptEngine`.
+Les anciens chemins `C:\Dev\FoldgptEngine` dans les preuves sont historiques.
+Le lien Git du worktree est relatif et vérifié sous Windows et WSL. Les logs
+locaux sont sous `work/root-artifacts-20260907` ; le snapshot complet du canal
+est sous `downloads/native-bootstrap-channel-20260907`.
+
+## Acquis téléphone : projet Python natif V2 réussi, 7 septembre vers 21:07
 
 Le [rapport V2](../docs/research/native-runtime-v2-device-result-2026-09-07.md)
 et ses [preuves exactes](verification/native-runtime-v2-20260907/manifest.json)
@@ -22,8 +46,7 @@ SHA256 `8572ecc3ed975e6eb8dc98e1df5247931e5354aa6dd737f400c4e7c699674b2c`.
 Action `.RUNTIME_RUN_FIXED_V2` consommée : ne pas rejouer ni effacer marker.
 
 Poursuivre le raccordement des chemins/autorités et du lancement du moteur à
-l'interface habituelle. Les changements Rust configuration projet/trust sont
-en cours, pas encore exportés à ce checkpoint. Aucun succès ordinaire UI.
+l'interface habituelle. Aucun succès ordinaire UI.
 Le maintien éveillé USB reste activé durant la session active.
 
 Les nouveaux binaires, stages et preuves sont également publiés dans le

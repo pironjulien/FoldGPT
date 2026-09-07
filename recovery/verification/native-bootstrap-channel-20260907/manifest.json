@@ -1,0 +1,1076 @@
+{
+  "format": 1,
+  "preservedUtc": "2026-09-07T21:44:45.129984+00:00",
+  "scope": "PC native bootstrap channel and real bounded config loader; not complete app-server/UI/Android integration",
+  "sourceSnapshot": "/mnt/c/Dev/ChatgptFold/downloads/native-bootstrap-channel-20260907",
+  "pythonTestExecutions": 108,
+  "rustProtocolTests": 17,
+  "crossUidVerified": true,
+  "files": [
+    {
+      "path": "bootstrap_files_pc",
+      "bytes": 390676800,
+      "sha256": "e614894b8fa544db9a54a67f26df603aeac160b28185417c2be8e08528710cce"
+    },
+    {
+      "path": "bootstrap_files_pc.rs",
+      "bytes": 6284,
+      "sha256": "8899bb7e6cb76704bfdf62e88810eb56d7fe2c4e3a25965f3c255267f4619094"
+    },
+    {
+      "path": "engine-evidence/bootstrap-example-build-v2.log",
+      "bytes": 1105,
+      "sha256": "6076ed41546aba55433510a486a79663980cd434de5231f70b1689cdf2bcd120"
+    },
+    {
+      "path": "engine-evidence/bootstrap-example-build-v3.log",
+      "bytes": 187,
+      "sha256": "2dd811f2964d6867fcff0b084b1cb0261cbf324da72905aca7ae5dcc7749b5d4"
+    },
+    {
+      "path": "engine-evidence/bootstrap-example-build.log",
+      "bytes": 25773,
+      "sha256": "6acc2df9500c86175e1e857c2f81e762009e325ec733eaeee22a08a9c3f5ee0b"
+    },
+    {
+      "path": "engine-evidence/bootstrap-final-fix-v2.log",
+      "bytes": 21706,
+      "sha256": "266b137a26ddc1387af2a668b853c7c4148fbc2d77acd62237e0527b0e5dacfa"
+    },
+    {
+      "path": "engine-evidence/bootstrap-final-fix.log",
+      "bytes": 262,
+      "sha256": "abb8400333b63529496316bfd828096b3e9a36ba47e43632448a9bb6515c0b16"
+    },
+    {
+      "path": "engine-evidence/bootstrap-final-fmt-v2.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "engine-evidence/bootstrap-final-fmt.log",
+      "bytes": 1644,
+      "sha256": "e0ad331d161fd5110e01486e0eef9b60b7aaa7e88116fbe807d05ff306bfb291"
+    },
+    {
+      "path": "engine-evidence/engine-cross-platform-git-links.json",
+      "bytes": 539,
+      "sha256": "e456ab8c14d8378023368f89797a30a9157348cbca0849c7924e3bd438674955"
+    },
+    {
+      "path": "engine-evidence/foldgpt-engine-app-bootstrap-clippy.log",
+      "bytes": 10329,
+      "sha256": "4aa74793b648367cc0d23390159ef439ec96b0c349d5c25e7a0f169c85ff1a96"
+    },
+    {
+      "path": "engine-evidence/foldgpt-engine-app-bootstrap-fix.log",
+      "bytes": 12237,
+      "sha256": "b09387a9cb0b57cf70fbb62a4ddfa961dcca91cf0a2b70b457328d847d7d49e3"
+    },
+    {
+      "path": "engine-evidence/foldgpt-engine-app-bootstrap-fmt.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "engine-evidence/foldgpt-engine-app-bootstrap-regression.log",
+      "bytes": 3960,
+      "sha256": "c84e9caa85c921df006e1431281bc13914922862645e97e2cd45ef902dfdcf3e"
+    },
+    {
+      "path": "engine-evidence/foldgpt-engine-app-bootstrap-tests.log",
+      "bytes": 10955,
+      "sha256": "e70238aa8cc1483eecf56a69299cedc18ce509bc158603f4be8ea0d3d200205a"
+    },
+    {
+      "path": "engine-evidence/foldgpt-engine-bootstrap-protocol-before-directory-admission.log",
+      "bytes": 2937,
+      "sha256": "72ddf0546ec3bd088aba37e02e98421e060c98eb119fb04f86b884c9410be5a8"
+    },
+    {
+      "path": "engine-evidence/foldgpt-engine-bootstrap-protocol-clippy-before-admission.log",
+      "bytes": 3067,
+      "sha256": "0b1d92251f41854138b1eecb08a400c559f9d79155c852b489add23524584cbf"
+    },
+    {
+      "path": "engine-evidence/foldgpt-engine-bootstrap-protocol-clippy.log",
+      "bytes": 570,
+      "sha256": "2edf63cd3a5f8bec7f065175c27c78aeee7144088d6a7d7192420f97aa6abcc4"
+    },
+    {
+      "path": "engine-evidence/foldgpt-engine-bootstrap-protocol-tests-before-admission.log",
+      "bytes": 2709,
+      "sha256": "4c2e3da14ad629da47f893d42904b115ada996ac84cd9583248ebcb42f6dd9cb"
+    },
+    {
+      "path": "engine-evidence/foldgpt-engine-bootstrap-protocol-tests-before-directory-fix.log",
+      "bytes": 3091,
+      "sha256": "42ebd89f78b3ee3098b4f28e299e487a3a1de4fe8c488606017e62918c9302b4"
+    },
+    {
+      "path": "engine-evidence/foldgpt-engine-bootstrap-protocol-tests-first.log",
+      "bytes": 3169,
+      "sha256": "235221ae0784567aa007ebd4443b411ab1d4e05efb55a44d106d8a5cb17056fd"
+    },
+    {
+      "path": "engine-evidence/foldgpt-engine-bootstrap-protocol-tests.log",
+      "bytes": 3234,
+      "sha256": "6dc69b0229dc4f7654dd2233be2455752475c9f8dda95702ed19f56b46163559"
+    },
+    {
+      "path": "engine-evidence/foldgpt-engine-bounded-trust-fix.log",
+      "bytes": 204,
+      "sha256": "74139db2c3aea61b689034aff19ee59077ffa4a629c905af1978f7dea0c2d1f0"
+    },
+    {
+      "path": "engine-evidence/foldgpt-engine-bounded-trust-fmt.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "engine-evidence/foldgpt-engine-bounded-trust-project-tests.log",
+      "bytes": 4996,
+      "sha256": "a874a224a3dc5a26232a7d7e7391689257f79685796089d1c0922d6f92b64280"
+    },
+    {
+      "path": "engine-evidence/foldgpt-engine-project-api-regression.log",
+      "bytes": 8629,
+      "sha256": "7e6d256336efcbaf9ca65d12909b79fc2b825743cce977d30509efaa1d5e12bc"
+    },
+    {
+      "path": "engine-evidence/foldgpt-engine-project-builder-first.log",
+      "bytes": 6305,
+      "sha256": "7274f06d5e0d276cd4ac3a10a49f92d493eb241ed7b757c8561ad54a6f0a34ef"
+    },
+    {
+      "path": "engine-evidence/foldgpt-engine-project-config-fix.log",
+      "bytes": 24018,
+      "sha256": "37838370d2d7a3f63ea46593b7aebf49a1052e1394700c0f4fb4b2d14aa70f9b"
+    },
+    {
+      "path": "engine-evidence/foldgpt-engine-project-config-fmt.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "engine-evidence/foldgpt-engine-project-config-service-regression.log",
+      "bytes": 5157,
+      "sha256": "6f79996087403058960cdbf50302e7067360a112f6a2540baa416d88760e1c26"
+    },
+    {
+      "path": "engine-evidence/foldgpt-engine-project-config-tests.log",
+      "bytes": 1464,
+      "sha256": "0fea37b1510a097df9f7666ab0da852dc86556ad4cdee2bad4046103d01af305"
+    },
+    {
+      "path": "engine-evidence/foldgpt-engine-project-feature-before.log",
+      "bytes": 7492,
+      "sha256": "3a1c93fec162ba6de3670de2ac46adc6fbb359c3096955a85481d1a0bd873019"
+    },
+    {
+      "path": "engine-evidence/foldgpt-engine-project-feature-fix.log",
+      "bytes": 7774,
+      "sha256": "c4ed98feb643031a50b56061f81b37f3dc26bb4d5aa7d0ab1bf327ac387af42e"
+    },
+    {
+      "path": "engine-evidence/foldgpt-engine-project-feature-fmt.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "engine-evidence/foldgpt-engine-project-feature-tests.log",
+      "bytes": 6194,
+      "sha256": "b00601ecf3ed06e803fdffe55698bf591e5c5decb1af34bfda7b2a53ee403fd0"
+    },
+    {
+      "path": "engine-evidence/foldgpt-engine-project-loader-regression.log",
+      "bytes": 13725,
+      "sha256": "0cd2c4882057a934b5a189877af0a85a5105b5278c640a1be3e584b2d0fdf9c8"
+    },
+    {
+      "path": "engine-evidence/foldgpt-engine-project-managed-feature-regression.log",
+      "bytes": 1592,
+      "sha256": "edca4d72eb5fac3e83b8206019569e3b2043d530a08c38c0ff99b07136443475"
+    },
+    {
+      "path": "engine-evidence/native-bootstrap-channel-tests.log",
+      "bytes": 20511,
+      "sha256": "00d1fdad1241480acfc3baabd382845b9cd9627897f2a77738f54e920cedbe46"
+    },
+    {
+      "path": "isolation/client/client-report.json",
+      "bytes": 443,
+      "sha256": "13224190513486f0bcf2adee6ec070ab2923137a534f35b2bca0697a7519fb24"
+    },
+    {
+      "path": "isolation/client/home/config.toml",
+      "bytes": 133,
+      "sha256": "d89cecf2342a5280f80eec3e972c419de5309017bd8e4343603d572956d69879"
+    },
+    {
+      "path": "isolation/client.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "isolation/client.stdout",
+      "bytes": 391,
+      "sha256": "481c940190336129139a401e4cd4c7db403df1553810aa48ed64d640a2d4a63b"
+    },
+    {
+      "path": "isolation/package/tools/executor/app_server_adapter.py",
+      "bytes": 6814,
+      "sha256": "75e98c20611b57d8e5a06903b3497576d4572637d5e5874bb63276ca9a73ee42"
+    },
+    {
+      "path": "isolation/package/tools/executor/app_server_routing.py",
+      "bytes": 8504,
+      "sha256": "63cf68a9b9735fdfdccc855573fe0807d176b6121b3ce5f30659db439b7fb958"
+    },
+    {
+      "path": "isolation/package/tools/executor/bionic-supervisor/__init__.py",
+      "bytes": 83,
+      "sha256": "a46bd99c12d9d547d1d9d9cdaa2e9dcfc2e6780fede44ec0751ad9806274c1ee"
+    },
+    {
+      "path": "isolation/package/tools/executor/bionic-supervisor/factory.py",
+      "bytes": 1417,
+      "sha256": "5ac757faca763c50c554d8904eb86a4515008f4f12adba8d0e43df091834d667"
+    },
+    {
+      "path": "isolation/package/tools/executor/bionic-supervisor/policy.py",
+      "bytes": 6068,
+      "sha256": "d4bccd92cd593cc44fcf3ceca6e90b416a7a7daeaa031b671704b2a7d1de4eb1"
+    },
+    {
+      "path": "isolation/package/tools/executor/bionic-supervisor/processes.py",
+      "bytes": 18747,
+      "sha256": "c756cba658a2e07d98f65f4ef28995682fd2e8a9a8547f3e596ac6c5ec3c8194"
+    },
+    {
+      "path": "isolation/package/tools/executor/bionic-supervisor/qualification.py",
+      "bytes": 7655,
+      "sha256": "a9078ce8e0167487dec33b422c337b157f1a9a3a553ed08b23c80541000ba099"
+    },
+    {
+      "path": "isolation/package/tools/executor/bionic-supervisor/qualification_factory.py",
+      "bytes": 12974,
+      "sha256": "4158ebee0997131207297f8fa0d4a56dbecea66c065dc81b481dd9e690d5644a"
+    },
+    {
+      "path": "isolation/package/tools/executor/bionic-supervisor/qualification_factory_v11.py",
+      "bytes": 285,
+      "sha256": "b15ad82e0c53a1753ed5365d89051f82180c3f65b80f0074600d98ef54043e92"
+    },
+    {
+      "path": "isolation/package/tools/executor/bionic-supervisor/qualification_factory_v12.py",
+      "bytes": 285,
+      "sha256": "4e1b27d65f166bfeac72b17aa32e1f9e64efe1148cfdba86e74d716ae70c6e42"
+    },
+    {
+      "path": "isolation/package/tools/executor/bionic-supervisor/runtime_paths.py",
+      "bytes": 3979,
+      "sha256": "55426d8d02f15160a7ed9e14be817467e033f0f088ce095931511ce669b382c6"
+    },
+    {
+      "path": "isolation/package/tools/executor/bionic-supervisor/runtime_qualification.py",
+      "bytes": 13240,
+      "sha256": "96ac10ac7f0d9f258447bb7828be7ef18888bc6eff9d654a1c5ea382e42db4d2"
+    },
+    {
+      "path": "isolation/package/tools/executor/bionic-supervisor/runtime_qualification_factory.py",
+      "bytes": 10182,
+      "sha256": "90fc969f87e606d412ddbaae756d672b9c18aab6ddd7305870d1c922044e6825"
+    },
+    {
+      "path": "isolation/package/tools/executor/bionic-supervisor/runtime_qualification_factory_v2.py",
+      "bytes": 308,
+      "sha256": "1dea635e138b669f2db8849f7e1767528663d99b0769b937dce06a2ac293b4f3"
+    },
+    {
+      "path": "isolation/package/tools/executor/bionic-supervisor/test_control_termination.py",
+      "bytes": 9863,
+      "sha256": "a9fbe3e29f515eca4af2d2f89c04818edcb9be078f1d5749bfb15364fd179190"
+    },
+    {
+      "path": "isolation/package/tools/executor/bionic-supervisor/test_executable_metadata_regression.py",
+      "bytes": 3134,
+      "sha256": "50473004582d7231b13df3b2c45442156ac26d8614f57cca2b82aa1d0e524a5f"
+    },
+    {
+      "path": "isolation/package/tools/executor/bionic-supervisor/test_factory.py",
+      "bytes": 22867,
+      "sha256": "145f15b5687701b60563a9894ee156ad0607ed5b8292bd4fe17114638a2cb202"
+    },
+    {
+      "path": "isolation/package/tools/executor/bionic-supervisor/test_kernel.py",
+      "bytes": 6721,
+      "sha256": "11604103a1b56557439220defc1615bac4a41180ab3eb4d7136fed785b9558b9"
+    },
+    {
+      "path": "isolation/package/tools/executor/bionic-supervisor/test_qualification_factory.py",
+      "bytes": 7808,
+      "sha256": "784d6eeca08bf78cb6fdda1b9a96adb6bccb88051878fe4ffcb975d38648ae1f"
+    },
+    {
+      "path": "isolation/package/tools/executor/bionic-supervisor/test_runtime_paths.py",
+      "bytes": 10369,
+      "sha256": "a9888873e069d61594f612250f94c22b56621b9cbb209c93c2c9a317fc0cca46"
+    },
+    {
+      "path": "isolation/package/tools/executor/bionic-supervisor/test_runtime_qualification.py",
+      "bytes": 9554,
+      "sha256": "4c0d260d017f5a7b1bb2a795c3bf22d25cf7a5b090d0ee65c6001c6a1d4fd912"
+    },
+    {
+      "path": "isolation/package/tools/executor/bionic-supervisor/wire.py",
+      "bytes": 2041,
+      "sha256": "9bb2a7b765ea7c3d80f55211e168b52c0343a13b617326c3a850ff0a3c6f9616"
+    },
+    {
+      "path": "isolation/package/tools/executor/collect-native-executor.py",
+      "bytes": 31684,
+      "sha256": "5ff1951de6f6e95889df52cbd6a7c488c44231d3710e406f7dab0d8d9dbdd12e"
+    },
+    {
+      "path": "isolation/package/tools/executor/collect-native-files-rpc.py",
+      "bytes": 4535,
+      "sha256": "da8037e444610219c89c3266106b521c9068fb0fb41a55393a9c500f0395d602"
+    },
+    {
+      "path": "isolation/package/tools/executor/collect-native-managed.py",
+      "bytes": 27474,
+      "sha256": "fbee4aeef4e0454761e42b97beccc4dae71711027f3fdc6c2c8985d1755d37aa"
+    },
+    {
+      "path": "isolation/package/tools/executor/collect-native-processes.py",
+      "bytes": 54213,
+      "sha256": "29afdd64044f00cf3876df3d4286382ab37a17d9aef0dbf2408c510ff1d654ae"
+    },
+    {
+      "path": "isolation/package/tools/executor/collect-private-exec.py",
+      "bytes": 21071,
+      "sha256": "5b0ea19c1d9fcc1fa60f9dc660d85c0b7721f8e061833e4abf242d71d1b03148"
+    },
+    {
+      "path": "isolation/package/tools/executor/exec_server.py",
+      "bytes": 26509,
+      "sha256": "d054089c34b8ddfc935569f1db441c8c080992d512b810385de2a13be4acdc53"
+    },
+    {
+      "path": "isolation/package/tools/executor/host_rpc_mux.py",
+      "bytes": 11536,
+      "sha256": "eeeccbc6061fd022c294d4b6b37c08a2ca98fcf6acf96bf4347c6a0908fe604c"
+    },
+    {
+      "path": "isolation/package/tools/executor/native-managed-test.py",
+      "bytes": 15151,
+      "sha256": "ce73e0d2b60aa6b40533932eb410cc256bccb506c39547e3139366b10b1f04b7"
+    },
+    {
+      "path": "isolation/package/tools/executor/native-runner-client-live-test.py",
+      "bytes": 2784,
+      "sha256": "cbce4f886f4c0861b90d0f2ed0206b4a9fe5f29d9bb44ec215fb0c6a48364d03"
+    },
+    {
+      "path": "isolation/package/tools/executor/native-runner-scudo-check.py",
+      "bytes": 2845,
+      "sha256": "dd5ebe54b2b8582fc154c89d8adcef45d996b21c9062043c07cb114940a65ccb"
+    },
+    {
+      "path": "isolation/package/tools/executor/native-runner-test.py",
+      "bytes": 11482,
+      "sha256": "0c85da50eb77b368b2ebae35eeefcd95de7c2ba1760256d89ef3d280dfef3131"
+    },
+    {
+      "path": "isolation/package/tools/executor/native_bootstrap_channel.py",
+      "bytes": 9049,
+      "sha256": "63f5fe3bbf9f7f869508d87ddc794e9e2a1db953b85a11997cf309e0818021ea"
+    },
+    {
+      "path": "isolation/package/tools/executor/native_bootstrap_files.py",
+      "bytes": 7639,
+      "sha256": "a40434489f94c3a338eb489f10eb50875b34366458dfd95c2c8d54331578a1d9"
+    },
+    {
+      "path": "isolation/package/tools/executor/native_client.py",
+      "bytes": 10900,
+      "sha256": "1204bfb8fd3d71d4c543a88ccd53fc0f04c332083a8da996f3af8affb78a0867"
+    },
+    {
+      "path": "isolation/package/tools/executor/native_environment.py",
+      "bytes": 6071,
+      "sha256": "ff68b91af77877b1736b6bdccbfc3b31f7d41e95de826b48651a3dffda5e6f5e"
+    },
+    {
+      "path": "isolation/package/tools/executor/native_environment_unicode.py",
+      "bytes": 5944,
+      "sha256": "912669d2c135cda550f0bdae211b3d72c3a0163e44df1c4aaec9832887bd1b20"
+    },
+    {
+      "path": "isolation/package/tools/executor/native_executor_android_fixture.py",
+      "bytes": 3656,
+      "sha256": "65592230f9a1d54c9f3f4723c3d0ac62d90352b82c7fae1c5fb0bf0d8b74bb3c"
+    },
+    {
+      "path": "isolation/package/tools/executor/native_executor_backend.py",
+      "bytes": 5308,
+      "sha256": "7bb835a2ed5c5655fe893862a24f6b3af76a194540533ed33c705d29f4dceb48"
+    },
+    {
+      "path": "isolation/package/tools/executor/native_file_streams.py",
+      "bytes": 14108,
+      "sha256": "65170c71de8e8218c88c9324064b8eb4ea209a59d708fcee74615474fd7a2a14"
+    },
+    {
+      "path": "isolation/package/tools/executor/native_files.py",
+      "bytes": 30203,
+      "sha256": "220c054ba113599ae09db6fee36fc162b36222086b5ebb8731d0652cbaa90c61"
+    },
+    {
+      "path": "isolation/package/tools/executor/native_files_rpc_fixture.py",
+      "bytes": 18075,
+      "sha256": "bacaaea6fa70d30c16f3b7a9fd6fdf28c1f1679cc362499dcca50b1f5ae6b2a9"
+    },
+    {
+      "path": "isolation/package/tools/executor/native_files_server.py",
+      "bytes": 1714,
+      "sha256": "2bb3b914937243656a859a060d9740f91fc5e92b43277c144386a496a92a2388"
+    },
+    {
+      "path": "isolation/package/tools/executor/native_managed_android_fixture.py",
+      "bytes": 3536,
+      "sha256": "90b06e4017c24c1ef5db76cbc4a4b81ddbe73ef7a55fb45c64eb27ec2ac38e56"
+    },
+    {
+      "path": "isolation/package/tools/executor/native_process_policy.py",
+      "bytes": 9833,
+      "sha256": "dad1b38fefdd8962681eda20534aca0fb670e02eb3361cd86ebec3e5db7b6ff1"
+    },
+    {
+      "path": "isolation/package/tools/executor/native_processes.py",
+      "bytes": 40169,
+      "sha256": "b6fefdef7deb9df76e1effb659aced0f8c0cbdb9aa3d05625d75ee574c612182"
+    },
+    {
+      "path": "isolation/package/tools/executor/native_processes_android_fixture.py",
+      "bytes": 4526,
+      "sha256": "4a20034a2fbc68e9b3f548639f27c8ecf0516c3d8057a751adfd98a1dcb7dfee"
+    },
+    {
+      "path": "isolation/package/tools/executor/policy_intent.py",
+      "bytes": 3988,
+      "sha256": "32a04ab8c8c459926df875cd15524a92902044c8847f462597d23a1c474de4cb"
+    },
+    {
+      "path": "isolation/package/tools/executor/private_exec_broker.py",
+      "bytes": 16400,
+      "sha256": "7386de6affce4689f281c63564702e7a83cda8213c30dde8915d55b690ad737f"
+    },
+    {
+      "path": "isolation/package/tools/executor/private_exec_fixture.py",
+      "bytes": 22809,
+      "sha256": "f97c281b0e26b79b4d9d1530ca5a36f2ffae248914002ef9ff8eb68ede5c5234"
+    },
+    {
+      "path": "isolation/package/tools/executor/qualify_bootstrap_isolation.py",
+      "bytes": 7863,
+      "sha256": "04781115868f104e64280955fdb6416a53771687d00743063cdded3158a935ac"
+    },
+    {
+      "path": "isolation/package/tools/executor/stage-android-python.py",
+      "bytes": 14106,
+      "sha256": "c2c786109b7645f4e79e6e135bb81e23d49a04025b0d9ce45f6976e13908b9d1"
+    },
+    {
+      "path": "isolation/package/tools/executor/stage-android-routing.py",
+      "bytes": 3657,
+      "sha256": "a6bec32464f26ad854100d30d32d264351a541d8bb3aff280481bcbf791445c2"
+    },
+    {
+      "path": "isolation/package/tools/executor/stage-gnu-loader.py",
+      "bytes": 2775,
+      "sha256": "4446f3b186344b45f5d80a0160550467d4c0aba4df2f6a1c0f15ba5f85e0679e"
+    },
+    {
+      "path": "isolation/package/tools/executor/test_app_server_routing.py",
+      "bytes": 8761,
+      "sha256": "469ce714573d50564f8e47774e7d314fd5fd337f862bf68240dc63a5461085de"
+    },
+    {
+      "path": "isolation/package/tools/executor/test_collect_native_executor.py",
+      "bytes": 6332,
+      "sha256": "d570868a4b29bf09f20abd78e56580d9e3d4ebbbb971dd2b2b4d6b5125bd2af5"
+    },
+    {
+      "path": "isolation/package/tools/executor/test_collect_native_processes.py",
+      "bytes": 7372,
+      "sha256": "0e4969e3ecdd45f9f432e5195416dd3f1700ee2b6b21c090f06e91b85b2844eb"
+    },
+    {
+      "path": "isolation/package/tools/executor/test_exec_server.py",
+      "bytes": 26271,
+      "sha256": "e0a96718a2f7cc2e0d96f4219b6e4ad0221b4789118195ec12dd7e95eaebc583"
+    },
+    {
+      "path": "isolation/package/tools/executor/test_native_bootstrap_channel.py",
+      "bytes": 7258,
+      "sha256": "be1ce6cdb18acd44c82098c56c4f56d3677d9e6248ca5ee7dc795ddc6974df7e"
+    },
+    {
+      "path": "isolation/package/tools/executor/test_native_bootstrap_files.py",
+      "bytes": 11242,
+      "sha256": "f706678eadd5be8e6a3fb558c5961ec86061e13d8a700556aad1f7679b583489"
+    },
+    {
+      "path": "isolation/package/tools/executor/test_native_client.py",
+      "bytes": 3644,
+      "sha256": "829c18ebbbf4d80ca8a79737dde54eb8617ae371ed00324f1433de64cccfbd0f"
+    },
+    {
+      "path": "isolation/package/tools/executor/test_native_environment.py",
+      "bytes": 6730,
+      "sha256": "3501890f8d6532d0118c8cda81c7a9c214c5eb5877fce05a285f02ba3e0a6d0d"
+    },
+    {
+      "path": "isolation/package/tools/executor/test_native_environment_live.py",
+      "bytes": 4707,
+      "sha256": "a8a4c157b8aa0abb8c58a34487e43d933ec72e620331d4feebae64f4a6b21090"
+    },
+    {
+      "path": "isolation/package/tools/executor/test_native_executor_transport.py",
+      "bytes": 29786,
+      "sha256": "89e557afc8940e2e71f5d69553698148719a9c1d273435f09829e2ee4e8dae0a"
+    },
+    {
+      "path": "isolation/package/tools/executor/test_native_file_streams.py",
+      "bytes": 24125,
+      "sha256": "2bc5bcf72691ddba1138aefa73d72afb75eaec245fda46ab6c5f9673d6d60501"
+    },
+    {
+      "path": "isolation/package/tools/executor/test_native_files_fixture_lifecycle.py",
+      "bytes": 3439,
+      "sha256": "b0f209ae62be0477712dc9951a5be199c2d39c52e1ebc9fa8fb7c9bdc7543b33"
+    },
+    {
+      "path": "isolation/package/tools/executor/test_native_files_live.py",
+      "bytes": 50693,
+      "sha256": "e9d5c20023a5cf63e753dff8f149e0051318cd7e20651c898e83c5db265aafc6"
+    },
+    {
+      "path": "isolation/package/tools/executor/test_native_processes_live.py",
+      "bytes": 35810,
+      "sha256": "618ac0ee93ef585c8661240d6fb9913be8ecd1641e86d3e8abef211b6ab1544f"
+    },
+    {
+      "path": "isolation/package/tools/executor/test_policy_intent.py",
+      "bytes": 5295,
+      "sha256": "66ea0dbec3e1ffe8e0f1be96f71c90baa8e8fd7bc932bb49aaba70fea4c575f3"
+    },
+    {
+      "path": "isolation/package/tools/executor/test_private_exec_broker.py",
+      "bytes": 13524,
+      "sha256": "ab41dbbfb58ef5ee1decd11ed51add5cc3af049ece6eaa743404994278c5ddf6"
+    },
+    {
+      "path": "isolation/package/tools/executor/test_private_session_owner.py",
+      "bytes": 12156,
+      "sha256": "d8c086c2b8a952f16035f51fe48b267e5d1200221eb695da747c04d28df99e39"
+    },
+    {
+      "path": "isolation/package/tools/executor/verify_app_server_adapter.py",
+      "bytes": 5276,
+      "sha256": "3bd9551ce37f077f10a49c4c95b9eafae117b1ac634e52ae41b3434307e44a05"
+    },
+    {
+      "path": "isolation/package/tools/executor/verify_host_rpc_mux.py",
+      "bytes": 13801,
+      "sha256": "aef518627a7acf43949f7b8efb8f5b3de5948eff67c8bfc2888b13a446b01929"
+    },
+    {
+      "path": "isolation/package/tools/executor/verify_official_environment.py",
+      "bytes": 6401,
+      "sha256": "5bec9cdef1e96fb0476338d9ba785df5c1263fffa0901cf54e83430d0c1dc464"
+    },
+    {
+      "path": "isolation/package/tools/policy/managed_policy.py",
+      "bytes": 16935,
+      "sha256": "0186d16b903e2cacc9bb4cd0a1f44dc013ac49a6f4000d21f5f109bafb8930a5"
+    },
+    {
+      "path": "isolation/ready.json",
+      "bytes": 171,
+      "sha256": "4048014fd266f22429ae4835d4f69c6865f2e09c2cf5b34582c0cc4e3e35470d"
+    },
+    {
+      "path": "isolation/report.json",
+      "bytes": 1197,
+      "sha256": "5e08c3da245034a34ba13900e30a7c869d4178851227f27ea3f704079b9134e3"
+    },
+    {
+      "path": "isolation/server/owner-report.json",
+      "bytes": 118,
+      "sha256": "c9d4f61fa908b9b968298dd959b8be6e95b6d7c8debcded28d8204e203769c02"
+    },
+    {
+      "path": "isolation/server/workspace/.codex/config.toml",
+      "bytes": 31,
+      "sha256": "dfeb52ef0b299d124c0938ea7d1370bc92b93424b399cd98b655538807d6eb22"
+    },
+    {
+      "path": "isolation/server/workspace/binary",
+      "bytes": 70000,
+      "sha256": "0c6c96cc20d3f906e54f1f1296e8878c1ac39262fb587cd56235c3aa9103d837"
+    },
+    {
+      "path": "isolation/server.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "isolation/sources.json",
+      "bytes": 11390,
+      "sha256": "8f69d3c18cbd5c277f06a7f5a00a2aa1c6e482b63794b765a56b286917f8622f"
+    },
+    {
+      "path": "python-tests/BINARIES.sha256",
+      "bytes": 244,
+      "sha256": "b9bcf6b39618b55d7ec362d8a74a42a29b9308cfa0b9db45e1b7085df117aec8"
+    },
+    {
+      "path": "python-tests/SOURCES.sha256",
+      "bytes": 9324,
+      "sha256": "88d00ceb5c50dd27dd943fecb90a99750f1bb080b95315237636edde7853b11f"
+    },
+    {
+      "path": "python-tests/native-file-handle",
+      "bytes": 790512,
+      "sha256": "048fe3ae381185db33603d547451d960037e0560854769e8e36e5ecc221c1244"
+    },
+    {
+      "path": "python-tests/native-file-handle.c",
+      "bytes": 6899,
+      "sha256": "9cb19d51a681465b86cbfe7504e0e0fecb778e2e899ad18821b91beafae238b3"
+    },
+    {
+      "path": "python-tests/native-files",
+      "bytes": 798856,
+      "sha256": "7321038029d8955ce89a0cddca020bfad7d7d1d91823ea057f9d97921c9cb506"
+    },
+    {
+      "path": "python-tests/native-files.c",
+      "bytes": 26174,
+      "sha256": "6393c856a31b3403922c6b2103f69afc8f151fdab19255727d76e32793d2f94d"
+    },
+    {
+      "path": "python-tests/package/tools/__init__.py",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "python-tests/package/tools/executor/__init__.py",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "python-tests/package/tools/executor/app_server_adapter.py",
+      "bytes": 6814,
+      "sha256": "75e98c20611b57d8e5a06903b3497576d4572637d5e5874bb63276ca9a73ee42"
+    },
+    {
+      "path": "python-tests/package/tools/executor/app_server_routing.py",
+      "bytes": 8504,
+      "sha256": "63cf68a9b9735fdfdccc855573fe0807d176b6121b3ce5f30659db439b7fb958"
+    },
+    {
+      "path": "python-tests/package/tools/executor/bionic-supervisor/__init__.py",
+      "bytes": 83,
+      "sha256": "a46bd99c12d9d547d1d9d9cdaa2e9dcfc2e6780fede44ec0751ad9806274c1ee"
+    },
+    {
+      "path": "python-tests/package/tools/executor/bionic-supervisor/factory.py",
+      "bytes": 1417,
+      "sha256": "5ac757faca763c50c554d8904eb86a4515008f4f12adba8d0e43df091834d667"
+    },
+    {
+      "path": "python-tests/package/tools/executor/bionic-supervisor/policy.py",
+      "bytes": 6068,
+      "sha256": "d4bccd92cd593cc44fcf3ceca6e90b416a7a7daeaa031b671704b2a7d1de4eb1"
+    },
+    {
+      "path": "python-tests/package/tools/executor/bionic-supervisor/processes.py",
+      "bytes": 18747,
+      "sha256": "c756cba658a2e07d98f65f4ef28995682fd2e8a9a8547f3e596ac6c5ec3c8194"
+    },
+    {
+      "path": "python-tests/package/tools/executor/bionic-supervisor/qualification.py",
+      "bytes": 7655,
+      "sha256": "a9078ce8e0167487dec33b422c337b157f1a9a3a553ed08b23c80541000ba099"
+    },
+    {
+      "path": "python-tests/package/tools/executor/bionic-supervisor/qualification_factory.py",
+      "bytes": 12974,
+      "sha256": "4158ebee0997131207297f8fa0d4a56dbecea66c065dc81b481dd9e690d5644a"
+    },
+    {
+      "path": "python-tests/package/tools/executor/bionic-supervisor/qualification_factory_v11.py",
+      "bytes": 285,
+      "sha256": "b15ad82e0c53a1753ed5365d89051f82180c3f65b80f0074600d98ef54043e92"
+    },
+    {
+      "path": "python-tests/package/tools/executor/bionic-supervisor/qualification_factory_v12.py",
+      "bytes": 285,
+      "sha256": "4e1b27d65f166bfeac72b17aa32e1f9e64efe1148cfdba86e74d716ae70c6e42"
+    },
+    {
+      "path": "python-tests/package/tools/executor/bionic-supervisor/runtime_paths.py",
+      "bytes": 3979,
+      "sha256": "55426d8d02f15160a7ed9e14be817467e033f0f088ce095931511ce669b382c6"
+    },
+    {
+      "path": "python-tests/package/tools/executor/bionic-supervisor/runtime_qualification.py",
+      "bytes": 13240,
+      "sha256": "96ac10ac7f0d9f258447bb7828be7ef18888bc6eff9d654a1c5ea382e42db4d2"
+    },
+    {
+      "path": "python-tests/package/tools/executor/bionic-supervisor/runtime_qualification_factory.py",
+      "bytes": 10182,
+      "sha256": "90fc969f87e606d412ddbaae756d672b9c18aab6ddd7305870d1c922044e6825"
+    },
+    {
+      "path": "python-tests/package/tools/executor/bionic-supervisor/runtime_qualification_factory_v2.py",
+      "bytes": 308,
+      "sha256": "1dea635e138b669f2db8849f7e1767528663d99b0769b937dce06a2ac293b4f3"
+    },
+    {
+      "path": "python-tests/package/tools/executor/bionic-supervisor/test_control_termination.py",
+      "bytes": 9863,
+      "sha256": "a9fbe3e29f515eca4af2d2f89c04818edcb9be078f1d5749bfb15364fd179190"
+    },
+    {
+      "path": "python-tests/package/tools/executor/bionic-supervisor/test_executable_metadata_regression.py",
+      "bytes": 3134,
+      "sha256": "50473004582d7231b13df3b2c45442156ac26d8614f57cca2b82aa1d0e524a5f"
+    },
+    {
+      "path": "python-tests/package/tools/executor/bionic-supervisor/test_factory.py",
+      "bytes": 22867,
+      "sha256": "145f15b5687701b60563a9894ee156ad0607ed5b8292bd4fe17114638a2cb202"
+    },
+    {
+      "path": "python-tests/package/tools/executor/bionic-supervisor/test_kernel.py",
+      "bytes": 6721,
+      "sha256": "11604103a1b56557439220defc1615bac4a41180ab3eb4d7136fed785b9558b9"
+    },
+    {
+      "path": "python-tests/package/tools/executor/bionic-supervisor/test_qualification_factory.py",
+      "bytes": 7808,
+      "sha256": "784d6eeca08bf78cb6fdda1b9a96adb6bccb88051878fe4ffcb975d38648ae1f"
+    },
+    {
+      "path": "python-tests/package/tools/executor/bionic-supervisor/test_runtime_paths.py",
+      "bytes": 10369,
+      "sha256": "a9888873e069d61594f612250f94c22b56621b9cbb209c93c2c9a317fc0cca46"
+    },
+    {
+      "path": "python-tests/package/tools/executor/bionic-supervisor/test_runtime_qualification.py",
+      "bytes": 9554,
+      "sha256": "4c0d260d017f5a7b1bb2a795c3bf22d25cf7a5b090d0ee65c6001c6a1d4fd912"
+    },
+    {
+      "path": "python-tests/package/tools/executor/bionic-supervisor/wire.py",
+      "bytes": 2041,
+      "sha256": "9bb2a7b765ea7c3d80f55211e168b52c0343a13b617326c3a850ff0a3c6f9616"
+    },
+    {
+      "path": "python-tests/package/tools/executor/collect-native-executor.py",
+      "bytes": 31684,
+      "sha256": "5ff1951de6f6e95889df52cbd6a7c488c44231d3710e406f7dab0d8d9dbdd12e"
+    },
+    {
+      "path": "python-tests/package/tools/executor/collect-native-files-rpc.py",
+      "bytes": 4535,
+      "sha256": "da8037e444610219c89c3266106b521c9068fb0fb41a55393a9c500f0395d602"
+    },
+    {
+      "path": "python-tests/package/tools/executor/collect-native-managed.py",
+      "bytes": 27474,
+      "sha256": "fbee4aeef4e0454761e42b97beccc4dae71711027f3fdc6c2c8985d1755d37aa"
+    },
+    {
+      "path": "python-tests/package/tools/executor/collect-native-processes.py",
+      "bytes": 54213,
+      "sha256": "29afdd64044f00cf3876df3d4286382ab37a17d9aef0dbf2408c510ff1d654ae"
+    },
+    {
+      "path": "python-tests/package/tools/executor/collect-private-exec.py",
+      "bytes": 21071,
+      "sha256": "5b0ea19c1d9fcc1fa60f9dc660d85c0b7721f8e061833e4abf242d71d1b03148"
+    },
+    {
+      "path": "python-tests/package/tools/executor/exec_server.py",
+      "bytes": 26509,
+      "sha256": "d054089c34b8ddfc935569f1db441c8c080992d512b810385de2a13be4acdc53"
+    },
+    {
+      "path": "python-tests/package/tools/executor/host_rpc_mux.py",
+      "bytes": 11536,
+      "sha256": "eeeccbc6061fd022c294d4b6b37c08a2ca98fcf6acf96bf4347c6a0908fe604c"
+    },
+    {
+      "path": "python-tests/package/tools/executor/native-managed-test.py",
+      "bytes": 15151,
+      "sha256": "ce73e0d2b60aa6b40533932eb410cc256bccb506c39547e3139366b10b1f04b7"
+    },
+    {
+      "path": "python-tests/package/tools/executor/native-runner-client-live-test.py",
+      "bytes": 2784,
+      "sha256": "cbce4f886f4c0861b90d0f2ed0206b4a9fe5f29d9bb44ec215fb0c6a48364d03"
+    },
+    {
+      "path": "python-tests/package/tools/executor/native-runner-scudo-check.py",
+      "bytes": 2845,
+      "sha256": "dd5ebe54b2b8582fc154c89d8adcef45d996b21c9062043c07cb114940a65ccb"
+    },
+    {
+      "path": "python-tests/package/tools/executor/native-runner-test.py",
+      "bytes": 11482,
+      "sha256": "0c85da50eb77b368b2ebae35eeefcd95de7c2ba1760256d89ef3d280dfef3131"
+    },
+    {
+      "path": "python-tests/package/tools/executor/native_bootstrap_channel.py",
+      "bytes": 9049,
+      "sha256": "63f5fe3bbf9f7f869508d87ddc794e9e2a1db953b85a11997cf309e0818021ea"
+    },
+    {
+      "path": "python-tests/package/tools/executor/native_bootstrap_files.py",
+      "bytes": 7639,
+      "sha256": "a40434489f94c3a338eb489f10eb50875b34366458dfd95c2c8d54331578a1d9"
+    },
+    {
+      "path": "python-tests/package/tools/executor/native_client.py",
+      "bytes": 10900,
+      "sha256": "1204bfb8fd3d71d4c543a88ccd53fc0f04c332083a8da996f3af8affb78a0867"
+    },
+    {
+      "path": "python-tests/package/tools/executor/native_environment.py",
+      "bytes": 6071,
+      "sha256": "ff68b91af77877b1736b6bdccbfc3b31f7d41e95de826b48651a3dffda5e6f5e"
+    },
+    {
+      "path": "python-tests/package/tools/executor/native_environment_unicode.py",
+      "bytes": 5944,
+      "sha256": "912669d2c135cda550f0bdae211b3d72c3a0163e44df1c4aaec9832887bd1b20"
+    },
+    {
+      "path": "python-tests/package/tools/executor/native_executor_android_fixture.py",
+      "bytes": 3656,
+      "sha256": "65592230f9a1d54c9f3f4723c3d0ac62d90352b82c7fae1c5fb0bf0d8b74bb3c"
+    },
+    {
+      "path": "python-tests/package/tools/executor/native_executor_backend.py",
+      "bytes": 5308,
+      "sha256": "7bb835a2ed5c5655fe893862a24f6b3af76a194540533ed33c705d29f4dceb48"
+    },
+    {
+      "path": "python-tests/package/tools/executor/native_file_streams.py",
+      "bytes": 14108,
+      "sha256": "65170c71de8e8218c88c9324064b8eb4ea209a59d708fcee74615474fd7a2a14"
+    },
+    {
+      "path": "python-tests/package/tools/executor/native_files.py",
+      "bytes": 30203,
+      "sha256": "220c054ba113599ae09db6fee36fc162b36222086b5ebb8731d0652cbaa90c61"
+    },
+    {
+      "path": "python-tests/package/tools/executor/native_files_rpc_fixture.py",
+      "bytes": 18075,
+      "sha256": "bacaaea6fa70d30c16f3b7a9fd6fdf28c1f1679cc362499dcca50b1f5ae6b2a9"
+    },
+    {
+      "path": "python-tests/package/tools/executor/native_files_server.py",
+      "bytes": 1714,
+      "sha256": "2bb3b914937243656a859a060d9740f91fc5e92b43277c144386a496a92a2388"
+    },
+    {
+      "path": "python-tests/package/tools/executor/native_managed_android_fixture.py",
+      "bytes": 3536,
+      "sha256": "90b06e4017c24c1ef5db76cbc4a4b81ddbe73ef7a55fb45c64eb27ec2ac38e56"
+    },
+    {
+      "path": "python-tests/package/tools/executor/native_process_policy.py",
+      "bytes": 9833,
+      "sha256": "dad1b38fefdd8962681eda20534aca0fb670e02eb3361cd86ebec3e5db7b6ff1"
+    },
+    {
+      "path": "python-tests/package/tools/executor/native_processes.py",
+      "bytes": 40169,
+      "sha256": "b6fefdef7deb9df76e1effb659aced0f8c0cbdb9aa3d05625d75ee574c612182"
+    },
+    {
+      "path": "python-tests/package/tools/executor/native_processes_android_fixture.py",
+      "bytes": 4526,
+      "sha256": "4a20034a2fbc68e9b3f548639f27c8ecf0516c3d8057a751adfd98a1dcb7dfee"
+    },
+    {
+      "path": "python-tests/package/tools/executor/policy_intent.py",
+      "bytes": 3988,
+      "sha256": "32a04ab8c8c459926df875cd15524a92902044c8847f462597d23a1c474de4cb"
+    },
+    {
+      "path": "python-tests/package/tools/executor/private_exec_broker.py",
+      "bytes": 16400,
+      "sha256": "7386de6affce4689f281c63564702e7a83cda8213c30dde8915d55b690ad737f"
+    },
+    {
+      "path": "python-tests/package/tools/executor/private_exec_fixture.py",
+      "bytes": 22809,
+      "sha256": "f97c281b0e26b79b4d9d1530ca5a36f2ffae248914002ef9ff8eb68ede5c5234"
+    },
+    {
+      "path": "python-tests/package/tools/executor/qualify_bootstrap_isolation.py",
+      "bytes": 7877,
+      "sha256": "9379dc432a5e6dc52a523dd7262ac30170ad958ee80656f6a4832de5cf2b5f06"
+    },
+    {
+      "path": "python-tests/package/tools/executor/stage-android-python.py",
+      "bytes": 14106,
+      "sha256": "c2c786109b7645f4e79e6e135bb81e23d49a04025b0d9ce45f6976e13908b9d1"
+    },
+    {
+      "path": "python-tests/package/tools/executor/stage-android-routing.py",
+      "bytes": 3657,
+      "sha256": "a6bec32464f26ad854100d30d32d264351a541d8bb3aff280481bcbf791445c2"
+    },
+    {
+      "path": "python-tests/package/tools/executor/stage-gnu-loader.py",
+      "bytes": 2775,
+      "sha256": "4446f3b186344b45f5d80a0160550467d4c0aba4df2f6a1c0f15ba5f85e0679e"
+    },
+    {
+      "path": "python-tests/package/tools/executor/test_app_server_routing.py",
+      "bytes": 8761,
+      "sha256": "469ce714573d50564f8e47774e7d314fd5fd337f862bf68240dc63a5461085de"
+    },
+    {
+      "path": "python-tests/package/tools/executor/test_collect_native_executor.py",
+      "bytes": 6332,
+      "sha256": "d570868a4b29bf09f20abd78e56580d9e3d4ebbbb971dd2b2b4d6b5125bd2af5"
+    },
+    {
+      "path": "python-tests/package/tools/executor/test_collect_native_processes.py",
+      "bytes": 7372,
+      "sha256": "0e4969e3ecdd45f9f432e5195416dd3f1700ee2b6b21c090f06e91b85b2844eb"
+    },
+    {
+      "path": "python-tests/package/tools/executor/test_exec_server.py",
+      "bytes": 26271,
+      "sha256": "e0a96718a2f7cc2e0d96f4219b6e4ad0221b4789118195ec12dd7e95eaebc583"
+    },
+    {
+      "path": "python-tests/package/tools/executor/test_native_bootstrap_channel.py",
+      "bytes": 7258,
+      "sha256": "be1ce6cdb18acd44c82098c56c4f56d3677d9e6248ca5ee7dc795ddc6974df7e"
+    },
+    {
+      "path": "python-tests/package/tools/executor/test_native_bootstrap_files.py",
+      "bytes": 11242,
+      "sha256": "f706678eadd5be8e6a3fb558c5961ec86061e13d8a700556aad1f7679b583489"
+    },
+    {
+      "path": "python-tests/package/tools/executor/test_native_client.py",
+      "bytes": 3644,
+      "sha256": "829c18ebbbf4d80ca8a79737dde54eb8617ae371ed00324f1433de64cccfbd0f"
+    },
+    {
+      "path": "python-tests/package/tools/executor/test_native_environment.py",
+      "bytes": 6730,
+      "sha256": "3501890f8d6532d0118c8cda81c7a9c214c5eb5877fce05a285f02ba3e0a6d0d"
+    },
+    {
+      "path": "python-tests/package/tools/executor/test_native_environment_live.py",
+      "bytes": 4707,
+      "sha256": "a8a4c157b8aa0abb8c58a34487e43d933ec72e620331d4feebae64f4a6b21090"
+    },
+    {
+      "path": "python-tests/package/tools/executor/test_native_executor_transport.py",
+      "bytes": 29786,
+      "sha256": "89e557afc8940e2e71f5d69553698148719a9c1d273435f09829e2ee4e8dae0a"
+    },
+    {
+      "path": "python-tests/package/tools/executor/test_native_file_streams.py",
+      "bytes": 24125,
+      "sha256": "2bc5bcf72691ddba1138aefa73d72afb75eaec245fda46ab6c5f9673d6d60501"
+    },
+    {
+      "path": "python-tests/package/tools/executor/test_native_files_fixture_lifecycle.py",
+      "bytes": 3439,
+      "sha256": "b0f209ae62be0477712dc9951a5be199c2d39c52e1ebc9fa8fb7c9bdc7543b33"
+    },
+    {
+      "path": "python-tests/package/tools/executor/test_native_files_live.py",
+      "bytes": 50693,
+      "sha256": "e9d5c20023a5cf63e753dff8f149e0051318cd7e20651c898e83c5db265aafc6"
+    },
+    {
+      "path": "python-tests/package/tools/executor/test_native_processes_live.py",
+      "bytes": 35810,
+      "sha256": "618ac0ee93ef585c8661240d6fb9913be8ecd1641e86d3e8abef211b6ab1544f"
+    },
+    {
+      "path": "python-tests/package/tools/executor/test_policy_intent.py",
+      "bytes": 5295,
+      "sha256": "66ea0dbec3e1ffe8e0f1be96f71c90baa8e8fd7bc932bb49aaba70fea4c575f3"
+    },
+    {
+      "path": "python-tests/package/tools/executor/test_private_exec_broker.py",
+      "bytes": 13524,
+      "sha256": "ab41dbbfb58ef5ee1decd11ed51add5cc3af049ece6eaa743404994278c5ddf6"
+    },
+    {
+      "path": "python-tests/package/tools/executor/test_private_session_owner.py",
+      "bytes": 12156,
+      "sha256": "d8c086c2b8a952f16035f51fe48b267e5d1200221eb695da747c04d28df99e39"
+    },
+    {
+      "path": "python-tests/package/tools/executor/verify_app_server_adapter.py",
+      "bytes": 5276,
+      "sha256": "3bd9551ce37f077f10a49c4c95b9eafae117b1ac634e52ae41b3434307e44a05"
+    },
+    {
+      "path": "python-tests/package/tools/executor/verify_host_rpc_mux.py",
+      "bytes": 13801,
+      "sha256": "aef518627a7acf43949f7b8efb8f5b3de5948eff67c8bfc2888b13a446b01929"
+    },
+    {
+      "path": "python-tests/package/tools/executor/verify_official_environment.py",
+      "bytes": 6401,
+      "sha256": "5bec9cdef1e96fb0476338d9ba785df5c1263fffa0901cf54e83430d0c1dc464"
+    },
+    {
+      "path": "python-tests/package/tools/policy/__init__.py",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "python-tests/package/tools/policy/managed_policy.py",
+      "bytes": 16935,
+      "sha256": "0186d16b903e2cacc9bb4cd0a1f44dc013ac49a6f4000d21f5f109bafb8930a5"
+    },
+    {
+      "path": "python-tests/paused-helper",
+      "bytes": 785320,
+      "sha256": "c1c73368a2b90fca894b688f3f78851efddfb0d42f30bc2e2051b954bd5f6fb9"
+    },
+    {
+      "path": "python-tests/test_bootstrap_paused_helper.c",
+      "bytes": 135,
+      "sha256": "e115b9fe712399c52a6a84c5fa7823e778d33acbaf9b4c68f1e41428012a29c6"
+    },
+    {
+      "path": "python-tests/tests.txt",
+      "bytes": 20327,
+      "sha256": "edcbf5a55adb5b57d1650a3353cd13d7c4e9be2dcf43cda4404e5c9acab3346d"
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+RUST_MIN_STACK=8388608 NEXTEST_PROFILE=local cargo nextest run --no-fail-fast "$@"
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.92s
+────────────
+ Nextest run ID 19b0fb1e-de5f-4e39-a06a-bd79650a6ff8 with nextest profile: local
+    Starting 29 tests across 1 binary (1124 tests skipped)
+        PASS [   0.483s] ( 1/29) codex-app-server::all suite::v2::environment_info::environment_info_rejects_unknown_environment
+        PASS [   0.528s] ( 2/29) codex-app-server::all suite::v2::environment_info::environment_info_accepts_missing_cwd
+        PASS [   0.529s] ( 3/29) codex-app-server::all suite::v2::environment_info::environment_info_probes_executor_even_when_metadata_is_cached
+        PASS [   0.540s] ( 4/29) codex-app-server::all suite::v2::environment_info::environment_info_reports_connection_failure
+        PASS [   0.417s] ( 5/29) codex-app-server::all suite::v2::environment_info::environment_info_returns_remote_environment_info
+        PASS [   0.408s] ( 6/29) codex-app-server::all suite::v2::fs::fs_copy_ignores_unknown_special_files_in_recursive_copy
+        PASS [   0.398s] ( 7/29) codex-app-server::all suite::v2::fs::fs_copy_preserves_symlinks_in_recursive_copy
+        PASS [   0.454s] ( 8/29) codex-app-server::all suite::v2::environment_status::environment_status_reports_connection_states_with_auto_env
+        PASS [   0.377s] ( 9/29) codex-app-server::all suite::v2::fs::fs_copy_rejects_copying_directory_into_descendant
+        PASS [   0.400s] (10/29) codex-app-server::all suite::v2::fs::fs_copy_rejects_standalone_fifo_source
+        PASS [   0.401s] (11/29) codex-app-server::all suite::v2::fs::fs_copy_rejects_directory_without_recursive
+        PASS [   0.381s] (12/29) codex-app-server::all suite::v2::fs::fs_get_metadata_reports_symlink
+        PASS [   0.351s] (13/29) codex-app-server::all suite::v2::fs::fs_get_metadata_returns_only_used_fields
+        PASS [   0.372s] (14/29) codex-app-server::all suite::v2::fs::fs_methods_reject_relative_paths
+        PASS [   0.379s] (15/29) codex-app-server::all suite::v2::fs::fs_methods_cover_current_fs_utils_surface
+        PASS [   0.368s] (16/29) codex-app-server::all suite::v2::fs::fs_methods_return_error_when_local_environment_is_disabled
+        PASS [   0.371s] (17/29) codex-app-server::all suite::v2::fs::fs_watch_rejects_relative_paths
+        PASS [   0.545s] (18/29) codex-app-server::all suite::v2::fs::fs_watch_allows_missing_file_targets
+        PASS [   0.585s] (19/29) codex-app-server::all suite::v2::fs::fs_watch_file_reports_atomic_replace_events
+        PASS [   0.317s] (20/29) codex-app-server::all suite::v2::fs::fs_write_file_accepts_base64_bytes
+        PASS [   0.341s] (21/29) codex-app-server::all suite::v2::fs::fs_write_file_rejects_invalid_base64
+        PASS [   0.356s] (22/29) codex-app-server::all suite::v2::initialize::initialize_codex_backend_does_not_override_originator
+        PASS [   0.366s] (23/29) codex-app-server::all suite::v2::initialize::initialize_probe_does_not_override_originator
+        PASS [   0.291s] (24/29) codex-app-server::all suite::v2::initialize::initialize_rejects_invalid_client_name
+        PASS [   0.343s] (25/29) codex-app-server::all suite::v2::initialize::initialize_respects_originator_override_env_var
+        PASS [   0.311s] (26/29) codex-app-server::all suite::v2::initialize::initialize_uses_client_info_name_as_originator
+        PASS [   0.915s] (27/29) codex-app-server::all suite::v2::initialize::initialize_opt_out_notification_methods_filters_notifications
+        PASS [   0.465s] (28/29) codex-app-server::all suite::v2::initialize::turn_start_notify_payload_includes_initialize_client_name
+        PASS [   2.298s] (29/29) codex-app-server::all suite::v2::fs::fs_watch_directory_reports_changed_child_paths_and_unwatch_stops_notifications
+────────────
+     Summary [   4.012s] 29 tests run: 29 passed, 1124 skipped

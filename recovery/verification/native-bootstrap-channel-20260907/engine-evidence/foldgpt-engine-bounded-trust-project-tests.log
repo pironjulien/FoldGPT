@@ -1,0 +1,49 @@
+RUST_MIN_STACK=8388608 NEXTEST_PROFILE=local cargo nextest run --no-fail-fast "$@"
+    Blocking waiting for file lock on artifact directory
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1m 07s
+────────────
+ Nextest run ID 5cda38cc-62aa-44d1-b31d-4bce4d7ebaef with nextest profile: local
+    Starting 41 tests across 1 binary
+        PASS [   0.007s] ( 1/41) codex-git-utils apply::tests::extract_paths_unescapes_c_style_in_quoted_headers
+        PASS [   0.007s] ( 2/41) codex-git-utils apply::tests::extract_paths_handles_quoted_headers
+        PASS [   0.007s] ( 3/41) codex-git-utils apply::tests::extract_paths_ignores_dev_null_header
+        PASS [   0.007s] ( 4/41) codex-git-utils fsmonitor::tests::detects_supported_builtin_fsmonitor_values
+        PASS [   0.015s] ( 5/41) codex-git-utils apply::tests::parse_output_unescapes_quoted_paths
+        PASS [   0.008s] ( 6/41) codex-git-utils info::tests::canonicalize_git_remote_url_handles_ghe_without_lowercasing_path
+        PASS [   0.008s] ( 7/41) codex-git-utils info::tests::canonicalize_git_remote_url_rejects_non_repository_values
+        PASS [   0.009s] ( 8/41) codex-git-utils info::tests::parse_git_remote_urls_skips_malformed_entries
+        PASS [   0.009s] ( 9/41) codex-git-utils info::tests::parse_git_remote_urls_sanitizes_fetch_credentials
+        PASS [   0.012s] (10/41) codex-git-utils info::tests::canonicalize_git_remote_url_normalizes_github_variants
+        PASS [   0.018s] (11/41) codex-git-utils info::tests::fsmonitor_override_rejects_configured_helper
+        PASS [   0.014s] (12/41) codex-git-utils status::tests::canceling_one_consumer_preserves_the_shared_status_scan
+        PASS [   0.014s] (13/41) codex-git-utils status::tests::completed_status_requests_start_fresh_scans_and_prune_expired_entries
+        PASS [   0.017s] (14/41) codex-git-utils status::tests::canceling_the_last_consumer_allows_a_fresh_status_scan
+        PASS [   0.016s] (15/41) codex-git-utils status::tests::completed_status_requests_are_not_reused_while_a_consumer_retains_them
+        PASS [   0.026s] (16/41) codex-git-utils baseline::tests::status_scan_does_not_write_added_file_blobs
+        PASS [   0.026s] (17/41) codex-git-utils info::tests::git_metadata_collection_sanitizes_rewritten_remote_credentials
+        PASS [   0.028s] (18/41) codex-git-utils info::tests::git_metadata_commands_do_not_inherit_stdin
+        PASS [   0.011s] (19/41) codex-git-utils status::tests::status_keys_coalesce_symlink_aliases_of_the_same_worktree
+        PASS [   0.032s] (20/41) codex-git-utils baseline::tests::write_index_ignores_configured_hooks_path
+        PASS [   0.033s] (21/41) codex-git-utils baseline::tests::reports_executable_bit_changes_as_modified
+        PASS [   0.066s] (22/41) codex-git-utils baseline::tests::ensure_recovers_from_unborn_repository
+        PASS [   0.066s] (23/41) codex-git-utils apply::tests::apply_add_success
+        PASS [   0.037s] (24/41) codex-git-utils baseline::tests::diff_reports_added_modified_and_deleted_files
+        PASS [   0.066s] (25/41) codex-git-utils baseline::tests::reset_creates_fresh_baseline
+        PASS [   0.069s] (26/41) codex-git-utils apply::tests::apply_modify_skipped_missing_index
+        PASS [   0.018s] (27/41) codex-git-utils status::tests::status_requests_from_sibling_directories_use_the_known_worktree_root
+        PASS [   0.041s] (28/41) codex-git-utils info::tests::local_git_branches_excludes_detached_head_entry
+        PASS [   0.071s] (29/41) codex-git-utils branch::tests::merge_base_returns_none_when_branch_missing
+        PASS [   0.046s] (30/41) codex-git-utils baseline::tests::reset_drops_previous_history
+        PASS [   0.078s] (31/41) codex-git-utils apply::tests::apply_modify_conflict
+        PASS [   0.039s] (32/41) codex-git-utils status::tests::concurrent_status_requests_share_one_repository_scan
+        PASS [   0.079s] (33/41) codex-git-utils apply::tests::preflight_blocks_partial_changes
+        PASS [   0.034s] (34/41) codex-git-utils status::tests::status_requests_do_not_share_different_repositories
+        PASS [   0.086s] (35/41) codex-git-utils apply::tests::apply_then_revert_success
+        PASS [   0.086s] (36/41) codex-git-utils apply::tests::revert_preflight_does_not_stage_index
+        PASS [   0.071s] (37/41) codex-git-utils branch::tests::merge_base_returns_shared_commit
+        PASS [   0.136s] (38/41) codex-git-utils branch::tests::merge_base_prefers_upstream_when_remote_ahead
+        PASS [   0.159s] (39/41) codex-git-utils info::tests::fsmonitor_override_uses_effective_layered_config_value
+        PASS [   3.139s] (40/41) codex-git-utils git_process::tests::timed_out_git_wrapper_does_not_leave_child_process_running
+        PASS [   3.172s] (41/41) codex-git-utils git_process::tests::timed_out_exited_git_wrapper_does_not_leave_child_process_running
+────────────
+     Summary [   3.202s] 41 tests run: 41 passed, 0 skipped

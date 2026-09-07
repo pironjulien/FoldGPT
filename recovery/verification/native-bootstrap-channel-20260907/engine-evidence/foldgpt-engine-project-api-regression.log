@@ -1,0 +1,82 @@
+RUST_MIN_STACK=8388608 NEXTEST_PROFILE=local cargo nextest run --no-fail-fast "$@"
+    Blocking waiting for file lock on artifact directory
+   Compiling codex-config v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/config)
+   Compiling codex-exec-server v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/exec-server)
+   Compiling codex-login v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/login)
+   Compiling codex-agent-roles v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/agent-roles)
+   Compiling codex-models-manager v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/models-manager)
+   Compiling codex-feedback v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/feedback)
+   Compiling codex-model-provider v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/model-provider)
+   Compiling codex-utils-plugins v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/utils/plugins)
+   Compiling codex-rmcp-client v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/rmcp-client)
+   Compiling codex-apply-patch v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/apply-patch)
+   Compiling codex-backend-client v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/backend-client)
+   Compiling codex-plugin v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/plugin)
+   Compiling codex-connectors v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/connectors)
+   Compiling codex-analytics v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/analytics)
+   Compiling codex-hooks v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/hooks)
+   Compiling codex-arg0 v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/arg0)
+   Compiling codex-tools v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/tools)
+   Compiling codex-mcp v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/codex-mcp)
+   Compiling codex-extension-api v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/ext/extension-api)
+   Compiling codex-core-plugins v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/core-plugins)
+   Compiling codex-skills-extension v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/ext/skills)
+   Compiling codex-home v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/codex-home)
+   Compiling codex-git-attribution v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/ext/git-attribution)
+   Compiling codex-core v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/core)
+   Compiling codex-connectors-extension v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/ext/connectors)
+   Compiling codex-memories-write v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/memories/write)
+   Compiling codex-queue-extension v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/ext/queue)
+   Compiling codex-agent-extension v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/ext/agent)
+   Compiling codex-web-search-extension v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/ext/web-search)
+   Compiling codex-history-notes-extension v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/ext/history-notes)
+   Compiling codex-cloud-config v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/cloud-config)
+   Compiling codex-goal-extension v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/ext/goal)
+   Compiling codex-guardian-v2 v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/ext/guardian-v2)
+   Compiling codex-memories-extension v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/ext/memories)
+   Compiling codex-app-server-transport v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/app-server-transport)
+   Compiling codex-mcp-extension v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/ext/mcp)
+   Compiling codex-image-generation-extension v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/ext/image-generation)
+   Compiling codex-chatgpt v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/chatgpt)
+   Compiling core_test_support v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/core/tests/common)
+   Compiling codex-external-agent-migration v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/external-agent-migration)
+   Compiling app_test_support v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/app-server/tests/common)
+   Compiling codex-app-server v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/app-server)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3m 14s
+────────────
+ Nextest run ID aaf5331e-3cab-4fac-8df6-a805dd7a9190 with nextest profile: local
+    Starting 32 tests across 1 binary (1127 tests skipped)
+        PASS [   0.427s] ( 1/32) codex-app-server::all suite::v2::config_rpc::config_batch_write_rejects_legacy_profile_tables
+        PASS [   0.442s] ( 2/32) codex-app-server::all suite::v2::config_rpc::config_batch_write_updates_multiple_desktop_settings
+        PASS [   0.442s] ( 3/32) codex-app-server::all suite::v2::config_rpc::config_batch_write_round_trips_browser_and_computer_use_config
+        PASS [   0.442s] ( 4/32) codex-app-server::all suite::v2::config_rpc::config_batch_write_applies_multiple_edits
+        PASS [   0.436s] ( 5/32) codex-app-server::all suite::v2::config_rpc::config_read_accepts_forced_chatgpt_workspace_id_list
+        PASS [   0.448s] ( 6/32) codex-app-server::all suite::v2::config_rpc::config_read_after_pipelined_write_sees_written_value
+        PASS [   0.452s] ( 7/32) codex-app-server::all suite::v2::config_rpc::config_read_accepts_legacy_forced_chatgpt_workspace_id
+        PASS [   0.452s] ( 8/32) codex-app-server::all suite::v2::config_rpc::config_read_disables_guardian_v2_when_managed_config_requires_guardian_v1
+        PASS [   0.429s] ( 9/32) codex-app-server::all suite::v2::config_rpc::config_read_ignores_bool_web_search_tool_config
+        PASS [   0.444s] (10/32) codex-app-server::all suite::v2::config_rpc::config_read_includes_apps
+        PASS [   0.445s] (11/32) codex-app-server::all suite::v2::config_rpc::config_read_includes_desktop_settings
+        PASS [   0.457s] (12/32) codex-app-server::all suite::v2::config_rpc::config_read_includes_browser_and_computer_use_config
+        PASS [   0.424s] (13/32) codex-app-server::all suite::v2::config_rpc::config_read_includes_nested_web_search_tool_config
+        PASS [   0.428s] (14/32) codex-app-server::all suite::v2::config_rpc::config_read_includes_project_layers_for_cwd
+        PASS [   0.425s] (15/32) codex-app-server::all suite::v2::config_rpc::config_read_includes_system_layer_and_overrides
+        PASS [   0.429s] (16/32) codex-app-server::all suite::v2::config_rpc::config_read_includes_tools
+        PASS [   0.405s] (17/32) codex-app-server::all suite::v2::config_rpc::config_read_respects_managed_project_root_markers
+        PASS [   0.407s] (18/32) codex-app-server::all suite::v2::config_rpc::config_read_returns_effective_and_layers
+        PASS [   0.410s] (19/32) codex-app-server::all suite::v2::config_rpc::config_requirements_read_includes_browser_and_computer_use_schema
+        PASS [   0.404s] (20/32) codex-app-server::all suite::v2::config_rpc::config_requirements_read_includes_in_app_updates_policy
+        PASS [   0.426s] (21/32) codex-app-server::all suite::v2::config_rpc::config_requirements_read_includes_managed_model_policy_and_instructions
+        PASS [   0.420s] (22/32) codex-app-server::all suite::v2::config_rpc::config_value_write_rejects_version_conflict
+        PASS [   0.427s] (23/32) codex-app-server::all suite::v2::config_rpc::config_requirements_read_includes_remote_control_and_managed_hooks
+        PASS [   0.440s] (24/32) codex-app-server::all suite::v2::config_rpc::config_value_write_replaces_value
+        PASS [   0.435s] (25/32) codex-app-server::all suite::v2::config_rpc::config_value_write_updates_desktop_settings
+        PASS [   0.445s] (26/32) codex-app-server::all suite::v2::injected_local_runtime::injected_local_runtime_absent_keeps_official_local_filesystem
+        PASS [   0.448s] (27/32) codex-app-server::all suite::v2::config_rpc::managed_auth_settings_are_exposed_enforced_and_read_only
+        PASS [   0.031s] (28/32) codex-app-server::all suite::v2::injected_local_runtime::injected_local_runtime_startup_refuses_incompatible_configuration::executor_only
+        PASS [   0.030s] (29/32) codex-app-server::all suite::v2::injected_local_runtime::injected_local_runtime_startup_refuses_incompatible_configuration::no_local
+        PASS [   0.449s] (30/32) codex-app-server::all suite::v2::injected_local_runtime::injected_local_runtime_serves_public_protocol_and_preserves_refusals::configured_runtime
+        PASS [   0.030s] (31/32) codex-app-server::all suite::v2::injected_local_runtime::injected_local_runtime_startup_refuses_incompatible_configuration::noise
+        PASS [   0.293s] (32/32) codex-app-server::all suite::v2::injected_local_runtime::injected_local_runtime_serves_public_protocol_and_preserves_refusals::environment_discovery_without_user_config
+────────────
+     Summary [   3.279s] 32 tests run: 32 passed, 1127 skipped

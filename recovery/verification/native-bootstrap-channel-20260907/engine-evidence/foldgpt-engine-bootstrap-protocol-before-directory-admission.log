@@ -1,0 +1,49 @@
+RUST_MIN_STACK=8388608 NEXTEST_PROFILE=local cargo nextest run --no-fail-fast "$@"
+   Compiling codex-exec-server v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/exec-server)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 15.81s
+────────────
+ Nextest run ID 44782bcb-9bef-4c32-8a3d-75835d2ab952 with nextest profile: local
+    Starting 1 test across 1 binary (311 tests skipped)
+  TRY 1 FAIL [   0.980s] (───) codex-exec-server bootstrap_files::tests::malformed_directory_cannot_admit_a_queued_request_before_validation
+  stdout ───
+
+    running 1 test
+    test bootstrap_files::tests::malformed_directory_cannot_admit_a_queued_request_before_validation ... FAILED
+
+    failures:
+
+    failures:
+        bootstrap_files::tests::malformed_directory_cannot_admit_a_queued_request_before_validation
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 311 filtered out; finished in 0.97s
+
+  stderr ───
+
+    thread 'bootstrap_files::tests::malformed_directory_cannot_admit_a_queued_request_before_validation' (1024) panicked at exec-server/src/bootstrap_files_tests.rs:342:25:
+    called `Result::unwrap_err()` on an `Ok` value: [123, 34, 105, 100, 34, 58, 50, 44, 34, 111, 112, 34, 58, 34, 114, 101, 97, 100, 70, 105, 108, 101, 34, 44, 34, 112, 97, 116, 104, 34, 58, 34, 102, 105, 108, 101, 58, 47, 47, 47, 115, 99, 111, 112, 101, 47, 102, 105, 108, 101, 34, 125]
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+  TRY 2 FAIL [   0.923s] (1/1) codex-exec-server bootstrap_files::tests::malformed_directory_cannot_admit_a_queued_request_before_validation
+  stdout ───
+
+    running 1 test
+    test bootstrap_files::tests::malformed_directory_cannot_admit_a_queued_request_before_validation ... FAILED
+
+    failures:
+
+    failures:
+        bootstrap_files::tests::malformed_directory_cannot_admit_a_queued_request_before_validation
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 311 filtered out; finished in 0.92s
+
+  stderr ───
+
+    thread 'bootstrap_files::tests::malformed_directory_cannot_admit_a_queued_request_before_validation' (1029) panicked at exec-server/src/bootstrap_files_tests.rs:342:25:
+    called `Result::unwrap_err()` on an `Ok` value: [123, 34, 105, 100, 34, 58, 50, 44, 34, 111, 112, 34, 58, 34, 114, 101, 97, 100, 70, 105, 108, 101, 34, 44, 34, 112, 97, 116, 104, 34, 58, 34, 102, 105, 108, 101, 58, 47, 47, 47, 115, 99, 111, 112, 101, 47, 102, 105, 108, 101, 34, 125]
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+────────────
+     Summary [   1.906s] 1 test run: 0 passed, 1 failed, 311 skipped
+  TRY 2 FAIL [   0.923s] (1/1) codex-exec-server bootstrap_files::tests::malformed_directory_cannot_admit_a_queued_request_before_validation
+error: test run failed
+error: recipe `test` failed on line 88 with exit code 100

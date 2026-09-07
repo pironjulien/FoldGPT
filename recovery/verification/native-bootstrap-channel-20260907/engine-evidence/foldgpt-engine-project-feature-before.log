@@ -1,0 +1,119 @@
+RUST_MIN_STACK=8388608 NEXTEST_PROFILE=local cargo nextest run --no-fail-fast "$@"
+   Compiling codex-git-utils v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/git-utils)
+   Compiling codex-config v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/config)
+   Compiling codex-secrets v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/secrets)
+   Compiling codex-rollout v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/rollout)
+   Compiling codex-prompts v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/prompts)
+   Compiling codex-utils-git-discovery v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/utils/git-discovery)
+   Compiling codex-app-server-protocol v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/app-server-protocol)
+   Compiling codex-exec-server v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/exec-server)
+   Compiling codex-login v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/login)
+   Compiling codex-agent-roles v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/agent-roles)
+   Compiling codex-feedback v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/feedback)
+   Compiling codex-models-manager v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/models-manager)
+   Compiling codex-model-provider v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/model-provider)
+   Compiling codex-backend-client v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/backend-client)
+   Compiling codex-utils-plugins v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/utils/plugins)
+   Compiling codex-rmcp-client v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/rmcp-client)
+   Compiling codex-apply-patch v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/apply-patch)
+   Compiling codex-plugin v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/plugin)
+   Compiling codex-connectors v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/connectors)
+   Compiling codex-hooks v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/hooks)
+   Compiling codex-arg0 v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/arg0)
+   Compiling codex-tools v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/tools)
+   Compiling codex-mcp v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/codex-mcp)
+   Compiling codex-analytics v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/analytics)
+   Compiling codex-thread-store v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/thread-store)
+   Compiling codex-extension-api v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/ext/extension-api)
+   Compiling codex-core-plugins v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/core-plugins)
+   Compiling codex-skills-extension v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/ext/skills)
+   Compiling codex-home v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/codex-home)
+   Compiling codex-git-attribution v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/ext/git-attribution)
+   Compiling codex-core v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/core)
+   Compiling codex-connectors-extension v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/ext/connectors)
+   Compiling codex-memories-write v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/memories/write)
+   Compiling codex-image-generation-extension v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/ext/image-generation)
+   Compiling codex-chatgpt v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/chatgpt)
+   Compiling codex-web-search-extension v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/ext/web-search)
+   Compiling codex-goal-extension v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/ext/goal)
+   Compiling codex-queue-extension v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/ext/queue)
+   Compiling codex-app-server-transport v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/app-server-transport)
+   Compiling codex-cloud-config v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/cloud-config)
+   Compiling codex-guardian-v2 v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/ext/guardian-v2)
+   Compiling codex-mcp-extension v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/ext/mcp)
+   Compiling codex-agent-extension v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/ext/agent)
+   Compiling codex-history-notes-extension v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/ext/history-notes)
+   Compiling codex-memories-extension v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/ext/memories)
+   Compiling core_test_support v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/core/tests/common)
+   Compiling codex-external-agent-migration v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/external-agent-migration)
+   Compiling app_test_support v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/app-server/tests/common)
+   Compiling codex-app-server v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/app-server)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 48.27s
+────────────
+ Nextest run ID 909e369d-8aa2-4bcc-9c29-eaf255a08099 with nextest profile: local
+    Starting 1 test across 1 binary (1159 tests skipped)
+  TRY 1 FAIL [   0.299s] (───) codex-app-server::all suite::v2::injected_project_config::injected_project_config_public_features_use_the_same_provider_read
+  stdout ───
+
+    running 1 test
+    test suite::v2::injected_project_config::injected_project_config_public_features_use_the_same_provider_read ... FAILED
+
+    failures:
+
+    failures:
+        suite::v2::injected_project_config::injected_project_config_public_features_use_the_same_provider_read
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 1159 filtered out; finished in 0.29s
+
+  stderr ───
+    codex app-server (WebSockets)
+      listening on: ws://127.0.0.1:39157
+      readyz: http://127.0.0.1:39157/readyz
+      healthz: http://127.0.0.1:39157/healthz
+      note: binds localhost only (use SSH port-forwarding for remote access)
+
+    thread 'suite::v2::injected_project_config::injected_project_config_public_features_use_the_same_provider_read' (9998) panicked at app-server/tests/suite/v2/injected_project_config.rs:59:5:
+    assertion failed: `(left == right)`
+
+    Diff < left / right > :
+    <Bool(false)
+    >Bool(true)
+
+
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+  TRY 2 FAIL [   0.304s] (1/1) codex-app-server::all suite::v2::injected_project_config::injected_project_config_public_features_use_the_same_provider_read
+  stdout ───
+
+    running 1 test
+    test suite::v2::injected_project_config::injected_project_config_public_features_use_the_same_provider_read ... FAILED
+
+    failures:
+
+    failures:
+        suite::v2::injected_project_config::injected_project_config_public_features_use_the_same_provider_read
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 1159 filtered out; finished in 0.29s
+
+  stderr ───
+    codex app-server (WebSockets)
+      listening on: ws://127.0.0.1:36643
+      readyz: http://127.0.0.1:36643/readyz
+      healthz: http://127.0.0.1:36643/healthz
+      note: binds localhost only (use SSH port-forwarding for remote access)
+
+    thread 'suite::v2::injected_project_config::injected_project_config_public_features_use_the_same_provider_read' (10050) panicked at app-server/tests/suite/v2/injected_project_config.rs:59:5:
+    assertion failed: `(left == right)`
+
+    Diff < left / right > :
+    <Bool(false)
+    >Bool(true)
+
+
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+────────────
+     Summary [   0.608s] 1 test run: 0 passed, 1 failed, 1159 skipped
+  TRY 2 FAIL [   0.304s] (1/1) codex-app-server::all suite::v2::injected_project_config::injected_project_config_public_features_use_the_same_provider_read
+error: test run failed
+error: recipe `test` failed on line 88 with exit code 100

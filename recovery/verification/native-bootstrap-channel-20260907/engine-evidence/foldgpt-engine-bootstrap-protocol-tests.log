@@ -1,0 +1,29 @@
+RUST_MIN_STACK=8388608 NEXTEST_PROFILE=local cargo nextest run --no-fail-fast "$@"
+   Compiling codex-exec-server v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/exec-server)
+   Compiling codex-apply-patch v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/apply-patch)
+   Compiling codex-exec-server-test-support v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/exec-server/tests/support)
+   Compiling codex-arg0 v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/arg0)
+   Compiling codex-test-binary-support v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/test-binary-support)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 15.32s
+────────────
+ Nextest run ID 9c518519-5ce6-44c3-bace-9b448b963e43 with nextest profile: local
+    Starting 17 tests across 1 binary (295 tests skipped)
+        PASS [   0.008s] ( 1/17) codex-exec-server bootstrap_files_socket::tests::stream_descriptors_are_not_accepted_as_message_transport
+        PASS [   0.008s] ( 2/17) codex-exec-server bootstrap_files::tests::disconnect_during_stream_never_exposes_unvalidated_prefix
+        PASS [   0.008s] ( 3/17) codex-exec-server bootstrap_files::tests::metadata_and_canonicalization_refuse_wrong_results_and_escaping_identities
+        PASS [   0.009s] ( 4/17) codex-exec-server bootstrap_files_socket::tests::credentialed_packets_preserve_boundaries_and_binary_bytes
+        PASS [   0.010s] ( 5/17) codex-exec-server bootstrap_files::tests::malformed_directory_content_closes_the_channel
+        PASS [   0.011s] ( 6/17) codex-exec-server bootstrap_files::tests::invalid_json_and_duplicate_fields_close_the_channel
+        PASS [   0.011s] ( 7/17) codex-exec-server bootstrap_files::tests::handshake_rejects_malformed_or_unbound_authority
+        PASS [   0.011s] ( 8/17) codex-exec-server bootstrap_files::tests::validated_authority_errors_preserve_kind_message_and_allow_next_request
+        PASS [   0.013s] ( 9/17) codex-exec-server bootstrap_files::tests::cancelling_active_request_closes_channel_and_prevents_response_reuse
+        PASS [   0.007s] (10/17) codex-exec-server bootstrap_files_socket::tests::transferred_rights_are_closed_and_packet_is_denied
+        PASS [   0.027s] (11/17) codex-exec-server bootstrap_files_socket::tests::packet_from_wrong_expected_pid_is_denied
+        PASS [   0.007s] (12/17) codex-exec-server bootstrap_files::tests::cancelling_mutex_waiter_preserves_active_request_and_identifier_sequence
+        PASS [   0.008s] (13/17) codex-exec-server bootstrap_files_socket::tests::oversized_packet_is_denied_without_returning_a_prefix
+        PASS [   0.030s] (14/17) codex-exec-server bootstrap_files::tests::malformed_replies_poison_the_channel_without_returning_partial_bytes
+        PASS [   0.038s] (15/17) codex-exec-server bootstrap_files_socket::tests::inherited_endpoint_is_authenticated_by_actual_sender_pid
+        PASS [   0.868s] (16/17) codex-exec-server bootstrap_files::tests::malformed_directory_cannot_admit_a_queued_request_before_validation
+        PASS [   0.907s] (17/17) codex-exec-server bootstrap_files::tests::total_read_limit_accepts_exact_boundary_and_rejects_one_more_byte
+────────────
+     Summary [   0.911s] 17 tests run: 17 passed, 295 skipped

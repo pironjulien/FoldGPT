@@ -1,0 +1,24 @@
+fatal: detected dubious ownership in repository at '/mnt/c/Dev/ChatgptFold/work/worktrees/FoldgptEngine'
+To add an exception for this directory, call:
+
+	git config --global --add safe.directory /mnt/c/Dev/ChatgptFold/work/worktrees/FoldgptEngine
+Traceback (most recent call last):
+  File "/mnt/c/Dev/ChatgptFold/work/worktrees/FoldgptEngine/codex-rs/../scripts/format.py", line 188, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/mnt/c/Dev/ChatgptFold/work/worktrees/FoldgptEngine/codex-rs/../scripts/format.py", line 169, in main
+    groups = formatter_groups(check=args.check)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/c/Dev/ChatgptFold/work/worktrees/FoldgptEngine/codex-rs/../scripts/format.py", line 130, in formatter_groups
+    buildifier_formatter_group(check=check),
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/c/Dev/ChatgptFold/work/worktrees/FoldgptEngine/codex-rs/../scripts/format.py", line 52, in buildifier_formatter_group
+    repository_files = subprocess.check_output(
+                       ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 466, in check_output
+    return run(*popenargs, stdout=PIPE, timeout=timeout, check=True,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['git', 'ls-files', '-z', '--cached', '--others', '--exclude-standard']' returned non-zero exit status 128.
+error: recipe `fmt` failed on line 51 with exit code 1

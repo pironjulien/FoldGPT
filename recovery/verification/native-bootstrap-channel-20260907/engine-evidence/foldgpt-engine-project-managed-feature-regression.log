@@ -1,0 +1,18 @@
+RUST_MIN_STACK=8388608 NEXTEST_PROFILE=local cargo nextest run --no-fail-fast "$@"
+    Blocking waiting for file lock on artifact directory
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 9.73s
+────────────
+ Nextest run ID 77c90a53-229d-41de-aae9-fc6a346fd50a with nextest profile: local
+    Starting 10 tests across 1 binary (2437 tests skipped)
+        PASS [   0.053s] ( 1/10) codex-core config::tests::feature_requirements_normalize_effective_feature_values
+        PASS [   0.052s] ( 2/10) codex-core config::tests::in_app_local_automation_feature_requirements_are_valid
+        PASS [   0.052s] ( 3/10) codex-core config::tests::browser_feature_requirements_are_valid
+        PASS [   0.053s] ( 4/10) codex-core config::tests::feature_requirements_warn_and_ignore_unknown_feature
+        PASS [   0.053s] ( 5/10) codex-core config::tests::in_app_chat_feature_requirements_are_valid
+        PASS [   0.053s] ( 6/10) codex-core config::tests::feature_requirements_warn_on_collab_legacy_alias
+        PASS [   0.053s] ( 7/10) codex-core config::tests::feature_requirements_normalize_runtime_feature_mutations
+        PASS [   0.053s] ( 8/10) codex-core config::tests::feature_requirements_auto_review_disables_guardian_approval
+        PASS [   0.054s] ( 9/10) codex-core config::tests::feature_requirements_can_still_disable_unified_exec
+        PASS [   0.078s] (10/10) codex-core config::tests::in_app_dictation_feature_requirements_are_valid
+────────────
+     Summary [   0.084s] 10 tests run: 10 passed, 2437 skipped

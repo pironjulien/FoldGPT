@@ -1,0 +1,43 @@
+RUST_MIN_STACK=8388608 NEXTEST_PROFILE=local cargo nextest run --no-fail-fast "$@"
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 6.45s
+────────────
+ Nextest run ID 7620c08c-3f80-4e4c-80f1-8cf6a4953384 with nextest profile: local
+    Starting 36 tests across 1 binary (249 tests skipped)
+        PASS [   0.029s] ( 1/36) codex-app-server config_manager_service::tests::clear_missing_nested_config_is_noop
+        PASS [   0.031s] ( 2/36) codex-app-server config_manager_service::tests::reserved_builtin_provider_override_rejected
+        PASS [   0.034s] ( 3/36) codex-app-server config_manager_service::tests::read_includes_origins_and_layers
+        PASS [   0.034s] ( 4/36) codex-app-server config_manager_service::tests::read_reports_managed_overrides_user_and_session_flags
+        PASS [   0.036s] ( 5/36) codex-app-server config_manager_service::tests::read_omits_origins_for_exact_managed_values
+        PASS [   0.036s] ( 6/36) codex-app-server config_manager_service::tests::multi_agent_v2_boolean_layer_owns_enabled_origin_and_overrides
+        PASS [   0.036s] ( 7/36) codex-app-server config_manager_service::tests::structured_feature_toggle_ignores_unrelated_managed_settings
+        PASS [   0.037s] ( 8/36) codex-app-server config_manager_service::tests::shell_environment_representation_switch_reports_managed_override
+        PASS [   0.022s] ( 9/36) codex-app-server config_manager_service::tests::toml_value_to_item_handles_nested_config_tables
+        PASS [   0.023s] (10/36) codex-app-server config_manager_service::tests::write_value_allows_unmanaged_sibling_of_exact_requirement
+        PASS [   0.024s] (11/36) codex-app-server config_manager_service::tests::write_value_defaults_to_user_config_path
+        PASS [   0.024s] (12/36) codex-app-server config_manager_service::tests::write_value_rejects_feature_requirement_conflict
+        PASS [   0.024s] (13/36) codex-app-server config_manager_service::tests::batch_write_rejects_legacy_profile_selector
+        PASS [   0.025s] (14/36) codex-app-server config_manager_service::tests::write_value_defaults_to_selected_user_config_path
+        PASS [   0.073s] (15/36) codex-app-server config_manager_service::tests::invalid_user_value_rejected_even_if_overridden_by_managed
+        PASS [   0.027s] (16/36) codex-app-server config_manager_service::tests::version_conflict_rejected
+        PASS [   0.028s] (17/36) codex-app-server config_manager_service::tests::shell_environment_upsert_rejects_case_variant_filters_in_one_edit
+        PASS [   0.028s] (18/36) codex-app-server config_manager_service::tests::clearing_user_setting_falls_back_to_packaged_default_without_override
+        PASS [   0.028s] (19/36) codex-app-server config_manager_service::tests::write_value_rejects_legacy_profile_table
+        PASS [   0.076s] (20/36) codex-app-server config_manager_service::tests::clear_shell_environment_filter_ignores_ascii_case
+        PASS [   0.077s] (21/36) codex-app-server config_manager_service::tests::read_materializes_default_allow_login_shell
+        PASS [   0.029s] (22/36) codex-app-server config_manager_service::tests::write_value_rejects_exact_managed_requirement
+        PASS [   0.030s] (23/36) codex-app-server config_manager_service::tests::write_value_reports_override
+        PASS [   0.030s] (24/36) codex-app-server config_manager_service::tests::write_value_preserves_comments_and_order
+        PASS [   0.078s] (25/36) codex-app-server config_manager_service::tests::load_default_config_preserves_managed_requirements_and_selected_user_config_path
+        PASS [   0.031s] (26/36) codex-app-server config_manager_service::tests::write_value_rejects_invalid_guardian_review_threshold
+        PASS [   0.032s] (27/36) codex-app-server config_manager_service::tests::write_value_rejects_legacy_profile_selector
+        PASS [   0.032s] (28/36) codex-app-server config_manager_service::tests::upsert_shell_environment_scalar_preserves_unrelated_formatting
+        PASS [   0.032s] (29/36) codex-app-server config_manager_service::tests::upsert_merges_tables_replace_overwrites
+        PASS [   0.032s] (30/36) codex-app-server config_manager_service::tests::write_value_supports_custom_mcp_server_default_tool_approval_mode
+        PASS [   0.033s] (31/36) codex-app-server config_manager_service::tests::write_value_reports_managed_override
+        PASS [   0.033s] (32/36) codex-app-server config_manager_service::tests::upsert_shell_environment_filter_scalar_preserves_formatting_and_version
+        PASS [   0.037s] (33/36) codex-app-server config_manager_service::tests::write_value_supports_nested_app_paths
+        PASS [   0.098s] (34/36) codex-app-server config_manager_service::tests::psp_feature_configures_first_party_routing
+        PASS [   0.111s] (35/36) codex-app-server config_manager_service::tests::config_writes_apply_path_sensitive_merge_rules
+        PASS [   0.256s] (36/36) codex-app-server config_manager_service::tests::managed_auth_policy_survives_unusable_requirements_file_changes
+────────────
+     Summary [   0.257s] 36 tests run: 36 passed, 249 skipped

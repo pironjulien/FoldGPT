@@ -1,0 +1,14 @@
+RUST_MIN_STACK=8388608 NEXTEST_PROFILE=local cargo nextest run --no-fail-fast "$@"
+    Blocking waiting for file lock on artifact directory
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 31.85s
+────────────
+ Nextest run ID 9a52375d-c3fd-4af6-88f5-202bab5b5e5b with nextest profile: local
+    Starting 6 tests across 1 binary (1153 tests skipped)
+        PASS [   0.038s] (1/6) codex-app-server::all suite::v2::injected_project_config::injected_project_config_diagnostics_use_captured_provider_text
+        PASS [   0.040s] (2/6) codex-app-server::all suite::v2::injected_project_config::injected_project_config_real_loader_preserves_managed_and_session_precedence
+        PASS [   0.423s] (3/6) codex-app-server::all suite::v2::injected_project_config::injected_project_config_refusal_never_reads_controller_copy::canonical_refusal
+        PASS [   0.435s] (4/6) codex-app-server::all suite::v2::injected_project_config::injected_project_config_public_read_keeps_sources_precedence_and_trust
+        PASS [   0.399s] (5/6) codex-app-server::all suite::v2::injected_project_config::injected_project_config_refusal_never_reads_controller_copy::read_refusal
+        PASS [   0.401s] (6/6) codex-app-server::all suite::v2::injected_project_config::injected_project_config_refusal_never_reads_controller_copy::metadata_refusal
+────────────
+     Summary [   0.443s] 6 tests run: 6 passed, 1153 skipped

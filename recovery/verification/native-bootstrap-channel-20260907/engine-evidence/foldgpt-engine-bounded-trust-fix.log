@@ -1,0 +1,3 @@
+cargo clippy --fix --tests --allow-dirty {args}
+    Checking codex-git-utils v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/git-utils)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 5.43s

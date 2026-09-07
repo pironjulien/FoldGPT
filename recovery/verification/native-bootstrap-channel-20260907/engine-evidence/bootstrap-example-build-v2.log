@@ -1,0 +1,19 @@
+   Compiling codex-exec-server v0.153.4 (/mnt/c/Dev/ChatgptFold/work/worktrees/FoldgptEngine/codex-rs/exec-server)
+error[E0716]: temporary value dropped while borrowed
+  --> exec-server/examples/bootstrap_files_pc.rs:66:19
+   |
+66 |     let origin = &layers.origins().get("model").context("model origin")?.name;
+   |                   ^^^^^^^^^^^^^^^^                                           - temporary value is freed at the end of this statement
+   |                   |
+   |                   creates a temporary value which is freed while still in use
+67 |     anyhow::ensure!(matches!(origin, codex_config::ConfigLayerSource::Project { .. }), "wrong model origin");
+   |                              ------ borrow later used here
+   |
+help: consider using a `let` binding to create a longer lived value
+   |
+66 ~     let binding = layers.origins();
+67 ~     let origin = &binding.get("model").context("model origin")?.name;
+   |
+
+For more information about this error, try `rustc --explain E0716`.
+error: could not compile `codex-exec-server` (example "bootstrap_files_pc") due to 1 previous error

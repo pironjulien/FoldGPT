@@ -1,0 +1,145 @@
+RUST_MIN_STACK=8388608 NEXTEST_PROFILE=local cargo nextest run --no-fail-fast "$@"
+   Compiling rustix v1.1.4
+   Compiling tracing-serde v0.2.0
+   Compiling quickcheck v1.1.0
+   Compiling rmcp v3.1.3
+   Compiling codex-backend-openapi-models v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/codex-backend-openapi-models)
+   Compiling is_ci v1.2.0
+   Compiling is-terminal v0.4.17
+   Compiling owo-colors v4.3.0
+   Compiling codex-uds v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/uds)
+   Compiling codex-utils-json-to-toml v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/utils/json-to-toml)
+   Compiling predicates v3.1.3
+   Compiling codex-file-watcher v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/file-watcher)
+   Compiling supports-color v2.1.0
+   Compiling supports-color v3.0.2
+   Compiling tracing-subscriber v0.3.22
+   Compiling assert_cmd v2.1.2
+   Compiling sorted_vector_map v0.2.1
+   Compiling codex-utils-cargo-bin v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/utils/cargo-bin)
+   Compiling pagable v0.4.1
+   Compiling tracing-opentelemetry v0.32.1
+   Compiling opentelemetry-appender-tracing v0.31.1
+   Compiling tracing-appender v0.2.4
+   Compiling codex-http-client v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/http-client)
+   Compiling starlark_map v0.14.2
+   Compiling starlark_syntax v0.14.2
+   Compiling codex-client v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/codex-client)
+   Compiling codex-websocket-client v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/websocket-client)
+   Compiling codex-workload-identity v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/workload-identity)
+   Compiling tempfile v3.27.0
+   Compiling terminal_size v0.4.3
+   Compiling fd-lock v4.0.4
+   Compiling gethostname v1.1.0
+   Compiling which v8.0.0
+   Compiling polling v3.11.0
+   Compiling clap_builder v4.5.58
+   Compiling rustyline v14.0.0
+   Compiling async-io v2.6.0
+   Compiling gix-tempfile v21.0.2
+   Compiling gix-odb v0.78.0
+   Compiling codex-utils-path v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/utils/path-utils)
+   Compiling gix-lock v21.0.2
+   Compiling zbus v4.4.0
+   Compiling gix-ref v0.61.0
+   Compiling gix-shallow v0.10.0
+   Compiling starlark v0.14.2
+   Compiling gix-protocol v0.59.0
+   Compiling gix-config v0.54.0
+   Compiling gix-discover v0.49.0
+   Compiling clap v4.5.58
+   Compiling codex-network-proxy v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/network-proxy)
+   Compiling codex-file-search v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/file-search)
+   Compiling gix v0.81.0
+   Compiling secret-service v4.0.0
+   Compiling keyring v3.6.3
+   Compiling codex-keyring-store v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/keyring-store)
+   Compiling codex-execpolicy v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/execpolicy)
+   Compiling codex-protocol v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/protocol)
+   Compiling codex-api v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/codex-api)
+   Compiling codex-file-system v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/file-system)
+   Compiling codex-shell-command v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/shell-command)
+   Compiling codex-agent-identity v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/agent-identity)
+   Compiling codex-utils-output-truncation v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/utils/output-truncation)
+   Compiling codex-code-mode-protocol v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/code-mode-protocol)
+   Compiling codex-history v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/history)
+   Compiling codex-context-fragments v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/context-fragments)
+   Compiling codex-shell-escalation v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/shell-escalation)
+   Compiling codex-utils-audio v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/utils/audio)
+   Compiling codex-guardian-context v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/guardian-context)
+   Compiling codex-git-utils v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/git-utils)
+   Compiling codex-state v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/state)
+   Compiling codex-exec-server-protocol v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/exec-server-protocol)
+   Compiling codex-skills v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/skills)
+   Compiling codex-memories-read v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/memories/read)
+   Compiling codex-utils-cli v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/utils/cli)
+   Compiling codex-secrets v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/secrets)
+   Compiling codex-utils-git-discovery v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/utils/git-discovery)
+   Compiling codex-prompts v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/prompts)
+   Compiling codex-otel v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/otel)
+   Compiling codex-model-provider-info v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/model-provider-info)
+   Compiling codex-response-debug-context v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/response-debug-context)
+   Compiling codex-agent-graph-store v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/agent-graph-store)
+   Compiling codex-features v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/features)
+   Compiling codex-windows-sandbox v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/windows-sandbox-rs)
+   Compiling codex-code-mode v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/code-mode)
+   Compiling codex-rollout v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/rollout)
+   Compiling codex-sandboxing v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/sandboxing)
+   Compiling codex-config v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/config)
+   Compiling codex-linux-sandbox v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/linux-sandbox)
+   Compiling codex-rollout-trace v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/rollout-trace)
+   Compiling codex-app-server-protocol v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/app-server-protocol)
+   Compiling codex-exec-server v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/exec-server)
+   Compiling codex-login v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/login)
+   Compiling codex-agent-roles v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/agent-roles)
+   Compiling codex-models-manager v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/models-manager)
+   Compiling codex-feedback v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/feedback)
+   Compiling codex-model-provider v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/model-provider)
+   Compiling codex-backend-client v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/backend-client)
+   Compiling codex-utils-plugins v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/utils/plugins)
+   Compiling codex-rmcp-client v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/rmcp-client)
+   Compiling codex-apply-patch v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/apply-patch)
+   Compiling codex-plugin v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/plugin)
+   Compiling codex-arg0 v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/arg0)
+   Compiling codex-connectors v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/connectors)
+   Compiling codex-hooks v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/hooks)
+   Compiling codex-tools v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/tools)
+   Compiling codex-mcp v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/codex-mcp)
+   Compiling codex-analytics v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/analytics)
+   Compiling codex-thread-store v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/thread-store)
+   Compiling codex-extension-api v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/ext/extension-api)
+   Compiling codex-core-plugins v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/core-plugins)
+   Compiling codex-skills-extension v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/ext/skills)
+   Compiling codex-home v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/codex-home)
+   Compiling codex-git-attribution v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/ext/git-attribution)
+   Compiling codex-connectors-extension v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/ext/connectors)
+   Compiling codex-core v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/core)
+   Compiling codex-memories-write v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/memories/write)
+   Compiling codex-memories-extension v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/ext/memories)
+   Compiling codex-web-search-extension v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/ext/web-search)
+   Compiling codex-image-generation-extension v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/ext/image-generation)
+   Compiling codex-queue-extension v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/ext/queue)
+   Compiling codex-mcp-extension v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/ext/mcp)
+   Compiling codex-guardian-v2 v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/ext/guardian-v2)
+   Compiling codex-goal-extension v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/ext/goal)
+   Compiling codex-chatgpt v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/chatgpt)
+   Compiling codex-agent-extension v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/ext/agent)
+   Compiling codex-history-notes-extension v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/ext/history-notes)
+   Compiling codex-cloud-config v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/cloud-config)
+   Compiling codex-app-server-transport v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/app-server-transport)
+   Compiling core_test_support v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/core/tests/common)
+   Compiling codex-external-agent-migration v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/external-agent-migration)
+   Compiling app_test_support v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/app-server/tests/common)
+   Compiling codex-app-server v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/app-server)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2m 39s
+────────────
+ Nextest run ID 2b2abb60-a3a8-4b10-8f94-ca3158d5a221 with nextest profile: local
+    Starting 6 tests across 1 binary (1147 tests skipped)
+        PASS [   0.034s] (1/6) codex-app-server::all suite::v2::injected_local_runtime::injected_local_runtime_startup_refuses_incompatible_configuration::executor_only
+        PASS [   0.031s] (2/6) codex-app-server::all suite::v2::injected_local_runtime::injected_local_runtime_startup_refuses_incompatible_configuration::no_local
+        PASS [   0.031s] (3/6) codex-app-server::all suite::v2::injected_local_runtime::injected_local_runtime_startup_refuses_incompatible_configuration::noise
+        PASS [   0.395s] (4/6) codex-app-server::all suite::v2::injected_local_runtime::injected_local_runtime_absent_keeps_official_local_filesystem
+        PASS [   0.398s] (5/6) codex-app-server::all suite::v2::injected_local_runtime::injected_local_runtime_serves_public_protocol_and_preserves_refusals::configured_runtime
+        PASS [   0.399s] (6/6) codex-app-server::all suite::v2::injected_local_runtime::injected_local_runtime_serves_public_protocol_and_preserves_refusals::environment_discovery_without_user_config
+────────────
+     Summary [   0.403s] 6 tests run: 6 passed, 1147 skipped

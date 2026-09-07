@@ -7,6 +7,7 @@ authority by sending a missing context, JSON field or serialized object.
 """
 from dataclasses import dataclass
 import os
+import stat
 
 from tools.executor.exec_server import RpcError
 from tools.executor.native_executor_backend import NativeExecutorBackend
@@ -63,10 +64,14 @@ class BootstrapReadAuthority:
         """Return the canonical URI only after real native object resolution."""
         return await self._read("canonicalize", uri)
 
+    async def read_directory(self, uri):
+        """List real children after the native helper verifies the pinned tree."""
+        return await self._read("directory", uri)
+
     async def _read(self, operation, uri):
         # The private method is also exact; no generic mutation dispatcher is
         # hidden behind the public three-method interface.
-        if operation not in {"read", "metadata", "metadata-nofollow", "canonicalize"}:
+        if operation not in {"read", "metadata", "metadata-nofollow", "canonicalize", "directory"}:
             raise ValueError("Bootstrap authority only admits read and inspection")
         try:
             if type(uri) is not str:
@@ -94,10 +99,29 @@ class BootstrapReadAuthority:
                 try:
                     # Structural admission has no policy argument: it inspects
                     # real owners, kinds, links and bounds using the pinned FD.
-                    files._inspect()
+                    _, _, _, nodes = files._inspect()
                 except (ValueError, OSError, UnicodeError) as error:
                     raise RpcError(-32000, str(error)) from error
                 relative = "/".join(path.parts[len(self._root.parts):]) or "."
+                if operation == "directory":
+                    parts = path.parts[len(self._root.parts):]
+                    target = nodes.get(parts)
+                    if target is not None and not stat.S_ISDIR(target.st_mode):
+                        raise RpcError(-32600, "Bootstrap readDirectory target is not a directory")
+                    children = files._children(nodes, parts)
+                    if len(children) > 50000:
+                        raise RpcError(-32000, "Bootstrap directory exceeds the admitted protocol bound")
+                    data = files._snapshot(nodes)
+                    # The same native tree helper reopens the real target and
+                    # validates every descriptor identity against this snapshot.
+                    # Missing targets must fail natively, never become an empty list.
+                    await files._native_operation(["tree", str(files.root), relative, str(len(data))],
+                        data, empty_output=True)
+                    if target is None:
+                        raise RpcError(-32603, "Native directory validation admitted a missing target")
+                    return {"entries": [{"fileName": child[-1],
+                        "isDirectory": stat.S_ISDIR(nodes[child].st_mode),
+                        "isFile": stat.S_ISREG(nodes[child].st_mode)} for child in children]}
                 output = await files._native_operation([operation, str(files.root), relative, "0"],
                     empty_output=operation == "canonicalize")
                 if operation == "canonicalize":

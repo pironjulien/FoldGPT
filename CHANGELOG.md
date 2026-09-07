@@ -2,6 +2,14 @@
 
 ## Unreleased — 2026-09-06
 
+- Connect the separate Rust engine to the native bootstrap read authority over
+  an anonymous, credential-checked channel. Seventeen Rust protocol/socket
+  tests and 108 Python/native regression executions pass. A real PC test with
+  distinct nonroot users proves direct controller access is denied while the
+  channel reads exact bytes and loads the trusted project configuration through
+  the bounded loader. Both owners exit with complete cleanup. Preserve source,
+  binary and failure evidence; full app-server/UI integration remains pending.
+
 - Publish and independently restore encrypted native checkpoint v9 from the
   private GitHub release: 8,958 files verified, including Python V2 success,
   earlier failure evidence, matching APKs, stages and supervisor builds.
@@ -234,3 +242,8 @@
 - Added a native PRoot startup shim, display settings, launcher APK and initial keyboard daemon. The client displayed its interface and later answered a conversation.
 - Audited the shim: `chroot` returned success while an outside marker remained accessible. Recorded the isolation limits in `NATIVE-AUDIT.md`.
 - The initial keyboard daemon toggled visibility and was not validated for reliable everyday touch use. The original launcher depended on the separate Termux:X11 application.
+
+## 2026-09-07 — Organisation locale du poste
+
+- Regroupe les worktrees, outils, archives et journaux FoldGPT dans `work/`, exclu localement de Git, au lieu de la racine de `C:\Dev`.
+- Répare les rattachements Git et adapte les chemins des scripts au nouvel emplacement du SDK Linux et des fichiers de travail.

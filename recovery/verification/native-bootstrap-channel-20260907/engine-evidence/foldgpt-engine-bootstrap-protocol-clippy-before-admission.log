@@ -1,0 +1,39 @@
+cargo clippy --tests {args}
+    Checking codex-utils-absolute-path v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/utils/absolute-path)
+    Checking codex-utils-redacted-string v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/utils/redacted-string)
+    Checking codex-utils-string v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/utils/string)
+   Compiling codex-windows-sandbox v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/windows-sandbox-rs)
+    Checking codex-utils-pty v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/utils/pty)
+   Compiling codex-linux-sandbox v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/linux-sandbox)
+    Checking codex-process-hardening v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/process-hardening)
+    Checking codex-utils-home-dir v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/utils/home-dir)
+    Checking codex-extension-items v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/ext/items)
+    Checking codex-execpolicy v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/execpolicy)
+    Checking codex-utils-path-uri v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/utils/path-uri)
+    Checking codex-utils-path v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/utils/path-utils)
+    Checking codex-network-proxy v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/network-proxy)
+    Checking codex-install-context v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/install-context)
+    Checking codex-protocol v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/protocol)
+    Checking codex-api v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/codex-api)
+    Checking codex-file-system v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/file-system)
+    Checking codex-shell-command v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/shell-command)
+    Checking codex-shell-escalation v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/shell-escalation)
+    Checking codex-git-utils v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/git-utils)
+    Checking codex-exec-server-protocol v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/exec-server-protocol)
+    Checking codex-otel v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/otel)
+    Checking codex-model-provider-info v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/model-provider-info)
+    Checking codex-features v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/features)
+    Checking codex-sandboxing v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/sandboxing)
+    Checking codex-config v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/config)
+    Checking codex-exec-server v0.153.4 (/mnt/c/Dev/FoldgptEngine/codex-rs/exec-server)
+error: holding a disallowed type across an await point `tokio::sync::MutexGuard`
+  --> exec-server/src/bootstrap_files.rs:98:13
+   |
+98 |         let mut next_id = self.next_id.lock().await;
+   |             ^^^^^^^^^^^
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.95.0/index.html#await_holding_invalid_type
+   = note: requested on the command line with `-D clippy::await-holding-invalid-type`
+
+error: could not compile `codex-exec-server` (lib) due to 1 previous error
+error: recipe `clippy` failed on line 61 with exit code 101
