@@ -6,7 +6,7 @@ checkpoint ne signifie pas que les commandes ordinaires fonctionnent déjà sur
 le téléphone.
 
 ```powershell
-gh repo clone pironjulien/FoldGPT-workspace C:\Dev\ChatgptFold
+gh repo clone pironjulien/FoldGPT-workspace C:\Dev\ChatgptFold -- -c core.autocrlf=false
 Set-Location C:\Dev\ChatgptFold
 python tools/recovery/restore-submodules.py
 ```
@@ -14,7 +14,8 @@ python tools/recovery/restore-submodules.py
 Le script récupère les deux sous-modules et applique les modifications exactes
 de Termux:X11, après contrôle du commit et du SHA-256. Il conserve un état déjà
 restauré et refuse un conflit. Les originaux officiels sont récupérés à leurs
-commits figés.
+commits figés. Le clone principal utilise LF afin que Git Windows et Git dans
+WSL lisent le même état de travail, indépendamment de leurs réglages globaux.
 
 Les dépendances, résultats d'essais et données locales ignorées par Git sont
 conservés séparément dans une archive chiffrée de la release privée de reprise.
