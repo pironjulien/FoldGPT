@@ -97,3 +97,29 @@ avant tout nouvel essai ; elle ne doit pas effacer la réservation v6.
 ChatGPT et FoldGPT restent intacts. Aucun réglage Shizuku, verrou du téléphone
 ou mécanisme de sécurité Android n'a été modifié. La mesure effective des
 mécanismes noyau reste à effectuer.
+
+## Laboratoire v7 : refus d'admission avant retour de la session
+
+L'APK v7 `0f7a673f8b5ec14f09368ebd31d974bbc5d0540617ff91e7d433fe65a072c82d`
+ajoute un diagnostic bootstrap privé borné. Les 84 ELF et le déploiement sont
+identiques à v6 ; vingt tests JVM et les vrais tests bootstrap PC passent. La
+revue indépendante a contrôlé APK, signature, sources et manifeste.
+
+Après mise à jour normale, les anciens rapports ont gardé leurs empreintes.
+Le runtime a été récupéré et revérifié contre le nouveau chemin réel d'APK
+(2 447 fichiers, 81 alias, 82 empreintes). L'unique action v7 a pourtant été
+refusée par `ExecutorService.open` avec `Executor admission failed`, avant
+retour de la session : aucun transport, frame RPC ou rapport natif n'est fourni.
+Le rapport ne revendique donc pas de nettoyage (`transportCleanupComplete:false`).
+Les preuves sont dans `downloads/native-kernel-trial/lab-v7-admission-refusal`.
+Le marqueur `files/kernel-v3/attempt-started` reste conservé.
+
+La cause Java est actuellement masquée par l'exception Binder générique ; cette
+mesure ne confirme pas l'hypothèse de socket. Le UserService PID6162 est encore
+présent au dernier contrôle. Ses maps référencent le véritable APK v7, sans
+bibliothèque `libfoldgpt` visible, et son contexte lu est shell UID/GID2000,
+capEff0, seccomp0. Le broker ne contient toujours que le verrou vide, sans
+socket ni marqueur de session. L'état exact du service doit être lu avant sa
+fermeture ; la simple absence de worker n'est pas une preuve de nettoyage.
+Prochaine étape : diagnostic d'admission Java et contrôle préalable en lecture
+seule dans le vrai UserService. Aucun nouvel essai identique ne doit être lancé.

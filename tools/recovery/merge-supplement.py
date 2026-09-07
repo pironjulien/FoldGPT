@@ -28,13 +28,11 @@ def merge(source, project):
     if Path(root).resolve() != project:
         raise ValueError('Project must be the Git root')
     index = subprocess.check_output(git + ['ls-files', '--stage', '-z']).split(b'\0')
-    tracked, submodules = set(), set()
+    tracked = set()
     for row in filter(None, index):
-        header, raw = row.split(b'\t', 1)
+        _, raw = row.split(b'\t', 1)
         name = os.fsdecode(raw)
         tracked.add(name)
-        if header.startswith(b'160000 '):
-            submodules.add(name)
     candidates = []
     for base, directories, files in os.walk(source, followlinks=False):
         directories[:] = sorted(name for name in directories if name != '.git')
@@ -43,7 +41,7 @@ def merge(source, project):
         for path in paths:
             relative = path.relative_to(source)
             name = relative.as_posix()
-            if name in tracked or any(name == boundary or name.startswith(boundary + '/') for boundary in submodules):
+            if name in tracked or any(parent.as_posix() in tracked for parent in relative.parents):
                 continue
             candidates.append((path, relative, name))
     classified = subprocess.run(git + ['check-ignore', '-z', '--stdin'],
@@ -112,9 +110,19 @@ def main():
     parser.add_argument('--project', required=True, type=Path)
     parser.add_argument('--report', required=True, type=Path)
     args = parser.parse_args()
-    report = merge(args.snapshot, args.project)
-    args.report.parent.mkdir(parents=True, exist_ok=True)
-    args.report.write_text(json.dumps(report, indent=2) + '\n')
+    report_path = args.report.absolute()
+    if report_path.exists() or report_path.is_symlink():
+        raise FileExistsError('The recovery report must be a new file')
+    if any(parent.is_symlink() for parent in report_path.parents):
+        raise ValueError('Recovery report parents must not be symbolic links')
+    report_path = report_path.resolve()
+    if any(report_path.is_relative_to(root.resolve(strict=True)) for root in (args.snapshot, args.project)):
+        raise ValueError('Recovery report must be outside the snapshot and Git project')
+    report_path.parent.mkdir(parents=True, exist_ok=True)
+    # Reserve the report before any merge and never overwrite a prior result.
+    with report_path.open('x', encoding='utf-8') as output:
+        report = merge(args.snapshot, args.project)
+        output.write(json.dumps(report, indent=2) + '\n')
     print(json.dumps({key: value for key, value in report.items() if key != 'addedPaths'}))
 
 

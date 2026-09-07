@@ -40,11 +40,14 @@ ancien checkpoint ; il ne reçoit pas cette sauvegarde privée.
 ## Suite concrète
 
 1. Le diagnostic Android est désormais installé dans le laboratoire autorisé
-   `app.foldgpt.shizukuprobe` v6. Shizuku a réellement lancé le bootstrap UID2000,
-   mais celui-ci est sorti70 avant `ready` et avant le worker, avec attente JNI
-   et nettoyage complets. Le stade et l'exception de préparation sont en cours
-   d'ajout dans une nouvelle version ; conserver le rapport et la réservation
-   `files/kernel-v2`, ne pas rejouer v6. Voir le
+   `app.foldgpt.shizukuprobe` v7. V6 a réellement lancé le bootstrap UID2000,
+   sorti70 avant `ready` et avant le worker, avec attente JNI et nettoyage
+   complets. V7 ajoute les erreurs bootstrap précises, mais son essai a rencontré
+   un refus Java d'admission avant retour de session. Le service PID6162 reste
+   présent au dernier contrôle, sans preuve de cleanup v7. Conserver les rapports
+   et réservations `files/kernel-v2` et `files/kernel-v3`. Prochaine étape :
+   diagnostic Java/préflight en lecture seule et lecture du statut de l'ancien
+   service avant toute fermeture ou nouvelle tentative. Voir le
    [rapport actuel](../docs/research/native-kernel-qualification-2026-09-07.md).
    Les chemins APK et les 81 alias Python ont été résolus et vérifiés contre le
    vrai `nativeLibraryDir`. Il faut les recalculer après chaque installation.

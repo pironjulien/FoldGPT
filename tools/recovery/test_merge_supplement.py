@@ -3,6 +3,7 @@ import importlib.util
 import os
 from pathlib import Path
 import subprocess
+import sys
 import tempfile
 import unittest
 
@@ -63,6 +64,27 @@ class MergeTests(unittest.TestCase):
         with self.assertRaises((ValueError, FileExistsError, RuntimeError)):
             module.merge(self.source, self.project)
         self.assertEqual(list(outside.iterdir()), [])
+
+    def test_absent_tracked_file_still_protects_all_descendants(self):
+        (self.project / '.gitignore').write_text('data/\n*.log\n')
+        (self.project / 'source.py').unlink()
+        (self.source / 'source.py').unlink()
+        (self.source / 'source.py').mkdir()
+        (self.source / 'source.py/added.log').write_text('must not replace the tracked file by a directory')
+        module.merge(self.source, self.project)
+        self.assertFalse((self.project / 'source.py').exists())
+
+    def test_report_cannot_replace_tracked_source_or_old_report(self):
+        for report in [self.project / 'source.py', self.base / 'previous.json']:
+            if report.name == 'previous.json':
+                report.write_text('prior evidence')
+            before = report.read_bytes()
+            result = subprocess.run([sys.executable, '-B', str(Path(module.__file__)),
+                '--snapshot', str(self.source), '--project', str(self.project), '--report', str(report)],
+                capture_output=True)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertEqual(report.read_bytes(), before)
+            self.assertFalse((self.project / 'data').exists())
 
 
 if __name__ == '__main__':
