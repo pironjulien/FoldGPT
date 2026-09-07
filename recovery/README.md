@@ -84,6 +84,10 @@ wsl --distribution Ubuntu-24.04 --exec python3 /mnt/c/Dev/ChatgptFold/tools/reco
 
 La procédure conserve les fichiers suivis par Git et les sous-modules déjà
 restaurés. Elle refuse les collisions avec des données locales préexistantes.
+Cette étape a été exécutée sur un clone Windows réel : **100 332 fichiers de
+données (13 460 048 339 octets) et 441 liens ont été comparés à l'inventaire
+après copie**, avec contrôle de l'absence de modification des sources Git.
+Voir le [rapport complet](verification/github-hydrated-files-verification.json).
 Les liens absolus sont conservés avec leur cible originale ; les sorties de
 build dépendant d'un ancien chemin doivent être reconstruites, pas exécutées
 aveuglément. `android/local.properties` conserve le chemin SDK du premier PC :
