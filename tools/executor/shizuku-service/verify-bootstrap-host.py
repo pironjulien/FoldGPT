@@ -3,6 +3,8 @@
 The installed test factory records and REFUSES process RPC; it never pretends
 to enforce a sandbox. A fixed diagnostic child exercises real cleanup only.
 """
+import errno
+import fcntl
 import json
 import os
 from pathlib import Path
@@ -43,7 +45,11 @@ class RecordingRefusal:
         Path(self.options["workspace"], "reaped").write_text(str(self.child.returncode))
         if self.options["failClose"]:
             raise RuntimeError("Injected cleanup reporting failure after real diagnostic cleanup")
-def create_backend(options): return RecordingRefusal(options)
+def create_backend(options):
+    if "validateFile" in options:
+        with open(options["validateFile"], "rb") as source:
+            source.read(1)
+    return RecordingRefusal(options)
 '''
 
 
@@ -72,7 +78,7 @@ def run():
     assert all(32 <= ord(char) <= 126 and char not in '\\"' for char in value["message"])
     with tempfile.TemporaryDirectory(prefix="foldgpt-bootstrap-", dir="/var/tmp") as temporary:
         root = Path(temporary)
-        for mode in ("eof", "cancel-open-input", "quarantine", "bad-schema", "broker-permissions", "broker-missing", "factory-missing"):
+        for mode in ("eof", "cancel-open-input", "quarantine", "bad-schema", "broker-permissions", "broker-missing", "factory-missing", "factory-permissions"):
             directory = root / mode
             directory.mkdir(mode=0o700)
             workspace = directory / "workspace"
@@ -95,6 +101,11 @@ def run():
                 config["brokerDirectory"] = str(directory / "missing-broker")
             elif mode == "factory-missing":
                 config["backendFactory"] = "no_such_installed_host_factory:create_backend"
+            elif mode == "factory-permissions":
+                denied = directory / "unreadable-runtime"
+                denied.write_bytes(b"fixed validation input\n")
+                denied.chmod(0)
+                config["backendOptions"]["validateFile"] = str(denied)
             with zipfile.ZipFile(apk, "w") as archive:
                 archive.writestr("assets/foldgpt-executor-deployment.json", json.dumps(config))
                 archive.writestr("assets/foldgpt-executor/transport_test_factory.py", FACTORY)
@@ -111,22 +122,48 @@ def run():
                 stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, bufsize=0)
             os.close(control_read)
             try:
-                if mode in {"bad-schema", "broker-permissions", "broker-missing", "factory-missing"}:
+                if mode in {"bad-schema", "broker-permissions", "broker-missing", "factory-missing", "factory-permissions"}:
+                    # Race the actual caller against startup refusal. A child
+                    # that has already closed admission may reject this write;
+                    # either schedule must expose the same diagnostic and EOF.
+                    try:
+                        process.stdin.write(b'{"id":1,"method":"initialize","params":{"clientName":"startup-refusal"}}\n')
+                    except BrokenPipeError:
+                        pass
                     diagnostic = read_line(process.stderr)
                     expected_stage = {"bad-schema": "deployment", "broker-permissions": "broker_open",
-                                      "broker-missing": "broker_open", "factory-missing": "factory_import"}[mode]
+                                      "broker-missing": "broker_open", "factory-missing": "factory_import",
+                                      "factory-permissions": "factory_construct"}[mode]
                     assert set(diagnostic) == {"schema", "event", "stage", "errorType", "errno", "source", "line", "message"}, diagnostic
                     assert diagnostic["event"] == "setup_failed" and diagnostic["stage"] == expected_stage, diagnostic
                     assert diagnostic["errorType"] == {"bad-schema": "ValueError", "broker-permissions": "PermissionError",
-                                                       "broker-missing": "FileNotFoundError", "factory-missing": "ModuleNotFoundError"}[mode], diagnostic
-                    assert diagnostic["errno"] == (2 if mode == "broker-missing" else None), diagnostic
+                                                       "broker-missing": "FileNotFoundError", "factory-missing": "ModuleNotFoundError",
+                                                       "factory-permissions": "PermissionError"}[mode], diagnostic
+                    assert diagnostic["errno"] == {"broker-missing": errno.ENOENT,
+                                                   "factory-permissions": errno.EACCES}.get(mode), diagnostic
                     assert len(diagnostic["message"]) <= 160 and 0 < diagnostic["line"] < 1000000, diagnostic
                     final = read_line(process.stderr)
-                    if mode == "factory-missing":
+                    if mode in {"factory-missing", "factory-permissions"}:
                         assert final["event"] == "quarantined" and final["cleanupComplete"] is False, final
                         assert process.poll() is None and (broker / "process-session.json").exists()
-                        # The deliberately missing factory module cannot create a
-                        # child; stop only this retained host-test bootstrap.
+                        assert select.select([process.stdout], [], [], 5)[0], "Startup quarantine left RPC reader blocked"
+                        assert os.read(process.stdout.fileno(), 1) == b"", "Startup refusal must not fabricate an RPC result"
+                        assert process.poll() is None, "RPC EOF must not terminate the retained native owner"
+                        try:
+                            process.stdin.write(b'{"id":2,"method":"initialize","params":{}}\n')
+                        except BrokenPipeError:
+                            pass
+                        else:
+                            raise AssertionError("Startup quarantine left RPC writes admitted")
+                        with (broker / "broker.lock").open("rb") as lock:
+                            try:
+                                fcntl.flock(lock.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+                            except BlockingIOError:
+                                pass
+                            else:
+                                raise AssertionError("RPC EOF released native ownership")
+                        # These fixed PC factories failed before child creation.
+                        # Stop only this deliberately retained test bootstrap.
                         process.kill(); process.wait(timeout=5)
                     else:
                         assert final == {"schema": "foldgpt.shizuku.session.v1", "event": "closed", "cleanupComplete": True, "exitCode": 70}, final
@@ -177,7 +214,7 @@ def run():
                     except subprocess.TimeoutExpired: process.kill(); process.wait(timeout=5)
                 for stream in (process.stdin, process.stdout, process.stderr):
                     stream.close()
-    print("PASS: actual ExecServer handshake; complete nested policy preserved and refused; real diagnostic child cleanup on stdin EOF and service EOF with stdin open; failed cleanup retains live owner and persistent marker; four real setup failures expose bounded stage/cause without changing cleanup/wait semantics")
+    print("PASS: actual ExecServer handshake; complete nested policy preserved and refused; real diagnostic child cleanup on stdin EOF and service EOF with stdin open; failed cleanup retains live owner and persistent marker; five real setup failures expose bounded stage/cause; startup quarantine unblocks RPC with EOF while retaining the live owner, kernel lock and marker")
 
 
 if __name__ == "__main__":

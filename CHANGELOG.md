@@ -2,6 +2,11 @@
 
 ## Unreleased — 2026-09-06
 
+- Close the unused RPC input/output after a quarantined startup failure so
+  initialize callers receive EOF/EPIPE while the real owner, lock and marker
+  remain retained. Real nonroot startup/lifecycle tests and an independent
+  late-writer test pass; the installed V10 quarantine is not changed.
+
 - Published the v5/v6 recovery supplements and independently verified their
   GitHub download, authenticated restoration and additive Windows merge.
   All23 remote assets match their size/digest. The v10 diagnostic passes socket

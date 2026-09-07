@@ -260,6 +260,18 @@ async def run_session(apk, control_fd=3):
                 owner.quarantined = True
                 owner.retained_backend = backend
             report("quarantined", cleanupComplete=False)
+            if not ready:
+                # No RPC serving task has started. Stop waiting clients from
+                # hanging on initialize while the independent native owner is
+                # retained. Closing these two transport ends grants no cleanup
+                # and leaves the private lifecycle/control channels untouched.
+                for descriptor in (0, 1):
+                    try:
+                        os.close(descriptor)
+                    except OSError:
+                        # A close failure must never destroy an unresolved
+                        # backend or turn quarantine into a successful close.
+                        pass
             # Keep the ACTUAL backend, pinned roots and process objects alive.
             # Never destroy the native owner, delete a marker, or auto-retry.
             await asyncio.Event().wait()
