@@ -2,6 +2,18 @@
 
 ## Unreleased — 2026-09-06
 
+- Publish and independently restore encrypted native checkpoint v9 from the
+  private GitHub release: 8,958 files verified, including Python V2 success,
+  earlier failure evidence, matching APKs, stages and supervisor builds.
+
+- Add an internal bootstrap-owned read authority for the existing pinned
+  native workspace: actual file bytes, metadata and canonicalization share
+  its FD helper, process lease and quarantine gate. Expose an explicit
+  discovery ceiling while preserving real outside-root denial and managed
+  model-context refusal. Ninety nonroot PC tests pass, including actual child
+  cancellation/reaping and existing file/stream/RPC regressions. No new RPC,
+  fabricated managed context or Android deployment is introduced.
+
 - Qualify the real native Bash/Python project on the Fold in isolated runtime
   V2: source creation/edit, three tests, zipapp build/execution, binary streams,
   empty child environments and actual denials pass. All 20 independent checks

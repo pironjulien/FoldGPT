@@ -1,0 +1,10 @@
+{
+  "verified": true,
+  "encryptedSha256": "f0d7cfdfabc367c46fd6b9af0de3b1baa36a778e7264b8ec1a71e8a5fd2a0efe",
+  "entries": 9902,
+  "files": 8958,
+  "fileBytes": 314414434,
+  "symlinks": 0,
+  "restoredFilesVerified": 8958,
+  "restoredTo": "/var/tmp/foldgpt-native-v9-restored"
+}

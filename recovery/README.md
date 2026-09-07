@@ -279,6 +279,33 @@ build `/opt/foldgpt` sont ceux du PC d'origine. Lire les scripts avant reprise
 et reconstituer leur environnement selon [build-environment.md](build-environment.md).
 Ce complément n'installe rien sur le téléphone et n'active aucun exécuteur.
 
+## Complément v9 : Python natif V2 réussi sur le Fold
+
+Le complément `native-checkpoint-v9*` conserve les stages et APK V12/V1/V2,
+les gels du superviseur correspondants, le runtime Python corrigé et les
+preuves du projet réellement créé, testé et construit sur le téléphone.
+L'échec de chargement V1 reste conservé avec la réussite V2.
+
+Archive chiffrée : **152 783 597 octets**, SHA256
+`f0d7cfdfabc367c46fd6b9af0de3b1baa36a778e7264b8ec1a71e8a5fd2a0efe`.
+Elle a été retéléchargée depuis la release privée, authentifiée, déchiffrée et
+extraite : **8 958 fichiers vérifiés**, soit 314 414 434 octets, sans lien
+symbolique. Voir la [preuve de restauration v9](verification/github-supplement-v9-restoration.json).
+La fusion additive dans le clone Windows n'a pas été répétée ; cette preuve
+porte sur la restauration Linux complète.
+
+Après les compléments précédents, utiliser des dossiers neufs :
+
+```powershell
+wsl --distribution Ubuntu-24.04 --exec python3 /mnt/c/Dev/ChatgptFold/tools/recovery/restore-archive.py --assets /mnt/c/Dev/FoldGPT-recovery/downloaded --manifest native-checkpoint-v9-manifest.json --identity $foldRecoveryKeyLinux --destination /var/tmp/foldgpt-native-v9 --report /mnt/c/Dev/FoldGPT-recovery/native-v9-verification.json
+wsl --distribution Ubuntu-24.04 --exec python3 /mnt/c/Dev/ChatgptFold/tools/recovery/merge-supplement.py --snapshot /var/tmp/foldgpt-native-v9/foldgpt-native-artifacts-v9-20260907 --project /mnt/c/Dev/ChatgptFold --report /mnt/c/Dev/FoldGPT-recovery/native-v9-merge.json
+```
+
+Lire le [rapport V2](../docs/research/native-runtime-v2-device-result-2026-09-07.md)
+avant toute reprise. Les actions de qualification V12/V1/V2 sont consommées ;
+restaurer leurs preuves ne les autorise pas à nouveau. Le raccordement aux
+commandes ordinaires de l'interface reste en développement.
+
 ## Récupérer le moteur séparé
 
 Le code du moteur séparé est développé sous `C:\Dev\FoldgptEngine`, à partir du

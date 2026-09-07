@@ -26,6 +26,11 @@ l'interface habituelle. Les changements Rust configuration projet/trust sont
 en cours, pas encore exportés à ce checkpoint. Aucun succès ordinaire UI.
 Le maintien éveillé USB reste activé durant la session active.
 
+Les nouveaux binaires, stages et preuves sont également publiés dans le
+complément privé v9 : 8 958 fichiers retéléchargés, authentifiés et vérifiés
+après extraction. Voir [la procédure](README.md#complément-v9--python-natif-v2-réussi-sur-le-fold)
+et [le rapport exact](verification/github-supplement-v9-restoration.json).
+
 ## Historique : Python runtime V1 échoue au chargement, 7 septembre vers 20:49
 
 Le [rapport runtime V1](../docs/research/native-runtime-v1-device-result-2026-09-07.md)

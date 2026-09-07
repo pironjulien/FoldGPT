@@ -122,7 +122,7 @@ class NativeFilesBackend:
         self.process = None
         self.closed = False
 
-    def _inspect(self, policy):
+    def _inspect(self, policy=None):
         """Refuse aliases and unsupported worktrees before an operation.
 
         The workspace is owned exclusively by this backend. A concurrent
@@ -460,42 +460,68 @@ class NativeFilesBackend:
                     arguments = ["write" if writing else "read", str(self.root), relative, str(len(data))]
             except (PolicyError, ValueError, KeyError, PermissionError, OSError, binascii.Error, UnicodeError) as error:
                 raise RpcError(-32000, str(error)) from error
-            self.process = await asyncio.create_subprocess_exec(
-                self.helper, *arguments,
-                stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE,
-                close_fds=True, pass_fds=(self.root,), env={})
-            communicate = asyncio.create_task(self.process.communicate(data))
+            output = await self._native_operation(arguments, data,
+                empty_output=writing or making or canonicalizing or planned)
+            if planned:
+                # Listings are assembled from actual descriptor metadata only
+                # after the native helper independently verifies the complete
+                # tree and identities. A missing native target is never a
+                # successful empty listing. Mutation success is syscall success.
+                if listing or walking:
+                    if planned_result is None:
+                        raise RpcError(-32603, "Native listing unexpectedly admitted a missing target")
+                    return planned_result
+                return {}
+            if metadata_query:
+                return _native_metadata(output)
+            if canonicalizing:
+                # The native helper has resolved the real admitted object
+                # through the pinned mount with aliases forbidden. Only now
+                # may its canonical guest URI be returned. Physical host
+                # paths and successful lexical-only guesses never escape.
+                return {"path": path.uri}
+            return {} if writing or making else {"dataBase64": base64.b64encode(output).decode("ascii")}
+
+    async def _native_operation(self, arguments, data=b"", *, empty_output=False):
+        """Run the existing FD helper while the caller owns this backend's lock.
+
+        Authorization stays with the caller: managed RPC or the separate
+        bootstrap read authority. This method creates no policy or new root.
+        Actual child reaping precedes lock release even under cancellation.
+        """
+        spawning = asyncio.create_task(asyncio.create_subprocess_exec(
+            self.helper, *arguments,
+            stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE,
+            close_fds=True, pass_fds=(self.root,), env={}))
+        process = communicate = None
+        async def settle(task):
+            while True:
+                try:
+                    return await asyncio.shield(task)
+                except asyncio.CancelledError:
+                    if task.done():
+                        return task.result()
+        try:
+            process = self.process = await asyncio.shield(spawning)
+            communicate = asyncio.create_task(process.communicate(data))
+            output, diagnostic = await asyncio.wait_for(asyncio.shield(communicate), 30)
+            if process.returncode != 0:
+                raise _native_failure(diagnostic)
+            if diagnostic or (empty_output and output) or len(output) > MAX_DATA:
+                raise RpcError(-32000, "Native filesystem response violates its contract")
+            return output
+        finally:
+            # Reclaim a spawn whose caller was cancelled before receiving its
+            # process object; never leave a child outside the shared ownership.
+            if process is None:
+                process = self.process = await settle(spawning)
             try:
-                output, diagnostic = await asyncio.wait_for(asyncio.shield(communicate), 30)
-                if self.process.returncode != 0:
-                    raise _native_failure(diagnostic)
-                if diagnostic or ((writing or making or canonicalizing or planned) and output) or len(output) > MAX_DATA:
-                    raise RpcError(-32000, "Native filesystem response violates its contract")
-                if planned:
-                    # Listings are assembled from actual descriptor metadata only
-                    # after the native helper independently verifies the complete
-                    # tree and identities. A missing native target is never a
-                    # successful empty listing. Mutation success is syscall success.
-                    if listing or walking:
-                        if planned_result is None:
-                            raise RpcError(-32603, "Native listing unexpectedly admitted a missing target")
-                        return planned_result
-                    return {}
-                if metadata_query:
-                    return _native_metadata(output)
-                if canonicalizing:
-                    # The native helper has resolved the real admitted object
-                    # through the pinned mount with aliases forbidden. Only now
-                    # may its canonical guest URI be returned. Physical host
-                    # paths and successful lexical-only guesses never escape.
-                    return {"path": path.uri}
-                return {} if writing or making else {"dataBase64": base64.b64encode(output).decode("ascii")}
+                if process.returncode is None:
+                    process.kill()
+                if communicate is None:
+                    communicate = asyncio.create_task(process.communicate())
+                await settle(communicate)
             finally:
-                # A transport cancellation is not a rollback of a write that
-                # has begun. Await termination before releasing root ownership.
-                if self.process.returncode is None:
-                    self.process.kill()
-                await communicate
                 self.process = None
 
     async def close(self, session_id):

@@ -1,0 +1,21 @@
+{
+  "source": "C:\\Dev\\ChatgptFold\\downloads\\bootstrap-files\\foldgpt-bootstrap-files-F2hzb4gY",
+  "scope": "90 nonroot PC tests of in-process bootstrap read authority; no wire protocol or Android deployment",
+  "files": [
+    {
+      "path": "tests.txt",
+      "bytes": 17100,
+      "sha256": "d9daf02be8f1b4e6581c60d82420c438215873433f53c5dc3dfdd91385360418"
+    },
+    {
+      "path": "SOURCES.sha256",
+      "bytes": 8965,
+      "sha256": "e55d2880e18e96fe634fb2b5a4b1ce9abfa970f946881b261d60b6bcc943e0c7"
+    },
+    {
+      "path": "BINARIES.sha256",
+      "bytes": 244,
+      "sha256": "b9bcf6b39618b55d7ec362d8a74a42a29b9308cfa0b9db45e1b7085df117aec8"
+    }
+  ]
+}

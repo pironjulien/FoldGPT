@@ -52,10 +52,16 @@ class NativeExecutorBackend:
             return await self.processes.handle(call, notify)
         if call.method != "process/start" and call.method not in self.files.supported_methods:
             raise RpcError(-32601, "Unsupported native executor method")
+        backend = self.processes if call.method == "process/start" else self.files
+        return await self._run_owned_operation(lambda: backend.handle(call, notify))
+
+    async def _run_owned_operation(self, operation_factory):
+        """Common lifecycle gate for managed RPC and bootstrap-owned reads."""
+        if self.closing:
+            raise RpcError(-32600, "Native executor session is closing")
         if self.processes.quarantined:
             raise RpcError(-32603, "Native process cleanup is unknown; filesystem access is quarantined")
-        backend = self.processes if call.method == "process/start" else self.files
-        operation = asyncio.create_task(backend.handle(call, notify))
+        operation = asyncio.create_task(operation_factory())
         quarantined = asyncio.create_task(self.processes.quarantine_event.wait())
         try:
             await asyncio.wait((operation, quarantined), return_when=asyncio.FIRST_COMPLETED)
