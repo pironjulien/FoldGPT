@@ -1,0 +1,10 @@
+{
+  "verified": true,
+  "encryptedSha256": "704d908f930fcde3d6353ef92449f8484533ea22a472a831cbc442f13635d1ea",
+  "entries": 148,
+  "files": 123,
+  "fileBytes": 52224910,
+  "symlinks": 0,
+  "restoredFilesVerified": 123,
+  "restoredTo": "/var/tmp/foldgpt-supplement-v2-restored-20260907"
+}

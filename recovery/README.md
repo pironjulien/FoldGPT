@@ -54,20 +54,24 @@ sur le PC pour conserver les liens Linux de l'archive. Les destinations doivent
 déchiffrement avant extraction, compare l'inventaire et contrôle les octets de
 chaque fichier effectivement restauré. La clé n'est jamais affichée.
 
-Le même téléchargement récupère aussi le complément `native-checkpoint*`.
+Le même téléchargement récupère aussi le complément actuel `native-checkpoint-v2*`.
 Il conserve l'APK et les builds natifs figés après l'archive principale. Sa
 restauration, également vérifiée après retéléchargement GitHub, s'effectue dans
 un dossier distinct :
 
 ```powershell
-wsl --distribution Ubuntu-24.04 --exec python3 /mnt/c/Dev/ChatgptFold/tools/recovery/restore-archive.py --assets /mnt/c/Dev/FoldGPT-recovery/downloaded --manifest native-checkpoint-manifest.json --identity $foldRecoveryKeyLinux --destination /var/tmp/foldgpt-native-recovered --report /mnt/c/Dev/FoldGPT-recovery/native-verification.json
+wsl --distribution Ubuntu-24.04 --exec python3 /mnt/c/Dev/ChatgptFold/tools/recovery/restore-archive.py --assets /mnt/c/Dev/FoldGPT-recovery/downloaded --manifest native-checkpoint-v2-manifest.json --identity $foldRecoveryKeyLinux --destination /var/tmp/foldgpt-native-recovered --report /mnt/c/Dev/FoldGPT-recovery/native-verification.json
 ```
 
-Ce complément contient 105 fichiers vérifiés et l'APK debug de FoldGPT
+Ce complément contient 123 fichiers vérifiés et l'APK debug de FoldGPT
 `c9a83886ebdfeba7f28ecbc37a383252cc91ad6e5c3ad3dc7189cc81e35694a1`,
 compilé et signé, **pas installé sur le téléphone**. Il reste séparé de
 l'ancienne sortie APK de l'archive principale. Voir le
-[rapport de restauration](verification/github-supplement-restoration.json).
+[rapport de restauration](verification/github-supplement-v2-restoration.json).
+Le superviseur actuel figé est `foldgpt-bionic-supervisor-8Kd8xQRE` ; il inclut
+les corrections de revue sur les threads et l'attente réelle du superviseur.
+Les anciens fichiers `native-checkpoint*` sans `v2` restent une preuve
+historique de l'étape précédente et ne sont pas le complément à utiliser.
 
 L'archive est un instantané réalisé pendant le développement. **Les sources
 les plus récentes sont celles de la branche Git**, pas celles de l'archive.
