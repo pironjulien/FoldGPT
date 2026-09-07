@@ -2,6 +2,12 @@
 
 ## Unreleased — 2026-09-06
 
+- Correct native directory enumeration to return the real immediate names and
+  kinds of an admitted directory, even when a child is denied. The previous
+  overrestriction prevented Python imports from the workspace. Child reads,
+  writes, metadata and traversal remain separately checked. Real file RPCs and
+  native process regressions pass; complete app-server qualification follows.
+
 - Preserve the upstream reconcile/preserve Windows proxy preferences in native
   POSIX handoffs too. Real app-server process requests include reconcile even
   on Linux; known inactive preferences must survive without blocking execution.

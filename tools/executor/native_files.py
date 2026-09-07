@@ -7,9 +7,10 @@ reviewed official tag rust-v0.153.4 (042fb41b7c813ac7999105e886b2b7aa715b5081),
 exec-server-protocol/src/protocol.rs, file-system/src/lib.rs and
 exec-server/src/{local_file_system,server/file_system_handler}.rs.
 
-Bulk operations retain the exclusive workspace admission: an unreadable tree,
-unsupported alias or a denied emitted/traversed child refuses the entire RPC.
-Listings do not silently omit policy-denied files. Copy refuses overlapping
+Bulk operations retain the exclusive workspace admission. A directory read
+returns its real immediate names and kinds, including denied children; it grants
+no access to those children. Recursive walk/copy still check each traversed
+object. Listings never silently omit policy-denied files. Copy refuses overlapping
 trees and bounds aggregate file data to 16 MiB; no truncation of a copy plan is
 treated as success. A transport/OS failure during an admitted mutation is not
 a transactional rollback. Only a fully successful native operation returns {}.
@@ -203,6 +204,7 @@ class NativeFilesBackend:
                       key=lambda child: child[-1].encode("utf-8"))
 
     def _listing(self, parts, nodes, policy):
+        self._require_read(policy, parts)
         if parts not in nodes:
             return None  # Native lookup must supply the real NotFound result.
         if not stat.S_ISDIR(nodes[parts].st_mode):
@@ -211,7 +213,9 @@ class NativeFilesBackend:
         for child in self._children(nodes, parts):
             if len(entries) == 50000:
                 raise ValueError("Directory listing exceeds the admitted protocol response bound")
-            self._require_read(policy, child)
+            # Directory read permission covers its immediate names and kinds,
+            # as native readdir does. Reading a child or descending into it is
+            # a separate operation with its own complete policy check.
             entries.append({"fileName": child[-1], "isDirectory": stat.S_ISDIR(nodes[child].st_mode),
                             "isFile": stat.S_ISREG(nodes[child].st_mode)})
         return {"entries": entries}

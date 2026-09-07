@@ -171,9 +171,12 @@ print('metadata preserved')
 os.mkdir('project')
 open('project/test_value.py','w').write('import unittest\\nclass Value(unittest.TestCase):\\n def test_value(self): self.assertEqual(6*7,42)\\n')
 assert os.listdir('project')==['test_value.py']
-try: os.listdir('.')
-except OSError as e: assert e.errno in (errno.EACCES,errno.EPERM),e
-else: raise AssertionError('listing disclosed denied child')
+assert sorted(os.listdir('.'))==['.git','private','project']
+for operation in (lambda: os.listdir('private'), lambda: os.stat('private'),
+                  lambda: open('private/secret','rb'), lambda: open('private/secret','wb')):
+    try: operation()
+    except OSError as e: assert e.errno in (errno.EACCES,errno.EPERM),e
+    else: raise AssertionError('denied child became accessible')
 suite=unittest.defaultTestLoader.discover('project')
 result=unittest.TextTestRunner().run(suite)
 assert result.wasSuccessful() and result.testsRun==1

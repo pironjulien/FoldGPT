@@ -56,8 +56,9 @@ operations reuse the existing policy resolver and filesystem inspection,
 including deny-read and `.git`/`.agents`/`.codex` protections. No additive
 Landlock path lowering stands in for that policy. Ordinary opens, stat/lstat,
 statx, mkdir and getdents64 are mediated. Directory listing uses the same rule
-as fs/readDirectory: a directory with an unreadable child is refused; entries
-are never hidden by producing a fabricated partial result. Symlink metadata,
+as fs/readDirectory: an admitted directory returns its real immediate names
+and kinds, including denied children. Opening, inspecting or listing a denied
+child remains refused; no entries are filtered into a partial result. Symlink metadata,
 readlink, and O_NOFOLLOW semantics for the immutable runtime are preserved.
 
 Cancellation is a separate native socket, including EOF. The native owner kills

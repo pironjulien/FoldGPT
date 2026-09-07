@@ -32,6 +32,13 @@ target and the complete supported sandbox context. `followSymlinks` is preserved
 and type-checked, but a workspace containing any symlink remains inadmissible
 under either option value.
 
+Reading an admitted directory returns its exact immediate names and kinds,
+including a child whose contents are denied. This follows native `readdir`
+semantics and the upstream unreadable-path mount behavior: the child's name
+is a directory entry, not access to its contents. Reading, writing, inspecting
+or listing that denied child remains refused. Recursive walk/copy checks each
+object it traverses; no policy-denied entry is silently filtered from a listing.
+
 Before starting the helper, the backend inventories the exclusively owned
 workspace and authorizes **every missing directory component**, including all
 missing ancestors. A writable leaf grant never grants implicit creation rights

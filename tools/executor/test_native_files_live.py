@@ -110,11 +110,22 @@ class NativeFilesLiveTests(unittest.IsolatedAsyncioTestCase):
         self.assertIn("error", await self.tree_rpc("readDirectory", "value"))
 
     async def test_walk_exact_upstream_options_and_policy_never_leak_denied_descendants(self):
-        for method, opts in (("readDirectory", {}), ("walk", {"options": self.walk_options()})):
-            denied = await self.tree_rpc(method, "", **opts)
+        listing = await self.tree_rpc("readDirectory", "")
+        self.assertEqual(listing["result"], {"entries": [
+            {"fileName": ".git", "isDirectory": True, "isFile": False},
+            {"fileName": "private", "isDirectory": True, "isFile": False},
+            {"fileName": "value", "isDirectory": False, "isFile": True},
+        ]})
+        for method, path, opts in (("readDirectory", "private", {}),
+                ("walk", "", {"options": self.walk_options()})):
+            denied = await self.tree_rpc(method, path, **opts)
             self.assertIn("error", denied)
             self.assertNotEqual(denied["error"]["code"], -32004)
             self.assertNotIn("secret", json.dumps(denied))
+        for denied in (await self.rpc("private/secret"), await self.inspect("private"),
+                       await self.rpc("private/secret", b"forbidden")):
+            self.assertIn("error", denied)
+        self.assertEqual((self.root / "private/secret").read_bytes(), b"private")
         policy = context()
         policy["permissions"]["file_system"]["entries"][2]["access"] = "read"
         self.assertIn("result", await self.tree_rpc("readDirectory", "", policy))

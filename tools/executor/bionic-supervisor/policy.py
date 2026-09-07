@@ -93,8 +93,8 @@ class Policy:
             if read:
                 self.files._require_read(self.policy, parts)
             if operation == "list":
-                # Preserve the file RPC rule: a listing containing unreadable
-                # children is refused, never silently filtered into fake data.
+                # Enumerate the admitted directory's real immediate entries;
+                # child contents remain subject to their own policy checks.
                 self.files._listing(parts, nodes, self.policy)
             if write:
                 self.files._require_write(self.policy, self.files.mount.append(parts), metadata)
