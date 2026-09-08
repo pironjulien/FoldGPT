@@ -1,5 +1,6 @@
 """Real nonroot ownership tests; no Android device or sandbox result is claimed."""
 import errno
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -17,6 +18,7 @@ if __package__ in (None, ""):
 from tools.executor.private_exec_broker import (
     PROCESS_SESSION, SOCKET_NAME, PrivateListener, PrivateSessionOwner, peer_identity,
 )
+from tools.executor.native_runtime_startup import BOOT_EPOCH_SCHEMA, BOOT_EPOCH_SOURCE
 
 REPO = Path(__file__).resolve().parents[2]
 CHILD_IMPORTS = (
@@ -29,7 +31,8 @@ CHILD_IMPORTS = (
 class PrivateSessionOwnerTests(unittest.TestCase):
     def setUp(self):
         self.assertNotEqual(os.getuid(), 0, "Run real ownership tests with an ordinary Linux UID")
-        self.temp = tempfile.TemporaryDirectory(prefix="fowner-", dir="/var/tmp")
+        self.temp = tempfile.TemporaryDirectory(prefix="fowner-",
+            dir=os.environ.get("FOLDGPT_TEST_TMPDIR", "/var/tmp"))
         self.addCleanup(self.temp.cleanup)
         self.root = Path(self.temp.name)
         self.directory = self.root / "broker"
@@ -248,6 +251,156 @@ class PrivateSessionOwnerTests(unittest.TestCase):
                 kind(self.directory)
         self.assertEqual(target.read_bytes(), b"lock-owner\n")
         self.assertEqual(target.stat().st_nlink, 2)
+
+    @staticmethod
+    def epoch(count):
+        return {"schema": BOOT_EPOCH_SCHEMA, "source": BOOT_EPOCH_SOURCE, "bootCount": count}
+
+    def previous_boot_marker(self, count=8):
+        owner = PrivateSessionOwner(self.directory, boot_epoch=self.epoch(count))
+        try:
+            owner.begin_process_session(self.workspace)
+        finally:
+            # Deliberately retain the marker. This models unavailable cleanup,
+            # not a completed session or an actual Android reboot.
+            owner.close()
+        return self.directory / PROCESS_SESSION
+
+    def test_explicit_boot_owner_persists_exact_epoch_and_normal_finish_still_removes_marker(self):
+        epoch = self.epoch(8)
+        owner = PrivateSessionOwner(self.directory, boot_epoch=epoch)
+        epoch["bootCount"] = 9
+        try:
+            owner.begin_process_session(self.workspace)
+            marker = json.loads((self.directory / PROCESS_SESSION).read_bytes())
+            self.assertEqual(marker["version"], 2)
+            self.assertEqual(marker["bootEpoch"], self.epoch(8))
+            with self.assertRaises(TypeError):
+                owner.boot_epoch["bootCount"] = 9
+            owner.finish_process_session()
+            self.assertFalse((self.directory / PROCESS_SESSION).exists())
+        finally:
+            owner.close()
+
+    def test_later_boot_archives_original_bytes_and_inode_then_allows_a_new_session(self):
+        marker = self.previous_boot_marker()
+        before = marker.read_bytes()
+        identity = marker.stat()
+        owner = PrivateSessionOwner(self.directory, boot_epoch=self.epoch(9))
+        try:
+            self.assertFalse(marker.exists())
+            result = owner.recovered_session
+            self.assertEqual(result["previousBootEpoch"], self.epoch(8))
+            self.assertEqual(result["currentBootEpoch"], self.epoch(9))
+            self.assertTrue(result["previousBootEnded"])
+            self.assertFalse(result["previousCleanupClaimed"])
+            archive = self.directory / result["archiveName"]
+            saved = archive / PROCESS_SESSION
+            self.assertEqual(saved.read_bytes(), before)
+            self.assertEqual((saved.stat().st_dev, saved.stat().st_ino), (identity.st_dev, identity.st_ino))
+            self.assertEqual(result["markerSha256"], hashlib.sha256(before).hexdigest())
+            receipt = json.loads((archive / "recovery.json").read_bytes())
+            self.assertEqual(receipt, {key: value for key, value in result.items() if key != "archiveName"})
+            self.assertEqual(stat.S_IMODE(archive.stat().st_mode), 0o700)
+            self.assertEqual(stat.S_IMODE((archive / "recovery.json").stat().st_mode), 0o600)
+            owner.begin_process_session(self.workspace)
+            self.assertEqual(json.loads(marker.read_bytes())["bootEpoch"], self.epoch(9))
+            owner.finish_process_session()
+        finally:
+            owner.close()
+
+    def test_same_boot_or_regressed_counter_preserves_marker_despite_unlocked_owner(self):
+        marker = self.previous_boot_marker()
+        before = marker.read_bytes()
+        for count in (8, 7, 0):
+            with self.subTest(count=count), self.assertRaisesRegex(FileExistsError, "earlier boot"):
+                PrivateSessionOwner(self.directory, boot_epoch=self.epoch(count))
+            self.assertEqual(marker.read_bytes(), before)
+            self.assertEqual({p.name for p in self.directory.iterdir()}, {"broker.lock", PROCESS_SESSION})
+
+    def test_actual_crashed_same_boot_child_remains_blocked(self):
+        source = "owner=PrivateSessionOwner(directory,boot_epoch=" + repr(self.epoch(8)) + ");owner.begin_process_session(workspace);os._exit(0)\n"
+        self.child(source)
+        marker = self.directory / PROCESS_SESSION
+        before = marker.read_bytes()
+        with self.assertRaisesRegex(FileExistsError, "earlier boot"):
+            PrivateSessionOwner(self.directory, boot_epoch=self.epoch(8))
+        self.assertEqual(marker.read_bytes(), before)
+
+    def test_active_real_owner_lock_excludes_recovery_even_with_a_later_supplied_counter(self):
+        owner = PrivateSessionOwner(self.directory, boot_epoch=self.epoch(8))
+        try:
+            owner.begin_process_session(self.workspace)
+            before = (self.directory / PROCESS_SESSION).read_bytes()
+            source = ("try:\n    owner=PrivateSessionOwner(directory,boot_epoch=" + repr(self.epoch(9)) + ")\n"
+                "except BlockingIOError:\n    print('blocked')\n"
+                "else:\n    owner.close();raise RuntimeError('Live ownership was recovered')\n")
+            self.assertEqual(self.child(source), "blocked\n")
+            self.assertEqual((self.directory / PROCESS_SESSION).read_bytes(), before)
+            owner.finish_process_session()
+        finally:
+            owner.close()
+
+    def test_legacy_marker_without_boot_proof_cannot_be_recovered(self):
+        self.child("owner=PrivateSessionOwner(directory);owner.begin_process_session(workspace);os._exit(0)\n")
+        marker = self.directory / PROCESS_SESSION
+        before = marker.read_bytes()
+        with self.assertRaisesRegex(FileExistsError, "verified boot evidence"):
+            PrivateSessionOwner(self.directory, boot_epoch=self.epoch(9))
+        self.assertEqual(marker.read_bytes(), before)
+
+    def test_foreign_boot_source_and_invalid_counter_are_rejected_without_creating_lock(self):
+        for change in ({"source": "model"}, {"schema": "unknown"}, {"bootCount": -1},
+                       {"bootCount": True}, {"bootCount": "9"}, {"bootCount": 2**31}):
+            with self.subTest(change=change), self.assertRaises(ValueError):
+                PrivateSessionOwner(self.directory, boot_epoch={**self.epoch(9), **change})
+            self.assertEqual(list(self.directory.iterdir()), [])
+
+    def test_malformed_or_foreign_marker_is_preserved(self):
+        marker = self.previous_boot_marker()
+        original = json.loads(marker.read_bytes())
+        values = [b'{"version":2,"version":2}', b"x" * 4097]
+        for change in ({"uid": os.getuid() + 1}, {"version": True}, {"brokerPid": -1},
+                       {"workspaceInode": False}, {"bootEpoch": self.epoch(True)}):
+            values.append(json.dumps({**original, **change}).encode())
+        for value in values:
+            marker.write_bytes(value)
+            with self.subTest(value=value[:64]), self.assertRaises((ValueError, OSError)):
+                PrivateSessionOwner(self.directory, boot_epoch=self.epoch(9))
+            self.assertEqual(marker.read_bytes(), value)
+
+    def test_boot_recovery_refuses_marker_symlink_hardlink_and_nonprivate_mode(self):
+        marker = self.previous_boot_marker()
+        original = self.root / "original-marker"
+        marker.rename(original)
+        before = original.read_bytes()
+        marker.symlink_to(original)
+        with self.assertRaises(OSError):
+            PrivateSessionOwner(self.directory, boot_epoch=self.epoch(9))
+        self.assertTrue(marker.is_symlink())
+        marker.unlink()
+        os.link(original, marker)
+        with self.assertRaises(PermissionError):
+            PrivateSessionOwner(self.directory, boot_epoch=self.epoch(9))
+        self.assertEqual(original.read_bytes(), before)
+        marker.unlink()
+        original.rename(marker)
+        marker.chmod(0o644)
+        with self.assertRaises(PermissionError):
+            PrivateSessionOwner(self.directory, boot_epoch=self.epoch(9))
+        self.assertEqual(marker.read_bytes(), before)
+
+    def test_legacy_socket_remains_independent_and_prevents_archival(self):
+        marker = self.previous_boot_marker()
+        before = marker.read_bytes()
+        path = self.directory / SOCKET_NAME
+        with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as previous:
+            previous.bind(str(path))
+        identity = path.stat()
+        with self.assertRaisesRegex(FileExistsError, "socket path already exists"):
+            PrivateSessionOwner(self.directory, boot_epoch=self.epoch(9))
+        self.assertEqual(marker.read_bytes(), before)
+        self.assertEqual((path.stat().st_dev, path.stat().st_ino), (identity.st_dev, identity.st_ino))
 
 
 if __name__ == "__main__":

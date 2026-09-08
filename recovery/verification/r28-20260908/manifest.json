@@ -1,0 +1,321 @@
+{
+  "schema": "foldgpt.r28.evidence.v1",
+  "apkSha256": "d1b218f25cff6b260570c767e68f838ea412dd99e1a69b30ba857c5ed8f32db4",
+  "files": [
+    {
+      "path": "apk-r28-verification.json",
+      "sourcePath": "work/app-transport-20260908/apk-r28-verification.json",
+      "sourceSha256": "26cb6744d70a8ff54a3a55d7d3ca4853e3088057f07e901162c21f7a97bea3c0",
+      "sha256": "26cb6744d70a8ff54a3a55d7d3ca4853e3088057f07e901162c21f7a97bea3c0",
+      "bytes": 574
+    },
+    {
+      "path": "app-start-r28/report.json",
+      "sourcePath": "work/app-transport-20260908/app-start-r28/report.json",
+      "sourceSha256": "adb7e4681782d6e64b2f2cb95209561a9092ed84b2de6205b6752c00b23b68c6",
+      "sha256": "adb7e4681782d6e64b2f2cb95209561a9092ed84b2de6205b6752c00b23b68c6",
+      "bytes": 193
+    },
+    {
+      "path": "app-start-r28/native-status.json",
+      "sourcePath": "work/app-transport-20260908/app-start-r28/native-status.json",
+      "sourceSha256": "ef088a4dc143eaf3a08f5c0b9b14d28f12a6eb6e26684ea8812822e0f5816a46",
+      "sha256": "ef088a4dc143eaf3a08f5c0b9b14d28f12a6eb6e26684ea8812822e0f5816a46",
+      "bytes": 1200
+    },
+    {
+      "path": "app-start-r28/launch.json",
+      "sourcePath": "work/app-transport-20260908/app-start-r28/launch.json",
+      "sourceSha256": "e59b2099f56b167b3847d892709e2bf45ad4a4667b220ccf3b81df7e0601acb3",
+      "sha256": "e59b2099f56b167b3847d892709e2bf45ad4a4667b220ccf3b81df7e0601acb3",
+      "bytes": 495
+    },
+    {
+      "path": "app-start-r28/process-session.json",
+      "sourcePath": "work/app-transport-20260908/app-start-r28/process-session.json",
+      "sourceSha256": "aee488a4fc6c0f9e78d4e6a5ca9cd0621fdcda20db6b9a3af6bcdf96ad29febf",
+      "sha256": "aee488a4fc6c0f9e78d4e6a5ca9cd0621fdcda20db6b9a3af6bcdf96ad29febf",
+      "bytes": 272
+    },
+    {
+      "path": "app-start-r28/startup.json",
+      "sourcePath": "work/app-transport-20260908/app-start-r28/startup.json",
+      "sourceSha256": "474d53ff1c79299e9c6644e73896a43e78a61211d6cc6d9e118653f644cf7afd",
+      "sha256": "474d53ff1c79299e9c6644e73896a43e78a61211d6cc6d9e118653f644cf7afd",
+      "bytes": 1008
+    },
+    {
+      "path": "r28-functional/report.json",
+      "sourcePath": "work/app-transport-20260908/r28-functional/report.json",
+      "sourceSha256": "25db30d10cc3b3c429a5189881c9cda7b621989c707f7dae4501fe0e0787774d",
+      "sha256": "25db30d10cc3b3c429a5189881c9cda7b621989c707f7dae4501fe0e0787774d",
+      "bytes": 1988
+    },
+    {
+      "path": "r28-functional/tool-outputs.json",
+      "sourcePath": "work/app-transport-20260908/r28-functional/tool-outputs.json",
+      "sourceSha256": "e71f4b4acec46534b40ed8a59e823b1af4eac4cb64ede35969bd70c88e7f4571",
+      "sha256": "e71f4b4acec46534b40ed8a59e823b1af4eac4cb64ede35969bd70c88e7f4571",
+      "bytes": 18033
+    },
+    {
+      "path": "r28-functional/projects.json",
+      "sourcePath": "work/app-transport-20260908/r28-functional/projects.json",
+      "sourceSha256": "b6c90074c2dfbed189f75916dd4132db9cdd81bb634a661eab02253224ceca58",
+      "sha256": "b6c90074c2dfbed189f75916dd4132db9cdd81bb634a661eab02253224ceca58",
+      "bytes": 61701
+    },
+    {
+      "path": "stop-r28/report.json",
+      "sourcePath": "work/app-transport-20260908/stop-r28/report.json",
+      "sourceSha256": "6380221fa52970225643356928b83705f993bcd623de30417fd9ef5d17cec078",
+      "sha256": "6380221fa52970225643356928b83705f993bcd623de30417fd9ef5d17cec078",
+      "bytes": 184
+    },
+    {
+      "path": "stop-r28/final-status.json",
+      "sourcePath": "work/app-transport-20260908/stop-r28/final-status.json",
+      "sourceSha256": "dc7825534281452f6c19e0c1aaaa97a291c64f5a360c25f4f2637bd72b6d40c1",
+      "sha256": "dc7825534281452f6c19e0c1aaaa97a291c64f5a360c25f4f2637bd72b6d40c1",
+      "bytes": 1198
+    },
+    {
+      "path": "stop-r28/statuses.json",
+      "sourcePath": "work/app-transport-20260908/stop-r28/statuses.json",
+      "sourceSha256": "1e13ddc1543ab39dd740370adcb882004308afbb25dc53be0ee3eb19447aac5a",
+      "sha256": "1e13ddc1543ab39dd740370adcb882004308afbb25dc53be0ee3eb19447aac5a",
+      "bytes": 2565
+    },
+    {
+      "path": "app-reopen-r28/report.json",
+      "sourcePath": "work/app-transport-20260908/app-reopen-r28/report.json",
+      "sourceSha256": "c79b884e2308548037374a5f21c278966c6db6a3e50499d227b5f422e12cea14",
+      "sha256": "c79b884e2308548037374a5f21c278966c6db6a3e50499d227b5f422e12cea14",
+      "bytes": 193
+    },
+    {
+      "path": "app-reopen-r28/process-session.json",
+      "sourcePath": "work/app-transport-20260908/app-reopen-r28/process-session.json",
+      "sourceSha256": "a57da7b672c049b6856245230691b497dc7f2f80f7e3f070c9459cb3a20c17a3",
+      "sha256": "a57da7b672c049b6856245230691b497dc7f2f80f7e3f070c9459cb3a20c17a3",
+      "bytes": 271
+    },
+    {
+      "path": "reboot-r28/before.json",
+      "sourcePath": "work/app-transport-20260908/reboot-r28/before.json",
+      "sourceSha256": "f344dae39bcd4828c6629ba2e6dacee1676da5c84691ac801a60d954f14e3490",
+      "sha256": "f344dae39bcd4828c6629ba2e6dacee1676da5c84691ac801a60d954f14e3490",
+      "bytes": 246
+    },
+    {
+      "path": "reboot-r28/before-marker.json",
+      "sourcePath": "work/app-transport-20260908/reboot-r28/before-marker.json",
+      "sourceSha256": "fa8eed73ee448ee34726215cf504f423ba533b0c1578a79415ad5f4af6be771a",
+      "sha256": "fa8eed73ee448ee34726215cf504f423ba533b0c1578a79415ad5f4af6be771a",
+      "bytes": 215
+    },
+    {
+      "path": "reboot-r28/archived-process-session.json",
+      "sourcePath": "work/app-transport-20260908/reboot-r28/archived-process-session.json",
+      "sourceSha256": "fa8eed73ee448ee34726215cf504f423ba533b0c1578a79415ad5f4af6be771a",
+      "sha256": "fa8eed73ee448ee34726215cf504f423ba533b0c1578a79415ad5f4af6be771a",
+      "bytes": 215
+    },
+    {
+      "path": "reboot-r28/archived-recovery.json",
+      "sourcePath": "work/app-transport-20260908/reboot-r28/archived-recovery.json",
+      "sourceSha256": "9d8e3496b67c78874638d24a07acfe83e67f2447212d1849d98fda0f54346b5d",
+      "sha256": "9d8e3496b67c78874638d24a07acfe83e67f2447212d1849d98fda0f54346b5d",
+      "bytes": 500
+    },
+    {
+      "path": "reboot-r28/recovery-verified.json",
+      "sourcePath": "work/app-transport-20260908/reboot-r28/recovery-verified.json",
+      "sourceSha256": "b8d304d801fefff8c15b922446b251674bd512c84e22369126589e29d4dbeb23",
+      "sha256": "b8d304d801fefff8c15b922446b251674bd512c84e22369126589e29d4dbeb23",
+      "bytes": 713
+    },
+    {
+      "path": "app-after-reboot-r28-r2/report.json",
+      "sourcePath": "work/app-transport-20260908/app-after-reboot-r28-r2/report.json",
+      "sourceSha256": "37ad4e99ff0f6d0486d55e0a2c8e50d9a825d025d30d6be6d8f94eacec18990a",
+      "sha256": "37ad4e99ff0f6d0486d55e0a2c8e50d9a825d025d30d6be6d8f94eacec18990a",
+      "bytes": 193
+    },
+    {
+      "path": "app-after-reboot-r28-r2/native-status.json",
+      "sourcePath": "work/app-transport-20260908/app-after-reboot-r28-r2/native-status.json",
+      "sourceSha256": "f00188358cccc094a748d33954d72270c9c26f9adfb7ef51751ff65ba724d482",
+      "sha256": "f00188358cccc094a748d33954d72270c9c26f9adfb7ef51751ff65ba724d482",
+      "bytes": 1200
+    },
+    {
+      "path": "app-after-reboot-r28-r2/launch.json",
+      "sourcePath": "work/app-transport-20260908/app-after-reboot-r28-r2/launch.json",
+      "sourceSha256": "b3ece35f46d056ad1c0c9144f650c345314fe98c468144de00e0cb42ac5d107f",
+      "sha256": "b3ece35f46d056ad1c0c9144f650c345314fe98c468144de00e0cb42ac5d107f",
+      "bytes": 495
+    },
+    {
+      "path": "app-after-reboot-r28-r2/process-session.json",
+      "sourcePath": "work/app-transport-20260908/app-after-reboot-r28-r2/process-session.json",
+      "sourceSha256": "5e169d2f65736046d4c82f60a9e4c95d845834b5b23aedfe2401a457942f4d0b",
+      "sha256": "5e169d2f65736046d4c82f60a9e4c95d845834b5b23aedfe2401a457942f4d0b",
+      "bytes": 272
+    },
+    {
+      "path": "r28-reboot-functional/report.json",
+      "sourcePath": "work/app-transport-20260908/r28-reboot-functional/report.json",
+      "sourceSha256": "f2332a4e72f1b0cd6afbb64123f370c4da1a9a687b42a04b295e9f9785fd4d09",
+      "sha256": "f2332a4e72f1b0cd6afbb64123f370c4da1a9a687b42a04b295e9f9785fd4d09",
+      "bytes": 1988
+    },
+    {
+      "path": "r28-reboot-functional/tool-outputs.json",
+      "sourcePath": "work/app-transport-20260908/r28-reboot-functional/tool-outputs.json",
+      "sourceSha256": "8d2d7aa90f60384a81998d2da072641410e3c7cf0b5cdb0c88285083ead6b15a",
+      "sha256": "8d2d7aa90f60384a81998d2da072641410e3c7cf0b5cdb0c88285083ead6b15a",
+      "bytes": 3043
+    },
+    {
+      "path": "r28-reboot-functional/projects.json",
+      "sourcePath": "work/app-transport-20260908/r28-reboot-functional/projects.json",
+      "sourceSha256": "b6c90074c2dfbed189f75916dd4132db9cdd81bb634a661eab02253224ceca58",
+      "sha256": "b6c90074c2dfbed189f75916dd4132db9cdd81bb634a661eab02253224ceca58",
+      "bytes": 61701
+    },
+    {
+      "path": "legacy-recovery-r26b-r1/report.json",
+      "sourcePath": "work/app-transport-20260908/legacy-recovery-r26b-r1/report.json",
+      "sourceSha256": "16fffd2446e7565207842637d656949dd8c3a8c43d443492e50d8479cc690442",
+      "sha256": "16fffd2446e7565207842637d656949dd8c3a8c43d443492e50d8479cc690442",
+      "bytes": 578
+    },
+    {
+      "path": "legacy-recovery-r26b-r1/locked-census.json",
+      "sourcePath": "work/app-transport-20260908/legacy-recovery-r26b-r1/locked-census.json",
+      "sourceSha256": "ab141a9968abbae889e9838465a7be6f5c29b680f6c77bea530fb80f2ac84f79",
+      "sha256": "ab141a9968abbae889e9838465a7be6f5c29b680f6c77bea530fb80f2ac84f79",
+      "bytes": 336
+    },
+    {
+      "path": "legacy-recovery-r26b-r1/process-session-before.json",
+      "sourcePath": "work/app-transport-20260908/legacy-recovery-r26b-r1/process-session-before.json",
+      "sourceSha256": "8c09b5a029b9cf3073a62890f9cead8748c8f5117ef9245d2c21f05b955c95fa",
+      "sha256": "8c09b5a029b9cf3073a62890f9cead8748c8f5117ef9245d2c21f05b955c95fa",
+      "bytes": 92
+    },
+    {
+      "path": "legacy-recovery-r26b-r1/process-session-archived.json",
+      "sourcePath": "work/app-transport-20260908/legacy-recovery-r26b-r1/process-session-archived.json",
+      "sourceSha256": "8c09b5a029b9cf3073a62890f9cead8748c8f5117ef9245d2c21f05b955c95fa",
+      "sha256": "8c09b5a029b9cf3073a62890f9cead8748c8f5117ef9245d2c21f05b955c95fa",
+      "bytes": 92
+    },
+    {
+      "path": "lifecycle-foreground-r2/report.json",
+      "sourcePath": "work/app-transport-20260908/lifecycle-foreground-r2/report.json",
+      "sourceSha256": "98a3a602c2ff763274a0bec07f42438f74071670543047c09594f46314a2ff8f",
+      "sha256": "98a3a602c2ff763274a0bec07f42438f74071670543047c09594f46314a2ff8f",
+      "bytes": 1025
+    },
+    {
+      "path": "lifecycle-foreground-r2/test.log",
+      "sourcePath": "work/app-transport-20260908/lifecycle-foreground-r2/test.log",
+      "sourceSha256": "fbf77235a75ac5238f2b1eeed8096e3b6f30e0ea9c2df8f0890020d808a35b7a",
+      "sha256": "fbf77235a75ac5238f2b1eeed8096e3b6f30e0ea9c2df8f0890020d808a35b7a",
+      "bytes": 80
+    },
+    {
+      "path": "r28-functional/project/stats-cli.pyz",
+      "sourcePath": "work/app-transport-20260908/r28-functional/project/stats-cli.pyz",
+      "sourceSha256": "9611c9414d7e52dbb147f3abef2e50afc72aa97115de53314eb0b73a9437d7ca",
+      "sha256": "9611c9414d7e52dbb147f3abef2e50afc72aa97115de53314eb0b73a9437d7ca",
+      "bytes": 6356
+    },
+    {
+      "path": "r28-functional/project/stats-cli/README.md",
+      "sourcePath": "work/app-transport-20260908/r28-functional/project/stats-cli/README.md",
+      "sourceSha256": "455166c71c101bc634be102b5db055fb75829cfc59a5c167a4afc90945496e86",
+      "sha256": "455166c71c101bc634be102b5db055fb75829cfc59a5c167a4afc90945496e86",
+      "bytes": 530
+    },
+    {
+      "path": "r28-functional/project/stats-cli/stats-cli.pyz",
+      "sourcePath": "work/app-transport-20260908/r28-functional/project/stats-cli/stats-cli.pyz",
+      "sourceSha256": "4df5dc3575177baa5ab84ca63baa55967fef0bf18e763d7c0ab864a2ec34f0af",
+      "sha256": "4df5dc3575177baa5ab84ca63baa55967fef0bf18e763d7c0ab864a2ec34f0af",
+      "bytes": 3055
+    },
+    {
+      "path": "r28-functional/project/stats-cli/stats_cli.py",
+      "sourcePath": "work/app-transport-20260908/r28-functional/project/stats-cli/stats_cli.py",
+      "sourceSha256": "ae85b569afbc83f5bc162231bd98ec4a588b9687910c0ae24e2c7ec7275885c1",
+      "sha256": "ae85b569afbc83f5bc162231bd98ec4a588b9687910c0ae24e2c7ec7275885c1",
+      "bytes": 1231
+    },
+    {
+      "path": "r28-functional/project/stats-cli/test_stats_cli.py",
+      "sourcePath": "work/app-transport-20260908/r28-functional/project/stats-cli/test_stats_cli.py",
+      "sourceSha256": "eb6351ce02f5cc5889f46ce2a22827bc555a8c3b55941091f049492d641de43d",
+      "sha256": "eb6351ce02f5cc5889f46ce2a22827bc555a8c3b55941091f049492d641de43d",
+      "bytes": 961
+    },
+    {
+      "path": "r28-functional/project/stats-cli/__main__.py",
+      "sourcePath": "work/app-transport-20260908/r28-functional/project/stats-cli/__main__.py",
+      "sourceSha256": "ec907432c624de955ecc7bb4f9f2a2fe32a46cfebfcd92e7f5c68f2cd2e326be",
+      "sha256": "ec907432c624de955ecc7bb4f9f2a2fe32a46cfebfcd92e7f5c68f2cd2e326be",
+      "bytes": 53
+    },
+    {
+      "path": "r28-legacy-progress3-completed-items.json",
+      "sourcePath": "work/app-transport-20260908/r28-legacy-progress3.json",
+      "sourceSha256": "a0e4bff2966313185f661c867567e823c8dabf325f4ef04f38a665af7b8fecfd",
+      "sha256": "1d60bd7e64a017685d5166d922cd515da6ef258bcab41c7e4cd3372301e58cee",
+      "bytes": 24344
+    },
+    {
+      "path": "r28-reboot-progress1-completed-items.json",
+      "sourcePath": "work/app-transport-20260908/r28-reboot-progress1.json",
+      "sourceSha256": "6b70c59f18d508dee703c8c4af21fc2839871833eca93bedc4fa77dab4c68c41",
+      "sha256": "e5d9ec30fa28eec13a37f53e4cfad7b678ba320d74cef111a74e9a635a964803",
+      "bytes": 5660
+    },
+    {
+      "path": "app-start-r28/uid-processes.json",
+      "sourcePath": "work/app-transport-20260908/app-start-r28/processes.txt",
+      "sourceSha256": "add40486f2cbae446f3f23344e00458cbafe71615bf2a76cd86067aa0f4b8858",
+      "sha256": "2c02a12ebda95c0f72cec86ab687b95cfb03bd3de67468aa906e127e39a41b3c",
+      "bytes": 7109
+    },
+    {
+      "path": "r28-functional/uid-processes.json",
+      "sourcePath": "work/app-transport-20260908/r28-functional/processes.txt",
+      "sourceSha256": "762ecbfa9650d0f99a81bb9e5b67a13041c787790cc816382a4f9a413f5a3038",
+      "sha256": "2e0afb372c2dc0021bde1b32174fb4cb09d5676c2d330aec2c5476fe52d8ba85",
+      "bytes": 7431
+    },
+    {
+      "path": "app-reopen-r28/uid-processes.json",
+      "sourcePath": "work/app-transport-20260908/app-reopen-r28/processes.txt",
+      "sourceSha256": "e5ecc1843e99ad8d9aa964c44b1465d7a2e0a7d9d2f4b1b244d81c14683b3267",
+      "sha256": "3a3b5ee841d3c5b58265e0cb1302c1329fdb2921a33baa28dcee3bb39e03e8a5",
+      "bytes": 728
+    },
+    {
+      "path": "app-after-reboot-r28-r2/uid-processes.json",
+      "sourcePath": "work/app-transport-20260908/app-after-reboot-r28-r2/processes.txt",
+      "sourceSha256": "469da613bc7be39af377adef638a7fe7ec23925100af4920328567c0bad64f84",
+      "sha256": "479fbdb283698b472cc7a99db485fe30601760c62ae47369c1c78d7e00983a50",
+      "bytes": 7112
+    },
+    {
+      "path": "r28-reboot-functional/uid-processes.json",
+      "sourcePath": "work/app-transport-20260908/r28-reboot-functional/processes.txt",
+      "sourceSha256": "32c6e130d47ee84edfaeb0d5bc94ff61d2cf8ed84eb2e3202f07162ed416223f",
+      "sha256": "081caea9378e32839dcae612c95e97815e4869ab390a62d0931113bfc45754dd",
+      "bytes": 7492
+    }
+  ]
+}

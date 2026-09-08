@@ -1,0 +1,98 @@
+[
+  {
+    "timestamp": "2026-09-08T19:38:39.444Z",
+    "ordinal": 472,
+    "type": "response_item",
+    "payload": {
+      "type": "custom_tool_call_output",
+      "id": "ctco_01a08287-97d4-79a0-92da-5f7af8340cbb",
+      "call_id": "call_sQYnnaAgopN8ZnUT9egVX34M",
+      "output": [
+        {
+          "type": "input_text",
+          "text": "Script completed\nWall time 1.3 seconds\nOutput:\n"
+        },
+        {
+          "type": "input_text",
+          "text": "{\"chunk_id\":\"1a7567\",\"wall_time_seconds\":1.001369687,\"session_id\":27554,\"original_token_count\":255,\"output\":\"--- python environment ---\\nsys.platform= android\\nplatform.machine()= aarch64\\nos.getuid()= 10412\\nos.getcwd()= /data/data/app.foldgpt/files/projects/ui-python-caae3a83d156\\nsys.executable= /data/app/~~h1j2vVo5ocZN-Hqe_vqEog==/app.foldgpt-MYcth4qAAloa1xvUC2DBWg==/lib/arm64/libfoldgpt_python_cli.so\\n--- rg path ---\\n/data/data/app.foldgpt/files/native-runtime-v1/python/bin/rg\\n--- tests ---\\ntest_cli_process_json_stable_and_codes (test_dependency_inspector.DependencyTests.test_cli_process_json_stable_and_codes) ... ok\\ntest_compound_constraint (test_dependency_inspector.DependencyTests.test_compound_constraint) ... ok\\ntest_invalid_entries (test_dependency_inspector.DependencyTests.test_invalid_entries) ... ok\\ntest_invalid_installed_version (test_dependency_inspector.DependencyTests.test_invalid_installed_version) ... ok\\ntest_statuses (test_dependency_inspector.DependencyTests.test_statuses) ... ok\\n\\n----------------------------------------------------------------------\\nRan 5 tests in 0.637s\\n\\nOK\\n--- zipapp JSON ---\\n\"}"
+        }
+      ],
+      "internal_chat_message_metadata_passthrough": {
+        "turn_id": "01a08287-665b-74e3-9d93-018afdf57f1e",
+        "create_time": 1788896319.4444213
+      }
+    }
+  },
+  {
+    "timestamp": "2026-09-08T19:38:42.806Z",
+    "ordinal": 479,
+    "type": "response_item",
+    "payload": {
+      "type": "custom_tool_call_output",
+      "id": "ctco_01a08287-a4f6-7a03-8503-36b8c4ce665a",
+      "call_id": "call_kD0YDUqSYhF94JGPnsO5bIMF",
+      "output": [
+        {
+          "type": "input_text",
+          "text": "Script completed\nWall time 0.0 seconds\nOutput:\n"
+        },
+        {
+          "type": "input_text",
+          "text": "{\"chunk_id\":\"9c2ea8\",\"wall_time_seconds\":0.000003906,\"exit_code\":0,\"original_token_count\":354,\"output\":\"{\\n  \\\"dependencies\\\": [\\n    {\\n      \\\"name\\\": \\\"requests\\\",\\n      \\\"requirement\\\": \\\"requests<3,>=2.31\\\",\\n      \\\"installed\\\": \\\"2.32.5\\\",\\n      \\\"status\\\": \\\"compatible\\\",\\n      \\\"reason\\\": \\\"2.32.5 satisfies <3,>=2.31\\\"\\n    },\\n    {\\n      \\\"name\\\": \\\"urllib3\\\",\\n      \\\"requirement\\\": \\\"urllib3<3,>=2\\\",\\n      \\\"installed\\\": \\\"1.26.20\\\",\\n      \\\"status\\\": \\\"incompatible\\\",\\n      \\\"reason\\\": \\\"1.26.20 does not satisfy <3,>=2\\\"\\n    },\\n    {\\n      \\\"name\\\": \\\"colorama\\\",\\n      \\\"requirement\\\": \\\"colorama>=0.4.6\\\",\\n      \\\"installed\\\": null,\\n      \\\"status\\\": \\\"absent\\\",\\n      \\\"reason\\\": \\\"not installed\\\"\\n    }\\n  ]\\n}\\n--- zipapp Markdown ---\\n# Dependency Inspector\\n\\n| Name | Requirement | Installed | Status | Reason |\\n|---|---|---|---|---|\\n| requests | requests<3,>=2.31 | 2.32.5 | compatible | 2.32.5 satisfies <3,>=2.31 |\\n| urllib3 | urllib3<3,>=2 | 1.26.20 | incompatible | 1.26.20 does not satisfy <3,>=2 |\\n| colorama | colorama>=0.4.6 | \u2014 | absent | not installed |\\n--- rg files ---\\nvalidation-resume.json\\n__main__.py\\nvalidation.json\\nvalidation-report.txt\\nCHANGELOG.md\\nREADME.md\\npyproject.toml\\ntests/test_dependency_inspector.py\\ndependency_inspector/cli.py\\ndependency_inspector/render.py\\ndependency_inspector/evaluate.py\\ndependency_inspector/inventory.py\\ndependency_inspector/__init__.py\\nvendor/wheels/packaging-26.3-py3-none-any.whl\\ndata/example.json\\ntools/build_zipapp.py\\ntools/build_zipapp.sh\\nstatuses: environment=0 rg=0 tests=0 json=1 markdown=1 rg_files=0\\n\"}"
+        }
+      ],
+      "internal_chat_message_metadata_passthrough": {
+        "turn_id": "01a08287-665b-74e3-9d93-018afdf57f1e",
+        "create_time": 1788896322.8065846
+      }
+    }
+  },
+  {
+    "timestamp": "2026-09-08T19:38:48.749Z",
+    "ordinal": 487,
+    "type": "response_item",
+    "payload": {
+      "type": "custom_tool_call_output",
+      "id": "ctco_01a08287-bc2d-7242-8b24-feff6a0e06d6",
+      "call_id": "call_jkUm40NIIb5AdAWetxpRbZuk",
+      "output": [
+        {
+          "type": "input_text",
+          "text": "Script completed\nWall time 1.2 seconds\nOutput:\n"
+        },
+        {
+          "type": "input_text",
+          "text": "{\"chunk_id\":\"cf7cf6\",\"wall_time_seconds\":1.00121125,\"session_id\":5081,\"original_token_count\":4,\"output\":\"FOLD_APP_READY\\r\\n\"}"
+        }
+      ],
+      "internal_chat_message_metadata_passthrough": {
+        "turn_id": "01a08287-665b-74e3-9d93-018afdf57f1e",
+        "create_time": 1788896328.749148
+      }
+    }
+  },
+  {
+    "timestamp": "2026-09-08T19:38:51.577Z",
+    "ordinal": 492,
+    "type": "response_item",
+    "payload": {
+      "type": "custom_tool_call_output",
+      "id": "ctco_01a08287-c736-7ff2-8e34-f139cf22a4a4",
+      "call_id": "call_nprmlqMGpSeQOX1OM2kWoXfm",
+      "output": [
+        {
+          "type": "input_text",
+          "text": "Script completed\nWall time 0.1 seconds\nOutput:\n"
+        },
+        {
+          "type": "input_text",
+          "text": "{\"chunk_id\":\"ca405f\",\"wall_time_seconds\":0.000010781,\"exit_code\":23,\"original_token_count\":13,\"output\":\"bonjour autonome\\r\\nFOLD_APP_REPLY=bonjour autonome\\r\\n\"}"
+        }
+      ],
+      "internal_chat_message_metadata_passthrough": {
+        "turn_id": "01a08287-665b-74e3-9d93-018afdf57f1e",
+        "create_time": 1788896331.5749502
+      }
+    }
+  }
+]

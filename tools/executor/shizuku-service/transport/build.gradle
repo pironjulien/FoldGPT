@@ -25,6 +25,7 @@ android {
     // Production supplies this entry only through its explicit pinned package;
     // adding it to legacy qualification APKs would invalidate their inventories.
     sourceSets.main.assets.exclude 'foldgpt-executor/foldgpt_native_bootstrap.py'
+    sourceSets.main.assets.exclude 'foldgpt-executor/foldgpt_app_bootstrap.py'
     compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
 }
 if (frozenTransportNative.isPresent()) {

@@ -28,6 +28,12 @@ final class SessionState {
         if (serviceUid != 2000 || clientUid < 10000) throw new SecurityException("Invalid Shizuku identities");
         this.clientUid = clientUid;
     }
+    private SessionState(int applicationUid) { this.clientUid = applicationUid; }
+    static SessionState forApplication(int serviceUid, int applicationUid) {
+        if (applicationUid < 10000 || serviceUid != applicationUid)
+            throw new SecurityException("Invalid application owner identities");
+        return new SessionState(applicationUid);
+    }
     void authenticate(int caller) {
         if (caller != clientUid) throw new SecurityException("Caller is not this executor application");
     }

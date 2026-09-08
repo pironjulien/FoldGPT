@@ -1,0 +1,59 @@
+{
+  "historyPrefixes": [
+    {
+      "threadId": "01a07363-4251-70f1-848e-b82effd2106b",
+      "prefixBytes": 117996,
+      "prefixSha256": "f746ee8bdb079b1ad6012ea5ebcf27e5ca0f8f81c419f890d9bc27a52167ebd5",
+      "prefixUnchanged": true,
+      "unchanged": true,
+      "archived": true
+    },
+    {
+      "threadId": "01a073e6-db92-7d10-ad7d-3067db9264da",
+      "prefixBytes": 92836,
+      "prefixSha256": "73b36a043c75637646fc680a2632b24cae1fde061db2d0516c00a0faa86c377f",
+      "prefixUnchanged": true,
+      "unchanged": true,
+      "archived": true
+    },
+    {
+      "threadId": "01a07423-bd14-7a30-9f16-e6135955a972",
+      "prefixBytes": 517137,
+      "prefixSha256": "0b82aee64ea30bf91d2f2d862ef6a255e378c6fb463202c4dc87897b2fb15dfc",
+      "prefixUnchanged": true,
+      "unchanged": true,
+      "archived": false
+    },
+    {
+      "threadId": "01a0782b-03d8-7982-a0e9-9e37cb7f35df",
+      "prefixBytes": 97252,
+      "prefixSha256": "6b546549e61ace33ec0abd68f6a557c37cbd05e0534054d573f8b00bf78943a3",
+      "prefixUnchanged": true,
+      "unchanged": true,
+      "archived": false
+    },
+    {
+      "threadId": "01a07830-0830-7cc3-a5e7-e3242c17b10d",
+      "prefixBytes": 156694,
+      "prefixSha256": "5ca602bcfeef0a99e7d989f877547cc693149f294d1eebda29e8faa635e9424d",
+      "prefixUnchanged": true,
+      "unchanged": true,
+      "archived": false
+    },
+    {
+      "threadId": "01a07831-abaa-7a11-811f-1a6706c3da40",
+      "prefixBytes": 330510,
+      "prefixSha256": "691f0009223dc9e12f9ba8ef6a1a63da33cc65d52530bd2242cd80a3b8da6b31",
+      "prefixUnchanged": true,
+      "unchanged": false,
+      "archived": false
+    }
+  ],
+  "existingProjectEntriesPreserved": 334,
+  "addedEntries": 0,
+  "launchOrigin": "android-app",
+  "shizukuInCensus": false,
+  "uidProcessCount": 31,
+  "bootId": "8dc407f6-5287-4873-93a4-d2dd7284828b",
+  "apkSha256": "d1b218f25cff6b260570c767e68f838ea412dd99e1a69b30ba857c5ed8f32db4"
+}

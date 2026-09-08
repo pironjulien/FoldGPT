@@ -1,0 +1,68 @@
+{
+  "app-start-r26b/processes.txt": {
+    "selected": [
+      {
+        "sourceLine": 1113,
+        "text": "28887  1903 10412 app.foldgpt"
+      },
+      {
+        "sourceLine": 1114,
+        "text": "28958  1903 10412 app.foldgpt:runtime"
+      },
+      {
+        "sourceLine": 1116,
+        "text": "29060 28958 10412 libfoldgpt_python_cli.so"
+      },
+      {
+        "sourceLine": 1117,
+        "text": "29066 28958 10412 libproot.so"
+      },
+      {
+        "sourceLine": 1118,
+        "text": "29076 29066 10412 dbus-run-session"
+      },
+      {
+        "sourceLine": 1120,
+        "text": "29078 29076 10412 bash"
+      },
+      {
+        "sourceLine": 1141,
+        "text": "29646 29113 10412 codex-native"
+      }
+    ],
+    "shizukuNameFoundInFullSnapshot": false
+  },
+  "device-current-r26b/processes.txt": {
+    "selected": [
+      {
+        "sourceLine": 2223,
+        "text": "28887  1903 10412 app.foldgpt"
+      },
+      {
+        "sourceLine": 2225,
+        "text": "28958  1903 10412 app.foldgpt:runtime"
+      },
+      {
+        "sourceLine": 2229,
+        "text": "29060 28958 10412 libfoldgpt_python_cli.so"
+      },
+      {
+        "sourceLine": 2231,
+        "text": "29066 28958 10412 libproot.so"
+      },
+      {
+        "sourceLine": 2233,
+        "text": "29076 29066 10412 dbus-run-session"
+      },
+      {
+        "sourceLine": 2237,
+        "text": "29078 29076 10412 bash"
+      },
+      {
+        "sourceLine": 2277,
+        "text": "29646 29113 10412 codex-native"
+      }
+    ],
+    "shizukuNameFoundInFullSnapshot": false
+  }
+}

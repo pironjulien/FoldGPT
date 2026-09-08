@@ -1,0 +1,32 @@
+[
+  {
+    "sourceIndex": 3,
+    "at": 1788896306948,
+    "method": "turn/started",
+    "threadId": "01a07fe2-4dc0-7791-adc0-fb3fe079872c",
+    "turn": {
+      "id": "01a08287-665b-74e3-9d93-018afdf57f1e",
+      "itemsView": "notLoaded",
+      "status": "inProgress",
+      "error": null,
+      "startedAt": 1788896306,
+      "completedAt": null,
+      "durationMs": null
+    }
+  },
+  {
+    "sourceIndex": 431,
+    "at": 1788896339259,
+    "method": "turn/completed",
+    "threadId": "01a07fe2-4dc0-7791-adc0-fb3fe079872c",
+    "turn": {
+      "id": "01a08287-665b-74e3-9d93-018afdf57f1e",
+      "itemsView": "summary",
+      "status": "completed",
+      "error": null,
+      "startedAt": 1788896306,
+      "completedAt": 1788896339,
+      "durationMs": 32317
+    }
+  }
+]

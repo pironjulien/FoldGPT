@@ -1,0 +1,13 @@
+{
+  "success": true,
+  "androidExecuted": false,
+  "sourceSha256": {
+    "android/app/src/main/java/app/foldgpt/RuntimeExitGate.java": "2f4c339d08fcbe19011773f6eca3f48d6d4c8f35ac394b1ce23a29039403e6df",
+    "android/app/src/test/java/app/foldgpt/RuntimeExitGateTest.java": "0324048201023a6a8e8fc94b9ca21e99502a6624bfbc961bc275bbf373c271ff",
+    "android/app/src/main/java/app/foldgpt/NativeSessionObservation.java": "18c46b6b21fd5731bc9c2427dd86851b50638c6878755590121154be0c5da4fe",
+    "android/app/src/test/java/app/foldgpt/NativeSessionObservationTest.java": "19a5a10658a07cf89da65d2ab568464f857389605787919d8496f21de61f94c2",
+    "android/app/src/main/java/app/foldgpt/RuntimeShutdownGate.java": "5079cba3765e84c8327fdf11d768909a2a6136c7fddcb4a5d88a928762d9a0c0",
+    "android/app/src/test/java/app/foldgpt/RuntimeShutdownGateTest.java": "4f137933b4fb3fcacde9b3710dc235796e899c1bda69f73fe2f6d077ab2aba86"
+  },
+  "result": "JUnit version 4.13.2\n........................\nTime: 0,018\n\nOK (24 tests)\n\n"
+}

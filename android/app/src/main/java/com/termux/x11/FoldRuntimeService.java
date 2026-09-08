@@ -9,6 +9,7 @@ import android.system.OsConstants;
 import android.util.Log;
 import app.foldgpt.FoldActivity;
 import app.foldgpt.FoldExecutorRuntime;
+import app.foldgpt.RuntimeShutdownGate;
 import app.foldgpt.KeyringVault;
 import app.foldgpt.install.GuestIdentity;
 import java.io.*;
@@ -21,8 +22,11 @@ public final class FoldRuntimeService extends Service {
     private java.lang.Process linux;
     private PowerManager.WakeLock wakeLock;
     private Thread worker;
+    private java.util.concurrent.CompletableFuture<Void> workspaceClosed = java.util.concurrent.CompletableFuture.completedFuture(null);
     private volatile boolean stopping;
-    private boolean restartRequested;
+    private final RuntimeShutdownGate shutdownGate = new RuntimeShutdownGate();
+    private long shutdownGeneration;
+    private boolean restartWorkspace;
     private boolean destroyed;
     private boolean xReady;
     private int latestStartId;
@@ -34,10 +38,6 @@ public final class FoldRuntimeService extends Service {
     @Override public IBinder onBind(Intent intent) { return null; }
     @Override public int onStartCommand(Intent intent, int flags, int startId) {
         latestStartId = startId;
-        if ("stop".equals(intent == null ? null : intent.getAction())) {
-            requestStop();
-            return START_NOT_STICKY;
-        }
         NotificationManager manager = getSystemService(NotificationManager.class);
         manager.createNotificationChannel(new NotificationChannel("workspace", "Espace Linux", NotificationManager.IMPORTANCE_LOW));
         PendingIntent open = PendingIntent.getActivity(this, 0, new Intent(this, FoldActivity.class), PendingIntent.FLAG_IMMUTABLE);
@@ -45,47 +45,100 @@ public final class FoldRuntimeService extends Service {
         startForeground(1, new Notification.Builder(this, "workspace").setSmallIcon(android.R.drawable.ic_menu_manage)
             .setContentTitle("FoldGPT").setContentText("Espace Linux actif").setContentIntent(open)
             .addAction(new Notification.Action.Builder(null, "Arrêter", stop).build()).setOngoing(true).build());
-        if (FoldExecutorRuntime.ACTION_PREPARE.equals(intent == null ? null : intent.getAction())) {
-            // Deliberate native preparation command. Its failure is explicit;
-            // it never starts the old launcher as an implicit fallback.
-            executorRuntime.prepare().whenComplete((endpoint, error) -> mainHandler.post(() -> {
-                if (error != null) {
-                    Log.e("FoldGPT", "Selected native executor is unavailable", error);
-                    if (worker == null) stopSelfResult(startId);
-                } else {
-                    Log.i("FoldGPT", "Authenticated native executor endpoint prepared; desktop launcher unchanged");
-                }
-            }));
+        String action = intent == null ? null : intent.getAction();
+        if ("stop".equals(action)) {
+            requestStop();
             return START_NOT_STICKY;
         }
-        if (stopping) restartRequested = true;
-        else if (worker == null) launchWorkspace();
+        boolean prepareOnly = FoldExecutorRuntime.ACTION_PREPARE.equals(action);
+        if (stopping) {
+            restartWorkspace |= !prepareOnly;
+            applyShutdownAction(shutdownGate.requestRestart());
+            return START_NOT_STICKY;
+        }
+        if (prepareOnly) {
+            // Deliberate native preparation command. Its failure is explicit;
+            // it never starts the old launcher as an implicit fallback.
+            prepareNative(executorRuntime);
+            return START_NOT_STICKY;
+        }
+        if (worker == null) launchWorkspace();
         return START_NOT_STICKY;
+    }
+    private void prepareNative(FoldExecutorRuntime runtime) {
+        runtime.prepare().whenComplete((endpoint, error) -> mainHandler.post(() -> {
+            if (destroyed || runtime != executorRuntime) return;
+            if (error != null) {
+                Log.e("FoldGPT", "Selected native executor is unavailable", error);
+                if (worker == null && !stopping) beginShutdown();
+            } else {
+                Log.i("FoldGPT", "Authenticated native executor endpoint prepared; desktop launcher unchanged");
+            }
+        }));
     }
     private void launchWorkspace() {
         synchronized (lifecycleLock) {
             if (destroyed || worker != null) return;
             stopping = false;
-            restartRequested = false;
-            worker = new Thread(this::startWorkspace, "FoldGPT-runtime");
+            restartWorkspace = false;
+            FoldExecutorRuntime runtime = executorRuntime;
+            workspaceClosed = new java.util.concurrent.CompletableFuture<>();
+            java.util.concurrent.CompletableFuture<Void> completion = workspaceClosed;
+            worker = new Thread(() -> startWorkspace(runtime, completion), "FoldGPT-runtime");
             worker.start();
         }
     }
     private void requestStop() {
-        if (executorRuntime != null) executorRuntime.requestStop();
         java.lang.Process running;
         Thread startingThread;
+        RuntimeShutdownGate.Action completed;
         synchronized (lifecycleLock) {
-            stopping = true;
-            restartRequested = false;
+            restartWorkspace = false;
+            completed = shutdownGate.cancelRestart();
             running = linux;
             startingThread = worker;
         }
+        beginShutdown();
         if (running != null) running.destroy();
         if (startingThread != null) startingThread.interrupt();
-        else stopSelfResult(latestStartId);
+        applyShutdownAction(completed);
     }
-    private void startWorkspace() {
+    /** Main-thread transition: retain foreground status throughout native cleanup. */
+    private void beginShutdown() {
+        synchronized (lifecycleLock) {
+            if (destroyed || stopping) return;
+            stopping = true;
+            shutdownGeneration = shutdownGate.begin(worker != null);
+        }
+        long generation = shutdownGeneration;
+        FoldExecutorRuntime runtime = executorRuntime;
+        try {
+            runtime.requestStop().whenComplete((ignored, error) -> mainHandler.post(() -> {
+                if (destroyed || runtime != executorRuntime) return;
+                if (error != null) Log.e("FoldGPT", "Native cleanup is unconfirmed; retaining runtime service", error);
+                applyShutdownAction(shutdownGate.nativeCompleted(generation, error));
+            }));
+        } catch (RuntimeException | LinkageError error) {
+            Log.e("FoldGPT", "Native stop request failed; retaining runtime service", error);
+            applyShutdownAction(shutdownGate.nativeCompleted(generation, error));
+        }
+    }
+    private void applyShutdownAction(RuntimeShutdownGate.Action action) {
+        if (destroyed) return;
+        if (action == RuntimeShutdownGate.Action.RESTART) {
+            // requestStop permanently closes one native owner. A restart needs
+            // a fresh registered owner, only after the old one is really clean.
+            boolean launch = restartWorkspace;
+            executorRuntime = new FoldExecutorRuntime(this);
+            stopping = false;
+            restartWorkspace = false;
+            if (launch) launchWorkspace();
+            else prepareNative(executorRuntime);
+        } else if (action == RuntimeShutdownGate.Action.STOP_SERVICE) {
+            stopSelfResult(latestStartId);
+        }
+    }
+    private void startWorkspace(FoldExecutorRuntime runtime, java.util.concurrent.CompletableFuture<Void> completion) {
         java.lang.Process started = null;
         byte[] keyringPassword = null;
         try {
@@ -97,8 +150,8 @@ public final class FoldRuntimeService extends Service {
             requireReadableFile(root, "usr/local/lib/foldgpt/foldgpt_ime.py");
             requireReadableFile(root, "usr/local/lib/foldgpt/keyboard-focus.js");
             requireReadableFile(root, "usr/share/X11/xkb/rules/evdev");
-            FoldExecutorRuntime.Endpoint nativeEndpoint = executorRuntime.isNativeSelected()
-                    ? executorRuntime.prepare(identity.home).get(90, java.util.concurrent.TimeUnit.SECONDS) : null;
+            FoldExecutorRuntime.Endpoint nativeEndpoint = runtime.isNativeSelected()
+                    ? runtime.prepare(identity.home).get(90, java.util.concurrent.TimeUnit.SECONDS) : null;
             if (nativeEndpoint != null && nativeEndpoint.directNative()) {
                 requireReadableFile(root, "usr/local/bin/foldgpt-codex-native");
                 requireReadableFile(root, "usr/local/libexec/foldgpt/codex-native");
@@ -134,7 +187,8 @@ public final class FoldRuntimeService extends Service {
             refreshLibraryAlias(alias, getApplicationInfo().nativeLibraryDir + "/libtalloc.so");
             List<String> args = new ArrayList<>(Arrays.asList(
                 getApplicationInfo().nativeLibraryDir + "/libproot.so", "--kill-on-exit", "--link2symlink", "--sysvipc",
-                "-r", root.getAbsolutePath(), "-i", identity.prootIds(), "-w", identity.home,
+                "-r", root.getAbsolutePath(), "-i", identity.prootIds(), "-w",
+                nativeEndpoint != null && nativeEndpoint.directNative() ? nativeEndpoint.workspace() : identity.home,
                 "-b", "/dev", "-b", "/proc", "-b", "/sys", "-b", "/system", "-b", "/apex",
                 "-b", temp.getAbsolutePath() + ":/tmp",
                 "-b", sharedMemory.getAbsolutePath() + ":/dev/shm"));
@@ -194,12 +248,13 @@ public final class FoldRuntimeService extends Service {
                 if (wakeLock != null && wakeLock.isHeld()) wakeLock.release();
                 wakeLock = null;
             }
+            completion.complete(null);
             Thread finished = Thread.currentThread();
             mainHandler.post(() -> {
                 if (worker != finished || destroyed) return;
                 worker = null;
-                if (restartRequested) launchWorkspace();
-                else stopSelfResult(latestStartId);
+                if (stopping) applyShutdownAction(shutdownGate.workspaceExited(shutdownGeneration));
+                else beginShutdown();
             });
         }
     }
@@ -224,31 +279,43 @@ public final class FoldRuntimeService extends Service {
     }
     private static void stopLinux(java.lang.Process running) {
         if (running == null || !running.isAlive()) return;
+        boolean interrupted = false;
         running.destroy();
         try {
             if (!running.waitFor(2, java.util.concurrent.TimeUnit.SECONDS)) {
                 running.destroyForcibly();
-                running.waitFor(2, java.util.concurrent.TimeUnit.SECONDS);
             }
         } catch (InterruptedException e) {
             running.destroyForcibly();
-            Thread.currentThread().interrupt();
+            interrupted = true;
         }
+        // A deadline or interrupt is not a process-exit receipt. Keep the worker
+        // and foreground service until the actual child has been waited for.
+        for (;;) {
+            try { running.waitFor(); break; }
+            catch (InterruptedException e) { interrupted = true; running.destroyForcibly(); }
+        }
+        if (interrupted) Thread.currentThread().interrupt();
     }
     @Override public void onDestroy() {
         synchronized (lifecycleLock) {
             destroyed = true;
             stopping = true;
+            shutdownGate.destroy();
             if (linux != null) linux.destroy();
             if (worker != null) worker.interrupt();
             if (wakeLock != null && wakeLock.isHeld()) wakeLock.release();
             wakeLock = null;
         }
         super.onDestroy();
-        // Retain the process and Shizuku binding until native cleanup is proven.
-        // The process-wide owner registry also prevents an older asynchronous
-        // shutdown from killing a newer runtime service instance or an older
-        // instance whose native children are still being cleaned up.
-        executorRuntime.shutdownAfterCleanup(() -> android.os.Process.killProcess(android.os.Process.myPid()));
+        // A system-initiated destruction can bypass our normal foreground gate.
+        // Request cleanup immediately, then request process exit only after the
+        // workspace worker has really waited for its child. Register the exit
+        // through the native generation gate at that time, so this old Service
+        // cannot kill an intervening new Service generation.
+        FoldExecutorRuntime endingRuntime = executorRuntime;
+        endingRuntime.requestStop();
+        workspaceClosed.thenRun(() -> mainHandler.post(() -> endingRuntime.shutdownAfterCleanup(
+                () -> android.os.Process.killProcess(android.os.Process.myPid()))));
     }
 }

@@ -1,4 +1,4 @@
-/* Production pre-interpreter admission after Android run-as. The private
+/* Production pre-interpreter admission for one compiled launch origin. The private
  * runtime and installed ELF inputs are checked before Python imports. No model
  * command is accepted here; only the application's private launch manifest. */
 #define _GNU_SOURCE
@@ -21,7 +21,26 @@
 struct runtime_file { const char *path; size_t size; const char *sha256; };
 struct runtime_alias { const char *path; const char *library; };
 #include "runtime-inventory.h"
-#define ROOT "/data/user/0/app.foldgpt/files/native-runtime-v1/python"
+#define DATA "/data/user/0/app.foldgpt"
+#define FILES DATA "/files"
+#define RUNTIME_BASE FILES "/native-runtime-v1"
+#define ROOT RUNTIME_BASE "/python"
+
+/* Each installed executable admits exactly its own origin. This is selected
+ * at build time, never by an environment variable or launch manifest. */
+#if defined(FOLDGPT_ANDROID_APP) && FOLDGPT_ANDROID_APP == 1
+#define LAUNCH_FLAG "--app-runtime-v1"
+#define OWN_LIBRARY "libfoldgpt_app_bootstrap.so"
+#define ENTRY_MODULE "foldgpt_app_bootstrap"
+#define INHERITED_SECCOMP 2
+#elif !defined(FOLDGPT_ANDROID_APP)
+#define LAUNCH_FLAG "--native-runtime-v1"
+#define OWN_LIBRARY "libfoldgpt_native_bootstrap.so"
+#define ENTRY_MODULE "foldgpt_native_bootstrap"
+#define INHERITED_SECCOMP 0
+#else
+#error Unsupported native bootstrap launch origin
+#endif
 
 static int refuse(const char *stage) {
     int error = errno;
@@ -103,6 +122,26 @@ static int number(const char *value) {
     long parsed = strtol(value, &end, 10);
     return errno || *end || parsed <= 0 || parsed > INT_MAX ? -1 : (int)parsed;
 }
+#if defined(FOLDGPT_ANDROID_APP)
+static int application_data(uid_t uid, char *canonical) {
+    struct stat declared, actual;
+    char cwd[PATH_MAX];
+    return realpath(DATA, canonical)
+        && (!strcmp(canonical, DATA) || !strcmp(canonical, "/data/data/app.foldgpt"))
+        && lstat(DATA, &declared) == 0 && lstat(canonical, &actual) == 0
+        && S_ISDIR(declared.st_mode) && S_ISDIR(actual.st_mode)
+        && declared.st_uid == uid && actual.st_uid == uid
+        && declared.st_gid == uid && actual.st_gid == uid
+        && !(declared.st_mode & 077) && !(actual.st_mode & 077)
+        && declared.st_dev == actual.st_dev && declared.st_ino == actual.st_ino
+        && getcwd(cwd, sizeof(cwd)) && !strcmp(cwd, canonical);
+}
+static int private_suffix(const char *declared, const char *data, const char *suffix, char *canonical) {
+    char resolved[PATH_MAX];
+    return snprintf(canonical, PATH_MAX, "%s%s", data, suffix) < PATH_MAX
+        && realpath(declared, resolved) && !strcmp(canonical, resolved);
+}
+#endif
 int main(int argc, char **argv) {
     struct sigaction deadline = {.sa_handler = SIG_DFL};
     sigset_t deadline_signal;
@@ -110,14 +149,14 @@ int main(int argc, char **argv) {
         || sigemptyset(&deadline_signal) || sigaddset(&deadline_signal, SIGALRM)
         || sigprocmask(SIG_UNBLOCK, &deadline_signal, NULL)) return refuse("deadline");
     alarm(30);
-    if (argc != 8 || strcmp(argv[1], "--native-runtime-v1") || strcmp(argv[3], "/data/user/0/app.foldgpt")
+    if (argc != 8 || strcmp(argv[1], LAUNCH_FLAG) || strcmp(argv[3], "/data/user/0/app.foldgpt")
         || strlen(argv[5]) != 32 || strspn(argv[5], "0123456789abcdef") != 32) return refuse("arguments");
     int expected = number(argv[2]), parent = number(argv[4]);
     uid_t ur = 0, ue = 0, us = 0; gid_t gr = 0, ge = 0, gs = 0;
     if (expected < 10000 || parent < 1 || getresuid(&ur, &ue, &us) || getresgid(&gr, &ge, &gs)
         || ur != (uid_t)expected || ue != ur || us != ur || gr != ur || ge != gr || gs != gr
         || getppid() != parent || prctl(PR_GET_NO_NEW_PRIVS, 0, 0, 0, 0) != 0
-        || prctl(PR_GET_SECCOMP, 0, 0, 0, 0) != 0) return refuse("identity");
+        || prctl(PR_GET_SECCOMP, 0, 0, 0, 0) != INHERITED_SECCOMP) return refuse("identity");
     struct __user_cap_header_struct caps_header = {.version = _LINUX_CAPABILITY_VERSION_3};
     struct __user_cap_data_struct caps[2] = {{0}, {0}};
     if (syscall(__NR_capget, &caps_header, caps)) return refuse("capabilities");
@@ -127,7 +166,7 @@ int main(int argc, char **argv) {
     if (count <= 0 || count >= (ssize_t)sizeof(own) - 1) return refuse("own-executable");
     own[count] = 0;
     char *slash = strrchr(own, '/');
-    if (!slash || strcmp(slash + 1, "libfoldgpt_native_bootstrap.so")) return refuse("own-executable");
+    if (!slash || strcmp(slash + 1, OWN_LIBRARY)) return refuse("own-executable");
     *slash = 0; strcpy(directory, own);
     if (strncmp(directory, "/data/app/", 10) || strncmp(argv[6], "/data/app/", 10)) return refuse("installed-prefix");
     char apk[PATH_MAX], expected_directory[PATH_MAX]; struct stat apk_stat;
@@ -138,7 +177,23 @@ int main(int argc, char **argv) {
     *apk_slash = 0;
     if (snprintf(expected_directory, sizeof(expected_directory), "%s/lib/arm64", apk) >= (int)sizeof(expected_directory)
         || strcmp(expected_directory, directory)) return refuse("installed-apk-directory");
-    const char *endpoint = "/data/user/0/app.foldgpt/app_foldgpt_exec";
+    // Application views may spell Android's data root /data/data instead of
+    // /data/user/0. Admit only that system-prefix identity. All private suffixes
+    // must still resolve exactly; no application-created alias is accepted.
+#if defined(FOLDGPT_ANDROID_APP)
+    char data_root[PATH_MAX], files_root[PATH_MAX], runtime_base[PATH_MAX], runtime_root[PATH_MAX];
+    char endpoint[PATH_MAX], expected_launch[PATH_MAX];
+    if (!application_data(ur, data_root)
+        || !private_suffix(FILES, data_root, "/files", files_root)
+        || !private_suffix(RUNTIME_BASE, data_root, "/files/native-runtime-v1", runtime_base)
+        || !private_suffix(ROOT, data_root, "/files/native-runtime-v1/python", runtime_root)
+        || !private_suffix(DATA "/app_foldgpt_exec", data_root, "/app_foldgpt_exec", endpoint)
+        || snprintf(expected_launch, sizeof(expected_launch), "%s/%s/launch.json", endpoint, argv[5]) >= (int)sizeof(expected_launch)
+        || strcmp(expected_launch, argv[7])) return refuse("application-private-paths");
+#else
+    const char *data_root = DATA, *files_root = FILES, *runtime_base = RUNTIME_BASE, *runtime_root = ROOT;
+    const char *endpoint = DATA "/app_foldgpt_exec";
+#endif
     char launch[PATH_MAX]; struct stat launch_stat;
     size_t endpoint_length = strlen(endpoint);
     if (!directory_owned(endpoint, ur, 1) || strncmp(argv[7], endpoint, endpoint_length)
@@ -149,19 +204,19 @@ int main(int argc, char **argv) {
     // The installed application's root is the private traversal boundary.
     // Its existing files/ may legitimately use broader bits; require actual
     // ownership/canonical identity there, keeping our new subtree owner-only.
-    if (!directory_owned("/data/user/0/app.foldgpt", ur, 1)
-        || !directory_owned("/data/user/0/app.foldgpt/files", ur, -1)
-        || !directory_owned("/data/user/0/app.foldgpt/files/native-runtime-v1", ur, 1)
-        || !directory_owned(ROOT, ur, 1)) return refuse("private-root");
+    if (!directory_owned(data_root, ur, 1)
+        || !directory_owned(files_root, ur, -1)
+        || !directory_owned(runtime_base, ur, 1)
+        || !directory_owned(runtime_root, ur, 1)) return refuse("private-root");
     for (size_t i = 0; i < sizeof(runtime_files) / sizeof(*runtime_files); ++i) {
         char path[PATH_MAX], canonical[PATH_MAX];
-        if (snprintf(path, sizeof(path), "%s/%s", ROOT, runtime_files[i].path) >= (int)sizeof(path)
+        if (snprintf(path, sizeof(path), "%s/%s", runtime_root, runtime_files[i].path) >= (int)sizeof(path)
             || !realpath(path, canonical) || strcmp(path, canonical)
             || !hash_file(path, runtime_files[i].sha256, runtime_files[i].size, ur, 1)) return refuse("runtime-data");
     }
     for (size_t i = 0; i < sizeof(runtime_aliases) / sizeof(*runtime_aliases); ++i) {
         char path[PATH_MAX], target[PATH_MAX], actual[PATH_MAX]; struct stat st;
-        if (snprintf(path, sizeof(path), "%s/%s", ROOT, runtime_aliases[i].path) >= (int)sizeof(path)
+        if (snprintf(path, sizeof(path), "%s/%s", runtime_root, runtime_aliases[i].path) >= (int)sizeof(path)
             || snprintf(target, sizeof(target), "%s/%s", directory, runtime_aliases[i].library) >= (int)sizeof(target)
             || lstat(path, &st) || !S_ISLNK(st.st_mode) || st.st_uid != ur) return refuse("runtime-alias");
         ssize_t size = readlink(path, actual, sizeof(actual) - 1);
@@ -170,7 +225,7 @@ int main(int argc, char **argv) {
         if (strcmp(target, actual) || !realpath(path, actual) || strcmp(target, actual)) return refuse("runtime-alias");
     }
     size_t leaves = 0;
-    if (!tree(ROOT, ur, &leaves, 0)
+    if (!tree(runtime_root, ur, &leaves, 0)
         || leaves != sizeof(runtime_files) / sizeof(*runtime_files) + sizeof(runtime_aliases) / sizeof(*runtime_aliases)) {
         return refuse("runtime-tree");
     }
@@ -180,7 +235,7 @@ int main(int argc, char **argv) {
             || !hash_file(path, native_files[i].sha256, native_files[i].size, 0, 0)) return refuse("native-inventory");
     }
     if (snprintf(python, sizeof(python), "%s/libfoldgpt_python_cli.so", directory) >= (int)sizeof(python)) return refuse("python-path");
-    static const char entry[] = "import sys;sys.path.insert(0,sys.argv[1]+'/assets/foldgpt-executor');from foldgpt_native_bootstrap import main;main(sys.argv[1:])";
+    static const char entry[] = "import sys;sys.path.insert(0,sys.argv[1]+'/assets/foldgpt-executor');from " ENTRY_MODULE " import main;main(sys.argv[1:])";
     char *arguments[] = {python, "-I", "-S", "-B", "-u", "-c", (char *)entry, argv[6], argv[2], argv[4], argv[5], argv[7], NULL};
     char *environment[] = {NULL};
     // The setup deadline survives exec and Python imports. Python cancels it

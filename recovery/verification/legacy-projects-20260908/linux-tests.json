@@ -1,0 +1,31 @@
+{
+  "image": "/mnt/c/Dev/ChatgptFold/work/legacy-projects-tests/fixtures-20260908T190105Z.ext4",
+  "mountPoint": "/mnt/c/Dev/ChatgptFold/work/legacy-projects-tests/mount-20260908T190105Z",
+  "mappingDuringTest": "/mnt/c/Dev/ChatgptFold/work/legacy-projects-tests/mount-20260908T190105Z /dev/loop0 ext4",
+  "testUid": 1000,
+  "testCommand": [
+    "runuser",
+    "-u",
+    "foldgpt-build",
+    "--",
+    "env",
+    "PYTHONDONTWRITEBYTECODE=1",
+    "FOLDGPT_LEGACY_TEST_ROOT=/mnt/c/Dev/ChatgptFold/work/legacy-projects-tests/mount-20260908T190105Z",
+    "python3",
+    "/mnt/c/Dev/ChatgptFold/tools/runtime/legacy-projects/test_relocate.py"
+  ],
+  "returnCode": 0,
+  "log": "/mnt/c/Dev/ChatgptFold/work/legacy-projects-tests/ext4-tests-20260908T190105Z.log",
+  "unmounted": true,
+  "sourceHashes": [
+    {
+      "path": "tools/runtime/legacy-projects/relocate.py",
+      "Hash": "D52002B42CB30E46B5FD59A4BB5ED44B35BD69D81E056C9207F265441A4EA4D4"
+    },
+    {
+      "path": "tools/runtime/legacy-projects/test_relocate.py",
+      "Hash": "3959927436271D17D2103694850CE07F52F7DB6A3859C1C39BA7027DB3A81552"
+    }
+  ],
+  "scope": "20 real filesystem tests on Linux ext4, ordinary uid 1000. No Android or app-server protocol test."
+}

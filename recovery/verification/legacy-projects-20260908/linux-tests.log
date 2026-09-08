@@ -1,0 +1,25 @@
+test_added_file_invalidates_reviewed_inventory (__main__.RelocationTests.test_added_file_invalidates_reviewed_inventory) ... ok
+test_change_after_publication_reports_failure_without_deletion (__main__.RelocationTests.test_change_after_publication_reports_failure_without_deletion) ... ok
+test_collision_created_at_publish_keeps_both_trees (__main__.RelocationTests.test_collision_created_at_publish_keeps_both_trees) ... ok
+test_copy_preserves_bytes_source_and_empty_directories (__main__.RelocationTests.test_copy_preserves_bytes_source_and_empty_directories) ... ok
+test_destination_name_traversal_is_refused (__main__.RelocationTests.test_destination_name_traversal_is_refused) ... ok
+test_existing_directory_is_never_replaced (__main__.RelocationTests.test_existing_directory_is_never_replaced) ... ok
+test_existing_file_is_never_replaced (__main__.RelocationTests.test_existing_file_is_never_replaced) ... ok
+test_failed_parent_fsync_reports_that_publication_already_happened (__main__.RelocationTests.test_failed_parent_fsync_reports_that_publication_already_happened) ... ok
+test_fifo_is_refused_without_opening (__main__.RelocationTests.test_fifo_is_refused_without_opening) ... ok
+test_hardlink_is_refused (__main__.RelocationTests.test_hardlink_is_refused) ... ok
+test_inventory_is_stable_and_hashes_real_binary_content (__main__.RelocationTests.test_inventory_is_stable_and_hashes_real_binary_content) ... ok
+test_metadata_like_files_are_only_copied (__main__.RelocationTests.test_metadata_like_files_are_only_copied) ... ok
+test_overlapping_roots_are_refused (__main__.RelocationTests.test_overlapping_roots_are_refused) ... ok
+test_publication_os_error_preserves_errno_and_stage (__main__.RelocationTests.test_publication_os_error_preserves_errno_and_stage) ... ok
+test_source_changed_after_copy_is_not_published (__main__.RelocationTests.test_source_changed_after_copy_is_not_published) ... ok
+test_stale_reviewed_inventory_refuses_before_staging (__main__.RelocationTests.test_stale_reviewed_inventory_refuses_before_staging) ... ok
+test_symlink_file_is_refused (__main__.RelocationTests.test_symlink_file_is_refused) ... ok
+test_symlink_in_root_path_is_refused (__main__.RelocationTests.test_symlink_in_root_path_is_refused) ... ok
+test_textual_prefix_is_not_a_boundary (__main__.RelocationTests.test_textual_prefix_is_not_a_boundary) ... ok
+test_unavailable_noreplace_never_falls_back_to_rename (__main__.RelocationTests.test_unavailable_noreplace_never_falls_back_to_rename) ... ok
+
+----------------------------------------------------------------------
+Ran 20 tests in 0.310s
+
+OK

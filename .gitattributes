@@ -1,6 +1,17 @@
 *.sh text eol=lf
 *.gdb text eol=lf
 *.patch text eol=lf
+# Application-origin build admission compares these sources with frozen bytes.
+tools/executor/runas-runtime/native-bootstrap.c text eol=lf
+tools/executor/runas-runtime/build-bootstrap-windows.py text eol=lf
+tools/executor/runas-runtime/app-launch-admission.py text eol=lf
+tools/executor/runas-runtime/stage-production-package.py text eol=lf
+tools/executor/private_exec_broker.py text eol=lf
+tools/executor/native_runtime_startup.py text eol=lf
+tools/executor/shizuku-service/build-app-transport-windows.py text eol=lf
+tools/executor/shizuku-service/transport/src/main/cpp/app-spawn.c text eol=lf
+tools/executor/shizuku-service/transport/src/main/assets/foldgpt-executor/foldgpt_app_bootstrap.py text eol=lf
+tools/executor/shizuku-service/transport/src/main/assets/foldgpt-executor/foldgpt_native_bootstrap.py text eol=lf
 # These candidate sources are matched byte-for-byte to the reviewed Android build.
 tools/executor/bionic-supervisor/tty-runner.c text eol=lf
 tools/executor/bionic-supervisor/tty_wire.py text eol=lf
@@ -37,3 +48,9 @@ recovery/verification/native-startup-parent-environment-20260908/** -text whites
 recovery/verification/native-host-production-20260908/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 recovery/verification/native-model-python-cli-20260908/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 recovery/verification/app-context-20260908/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+recovery/verification/r26b-20260908/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+recovery/verification/r28-20260908/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+recovery/verification/legacy-projects-20260908/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+# JUnit emits a final blank line; preserve its recorded output exactly.
+recovery/verification/r26b-20260908/**/*.log -text whitespace=-blank-at-eof,cr-at-eol
+recovery/verification/r28-20260908/**/*.log -text whitespace=-blank-at-eof,cr-at-eol

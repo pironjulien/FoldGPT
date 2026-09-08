@@ -12,7 +12,19 @@ from tools.executor.native_path_uri import path_uri, uri_path
 
 MAX_MANIFEST_BYTES = 65536
 LAUNCH_SCHEMA = "foldgpt.native-launch.v1"
+APP_LAUNCH_SCHEMA = "foldgpt.native-launch.v2"
 STARTUP_SCHEMA = "foldgpt.native-startup.v1"
+BOOT_EPOCH_SCHEMA = "foldgpt.android-boot-epoch.v1"
+BOOT_EPOCH_SOURCE = "android.provider.Settings.Global.BOOT_COUNT"
+
+
+def android_boot_epoch(value):
+    """Validate Java's default-free, pre-fork rechecked Android boot counter."""
+    if (type(value) is not dict or set(value) != {"schema", "source", "bootCount"}
+            or value["schema"] != BOOT_EPOCH_SCHEMA or value["source"] != BOOT_EPOCH_SOURCE
+            or type(value["bootCount"]) is not int or not 0 <= value["bootCount"] <= 2**31 - 1):
+        raise ValueError("Android boot epoch must identify the exact system boot counter")
+    return dict(value)
 
 
 def strict_json(data):
@@ -92,12 +104,19 @@ def read_private_json(path, uid):
         os.close(parent)
 
 
-def read_launch(path, *, uid, broker_directory, projects_directory):
+def read_launch(path, *, uid, broker_directory, projects_directory, launch_origin="run-as"):
+    if launch_origin not in ("run-as", "android-app"):
+        raise ValueError("Unknown native launch origin")
     value = read_private_json(path, uid)
-    if (type(value) is not dict or set(value) != {
-            "schema", "workspace", "socketPath", "manifestPath", "controllerRoots"}
-            or value["schema"] != LAUNCH_SCHEMA):
+    fields = {"schema", "workspace", "socketPath", "manifestPath", "controllerRoots"}
+    schema = LAUNCH_SCHEMA
+    if launch_origin == "android-app":
+        fields.add("bootEpoch")
+        schema = APP_LAUNCH_SCHEMA
+    if type(value) is not dict or set(value) != fields or value["schema"] != schema:
         raise ValueError("Native launch input differs from its exact installed contract")
+    if launch_origin == "android-app":
+        android_boot_epoch(value["bootEpoch"])
     broker = canonical_path(str(broker_directory))
     projects = canonical_path(str(projects_directory))
     workspace = canonical_path(value["workspace"])

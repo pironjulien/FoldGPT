@@ -1,10 +1,11 @@
-"""Installed production native owner after the C run-as admission.
+"""Installed production native owner after an origin-specific C admission.
 
 FD3 is the independent service lifetime. Exec/config/UI traffic uses three
 direct Unix sockets acquired through the private startup manifest. Stdio is
 never used as a Java relay or as an alternate executor.
 """
 import asyncio
+from collections import namedtuple
 import importlib
 import os
 from pathlib import Path
@@ -24,31 +25,67 @@ PROJECTS = DATA / "files/projects"
 BROKER = DATA / "app_foldgpt_exec"
 ASSET = "assets/foldgpt-executor-deployment.json"
 FACTORY = "tools.executor.bionic-supervisor.factory:factory"
+BootstrapPaths = namedtuple("BootstrapPaths", "data runtime projects broker")
 
 
-def identity(uid, parent, nonce, launch_path):
+def launch_contract(launch_origin):
+    if launch_origin == "run-as":
+        return "foldgpt.native.deployment.v1", 0
+    if launch_origin == "android-app":
+        return "foldgpt.native.deployment.v2", 2
+    raise ValueError("Unknown installed native launch origin")
+
+
+def process_context(status, context, *, launch_origin="run-as"):
+    """Validate observed kernel state, never infer it from a deployment flag."""
+    _, seccomp = launch_contract(launch_origin)
+    for name in ("CapInh", "CapPrm", "CapEff", "CapAmb"):
+        if int(status[name].strip(), 16) != 0:
+            raise ValueError("Native bootstrap must not possess capabilities")
+    if int(status["NoNewPrivs"].strip()) != 0 or int(status["Seccomp"].strip()) != seccomp:
+        raise ValueError("Native bootstrap did not preserve its admitted process state")
+    filters = int(status["Seccomp_filters"].strip())
+    if (seccomp == 0 and filters != 0) or (seccomp == 2 and filters < 1):
+        raise ValueError("Native bootstrap inherited filter count differs")
+    if launch_origin == "run-as":
+        if not context.startswith("u:r:runas_app:"):
+            raise ValueError("Native bootstrap has an unexpected Android process context")
+    else:
+        # The application context is checked against actual collected device
+        # evidence. The final domain check is defined by the app entry module.
+        from foldgpt_app_bootstrap import application_context
+        application_context(status, context)
+
+
+def identity(uid, parent, nonce, launch_path, *, launch_origin="run-as"):
+    launch_contract(launch_origin)
     if (sys.platform != "android" or not sys.flags.isolated or not sys.flags.no_site
             or not sys.dont_write_bytecode or uid < 10000
             or os.getresuid() != (uid,) * 3 or os.getresgid() != (uid,) * 3
             or parent <= 0 or os.getppid() != parent
-            or re.fullmatch(r"[0-9a-f]{32}", nonce) is None
-            or Path(launch_path) != BROKER / nonce / "launch.json"
-            or Path.cwd() != DATA):
+            or re.fullmatch(r"[0-9a-f]{32}", nonce) is None):
         raise ValueError("Installed native bootstrap identity or launch input differs")
+    paths = runtime_paths(uid, launch_origin=launch_origin)
+    if Path(launch_path) != paths.broker / nonce / "launch.json" or Path.cwd() != paths.data:
+        raise ValueError("Installed native bootstrap private path or working directory differs")
     with open("/proc/self/status", encoding="ascii") as source:
         status = dict(line.split(":", 1) for line in source.read(65536).splitlines() if ":" in line)
-    for name in ("CapInh", "CapPrm", "CapEff", "CapAmb"):
-        if int(status[name].strip(), 16) != 0:
-            raise ValueError("Native bootstrap must not possess capabilities")
-    for name in ("NoNewPrivs", "Seccomp", "Seccomp_filters"):
-        if int(status[name].strip()) != 0:
-            raise ValueError("Native bootstrap did not preserve its admitted run-as process state")
     with open("/proc/self/attr/current", encoding="ascii") as source:
-        if not source.read(4096).rstrip("\n\0").startswith("u:r:runas_app:"):
-            raise ValueError("Native bootstrap has an unexpected Android process context")
+        context = source.read(4096).rstrip("\n\0")
+    process_context(status, context, launch_origin=launch_origin)
+    return paths
 
 
-def deployment(apk):
+def runtime_paths(uid, *, launch_origin="run-as"):
+    launch_contract(launch_origin)
+    if launch_origin == "android-app":
+        from foldgpt_app_bootstrap import application_paths
+        return application_paths(uid)
+    return BootstrapPaths(DATA, RUNTIME, PROJECTS, BROKER)
+
+
+def deployment(apk, *, launch_origin="run-as"):
+    launch_contract(launch_origin)
     if not apk.startswith("/data/app/") or os.path.realpath(apk) != apk:
         raise ValueError("Native bootstrap must load its installed canonical APK")
     with zipfile.ZipFile(apk) as archive:
@@ -56,17 +93,25 @@ def deployment(apk):
         if item.file_size > 65536 or archive.namelist().count(ASSET) != 1:
             raise ValueError("Native deployment asset is not uniquely bounded")
         config = strict_json(archive.read(item))
-    if (type(config) is not dict or set(config) != {
-            "schema", "packageName", "pythonLibrary", "pythonSha256", "nativeLibraries",
-            "pythonRuntime", "backendFactory", "backendOptions"}
-            or config["schema"] != "foldgpt.native.deployment.v1"
+    return deployment_contract(config, launch_origin=launch_origin)
+
+
+def deployment_contract(config, *, launch_origin="run-as"):
+    schema, _ = launch_contract(launch_origin)
+    fields = {"schema", "packageName", "pythonLibrary", "pythonSha256", "nativeLibraries",
+              "pythonRuntime", "backendFactory", "backendOptions"}
+    if launch_origin == "android-app":
+        fields.add("launchOrigin")
+    if (type(config) is not dict or set(config) != fields
+            or config["schema"] != schema
+            or launch_origin == "android-app" and config["launchOrigin"] != "android-app"
             or config["packageName"] != "app.foldgpt"
             or config["pythonLibrary"] != "libfoldgpt_python_cli.so"
             or config["backendFactory"] != FACTORY):
         raise ValueError("Native deployment differs from its exact installed contract")
     runtime = config["pythonRuntime"]
     if (type(runtime) is not dict or set(runtime) != {"path", "manifestAsset", "manifestSha256"}
-            or runtime["path"] != str(RUNTIME)
+            or runtime["path"] != RUNTIME.as_posix()
             or runtime["manifestAsset"] != "foldgpt-python-runtime.json"
             or type(runtime["manifestSha256"]) is not str
             or re.fullmatch(r"[0-9a-f]{64}", runtime["manifestSha256"]) is None):
@@ -100,8 +145,9 @@ def production_entrypoints(executables, native, libraries):
     return {**expected, **{path: path for path in expected.values()}}
 
 
-def production_options(config, workspace):
+def production_options(config, workspace, *, launch_origin="run-as"):
     from tools.executor.native_path_uri import path_uri
+    paths = runtime_paths(os.getuid(), launch_origin=launch_origin)
     options = installed_backend_options(config)
     native = Path(os.readlink("/proc/self/exe")).parent
     if not str(native).startswith("/data/app/") or native.resolve(strict=True) != native:
@@ -118,10 +164,16 @@ def production_options(config, workspace):
     bash, python = str(native / "libfoldgpt_bash.so"), str(native / "libfoldgpt_python_cli.so")
     options["executables"] = production_entrypoints(options["executables"], native, config["nativeLibraries"])
     options["workspace"] = workspace
+    if launch_origin == "android-app":
+        # Only the exact compiled Python prefix may change spelling, after the
+        # local same-inode app-root and exact private suffix checks above.
+        options["runtime"] = [dict(grant, path=str(paths.runtime))
+                              if grant["path"] == str(RUNTIME) else grant
+                              for grant in options["runtime"]]
     options["runtime"] = [*options["runtime"], {"path": str(native), "execute": True}]
     temporary = str(Path(workspace) / ".foldgpt-tmp")
     options["parentEnvironment"] = {"HOME": workspace, "TMPDIR": temporary,
-        "PATH": str(RUNTIME / "bin") + ":/system/bin", "SHELL": bash, "LANG": "C.UTF-8"}
+        "PATH": str(paths.runtime / "bin") + ":/system/bin", "SHELL": bash, "LANG": "C.UTF-8"}
     info = {"cwd": path_uri(workspace), "userHomeDir": path_uri(workspace),
         "platformOs": "android", "shell": {"name": "bash", "path": bash},
         "temporaryDirectories": [path_uri(temporary)], "tempDir": path_uri(temporary)}
@@ -177,7 +229,7 @@ async def cleanup_resources(backend, server, acquisition, manifest, owner, facto
     return clean, None
 
 
-async def run(apk, uid, parent, nonce, launch_path, control_fd=3):
+async def run(apk, uid, parent, nonce, launch_path, control_fd=3, *, launch_origin="run-as"):
     backend = server = owner = acquisition = manifest = None
     factory_entered = ready = reader_registered = False
     exit_code = 0
@@ -195,7 +247,7 @@ async def run(apk, uid, parent, nonce, launch_path, control_fd=3):
 
     stage = "control"
     try:
-        identity(uid, parent, nonce, launch_path)
+        paths = identity(uid, parent, nonce, launch_path, launch_origin=launch_origin)
         os.set_inheritable(control_fd, False)
         os.set_blocking(control_fd, False)
         loop.add_reader(control_fd, control_ready)
@@ -209,14 +261,15 @@ async def run(apk, uid, parent, nonce, launch_path, control_fd=3):
         from tools.executor.native_host_bootstrap_v2 import installed_host_factory
         from tools.executor.private_exec_broker import PrivateSessionOwner
         stage = "deployment"
-        config = deployment(apk)
-        launch = read_launch(launch_path, uid=uid, broker_directory=BROKER / nonce,
-                             projects_directory=PROJECTS)
+        config = deployment(apk, launch_origin=launch_origin)
+        launch = read_launch(launch_path, uid=uid, broker_directory=paths.broker / nonce,
+                             projects_directory=paths.projects, launch_origin=launch_origin)
         stage = "native_inventory"
-        options, environment, native = production_options(config, launch["workspace"])
+        options, environment, native = production_options(config, launch["workspace"], launch_origin=launch_origin)
         host_factory = installed_host_factory(apk, config, options, native)
         stage = "broker_open"
-        owner = PrivateSessionOwner(BROKER)
+        owner = PrivateSessionOwner(paths.broker,
+            boot_epoch=launch["bootEpoch"] if launch_origin == "android-app" else None)
         stage = "workspace_claim"
         owner.begin_process_session(launch["workspace"])
         stage = "factory_import"
@@ -239,7 +292,7 @@ async def run(apk, uid, parent, nonce, launch_path, control_fd=3):
         acquisition = NativeRuntimeAcquisition(launch["socketPath"], server, controller_uid=uid,
             host_channel_factory=host_factory)
         manifest = StartupManifest(launch["manifestPath"], socket_path=acquisition.path,
-            workspace=launch["workspace"], shared_paths=[launch["workspace"], str(RUNTIME), str(native)],
+            workspace=launch["workspace"], shared_paths=[launch["workspace"], str(paths.runtime), str(native)],
             controller_roots=launch["controllerRoots"],
             parent_environment=dict(backend.processes.parent_environment), directory_fd=acquisition.directory_fd,
             host_schema=host_factory.schema if host_factory is not None else None)

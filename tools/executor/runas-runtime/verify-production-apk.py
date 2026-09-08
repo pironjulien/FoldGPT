@@ -25,6 +25,31 @@ def strict_json(data):
         parse_constant=lambda _: (_ for _ in ()).throw(ValueError("Nonfinite package value")))
 
 
+def verify_launch_origin(config, qualification, read_asset, read_library, sources):
+    schema = config.get("schema")
+    native = config["nativeLibraries"]
+    app_libraries = {"libfoldgpt_app_bootstrap.so", "libfoldgpt_app_transport.so"}
+    if schema == "foldgpt.native.deployment.v1":
+        if ("launchOrigin" in config or "launchOrigin" in qualification or "appLaunchBuildSha256" in qualification
+                or app_libraries & set(native) or "libfoldgpt_native_bootstrap.so" not in native):
+            raise ValueError("Run-as deployment mixes application-origin inputs")
+        if "foldgpt_native_bootstrap.py" not in sources:
+            raise ValueError("Run-as bootstrap source is absent")
+        return "run-as"
+    if (schema != "foldgpt.native.deployment.v2" or config.get("launchOrigin") != "android-app"
+            or qualification.get("launchOrigin") != "android-app"
+            or "libfoldgpt_native_bootstrap.so" in native or not app_libraries <= set(native)
+            or not {"foldgpt_app_bootstrap.py", "foldgpt_native_bootstrap.py"} <= sources):
+        raise ValueError("Application deployment mixes launch origins or lacks its source closure")
+    data = read_asset("foldgpt-app-launch-build.json")
+    if digest(data) != qualification.get("appLaunchBuildSha256"):
+        raise ValueError("Application launcher build attestation is absent or changed")
+    spec = importlib.util.spec_from_file_location("foldgpt_apk_app_launch", Path(__file__).with_name("app-launch-admission.py"))
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module.verify(strict_json(data), native, read_library)
+
+
 def verify_model_selection(config, qualification, read_library, sources, *, read_source=None):
     """Validate the explicit installed option, independently of mere ELF presence."""
     options = config["backendOptions"]
@@ -173,7 +198,7 @@ def main():
             if digest(asset("foldgpt-executor-" + name + ".json")) != qualification[key]:
                 raise ValueError("Package asset digest differs: " + name)
         config = strict_json(asset("foldgpt-executor-deployment.json"))
-        if config["schema"] != "foldgpt.native.deployment.v1":
+        if config["schema"] not in ("foldgpt.native.deployment.v1", "foldgpt.native.deployment.v2"):
             raise ValueError("Native deployment schema differs")
         if "ripgrepBuild" in qualification:
             notices = asset("notices/ripgrep.txt")
@@ -228,6 +253,8 @@ def main():
                     module = node.module.replace(".", "/")
                     if module + ".py" not in sources and module + "/__init__.py" not in sources:
                         raise ValueError("Packaged source import is unresolved: " + node.module)
+        launch_origin = verify_launch_origin(config, qualification, asset,
+            lambda name: archive.read("lib/arm64-v8a/" + name), sources)
         profiles = verify_model_selection(config, qualification,
             lambda name: archive.read("lib/arm64-v8a/" + name), sources,
             read_source=lambda path: asset("foldgpt-executor/" + path))
@@ -237,7 +264,7 @@ def main():
             "androidProductionExecuted": False, "apkSha256": digest(args.apk.read_bytes()),
             "nativeLibraries": len(config["nativeLibraries"]), "pythonDataFiles": len(runtime["dataFiles"]),
             "runtimeAliases": len(runtime["runtimeAliases"]), "sourceFiles": len(sources), "hostSchema": host_schema,
-            "modelProfiles": profiles, "nativeCommands": commands}
+            "modelProfiles": profiles, "nativeCommands": commands, "launchOrigin": launch_origin}
         if notice_files:
             result["ripgrepToolchainNoticeFiles"] = notice_files
     args.output.write_text(json.dumps(result, indent=2) + "\n")

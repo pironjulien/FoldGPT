@@ -1,0 +1,9 @@
+{
+  "compileExitCode": 0,
+  "androidExecuted": false,
+  "apkBuilt": false,
+  "sourceSha256": {
+    "android\\app\\src\\main\\java\\com\\termux\\x11\\FoldRuntimeService.java": "d8758f3a9c4bd4c5baa33ef0883e9c1f7dbbe978478e70d452bddec9b5f02ada",
+    "android\\app\\src\\main\\java\\app\\foldgpt\\RuntimeShutdownGate.java": "5079cba3765e84c8327fdf11d768909a2a6136c7fddcb4a5d88a928762d9a0c0"
+  }
+}

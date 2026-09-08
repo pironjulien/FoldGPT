@@ -43,4 +43,23 @@ public final class ApplicationDataPaths {
         }
         return file.getCanonicalPath().equals(canonical.getPath() + suffix);
     }
+
+    /** Verified Android view used for the distinct application launch contract. */
+    public File canonicalRoot() { return canonical; }
+
+    /** No aliases are admitted beneath the measured canonical application root. */
+    public boolean isCanonicalExact(File file) throws Exception { return canonicalExact(canonical, file); }
+
+    static boolean canonicalExact(File root, File file) throws Exception {
+        String prefix = root.getPath();
+        String path = file.getPath();
+        if (!file.isAbsolute() || !(path.equals(prefix) || path.startsWith(prefix + File.separator))) return false;
+        String suffix = path.substring(prefix.length());
+        if (!suffix.isEmpty()) {
+            for (String component : suffix.substring(1).split(java.util.regex.Pattern.quote(File.separator), -1)) {
+                if (component.isEmpty() || component.equals(".") || component.equals("..")) return false;
+            }
+        }
+        return file.getCanonicalFile().equals(file);
+    }
 }

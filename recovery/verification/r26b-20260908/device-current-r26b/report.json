@@ -1,0 +1,24 @@
+{
+  "state": "ready",
+  "launchOrigin": "android-app",
+  "apkSha256": "632012aa8dd355fcede9a11b2483e8c48d22d2d170c9f4803c3d55cdd8e2723f",
+  "bootId": "348d453e-f4e5-40e0-8ef0-030f4d5e38af",
+  "roots": {
+    "/data/user/0/app.foldgpt/files/projects": {
+      "ino": 471258,
+      "dev": 65097,
+      "entries": 288
+    },
+    "/data/data/app.foldgpt/files/projects": {
+      "ino": 471258,
+      "dev": 65097,
+      "entries": 288
+    },
+    "/data/data/app.foldgpt/files/debian/home/julien/Documents/Codex": {
+      "ino": 152345,
+      "dev": 65097,
+      "entries": 38
+    }
+  },
+  "shizukuInCensus": false
+}

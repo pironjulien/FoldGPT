@@ -1,0 +1,46 @@
+{
+  "sourceRecordIndices": [
+    472,
+    479,
+    487,
+    492
+  ],
+  "sourceRecordNumbers": [
+    473,
+    480,
+    488,
+    493
+  ],
+  "extractionMatchesOriginalRecords": true,
+  "parsedCommandChunks": [
+    {
+      "chunk_id": "1a7567",
+      "wall_time_seconds": 1.001369687,
+      "session_id": 27554,
+      "original_token_count": 255,
+      "output": "--- python environment ---\nsys.platform= android\nplatform.machine()= aarch64\nos.getuid()= 10412\nos.getcwd()= /data/data/app.foldgpt/files/projects/ui-python-caae3a83d156\nsys.executable= /data/app/~~h1j2vVo5ocZN-Hqe_vqEog==/app.foldgpt-MYcth4qAAloa1xvUC2DBWg==/lib/arm64/libfoldgpt_python_cli.so\n--- rg path ---\n/data/data/app.foldgpt/files/native-runtime-v1/python/bin/rg\n--- tests ---\ntest_cli_process_json_stable_and_codes (test_dependency_inspector.DependencyTests.test_cli_process_json_stable_and_codes) ... ok\ntest_compound_constraint (test_dependency_inspector.DependencyTests.test_compound_constraint) ... ok\ntest_invalid_entries (test_dependency_inspector.DependencyTests.test_invalid_entries) ... ok\ntest_invalid_installed_version (test_dependency_inspector.DependencyTests.test_invalid_installed_version) ... ok\ntest_statuses (test_dependency_inspector.DependencyTests.test_statuses) ... ok\n\n----------------------------------------------------------------------\nRan 5 tests in 0.637s\n\nOK\n--- zipapp JSON ---\n"
+    },
+    {
+      "chunk_id": "9c2ea8",
+      "wall_time_seconds": 3.906e-06,
+      "exit_code": 0,
+      "original_token_count": 354,
+      "output": "{\n  \"dependencies\": [\n    {\n      \"name\": \"requests\",\n      \"requirement\": \"requests<3,>=2.31\",\n      \"installed\": \"2.32.5\",\n      \"status\": \"compatible\",\n      \"reason\": \"2.32.5 satisfies <3,>=2.31\"\n    },\n    {\n      \"name\": \"urllib3\",\n      \"requirement\": \"urllib3<3,>=2\",\n      \"installed\": \"1.26.20\",\n      \"status\": \"incompatible\",\n      \"reason\": \"1.26.20 does not satisfy <3,>=2\"\n    },\n    {\n      \"name\": \"colorama\",\n      \"requirement\": \"colorama>=0.4.6\",\n      \"installed\": null,\n      \"status\": \"absent\",\n      \"reason\": \"not installed\"\n    }\n  ]\n}\n--- zipapp Markdown ---\n# Dependency Inspector\n\n| Name | Requirement | Installed | Status | Reason |\n|---|---|---|---|---|\n| requests | requests<3,>=2.31 | 2.32.5 | compatible | 2.32.5 satisfies <3,>=2.31 |\n| urllib3 | urllib3<3,>=2 | 1.26.20 | incompatible | 1.26.20 does not satisfy <3,>=2 |\n| colorama | colorama>=0.4.6 | \u2014 | absent | not installed |\n--- rg files ---\nvalidation-resume.json\n__main__.py\nvalidation.json\nvalidation-report.txt\nCHANGELOG.md\nREADME.md\npyproject.toml\ntests/test_dependency_inspector.py\ndependency_inspector/cli.py\ndependency_inspector/render.py\ndependency_inspector/evaluate.py\ndependency_inspector/inventory.py\ndependency_inspector/__init__.py\nvendor/wheels/packaging-26.3-py3-none-any.whl\ndata/example.json\ntools/build_zipapp.py\ntools/build_zipapp.sh\nstatuses: environment=0 rg=0 tests=0 json=1 markdown=1 rg_files=0\n"
+    },
+    {
+      "chunk_id": "cf7cf6",
+      "wall_time_seconds": 1.00121125,
+      "session_id": 5081,
+      "original_token_count": 4,
+      "output": "FOLD_APP_READY\r\n"
+    },
+    {
+      "chunk_id": "ca405f",
+      "wall_time_seconds": 1.0781e-05,
+      "exit_code": 23,
+      "original_token_count": 13,
+      "output": "bonjour autonome\r\nFOLD_APP_REPLY=bonjour autonome\r\n"
+    }
+  ],
+  "scope": "Actual tool-result records of the target turn; full conversation omitted"
+}

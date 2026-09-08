@@ -1,0 +1,39 @@
+{
+  "schema": "foldgpt.native.owner.v1",
+  "state": "ready",
+  "generation": 1,
+  "selected": true,
+  "officialLauncherReplaced": false,
+  "launchOrigin": "android-app",
+  "lastRemoteStatus": null,
+  "lastNativeSessionStatus": {
+    "schema": "foldgpt.shizuku.transport.v1",
+    "ready": true,
+    "cancelRequested": false,
+    "bootstrapReaped": false,
+    "cleanupComplete": false,
+    "ownerRetained": true,
+    "quarantined": false,
+    "refusedBeforeFork": false,
+    "setupError": null,
+    "cleanupError": null,
+    "transportFailed": false,
+    "waitStatus": -1,
+    "bootstrapPid": 21725,
+    "directNative": true,
+    "launchOrigin": "android-app",
+    "admission": {
+      "schema": "foldgpt.executor-admission.v1",
+      "admitted": true,
+      "stage": "complete",
+      "subject": "",
+      "facts": {},
+      "error": null
+    }
+  },
+  "socketPath": "/data/data/app.foldgpt/app_foldgpt_exec/88980fe7e3a14693b252b50e3afc1d44/owner.sock",
+  "peerUid": 10412,
+  "directNative": true,
+  "startupManifest": "/data/data/app.foldgpt/app_foldgpt_exec/88980fe7e3a14693b252b50e3afc1d44/startup.json",
+  "workspace": "/data/data/app.foldgpt/files/projects"
+}

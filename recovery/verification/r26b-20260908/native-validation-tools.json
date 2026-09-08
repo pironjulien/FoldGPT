@@ -1,0 +1,60 @@
+[
+  {
+    "at": 1788896320363,
+    "method": "item/completed",
+    "params": {
+      "item": {
+        "type": "commandExecution",
+        "id": "exec-adcda63d-d4f5-476c-8558-a68b37fdd3d8",
+        "pluginId": null,
+        "scriptPath": null,
+        "command": "'/data/app/~~h1j2vVo5ocZN-Hqe_vqEog==/app.foldgpt-MYcth4qAAloa1xvUC2DBWg==/lib/arm64/libfoldgpt_bash.so' -lc \"set +e\nprintf '%s\\\\n' '--- python environment ---'\npython3 -c 'import sys,platform,os; print(\\\"sys.platform=\\\",sys.platform); print(\\\"platform.machine()=\\\",platform.machine()); print(\\\"os.getuid()=\\\",os.getuid()); print(\\\"os.getcwd()=\\\",os.getcwd()); print(\\\"sys.executable=\\\",sys.executable)'\nenv_status=\"'$?\nprintf '\"'%s\\\\n' '--- rg path ---'\ncommand -v rg\nrg_status=\"'$?\nprintf '\"'%s\\\\n' '--- tests ---'\nPYTHONPATH=dependency-inspector/.deps:dependency-inspector python3 -m unittest discover -s dependency-inspector/tests -v\ntest_status=\"'$?\nprintf '\"'%s\\\\n' '--- zipapp JSON ---'\nPYTHONPATH=dependency-inspector/.deps:dependency-inspector python3 dependency-inspector/dependency-inspector.pyz dependency-inspector/data/example.json --format json\njson_status=\"'$?\nprintf '\"'%s\\\\n' '--- zipapp Markdown ---'\nPYTHONPATH=dependency-inspector/.deps:dependency-inspector python3 dependency-inspector/dependency-inspector.pyz dependency-inspector/data/example.json --format markdown\nmarkdown_status=\"'$?\nprintf '\"'%s\\\\n' '--- rg files ---'\ncd dependency-inspector\nrg --files --ignore-file .gitignore\nfiles_status=\"'$?\nprintf '\"'%s\\\\n' \\\"statuses: environment=\"'$env_status rg=$rg_status tests=$test_status json=$json_status markdown=$markdown_status rg_files=$files_status\"\nexit 0'",
+        "cwd": "/data/data/app.foldgpt/files/projects/ui-python-caae3a83d156",
+        "processId": "27554",
+        "source": "unifiedExecStartup",
+        "status": "completed",
+        "commandActions": [
+          {
+            "type": "unknown",
+            "command": "'/data/app/~~h1j2vVo5ocZN-Hqe_vqEog==/app.foldgpt-MYcth4qAAloa1xvUC2DBWg==/lib/arm64/libfoldgpt_bash.so' -lc \"set +e\nprintf '%s\\\\n' '--- python environment ---'\npython3 -c 'import sys,platform,os; print(\\\"sys.platform=\\\",sys.platform); print(\\\"platform.machine()=\\\",platform.machine()); print(\\\"os.getuid()=\\\",os.getuid()); print(\\\"os.getcwd()=\\\",os.getcwd()); print(\\\"sys.executable=\\\",sys.executable)'\nenv_status=\"'$?\nprintf '\"'%s\\\\n' '--- rg path ---'\ncommand -v rg\nrg_status=\"'$?\nprintf '\"'%s\\\\n' '--- tests ---'\nPYTHONPATH=dependency-inspector/.deps:dependency-inspector python3 -m unittest discover -s dependency-inspector/tests -v\ntest_status=\"'$?\nprintf '\"'%s\\\\n' '--- zipapp JSON ---'\nPYTHONPATH=dependency-inspector/.deps:dependency-inspector python3 dependency-inspector/dependency-inspector.pyz dependency-inspector/data/example.json --format json\njson_status=\"'$?\nprintf '\"'%s\\\\n' '--- zipapp Markdown ---'\nPYTHONPATH=dependency-inspector/.deps:dependency-inspector python3 dependency-inspector/dependency-inspector.pyz dependency-inspector/data/example.json --format markdown\nmarkdown_status=\"'$?\nprintf '\"'%s\\\\n' '--- rg files ---'\ncd dependency-inspector\nrg --files --ignore-file .gitignore\nfiles_status=\"'$?\nprintf '\"'%s\\\\n' \\\"statuses: environment=\"'$env_status rg=$rg_status tests=$test_status json=$json_status markdown=$markdown_status rg_files=$files_status\"\nexit 0'"
+          }
+        ],
+        "aggregatedOutput": "test_cli_process_json_stable_and_codes (test_dependency_inspector.DependencyTests.test_cli_process_json_stable_and_codes) ... ok\ntest_compound_constraint (test_dependency_inspector.DependencyTests.test_compound_constraint) ... ok\ntest_invalid_entries (test_dependency_inspector.DependencyTests.test_invalid_entries) ... ok\ntest_invalid_installed_version (test_dependency_inspector.DependencyTests.test_invalid_installed_version) ... ok\ntest_statuses (test_dependency_inspector.DependencyTests.test_statuses) ... ok\n\n----------------------------------------------------------------------\nRan 5 tests in 0.637s\n\nOK\n--- zipapp JSON ---\n{\n  \"dependencies\": [\n    {\n      \"name\": \"requests\",\n      \"requirement\": \"requests<3,>=2.31\",\n      \"installed\": \"2.32.5\",\n      \"status\": \"compatible\",\n      \"reason\": \"2.32.5 satisfies <3,>=2.31\"\n    },\n    {\n      \"name\": \"urllib3\",\n      \"requirement\": \"urllib3<3,>=2\",\n      \"installed\": \"1.26.20\",\n      \"status\": \"incompatible\",\n      \"reason\": \"1.26.20 does not satisfy <3,>=2\"\n    },\n    {\n      \"name\": \"colorama\",\n      \"requirement\": \"colorama>=0.4.6\",\n      \"installed\": null,\n      \"status\": \"absent\",\n      \"reason\": \"not installed\"\n    }\n  ]\n}\n--- zipapp Markdown ---\n# Dependency Inspector\n\n| Name | Requirement | Installed | Status | Reason |\n|---|---|---|---|---|\n| requests | requests<3,>=2.31 | 2.32.5 | compatible | 2.32.5 satisfies <3,>=2.31 |\n| urllib3 | urllib3<3,>=2 | 1.26.20 | incompatible | 1.26.20 does not satisfy <3,>=2 |\n| colorama | colorama>=0.4.6 | \u2014 | absent | not installed |\n--- rg files ---\nvalidation-resume.json\n__main__.py\nvalidation.json\nvalidation-report.txt\nCHANGELOG.md\nREADME.md\npyproject.toml\ntests/test_dependency_inspector.py\ndependency_inspector/cli.py\ndependency_inspector/render.py\ndependency_inspector/evaluate.py\ndependency_inspector/inventory.py\ndependency_inspector/__init__.py\nvendor/wheels/packaging-26.3-py3-none-any.whl\ndata/example.json\ntools/build_zipapp.py\ntools/build_zipapp.sh\nstatuses: environment=0 rg=0 tests=0 json=1 markdown=1 rg_files=0\n",
+        "exitCode": 0,
+        "durationMs": 1893
+      },
+      "threadId": "01a07fe2-4dc0-7791-adc0-fb3fe079872c",
+      "turnId": "01a08287-665b-74e3-9d93-018afdf57f1e",
+      "completedAtMs": 1788896320325
+    }
+  },
+  {
+    "at": 1788896331600,
+    "method": "item/completed",
+    "params": {
+      "item": {
+        "type": "commandExecution",
+        "id": "exec-b30605e3-a0c1-4e5a-945a-c95a377b92ff",
+        "pluginId": null,
+        "scriptPath": null,
+        "command": "'/data/app/~~h1j2vVo5ocZN-Hqe_vqEog==/app.foldgpt-MYcth4qAAloa1xvUC2DBWg==/lib/arm64/libfoldgpt_bash.so' -lc \"python3 -u -c \\\"print('FOLD_APP_READY',flush=True); value=input(); print('FOLD_APP_REPLY='+value,flush=True); raise SystemExit(23)\\\"\"",
+        "cwd": "/data/data/app.foldgpt/files/projects/ui-python-caae3a83d156",
+        "processId": "5081",
+        "source": "unifiedExecStartup",
+        "status": "failed",
+        "commandActions": [
+          {
+            "type": "unknown",
+            "command": "'/data/app/~~h1j2vVo5ocZN-Hqe_vqEog==/app.foldgpt-MYcth4qAAloa1xvUC2DBWg==/lib/arm64/libfoldgpt_bash.so' -lc \"python3 -u -c \\\"print('FOLD_APP_READY',flush=True); value=input(); print('FOLD_APP_REPLY='+value,flush=True); raise SystemExit(23)\\\"\""
+          }
+        ],
+        "aggregatedOutput": "bonjour autonome\r\nFOLD_APP_REPLY=bonjour autonome\r\n",
+        "exitCode": 23,
+        "durationMs": 3813
+      },
+      "threadId": "01a07fe2-4dc0-7791-adc0-fb3fe079872c",
+      "turnId": "01a08287-665b-74e3-9d93-018afdf57f1e",
+      "completedAtMs": 1788896331558
+    }
+  }
+]

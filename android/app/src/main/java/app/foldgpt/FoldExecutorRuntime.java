@@ -10,6 +10,7 @@ import android.os.Looper;
 import android.util.AtomicFile;
 import android.util.Log;
 import app.foldgpt.shizukuexec.AppSocketBridge;
+import app.foldgpt.shizukuexec.AppNativeSession;
 import app.foldgpt.shizukuexec.Deployment;
 import app.foldgpt.shizukuexec.ExecutorService;
 import app.foldgpt.shizukuexec.IExecutorService;
@@ -50,7 +51,7 @@ public final class FoldExecutorRuntime {
     private IExecutorSession nativeSession;
     private final android.os.Binder nativeOwner = new android.os.Binder();
     private NativeLaunch nativeLaunch;
-    private boolean directNative;
+    private boolean directNative, applicationLaunch;
     private boolean closing, bound, listeners, failed;
     private boolean permissionRequested;
     private String failureReason, failureDetail;
@@ -81,7 +82,7 @@ public final class FoldExecutorRuntime {
         if (assets == null || !java.util.Arrays.asList(assets).contains("foldgpt-executor-deployment.json")) return false;
         JSONObject deployment = new JSONObject(new String(asset("foldgpt-executor-deployment.json", 65536), StandardCharsets.UTF_8));
         String schema = deployment.getString("schema");
-        if (schema.equals("foldgpt.native.deployment.v1")) return true;
+        if (schema.equals("foldgpt.native.deployment.v1") || schema.equals("foldgpt.native.deployment.v2")) return true;
         if (schema.equals("foldgpt.shizuku.deployment.v1")) return false;
         throw new SecurityException("Installed executor selection has an unsupported schema");
     }
@@ -95,10 +96,23 @@ public final class FoldExecutorRuntime {
                 admitQualifiedDeployment();
                 if (directNative) nativeLaunch = new NativeLaunch(context, controllerHome);
                 Deployment.verifyInstalledInputs(context);
-                main.post(this::attachBinder);
+                if (applicationLaunch) openApplicationSession();
+                else main.post(this::attachBinder);
             } catch (Exception | LinkageError error) { fail("qualified_native_deployment_unavailable", error); }
         });
         return preparing;
+    }
+
+    /** Application-origin deployments never enter the privileged service route. */
+    private synchronized void openApplicationSession() {
+        if (closing || failed) { finishWhenClean(); return; }
+        try {
+            nativeSession = AppNativeSession.open(context, nativeLaunch.launchPath, nativeLaunch.nonce);
+            observeNative();
+        } catch (Exception | LinkageError error) {
+            fail("application_native_endpoint_unavailable", error);
+            requestStop();
+        }
     }
 
     private final Shizuku.OnBinderReceivedListener binderReceived = () -> main.post(this::bind);
@@ -197,6 +211,9 @@ public final class FoldExecutorRuntime {
     /** Each value is a copy of a real response, never reconstructed from flags. */
     private void refreshEvidence() throws Exception {
         if (nativeSession != null) lastNativeSessionStatus = new JSONObject(nativeSession.status());
+        else if (applicationLaunch && nativeLaunch != null) {
+            lastNativeSessionStatus = new JSONObject(AppNativeSession.cleanupStatus(context, nativeLaunch.nonce));
+        }
         if (remote != null) lastRemoteStatus = new JSONObject(remote.status());
     }
 
@@ -256,6 +273,8 @@ public final class FoldExecutorRuntime {
             if (bridge != null) bridge.close();
             if (nativeSession != null) try { nativeSession.cancel(); }
             catch (Exception error) { fail("native_cancel_unconfirmed", error); }
+            else if (applicationLaunch && nativeLaunch != null) try { AppNativeSession.requestCurrentStop(context, nativeLaunch.nonce); }
+            catch (Exception | LinkageError error) { fail("application_native_cancel_unconfirmed", error); }
             persist(failed ? "unavailable" : "stopping", failureReason, null);
         }
         work.execute(this::finishWhenClean);
@@ -272,9 +291,23 @@ public final class FoldExecutorRuntime {
     private synchronized void finishWhenClean() {
         if (!closing || closed.isDone()) return;
         if (bridge != null && !bridge.cleanupComplete()) return;
-        // If no remote was delivered, no bridge/session was constructed and no
-        // worker command could have been admitted. Detaching that pending
-        // connection is safe; a late callback only observes closing=true.
+        // Local ownership needs the same terminal report AND real wait as the
+        // remote service. An absent Binder is not evidence of local cleanup.
+        if (applicationLaunch && nativeLaunch != null) {
+            try {
+                refreshEvidence();
+                if (!lastNativeSessionStatus.getBoolean("cleanupComplete")
+                        || lastNativeSessionStatus.getBoolean("ownerRetained")) {
+                    persist(recordedState, failureReason, null);
+                    main.postDelayed(() -> work.execute(this::finishWhenClean), 200);
+                    return;
+                }
+            } catch (Exception | LinkageError error) {
+                persist(recordedState, failureReason, null);
+                return;
+            }
+        }
+        // A pending remote connection cannot admit commands before its callback.
         if (remote != null) {
             try {
                 refreshEvidence();
@@ -353,11 +386,25 @@ public final class FoldExecutorRuntime {
         }
         Set<String> actual = new HashSet<>();
         listAssets("foldgpt-executor", "", actual);
-        if (!expected.equals(actual) || !expected.contains(directNative ? "foldgpt_native_bootstrap.py" : "foldgpt_shizuku_bootstrap.py")) {
+        JSONObject config = new JSONObject(new String(deployment, StandardCharsets.UTF_8));
+        String schema = config.getString("schema");
+        applicationLaunch = "foldgpt.native.deployment.v2".equals(schema);
+        if (directNative != (applicationLaunch || "foldgpt.native.deployment.v1".equals(schema))
+                || (applicationLaunch && (!"android-app".equals(config.getString("launchOrigin"))
+                    || !"android-app".equals(qualification.getString("launchOrigin"))))
+                || (!applicationLaunch && (config.has("launchOrigin") || qualification.has("launchOrigin")))) {
+            throw new SecurityException("Native package and launch origin disagree");
+        }
+        if (applicationLaunch) {
+            requireHash(asset("foldgpt-app-launch-build.json", 65536), qualification.getString("appLaunchBuildSha256"));
+        } else if (qualification.has("appLaunchBuildSha256")) {
+            throw new SecurityException("Application launcher attestation in another launch origin");
+        }
+        String entry = applicationLaunch ? "foldgpt_app_bootstrap.py"
+                : directNative ? "foldgpt_native_bootstrap.py" : "foldgpt_shizuku_bootstrap.py";
+        if (!expected.equals(actual) || !expected.contains(entry)) {
             throw new SecurityException("Installed executor sources differ from qualification");
         }
-        JSONObject config = new JSONObject(new String(deployment, StandardCharsets.UTF_8));
-        if (directNative != "foldgpt.native.deployment.v1".equals(config.getString("schema"))) throw new SecurityException("Native package and deployment selection disagree");
         String factory = config.getString("backendFactory").split(":", -1)[0].replace('.', '/') + ".py";
         if (!expected.contains(factory)) throw new SecurityException("Qualified backend factory is absent");
     }
@@ -396,6 +443,7 @@ public final class FoldExecutorRuntime {
         try {
             JSONObject status = new JSONObject().put("schema", "foldgpt.native.owner.v1").put("state", state)
                 .put("generation", generation).put("selected", preparing != null).put("officialLauncherReplaced", false);
+            status.put("launchOrigin", applicationLaunch ? "android-app" : "run-as");
             status.put("lastRemoteStatus", lastRemoteStatus == null ? JSONObject.NULL : lastRemoteStatus)
                 .put("lastNativeSessionStatus", lastNativeSessionStatus == null ? JSONObject.NULL : lastNativeSessionStatus);
             if (reason != null) status.put("reason", reason);

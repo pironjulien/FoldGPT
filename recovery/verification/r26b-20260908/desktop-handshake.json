@@ -1,0 +1,6 @@
+[
+  {
+    "sourceLine": 73,
+    "text": "[AppServerConnection] initialize_handshake_result durationMs=479 initializeRequestId=__codex_initialize__ outcome=success transportKind=stdio"
+  }
+]

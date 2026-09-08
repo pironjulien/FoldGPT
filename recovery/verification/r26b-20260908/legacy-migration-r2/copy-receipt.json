@@ -1,0 +1,13 @@
+{
+  "schema": "foldgpt.legacy-project-copy.v1",
+  "copied": true,
+  "published": true,
+  "source": "/data/data/app.foldgpt/files/debian/home/julien/Documents/Codex",
+  "destination": "/data/data/app.foldgpt/files/projects/imported-codex",
+  "sourceInventorySha256": "09b5495d660ecbb774fb5d80cc11be6c4aa2b4ed3c07176ab31b6f68d5dd4b41",
+  "contentSha256": "f514214696c7c1591bd990bc3dbd32492c9d3ed4bb07c335840dd10c15dc22c5",
+  "fileCount": 0,
+  "totalBytes": 0,
+  "sourceDeleted": false,
+  "threadMetadataChanged": false
+}

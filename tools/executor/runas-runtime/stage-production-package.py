@@ -48,6 +48,8 @@ def main():
     parser.add_argument("--admission-build", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--host-v2", action="store_true")
+    parser.add_argument("--launch-origin", choices=("run-as", "android-app"), default="run-as")
+    parser.add_argument("--app-transport-build", type=Path)
     parser.add_argument("--ordinary-uid", action="store_true",
                         help="Explicitly include ordinary Android UID execution for upstream Full access")
     args = parser.parse_args()
@@ -62,9 +64,22 @@ def main():
     build = json.loads((admission / "build.json").read_text())
     if digest((stage / "runtime-inventory.h").read_bytes()) != build["inventorySha256"]:
         raise ValueError("Admission inventory differs from the selected native stage")
-    bootstrap = (admission / "libfoldgpt_native_bootstrap.so").read_bytes()
-    if digest(bootstrap) != build["executableSha256"]:
-        raise ValueError("Admission build digest differs")
+    app_launch = None
+    if args.launch_origin == "android-app":
+        if args.app_transport_build is None:
+            raise ValueError("Application launch requires its separate source-attested JNI build")
+        spec = importlib.util.spec_from_file_location("foldgpt_app_launch_admission", Path(__file__).with_name("app-launch-admission.py"))
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        app_launch, launch_libraries = module.admit_builds(admission, args.app_transport_build,
+                                                         (stage / "runtime-inventory.h").read_bytes())
+    else:
+        if args.app_transport_build is not None or build.get("schema") != "foldgpt.native-admission-build.v1" or "launchOrigin" in build:
+            raise ValueError("Run-as launch cannot use an application-origin build")
+        bootstrap = (admission / "libfoldgpt_native_bootstrap.so").read_bytes()
+        if digest(bootstrap) != build["executableSha256"]:
+            raise ValueError("Admission build digest differs")
+        launch_libraries = {"libfoldgpt_native_bootstrap.so": bootstrap}
     direct_name = "libfoldgpt_direct_runner.so"
     if args.ordinary_uid and ("ordinaryUidBuild" not in inventory
             or not (stage / "jniLibs/arm64-v8a" / direct_name).is_file()):
@@ -115,7 +130,10 @@ def main():
     shutil.copytree(stage / "assets", output / "assets")
     shutil.copytree(stage / "jniLibs", output / "jniLibs")
     assets, jni = output / "assets", output / "jniLibs/arm64-v8a"
-    (jni / "libfoldgpt_native_bootstrap.so").write_bytes(bootstrap)
+    for name, data in launch_libraries.items():
+        if (jni / name).exists():
+            raise ValueError("Native stage unexpectedly contains a launch executable: " + name)
+        (jni / name).write_bytes(data)
     native = {p.name: digest(p.read_bytes()) for p in sorted(jni.iterdir())}
     # The frozen transport module is the unique packager of these same bytes.
     for name in ("libfoldgpt_shizuku_transport.so", "libfoldgpt_bionic_cwd.so"):
@@ -140,6 +158,9 @@ def main():
                 ("/apex/com.android.tzdata/etc/tz/tzdata", False), (runtime_path, False))],
             "limits": {},
             "cwdShim": {"path": marker + "libfoldgpt_bionic_cwd.so", "sha256": native["libfoldgpt_bionic_cwd.so"]}}}
+    if app_launch is not None:
+        config.update(schema="foldgpt.native.deployment.v2", launchOrigin="android-app")
+        (assets / "foldgpt-app-launch-build.json").write_text(json.dumps(app_launch, indent=2) + "\n")
     if args.ordinary_uid:
         config["backendOptions"]["ordinaryUid"] = {"processRunner": marker + direct_name, "limits": {}}
         if "ordinaryPtyBuild" in inventory:
@@ -198,6 +219,9 @@ def main():
         "deploymentSha256": digest((assets / "foldgpt-executor-deployment.json").read_bytes()),
         "sourceManifestSha256": digest((assets / "foldgpt-executor-manifest.json").read_bytes()),
         "evidenceSha256": digest(evidence)}
+    if app_launch is not None:
+        qualification.update(launchOrigin="android-app",
+            appLaunchBuildSha256=digest((assets / "foldgpt-app-launch-build.json").read_bytes()))
     if args.host_v2:
         qualification["hostDeploymentSha256"] = digest((assets / "foldgpt-host-deployment.json").read_bytes())
     if args.ordinary_uid:

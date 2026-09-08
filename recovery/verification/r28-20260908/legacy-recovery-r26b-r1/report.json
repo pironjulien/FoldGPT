@@ -1,0 +1,15 @@
+{
+  "recovered": true,
+  "basis": "Android force-stop and complete app-UID quiescence plus exclusive native lock",
+  "boot": "348d453e-f4e5-40e0-8ef0-030f4d5e38af",
+  "previousCleanupClaimed": false,
+  "receipt": {
+    "archived": "/data/user/0/app.foldgpt/app_foldgpt_exec/recovered-v1-4d9f023219b4fd8a335cc3734bff854c/process-session.json",
+    "sha256": "8c09b5a029b9cf3073a62890f9cead8748c8f5117ef9245d2c21f05b955c95fa",
+    "markerDevice": 65097,
+    "markerInode": 490129,
+    "uid": 10412,
+    "helperPid": 25105,
+    "previousCleanupClaimed": false
+  }
+}

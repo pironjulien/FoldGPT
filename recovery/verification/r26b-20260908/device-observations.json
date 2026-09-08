@@ -1,0 +1,53 @@
+[
+  {
+    "sourceIndex": 0,
+    "record": {
+      "argv": [
+        "run-as",
+        "app.foldgpt",
+        "cat",
+        "files/native-executor-status.json"
+      ],
+      "code": 0,
+      "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"ready\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"launchOrigin\": \"android-app\",\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": {\r\n    \"schema\": \"foldgpt.shizuku.transport.v1\",\r\n    \"ready\": true,\r\n    \"cancelRequested\": false,\r\n    \"bootstrapReaped\": false,\r\n    \"cleanupComplete\": false,\r\n    \"ownerRetained\": true,\r\n    \"quarantined\": false,\r\n    \"refusedBeforeFork\": false,\r\n    \"setupError\": null,\r\n    \"cleanupError\": null,\r\n    \"transportFailed\": false,\r\n    \"waitStatus\": -1,\r\n    \"bootstrapPid\": 29060,\r\n    \"directNative\": true,\r\n    \"launchOrigin\": \"android-app\",\r\n    \"admission\": {\r\n      \"schema\": \"foldgpt.executor-admission.v1\",\r\n      \"admitted\": true,\r\n      \"stage\": \"complete\",\r\n      \"subject\": \"\",\r\n      \"facts\": {},\r\n      \"error\": null\r\n    }\r\n  },\r\n  \"socketPath\": \"\\/data\\/data\\/app.foldgpt\\/app_foldgpt_exec\\/23b4ef503e6c438699dfe63d549a6ea3\\/owner.sock\",\r\n  \"peerUid\": 10412,\r\n  \"directNative\": true,\r\n  \"startupManifest\": \"\\/data\\/data\\/app.foldgpt\\/app_foldgpt_exec\\/23b4ef503e6c438699dfe63d549a6ea3\\/startup.json\",\r\n  \"workspace\": \"\\/data\\/data\\/app.foldgpt\\/files\\/projects\"\r\n}\r\n",
+      "stderr": ""
+    }
+  },
+  {
+    "sourceIndex": 1,
+    "record": {
+      "argv": [
+        "pm",
+        "path",
+        "app.foldgpt"
+      ],
+      "code": 0,
+      "stdout": "package:/data/app/~~h1j2vVo5ocZN-Hqe_vqEog==/app.foldgpt-MYcth4qAAloa1xvUC2DBWg==/base.apk\r\n",
+      "stderr": ""
+    }
+  },
+  {
+    "sourceIndex": 4,
+    "record": {
+      "argv": [
+        "sha256sum",
+        "/data/app/~~h1j2vVo5ocZN-Hqe_vqEog==/app.foldgpt-MYcth4qAAloa1xvUC2DBWg==/base.apk"
+      ],
+      "code": 0,
+      "stdout": "632012aa8dd355fcede9a11b2483e8c48d22d2d170c9f4803c3d55cdd8e2723f  /data/app/~~h1j2vVo5ocZN-Hqe_vqEog==/app.foldgpt-MYcth4qAAloa1xvUC2DBWg==/base.apk\r\n",
+      "stderr": ""
+    }
+  },
+  {
+    "sourceIndex": 5,
+    "record": {
+      "argv": [
+        "cat",
+        "/proc/sys/kernel/random/boot_id"
+      ],
+      "code": 0,
+      "stdout": "348d453e-f4e5-40e0-8ef0-030f4d5e38af\r\n",
+      "stderr": ""
+    }
+  }
+]

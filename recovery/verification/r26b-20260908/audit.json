@@ -1,0 +1,85 @@
+{
+  "schema": "foldgpt.r26b-evidence-audit.v1",
+  "threadId": "01a07fe2-4dc0-7791-adc0-fb3fe079872c",
+  "turnId": "01a08287-665b-74e3-9d93-018afdf57f1e",
+  "sourceEvents": 432,
+  "eventCounts": {
+    "mcpServer/startupStatus/updated": 6,
+    "thread/settings/updated": 1,
+    "thread/status/changed": 2,
+    "turn/started": 1,
+    "item/started": 9,
+    "item/completed": 9,
+    "item/reasoning/summaryPartAdded": 2,
+    "item/reasoning/summaryTextDelta": 2,
+    "item/agentMessage/delta": 377,
+    "item/commandExecution/outputDelta": 16,
+    "thread/tokenUsage/updated": 5,
+    "item/commandExecution/terminalInteraction": 1,
+    "turn/completed": 1
+  },
+  "selectedCommandEvents": 21,
+  "completedCommands": 2,
+  "commandCompletionCopyMatchesOriginalCapture": true,
+  "unitTestsPassed": 5,
+  "jsonAndMarkdownSemanticExitCodes": [
+    1,
+    1
+  ],
+  "ptyInput": "bonjour autonome\n",
+  "ptyExpectedExitCode": 23,
+  "initialChunksMissingInUiCapture": [
+    "Python environment values",
+    "command -v rg result",
+    "FOLD_APP_READY"
+  ],
+  "initialChunksRecoveredFromActualToolOutputs": true,
+  "pythonEnvironment": {
+    "sys.platform": "android",
+    "platform.machine": "aarch64",
+    "uid": 10412,
+    "source": "r26b-functional/tool-outputs.json, matched to original JSONL records"
+  },
+  "nativeOwner": {
+    "pid": 29060,
+    "parentPid": 28958,
+    "uid": 10412,
+    "state": "ready",
+    "cleanupComplete": false,
+    "bootstrapReaped": false,
+    "ownerRetained": true
+  },
+  "projectAliasesEqual": true,
+  "projectRootDevice": 65097,
+  "projectRootInode": 471258,
+  "projectEntriesInSnapshot": 288,
+  "history": {
+    "beforeBytes": 882971,
+    "afterBytes": 883646,
+    "appendedBytes": 675,
+    "historyPrefixByteIdentical": true,
+    "addedRecords": 1,
+    "addedEventType": "thread_settings_applied",
+    "scope": "cwd repair before target validation turn",
+    "postValidationBytes": 957836,
+    "postValidationPreservesRepairedPrefix": true
+  },
+  "migration": {
+    "sourceBeforeEqualsSourceAfter": true,
+    "matchingContentSha256": "f514214696c7c1591bd990bc3dbd32492c9d3ed4bb07c335840dd10c15dc22c5",
+    "directoriesIncludingRoot": 39,
+    "files": 0,
+    "totalBytes": 0,
+    "nativeTestsPassed": 20,
+    "nativeTestErrors": 1,
+    "nativeSuiteExitCode": 1,
+    "error": "hardlink fixture os.link failed with EACCES before assertion"
+  },
+  "boundaries": [
+    "initial app-origin native owner and UI command execution tested",
+    "UI and controller still use PRoot; native command path does not make whole application native",
+    "this turn executes an existing zipapp, not a fresh project creation or build",
+    "same-boot crash recovery and physical reboot recovery not demonstrated by these observations",
+    "owner snapshot is ready with retained owner, not a successful cleanup receipt"
+  ]
+}

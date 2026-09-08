@@ -1,3 +1,4 @@
 -keep class app.foldgpt.shizukuexec.ExecutorService { public <init>(android.content.Context); *; }
 -keep class app.foldgpt.shizukuexec.NativeSpawn { *; }
+-keep class app.foldgpt.shizukuexec.AppNativeSpawn { *; }
 -keep class app.foldgpt.shizukuexec.ExecutorProvider { *; }

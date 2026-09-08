@@ -8,7 +8,21 @@ Date : 2026-09-08. Étude PC uniquement : lecture des métadonnées collectées,
 
 La reprise avec cwd explicite permet de franchir correctement le contrôle : elle ne le désactive pas. La persistance doit passer par l’événement ThreadSettingsApplied produit par le moteur. Il ne faut pas remplacer des chaînes dans tout le JSONL, modifier directement SQLite, créer une nouvelle conversation ni étendre discoveryRoot vers /.
 
-Ce plan dépend encore de deux collectes ciblées : l’inventaire réel des fichiers de l’ancien projet et l’identification des champs persistants de l’interface qui conservent ses anciens chemins. Les quatre fichiers sous work/config-inspection-20260908 ne contiennent pas cet inventaire ni le schéma complet de ces préférences.
+Ce plan dépend encore de deux collectes ciblées : l’inventaire réel des fichiers de l’ancien projet et l’identification de son véritable projectId et des éventuelles préférences supplémentaires de l’interface. Le schéma app-server project/update a depuis été identifié et est détaillé ci-dessous ; les quatre fichiers sous work/config-inspection-20260908 ne contiennent pas cet inventaire ni les associations complètes de projet.
+
+## Deux cas à distinguer avant toute migration
+
+La collecte [native-production-python trial](../../recovery/verification/native-production-python-20260908/trial/commands.json), message Java du 8 septembre à 04:02:03.363, montre dataDir=/data/user/0/app.foldgpt mais canonicalDataDir=/data/data/app.foldgpt et canonicalFilesDir=/data/data/app.foldgpt/files. Le nouveau démarrage sous le contexte applicatif utilisera la racine canonique. Cette preuve porte sur la canonicalisation observée, pas sur l’identité de tous les dossiers de projet, qui reste à contrôler individuellement.
+
+| Cas observé | Travail sur les fichiers | Travail sur les références |
+| --- | --- | --- |
+| Projet ancien /home/julien/Documents/Codex/... dont les données sont dans files/debian | Inventorier le vrai dossier, copier dans un nouveau dossier natif et vérifier les octets ; conserver la source. | Même threadId, cwd persistant et racines du même projet vers la destination vérifiée. |
+| Projet déjà natif /data/user/0/app.foldgpt/files/projects/... dont /data/data/app.foldgpt/files/projects/... est le même dossier | Vérifier canonicalisation, identité device/inode, contenu et admission dans l’autorité actuelle. **Aucune copie ni aucun déplacement** si l’identité est démontrée. | Réconcilier seulement les références vers la forme canonique, même threadId et projectId. |
+| Ancien chemin absent, ou deux chemins qui désignent des dossiers différents | Conserver les données ; ne pas déclarer un alias ou créer un dossier vide. | Aucune réécriture automatique. Résoudre l’inventaire avant modification. |
+
+Ces correspondances sont exactes par composants. Elles ne sont pas un remplacement de chaîne global /data/user/0 → /data/data, ni un motif d’étendre discoveryRoot. La racine admise doit être celle fournie et canonicalisée par l’application à ce démarrage. Les anciens messages et SessionMeta gardent leurs chemins historiques.
+
+Le nouvel outil [relocate.py](../../tools/runtime/legacy-projects/relocate.py) assure seulement l’inventaire et la copie du premier cas ; il refuse les liens symboliques et ne canonicalise pas silencieusement les alias. Le deuxième cas utilise le chemin canonique vérifié pour son inventaire, puis uniquement les API de réglage. Le [README](../../tools/runtime/legacy-projects/README.md) précise les garanties, les limites de concurrence et les 20 tests PC ext4 exécutés. Ces tests de copie n’exécutent pas les tests de protocole ni les tests téléphone proposés dans le présent document.
 
 ## Cause et périmètre établis
 
@@ -72,16 +86,33 @@ Les sous-agents V2 appartenant à un parent ont en outre un chemin de reprise pa
 
 Il ne constitue donc pas une migration déjà déployée. Ajouter une réécriture générique de chemin à ce routeur ne serait pas la correction minimale tant que la copie des fichiers et la persistance des références ne sont pas qualifiées.
 
+### Réconcilier le même projet avec project/update
+
+Le protocole canonique [ProjectUpdateParams](../../work/worktrees/FoldgptEngine/codex-rs/app-server-protocol/src/protocol/v2/project.rs:124) contient projectId, name optionnel, roots optionnel et metadata optionnel. Après identification réelle du projet avec project/list et project/read, le corps params minimal est :
+
+~~~json
+{
+  "projectId": "ID_PROJET_REEL_OBSERVE",
+  "roots": [{"path": "/data/data/app.foldgpt/files/projects/PROJET_VERIFIE"}]
+}
+~~~
+
+Cet exemple suppose une seule racine. roots remplace la liste entière : conserver les autres racines effectivement observées et ne retargeter que celles qui ont été copiées ou reconnues comme alias du même dossier. Omettre name et metadata préserve ces champs ; ne pas reconstruire le projet ou son identifiant à partir d’un titre.
+
+Le [traitement project_update](../../work/worktrees/FoldgptEngine/codex-rs/app-server/src/request_processors/projects.rs:178) met à jour le même projet dans le thread store, retourne le projet obtenu et émet project/changed avec changeType=updated si ses données ont changé. Il **ne met pas à jour le cwd des conversations** : les opérations thread/resume et thread/settings/update restent nécessaires pour chaque conversation concernée. Les éventuelles préférences de navigation en dehors du modèle app-server doivent encore être identifiées et vérifiées dans l’interface ; aucune fonction RPC exposée dans le renderer n’est supposée disponible.
+
+ProjectUpdateParams ne contient ni version attendue ni compare-and-swap. Un project/read puis project/update n’est pas atomique contre un client concurrent : coordonner la période sans écriture, relire immédiatement avant et après, et conserver l’état précédent pour examiner toute divergence. Les opérations projet/thread sont distinctes ; un échec intermédiaire ne doit pas être présenté comme une migration terminée.
+
 ## Migration de données proposée, transaction par projet
 
 La migration doit être fondée sur le **projet**, pas sur une copie des fichiers par conversation : plusieurs conversations peuvent viser le même cwd et doivent continuer à travailler sur les mêmes fichiers.
 
 1. **Préparer un inventaire daté en lecture seule.** Lire les métadonnées des conversations concernées, identifier le vrai répertoire correspondant dans le stockage Debian de FoldGPT, puis relever chemins relatifs, type, taille et empreinte des fichiers. Pour ce projet, la traduction attendue de la racine PRoot est files/debian/home/julien/Documents/Codex/... ; cette correspondance doit être vérifiée sur le répertoire réel, pas seulement déduite du nom.
-2. **Fixer une correspondance unique ancien cwd → nouveau cwd.** Exemple proposé, encore non créé : /data/user/0/app.foldgpt/files/projects/imported-codex/2026-09-06/dans-le-dossier-de-cette-nouvelle. Valider les composants et la provenance. /home/julien/Documents/Codex-other ne doit pas être accepté comme enfant de /home/julien/Documents/Codex. Aucune normalisation ambiguë, symlink ou URI étrangère n’est convertie implicitement.
+2. **Fixer une correspondance unique ancien cwd → nouveau cwd.** Exemple proposé, encore non créé : /data/data/app.foldgpt/files/projects/imported-codex/2026-09-06/dans-le-dossier-de-cette-nouvelle, sous la racine canonique observée. Valider les composants et la provenance. /home/julien/Documents/Codex-other ne doit pas être accepté comme enfant de /home/julien/Documents/Codex. Aucune normalisation ambiguë, symlink ou URI étrangère n’est convertie implicitement.
 3. **Copier dans un emplacement neuf sous la racine admise.** Garder la source intégralement. Vérifier le manifeste copié avant publication du répertoire final. Refuser un conflit de destination ; une reprise idempotente ne réutilise une destination que si provenance et inventaire concordent. Vérifier que source et destination n’ont pas changé pendant la copie.
 4. **Vérifier l’admission native.** Lire/canonicaliser le nouveau cwd avec l’autorité bootstrap existante. Les types et structures refusés aujourd’hui, notamment liens ou indirections Git hors racine, doivent être signalés, conservés à la source et traités explicitement ; ne pas les supprimer ou les ignorer dans un inventaire présenté comme complet.
 5. **Reprendre le même threadId et persister le réglage.** Utiliser les deux appels ci-dessous via le transport app-server existant, avec des IDs RPC neufs. Ne pas changer le modèle, les politiques, la confiance ou les permissions pour faire passer la reprise.
-6. **Mettre à jour les références de navigation démontrées.** L’ancienne UI a aussi des indices de racine/sortie vers /home/julien/Documents/Codex. Identifier leurs fichiers et clés exacts avant intervention ; modifier uniquement les associations de ce projet, avec sauvegarde et contrôle de concurrence. Vérifier les nouvelles requêtes config/read, la liste des tâches et l’éditeur. Les métadonnées collectées ne permettent pas ici de donner des noms de clés fiables.
+6. **Mettre à jour les références de navigation démontrées.** Utiliser project/update pour le même projet réellement identifié, comme détaillé plus haut. L’ancienne UI a aussi des indices de racine/sortie vers /home/julien/Documents/Codex. Identifier les éventuelles préférences supplémentaires et leurs clés exactes avant intervention ; modifier uniquement les associations de ce projet, avec sauvegarde et coordination des écritures. Vérifier les nouvelles requêtes config/read, la liste des tâches et l’éditeur. Les métadonnées collectées ne permettent pas encore de donner des noms de clés fiables pour ces préférences supplémentaires.
 7. **Fermer et reprendre sans override.** Valider le même threadId, les mêmes messages historiques, les fichiers copiés et le cwd natif. La source d’origine et le journal de migration restent conservés ; aucune suppression n’est nécessaire pour cette réparation.
 
 Exemple de requêtes pour le futur essai, non envoyées :
@@ -93,7 +124,7 @@ Exemple de requêtes pour le futur essai, non envoyées :
   "method": "thread/resume",
   "params": {
     "threadId": "01a07831-abaa-7a11-811f-1a6706c3da40",
-    "cwd": "/data/user/0/app.foldgpt/files/projects/imported-codex/2026-09-06/dans-le-dossier-de-cette-nouvelle"
+    "cwd": "/data/data/app.foldgpt/files/projects/imported-codex/2026-09-06/dans-le-dossier-de-cette-nouvelle"
   }
 }
 ~~~
@@ -105,7 +136,7 @@ Exemple de requêtes pour le futur essai, non envoyées :
   "method": "thread/settings/update",
   "params": {
     "threadId": "01a07831-abaa-7a11-811f-1a6706c3da40",
-    "cwd": "/data/user/0/app.foldgpt/files/projects/imported-codex/2026-09-06/dans-le-dossier-de-cette-nouvelle"
+    "cwd": "/data/data/app.foldgpt/files/projects/imported-codex/2026-09-06/dans-le-dossier-de-cette-nouvelle"
   }
 }
 ~~~

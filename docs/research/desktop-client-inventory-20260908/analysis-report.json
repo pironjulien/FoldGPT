@@ -1,0 +1,328 @@
+{
+  "schema": "foldgpt.desktop-static-surface.v1",
+  "generatedAt": "2026-09-08T19:59:55.167Z",
+  "parser": {
+    "name": "acorn",
+    "version": "8.18.0",
+    "ecmaVersion": "latest",
+    "execution": "Parsing only; client code was not executed"
+  },
+  "offsetUnit": "UTF-16 code units, zero-based; lines one-based; columns zero-based",
+  "coverage": [
+    {
+      "name": "installed",
+      "root": "work/desktop-audit-20260908/installed-extracted/asar",
+      "filesAvailable": 7546,
+      "javascriptFiles": 7176,
+      "parsed": 7176,
+      "parseErrors": 0,
+      "sourceMapsAvailable": 0
+    },
+    {
+      "name": "installedExternal",
+      "root": "work/desktop-audit-20260908/installed-files/files",
+      "filesAvailable": 6194,
+      "javascriptFiles": 2561,
+      "parsed": 2561,
+      "parseErrors": 0,
+      "sourceMapsAvailable": 0
+    },
+    {
+      "name": "baseline",
+      "root": "work/desktop-audit-20260908/extracted-r2/asar",
+      "filesAvailable": 7514,
+      "javascriptFiles": 7176,
+      "parsed": 7176,
+      "parseErrors": 0,
+      "sourceMapsAvailable": 0
+    },
+    {
+      "name": "baselineExternal",
+      "root": "work/desktop-audit-20260908/extracted-r2/package",
+      "filesAvailable": 3073,
+      "javascriptFiles": 2561,
+      "parsed": 2561,
+      "parseErrors": 0,
+      "sourceMapsAvailable": 0
+    },
+    {
+      "name": "liveInitial",
+      "root": "work/app-transport-20260908/desktop-app-initial-36a3a1b7313c.js",
+      "filesAvailable": 1,
+      "javascriptFiles": 1,
+      "parsed": 1,
+      "parseErrors": 0,
+      "sourceMapsAvailable": 0
+    },
+    {
+      "name": "livePrimary",
+      "root": "work/app-transport-20260908/desktop-app-primary-804f738d362c.js",
+      "filesAvailable": 1,
+      "javascriptFiles": 1,
+      "parsed": 1,
+      "parseErrors": 0,
+      "sourceMapsAvailable": 0
+    }
+  ],
+  "categories": [
+    {
+      "category": "appHostService",
+      "observations": 190,
+      "distinctValues": 95,
+      "file": "appHostService.json",
+      "sha256": "bc7dfd1d99698ff879cca5c01948d490bc83f6808f450c3446941c8d140dac83"
+    },
+    {
+      "category": "classInstanceBinding",
+      "observations": 19125,
+      "distinctValues": 2809,
+      "file": "classInstanceBinding.json",
+      "sha256": "aab8daa73f3c004d011170e6c76c6ade6085cc727781e1d5a3b7d12663aa696d"
+    },
+    {
+      "category": "commandCall",
+      "observations": 32,
+      "distinctValues": 12,
+      "file": "commandCall.json",
+      "sha256": "40697675e01cd4526ce74bbce36e5838a1317dd1a87833954548f3bc414fb898"
+    },
+    {
+      "category": "commandDefinitionCandidate",
+      "observations": 9,
+      "distinctValues": 3,
+      "file": "commandDefinitionCandidate.json",
+      "sha256": "ac337c813b70a85e04ce0a764f541e29cfdca54ef6791da62324f6e7c5c58883"
+    },
+    {
+      "category": "commandIdProperty",
+      "observations": 65,
+      "distinctValues": 13,
+      "file": "commandIdProperty.json",
+      "sha256": "5898af4288a7d39580bb3685d4b632d14825c368cd5ec227cd4c69261876b7c3"
+    },
+    {
+      "category": "commandStringCandidate",
+      "observations": 489,
+      "distinctValues": 139,
+      "file": "commandStringCandidate.json",
+      "sha256": "2348e6eb468f7998fb816bfc2c184a8918c51b0de2d0bba29dfb44551933c10b"
+    },
+    {
+      "category": "commandVectorCandidate",
+      "observations": 212,
+      "distinctValues": 30,
+      "file": "commandVectorCandidate.json",
+      "sha256": "c54d258ee0e2adeb3f656a42953b1efa328a138e642d86d27717855a098a07b8"
+    },
+    {
+      "category": "dispatchedMessage",
+      "observations": 442,
+      "distinctValues": 100,
+      "file": "dispatchedMessage.json",
+      "sha256": "78050e41399cc94ca751a0de89aedf63b5bf19000d41ac2943687cefbdd50aa9"
+    },
+    {
+      "category": "dynamicModuleImport",
+      "observations": 13236,
+      "distinctValues": 7329,
+      "file": "dynamicModuleImport.json",
+      "sha256": "630477693effd606d687552e6c6a42eeedfd2f7d0e08d0322d16baed01c9a1ff"
+    },
+    {
+      "category": "dynamicRouteExpression",
+      "observations": 117,
+      "distinctValues": 67,
+      "file": "dynamicRouteExpression.json",
+      "sha256": "de9debb1e19cf78e103bddd82c1c86a5c46f529b791eddac2cf7c55e6c123a38"
+    },
+    {
+      "category": "explicitLimitation",
+      "observations": 1501,
+      "distinctValues": 368,
+      "file": "explicitLimitation.json",
+      "sha256": "7dfeaefce6efa070c5ae935d1e066c62c96aadf7376283c5bd452220587b63f6"
+    },
+    {
+      "category": "hostAddressLiteral",
+      "observations": 2164,
+      "distinctValues": 71,
+      "file": "hostAddressLiteral.json",
+      "sha256": "9b4533e5633414894f3b43ee20e4023e6c1d63be6421c3901f147f3ce6d3952a"
+    },
+    {
+      "category": "hostFetchHandler",
+      "observations": 428,
+      "distinctValues": 168,
+      "file": "hostFetchHandler.json",
+      "sha256": "5cf3a4357c1a4153ea5fa40681a29ff478b7d27bb0cc19731da95e837172bf1f"
+    },
+    {
+      "category": "methodProperty",
+      "observations": 1157,
+      "distinctValues": 230,
+      "file": "methodProperty.json",
+      "sha256": "3db68f8c1c73779727c10524e9c1f6ca198cb194843331988b45fd332659f12f"
+    },
+    {
+      "category": "moduleExport",
+      "observations": 66569,
+      "distinctValues": 12008,
+      "file": "moduleExport.json",
+      "sha256": "321083ad197c0a28342cc3304665cb0092e93eba9fced89d6d5309fd6d0068bc"
+    },
+    {
+      "category": "moduleImport",
+      "observations": 44309,
+      "distinctValues": 5060,
+      "file": "moduleImport.json",
+      "sha256": "aa12a2f3a9f55fb315cad9df42ef864e534b6f1bb21a3a582b48af48ec49dae6"
+    },
+    {
+      "category": "moduleRequire",
+      "observations": 15702,
+      "distinctValues": 2116,
+      "file": "moduleRequire.json",
+      "sha256": "56a9183bf6b87e149a87fc7555ea1d2efc1952189485b4f96739bde5e856cc5d"
+    },
+    {
+      "category": "namedCallCandidate",
+      "observations": 20496,
+      "distinctValues": 2494,
+      "file": "namedCallCandidate.json",
+      "sha256": "03014c40cda617f35f46e7cfcbc1a3a39c38cf335ad197c8f9c760a47bb254bc"
+    },
+    {
+      "category": "namedMapEntryCandidate",
+      "observations": 379,
+      "distinctValues": 84,
+      "file": "namedMapEntryCandidate.json",
+      "sha256": "f71c879bccc5c11710cf819175da6e51df7644e60faf7d61407910ce4663e324"
+    },
+    {
+      "category": "pathPropertyCandidate",
+      "observations": 1616,
+      "distinctValues": 722,
+      "file": "pathPropertyCandidate.json",
+      "sha256": "a61fd5a6b4cbab0a24bf1c7e5384fb2335612b9817dd8d3fdcbf77c1eea39c68"
+    },
+    {
+      "category": "platformGuard",
+      "observations": 1483,
+      "distinctValues": 21,
+      "file": "platformGuard.json",
+      "sha256": "c77428dc33131f175f7c31a22624c7c1a1c69faa5dcb390616ecab28c9719230"
+    },
+    {
+      "category": "postedTypedMessage",
+      "observations": 467,
+      "distinctValues": 140,
+      "file": "postedTypedMessage.json",
+      "sha256": "2bd6a9b6b5b650552e1bfbce4b2c68d0b05b5679d4e42d461726dc0b4e00de94"
+    },
+    {
+      "category": "processProgram",
+      "observations": 62,
+      "distinctValues": 13,
+      "file": "processProgram.json",
+      "sha256": "68827287b1fb21382dd6ca6b1312a1402777d77f10a2d02063d6b264df8822d2"
+    },
+    {
+      "category": "protocolLiteral",
+      "observations": 3281,
+      "distinctValues": 177,
+      "file": "protocolLiteral.json",
+      "sha256": "d193fa11de31ce84d40a58ef9575387286cc977e44cb8811cea8d18f76b4a723"
+    },
+    {
+      "category": "protocolStringCandidate",
+      "observations": 67,
+      "distinctValues": 23,
+      "file": "protocolStringCandidate.json",
+      "sha256": "734d9ec5e4f088e329532362b756b0d7106be89c925af0a369dceadc63a4cd79"
+    },
+    {
+      "category": "requestCall",
+      "observations": 1103,
+      "distinctValues": 205,
+      "file": "requestCall.json",
+      "sha256": "9f46819b91197834c847481364ecbf390e2772daa0c8c441a6c4107c73f122f4"
+    },
+    {
+      "category": "routeDefinition",
+      "observations": 108,
+      "distinctValues": 36,
+      "file": "routeDefinition.json",
+      "sha256": "291f76d8700c01460f3547477cefb642e094475a83703569667d8b382c18986d"
+    },
+    {
+      "category": "rpcTargetClass",
+      "observations": 218,
+      "distinctValues": 153,
+      "file": "rpcTargetClass.json",
+      "sha256": "288fceab5bce3ac4f780bbdc10af4612a89409c4f0fc122c620ec3b3bf5bda36"
+    },
+    {
+      "category": "rpcTargetMethod",
+      "observations": 1121,
+      "distinctValues": 389,
+      "file": "rpcTargetMethod.json",
+      "sha256": "3bf53a0044f1de40ceca6476c0d834b891522824bb046e03b7eeffcba42d1427"
+    },
+    {
+      "category": "settingDefinition",
+      "observations": 532,
+      "distinctValues": 76,
+      "file": "settingDefinition.json",
+      "sha256": "4f13a2308b68bd3881a055194898ff9f0d00a389f9bc64c0d0924e5866d2c6e6"
+    },
+    {
+      "category": "slashCallCandidate",
+      "observations": 1576,
+      "distinctValues": 211,
+      "file": "slashCallCandidate.json",
+      "sha256": "c0ef80f4ac504b4ad26f55d97ba38b3a5a2bf7eba79937dfaf60ae3a86fc9c15"
+    },
+    {
+      "category": "subscribedEvent",
+      "observations": 106,
+      "distinctValues": 31,
+      "file": "subscribedEvent.json",
+      "sha256": "de55a8eecbebe14a5f14be37d903605b73e52a3df08cdb1cdace79e82ed5fe87"
+    },
+    {
+      "category": "typedSwitchCase",
+      "observations": 10854,
+      "distinctValues": 1594,
+      "file": "typedSwitchCase.json",
+      "sha256": "1f349e038a4236434cce3ba10e5620059893a27a3d5a6f9f09a18a3de987ef5c"
+    },
+    {
+      "category": "versionRequirementCandidate",
+      "observations": 165,
+      "distinctValues": 39,
+      "file": "versionRequirementCandidate.json",
+      "sha256": "666707385393523f986d1d3d72fdd2c3f230e8e9bbddaf624d28a38f21c73ad8"
+    }
+  ],
+  "unresolvedDynamicOccurrences": {
+    "methodProperty": 1436,
+    "typedSwitchCase": 2159,
+    "commandVectorCandidate": 545,
+    "processProgram": 5916,
+    "rpcTargetMethod": 58,
+    "subscribedEvent": 500,
+    "dynamicModuleImport": 90,
+    "requestCall": 314,
+    "namedMapEntryCandidate": 157,
+    "commandIdProperty": 171,
+    "hostFetchHandler": 9,
+    "postedTypedMessage": 12,
+    "moduleRequire": 104,
+    "dispatchedMessage": 49,
+    "routeDefinition": 117,
+    "commandCall": 124
+  },
+  "parseErrorCount": 0,
+  "allInspectedSourceBytesUnchanged": true,
+  "scope": "All JavaScript files available under explicit corpus roots parsed or recorded as parse failures. Candidate categories are not verified commands. No claim of complete source recovery, native-code decompilation, dynamically generated names or runtime feature support."
+}

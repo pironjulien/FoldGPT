@@ -1,0 +1,596 @@
+{
+  "schema": "foldgpt.legacy-project-inventory.v1",
+  "source": "/data/data/app.foldgpt/files/debian/home/julien/Documents/Codex",
+  "sourceBoundary": "/data/data/app.foldgpt/files/debian/home/julien/Documents/Codex",
+  "entries": [
+    {
+      "path": ".",
+      "kind": "directory",
+      "stat": {
+        "device": 65097,
+        "inode": 152345,
+        "mode": 16877,
+        "uid": 10412,
+        "gid": 10412,
+        "links": 4,
+        "bytes": 3452,
+        "mtimeNs": 1788654893905670131,
+        "ctimeNs": 1788654893905670131
+      }
+    },
+    {
+      "path": "2026-09-05",
+      "kind": "directory",
+      "stat": {
+        "device": 65097,
+        "inode": 152346,
+        "mode": 16877,
+        "uid": 10412,
+        "gid": 10412,
+        "links": 10,
+        "bytes": 3452,
+        "mtimeNs": 1788651406345671462,
+        "ctimeNs": 1788651406345671462
+      }
+    },
+    {
+      "path": "2026-09-05/aet",
+      "kind": "directory",
+      "stat": {
+        "device": 65097,
+        "inode": 141668,
+        "mode": 16832,
+        "uid": 10412,
+        "gid": 10412,
+        "links": 4,
+        "bytes": 3452,
+        "mtimeNs": 1788651406345671462,
+        "ctimeNs": 1788651406345671462
+      }
+    },
+    {
+      "path": "2026-09-05/aet/outputs",
+      "kind": "directory",
+      "stat": {
+        "device": 65097,
+        "inode": 141910,
+        "mode": 16832,
+        "uid": 10412,
+        "gid": 10412,
+        "links": 2,
+        "bytes": 3452,
+        "mtimeNs": 1788651406345671462,
+        "ctimeNs": 1788651406345671462
+      }
+    },
+    {
+      "path": "2026-09-05/aet/work",
+      "kind": "directory",
+      "stat": {
+        "device": 65097,
+        "inode": 141918,
+        "mode": 16832,
+        "uid": 10412,
+        "gid": 10412,
+        "links": 2,
+        "bytes": 3452,
+        "mtimeNs": 1788651406345671462,
+        "ctimeNs": 1788651406345671462
+      }
+    },
+    {
+      "path": "2026-09-05/bonjour-astra",
+      "kind": "directory",
+      "stat": {
+        "device": 65097,
+        "inode": 152347,
+        "mode": 16877,
+        "uid": 10412,
+        "gid": 10412,
+        "links": 4,
+        "bytes": 3452,
+        "mtimeNs": 1788642279000000000,
+        "ctimeNs": 1788649727877672102
+      }
+    },
+    {
+      "path": "2026-09-05/bonjour-astra/outputs",
+      "kind": "directory",
+      "stat": {
+        "device": 65097,
+        "inode": 152348,
+        "mode": 16877,
+        "uid": 10412,
+        "gid": 10412,
+        "links": 2,
+        "bytes": 3452,
+        "mtimeNs": 1788642279000000000,
+        "ctimeNs": 1788649727877672102
+      }
+    },
+    {
+      "path": "2026-09-05/bonjour-astra/work",
+      "kind": "directory",
+      "stat": {
+        "device": 65097,
+        "inode": 152349,
+        "mode": 16877,
+        "uid": 10412,
+        "gid": 10412,
+        "links": 2,
+        "bytes": 3452,
+        "mtimeNs": 1788642279000000000,
+        "ctimeNs": 1788649727877672102
+      }
+    },
+    {
+      "path": "2026-09-05/sa",
+      "kind": "directory",
+      "stat": {
+        "device": 65097,
+        "inode": 188200,
+        "mode": 16832,
+        "uid": 10412,
+        "gid": 10412,
+        "links": 4,
+        "bytes": 3452,
+        "mtimeNs": 1788650904073671653,
+        "ctimeNs": 1788650904073671653
+      }
+    },
+    {
+      "path": "2026-09-05/sa/outputs",
+      "kind": "directory",
+      "stat": {
+        "device": 65097,
+        "inode": 188204,
+        "mode": 16832,
+        "uid": 10412,
+        "gid": 10412,
+        "links": 2,
+        "bytes": 3452,
+        "mtimeNs": 1788650904073671653,
+        "ctimeNs": 1788650904073671653
+      }
+    },
+    {
+      "path": "2026-09-05/sa/work",
+      "kind": "directory",
+      "stat": {
+        "device": 65097,
+        "inode": 188205,
+        "mode": 16832,
+        "uid": 10412,
+        "gid": 10412,
+        "links": 2,
+        "bytes": 3452,
+        "mtimeNs": 1788650904073671653,
+        "ctimeNs": 1788650904073671653
+      }
+    },
+    {
+      "path": "2026-09-05/test-de-saisie-accentu",
+      "kind": "directory",
+      "stat": {
+        "device": 65097,
+        "inode": 152350,
+        "mode": 16877,
+        "uid": 10412,
+        "gid": 10412,
+        "links": 4,
+        "bytes": 3452,
+        "mtimeNs": 1788646382000000000,
+        "ctimeNs": 1788649727877672102
+      }
+    },
+    {
+      "path": "2026-09-05/test-de-saisie-accentu/outputs",
+      "kind": "directory",
+      "stat": {
+        "device": 65097,
+        "inode": 152351,
+        "mode": 16877,
+        "uid": 10412,
+        "gid": 10412,
+        "links": 2,
+        "bytes": 3452,
+        "mtimeNs": 1788646382000000000,
+        "ctimeNs": 1788649727877672102
+      }
+    },
+    {
+      "path": "2026-09-05/test-de-saisie-accentu/work",
+      "kind": "directory",
+      "stat": {
+        "device": 65097,
+        "inode": 152352,
+        "mode": 16877,
+        "uid": 10412,
+        "gid": 10412,
+        "links": 2,
+        "bytes": 3452,
+        "mtimeNs": 1788646382000000000,
+        "ctimeNs": 1788649727877672102
+      }
+    },
+    {
+      "path": "2026-09-05/test-de-saisie-accentutest-de-saisie",
+      "kind": "directory",
+      "stat": {
+        "device": 65097,
+        "inode": 152353,
+        "mode": 16877,
+        "uid": 10412,
+        "gid": 10412,
+        "links": 4,
+        "bytes": 3452,
+        "mtimeNs": 1788646606000000000,
+        "ctimeNs": 1788649727877672102
+      }
+    },
+    {
+      "path": "2026-09-05/test-de-saisie-accentutest-de-saisie/outputs",
+      "kind": "directory",
+      "stat": {
+        "device": 65097,
+        "inode": 152354,
+        "mode": 16877,
+        "uid": 10412,
+        "gid": 10412,
+        "links": 2,
+        "bytes": 3452,
+        "mtimeNs": 1788646606000000000,
+        "ctimeNs": 1788649727877672102
+      }
+    },
+    {
+      "path": "2026-09-05/test-de-saisie-accentutest-de-saisie/work",
+      "kind": "directory",
+      "stat": {
+        "device": 65097,
+        "inode": 152355,
+        "mode": 16877,
+        "uid": 10412,
+        "gid": 10412,
+        "links": 2,
+        "bytes": 3452,
+        "mtimeNs": 1788646606000000000,
+        "ctimeNs": 1788649727877672102
+      }
+    },
+    {
+      "path": "2026-09-05/test-de-saisie-accentutest-de-saisie-2",
+      "kind": "directory",
+      "stat": {
+        "device": 65097,
+        "inode": 152356,
+        "mode": 16877,
+        "uid": 10412,
+        "gid": 10412,
+        "links": 4,
+        "bytes": 3452,
+        "mtimeNs": 1788647498000000000,
+        "ctimeNs": 1788649727877672102
+      }
+    },
+    {
+      "path": "2026-09-05/test-de-saisie-accentutest-de-saisie-2/outputs",
+      "kind": "directory",
+      "stat": {
+        "device": 65097,
+        "inode": 152357,
+        "mode": 16877,
+        "uid": 10412,
+        "gid": 10412,
+        "links": 2,
+        "bytes": 3452,
+        "mtimeNs": 1788647498000000000,
+        "ctimeNs": 1788649727877672102
+      }
+    },
+    {
+      "path": "2026-09-05/test-de-saisie-accentutest-de-saisie-2/work",
+      "kind": "directory",
+      "stat": {
+        "device": 65097,
+        "inode": 152358,
+        "mode": 16877,
+        "uid": 10412,
+        "gid": 10412,
+        "links": 2,
+        "bytes": 3452,
+        "mtimeNs": 1788647498000000000,
+        "ctimeNs": 1788649727877672102
+      }
+    },
+    {
+      "path": "2026-09-05/test-de-saisie-accentutest-de-saisie-3",
+      "kind": "directory",
+      "stat": {
+        "device": 65097,
+        "inode": 152359,
+        "mode": 16877,
+        "uid": 10412,
+        "gid": 10412,
+        "links": 4,
+        "bytes": 3452,
+        "mtimeNs": 1788647512000000000,
+        "ctimeNs": 1788649727877672102
+      }
+    },
+    {
+      "path": "2026-09-05/test-de-saisie-accentutest-de-saisie-3/outputs",
+      "kind": "directory",
+      "stat": {
+        "device": 65097,
+        "inode": 152360,
+        "mode": 16877,
+        "uid": 10412,
+        "gid": 10412,
+        "links": 2,
+        "bytes": 3452,
+        "mtimeNs": 1788647512000000000,
+        "ctimeNs": 1788649727877672102
+      }
+    },
+    {
+      "path": "2026-09-05/test-de-saisie-accentutest-de-saisie-3/work",
+      "kind": "directory",
+      "stat": {
+        "device": 65097,
+        "inode": 152361,
+        "mode": 16877,
+        "uid": 10412,
+        "gid": 10412,
+        "links": 2,
+        "bytes": 3452,
+        "mtimeNs": 1788647512000000000,
+        "ctimeNs": 1788649727877672102
+      }
+    },
+    {
+      "path": "2026-09-05/test-de-saisie-accentutest-de-saisie-4",
+      "kind": "directory",
+      "stat": {
+        "device": 65097,
+        "inode": 152362,
+        "mode": 16877,
+        "uid": 10412,
+        "gid": 10412,
+        "links": 4,
+        "bytes": 3452,
+        "mtimeNs": 1788647626000000000,
+        "ctimeNs": 1788649727877672102
+      }
+    },
+    {
+      "path": "2026-09-05/test-de-saisie-accentutest-de-saisie-4/outputs",
+      "kind": "directory",
+      "stat": {
+        "device": 65097,
+        "inode": 152364,
+        "mode": 16877,
+        "uid": 10412,
+        "gid": 10412,
+        "links": 2,
+        "bytes": 3452,
+        "mtimeNs": 1788647626000000000,
+        "ctimeNs": 1788649727877672102
+      }
+    },
+    {
+      "path": "2026-09-05/test-de-saisie-accentutest-de-saisie-4/work",
+      "kind": "directory",
+      "stat": {
+        "device": 65097,
+        "inode": 152363,
+        "mode": 16877,
+        "uid": 10412,
+        "gid": 10412,
+        "links": 2,
+        "bytes": 3452,
+        "mtimeNs": 1788647626000000000,
+        "ctimeNs": 1788649727877672102
+      }
+    },
+    {
+      "path": "2026-09-06",
+      "kind": "directory",
+      "stat": {
+        "device": 65097,
+        "inode": 140541,
+        "mode": 16832,
+        "uid": 10412,
+        "gid": 10412,
+        "links": 6,
+        "bytes": 3452,
+        "mtimeNs": 1788722915897993841,
+        "ctimeNs": 1788722915897993841
+      }
+    },
+    {
+      "path": "2026-09-06/dans-le-dossier-de-cette-nouvelle",
+      "kind": "directory",
+      "stat": {
+        "device": 65097,
+        "inode": 374235,
+        "mode": 16832,
+        "uid": 10412,
+        "gid": 10412,
+        "links": 4,
+        "bytes": 3452,
+        "mtimeNs": 1788722915897993841,
+        "ctimeNs": 1788722915897993841
+      }
+    },
+    {
+      "path": "2026-09-06/dans-le-dossier-de-cette-nouvelle/outputs",
+      "kind": "directory",
+      "stat": {
+        "device": 65097,
+        "inode": 374013,
+        "mode": 16832,
+        "uid": 10412,
+        "gid": 10412,
+        "links": 2,
+        "bytes": 3452,
+        "mtimeNs": 1788722915897993841,
+        "ctimeNs": 1788722915897993841
+      }
+    },
+    {
+      "path": "2026-09-06/dans-le-dossier-de-cette-nouvelle/work",
+      "kind": "directory",
+      "stat": {
+        "device": 65097,
+        "inode": 374025,
+        "mode": 16832,
+        "uid": 10412,
+        "gid": 10412,
+        "links": 2,
+        "bytes": 3452,
+        "mtimeNs": 1788722915897993841,
+        "ctimeNs": 1788722915897993841
+      }
+    },
+    {
+      "path": "2026-09-06/sa",
+      "kind": "directory",
+      "stat": {
+        "device": 65097,
+        "inode": 140155,
+        "mode": 16832,
+        "uid": 10412,
+        "gid": 10412,
+        "links": 4,
+        "bytes": 3452,
+        "mtimeNs": 1788654893905670131,
+        "ctimeNs": 1788654893905670131
+      }
+    },
+    {
+      "path": "2026-09-06/sa/outputs",
+      "kind": "directory",
+      "stat": {
+        "device": 65097,
+        "inode": 140198,
+        "mode": 16832,
+        "uid": 10412,
+        "gid": 10412,
+        "links": 2,
+        "bytes": 3452,
+        "mtimeNs": 1788654893905670131,
+        "ctimeNs": 1788654893905670131
+      }
+    },
+    {
+      "path": "2026-09-06/sa/work",
+      "kind": "directory",
+      "stat": {
+        "device": 65097,
+        "inode": 140467,
+        "mode": 16832,
+        "uid": 10412,
+        "gid": 10412,
+        "links": 2,
+        "bytes": 3452,
+        "mtimeNs": 1788654893905670131,
+        "ctimeNs": 1788654893905670131
+      }
+    },
+    {
+      "path": "2026-09-06/sans-appeler-aucun-outil-et-uniquement",
+      "kind": "directory",
+      "stat": {
+        "device": 65097,
+        "inode": 380883,
+        "mode": 16832,
+        "uid": 10412,
+        "gid": 10412,
+        "links": 4,
+        "bytes": 3452,
+        "mtimeNs": 1788722479853994008,
+        "ctimeNs": 1788722479853994008
+      }
+    },
+    {
+      "path": "2026-09-06/sans-appeler-aucun-outil-et-uniquement/outputs",
+      "kind": "directory",
+      "stat": {
+        "device": 65097,
+        "inode": 380884,
+        "mode": 16832,
+        "uid": 10412,
+        "gid": 10412,
+        "links": 2,
+        "bytes": 3452,
+        "mtimeNs": 1788722479853994008,
+        "ctimeNs": 1788722479853994008
+      }
+    },
+    {
+      "path": "2026-09-06/sans-appeler-aucun-outil-et-uniquement/work",
+      "kind": "directory",
+      "stat": {
+        "device": 65097,
+        "inode": 380885,
+        "mode": 16832,
+        "uid": 10412,
+        "gid": 10412,
+        "links": 2,
+        "bytes": 3452,
+        "mtimeNs": 1788722479853994008,
+        "ctimeNs": 1788722479853994008
+      }
+    },
+    {
+      "path": "2026-09-06/sans-appeler-aucun-outil-et-uniquement-2",
+      "kind": "directory",
+      "stat": {
+        "device": 65097,
+        "inode": 370964,
+        "mode": 16832,
+        "uid": 10412,
+        "gid": 10412,
+        "links": 4,
+        "bytes": 3452,
+        "mtimeNs": 1788722808677993882,
+        "ctimeNs": 1788722808677993882
+      }
+    },
+    {
+      "path": "2026-09-06/sans-appeler-aucun-outil-et-uniquement-2/outputs",
+      "kind": "directory",
+      "stat": {
+        "device": 65097,
+        "inode": 370979,
+        "mode": 16832,
+        "uid": 10412,
+        "gid": 10412,
+        "links": 2,
+        "bytes": 3452,
+        "mtimeNs": 1788722808677993882,
+        "ctimeNs": 1788722808677993882
+      }
+    },
+    {
+      "path": "2026-09-06/sans-appeler-aucun-outil-et-uniquement-2/work",
+      "kind": "directory",
+      "stat": {
+        "device": 65097,
+        "inode": 371054,
+        "mode": 16832,
+        "uid": 10412,
+        "gid": 10412,
+        "links": 2,
+        "bytes": 3452,
+        "mtimeNs": 1788722808677993882,
+        "ctimeNs": 1788722808677993882
+      }
+    }
+  ],
+  "inventorySha256": "09b5495d660ecbb774fb5d80cc11be6c4aa2b4ed3c07176ab31b6f68d5dd4b41",
+  "contentSha256": "f514214696c7c1591bd990bc3dbd32492c9d3ed4bb07c335840dd10c15dc22c5",
+  "fileCount": 0,
+  "totalBytes": 0
+}

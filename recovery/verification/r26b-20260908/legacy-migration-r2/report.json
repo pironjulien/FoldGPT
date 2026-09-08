@@ -1,0 +1,9 @@
+{
+  "copied": true,
+  "sourceUnchanged": true,
+  "directories": 39,
+  "files": 0,
+  "destination": "/data/data/app.foldgpt/files/projects/imported-codex",
+  "contentSha256": "f514214696c7c1591bd990bc3dbd32492c9d3ed4bb07c335840dd10c15dc22c5",
+  "tests": "20 native cases passed; hardlink fixture creation denied by Android, detection previously tested on Linux; no guard removed"
+}

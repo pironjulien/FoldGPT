@@ -2,18 +2,26 @@
 
 Experimental Android host for the official ChatGPT Linux ARM64 desktop client on a Galaxy Z Fold.
 
-**Latest feasibility review, 8 September:** [comparative findings and decisive tests](docs/research/survey-20260908-verdict.md).
-The real Python workflow is demonstrated; autonomous startup, legacy conversation
-recovery and a wholly Android-native interface remain unqualified. The separate
-[app-context diagnostic passed both real pipe/PTY cases without Shizuku](docs/research/app-context-device-validation-20260908.md).
-Production integration is pending; its owner was already unavailable before the test.
+**État courant, 8 septembre : r28/versionCode18 installé.** Le démarrage natif
+depuis FoldGPT fonctionne sans Shizuku. L'ancienne conversation qui échouait
+sur bwrap crée maintenant son projet Python, passe six tests, construit et
+exécute son zipapp. Arrêt propre, réouverture et reprise avec exécution après
+reboot complet validés. La gestion durable des processus, la reprise après
+crash pendant le même boot et la parité desktop restent à
+qualifier : voir le [bilan r28](docs/research/r28-device-validation-20260908.md).
+
+L'[inventaire du client de bureau](docs/research/desktop-client-inventory-20260908/README.md)
+recense les commandes, routes, services et dépendances de la version réellement
+installée : 9 737 fichiers JavaScript et 57 composants ELF examinés. Il conserve
+les valeurs dynamiques non résolues ; il ne reconstitue pas tout le code source
+original ni celui des serveurs OpenAI.
 
 **Reprise privée sur un autre PC :** utiliser le dépôt `pironjulien/FoldGPT-workspace`
 et la [procédure de récupération complète](recovery/README.md). Elle conserve les
 modifications en cours, le moteur séparé, les dépendances locales et les preuves
 chiffrées, au-delà du checkpoint publié dans le dépôt public d'origine.
 
-**État du 8 septembre, r25/versionCode15 installé :** le modèle utilise un vrai
+**Historique r25/versionCode15 :** le modèle utilise un vrai
 terminal Android depuis la conversation : saisie et interruption Ctrl+C
 réussies, puis fermeture et réouverture propres. La régression Python et rg
 passe et les 104 fichiers du projet sont inchangés. Voir le

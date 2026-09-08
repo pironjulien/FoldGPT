@@ -1,0 +1,24 @@
+{
+  "schema": "foldgpt.native-apk-verification.v1",
+  "success": true,
+  "androidProductionExecuted": false,
+  "apkSha256": "632012aa8dd355fcede9a11b2483e8c48d22d2d170c9f4803c3d55cdd8e2723f",
+  "nativeLibraries": 91,
+  "pythonDataFiles": 2447,
+  "runtimeAliases": 87,
+  "sourceFiles": 98,
+  "hostSchema": "foldgpt.host.v2",
+  "modelProfiles": [
+    "managed",
+    "ordinaryUid",
+    "ordinaryPty"
+  ],
+  "nativeCommands": [
+    "bash",
+    "python",
+    "python3",
+    "rg"
+  ],
+  "launchOrigin": "android-app",
+  "ripgrepToolchainNoticeFiles": 15
+}

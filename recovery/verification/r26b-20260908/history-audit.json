@@ -1,0 +1,11 @@
+{
+  "beforeBytes": 882971,
+  "afterBytes": 883646,
+  "appendedBytes": 675,
+  "historyPrefixByteIdentical": true,
+  "addedRecords": 1,
+  "addedEventType": "thread_settings_applied",
+  "scope": "cwd repair before target validation turn",
+  "postValidationBytes": 957836,
+  "postValidationPreservesRepairedPrefix": true
+}

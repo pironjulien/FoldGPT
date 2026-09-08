@@ -83,6 +83,31 @@ class NativeRuntimeStartupTests(unittest.TestCase):
         return read_launch(self.launch, uid=os.getuid(), broker_directory=self.broker,
                            projects_directory=self.projects)
 
+    def test_application_launch_requires_exact_verified_boot_metadata(self):
+        epoch = {"schema": "foldgpt.android-boot-epoch.v1",
+                 "source": "android.provider.Settings.Global.BOOT_COUNT", "bootCount": 8}
+        value = {**self.value, "schema": "foldgpt.native-launch.v2", "bootEpoch": epoch}
+        self.write_launch(value)
+        self.assertEqual(read_launch(self.launch, uid=os.getuid(), broker_directory=self.broker,
+                                     projects_directory=self.projects, launch_origin="android-app"), value)
+        with self.assertRaises(ValueError):
+            self.admit()
+        for change in ({"source": "model"}, {"bootCount": -1}, {"bootCount": True},
+                       {"bootCount": "8"}, {"schema": "wrong"}):
+            self.write_launch({**value, "bootEpoch": {**epoch, **change}})
+            with self.subTest(change=change), self.assertRaises(ValueError):
+                read_launch(self.launch, uid=os.getuid(), broker_directory=self.broker,
+                            projects_directory=self.projects, launch_origin="android-app")
+
+    def test_application_launch_never_falls_back_to_missing_boot_metadata(self):
+        with self.assertRaises(ValueError):
+            read_launch(self.launch, uid=os.getuid(), broker_directory=self.broker,
+                        projects_directory=self.projects, launch_origin="android-app")
+        self.write_launch({**self.value, "schema": "foldgpt.native-launch.v2"})
+        with self.assertRaises(ValueError):
+            read_launch(self.launch, uid=os.getuid(), broker_directory=self.broker,
+                        projects_directory=self.projects, launch_origin="android-app")
+
     def publish(self, **overrides):
         values = {"socket_path": self.endpoint, "workspace": self.workspace,
             "shared_paths": [self.workspace, self.runtime],

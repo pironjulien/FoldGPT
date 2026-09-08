@@ -1,6 +1,20 @@
 # Reprise technique du 8 septembre 2026
 
-## Dernier état : r25, 16:14 UTC
+## Dernier état : r28/versionCode18
+
+Voir le [rapport r28](../docs/research/r28-device-validation-20260908.md) pour
+le paquet réellement installé et les preuves. Démarrage direct sous l'UID
+Android, six tests du nouveau projet dans l'ancienne conversation, build et
+exécution passent sans Shizuku. Arrêt normal et réouverture propres démontrés.
+Après reboot physique, le propriétaire v2 se rétablit automatiquement ; les
+six tests et le zipapp passent depuis la même conversation. Les 334 éléments
+du projet sont inchangés. Aucune préparation du moteur n'est faite par le PC.
+L'[inventaire desktop](../docs/research/desktop-client-inventory-20260908/README.md)
+est livré ; la [pression des processus](../docs/research/native-process-pressure-options-20260908.md)
+reste le défaut courant à corriger. Ne pas réinstaller r25 ni supprimer un
+marqueur de propriétaire sur la seule disparition d'un PID.
+
+## Historique r25, 16:14 UTC
 
 **Réexamen après la question sur une application Android ordinaire :** la
 [revue des alternatives](../docs/research/phone-only-options-20260908.md)

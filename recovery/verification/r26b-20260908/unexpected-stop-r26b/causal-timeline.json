@@ -1,0 +1,30 @@
+[
+  {
+    "sourceLine": 2832,
+    "text": "09-08 21:48:16.885  2519  2980 I ActivityManager: Killing PhantomProcessRecord {c171123 29060:28958:libfoldgpt_python_cli.so/u0a412}: Trimming phantom processes"
+  },
+  {
+    "sourceLine": 2833,
+    "text": "09-08 21:48:16.886  2519  2980 I ActivityManager: Killing PhantomProcessRecord {11d2620 29066:28958:libproot.so/u0a412}: Trimming phantom processes"
+  },
+  {
+    "sourceLine": 2843,
+    "text": "09-08 21:48:16.893  2519  2983 I ActivityManager: Process PhantomProcessRecord {11d2620 29066:28958:libproot.so/u0a412} died"
+  },
+  {
+    "sourceLine": 2844,
+    "text": "09-08 21:48:16.894  2519  2983 I ActivityManager: Process PhantomProcessRecord {c171123 29060:28958:libfoldgpt_python_cli.so/u0a412} died"
+  },
+  {
+    "sourceLine": 2850,
+    "text": "09-08 21:48:16.896 28958 29020 I FoldGPT : Linux exited with 137"
+  },
+  {
+    "sourceLine": 2858,
+    "text": "09-08 21:48:16.920  2519  6458 I ActivityManager: Killing 28958:app.foldgpt:runtime/u0a412 (adj 905): remove task"
+  },
+  {
+    "sourceLine": 2859,
+    "text": "09-08 21:48:16.921  2519  6458 I ActivityManager: Changes in 10412 4 to 19, 504 to 0"
+  }
+]

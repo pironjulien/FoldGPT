@@ -1,0 +1,955 @@
+{
+  "schema": "foldgpt.desktop-native-comparison.v1",
+  "scope": "static ELF comparison; no client execution",
+  "installedVersion": "26.901.41600",
+  "referenceVersion": "26.901.51231",
+  "installedAsarSha256": "1306be560e77fbfb68dd8b0bccac58d52396a3d445f12810a50438fb05f2e61d",
+  "referenceAsarSha256": "4b34e3fec936b52641591644d0574f5f73f95d797d04b25f8ec60bc05378905a",
+  "installedInventorySha256": "3921677cd10962a4a99867f2bdc7d4964a16839e4f1f76206cd64107f040e8f4",
+  "referenceInventorySha256": "bb20aa7ea044ecbeca6a5865020581a53f12f7d005b4c2c1f9e2015f6b9764a6",
+  "comparedFields": [
+    "machine",
+    "elfClass",
+    "osAbi",
+    "type",
+    "interpreter",
+    "needed",
+    "soname",
+    "loaderSearch",
+    "loadSegments",
+    "versionRequirements",
+    "highestReferencedGlibc",
+    "highestReferencedGlibcxx",
+    "abiEvidence",
+    "undefinedSymbols",
+    "structuralImports",
+    "selectedExports",
+    "napiImportCount",
+    "definedStructuralFunctions"
+  ],
+  "commonPathCount": 57,
+  "onlyInstalledPaths": [],
+  "onlyReferencePaths": [],
+  "identicalByteCount": 51,
+  "changedByteCount": 6,
+  "changedRequirementCount": 0,
+  "changedModuleIdentityCount": 0,
+  "limits": [
+    "Equal imported requirements do not establish equal behavior, implementation or confinement.",
+    "This compares collected ELF bytes, not runtime paths or the ASAR JavaScript behavior."
+  ],
+  "entries": [
+    {
+      "path": "ChatGPT",
+      "presentInstalled": true,
+      "presentReference": true,
+      "installed": {
+        "sha256": "beb5071ee593cf34a858b3aa53132b8b99fc28fbf1fade1e6ef1e11c95e73afe",
+        "bytes": 304549160
+      },
+      "reference": {
+        "sha256": "bf185f9bcc37f1ac10cb15bfd9f56d234df759ff655bb4b481b8f67081dd0ce3",
+        "bytes": 304483624
+      },
+      "identicalBytes": false,
+      "requirementChanges": {},
+      "moduleIdentityChanges": {}
+    },
+    {
+      "path": "browser_crashpad_handler",
+      "presentInstalled": true,
+      "presentReference": true,
+      "installed": {
+        "sha256": "84fd7c472eec42ef0de30277d2051ac7a325f327cbbe712bb8974c51432bb28d",
+        "bytes": 1529256
+      },
+      "reference": {
+        "sha256": "e4de2be644e6f8cbeaff418b445f148267f5502ea8ee29b95528f831a19cc31d",
+        "bytes": 1529064
+      },
+      "identicalBytes": false,
+      "requirementChanges": {},
+      "moduleIdentityChanges": {}
+    },
+    {
+      "path": "libEGL.so",
+      "presentInstalled": true,
+      "presentReference": true,
+      "installed": {
+        "sha256": "d757c4a44440d7fcc31b0cdf45a115c3d627e0d828008fcc189879b9104ea9f4",
+        "bytes": 237848
+      },
+      "reference": {
+        "sha256": "0005be5ea75dad152a0dc765843eb5bba6ee8bdbb5133fe617c12f279e19c987",
+        "bytes": 237896
+      },
+      "identicalBytes": false,
+      "requirementChanges": {},
+      "moduleIdentityChanges": {}
+    },
+    {
+      "path": "libGLESv2.so",
+      "presentInstalled": true,
+      "presentReference": true,
+      "installed": {
+        "sha256": "384c70440497e8eca2f7deba927b4106430cdcea8ca2a084f3ec2d44ec510f20",
+        "bytes": 237848
+      },
+      "reference": {
+        "sha256": "43470f6913132f022506ee2337f2d99fbf0783683017ddc7fcb5b0f751626743",
+        "bytes": 237912
+      },
+      "identicalBytes": false,
+      "requirementChanges": {},
+      "moduleIdentityChanges": {}
+    },
+    {
+      "path": "libqt5_shim.so",
+      "presentInstalled": true,
+      "presentReference": true,
+      "installed": {
+        "sha256": "074fac9212c5ae9ae7acb8aa4a65a4bdc0d994d077921168b568f8061174e7d0",
+        "bytes": 29296
+      },
+      "reference": {
+        "sha256": "074fac9212c5ae9ae7acb8aa4a65a4bdc0d994d077921168b568f8061174e7d0",
+        "bytes": 29296
+      },
+      "identicalBytes": true,
+      "requirementChanges": {},
+      "moduleIdentityChanges": {}
+    },
+    {
+      "path": "libqt6_shim.so",
+      "presentInstalled": true,
+      "presentReference": true,
+      "installed": {
+        "sha256": "4a7bd718d5c4ff05666deeb4c81e778b9a80d75ef61da862efc46355bc711539",
+        "bytes": 31416
+      },
+      "reference": {
+        "sha256": "4a7bd718d5c4ff05666deeb4c81e778b9a80d75ef61da862efc46355bc711539",
+        "bytes": 31416
+      },
+      "identicalBytes": true,
+      "requirementChanges": {},
+      "moduleIdentityChanges": {}
+    },
+    {
+      "path": "libvk_swiftshader.so",
+      "presentInstalled": true,
+      "presentReference": true,
+      "installed": {
+        "sha256": "714e23567948425787ca80a0673a3d30624ccd21095ab05a258352f24e073bc7",
+        "bytes": 17084056
+      },
+      "reference": {
+        "sha256": "08b117924c85b418ed58206b09ed43bde9daea9998927c5685c36992b8e90876",
+        "bytes": 17084088
+      },
+      "identicalBytes": false,
+      "requirementChanges": {},
+      "moduleIdentityChanges": {}
+    },
+    {
+      "path": "libvulkan.so.1",
+      "presentInstalled": true,
+      "presentReference": true,
+      "installed": {
+        "sha256": "374c418756de7a72d995cc0816622d795f0452ae6ff4b5505d3073f978d8268f",
+        "bytes": 673232
+      },
+      "reference": {
+        "sha256": "2680231b2831b4c64cdeb38a801a5f0335df3932d6a32e33cd07b49e444ff5f6",
+        "bytes": 673280
+      },
+      "identicalBytes": false,
+      "requirementChanges": {},
+      "moduleIdentityChanges": {}
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/@parcel/watcher-linux-arm64-glibc/watcher.node",
+      "presentInstalled": true,
+      "presentReference": true,
+      "installed": {
+        "sha256": "7c05ea16fe5d983c4bab7b39abe07c3622bfbc7acdbce9c816a6d1936d855222",
+        "bytes": 469976
+      },
+      "reference": {
+        "sha256": "7c05ea16fe5d983c4bab7b39abe07c3622bfbc7acdbce9c816a6d1936d855222",
+        "bytes": 469976
+      },
+      "identicalBytes": true,
+      "requirementChanges": {},
+      "moduleIdentityChanges": {}
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/@worklouder/device-kit-oai/node_modules/@worklouder/wl-device-kit/dist/native/linux/arm64/serial_control.node",
+      "presentInstalled": true,
+      "presentReference": true,
+      "installed": {
+        "sha256": "be241a0a0763b299998bc929907b7d09d75b6fb0975d344e76e1450a906aeb88",
+        "bytes": 142568
+      },
+      "reference": {
+        "sha256": "be241a0a0763b299998bc929907b7d09d75b6fb0975d344e76e1450a906aeb88",
+        "bytes": 142568
+      },
+      "identicalBytes": true,
+      "requirementChanges": {},
+      "moduleIdentityChanges": {}
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/@worklouder/device-kit-oai/node_modules/@worklouder/wl-device-kit/node_modules/node-hid/prebuilds/HID-linux-arm/node-napi-v4.node",
+      "presentInstalled": true,
+      "presentReference": true,
+      "installed": {
+        "sha256": "3fa6043e16eda80ac13845c7444763c4024cc46a49f65e2285bbfac74212a249",
+        "bytes": 156136
+      },
+      "reference": {
+        "sha256": "3fa6043e16eda80ac13845c7444763c4024cc46a49f65e2285bbfac74212a249",
+        "bytes": 156136
+      },
+      "identicalBytes": true,
+      "requirementChanges": {},
+      "moduleIdentityChanges": {}
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/@worklouder/device-kit-oai/node_modules/@worklouder/wl-device-kit/node_modules/node-hid/prebuilds/HID-linux-arm64/node-napi-v4.node",
+      "presentInstalled": true,
+      "presentReference": true,
+      "installed": {
+        "sha256": "e9b672dd03503f1388a5866edbc4d50535af721e52921d0b7fa9167c90ffc67d",
+        "bytes": 240976
+      },
+      "reference": {
+        "sha256": "e9b672dd03503f1388a5866edbc4d50535af721e52921d0b7fa9167c90ffc67d",
+        "bytes": 240976
+      },
+      "identicalBytes": true,
+      "requirementChanges": {},
+      "moduleIdentityChanges": {}
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/@worklouder/device-kit-oai/node_modules/@worklouder/wl-device-kit/node_modules/node-hid/prebuilds/HID-linux-x64-musl/node-napi-v4.node",
+      "presentInstalled": true,
+      "presentReference": true,
+      "installed": {
+        "sha256": "2b047dfdd2ddd7fa40e9904568a1d9a9033af5c11f0497efcf8ff36a1fed7973",
+        "bytes": 267552
+      },
+      "reference": {
+        "sha256": "2b047dfdd2ddd7fa40e9904568a1d9a9033af5c11f0497efcf8ff36a1fed7973",
+        "bytes": 267552
+      },
+      "identicalBytes": true,
+      "requirementChanges": {},
+      "moduleIdentityChanges": {}
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/@worklouder/device-kit-oai/node_modules/@worklouder/wl-device-kit/node_modules/node-hid/prebuilds/HID-linux-x64/node-napi-v4.node",
+      "presentInstalled": true,
+      "presentReference": true,
+      "installed": {
+        "sha256": "f3fafca229334a8e7c534d74ddcff4d9712f690502c0912ed086c4bf69f6470e",
+        "bytes": 257456
+      },
+      "reference": {
+        "sha256": "f3fafca229334a8e7c534d74ddcff4d9712f690502c0912ed086c4bf69f6470e",
+        "bytes": 257456
+      },
+      "identicalBytes": true,
+      "requirementChanges": {},
+      "moduleIdentityChanges": {}
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/@worklouder/device-kit-oai/node_modules/@worklouder/wl-device-kit/node_modules/node-hid/prebuilds/HID_hidraw-linux-arm/node-napi-v4.node",
+      "presentInstalled": true,
+      "presentReference": true,
+      "installed": {
+        "sha256": "cbbbe8b2d44b21ef433c39d1826fdb321a7cc4d83fbbaf94be4dcfdf83f933fe",
+        "bytes": 150340
+      },
+      "reference": {
+        "sha256": "cbbbe8b2d44b21ef433c39d1826fdb321a7cc4d83fbbaf94be4dcfdf83f933fe",
+        "bytes": 150340
+      },
+      "identicalBytes": true,
+      "requirementChanges": {},
+      "moduleIdentityChanges": {}
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/@worklouder/device-kit-oai/node_modules/@worklouder/wl-device-kit/node_modules/node-hid/prebuilds/HID_hidraw-linux-arm64/node-napi-v4.node",
+      "presentInstalled": true,
+      "presentReference": true,
+      "installed": {
+        "sha256": "b0e734bfcca7a2f6ce8e9543a2d39836ff61d3dadf17de5ae5a4387118457b58",
+        "bytes": 229384
+      },
+      "reference": {
+        "sha256": "b0e734bfcca7a2f6ce8e9543a2d39836ff61d3dadf17de5ae5a4387118457b58",
+        "bytes": 229384
+      },
+      "identicalBytes": true,
+      "requirementChanges": {},
+      "moduleIdentityChanges": {}
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/@worklouder/device-kit-oai/node_modules/@worklouder/wl-device-kit/node_modules/node-hid/prebuilds/HID_hidraw-linux-x64-musl/node-napi-v4.node",
+      "presentInstalled": true,
+      "presentReference": true,
+      "installed": {
+        "sha256": "e085de9cac2ec6c60310656ddf339342511b6ef57ab3ce47ed6faf553a468c03",
+        "bytes": 256120
+      },
+      "reference": {
+        "sha256": "e085de9cac2ec6c60310656ddf339342511b6ef57ab3ce47ed6faf553a468c03",
+        "bytes": 256120
+      },
+      "identicalBytes": true,
+      "requirementChanges": {},
+      "moduleIdentityChanges": {}
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/@worklouder/device-kit-oai/node_modules/@worklouder/wl-device-kit/node_modules/node-hid/prebuilds/HID_hidraw-linux-x64/node-napi-v4.node",
+      "presentInstalled": true,
+      "presentReference": true,
+      "installed": {
+        "sha256": "5b50d9229ca6ebc78eba1dd9a8c73de18035addf041dbc5a1323cb904dd838c4",
+        "bytes": 241736
+      },
+      "reference": {
+        "sha256": "5b50d9229ca6ebc78eba1dd9a8c73de18035addf041dbc5a1323cb904dd838c4",
+        "bytes": 241736
+      },
+      "identicalBytes": true,
+      "requirementChanges": {},
+      "moduleIdentityChanges": {}
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/@worklouder/device-kit-oai/node_modules/@worklouder/wl-device-kit/node_modules/serialport/node_modules/@serialport/bindings-cpp/prebuilds/android-arm/node.napi.armv7.node",
+      "presentInstalled": true,
+      "presentReference": true,
+      "installed": {
+        "sha256": "7947c3e850b753da5b602c776028aae372b4f7847dfbaf7c696f1ee743a7e1eb",
+        "bytes": 93432
+      },
+      "reference": {
+        "sha256": "7947c3e850b753da5b602c776028aae372b4f7847dfbaf7c696f1ee743a7e1eb",
+        "bytes": 93432
+      },
+      "identicalBytes": true,
+      "requirementChanges": {},
+      "moduleIdentityChanges": {}
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/@worklouder/device-kit-oai/node_modules/@worklouder/wl-device-kit/node_modules/serialport/node_modules/@serialport/bindings-cpp/prebuilds/android-arm64/node.napi.armv8.node",
+      "presentInstalled": true,
+      "presentReference": true,
+      "installed": {
+        "sha256": "bdfe8f469663f1adca8f910e669950dacdf4710182ba147d94beba47174b594f",
+        "bytes": 132552
+      },
+      "reference": {
+        "sha256": "bdfe8f469663f1adca8f910e669950dacdf4710182ba147d94beba47174b594f",
+        "bytes": 132552
+      },
+      "identicalBytes": true,
+      "requirementChanges": {},
+      "moduleIdentityChanges": {}
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/@worklouder/device-kit-oai/node_modules/@worklouder/wl-device-kit/node_modules/serialport/node_modules/@serialport/bindings-cpp/prebuilds/linux-arm/node.napi.armv6.node",
+      "presentInstalled": true,
+      "presentReference": true,
+      "installed": {
+        "sha256": "b10a83aca31ebf21b901affc61961a16924aa558ddf4b27ed2aa694ecb00f1e5",
+        "bytes": 117012
+      },
+      "reference": {
+        "sha256": "b10a83aca31ebf21b901affc61961a16924aa558ddf4b27ed2aa694ecb00f1e5",
+        "bytes": 117012
+      },
+      "identicalBytes": true,
+      "requirementChanges": {},
+      "moduleIdentityChanges": {}
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/@worklouder/device-kit-oai/node_modules/@worklouder/wl-device-kit/node_modules/serialport/node_modules/@serialport/bindings-cpp/prebuilds/linux-arm/node.napi.armv7.node",
+      "presentInstalled": true,
+      "presentReference": true,
+      "installed": {
+        "sha256": "0f3fc12ed86fb8ea6460c7d2b612db997bd0bb6c8a6eb7492f93dcad376c7cea",
+        "bytes": 117024
+      },
+      "reference": {
+        "sha256": "0f3fc12ed86fb8ea6460c7d2b612db997bd0bb6c8a6eb7492f93dcad376c7cea",
+        "bytes": 117024
+      },
+      "identicalBytes": true,
+      "requirementChanges": {},
+      "moduleIdentityChanges": {}
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/@worklouder/device-kit-oai/node_modules/@worklouder/wl-device-kit/node_modules/serialport/node_modules/@serialport/bindings-cpp/prebuilds/linux-arm64/node.napi.armv8.node",
+      "presentInstalled": true,
+      "presentReference": true,
+      "installed": {
+        "sha256": "2341a58d2c3d99f827a411c65cb1c9c9f00a80b62e9bbbde58b2f29625fd56d9",
+        "bytes": 146744
+      },
+      "reference": {
+        "sha256": "2341a58d2c3d99f827a411c65cb1c9c9f00a80b62e9bbbde58b2f29625fd56d9",
+        "bytes": 146744
+      },
+      "identicalBytes": true,
+      "requirementChanges": {},
+      "moduleIdentityChanges": {}
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/@worklouder/device-kit-oai/node_modules/@worklouder/wl-device-kit/node_modules/serialport/node_modules/@serialport/bindings-cpp/prebuilds/linux-x64/node.napi.glibc.node",
+      "presentInstalled": true,
+      "presentReference": true,
+      "installed": {
+        "sha256": "c32a2a98bb31220544a2e866a9d2bee618b2fa8bdc735ffdabec19421c589960",
+        "bytes": 154928
+      },
+      "reference": {
+        "sha256": "c32a2a98bb31220544a2e866a9d2bee618b2fa8bdc735ffdabec19421c589960",
+        "bytes": 154928
+      },
+      "identicalBytes": true,
+      "requirementChanges": {},
+      "moduleIdentityChanges": {}
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/@worklouder/device-kit-oai/node_modules/@worklouder/wl-device-kit/node_modules/serialport/node_modules/@serialport/bindings-cpp/prebuilds/linux-x64/node.napi.musl.node",
+      "presentInstalled": true,
+      "presentReference": true,
+      "installed": {
+        "sha256": "a9bad9a88cb0b67ad1807debce24510d581752c7aef3d9f2bcce30b119ac3009",
+        "bytes": 153776
+      },
+      "reference": {
+        "sha256": "a9bad9a88cb0b67ad1807debce24510d581752c7aef3d9f2bcce30b119ac3009",
+        "bytes": 153776
+      },
+      "identicalBytes": true,
+      "requirementChanges": {},
+      "moduleIdentityChanges": {}
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/better-sqlite3/build/Release/better_sqlite3.node",
+      "presentInstalled": true,
+      "presentReference": true,
+      "installed": {
+        "sha256": "3ed481822f3dfb4bb47fd059fe40225b5826a3ca16f078d6cd314a2ddbf1fbbc",
+        "bytes": 2088888
+      },
+      "reference": {
+        "sha256": "3ed481822f3dfb4bb47fd059fe40225b5826a3ca16f078d6cd314a2ddbf1fbbc",
+        "bytes": 2088888
+      },
+      "identicalBytes": true,
+      "requirementChanges": {},
+      "moduleIdentityChanges": {}
+    },
+    {
+      "path": "resources/app.asar.unpacked/node_modules/node-pty/build/Release/pty.node",
+      "presentInstalled": true,
+      "presentReference": true,
+      "installed": {
+        "sha256": "a2256c5f91e88c2fbea42d05468217c0d3e6a44a1e3e6d2c34f0beab1d61c229",
+        "bytes": 51448
+      },
+      "reference": {
+        "sha256": "a2256c5f91e88c2fbea42d05468217c0d3e6a44a1e3e6d2c34f0beab1d61c229",
+        "bytes": 51448
+      },
+      "identicalBytes": true,
+      "requirementChanges": {},
+      "moduleIdentityChanges": {}
+    },
+    {
+      "path": "resources/codex",
+      "presentInstalled": true,
+      "presentReference": true,
+      "installed": {
+        "sha256": "4d76e542c222ea8c75861d8c4ade60a1a332a63255ce1c60bdaebf7c2a2869e6",
+        "bytes": 222567456
+      },
+      "reference": {
+        "sha256": "4d76e542c222ea8c75861d8c4ade60a1a332a63255ce1c60bdaebf7c2a2869e6",
+        "bytes": 222567456
+      },
+      "identicalBytes": true,
+      "requirementChanges": {},
+      "moduleIdentityChanges": {}
+    },
+    {
+      "path": "resources/codex-code-mode-host",
+      "presentInstalled": true,
+      "presentReference": true,
+      "installed": {
+        "sha256": "d677dedf8179ca28ceb869a2e0b60d3ffad3d26f6e7738f7617d34500128a369",
+        "bytes": 63381656
+      },
+      "reference": {
+        "sha256": "d677dedf8179ca28ceb869a2e0b60d3ffad3d26f6e7738f7617d34500128a369",
+        "bytes": 63381656
+      },
+      "identicalBytes": true,
+      "requirementChanges": {},
+      "moduleIdentityChanges": {}
+    },
+    {
+      "path": "resources/cua_node/bin/node",
+      "presentInstalled": true,
+      "presentReference": true,
+      "installed": {
+        "sha256": "3e53e5ff5eaa922f1b4308312d50da9091db62d40b87716ad36c60b347e7f984",
+        "bytes": 122077656
+      },
+      "reference": {
+        "sha256": "3e53e5ff5eaa922f1b4308312d50da9091db62d40b87716ad36c60b347e7f984",
+        "bytes": 122077656
+      },
+      "identicalBytes": true,
+      "requirementChanges": {},
+      "moduleIdentityChanges": {}
+    },
+    {
+      "path": "resources/cua_node/bin/node_repl",
+      "presentInstalled": true,
+      "presentReference": true,
+      "installed": {
+        "sha256": "18ae58269621e81151fed3b0530c18e0aebc58fc2430001cdd798e9fa3b75d15",
+        "bytes": 19932320
+      },
+      "reference": {
+        "sha256": "18ae58269621e81151fed3b0530c18e0aebc58fc2430001cdd798e9fa3b75d15",
+        "bytes": 19932320
+      },
+      "identicalBytes": true,
+      "requirementChanges": {},
+      "moduleIdentityChanges": {}
+    },
+    {
+      "path": "resources/cua_node/lib/node_modules/.bin/sky_linux_arm64",
+      "presentInstalled": true,
+      "presentReference": true,
+      "installed": {
+        "sha256": "3def0a23b5c01f0e048a9b487eac572b27d5d3a1cdb2ca720c15c05381ffc615",
+        "bytes": 2773952
+      },
+      "reference": {
+        "sha256": "3def0a23b5c01f0e048a9b487eac572b27d5d3a1cdb2ca720c15c05381ffc615",
+        "bytes": 2773952
+      },
+      "identicalBytes": true,
+      "requirementChanges": {},
+      "moduleIdentityChanges": {}
+    },
+    {
+      "path": "resources/cua_node/lib/node_modules/@img/sharp-libvips-linux-arm64/lib/libvips-cpp.so.8.18.3",
+      "presentInstalled": true,
+      "presentReference": true,
+      "installed": {
+        "sha256": "56f7e7c98d134371c07990a318e41178cf0b6a956b8d5cd73779881c17deaaab",
+        "bytes": 17800568
+      },
+      "reference": {
+        "sha256": "56f7e7c98d134371c07990a318e41178cf0b6a956b8d5cd73779881c17deaaab",
+        "bytes": 17800568
+      },
+      "identicalBytes": true,
+      "requirementChanges": {},
+      "moduleIdentityChanges": {}
+    },
+    {
+      "path": "resources/cua_node/lib/node_modules/@img/sharp-linux-arm64/lib/sharp-linux-arm64-0.35.3.node",
+      "presentInstalled": true,
+      "presentReference": true,
+      "installed": {
+        "sha256": "ca16f6b4af700f2eb8fb43e9f32103b50c39a16fe882bb1282d3d76c975069ac",
+        "bytes": 530120
+      },
+      "reference": {
+        "sha256": "ca16f6b4af700f2eb8fb43e9f32103b50c39a16fe882bb1282d3d76c975069ac",
+        "bytes": 530120
+      },
+      "identicalBytes": true,
+      "requirementChanges": {},
+      "moduleIdentityChanges": {}
+    },
+    {
+      "path": "resources/cua_node/lib/node_modules/@napi-rs/canvas-linux-arm64-gnu/skia.linux-arm64-gnu.node",
+      "presentInstalled": true,
+      "presentReference": true,
+      "installed": {
+        "sha256": "9de2f5a8b54ef65060faaac7d11b14079d6b6b61f7a45b0599b07bf56a50bf1d",
+        "bytes": 27649936
+      },
+      "reference": {
+        "sha256": "9de2f5a8b54ef65060faaac7d11b14079d6b6b61f7a45b0599b07bf56a50bf1d",
+        "bytes": 27649936
+      },
+      "identicalBytes": true,
+      "requirementChanges": {},
+      "moduleIdentityChanges": {}
+    },
+    {
+      "path": "resources/cua_node/lib/node_modules/@oai/cua/bin/linux/sky_linux_arm64",
+      "presentInstalled": true,
+      "presentReference": true,
+      "installed": {
+        "sha256": "3def0a23b5c01f0e048a9b487eac572b27d5d3a1cdb2ca720c15c05381ffc615",
+        "bytes": 2773952
+      },
+      "reference": {
+        "sha256": "3def0a23b5c01f0e048a9b487eac572b27d5d3a1cdb2ca720c15c05381ffc615",
+        "bytes": 2773952
+      },
+      "identicalBytes": true,
+      "requirementChanges": {},
+      "moduleIdentityChanges": {}
+    },
+    {
+      "path": "resources/cua_node/lib/node_modules/@oai/cua/dist/lib/js/oai_js_browser/dist/skill/node_modules/classic-level/prebuilds/android-arm/classic-level.armv7.node",
+      "presentInstalled": true,
+      "presentReference": true,
+      "installed": {
+        "sha256": "fe196ae283d4852d4b75b510eb148c05de821f5d5d32a158aa9afa1411ccb5dd",
+        "bytes": 341724
+      },
+      "reference": {
+        "sha256": "fe196ae283d4852d4b75b510eb148c05de821f5d5d32a158aa9afa1411ccb5dd",
+        "bytes": 341724
+      },
+      "identicalBytes": true,
+      "requirementChanges": {},
+      "moduleIdentityChanges": {}
+    },
+    {
+      "path": "resources/cua_node/lib/node_modules/@oai/cua/dist/lib/js/oai_js_browser/dist/skill/node_modules/classic-level/prebuilds/android-arm64/classic-level.armv8.node",
+      "presentInstalled": true,
+      "presentReference": true,
+      "installed": {
+        "sha256": "f76444a1d96b46a4548170bba1c4b4de76438b2f296b3de4ebc02e4391eff803",
+        "bytes": 379976
+      },
+      "reference": {
+        "sha256": "f76444a1d96b46a4548170bba1c4b4de76438b2f296b3de4ebc02e4391eff803",
+        "bytes": 379976
+      },
+      "identicalBytes": true,
+      "requirementChanges": {},
+      "moduleIdentityChanges": {}
+    },
+    {
+      "path": "resources/cua_node/lib/node_modules/@oai/cua/dist/lib/js/oai_js_browser/dist/skill/node_modules/classic-level/prebuilds/linux-arm/classic-level.armv6.node",
+      "presentInstalled": true,
+      "presentReference": true,
+      "installed": {
+        "sha256": "363693d6d11f3c5c4325391a79ce528ab47756ee46520fc60742194da90f48e0",
+        "bytes": 413160
+      },
+      "reference": {
+        "sha256": "363693d6d11f3c5c4325391a79ce528ab47756ee46520fc60742194da90f48e0",
+        "bytes": 413160
+      },
+      "identicalBytes": true,
+      "requirementChanges": {},
+      "moduleIdentityChanges": {}
+    },
+    {
+      "path": "resources/cua_node/lib/node_modules/@oai/cua/dist/lib/js/oai_js_browser/dist/skill/node_modules/classic-level/prebuilds/linux-arm/classic-level.armv7.node",
+      "presentInstalled": true,
+      "presentReference": true,
+      "installed": {
+        "sha256": "88f4c538c8759309489047d090bf02b40d6466059ba7903f6052b3b411fb6e46",
+        "bytes": 413164
+      },
+      "reference": {
+        "sha256": "88f4c538c8759309489047d090bf02b40d6466059ba7903f6052b3b411fb6e46",
+        "bytes": 413164
+      },
+      "identicalBytes": true,
+      "requirementChanges": {},
+      "moduleIdentityChanges": {}
+    },
+    {
+      "path": "resources/cua_node/lib/node_modules/@oai/cua/dist/lib/js/oai_js_browser/dist/skill/node_modules/classic-level/prebuilds/linux-arm64/classic-level.armv8.node",
+      "presentInstalled": true,
+      "presentReference": true,
+      "installed": {
+        "sha256": "d81eaacbec70a75c872c5da37e0dd8e7b3d65b565a1b55953b7b4b532608bfb0",
+        "bytes": 452056
+      },
+      "reference": {
+        "sha256": "d81eaacbec70a75c872c5da37e0dd8e7b3d65b565a1b55953b7b4b532608bfb0",
+        "bytes": 452056
+      },
+      "identicalBytes": true,
+      "requirementChanges": {},
+      "moduleIdentityChanges": {}
+    },
+    {
+      "path": "resources/cua_node/lib/node_modules/@oai/cua/dist/lib/js/oai_js_browser/dist/skill/node_modules/classic-level/prebuilds/linux-x64/classic-level.musl.node",
+      "presentInstalled": true,
+      "presentReference": true,
+      "installed": {
+        "sha256": "d987896212d3daea0c18997fb4fa5323381bac7dd05bec18920951738029320b",
+        "bytes": 485192
+      },
+      "reference": {
+        "sha256": "d987896212d3daea0c18997fb4fa5323381bac7dd05bec18920951738029320b",
+        "bytes": 485192
+      },
+      "identicalBytes": true,
+      "requirementChanges": {},
+      "moduleIdentityChanges": {}
+    },
+    {
+      "path": "resources/cua_node/lib/node_modules/@oai/cua/dist/lib/js/oai_js_browser/dist/skill/node_modules/classic-level/prebuilds/linux-x64/classic-level.node",
+      "presentInstalled": true,
+      "presentReference": true,
+      "installed": {
+        "sha256": "48843c7375f755db2b80d37bc26b075b74df584820b26dd1dc9cd7b323575143",
+        "bytes": 480800
+      },
+      "reference": {
+        "sha256": "48843c7375f755db2b80d37bc26b075b74df584820b26dd1dc9cd7b323575143",
+        "bytes": 480800
+      },
+      "identicalBytes": true,
+      "requirementChanges": {},
+      "moduleIdentityChanges": {}
+    },
+    {
+      "path": "resources/cua_node/lib/node_modules/@oai/sky/bin/linux/sky_linux_arm64",
+      "presentInstalled": true,
+      "presentReference": true,
+      "installed": {
+        "sha256": "3def0a23b5c01f0e048a9b487eac572b27d5d3a1cdb2ca720c15c05381ffc615",
+        "bytes": 2773952
+      },
+      "reference": {
+        "sha256": "3def0a23b5c01f0e048a9b487eac572b27d5d3a1cdb2ca720c15c05381ffc615",
+        "bytes": 2773952
+      },
+      "identicalBytes": true,
+      "requirementChanges": {},
+      "moduleIdentityChanges": {}
+    },
+    {
+      "path": "resources/cua_node/lib/node_modules/classic-level/prebuilds/android-arm/classic-level.armv7.node",
+      "presentInstalled": true,
+      "presentReference": true,
+      "installed": {
+        "sha256": "fe196ae283d4852d4b75b510eb148c05de821f5d5d32a158aa9afa1411ccb5dd",
+        "bytes": 341724
+      },
+      "reference": {
+        "sha256": "fe196ae283d4852d4b75b510eb148c05de821f5d5d32a158aa9afa1411ccb5dd",
+        "bytes": 341724
+      },
+      "identicalBytes": true,
+      "requirementChanges": {},
+      "moduleIdentityChanges": {}
+    },
+    {
+      "path": "resources/cua_node/lib/node_modules/classic-level/prebuilds/android-arm64/classic-level.armv8.node",
+      "presentInstalled": true,
+      "presentReference": true,
+      "installed": {
+        "sha256": "f76444a1d96b46a4548170bba1c4b4de76438b2f296b3de4ebc02e4391eff803",
+        "bytes": 379976
+      },
+      "reference": {
+        "sha256": "f76444a1d96b46a4548170bba1c4b4de76438b2f296b3de4ebc02e4391eff803",
+        "bytes": 379976
+      },
+      "identicalBytes": true,
+      "requirementChanges": {},
+      "moduleIdentityChanges": {}
+    },
+    {
+      "path": "resources/cua_node/lib/node_modules/classic-level/prebuilds/linux-arm/classic-level.armv6.node",
+      "presentInstalled": true,
+      "presentReference": true,
+      "installed": {
+        "sha256": "363693d6d11f3c5c4325391a79ce528ab47756ee46520fc60742194da90f48e0",
+        "bytes": 413160
+      },
+      "reference": {
+        "sha256": "363693d6d11f3c5c4325391a79ce528ab47756ee46520fc60742194da90f48e0",
+        "bytes": 413160
+      },
+      "identicalBytes": true,
+      "requirementChanges": {},
+      "moduleIdentityChanges": {}
+    },
+    {
+      "path": "resources/cua_node/lib/node_modules/classic-level/prebuilds/linux-arm/classic-level.armv7.node",
+      "presentInstalled": true,
+      "presentReference": true,
+      "installed": {
+        "sha256": "88f4c538c8759309489047d090bf02b40d6466059ba7903f6052b3b411fb6e46",
+        "bytes": 413164
+      },
+      "reference": {
+        "sha256": "88f4c538c8759309489047d090bf02b40d6466059ba7903f6052b3b411fb6e46",
+        "bytes": 413164
+      },
+      "identicalBytes": true,
+      "requirementChanges": {},
+      "moduleIdentityChanges": {}
+    },
+    {
+      "path": "resources/cua_node/lib/node_modules/classic-level/prebuilds/linux-arm64/classic-level.armv8.node",
+      "presentInstalled": true,
+      "presentReference": true,
+      "installed": {
+        "sha256": "d81eaacbec70a75c872c5da37e0dd8e7b3d65b565a1b55953b7b4b532608bfb0",
+        "bytes": 452056
+      },
+      "reference": {
+        "sha256": "d81eaacbec70a75c872c5da37e0dd8e7b3d65b565a1b55953b7b4b532608bfb0",
+        "bytes": 452056
+      },
+      "identicalBytes": true,
+      "requirementChanges": {},
+      "moduleIdentityChanges": {}
+    },
+    {
+      "path": "resources/cua_node/lib/node_modules/classic-level/prebuilds/linux-x64/classic-level.musl.node",
+      "presentInstalled": true,
+      "presentReference": true,
+      "installed": {
+        "sha256": "d987896212d3daea0c18997fb4fa5323381bac7dd05bec18920951738029320b",
+        "bytes": 485192
+      },
+      "reference": {
+        "sha256": "d987896212d3daea0c18997fb4fa5323381bac7dd05bec18920951738029320b",
+        "bytes": 485192
+      },
+      "identicalBytes": true,
+      "requirementChanges": {},
+      "moduleIdentityChanges": {}
+    },
+    {
+      "path": "resources/cua_node/lib/node_modules/classic-level/prebuilds/linux-x64/classic-level.node",
+      "presentInstalled": true,
+      "presentReference": true,
+      "installed": {
+        "sha256": "48843c7375f755db2b80d37bc26b075b74df584820b26dd1dc9cd7b323575143",
+        "bytes": 480800
+      },
+      "reference": {
+        "sha256": "48843c7375f755db2b80d37bc26b075b74df584820b26dd1dc9cd7b323575143",
+        "bytes": 480800
+      },
+      "identicalBytes": true,
+      "requirementChanges": {},
+      "moduleIdentityChanges": {}
+    },
+    {
+      "path": "resources/native/hid-topology-watcher.node",
+      "presentInstalled": true,
+      "presentReference": true,
+      "installed": {
+        "sha256": "162b41520effe3a63aa3d52d276e05476f26314492447c24d138f4e02930b3a7",
+        "bytes": 75128
+      },
+      "reference": {
+        "sha256": "162b41520effe3a63aa3d52d276e05476f26314492447c24d138f4e02930b3a7",
+        "bytes": 75128
+      },
+      "identicalBytes": true,
+      "requirementChanges": {},
+      "moduleIdentityChanges": {}
+    },
+    {
+      "path": "resources/plugins/openai-bundled/plugins/browser/node_modules/classic-level/prebuilds/linux-arm64/classic-level.armv8.node",
+      "presentInstalled": true,
+      "presentReference": true,
+      "installed": {
+        "sha256": "d81eaacbec70a75c872c5da37e0dd8e7b3d65b565a1b55953b7b4b532608bfb0",
+        "bytes": 452056
+      },
+      "reference": {
+        "sha256": "d81eaacbec70a75c872c5da37e0dd8e7b3d65b565a1b55953b7b4b532608bfb0",
+        "bytes": 452056
+      },
+      "identicalBytes": true,
+      "requirementChanges": {},
+      "moduleIdentityChanges": {}
+    },
+    {
+      "path": "resources/plugins/openai-bundled/plugins/chrome/extension-host/linux/arm64/extension-host",
+      "presentInstalled": true,
+      "presentReference": true,
+      "installed": {
+        "sha256": "f95a820a5f025263f00b44eea861e2029c62d88be7a36a18a0882e6512bccc5f",
+        "bytes": 1168760
+      },
+      "reference": {
+        "sha256": "f95a820a5f025263f00b44eea861e2029c62d88be7a36a18a0882e6512bccc5f",
+        "bytes": 1168760
+      },
+      "identicalBytes": true,
+      "requirementChanges": {},
+      "moduleIdentityChanges": {}
+    },
+    {
+      "path": "resources/plugins/openai-bundled/plugins/chrome/node_modules/classic-level/prebuilds/linux-arm64/classic-level.armv8.node",
+      "presentInstalled": true,
+      "presentReference": true,
+      "installed": {
+        "sha256": "d81eaacbec70a75c872c5da37e0dd8e7b3d65b565a1b55953b7b4b532608bfb0",
+        "bytes": 452056
+      },
+      "reference": {
+        "sha256": "d81eaacbec70a75c872c5da37e0dd8e7b3d65b565a1b55953b7b4b532608bfb0",
+        "bytes": 452056
+      },
+      "identicalBytes": true,
+      "requirementChanges": {},
+      "moduleIdentityChanges": {}
+    },
+    {
+      "path": "resources/plugins/openai-bundled/plugins/latex/bin/tectonic",
+      "presentInstalled": true,
+      "presentReference": true,
+      "installed": {
+        "sha256": "19a2b763e5875fffefaa193c42e460ceba5983d027b6d50b0094130d26ba4e4a",
+        "bytes": 25896944
+      },
+      "reference": {
+        "sha256": "19a2b763e5875fffefaa193c42e460ceba5983d027b6d50b0094130d26ba4e4a",
+        "bytes": 25896944
+      },
+      "identicalBytes": true,
+      "requirementChanges": {},
+      "moduleIdentityChanges": {}
+    },
+    {
+      "path": "resources/rg",
+      "presentInstalled": true,
+      "presentReference": true,
+      "installed": {
+        "sha256": "e36d0eb52e70696bdf1781392722e05a21bb91d3b7b762ef5ec20e5df2ec687b",
+        "bytes": 4506992
+      },
+      "reference": {
+        "sha256": "e36d0eb52e70696bdf1781392722e05a21bb91d3b7b762ef5ec20e5df2ec687b",
+        "bytes": 4506992
+      },
+      "identicalBytes": true,
+      "requirementChanges": {},
+      "moduleIdentityChanges": {}
+    }
+  ]
+}

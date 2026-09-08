@@ -17,15 +17,22 @@ import java.util.UUID;
 /** App-owned paths and signed Python data. This class never executes a command. */
 final class NativeLaunch {
     private final app.foldgpt.shizukuexec.ApplicationDataPaths dataPaths;
+    private final boolean applicationLaunch;
     final String nonce, launchPath, manifestPath, socketPath, workspace, endpointRoot, pythonRoot, nativeRoot;
 
     NativeLaunch(Context context, String controllerHome) throws Exception {
         File declaredFiles = context.getFilesDir();
         File declaredData = new File(context.getApplicationInfo().dataDir);
         dataPaths = new app.foldgpt.shizukuexec.ApplicationDataPaths(context);
-        File files = declaredFiles;
-        File data = declaredData;
-        if (!files.getParentFile().equals(data) || !dataPaths.isExact(files)) throw new SecurityException("Unexpected application files location");
+        applicationLaunch = app.foldgpt.shizukuexec.Deployment.isApplicationLaunch(context);
+        if (!declaredFiles.getParentFile().equals(declaredData) || !dataPaths.isExact(declaredFiles)) {
+            throw new SecurityException("Unexpected application files location");
+        }
+        // Each origin publishes paths canonical in its own Android mount view.
+        // The app path mapping is verified against PackageManager's same inode;
+        // no private suffix may redirect elsewhere.
+        File data = applicationLaunch ? dataPaths.canonicalRoot() : declaredData;
+        File files = new File(data, "files");
         int uid = context.getApplicationInfo().uid;
         workspace = privateDirectory(new File(files, "projects"), uid).getPath();
         File endpoint = endpointDirectory(data, uid);
@@ -45,7 +52,9 @@ final class NativeLaunch {
         privateDirectory(new File(pythonRoot + "-cache"), uid);
         JSONObject config = new JSONObject(new String(asset(context, "foldgpt-executor-deployment.json", 65536), StandardCharsets.UTF_8));
         JSONObject runtime = config.getJSONObject("pythonRuntime");
-        if (!pythonRoot.equals(runtime.getString("path"))) {
+        String declaredRuntime = new File(declaredFiles, "native-runtime-v1/python").getPath();
+        if (!(applicationLaunch ? declaredRuntime : pythonRoot).equals(runtime.getString("path"))
+                || (applicationLaunch && !new File(declaredRuntime).getCanonicalPath().equals(pythonRoot))) {
             JSONObject paths = new JSONObject().put("actual", boundedPath(pythonRoot))
                     .put("expected", boundedPath(runtime.getString("path")))
                     .put("dataDir", boundedPath(declaredData.getPath())).put("filesDir", boundedPath(declaredFiles.getPath()))
@@ -59,9 +68,10 @@ final class NativeLaunch {
                 || controllerHome.equals("/") || controllerHome.startsWith(data.getPath() + "/")) {
             throw new SecurityException("Invalid controller HOME");
         }
-        JSONObject launch = new JSONObject().put("schema", "foldgpt.native-launch.v1")
+        JSONObject launch = new JSONObject().put("schema", applicationLaunch ? "foldgpt.native-launch.v2" : "foldgpt.native-launch.v1")
             .put("workspace", workspace).put("socketPath", socketPath).put("manifestPath", manifestPath)
             .put("controllerRoots", new JSONArray().put(uri(controllerHome)).put("file:///tmp"));
+        if (applicationLaunch) launch.put("bootEpoch", app.foldgpt.shizukuexec.AndroidBootEpoch.capture(context));
         writeNew(new File(launchPath), (launch.toString() + "\n").getBytes(StandardCharsets.UTF_8));
     }
 
@@ -78,7 +88,7 @@ final class NativeLaunch {
             if (file.exists()) {
                 StructStat stat = Os.lstat(file.getPath());
                 if (!OsConstants.S_ISREG(stat.st_mode) || stat.st_uid != uid || (stat.st_mode & 0022) != 0
-                        || !dataPaths.isExact(file)) throw new SecurityException("Existing runtime file is not private regular data");
+                        || !exactPath(file)) throw new SecurityException("Existing runtime file is not private regular data");
                 try (InputStream input = new FileInputStream(file)) { requireHash(read(input, 16777216), item.getString("sha256")); }
             } else writeNew(file, bytes);
         }
@@ -100,6 +110,9 @@ final class NativeLaunch {
         }
     }
     private static String boundedPath(String path) { return path.length() <= 512 ? path : path.substring(0, 512) + "[truncated]"; }
+    private boolean exactPath(File file) throws Exception {
+        return applicationLaunch ? dataPaths.isCanonicalExact(file) : dataPaths.isExact(file);
+    }
     private File descendant(File root, String relative, int uid) throws Exception {
         if (relative.isEmpty() || relative.startsWith("/") || relative.contains("\\") || relative.indexOf('\0') >= 0)
             throw new SecurityException("Invalid native runtime path");
@@ -117,7 +130,7 @@ final class NativeLaunch {
         try { Os.mkdir(file.getPath(), 0700); }
         catch (android.system.ErrnoException exists) { if (exists.errno != OsConstants.EEXIST) throw exists; }
         StructStat stat = Os.lstat(file.getPath());
-        if (!dataPaths.isExact(file) || !OsConstants.S_ISDIR(stat.st_mode) || stat.st_uid != uid
+        if (!exactPath(file) || !OsConstants.S_ISDIR(stat.st_mode) || stat.st_uid != uid
                 || stat.st_gid != uid || (stat.st_mode & 0077) != 0) throw new SecurityException("Native directory must be private and app-owned: " + file.getName());
         return file;
     }
@@ -129,7 +142,7 @@ final class NativeLaunch {
         try { Os.mkdir(endpoint.getPath(), 0700); }
         catch (android.system.ErrnoException exists) { if (exists.errno != OsConstants.EEXIST) throw exists; }
         StructStat named = Os.lstat(endpoint.getPath());
-        if (!dataPaths.isExact(endpoint) || !OsConstants.S_ISDIR(named.st_mode)
+        if (!exactPath(endpoint) || !OsConstants.S_ISDIR(named.st_mode)
                 || named.st_uid != uid || named.st_gid != uid) throw new SecurityException("Native endpoint directory identity differs");
         if ((named.st_mode & 07777) == 0771) {
             java.io.FileDescriptor descriptor = Os.open(endpoint.getPath(), OsConstants.O_RDONLY | OsConstants.O_NONBLOCK
@@ -159,7 +172,7 @@ final class NativeLaunch {
         File file = new File(manifestPath);
         StructStat info = Os.lstat(file.getPath());
         if (!OsConstants.S_ISREG(info.st_mode) || info.st_uid != uid || (info.st_mode & 0077) != 0
-                || !dataPaths.isExact(file)) throw new SecurityException("Native startup manifest is not private app data");
+                || !exactPath(file)) throw new SecurityException("Native startup manifest is not private app data");
         JSONObject manifest;
         try (InputStream input = new FileInputStream(file)) { manifest = new JSONObject(new String(read(input, 65536), StandardCharsets.UTF_8)); }
         JSONObject peer = manifest.getJSONObject("peer");

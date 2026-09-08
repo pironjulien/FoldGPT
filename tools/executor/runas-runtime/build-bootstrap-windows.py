@@ -20,6 +20,8 @@ def main():
     parser.add_argument("--inventory", type=Path, required=True)
     parser.add_argument("--libraries", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--launch-origin", choices=("run-as", "android-app"), default="run-as",
+                        help="Compile a distinct strict admission executable; default preserves run-as")
     args = parser.parse_args()
     ndk, prefix, inventory, libraries, output = [getattr(args, key).resolve() for key in (
         "ndk", "prefix", "inventory", "libraries", "output")]
@@ -40,13 +42,16 @@ def main():
     header.write_bytes(inventory.read_bytes())
     toolchain = ndk / "toolchains/llvm/prebuilt/windows-x86_64"
     compiler = toolchain / "bin/clang.exe"
-    executable = output / "libfoldgpt_native_bootstrap.so"
+    app_origin = args.launch_origin == "android-app"
+    executable = output / ("libfoldgpt_app_bootstrap.so" if app_origin else "libfoldgpt_native_bootstrap.so")
     command = [str(compiler), "--target=aarch64-linux-android35", "-std=c11", "-O2",
                "-Wall", "-Wextra", "-Werror", "-fPIE", "-fstack-protector-strong", "-pie",
                "-I" + str(output), "-I" + str(prefix / "include"), str(source),
                "-L" + str(libraries), "-lcrypto_python", "-Xlinker", "-rpath", "-Xlinker", "$ORIGIN",
                "-Wl,--no-undefined,-z,relro,-z,now,-z,noexecstack,-z,max-page-size=16384,-z,common-page-size=16384",
                "-o", str(executable)]
+    if app_origin:
+        command.insert(1, "-DFOLDGPT_ANDROID_APP=1")
     (output / "command.json").write_text(json.dumps(command, indent=2) + "\n")
     compiled = subprocess.run(command, capture_output=True, timeout=120)
     (output / "compiler.stdout").write_bytes(compiled.stdout)
@@ -64,6 +69,9 @@ def main():
               "cryptoSha256": digest(crypto), "executableSha256": digest(executable),
               "runtimeHome": "/data/user/0/app.foldgpt/files/native-runtime-v1/python",
               "ndk": "29.0.14206865"}
+    if app_origin:
+        record.update(schema="foldgpt.native-admission-build.v2", launchOrigin="android-app",
+                      executableName=executable.name, inheritedSeccomp=2)
     (output / "build.json").write_text(json.dumps(record, indent=2) + "\n")
     print(json.dumps({"output": str(executable), **record}))
 

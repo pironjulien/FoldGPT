@@ -18,23 +18,55 @@ public final class Deployment {
     final String transportLibrary;
     final String[] argv;
     final boolean directNative;
+    final boolean applicationLaunch;
+    final String workingDirectory;
+    final int applicationUid;
     /** Read-only admission for an application owner before selecting Shizuku. */
-    public static void verifyInstalledInputs(Context context) throws Exception { new Deployment(context); }
+    public static void verifyInstalledInputs(Context context) throws Exception {
+        new Deployment(context, new AdmissionTrace(), null, null, null);
+    }
+    public static boolean isApplicationLaunch(Context context) throws Exception {
+        return applicationOrigin(readConfig(context));
+    }
+    static Deployment forApplication(Context context, AdmissionTrace trace, String launchPath, String nonce) throws Exception {
+        if (launchPath == null || nonce == null) throw new SecurityException("Application launch identity is required");
+        return new Deployment(context, trace, launchPath, nonce, Boolean.TRUE);
+    }
+    private static JSONObject readConfig(Context context) throws Exception {
+        try (InputStream input = context.getAssets().open(ASSET)) {
+            return new JSONObject(new String(readBounded(input, 65536), StandardCharsets.UTF_8));
+        }
+    }
+    static boolean applicationOrigin(JSONObject config) throws Exception {
+        Object schema = config.get("schema");
+        if ("foldgpt.native.deployment.v2".equals(schema)) {
+            if (!"android-app".equals(config.get("launchOrigin")))
+                throw new SecurityException("Unknown native application launch origin");
+            return true;
+        }
+        if (!("foldgpt.native.deployment.v1".equals(schema) || "foldgpt.shizuku.deployment.v1".equals(schema))
+                || config.has("launchOrigin")) throw new SecurityException("Unknown or mixed deployment origin");
+        return false;
+    }
 
     Deployment(Context context) throws Exception { this(context, new AdmissionTrace()); }
     Deployment(Context context, AdmissionTrace trace) throws Exception { this(context, trace, null, null); }
     Deployment(Context context, AdmissionTrace trace, String launchPath, String nonce) throws Exception {
+        this(context, trace, launchPath, nonce, Boolean.FALSE);
+    }
+    private Deployment(Context context, AdmissionTrace trace, String launchPath, String nonce, Boolean expectedApp) throws Exception {
         trace.at(AdmissionTrace.Stage.DEPLOYMENT_ASSET);
-        JSONObject config;
-        try (InputStream input = context.getAssets().open(ASSET)) {
-            config = new JSONObject(new String(readBounded(input, 65536), StandardCharsets.UTF_8));
-        }
+        JSONObject config = readConfig(context);
         trace.at(AdmissionTrace.Stage.DEPLOYMENT_SCHEMA);
-        directNative = "foldgpt.native.deployment.v1".equals(config.getString("schema"));
-        if ((!directNative && !"foldgpt.shizuku.deployment.v1".equals(config.getString("schema")))
+        applicationLaunch = applicationOrigin(config);
+        directNative = applicationLaunch || "foldgpt.native.deployment.v1".equals(config.getString("schema"));
+        if ((expectedApp != null && expectedApp.booleanValue() != applicationLaunch)
                 || !context.getPackageName().equals(config.getString("packageName"))) {
             throw new SecurityException("Deployment does not identify this installed application");
         }
+        applicationUid = context.getApplicationInfo().uid;
+        ApplicationDataPaths dataPaths = applicationLaunch ? new ApplicationDataPaths(context) : null;
+        workingDirectory = applicationLaunch ? dataPaths.canonicalRoot().getPath() : "/";
         String name = config.getString("pythonLibrary");
         trace.at(AdmissionTrace.Stage.NATIVE_DIRECTORY);
         trace.fact("observed", context.getApplicationInfo().nativeLibraryDir);
@@ -50,18 +82,25 @@ public final class Deployment {
         // The real UserService repeats APK admission and checks them before fork.
         if (directNative) {
             if (android.system.Os.getuid() == context.getApplicationInfo().uid) PythonRuntime.verifyApplication(context, config, directory, trace);
-            File bootstrap = InstalledLibrary.verify(directory, "libfoldgpt_native_bootstrap.so",
-                    config.getJSONObject("nativeLibraries").getString("libfoldgpt_native_bootstrap.so"));
-            executable = "/system/bin/run-as";
+            String bootstrapName = applicationLaunch ? "libfoldgpt_app_bootstrap.so" : "libfoldgpt_native_bootstrap.so";
+            File bootstrap = InstalledLibrary.verify(directory, bootstrapName,
+                    config.getJSONObject("nativeLibraries").getString(bootstrapName));
+            executable = applicationLaunch ? bootstrap.getPath() : "/system/bin/run-as";
             if (launchPath == null && nonce == null) { argv = new String[0]; }
             else {
                 if (nonce == null || !nonce.matches("[0-9a-f]{32}")) throw new SecurityException("Invalid native session nonce");
                 String data = context.getApplicationInfo().dataDir;
                 // Shell cannot traverse the app-private path. Its canonical identity
                 // and contents are checked again by C after the run-as transition.
-                String expected = data + "/app_foldgpt_exec/" + nonce + "/launch.json";
+                String expected = (applicationLaunch ? workingDirectory : data) + "/app_foldgpt_exec/" + nonce + "/launch.json";
                 if (!expected.equals(launchPath)) throw new SecurityException("Native launch path is outside the fixed private session");
-                argv = new String[] {executable, context.getPackageName(), bootstrap.getPath(), "--native-runtime-v1",
+                if (applicationLaunch && !dataPaths.isCanonicalExact(new File(launchPath)))
+                    throw new SecurityException("Application launch path contains an unadmitted alias");
+                if (applicationLaunch) AndroidBootEpoch.verifyLaunch(context, new File(launchPath));
+                argv = applicationLaunch ? new String[] {executable, "--app-runtime-v1",
+                    Integer.toString(applicationUid), data, Integer.toString(android.system.Os.getpid()),
+                    nonce, context.getApplicationInfo().sourceDir, launchPath}
+                    : new String[] {executable, context.getPackageName(), bootstrap.getPath(), "--native-runtime-v1",
                     Integer.toString(context.getApplicationInfo().uid), data, Integer.toString(android.system.Os.getpid()),
                     nonce, context.getApplicationInfo().sourceDir, launchPath};
             }
@@ -71,7 +110,10 @@ public final class Deployment {
             executable = file.getPath();
             argv = new String[] {executable, "-I", "-S", "-B", "-u", "-c", ENTRY, context.getApplicationInfo().sourceDir};
         }
-        transportLibrary = new File(directory, "libfoldgpt_shizuku_transport.so").getPath();
+        String transportName = applicationLaunch ? "libfoldgpt_app_transport.so" : "libfoldgpt_shizuku_transport.so";
+        transportLibrary = applicationLaunch ? InstalledLibrary.verify(directory, transportName,
+                config.getJSONObject("nativeLibraries").getString(transportName)).getPath()
+                : new File(directory, transportName).getPath();
     }
     static byte[] readBounded(InputStream input, int limit) throws Exception {
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();

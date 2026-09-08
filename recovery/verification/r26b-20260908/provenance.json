@@ -1,0 +1,330 @@
+{
+  "base": "work/app-transport-20260908",
+  "sources": {
+    "native-validation-progress1.json": {
+      "bytes": 217245,
+      "sha256": "3e50751ef2795792ada489c88fcd0007e472364ac78e9c965fb66f506c7960dd"
+    },
+    "native-validation-tools.json": {
+      "bytes": 7340,
+      "sha256": "4e159f4e6b67724cc79b11471d7af32aff1ec6644bd23566e2b28652f792edd1"
+    },
+    "r26b-functional/native-conversation.jsonl": {
+      "bytes": 957836,
+      "sha256": "947e6e961139926ca1fb448a359fe18acc95ca9cabd8d3013bce1375a008cec3"
+    },
+    "r26b-functional/tool-outputs.json": {
+      "bytes": 6067,
+      "sha256": "1616bde84ceb01b1b60cff83f584d45300a7810b7e0f8566b42311ab5ace6203"
+    },
+    "app-start-r26b/startup.json": {
+      "bytes": 1010,
+      "sha256": "a78ef88ce6d0d1206458d8d25a3d43dc85bfbf16073f45264c8c18fd6ef63f3f"
+    },
+    "app-start-r26b/native-status.json": {
+      "bytes": 1200,
+      "sha256": "9d6e22176b90eddd1d0ff49e0b7c2c93825a6bf0652fe30874ec859355cd0afc"
+    },
+    "app-start-r26b/report.json": {
+      "bytes": 377,
+      "sha256": "049c03c371d9546ae497d70dd3996d735ba171f91522044ec468944fb2db643c"
+    },
+    "device-current-r26b/native-status.json": {
+      "bytes": 1200,
+      "sha256": "9d6e22176b90eddd1d0ff49e0b7c2c93825a6bf0652fe30874ec859355cd0afc"
+    },
+    "device-current-r26b/report.json": {
+      "bytes": 633,
+      "sha256": "e1d90b9d53d9de6d9c27793021cfa37bb43ad32c7e8c2b356460dfde357943fa"
+    },
+    "apk-r26b-verification.json": {
+      "bytes": 574,
+      "sha256": "63b324e839aca69e7f3c659e54d9633654d1bbc43933b18433da461b12086ea7"
+    },
+    "legacy-migration-r2/qualification-commands.json": {
+      "bytes": 4338,
+      "sha256": "5c3f69aaf833f74fdb667d74d61aadfb81235a10c909ff2a9256427e22483786"
+    },
+    "legacy-migration-r2/copy-receipt.json": {
+      "bytes": 530,
+      "sha256": "6775cd790ef72fa5d3ead0f222a69198e84ff28c237c748c39e7438d05e699b9"
+    },
+    "legacy-migration-r2/report.json": {
+      "bytes": 388,
+      "sha256": "2b41c0c418241c7ff2102ce7db9ae078bafc58605eceed73c9d75fefeb98f63d"
+    },
+    "legacy-migration-r2/source-inventory.json": {
+      "bytes": 15048,
+      "sha256": "ca707dba6ac3ebdae02b5309f5f78b4348278f072fc68f83ac7acdbb2c5e0636"
+    },
+    "legacy-migration-r2/destination-inventory.json": {
+      "bytes": 15026,
+      "sha256": "3021f15ecc8ee52a77911554111a7f6e3eb8ed0afb9b80fef3cc9cce15814bc2"
+    },
+    "native-thread-after/appended.jsonl": {
+      "bytes": 675,
+      "sha256": "47c355c41a8b2165e9069ed040ee6cca7d3219d77fb8f8effb82a3f35b857863"
+    },
+    "device-current-r26b/commands.json": {
+      "bytes": 188422,
+      "sha256": "4a923a1342f2f4d5dc44c5895231b7a1baf384f98213453a8ecd1d7d05dbe85c"
+    },
+    "app-start-r26b/processes.txt": {
+      "bytes": 56848,
+      "sha256": "7a991f585f89b1c896d3d3fced74b4e27ac6bc2a0493c0fe6a4f8a710e8c596c"
+    },
+    "device-current-r26b/processes.txt": {
+      "bytes": 57609,
+      "sha256": "78c94094cdb5a2ec48752a93c1bd2111bba699c915b2411f36d21b62d0b6d6b2"
+    },
+    "app-start-r26b/runtime.log": {
+      "bytes": 256566,
+      "sha256": "55ff1b1fab2d0b9467edf6dffd26da9801bb53043d57f519829fad6a5e104345"
+    },
+    "native-thread-before/conversation.jsonl": {
+      "bytes": 882971,
+      "sha256": "bc0c71852c3c420a959f48687f50617e6aa5245dee83fbdad29a8fa8cb3c8466"
+    },
+    "native-thread-after/conversation.jsonl": {
+      "bytes": 883646,
+      "sha256": "ea20e09dde4aabc53ea38fbeb24d026d0c706db32aa7c8e512d4de6c38f649e9"
+    },
+    "project-current-after-repair.json": {
+      "bytes": 1630,
+      "sha256": "3d1bb220c95de4e15f84d9163f2887948dbe5490d3390c27694bd158a5fb7100"
+    },
+    "device-current-r26b/project-inventories.json": {
+      "bytes": 117160,
+      "sha256": "818fed325994fbc497621e96df4a9d6e0f77e6180664b3ebf09d3442e171f534"
+    },
+    "legacy-migration-r2/copy-commands.json": {
+      "bytes": 55838,
+      "sha256": "6bd03241136818be3870fd7e98bf665e05627b3da35267238485d13e1466fb47"
+    },
+    "unexpected-stop-r26b/status.txt": {
+      "bytes": 1222,
+      "sha256": "294e260ce4eeecf655af4019716160bbb1b972a1f038383b38efa5d46ded27ea"
+    },
+    "unexpected-stop-r26b/marker.txt": {
+      "bytes": 93,
+      "sha256": "f46f8778f42cad3591cc786287d203564ab79bccb81cd0cac543086e791ff14a"
+    },
+    "lifecycle-foreground-r2/report.json": {
+      "bytes": 1025,
+      "sha256": "98a3a602c2ff763274a0bec07f42438f74071670543047c09594f46314a2ff8f"
+    },
+    "lifecycle-foreground-r2/test.log": {
+      "bytes": 80,
+      "sha256": "fbf77235a75ac5238f2b1eeed8096e3b6f30e0ea9c2df8f0890020d808a35b7a"
+    },
+    "lifecycle-foreground-r2/compile.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "lifecycle-foreground-service-r2/report.json": {
+      "bytes": 400,
+      "sha256": "c8e0af1c29a77ed7b9f0d4137a03828b5ee766a2c27ee53952e0ccf6a35e7dde"
+    },
+    "lifecycle-foreground-service-r2/compile.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "unexpected-stop-r26b/exit-info.txt": {
+      "bytes": 6127,
+      "sha256": "112701b0bf0c9843116f09b0537e0cecbc415921781986532d27a8a1b3b2f420"
+    },
+    "unexpected-stop-r26b/lifecycle-logcat.txt": {
+      "bytes": 488354,
+      "sha256": "774395b00f99da41375b6b5b38bcc3f15f8302ef2f7be0f6eb361a95df667ce9"
+    },
+    "package-r26b-evidence.py": {
+      "bytes": 18050,
+      "sha256": "e3e2dacf69fe0762302c951d064b232780317c8592cb32cdde7f432b8b46cecf"
+    }
+  },
+  "outputs": {
+    "command-events.json": {
+      "kind": "JSON extraction or calculated audit",
+      "source": "native-validation-progress1.json",
+      "selection": "/response/result/result/value/events; exact selected event objects with zero-based sourceIndex"
+    },
+    "turn-metadata.json": {
+      "kind": "JSON extraction or calculated audit",
+      "source": "native-validation-progress1.json",
+      "selection": "/response/result/result/value/events; selected turn metadata only; items deliberately omitted"
+    },
+    "native-validation-tools.json": {
+      "kind": "byte-identical copy",
+      "source": "native-validation-tools.json"
+    },
+    "r26b-functional/tool-outputs.json": {
+      "kind": "byte-identical copy",
+      "source": "r26b-functional/tool-outputs.json"
+    },
+    "persisted-tool-output-audit.json": {
+      "kind": "JSON extraction or calculated audit",
+      "source": "r26b-functional/native-conversation.jsonl",
+      "selection": "zero-based JSONL record indices, plus parsed nested tool results"
+    },
+    "app-start-r26b/startup.json": {
+      "kind": "byte-identical copy",
+      "source": "app-start-r26b/startup.json"
+    },
+    "app-start-r26b/native-status.json": {
+      "kind": "byte-identical copy",
+      "source": "app-start-r26b/native-status.json"
+    },
+    "app-start-r26b/report.json": {
+      "kind": "byte-identical copy",
+      "source": "app-start-r26b/report.json"
+    },
+    "device-current-r26b/native-status.json": {
+      "kind": "byte-identical copy",
+      "source": "device-current-r26b/native-status.json"
+    },
+    "device-current-r26b/report.json": {
+      "kind": "byte-identical copy",
+      "source": "device-current-r26b/report.json"
+    },
+    "apk-r26b-verification.json": {
+      "kind": "byte-identical copy",
+      "source": "apk-r26b-verification.json"
+    },
+    "legacy-migration-r2/qualification-commands.json": {
+      "kind": "byte-identical copy",
+      "source": "legacy-migration-r2/qualification-commands.json"
+    },
+    "legacy-migration-r2/copy-receipt.json": {
+      "kind": "byte-identical copy",
+      "source": "legacy-migration-r2/copy-receipt.json"
+    },
+    "legacy-migration-r2/report.json": {
+      "kind": "byte-identical copy",
+      "source": "legacy-migration-r2/report.json"
+    },
+    "legacy-migration-r2/source-inventory.json": {
+      "kind": "byte-identical copy",
+      "source": "legacy-migration-r2/source-inventory.json"
+    },
+    "legacy-migration-r2/destination-inventory.json": {
+      "kind": "byte-identical copy",
+      "source": "legacy-migration-r2/destination-inventory.json"
+    },
+    "native-thread-after/appended.jsonl": {
+      "kind": "byte-identical copy",
+      "source": "native-thread-after/appended.jsonl"
+    },
+    "device-observations.json": {
+      "kind": "JSON extraction or calculated audit",
+      "source": "device-current-r26b/commands.json",
+      "selection": "array indices 0,1,4,5; exact command result records"
+    },
+    "process-chain.json": {
+      "kind": "JSON extraction or calculated audit",
+      "source": [
+        "app-start-r26b/processes.txt",
+        "device-current-r26b/processes.txt"
+      ],
+      "selection": "exact selected lines with one-based line numbers; Shizuku name check calculated over full snapshots"
+    },
+    "desktop-handshake.json": {
+      "kind": "JSON extraction or calculated audit",
+      "source": "app-start-r26b/runtime.log",
+      "selection": "exact lines containing initialize_handshake_result and outcome=success"
+    },
+    "history-audit.json": {
+      "kind": "JSON extraction or calculated audit",
+      "source": [
+        "native-thread-before/conversation.jsonl",
+        "native-thread-after/conversation.jsonl",
+        "native-thread-after/appended.jsonl",
+        "r26b-functional/native-conversation.jsonl"
+      ],
+      "selection": "raw byte prefix and exact suffix comparison; full conversations omitted"
+    },
+    "project-settings.json": {
+      "kind": "JSON extraction or calculated audit",
+      "source": "project-current-after-repair.json",
+      "selection": "/response/result/result/value/projects; visible UI text and page expression omitted"
+    },
+    "legacy-migration-r2/copy-commands.json": {
+      "kind": "byte-identical copy",
+      "source": "legacy-migration-r2/copy-commands.json"
+    },
+    "audit.json": {
+      "kind": "JSON extraction or calculated audit",
+      "source": [
+        "apk-r26b-verification.json",
+        "app-start-r26b/native-status.json",
+        "app-start-r26b/processes.txt",
+        "app-start-r26b/report.json",
+        "app-start-r26b/runtime.log",
+        "app-start-r26b/startup.json",
+        "device-current-r26b/commands.json",
+        "device-current-r26b/native-status.json",
+        "device-current-r26b/processes.txt",
+        "device-current-r26b/project-inventories.json",
+        "device-current-r26b/report.json",
+        "legacy-migration-r2/copy-commands.json",
+        "legacy-migration-r2/copy-receipt.json",
+        "legacy-migration-r2/destination-inventory.json",
+        "legacy-migration-r2/qualification-commands.json",
+        "legacy-migration-r2/report.json",
+        "legacy-migration-r2/source-inventory.json",
+        "native-thread-after/appended.jsonl",
+        "native-thread-after/conversation.jsonl",
+        "native-thread-before/conversation.jsonl",
+        "native-validation-progress1.json",
+        "native-validation-tools.json",
+        "project-current-after-repair.json",
+        "r26b-functional/native-conversation.jsonl",
+        "r26b-functional/tool-outputs.json"
+      ],
+      "selection": "independent assertions and calculations described by evidence script"
+    },
+    "unexpected-stop-r26b/status.txt": {
+      "kind": "byte-identical copy",
+      "source": "unexpected-stop-r26b/status.txt"
+    },
+    "unexpected-stop-r26b/marker.txt": {
+      "kind": "byte-identical copy",
+      "source": "unexpected-stop-r26b/marker.txt"
+    },
+    "lifecycle-foreground-r2/report.json": {
+      "kind": "byte-identical copy",
+      "source": "lifecycle-foreground-r2/report.json"
+    },
+    "lifecycle-foreground-r2/test.log": {
+      "kind": "byte-identical copy",
+      "source": "lifecycle-foreground-r2/test.log"
+    },
+    "lifecycle-foreground-r2/compile.log": {
+      "kind": "byte-identical copy",
+      "source": "lifecycle-foreground-r2/compile.log"
+    },
+    "lifecycle-foreground-service-r2/report.json": {
+      "kind": "byte-identical copy",
+      "source": "lifecycle-foreground-service-r2/report.json"
+    },
+    "lifecycle-foreground-service-r2/compile.log": {
+      "kind": "byte-identical copy",
+      "source": "lifecycle-foreground-service-r2/compile.log"
+    },
+    "unexpected-stop-r26b/runtime-exit.json": {
+      "kind": "JSON extraction or calculated audit",
+      "source": "unexpected-stop-r26b/exit-info.txt",
+      "selection": "exact text of first ApplicationExitInfo record only"
+    },
+    "unexpected-stop-r26b/causal-timeline.json": {
+      "kind": "JSON extraction or calculated audit",
+      "source": "unexpected-stop-r26b/lifecycle-logcat.txt",
+      "selection": "exact selected package lifecycle lines from 21:48:16"
+    },
+    "package-r26b-evidence.py": {
+      "kind": "byte-identical copy",
+      "source": "package-r26b-evidence.py"
+    }
+  },
+  "scope": "No full prompts, full conversations, UI body, credentials, third-party sources or full-device census copied.",
+  "integrity": "Copy entries preserve bytes; extracted JSON preserves selected values and array order, not source formatting."
+}

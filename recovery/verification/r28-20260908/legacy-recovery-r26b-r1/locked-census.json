@@ -1,0 +1,16 @@
+{
+  "ready": {
+    "phase": "locked",
+    "helperPid": 25105,
+    "uid": 10412,
+    "nonce": "4d9f023219b4fd8a335cc3734bff854c"
+  },
+  "uidProcesses": [
+    [
+      "25105",
+      "10412",
+      "libfoldgpt_python_cli.so"
+    ]
+  ],
+  "censusSha256": "32938fa5bfcf9c7ee73607c765107dd45871cf3cea82f5c81fa1334f319b2576"
+}

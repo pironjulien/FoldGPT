@@ -2,6 +2,34 @@
 
 ## Unreleased - 2026-09-08
 
+- Inventory the actual desktop client (26.901.41600) and compare it with the
+  26.901.51231 reference: 9,737 installed JavaScript files parsed, 370/370 ASAR
+  external members collected, 57 native ELF inspected per version. Record
+  commands, handlers, services, routes, settings, ABI requirements, dynamic
+  unknowns and source hashes. Document the desktop conversation retention
+  lifecycle and its Android process-count implications.
+- Install r28/versionCode18 with direct application-origin native startup and
+  verified Android boot-count provenance. The original failing legacy conversation
+  now creates a Python CLI, passes six tests, builds and runs its zipapp under
+  Android UID10412. Preserve all 327 preceding project entries and history prefixes.
+  Normal stop reaps the native owner with exit0 and removes its resources;
+  reopening succeeds with all 334 resulting project entries preserved.
+- Retain the Android foreground service until both the desktop worker and native
+  cleanup actually finish. Add generation/restart guards and 14 lifecycle cases
+  (24 JVM tests total). A missing cleanup confirmation never becomes success.
+- Preserve the r26b real pipe/PTY evidence and subsequent failure chronology:
+  Android phantom-process trimming precedes Linux137 and REMOVE_TASK. The new
+  shutdown ordering does not resolve process accumulation. Same-boot crash recovery
+  and desktop feature parity remain unqualified. A real reboot from Android
+  BOOT_COUNT8 to9 now passes automatic marker archival, application-origin
+  restart and the existing conversation's six tests/zipapp (all exit0), without
+  backend preparation by the PC. Physical cable-disconnected use remains distinct.
+- Repair native and four active legacy conversation paths through the existing
+  desktop APIs, without rewriting their history. Copy 39 empty legacy directories
+  with no symlink traversal; preserve two archived conversations unchanged.
+  Extend the one-time v1 maintenance contract for observed stale stopping sessions,
+  retaining whole-UID quiescence, exclusive lock and original marker archival.
+
 - Run the separate app-context diagnostic on the Fold with Shizuku absent:
   real pipe/PTY commands, files, subprocesses, input, interrupt and cleanup pass
   under Java/Zygote. Independently verify receipts, files, process enumeration,

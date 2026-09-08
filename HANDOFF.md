@@ -1,24 +1,34 @@
 # FoldGPT — point d'entrée de reprise
 
-**Dernier état : r25/versionCode15 installé, terminal interactif du modèle
-validé depuis la conversation, cinq tests Python et rg toujours réussis.**
-Voir le [rapport r25](docs/research/r25-device-validation-20260908.md) pour les
-preuves, la dernière ouverture et les fonctions encore à terminer.
+**Dernier état : r28/versionCode18 installé.** Démarrage direct depuis FoldGPT
+sans Shizuku, ancienne conversation reprise sans correction temporaire du cwd,
+projet Python créé, six tests réussis, zipapp construit et exécuté. Arrêt propre
+et réouverture démontrés. Après reboot complet Android, la même conversation
+repasse six tests et exécute son zipapp, sans préparation du moteur par le PC.
+Voir le [rapport r28](docs/research/r28-device-validation-20260908.md).
+
+L'[inventaire demandé du client desktop](docs/research/desktop-client-inventory-20260908/README.md)
+couvre 9 737 JavaScript et 57 ELF. Il a permis d'identifier les délais de
+conservation des conversations : jusqu'à une heure côté interface avant
+désabonnement, puis 30 minutes côté moteur. r26b a atteint 45 processus UID
+et subi un arrêt Android par dépassement de la limite des sous-processus.
+Ce défaut de fiabilité reste ouvert ; aucun réglage Android n'a été désactivé.
 
 **Priorité confirmée par Julien : ouvrir FoldGPT et travailler avec le PC
 éteint.** Le panneau de terminal manuel est reporté ; il n'est pas nécessaire
 pour qualifier le travail depuis la conversation. La [revue des alternatives](docs/research/phone-only-options-20260908.md)
 retrouve un résultat Python Bionic sous application ordinaire : Shizuku est
-une dépendance de r25, pas une nécessité générale démontrée. Qualifier le
-lancement direct du propriétaire actuel avant d'investir dans un démarrage
-Shizuku intégré, puis démontrer la reprise sans préparation par le PC.
+une dépendance de r25, supprimée du lancement courant dans r26b/r28. La reprise
+après arrêt propre et après reboot complet est démontrée. La stabilité durable
+avec plusieurs conversations reste à corriger.
 
 Le statut technique actuel et les prochaines étapes sont dans
 [recovery/HANDOFF.md](recovery/HANDOFF.md). Les commandes ordinaires depuis
 l'interface sont maintenant validées pour le parcours Python natif Android :
 création, tests, construction, puis reprise d'un projet avec Packaging 26.3
-sous r24. Le panneau de terminal utilisateur et le fonctionnement sans PC après reboot restent
-à qualifier ; interface et contrôleur utilisent encore PRoot.
+sous r24. R28 ajoute la reprise après reboot sans préparation du moteur par le PC.
+Le panneau de terminal utilisateur reste à qualifier ; interface et contrôleur
+utilisent encore PRoot.
 
 La récupération des sources, dépendances et preuves est décrite dans
 [recovery/README.md](recovery/README.md). Le dépôt de travail est **privé** :
