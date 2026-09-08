@@ -17,12 +17,18 @@ import java.util.Set;
 /** Admit fixed Python data before the interpreter can import any staged file. */
 final class PythonRuntime {
     static void verify(Context context, JSONObject config, File nativeDirectory, AdmissionTrace trace) throws Exception {
+        verify(context, config, nativeDirectory, trace, 2000, true);
+    }
+    static void verifyApplication(Context context, JSONObject config, File nativeDirectory, AdmissionTrace trace) throws Exception {
+        verify(context, config, nativeDirectory, trace, context.getApplicationInfo().uid, false);
+    }
+    private static void verify(Context context, JSONObject config, File nativeDirectory, AdmissionTrace trace, int ownerUid, boolean shell) throws Exception {
         if (!config.has("pythonRuntime")) return;
         trace.at(AdmissionTrace.Stage.PYTHON_DOMAIN);
         try (InputStream input = new FileInputStream("/proc/self/attr/current")) {
             String label = new String(Deployment.readBounded(input, 4096), StandardCharsets.US_ASCII).replace("\0", "").trim();
             trace.fact("observed", label);
-            if (!label.equals("u:r:shell:s0")) throw new SecurityException("Python bootstrap requires the actual shell SELinux domain");
+            if (shell && !label.equals("u:r:shell:s0")) throw new SecurityException("Python bootstrap requires the actual shell SELinux domain");
         }
         trace.at(AdmissionTrace.Stage.PYTHON_MANIFEST);
         JSONObject runtime = config.getJSONObject("pythonRuntime");
@@ -37,10 +43,11 @@ final class PythonRuntime {
         File root = new File(runtime.getString("path"));
         trace.fact("expected", root.getPath());
         trace.fact("canonical", root.getCanonicalPath());
-        if (!root.isAbsolute() || !root.getCanonicalFile().equals(root)) throw new SecurityException("Invalid Python runtime root");
+        ApplicationDataPaths dataPaths = shell ? null : new ApplicationDataPaths(context);
+        if (!root.isAbsolute() || !(dataPaths == null ? root.getCanonicalFile().equals(root) : dataPaths.isExact(root))) throw new SecurityException("Invalid Python runtime root");
         StructStat rootStat = Os.lstat(root.getPath());
         trace.fact("uid", rootStat.st_uid); trace.fact("mode", rootStat.st_mode);
-        if (!OsConstants.S_ISDIR(rootStat.st_mode) || rootStat.st_uid != 2000 || (rootStat.st_mode & 0077) != 0) {
+        if (!OsConstants.S_ISDIR(rootStat.st_mode) || rootStat.st_uid != ownerUid || (rootStat.st_mode & 0077) != 0) {
             throw new SecurityException("Python runtime must be an owner-only shell directory");
         }
         Set<String> expected = new HashSet<>();
@@ -50,10 +57,10 @@ final class PythonRuntime {
             JSONObject entry = data.getJSONObject(i);
             trace.subject(entry.getString("path"));
             File file = descendant(root, entry.getString("path"), expected);
-            if (!file.getCanonicalFile().equals(file)) throw new SecurityException("Python data alias is not admitted");
+            if (!(dataPaths == null ? file.getCanonicalFile().equals(file) : dataPaths.isExact(file))) throw new SecurityException("Python data alias is not admitted");
             StructStat info = Os.lstat(file.getPath());
             trace.fact("uid", info.st_uid); trace.fact("mode", info.st_mode);
-            if (!OsConstants.S_ISREG(info.st_mode) || info.st_uid != 2000 || (info.st_mode & 0022) != 0
+            if (!OsConstants.S_ISREG(info.st_mode) || info.st_uid != ownerUid || (info.st_mode & 0022) != 0
                     || info.st_size != entry.getLong("bytes") || info.st_size > 16777216) {
                 throw new SecurityException("Python data differs from bounded runtime inventory");
             }
@@ -82,7 +89,7 @@ final class PythonRuntime {
         }
         Set<String> actual = new HashSet<>();
         trace.at(AdmissionTrace.Stage.PYTHON_TREE);
-        walk(root, root, actual, trace);
+        walk(root, root, actual, trace, ownerUid);
         if (!actual.equals(expected)) {
             String unexpected = actual.stream().filter(path -> !expected.contains(path)).sorted().findFirst().orElse(null);
             String missing = expected.stream().filter(path -> !actual.contains(path)).sorted().findFirst().orElse(null);
@@ -97,17 +104,17 @@ final class PythonRuntime {
                 || !paths.add(relative)) throw new SecurityException("Invalid Python inventory path");
         return new File(root, relative);
     }
-    private static void walk(File root, File directory, Set<String> files, AdmissionTrace trace) throws Exception {
+    private static void walk(File root, File directory, Set<String> files, AdmissionTrace trace, int ownerUid) throws Exception {
         trace.subject(root.toPath().relativize(directory.toPath()).toString());
         StructStat info = Os.lstat(directory.getPath());
         trace.fact("uid", info.st_uid); trace.fact("mode", info.st_mode);
-        if (!OsConstants.S_ISDIR(info.st_mode) || info.st_uid != 2000 || (info.st_mode & 0022) != 0) {
+        if (!OsConstants.S_ISDIR(info.st_mode) || info.st_uid != ownerUid || (info.st_mode & 0022) != 0) {
             throw new SecurityException("Python runtime directory is not admitted");
         }
         File[] children = directory.listFiles();
         if (children == null) throw new SecurityException("Cannot inspect Python runtime directory");
         for (File child : children) {
-            if (OsConstants.S_ISDIR(Os.lstat(child.getPath()).st_mode)) walk(root, child, files, trace);
+            if (OsConstants.S_ISDIR(Os.lstat(child.getPath()).st_mode)) walk(root, child, files, trace, ownerUid);
             else files.add(root.toPath().relativize(child.toPath()).toString());
         }
     }

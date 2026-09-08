@@ -8,7 +8,7 @@ android {
         applicationId 'app.foldgpt'
         minSdk 30
         targetSdk 37
-        versionCode 2
+        versionCode 3
         versionName '0.2.0-dev'
         ndk { abiFilters 'arm64-v8a' }
     }
@@ -26,6 +26,7 @@ dependencies {
     implementation 'androidx.window:window-java:1.5.0'
     implementation 'org.apache.commons:commons-compress:1.28.0'
     testImplementation 'junit:junit:4.13.2'
+    testImplementation 'org.json:json:20260719'
 }
 
 // Explicit reviewed deployment only. Merely linking the transport must never
@@ -40,6 +41,29 @@ if (qualifiedExecutorAssets.isPresent()) {
         throw new GradleException('Selected executor assets lack the explicit deployment, source manifest or qualification evidence')
     }
     android.sourceSets.main.assets.srcDir(supplied)
+    // AAPT's default <dir>_* rule drops Python's __phello__ and other
+    // underscore package directories despite their signed inventory.
+    android.androidResources.ignoreAssetsPattern = '!.svn:!.git:!.DS_Store:!*.scc:!CVS:!thumbs.db:!picasa.ini:!*~'
+}
+
+// A separately selected, manifest-pinned native executor payload. Preserve ELF
+// bytes because both Java and the pre-interpreter admission verify its hashes.
+def executorJni = providers.gradleProperty('foldgptExecutorJni')
+if (executorJni.isPresent()) {
+    if (!qualifiedExecutorAssets.isPresent()) throw new GradleException('Executor JNI requires explicit deployment assets')
+    def supplied = file(executorJni.get()).canonicalFile
+    def deployment = new groovy.json.JsonSlurper().parse(new File(file(qualifiedExecutorAssets.get()), 'foldgpt-executor-deployment.json'))
+    def expected = deployment.nativeLibraries.keySet().findAll { !(it in ['libfoldgpt_shizuku_transport.so', 'libfoldgpt_bionic_cwd.so']) }.toSet()
+    def actual = fileTree(new File(supplied, 'arm64-v8a')).files.collect { it.name }.toSet()
+    if (expected != actual) throw new GradleException('Executor JNI differs from its deployment inventory')
+    expected.each { name ->
+        def input = new File(supplied, 'arm64-v8a/' + name)
+        def digest = java.security.MessageDigest.getInstance('SHA-256').digest(input.bytes).encodeHex().toString()
+        if (digest != deployment.nativeLibraries[name]) throw new GradleException('Executor JNI hash differs: ' + name)
+    }
+    android.sourceSets.main.jniLibs.srcDir(supplied)
+    expected.each { name -> android.sourceSets.debug.jniLibs.exclude('**/' + name) }
+    android.packaging.jniLibs.keepDebugSymbols.add('**/lib*.so')
 }
 
 // The native file transport fixture executes only these APK-owned public source

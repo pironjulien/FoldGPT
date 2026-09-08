@@ -1,0 +1,22 @@
+{
+  "scope": "Real Bionic startup file/socket tests via ADB/run-as; no supervisor or UI",
+  "passed": true,
+  "tests": 12,
+  "files": [
+    {
+      "path": "commands.json",
+      "bytes": 6465,
+      "sha256": "689a0e45bbd6b2b0e89de7038888777ac05fddd15ec686f37dd6a91c9e2b0d8e"
+    },
+    {
+      "path": "report.json",
+      "bytes": 1181,
+      "sha256": "5632aa3bc3d9058d58c1602199b9cf25c1670639efaef367a5d6bc98234bbc0d"
+    },
+    {
+      "path": "sources.tar",
+      "bytes": 30720,
+      "sha256": "9ba7cca1799e6d09234271ba9f6a6f7216f6fcd992d7609c9bbbab9c99bdd309"
+    }
+  ]
+}

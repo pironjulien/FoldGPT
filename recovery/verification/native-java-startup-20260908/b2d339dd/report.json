@@ -1,0 +1,29 @@
+{
+  "passed": false,
+  "scope": "Actual Java/Shizuku/run-as owner and GNU client; app-server and UI not tested",
+  "prepareResponse": "Broadcasting: Intent { act=app.foldgpt.action.PREPARE_NATIVE_EXECUTOR flg=0x10400000 cmp=app.foldgpt/.NativePreparationReceiver }\r\nBroadcast completed: result=0",
+  "error": "RuntimeError: Native preparation failed: {\"schema\": \"foldgpt.native.owner.v1\", \"state\": \"unavailable\", \"generation\": 1, \"selected\": true, \"officialLauncherReplaced\": false, \"lastRemoteStatus\": null, \"lastNativeSessionStatus\": null, \"reason\": \"qualified_native_deployment_unavailable\"}",
+  "beforeStopStatus": {
+    "schema": "foldgpt.native.owner.v1",
+    "state": "unavailable",
+    "generation": 1,
+    "selected": true,
+    "officialLauncherReplaced": false,
+    "lastRemoteStatus": null,
+    "lastNativeSessionStatus": null,
+    "reason": "qualified_native_deployment_unavailable"
+  },
+  "stopResponse": "Broadcasting: Intent { act=app.foldgpt.action.STOP_NATIVE_EXECUTOR flg=0x10400000 cmp=app.foldgpt/.NativePreparationReceiver }\r\nBroadcast completed: result=0",
+  "finalStatus": {
+    "schema": "foldgpt.native.owner.v1",
+    "state": "unavailable",
+    "generation": 1,
+    "selected": true,
+    "officialLauncherReplaced": false,
+    "lastRemoteStatus": null,
+    "lastNativeSessionStatus": null,
+    "reason": "qualified_native_deployment_unavailable"
+  },
+  "bootUnchanged": true,
+  "cleanupVerified": false
+}

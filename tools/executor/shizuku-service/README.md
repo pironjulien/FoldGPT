@@ -197,6 +197,61 @@ runner. This limitation is separate from the successful main APK build and the
 
 ## Immutable deployment inputs
 
+### Explicit native production candidate
+
+The application now also accepts the distinct `foldgpt.native.deployment.v1`
+package. Its signed metadata uses `foldgpt.native.package.v1` and the scope
+`native-production-candidate`; the attached broker evidence retains its original
+bytes and does not certify the newly assembled application. The corresponding
+Gradle properties are `foldgptExecutorAssets` and `foldgptExecutorJni`. Native ELF
+bytes are not stripped, and AAPT must retain Python package directories beginning
+with underscores. `runas-runtime/verify-production-apk.py` checks all native and
+Python data hashes, the complete source inventory and its `tools` imports.
+
+Only this explicit schema selects the native route during normal UI startup.
+Builds without it keep their previous launcher. A selected native failure never
+starts another executor. `NativeLaunch` creates app-private `files/projects`,
+`files/native-runtime-v1/python` and `app_foldgpt_exec/<nonce32>` directories. It
+copies only verified signed Python data and refreshes ELF aliases to the current
+PackageManager native directory. No shell-owned data or full app-data bind is
+used. The launch JSON is private and outside the model workspace.
+
+The fixed Shizuku service exposes `openNative(owner, launchPath, nonce)`. After
+validating the installed package and path, the unchanged four-FD JNI launches
+`run-as app.foldgpt` and the packaged C admission. Python owns the direct
+SEQPACKET listener and publishes the factual startup manifest. Java keeps FD3
+and the real child wait, validates the PID/UID/GID and each shared device/inode,
+then reports preparation complete. FD0/FD1 cannot be taken through Binder in
+this mode; no Java relay lies in the SCM_RIGHTS channel path.
+
+`FoldRuntimeService` binds projects, the endpoint directory, the Python runtime
+and the installed native directory to their exact absolute paths in PRoot.
+Controller HOME, user, keyring and history remain the selected guest identity.
+It sets `CODEX_CLI_PATH=/usr/local/bin/foldgpt-codex-native`; the canonical guest
+bundle supplies that wrapper. The separately built engine must be installed at
+`/usr/local/libexec/foldgpt/codex-native`, with its companions adjacent, before
+normal UI startup. For `app-server` the wrapper passes the real private manifest
+with `--foldgpt-native-bootstrap`. Official application files are not replaced.
+
+For a preparation-only device check, the debug APK includes the DUMP-protected
+`app.foldgpt.NativePreparationReceiver`. Its only actions are
+`app.foldgpt.action.PREPARE_NATIVE_EXECUTOR` and
+`app.foldgpt.action.STOP_NATIVE_EXECUTOR`; it accepts no command or path. The
+real runtime service stays non-exported. Preparation does not start the desktop.
+The native acquisition currently allows 30 seconds for a real controller;
+preparation alone therefore does not demonstrate an end-to-end coding session.
+
+The persisted owner status includes `lastRemoteStatus` and
+`lastNativeSessionStatus`, copied from the real authenticated Binder responses.
+They are refreshed during observation and cleanup and retained after closure,
+including the actual bootstrap PID, wait status, admission cause and cleanup
+flags. A clean terminal report plus real wait status zero is a normal closed
+session, including controller EOF; reaping alone or a nonzero exit is a failure.
+Unchanged snapshots are not repeatedly written, and a failed status read cannot
+turn an older snapshot into fresh cleanup evidence.
+
+### Legacy qualified deployment
+
 The application must package the native library from this AAR and its real
 Python CLI in extracted, APK-owned `nativeLibraryDir`. The interpreter's default
 home must match the admitted Python distribution; `-I -S -u` excludes external

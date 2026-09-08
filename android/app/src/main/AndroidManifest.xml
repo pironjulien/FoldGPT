@@ -4,7 +4,9 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="moe.shizuku.manager.permission.API_V23" />
     <application android:label="FoldGPT" android:icon="@drawable/foldgpt_icon" android:roundIcon="@drawable/foldgpt_icon" android:allowBackup="false" android:extractNativeLibs="true" tools:replace="android:label,android:icon,android:roundIcon">
+        <meta-data android:name="moe.shizuku.client.V3_SUPPORT" android:value="true" />
         <!-- Binder provider stays in the main app process. :runtime explicitly
              requests its Binder through the official multi-process SDK API. -->
         <provider android:name="app.foldgpt.shizukuexec.ExecutorProvider"

@@ -5,7 +5,7 @@ repo=$(cd "$(dirname "$0")/../.." && pwd)
 runner=${1:?Usage: native-host-files-test.sh ACTUAL_HOST_BIONIC_SUPERVISOR}
 test_module=${2:-tools.executor.test_native_host_files}
 case "$test_module" in
-  tools.executor.test_native_host_files|tools.executor.test_native_host_files_channel) ;;
+  tools.executor.test_native_host_files|tools.executor.test_native_host_files_channel|tools.executor.test_native_runtime_acquisition) ;;
   *) printf 'Unsupported qualification module: %s\n' "$test_module" >&2; exit 2 ;;
 esac
 test -x "$runner"

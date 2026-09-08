@@ -1,0 +1,166 @@
+{
+  "passed": false,
+  "scope": "Actual Java/Shizuku/run-as owner and GNU client; app-server and UI not tested",
+  "prepareResponse": "Broadcasting: Intent { act=app.foldgpt.action.PREPARE_NATIVE_EXECUTOR flg=0x10400000 cmp=app.foldgpt/.NativePreparationReceiver }\r\nBroadcast completed: result=0",
+  "startup": {
+    "schema": "foldgpt.native-startup.v1",
+    "socketPath": "/data/user/0/app.foldgpt/app_foldgpt_exec/e22f3b0fcbf148cead63e86c01be0859/owner.sock",
+    "peer": {
+      "pid": 4224,
+      "uid": 10412,
+      "gid": 10412
+    },
+    "workspaceRoot": "file:///data/user/0/app.foldgpt/files/projects",
+    "sharedPaths": [
+      {
+        "path": "file:///data/user/0/app.foldgpt/files/projects",
+        "device": 65097,
+        "inode": 471258
+      },
+      {
+        "path": "file:///data/user/0/app.foldgpt/files/native-runtime-v1/python",
+        "device": 65097,
+        "inode": 472354
+      },
+      {
+        "path": "file:///data/app/~~ZNTW9_n2vrSxvJU5K1HyIQ%3D%3D/app.foldgpt-2M9qPLg_6Aqx2rpWyHXc8g%3D%3D/lib/arm64",
+        "device": 65097,
+        "inode": 471120
+      }
+    ],
+    "controllerRoots": [
+      "file:///home/julien",
+      "file:///tmp"
+    ],
+    "parentEnvironment": {
+      "HOME": "/data/user/0/app.foldgpt/files/projects",
+      "TMPDIR": "/data/user/0/app.foldgpt/files/projects/.foldgpt-tmp",
+      "PATH": "/data/user/0/app.foldgpt/files/native-runtime-v1/python/bin:/system/bin",
+      "SHELL": "/data/app/~~ZNTW9_n2vrSxvJU5K1HyIQ==/app.foldgpt-2M9qPLg_6Aqx2rpWyHXc8g==/lib/arm64/libfoldgpt_bash.so",
+      "LANG": "C.UTF-8"
+    }
+  },
+  "client": {
+    "appServerTested": false,
+    "controllerGnuLibcVersion": "2.41",
+    "controllerLibcUid": 10410,
+    "controllerPid": 4282,
+    "error": "ValueError: File channel does not bind the actual exec session",
+    "nativeOwner": {
+      "gid": 10412,
+      "pid": 4224,
+      "uid": 10412
+    },
+    "nativeOwnerReaped": false,
+    "passed": false,
+    "phoneUiTested": false,
+    "schema": "foldgpt.native-production-qualification.v1"
+  },
+  "error": "RuntimeError: Production client failed; preserve exact report",
+  "beforeStopStatus": {
+    "schema": "foldgpt.native.owner.v1",
+    "state": "ready",
+    "generation": 1,
+    "selected": true,
+    "officialLauncherReplaced": false,
+    "lastRemoteStatus": {
+      "schema": "foldgpt.shizuku.transport.v1",
+      "ready": true,
+      "cancelRequested": false,
+      "bootstrapReaped": false,
+      "cleanupComplete": false,
+      "ownerRetained": true,
+      "quarantined": false,
+      "refusedBeforeFork": false,
+      "setupError": null,
+      "transportFailed": false,
+      "waitStatus": -1,
+      "bootstrapPid": 4224,
+      "directNative": true,
+      "admission": {
+        "schema": "foldgpt.executor-admission.v1",
+        "admitted": true,
+        "stage": "complete",
+        "subject": "",
+        "facts": {},
+        "error": null
+      },
+      "preflight": null
+    },
+    "lastNativeSessionStatus": {
+      "schema": "foldgpt.shizuku.transport.v1",
+      "ready": true,
+      "cancelRequested": false,
+      "bootstrapReaped": false,
+      "cleanupComplete": false,
+      "ownerRetained": true,
+      "quarantined": false,
+      "refusedBeforeFork": false,
+      "setupError": null,
+      "transportFailed": false,
+      "waitStatus": -1,
+      "bootstrapPid": 4224,
+      "directNative": true
+    },
+    "socketPath": "/data/user/0/app.foldgpt/app_foldgpt_exec/e22f3b0fcbf148cead63e86c01be0859/owner.sock",
+    "peerUid": 10412,
+    "directNative": true,
+    "startupManifest": "/data/user/0/app.foldgpt/app_foldgpt_exec/e22f3b0fcbf148cead63e86c01be0859/startup.json",
+    "workspace": "/data/user/0/app.foldgpt/files/projects"
+  },
+  "stopResponse": "Broadcasting: Intent { act=app.foldgpt.action.STOP_NATIVE_EXECUTOR flg=0x10400000 cmp=app.foldgpt/.NativePreparationReceiver }\r\nBroadcast completed: result=0",
+  "finalStatus": {
+    "schema": "foldgpt.native.owner.v1",
+    "state": "closed",
+    "generation": 1,
+    "selected": true,
+    "officialLauncherReplaced": false,
+    "lastRemoteStatus": {
+      "schema": "foldgpt.shizuku.transport.v1",
+      "ready": true,
+      "cancelRequested": false,
+      "bootstrapReaped": true,
+      "cleanupComplete": true,
+      "ownerRetained": false,
+      "quarantined": false,
+      "refusedBeforeFork": false,
+      "setupError": null,
+      "transportFailed": false,
+      "waitStatus": 0,
+      "bootstrapPid": 4224,
+      "directNative": true,
+      "admission": {
+        "schema": "foldgpt.executor-admission.v1",
+        "admitted": true,
+        "stage": "complete",
+        "subject": "",
+        "facts": {},
+        "error": null
+      },
+      "preflight": null
+    },
+    "lastNativeSessionStatus": {
+      "schema": "foldgpt.shizuku.transport.v1",
+      "ready": true,
+      "cancelRequested": false,
+      "bootstrapReaped": true,
+      "cleanupComplete": true,
+      "ownerRetained": false,
+      "quarantined": false,
+      "refusedBeforeFork": false,
+      "setupError": null,
+      "transportFailed": false,
+      "waitStatus": 0,
+      "bootstrapPid": 4224,
+      "directNative": true
+    },
+    "socketPath": "/data/user/0/app.foldgpt/app_foldgpt_exec/e22f3b0fcbf148cead63e86c01be0859/owner.sock",
+    "peerUid": 10412,
+    "directNative": true,
+    "startupManifest": "/data/user/0/app.foldgpt/app_foldgpt_exec/e22f3b0fcbf148cead63e86c01be0859/startup.json",
+    "workspace": "/data/user/0/app.foldgpt/files/projects"
+  },
+  "bootUnchanged": true,
+  "nativeOwnerAbsent": true,
+  "cleanupVerified": true
+}

@@ -97,6 +97,12 @@ public final class FoldRuntimeService extends Service {
             requireReadableFile(root, "usr/local/lib/foldgpt/foldgpt_ime.py");
             requireReadableFile(root, "usr/local/lib/foldgpt/keyboard-focus.js");
             requireReadableFile(root, "usr/share/X11/xkb/rules/evdev");
+            FoldExecutorRuntime.Endpoint nativeEndpoint = executorRuntime.isNativeSelected()
+                    ? executorRuntime.prepare(identity.home).get(90, java.util.concurrent.TimeUnit.SECONDS) : null;
+            if (nativeEndpoint != null && nativeEndpoint.directNative()) {
+                requireReadableFile(root, "usr/local/bin/foldgpt-codex-native");
+                requireReadableFile(root, "usr/local/libexec/foldgpt/codex-native");
+            }
             // Validate Linux and unlock its existing credential before creating native
             // X11 threads. A missing first-install component must not leave a partial
             // display server running or request a Linux password window.
@@ -131,13 +137,26 @@ public final class FoldRuntimeService extends Service {
                 "-r", root.getAbsolutePath(), "-i", identity.prootIds(), "-w", identity.home,
                 "-b", "/dev", "-b", "/proc", "-b", "/sys", "-b", "/system", "-b", "/apex",
                 "-b", temp.getAbsolutePath() + ":/tmp",
-                "-b", sharedMemory.getAbsolutePath() + ":/dev/shm",
-                "/usr/bin/env", "-i", "HOME=" + identity.home, "USER=" + identity.user, "LOGNAME=" + identity.user,
+                "-b", sharedMemory.getAbsolutePath() + ":/dev/shm"));
+            if (nativeEndpoint != null && nativeEndpoint.directNative()) {
+                // The controller and native authority must observe identical
+                // absolute paths and inodes. Bind only the declared roots.
+                for (String shared : new String[] {nativeEndpoint.workspace(), nativeEndpoint.endpointRoot(),
+                        nativeEndpoint.pythonRoot(), nativeEndpoint.nativeRoot()}) {
+                    args.add("-b"); args.add(shared + ":" + shared);
+                }
+            }
+            args.addAll(Arrays.asList("/usr/bin/env", "-i", "HOME=" + identity.home, "USER=" + identity.user, "LOGNAME=" + identity.user,
                 "LANG=C.UTF-8", "PATH=/usr/local/bin:/usr/bin:/bin",
                 "DISPLAY=:2", "FOLDGPT_IME_UID=" + android.os.Process.myUid(),
                 "FOLDGPT_URL_UID=" + android.os.Process.myUid(),
-                "FOLDGPT_SCALE=" + getResources().getDisplayMetrics().density,
-                "/bin/bash", "/usr/local/bin/foldgpt-session"));
+                "FOLDGPT_SCALE=" + getResources().getDisplayMetrics().density));
+            if (nativeEndpoint != null && nativeEndpoint.directNative()) {
+                args.add("CODEX_CLI_PATH=/usr/local/bin/foldgpt-codex-native");
+                args.add("FOLDGPT_NATIVE_BOOTSTRAP=" + nativeEndpoint.startupManifest());
+                args.add("FOLDGPT_NATIVE_WORKSPACE=" + nativeEndpoint.workspace());
+            }
+            args.addAll(Arrays.asList("/bin/bash", "/usr/local/bin/foldgpt-session"));
             ProcessBuilder builder = new ProcessBuilder(args);
             builder.environment().put("LD_LIBRARY_PATH", aliases + ":" + getApplicationInfo().nativeLibraryDir);
             builder.environment().put("PROOT_LOADER", getApplicationInfo().nativeLibraryDir + "/libproot-loader.so");

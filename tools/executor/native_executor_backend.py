@@ -37,6 +37,9 @@ class NativeExecutorBackend:
         self.session = None
         self.closing = False
         self._close_task = None
+        # Optional bootstrap-owned human processes share this exact filesystem.
+        # They never enter the model method dispatch above.
+        self._host_process_owners = []
 
     def _bind(self, session):
         if self.session is None:
@@ -92,7 +95,14 @@ class NativeExecutorBackend:
         # Unknown process cleanup deliberately leaves the pinned root/lease
         # owned. Closing its file backend would release the kernel flock and
         # allow a new connection to race surviving workers.
-        await self.processes.close(session_id)
+        if self._host_process_owners:
+            results = await asyncio.gather(self.processes.close(session_id),
+                *(owner.close(session_id) for owner in self._host_process_owners), return_exceptions=True)
+            for result in results:
+                if isinstance(result, BaseException):
+                    raise result
+        else:
+            await self.processes.close(session_id)
         if self.processes.quarantined:
             raise RpcError(-32603, "Native executor cannot release an unknown process workspace")
         await self.files.close(session_id)

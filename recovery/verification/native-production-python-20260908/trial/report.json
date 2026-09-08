@@ -1,0 +1,184 @@
+{
+  "passed": true,
+  "scope": "Actual Java/Shizuku/run-as owner and GNU client; app-server and UI not tested",
+  "prepareResponse": "Starting: Intent { act=app.foldgpt.action.PREPARE_NATIVE_EXECUTOR cmp=app.foldgpt/.NativePreparationActivity }\r\nStatus: ok\r\nLaunchState: WARM\r\nActivity: app.foldgpt/.NativePreparationActivity\r\nTotalTime: 71\r\nWaitTime: 74\r\nComplete",
+  "startup": {
+    "schema": "foldgpt.native-startup.v1",
+    "socketPath": "/data/user/0/app.foldgpt/app_foldgpt_exec/612920aced6148459dc9b58fd2ea8a4a/owner.sock",
+    "peer": {
+      "pid": 10018,
+      "uid": 10412,
+      "gid": 10412
+    },
+    "workspaceRoot": "file:///data/user/0/app.foldgpt/files/projects",
+    "sharedPaths": [
+      {
+        "path": "file:///data/user/0/app.foldgpt/files/projects",
+        "device": 65097,
+        "inode": 471258
+      },
+      {
+        "path": "file:///data/user/0/app.foldgpt/files/native-runtime-v1/python",
+        "device": 65097,
+        "inode": 472354
+      },
+      {
+        "path": "file:///data/app/~~Tvt7J-zOLlQp9c0jDgqFJg%3D%3D/app.foldgpt-Gn2TuF8BAI-tQszCQqpWSQ%3D%3D/lib/arm64",
+        "device": 65097,
+        "inode": 473912
+      }
+    ],
+    "controllerRoots": [
+      "file:///home/julien",
+      "file:///tmp"
+    ],
+    "parentEnvironment": {
+      "HOME": "/data/user/0/app.foldgpt/files/projects",
+      "TMPDIR": "/data/user/0/app.foldgpt/files/projects/.foldgpt-tmp",
+      "PATH": "/data/user/0/app.foldgpt/files/native-runtime-v1/python/bin:/system/bin",
+      "SHELL": "/data/app/~~Tvt7J-zOLlQp9c0jDgqFJg==/app.foldgpt-Gn2TuF8BAI-tQszCQqpWSQ==/lib/arm64/libfoldgpt_bash.so",
+      "LANG": "C.UTF-8"
+    }
+  },
+  "client": {
+    "appServerTested": false,
+    "controllerGnuLibcVersion": "2.41",
+    "controllerLibcUid": 10410,
+    "controllerPid": 10053,
+    "directChannelsAuthenticated": true,
+    "lifetimeClosedAfterWork": true,
+    "nativeOwner": {
+      "gid": 10412,
+      "pid": 10018,
+      "uid": 10412
+    },
+    "nativeOwnerReaped": false,
+    "nativeProcessClosed": true,
+    "passed": true,
+    "phoneUiTested": false,
+    "project": "/data/user/0/app.foldgpt/files/projects/native-production-39ac4e299b644bbfac04b9303da09870",
+    "schema": "foldgpt.native-production-qualification.v1",
+    "sessionId": "d24c6ff9-490a-489c-856d-3eaff5d30aea",
+    "worker": {
+      "HOME": "/data/user/0/app.foldgpt/files/projects",
+      "PATH": "/data/user/0/app.foldgpt/files/native-runtime-v1/python/bin:/system/bin",
+      "TMPDIR": "/data/user/0/app.foldgpt/files/projects/.foldgpt-tmp",
+      "builtOutput": "42\n",
+      "cwd": "/data/user/0/app.foldgpt/files/projects/native-production-39ac4e299b644bbfac04b9303da09870",
+      "machine": "aarch64",
+      "platform": "android",
+      "python": "/data/app/~~Tvt7J-zOLlQp9c0jDgqFJg==/app.foldgpt-Gn2TuF8BAI-tQszCQqpWSQ==/lib/arm64/libfoldgpt_python_cli.so",
+      "tests": 3,
+      "uid": 10412
+    },
+    "workerStderr": "test_negative (test_add.Addition.test_negative) ... ok\ntest_positive (test_add.Addition.test_positive) ... ok\ntest_zero (test_add.Addition.test_zero) ... ok\n\n----------------------------------------------------------------------\nRan 3 tests in 0.000s\n\nOK\n",
+    "zipappSha256": "7b9a65336f8b37be69f47d53a61a51e4e2c3957717c875389b1ae2f28153fadd"
+  },
+  "clientPassed": true,
+  "beforeStopStatus": {
+    "schema": "foldgpt.native.owner.v1",
+    "state": "ready",
+    "generation": 1,
+    "selected": true,
+    "officialLauncherReplaced": false,
+    "lastRemoteStatus": {
+      "schema": "foldgpt.shizuku.transport.v1",
+      "ready": true,
+      "cancelRequested": false,
+      "bootstrapReaped": false,
+      "cleanupComplete": false,
+      "ownerRetained": true,
+      "quarantined": false,
+      "refusedBeforeFork": false,
+      "setupError": null,
+      "transportFailed": false,
+      "waitStatus": -1,
+      "bootstrapPid": 10018,
+      "directNative": true,
+      "admission": {
+        "schema": "foldgpt.executor-admission.v1",
+        "admitted": true,
+        "stage": "complete",
+        "subject": "",
+        "facts": {},
+        "error": null
+      },
+      "preflight": null
+    },
+    "lastNativeSessionStatus": {
+      "schema": "foldgpt.shizuku.transport.v1",
+      "ready": true,
+      "cancelRequested": false,
+      "bootstrapReaped": false,
+      "cleanupComplete": false,
+      "ownerRetained": true,
+      "quarantined": false,
+      "refusedBeforeFork": false,
+      "setupError": null,
+      "transportFailed": false,
+      "waitStatus": -1,
+      "bootstrapPid": 10018,
+      "directNative": true
+    },
+    "socketPath": "/data/user/0/app.foldgpt/app_foldgpt_exec/612920aced6148459dc9b58fd2ea8a4a/owner.sock",
+    "peerUid": 10412,
+    "directNative": true,
+    "startupManifest": "/data/user/0/app.foldgpt/app_foldgpt_exec/612920aced6148459dc9b58fd2ea8a4a/startup.json",
+    "workspace": "/data/user/0/app.foldgpt/files/projects"
+  },
+  "stopResponse": "Starting: Intent { act=app.foldgpt.action.STOP_NATIVE_EXECUTOR cmp=app.foldgpt/.NativePreparationActivity }\r\nWarning: Activity not started, intent has been delivered to currently running top-most instance.\r\nStatus: ok\r\nLaunchState: UNKNOWN (0)\r\nActivity: app.foldgpt/.NativePreparationActivity\r\nTotalTime: 0\r\nWaitTime: 7\r\nComplete",
+  "finalStatus": {
+    "schema": "foldgpt.native.owner.v1",
+    "state": "closed",
+    "generation": 1,
+    "selected": true,
+    "officialLauncherReplaced": false,
+    "lastRemoteStatus": {
+      "schema": "foldgpt.shizuku.transport.v1",
+      "ready": true,
+      "cancelRequested": false,
+      "bootstrapReaped": true,
+      "cleanupComplete": true,
+      "ownerRetained": false,
+      "quarantined": false,
+      "refusedBeforeFork": false,
+      "setupError": null,
+      "transportFailed": false,
+      "waitStatus": 0,
+      "bootstrapPid": 10018,
+      "directNative": true,
+      "admission": {
+        "schema": "foldgpt.executor-admission.v1",
+        "admitted": true,
+        "stage": "complete",
+        "subject": "",
+        "facts": {},
+        "error": null
+      },
+      "preflight": null
+    },
+    "lastNativeSessionStatus": {
+      "schema": "foldgpt.shizuku.transport.v1",
+      "ready": true,
+      "cancelRequested": false,
+      "bootstrapReaped": true,
+      "cleanupComplete": true,
+      "ownerRetained": false,
+      "quarantined": false,
+      "refusedBeforeFork": false,
+      "setupError": null,
+      "transportFailed": false,
+      "waitStatus": 0,
+      "bootstrapPid": 10018,
+      "directNative": true
+    },
+    "socketPath": "/data/user/0/app.foldgpt/app_foldgpt_exec/612920aced6148459dc9b58fd2ea8a4a/owner.sock",
+    "peerUid": 10412,
+    "directNative": true,
+    "startupManifest": "/data/user/0/app.foldgpt/app_foldgpt_exec/612920aced6148459dc9b58fd2ea8a4a/startup.json",
+    "workspace": "/data/user/0/app.foldgpt/files/projects"
+  },
+  "bootUnchanged": true,
+  "nativeOwnerAbsent": true,
+  "cleanupVerified": true
+}

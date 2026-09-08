@@ -28,6 +28,7 @@ MAX_BUNDLE_BYTES = 8 * 1024 * 1024
 SOURCES = {
     "LICENSE": ("LICENSE", 0o644),
     "foldgpt-session.sh": ("payload/usr/local/bin/foldgpt-session", 0o700),
+    "tools/executor/foldgpt-codex-native.sh": ("payload/usr/local/bin/foldgpt-codex-native", 0o755),
     "foldgpt_keyring.py": ("payload/usr/local/lib/foldgpt/foldgpt_keyring.py", 0o644),
     "foldgpt_ime.py": ("payload/usr/local/lib/foldgpt/foldgpt_ime.py", 0o644),
     "keyboard-focus.js": ("payload/usr/local/lib/foldgpt/keyboard-focus.js", 0o644),

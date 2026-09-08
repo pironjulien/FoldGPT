@@ -11,6 +11,7 @@
 #include <string.h>
 #include <sys/ioctl.h>
 #include <sys/prctl.h>
+#include <sys/resource.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
 #include <sys/syscall.h>
@@ -93,7 +94,19 @@ int main(int argc,char **argv) {
        prctl(PR_GET_NO_NEW_PRIVS,0,0,0,0)!=1||prctl(PR_GET_SECCOMP,0,0,0,0)!=2)
         return fail("required-enforcement",EPERM);
     int result=mechanisms();if(result)return result;
-    pthread_t thread;int created=pthread_create(&thread,NULL,thread_mechanisms,NULL);
+    /* The host's default pthread stack can consume the complete data limit
+     * (GitHub: 16MiB each). Reserve half of the actual allowance for this one
+     * secondary thread and retain the other half for the main worker/heap. */
+    struct rlimit data_limit;
+    NEED(getrlimit(RLIMIT_DATA,&data_limit)==0&&data_limit.rlim_cur!=RLIM_INFINITY,"thread-data-budget");
+    size_t stack_bytes=(size_t)(data_limit.rlim_cur/2);
+    NEED(stack_bytes>=(size_t)PTHREAD_STACK_MIN,"thread-stack-budget");
+    pthread_attr_t attributes;int configured=pthread_attr_init(&attributes);
+    if(configured)return fail("thread-attributes",configured);
+    configured=pthread_attr_setstacksize(&attributes,stack_bytes);
+    if(configured){pthread_attr_destroy(&attributes);return fail("thread-stack-attributes",configured);}
+    pthread_t thread;int created=pthread_create(&thread,&attributes,thread_mechanisms,NULL);
+    pthread_attr_destroy(&attributes);
     if(created)return fail("create-real-secondary-thread",created);
     void *thread_result=NULL;int joined=pthread_join(thread,&thread_result);
     if(joined)return fail("join-real-secondary-thread",joined);

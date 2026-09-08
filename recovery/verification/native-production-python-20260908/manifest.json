@@ -1,0 +1,54 @@
+{
+  "scope": "Actual Java/Shizuku/run-as owner and GNU client; app-server and UI not tested",
+  "passed": true,
+  "officialChatgptUnchanged": true,
+  "propertiesUnchanged": true,
+  "bootUnchanged": true,
+  "files": [
+    {
+      "path": "trial/client.py",
+      "bytes": 18672,
+      "sha256": "2503198aaac344720144c346f26020001f24a5c07d8c299b057e86061bf4f2fb"
+    },
+    {
+      "path": "trial/client.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "trial/client.stdout",
+      "bytes": 1452,
+      "sha256": "6a17779bbadffe38a54e0dd533868833fa1955bb476d2f0b8d7261923bdd62e1"
+    },
+    {
+      "path": "trial/commands.json",
+      "bytes": 69494,
+      "sha256": "c906074fdd740b61123f81a6e82956e8c5cb3c58e72a8823a0c7abd03faedf88"
+    },
+    {
+      "path": "trial/report.json",
+      "bytes": 7122,
+      "sha256": "c30f73d8778c5c98b61369a8f091a1af7e3b362183c7c00818fdac1858906373"
+    },
+    {
+      "path": "trial/startup.json",
+      "bytes": 1239,
+      "sha256": "7dd985cfc47ab31ef53df97b53d24e4236f4a7be20cfc1fb11211eda4b35f353"
+    },
+    {
+      "path": "trial/statuses.json",
+      "bytes": 6064,
+      "sha256": "4e059b0b72b014d4d0b045c10fc185b24802498579d2483dcc6f46fc2095e1da"
+    },
+    {
+      "path": "after/commands.json",
+      "bytes": 5700,
+      "sha256": "d2a2da7b994e20945ab1b5376e7a1dbfca8e06d31e11c0fd88ee35892982ade9"
+    },
+    {
+      "path": "after/snapshot.json",
+      "bytes": 2009,
+      "sha256": "343d6cab124917940d16c73a738bcdc791d7792838dddd458baa5efb37651763"
+    }
+  ]
+}

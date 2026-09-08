@@ -1,0 +1,41 @@
+{
+  "scope": "Real Bionic startup file/socket tests via ADB/run-as; no supervisor or UI",
+  "deviceDirectory": "/data/user/0/app.foldgpt/files/nt-5dba0278",
+  "uid": 10412,
+  "passed": true,
+  "tests": {
+    "pid": 24868,
+    "uid": 10412,
+    "gid": 10412,
+    "platform": "android",
+    "tests": 12,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": true
+  },
+  "sources": [
+    {
+      "path": "tools/__init__.py",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tools/executor/__init__.py",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tools/executor/native_runtime_startup.py",
+      "bytes": 11533,
+      "sha256": "4432899bc0d0f498a4acf44d86d5a21c5d41e57e4430be870ebf97400eb1c462"
+    },
+    {
+      "path": "tools/executor/test_native_runtime_startup.py",
+      "bytes": 9435,
+      "sha256": "edb9bca218bea9b88e20af460a1babdd52f817a6662ca76ce08b0b7d2b01def1"
+    }
+  ],
+  "bootId": "348d453e-f4e5-40e0-8ef0-030f4d5e38af",
+  "bootUnchanged": true
+}

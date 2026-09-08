@@ -1,0 +1,1535 @@
+[
+  {
+    "argv": [
+      "cat",
+      "/proc/sys/kernel/random/boot_id"
+    ],
+    "code": 0,
+    "stdout": "348d453e-f4e5-40e0-8ef0-030f4d5e38af\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "pm",
+      "path",
+      "app.foldgpt"
+    ],
+    "code": 0,
+    "stdout": "package:/data/app/~~wGYAB2PqbUyL_CxBbDMYoQ==/app.foldgpt-t3Luk06-GULUyX8_Hx3Zkg==/base.apk\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "sha256sum",
+      "/data/app/~~wGYAB2PqbUyL_CxBbDMYoQ==/app.foldgpt-t3Luk06-GULUyX8_Hx3Zkg==/base.apk"
+    ],
+    "code": 0,
+    "stdout": "b8ebceeedbd75e36fabdb8d1e178ed46f8115eaa9fe7836e1a4e45bb84c01444  /data/app/~~wGYAB2PqbUyL_CxBbDMYoQ==/app.foldgpt-t3Luk06-GULUyX8_Hx3Zkg==/base.apk\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "id",
+      "-u"
+    ],
+    "code": 0,
+    "stdout": "10412\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"closed\",\r\n  \"generation\": 1,\r\n  \"selected\": false,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/debian/etc/foldgpt-user"
+    ],
+    "code": 0,
+    "stdout": "julien\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/debian/etc/passwd"
+    ],
+    "code": 0,
+    "stdout": "root:x:0:0:root:/root:/bin/bash\r\ndaemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin\r\nbin:x:2:2:bin:/bin:/usr/sbin/nologin\r\nsys:x:3:3:sys:/dev:/usr/sbin/nologin\r\nsync:x:4:65534:sync:/bin:/bin/sync\r\ngames:x:5:60:games:/usr/games:/usr/sbin/nologin\r\nman:x:6:12:man:/var/cache/man:/usr/sbin/nologin\r\nlp:x:7:7:lp:/var/spool/lpd:/usr/sbin/nologin\r\nmail:x:8:8:mail:/var/mail:/usr/sbin/nologin\r\nnews:x:9:9:news:/var/spool/news:/usr/sbin/nologin\r\nuucp:x:10:10:uucp:/var/spool/uucp:/usr/sbin/nologin\r\nproxy:x:13:13:proxy:/bin:/usr/sbin/nologin\r\nwww-data:x:33:33:www-data:/var/www:/usr/sbin/nologin\r\nbackup:x:34:34:backup:/var/backups:/usr/sbin/nologin\r\nlist:x:38:38:Mailing List Manager:/var/list:/usr/sbin/nologin\r\nirc:x:39:39:ircd:/run/ircd:/usr/sbin/nologin\r\n_apt:x:42:65534::/nonexistent:/usr/sbin/nologin\r\nnobody:x:65534:65534:nobody:/nonexistent:/usr/sbin/nologin\r\naid_u0_a409:x:10409:10409:Termux:/:/sbin/nologin\r\njulien:x:10410:10410::/home/julien:/bin/bash\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "mkdir",
+      "-m",
+      "700",
+      "/data/user/0/app.foldgpt/files/pc-b2d339dd"
+    ],
+    "code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "ln",
+      "-s",
+      "/data/app/~~wGYAB2PqbUyL_CxBbDMYoQ==/app.foldgpt-t3Luk06-GULUyX8_Hx3Zkg==/lib/arm64/libtalloc.so",
+      "/data/user/0/app.foldgpt/files/pc-b2d339dd/libtalloc.so.2"
+    ],
+    "code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "readlink",
+      "-f",
+      "/data/user/0/app.foldgpt/files/pc-b2d339dd/libtalloc.so.2"
+    ],
+    "code": 0,
+    "stdout": "/data/app/~~wGYAB2PqbUyL_CxBbDMYoQ==/app.foldgpt-t3Luk06-GULUyX8_Hx3Zkg==/lib/arm64/libtalloc.so\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "test",
+      "-d",
+      "/data/user/0/app.foldgpt/cache/x11"
+    ],
+    "code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "test",
+      "-d",
+      "/data/user/0/app.foldgpt/cache/shm"
+    ],
+    "code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "tar",
+      "-xf",
+      "-",
+      "-C",
+      "/data/user/0/app.foldgpt/files/pc-b2d339dd"
+    ],
+    "code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "sha256sum",
+      "/data/user/0/app.foldgpt/files/pc-b2d339dd/client.py"
+    ],
+    "code": 0,
+    "stdout": "d2de6fac69ce80f11fe283043e67f6b7455d484c0cff4b28bf2240f0b8f79515  /data/user/0/app.foldgpt/files/pc-b2d339dd/client.py\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "am",
+      "broadcast",
+      "--receiver-foreground",
+      "-n",
+      "app.foldgpt/.NativePreparationReceiver",
+      "-a",
+      "app.foldgpt.action.PREPARE_NATIVE_EXECUTOR"
+    ],
+    "code": 0,
+    "stdout": "Broadcasting: Intent { act=app.foldgpt.action.PREPARE_NATIVE_EXECUTOR flg=0x10400000 cmp=app.foldgpt/.NativePreparationReceiver }\r\nBroadcast completed: result=0\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"closed\",\r\n  \"generation\": 1,\r\n  \"selected\": false,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "logcat",
+      "-d",
+      "-v",
+      "threadtime",
+      "-s",
+      "FoldGPT-executor",
+      "FoldGPT"
+    ],
+    "code": 0,
+    "stdout": "--------- beginning of main\r\n09-08 03:45:55.421 27279 27294 E FoldGPT-executor: qualified_native_deployment_unavailable\r\n09-08 03:45:55.421 27279 27294 E FoldGPT-executor: java.lang.SecurityException: Native directory must be private and app-owned: app_foldgpt_exec\r\n09-08 03:45:55.421 27279 27294 E FoldGPT-executor: \tat app.foldgpt.NativeLaunch.privateDirectory(NativeLaunch.java:107)\r\n09-08 03:45:55.421 27279 27294 E FoldGPT-executor: \tat app.foldgpt.NativeLaunch.<init>(NativeLaunch.java:27)\r\n09-08 03:45:55.421 27279 27294 E FoldGPT-executor: \tat app.foldgpt.FoldExecutorRuntime.lambda$prepare$1(FoldExecutorRuntime.java:95)\r\n09-08 03:45:55.421 27279 27294 E FoldGPT-executor: \tat app.foldgpt.FoldExecutorRuntime.$r8$lambda$-ZPNPtBcp5lWOOVJFeIJlAYf69E(FoldExecutorRuntime.java:0)\r\n09-08 03:45:55.421 27279 27294 E FoldGPT-executor: \tat app.foldgpt.FoldExecutorRuntime$$ExternalSyntheticLambda0.run(D8$$SyntheticClass:0)\r\n09-08 03:45:55.421 27279 27294 E FoldGPT-executor: \tat java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1100)\r\n09-08 03:45:55.421 27279 27294 E FoldGPT-executor: \tat java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)\r\n09-08 03:45:55.421 27279 27294 E FoldGPT-executor: \tat java.lang.Thread.run(Thread.java:1572)\r\n09-08 03:45:55.422 27279 27279 E FoldGPT : Selected native executor is unavailable\r\n09-08 03:45:55.422 27279 27279 E FoldGPT : java.lang.IllegalStateException: qualified_native_deployment_unavailable\r\n09-08 03:45:55.422 27279 27279 E FoldGPT : \tat app.foldgpt.FoldExecutorRuntime.fail(FoldExecutorRuntime.java:297)\r\n09-08 03:45:55.422 27279 27279 E FoldGPT : \tat app.foldgpt.FoldExecutorRuntime.lambda$prepare$1(FoldExecutorRuntime.java:98)\r\n09-08 03:45:55.422 27279 27279 E FoldGPT : \tat app.foldgpt.FoldExecutorRuntime.$r8$lambda$-ZPNPtBcp5lWOOVJFeIJlAYf69E(FoldExecutorRuntime.java:0)\r\n09-08 03:45:55.422 27279 27279 E FoldGPT : \tat app.foldgpt.FoldExecutorRuntime$$ExternalSyntheticLambda0.run(D8$$SyntheticClass:0)\r\n09-08 03:45:55.422 27279 27279 E FoldGPT : \tat java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1100)\r\n09-08 03:45:55.422 27279 27279 E FoldGPT : \tat java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)\r\n09-08 03:45:55.422 27279 27279 E FoldGPT : \tat java.lang.Thread.run(Thread.java:1572)\r\n09-08 03:45:55.422 27279 27279 E FoldGPT : Caused by: java.lang.SecurityException: Native directory must be private and app-owned: app_foldgpt_exec\r\n09-08 03:45:55.422 27279 27279 E FoldGPT : \tat app.foldgpt.NativeLaunch.privateDirectory(NativeLaunch.java:107)\r\n09-08 03:45:55.422 27279 27279 E FoldGPT : \tat app.foldgpt.NativeLaunch.<init>(NativeLaunch.java:27)\r\n09-08 03:45:55.422 27279 27279 E FoldGPT : \tat app.foldgpt.FoldExecutorRuntime.lambda$prepare$1(FoldExecutorRuntime.java:95)\r\n09-08 03:45:55.422 27279 27279 E FoldGPT : \t... 5 more\r\n09-08 03:56:16.114 28858 28874 E FoldGPT-executor: qualified_native_deployment_unavailable\r\n09-08 03:56:16.114 28858 28874 E FoldGPT-executor: java.lang.SecurityException: Runtime path differs from the application-owned prefix\r\n09-08 03:56:16.114 28858 28874 E FoldGPT-executor: \tat app.foldgpt.NativeLaunch.<init>(NativeLaunch.java:41)\r\n09-08 03:56:16.114 28858 28874 E FoldGPT-executor: \tat app.foldgpt.FoldExecutorRuntime.lambda$prepare$1(FoldExecutorRuntime.java:95)\r\n09-08 03:56:16.114 28858 28874 E FoldGPT-executor: \tat app.foldgpt.FoldExecutorRuntime.$r8$lambda$-ZPNPtBcp5lWOOVJFeIJlAYf69E(FoldExecutorRuntime.java:0)\r\n09-08 03:56:16.114 28858 28874 E FoldGPT-executor: \tat app.foldgpt.FoldExecutorRuntime$$ExternalSyntheticLambda0.run(D8$$SyntheticClass:0)\r\n09-08 03:56:16.114 28858 28874 E FoldGPT-executor: \tat java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1100)\r\n09-08 03:56:16.114 28858 28874 E FoldGPT-executor: \tat java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)\r\n09-08 03:56:16.114 28858 28874 E FoldGPT-executor: \tat java.lang.Thread.run(Thread.java:1572)\r\n09-08 03:56:16.116 28858 28858 E FoldGPT : Selected native executor is unavailable\r\n09-08 03:56:16.116 28858 28858 E FoldGPT : java.lang.IllegalStateException: qualified_native_deployment_unavailable\r\n09-08 03:56:16.116 28858 28858 E FoldGPT : \tat app.foldgpt.FoldExecutorRuntime.fail(FoldExecutorRuntime.java:297)\r\n09-08 03:56:16.116 28858 28858 E FoldGPT : \tat app.foldgpt.FoldExecutorRuntime.lambda$prepare$1(FoldExecutorRuntime.java:98)\r\n09-08 03:56:16.116 28858 28858 E FoldGPT : \tat app.foldgpt.FoldExecutorRuntime.$r8$lambda$-ZPNPtBcp5lWOOVJFeIJlAYf69E(FoldExecutorRuntime.java:0)\r\n09-08 03:56:16.116 28858 28858 E FoldGPT : \tat app.foldgpt.FoldExecutorRuntime$$ExternalSyntheticLambda0.run(D8$$SyntheticClass:0)\r\n09-08 03:56:16.116 28858 28858 E FoldGPT : \tat java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1100)\r\n09-08 03:56:16.116 28858 28858 E FoldGPT : \tat java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)\r\n09-08 03:56:16.116 28858 28858 E FoldGPT : \tat java.lang.Thread.run(Thread.java:1572)\r\n09-08 03:56:16.116 28858 28858 E FoldGPT : Caused by: java.lang.SecurityException: Runtime path differs from the application-owned prefix\r\n09-08 03:56:16.116 28858 28858 E FoldGPT : \tat app.foldgpt.NativeLaunch.<init>(NativeLaunch.java:41)\r\n09-08 03:56:16.116 28858 28858 E FoldGPT : \tat app.foldgpt.FoldExecutorRuntime.lambda$prepare$1(FoldExecutorRuntime.java:95)\r\n09-08 03:56:16.116 28858 28858 E FoldGPT : \t... 5 more\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "am",
+      "broadcast",
+      "--receiver-foreground",
+      "-n",
+      "app.foldgpt/.NativePreparationReceiver",
+      "-a",
+      "app.foldgpt.action.STOP_NATIVE_EXECUTOR"
+    ],
+    "code": 0,
+    "stdout": "Broadcasting: Intent { act=app.foldgpt.action.STOP_NATIVE_EXECUTOR flg=0x10400000 cmp=app.foldgpt/.NativePreparationReceiver }\r\nBroadcast completed: result=0\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"unavailable\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null,\r\n  \"reason\": \"qualified_native_deployment_unavailable\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "cat",
+      "/proc/sys/kernel/random/boot_id"
+    ],
+    "code": 0,
+    "stdout": "348d453e-f4e5-40e0-8ef0-030f4d5e38af\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "logcat",
+      "-d",
+      "-v",
+      "threadtime",
+      "-s",
+      "FoldGPT-executor",
+      "FoldGPT"
+    ],
+    "code": 0,
+    "stdout": "--------- beginning of main\r\n09-08 03:45:55.421 27279 27294 E FoldGPT-executor: qualified_native_deployment_unavailable\r\n09-08 03:45:55.421 27279 27294 E FoldGPT-executor: java.lang.SecurityException: Native directory must be private and app-owned: app_foldgpt_exec\r\n09-08 03:45:55.421 27279 27294 E FoldGPT-executor: \tat app.foldgpt.NativeLaunch.privateDirectory(NativeLaunch.java:107)\r\n09-08 03:45:55.421 27279 27294 E FoldGPT-executor: \tat app.foldgpt.NativeLaunch.<init>(NativeLaunch.java:27)\r\n09-08 03:45:55.421 27279 27294 E FoldGPT-executor: \tat app.foldgpt.FoldExecutorRuntime.lambda$prepare$1(FoldExecutorRuntime.java:95)\r\n09-08 03:45:55.421 27279 27294 E FoldGPT-executor: \tat app.foldgpt.FoldExecutorRuntime.$r8$lambda$-ZPNPtBcp5lWOOVJFeIJlAYf69E(FoldExecutorRuntime.java:0)\r\n09-08 03:45:55.421 27279 27294 E FoldGPT-executor: \tat app.foldgpt.FoldExecutorRuntime$$ExternalSyntheticLambda0.run(D8$$SyntheticClass:0)\r\n09-08 03:45:55.421 27279 27294 E FoldGPT-executor: \tat java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1100)\r\n09-08 03:45:55.421 27279 27294 E FoldGPT-executor: \tat java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)\r\n09-08 03:45:55.421 27279 27294 E FoldGPT-executor: \tat java.lang.Thread.run(Thread.java:1572)\r\n09-08 03:45:55.422 27279 27279 E FoldGPT : Selected native executor is unavailable\r\n09-08 03:45:55.422 27279 27279 E FoldGPT : java.lang.IllegalStateException: qualified_native_deployment_unavailable\r\n09-08 03:45:55.422 27279 27279 E FoldGPT : \tat app.foldgpt.FoldExecutorRuntime.fail(FoldExecutorRuntime.java:297)\r\n09-08 03:45:55.422 27279 27279 E FoldGPT : \tat app.foldgpt.FoldExecutorRuntime.lambda$prepare$1(FoldExecutorRuntime.java:98)\r\n09-08 03:45:55.422 27279 27279 E FoldGPT : \tat app.foldgpt.FoldExecutorRuntime.$r8$lambda$-ZPNPtBcp5lWOOVJFeIJlAYf69E(FoldExecutorRuntime.java:0)\r\n09-08 03:45:55.422 27279 27279 E FoldGPT : \tat app.foldgpt.FoldExecutorRuntime$$ExternalSyntheticLambda0.run(D8$$SyntheticClass:0)\r\n09-08 03:45:55.422 27279 27279 E FoldGPT : \tat java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1100)\r\n09-08 03:45:55.422 27279 27279 E FoldGPT : \tat java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)\r\n09-08 03:45:55.422 27279 27279 E FoldGPT : \tat java.lang.Thread.run(Thread.java:1572)\r\n09-08 03:45:55.422 27279 27279 E FoldGPT : Caused by: java.lang.SecurityException: Native directory must be private and app-owned: app_foldgpt_exec\r\n09-08 03:45:55.422 27279 27279 E FoldGPT : \tat app.foldgpt.NativeLaunch.privateDirectory(NativeLaunch.java:107)\r\n09-08 03:45:55.422 27279 27279 E FoldGPT : \tat app.foldgpt.NativeLaunch.<init>(NativeLaunch.java:27)\r\n09-08 03:45:55.422 27279 27279 E FoldGPT : \tat app.foldgpt.FoldExecutorRuntime.lambda$prepare$1(FoldExecutorRuntime.java:95)\r\n09-08 03:45:55.422 27279 27279 E FoldGPT : \t... 5 more\r\n09-08 03:56:16.114 28858 28874 E FoldGPT-executor: qualified_native_deployment_unavailable\r\n09-08 03:56:16.114 28858 28874 E FoldGPT-executor: java.lang.SecurityException: Runtime path differs from the application-owned prefix\r\n09-08 03:56:16.114 28858 28874 E FoldGPT-executor: \tat app.foldgpt.NativeLaunch.<init>(NativeLaunch.java:41)\r\n09-08 03:56:16.114 28858 28874 E FoldGPT-executor: \tat app.foldgpt.FoldExecutorRuntime.lambda$prepare$1(FoldExecutorRuntime.java:95)\r\n09-08 03:56:16.114 28858 28874 E FoldGPT-executor: \tat app.foldgpt.FoldExecutorRuntime.$r8$lambda$-ZPNPtBcp5lWOOVJFeIJlAYf69E(FoldExecutorRuntime.java:0)\r\n09-08 03:56:16.114 28858 28874 E FoldGPT-executor: \tat app.foldgpt.FoldExecutorRuntime$$ExternalSyntheticLambda0.run(D8$$SyntheticClass:0)\r\n09-08 03:56:16.114 28858 28874 E FoldGPT-executor: \tat java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1100)\r\n09-08 03:56:16.114 28858 28874 E FoldGPT-executor: \tat java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)\r\n09-08 03:56:16.114 28858 28874 E FoldGPT-executor: \tat java.lang.Thread.run(Thread.java:1572)\r\n09-08 03:56:16.116 28858 28858 E FoldGPT : Selected native executor is unavailable\r\n09-08 03:56:16.116 28858 28858 E FoldGPT : java.lang.IllegalStateException: qualified_native_deployment_unavailable\r\n09-08 03:56:16.116 28858 28858 E FoldGPT : \tat app.foldgpt.FoldExecutorRuntime.fail(FoldExecutorRuntime.java:297)\r\n09-08 03:56:16.116 28858 28858 E FoldGPT : \tat app.foldgpt.FoldExecutorRuntime.lambda$prepare$1(FoldExecutorRuntime.java:98)\r\n09-08 03:56:16.116 28858 28858 E FoldGPT : \tat app.foldgpt.FoldExecutorRuntime.$r8$lambda$-ZPNPtBcp5lWOOVJFeIJlAYf69E(FoldExecutorRuntime.java:0)\r\n09-08 03:56:16.116 28858 28858 E FoldGPT : \tat app.foldgpt.FoldExecutorRuntime$$ExternalSyntheticLambda0.run(D8$$SyntheticClass:0)\r\n09-08 03:56:16.116 28858 28858 E FoldGPT : \tat java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1100)\r\n09-08 03:56:16.116 28858 28858 E FoldGPT : \tat java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)\r\n09-08 03:56:16.116 28858 28858 E FoldGPT : \tat java.lang.Thread.run(Thread.java:1572)\r\n09-08 03:56:16.116 28858 28858 E FoldGPT : Caused by: java.lang.SecurityException: Runtime path differs from the application-owned prefix\r\n09-08 03:56:16.116 28858 28858 E FoldGPT : \tat app.foldgpt.NativeLaunch.<init>(NativeLaunch.java:41)\r\n09-08 03:56:16.116 28858 28858 E FoldGPT : \tat app.foldgpt.FoldExecutorRuntime.lambda$prepare$1(FoldExecutorRuntime.java:95)\r\n09-08 03:56:16.116 28858 28858 E FoldGPT : \t... 5 more\r\n",
+    "stderr": ""
+  }
+]

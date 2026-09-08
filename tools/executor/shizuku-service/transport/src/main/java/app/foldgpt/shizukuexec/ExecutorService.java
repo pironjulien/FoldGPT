@@ -28,6 +28,13 @@ public final class ExecutorService extends IExecutorService.Stub {
         if (Binder.getCallingUid() != clientUid) throw new SecurityException("Unauthorized executor caller");
     }
     @Override public synchronized IExecutorSession open(IBinder owner) {
+        return open(owner, null, null);
+    }
+    @Override public synchronized IExecutorSession openNative(IBinder owner, String launchPath, String nonce) {
+        if (launchPath == null || nonce == null) throw new SecurityException("Native launch identity is required");
+        return open(owner, launchPath, nonce);
+    }
+    private IExecutorSession open(IBinder owner, String launchPath, String nonce) {
         authenticate();
         AdmissionTrace trace = new AdmissionTrace();
         try {
@@ -36,7 +43,8 @@ public final class ExecutorService extends IExecutorService.Stub {
             if (current != null && !current.state.releasable()) {
                 throw new IllegalStateException("Existing session retains native ownership");
             }
-            Deployment deployment = new Deployment(context, trace);
+            Deployment deployment = new Deployment(context, trace, launchPath, nonce);
+            if (deployment.directNative && launchPath == null) throw new SecurityException("Native deployment requires explicit direct startup");
             trace.at(AdmissionTrace.Stage.TRANSPORT_LOAD);
             NativeSpawn.load(deployment.transportLibrary);
             trace.at(AdmissionTrace.Stage.OWNER_LINK);
@@ -56,7 +64,7 @@ public final class ExecutorService extends IExecutorService.Stub {
     @Override public synchronized String status() {
         authenticate();
         try {
-            JSONObject result = current == null ? new JSONObject().put("state", "idle") : new JSONObject(current.state.json());
+            JSONObject result = current == null ? new JSONObject().put("state", "idle") : current.snapshot();
             return result.put("admission", lastAdmission == null ? JSONObject.NULL : lastAdmission)
                 .put("preflight", lastPreflight == null ? JSONObject.NULL : lastPreflight).toString();
         } catch (Exception error) { throw new IllegalStateException("Executor status encoding failed", error); }
@@ -115,10 +123,12 @@ public final class ExecutorService extends IExecutorService.Stub {
         final SessionState state = new SessionState(Os.getuid(), clientUid);
         final IBinder owner;
         ParcelFileDescriptor input, output, control;
-        boolean cancelling;
+        boolean cancelling, directNative;
+        volatile int childPid = -1;
         Session(IBinder owner) throws Exception { this.owner = owner; owner.linkToDeath(this, 0); }
 
         synchronized void launch(Deployment deployment, AdmissionTrace trace) throws Exception {
+            directNative = deployment.directNative;
             ParcelFileDescriptor[] stdin = null, stdout = null, reports = null, controls = null;
             boolean spawned = false;
             try {
@@ -134,6 +144,7 @@ public final class ExecutorService extends IExecutorService.Stub {
                 trace.at(AdmissionTrace.Stage.NATIVE_FORK);
                 int pid = NativeSpawn.launch(deployment.executable, deployment.argv,
                     stdin[0].getFd(), stdout[1].getFd(), reports[1].getFd(), controls[0].getFd());
+                childPid = pid;
                 spawned = true;
                 trace.at(AdmissionTrace.Stage.OBSERVER_START);
                 ParcelFileDescriptor report = reports[0]; reports[0] = null;
@@ -154,16 +165,25 @@ public final class ExecutorService extends IExecutorService.Stub {
         }
         @Override public synchronized ParcelFileDescriptor takeInput() {
             state.authenticate(Binder.getCallingUid());
+            if (directNative) throw new IllegalStateException("Native channels are published directly with SCM_RIGHTS");
             if (input == null || cancelling) throw new IllegalStateException("Input already transferred or cancelled");
             ParcelFileDescriptor result = input; input = null; return result;
         }
         @Override public synchronized ParcelFileDescriptor takeOutput() {
             state.authenticate(Binder.getCallingUid());
+            if (directNative) throw new IllegalStateException("Native channels are published directly with SCM_RIGHTS");
             if (output == null) throw new IllegalStateException("Output already transferred");
             ParcelFileDescriptor result = output; output = null; return result;
         }
         @Override public void cancel() { state.authenticate(Binder.getCallingUid()); requestCancel(); }
-        @Override public String status() { state.authenticate(Binder.getCallingUid()); return state.json(); }
+        @Override public String status() {
+            state.authenticate(Binder.getCallingUid());
+            try { return snapshot().toString(); }
+            catch (Exception error) { throw new IllegalStateException(error); }
+        }
+        JSONObject snapshot() throws Exception {
+            return new JSONObject(state.json()).put("bootstrapPid", childPid).put("directNative", directNative);
+        }
         @Override public void binderDied() { requestCancel(); }
         synchronized void requestCancel() {
             cancelling = true; state.cancel();
@@ -190,7 +210,7 @@ public final class ExecutorService extends IExecutorService.Stub {
             try { state.reaped(NativeSpawn.waitChild(pid)); }
             catch (Exception error) { state.fail(); }
             if (state.releasable()) {
-                synchronized (this) { closeOne(control); control = null; closeOne(input); input = null; }
+                synchronized (this) { closeOne(control); control = null; closeOne(input); input = null; closeOne(output); output = null; }
                 owner.unlinkToDeath(this, 0);
                 finishDestroy();
             }

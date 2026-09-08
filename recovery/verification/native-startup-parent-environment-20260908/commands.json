@@ -1,0 +1,117 @@
+[
+  {
+    "argv": [
+      "cat",
+      "/proc/sys/kernel/random/boot_id"
+    ],
+    "code": 0,
+    "stdout": "348d453e-f4e5-40e0-8ef0-030f4d5e38af\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "sha256sum",
+      "/data/app/~~tZhnS0-qQoodtbpJNewWIg==/app.foldgpt.runasbrokerqualification.v2-ZSYy4cDX8E6_L8n600Md9A==/lib/arm64/libfoldgpt_python_cli.so"
+    ],
+    "code": 0,
+    "stdout": "76f4de641c0d65b04c1a627e197f78bec224f9032165130acdd820c4c2801f67  /data/app/~~tZhnS0-qQoodtbpJNewWIg==/app.foldgpt.runasbrokerqualification.v2-ZSYy4cDX8E6_L8n600Md9A==/lib/arm64/libfoldgpt_python_cli.so\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "mkdir",
+      "-m",
+      "700",
+      "/data/user/0/app.foldgpt/files/nt-5dba0278"
+    ],
+    "code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "tar",
+      "-xf",
+      "-",
+      "-C",
+      "/data/user/0/app.foldgpt/files/nt-5dba0278"
+    ],
+    "code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "sha256sum",
+      "/data/user/0/app.foldgpt/files/nt-5dba0278/tools/__init__.py"
+    ],
+    "code": 0,
+    "stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  /data/user/0/app.foldgpt/files/nt-5dba0278/tools/__init__.py\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "sha256sum",
+      "/data/user/0/app.foldgpt/files/nt-5dba0278/tools/executor/__init__.py"
+    ],
+    "code": 0,
+    "stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  /data/user/0/app.foldgpt/files/nt-5dba0278/tools/executor/__init__.py\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "sha256sum",
+      "/data/user/0/app.foldgpt/files/nt-5dba0278/tools/executor/native_runtime_startup.py"
+    ],
+    "code": 0,
+    "stdout": "4432899bc0d0f498a4acf44d86d5a21c5d41e57e4430be870ebf97400eb1c462  /data/user/0/app.foldgpt/files/nt-5dba0278/tools/executor/native_runtime_startup.py\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "sha256sum",
+      "/data/user/0/app.foldgpt/files/nt-5dba0278/tools/executor/test_native_runtime_startup.py"
+    ],
+    "code": 0,
+    "stdout": "edb9bca218bea9b88e20af460a1babdd52f817a6662ca76ce08b0b7d2b01def1  /data/user/0/app.foldgpt/files/nt-5dba0278/tools/executor/test_native_runtime_startup.py\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "/data/app/~~tZhnS0-qQoodtbpJNewWIg==/app.foldgpt.runasbrokerqualification.v2-ZSYy4cDX8E6_L8n600Md9A==/lib/arm64/libfoldgpt_python_cli.so",
+      "-I",
+      "-S",
+      "-B",
+      "-u",
+      "-c",
+      "import os,sys,json,unittest;os.environ['FOLDGPT_TEST_TMPDIR']=sys.argv[1];sys.path.insert(0,sys.argv[1]);from tools.executor import test_native_runtime_startup as tests;suite=unittest.defaultTestLoader.loadTestsFromModule(tests);result=unittest.TextTestRunner(verbosity=2).run(suite);print(json.dumps(dict(pid=os.getpid(),uid=os.getuid(),gid=os.getgid(),platform=sys.platform,tests=result.testsRun,failures=len(result.failures),errors=len(result.errors),skipped=len(result.skipped),passed=result.wasSuccessful())));sys.exit(0 if result.wasSuccessful() else 1)",
+      "/data/user/0/app.foldgpt/files/nt-5dba0278"
+    ],
+    "code": 0,
+    "stdout": "{\"observation\": \"hardlink_creation_denied_by_kernel\", \"errno\": 13, \"linkedInputAdmissionTested\": false}\r\n{\"pid\": 24868, \"uid\": 10412, \"gid\": 10412, \"platform\": \"android\", \"tests\": 12, \"failures\": 0, \"errors\": 0, \"skipped\": 0, \"passed\": true}\r\n",
+    "stderr": "test_actual_identity_and_inode_manifest_is_exclusive_and_removable (tools.executor.test_native_runtime_startup.NativeRuntimeStartupTests.test_actual_identity_and_inode_manifest_is_exclusive_and_removable) ... ok\r\ntest_actual_workspace_permissions_are_required (tools.executor.test_native_runtime_startup.NativeRuntimeStartupTests.test_actual_workspace_permissions_are_required) ... ok\r\ntest_alias_and_hardlinked_inputs_are_refused (tools.executor.test_native_runtime_startup.NativeRuntimeStartupTests.test_alias_and_hardlinked_inputs_are_refused) ... ok\r\ntest_bound_endpoint_requires_private_socket_in_actual_pinned_directory (tools.executor.test_native_runtime_startup.NativeRuntimeStartupTests.test_bound_endpoint_requires_private_socket_in_actual_pinned_directory) ... ok\r\ntest_controller_uri_requires_exact_unambiguous_local_spelling (tools.executor.test_native_runtime_startup.NativeRuntimeStartupTests.test_controller_uri_requires_exact_unambiguous_local_spelling) ... ok\r\ntest_endpoint_and_manifest_are_fixed_outside_workspace (tools.executor.test_native_runtime_startup.NativeRuntimeStartupTests.test_endpoint_and_manifest_are_fixed_outside_workspace) ... ok\r\ntest_launch_rejects_duplicate_and_unknown_fields (tools.executor.test_native_runtime_startup.NativeRuntimeStartupTests.test_launch_rejects_duplicate_and_unknown_fields) ... ok\r\ntest_parent_environment_rejects_invalid_variables_without_publication (tools.executor.test_native_runtime_startup.NativeRuntimeStartupTests.test_parent_environment_rejects_invalid_variables_without_publication) ... ok\r\ntest_private_input_identity_and_bounds_are_required (tools.executor.test_native_runtime_startup.NativeRuntimeStartupTests.test_private_input_identity_and_bounds_are_required) ... ok\r\ntest_replaced_manifest_is_never_removed (tools.executor.test_native_runtime_startup.NativeRuntimeStartupTests.test_replaced_manifest_is_never_removed) ... ok\r\ntest_shared_identity_must_cover_actual_workspace_without_aliases (tools.executor.test_native_runtime_startup.NativeRuntimeStartupTests.test_shared_identity_must_cover_actual_workspace_without_aliases) ... ok\r\ntest_workspace_escape_and_controller_overlap_are_refused (tools.executor.test_native_runtime_startup.NativeRuntimeStartupTests.test_workspace_escape_and_controller_overlap_are_refused) ... ok\r\n\r\n----------------------------------------------------------------------\r\nRan 12 tests in 0.062s\r\n\r\nOK\r\n"
+  },
+  {
+    "argv": [
+      "cat",
+      "/proc/sys/kernel/random/boot_id"
+    ],
+    "code": 0,
+    "stdout": "348d453e-f4e5-40e0-8ef0-030f4d5e38af\r\n",
+    "stderr": ""
+  }
+]

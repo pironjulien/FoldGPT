@@ -17,18 +17,21 @@ public final class Deployment {
     final String executable;
     final String transportLibrary;
     final String[] argv;
+    final boolean directNative;
     /** Read-only admission for an application owner before selecting Shizuku. */
     public static void verifyInstalledInputs(Context context) throws Exception { new Deployment(context); }
 
     Deployment(Context context) throws Exception { this(context, new AdmissionTrace()); }
-    Deployment(Context context, AdmissionTrace trace) throws Exception {
+    Deployment(Context context, AdmissionTrace trace) throws Exception { this(context, trace, null, null); }
+    Deployment(Context context, AdmissionTrace trace, String launchPath, String nonce) throws Exception {
         trace.at(AdmissionTrace.Stage.DEPLOYMENT_ASSET);
         JSONObject config;
         try (InputStream input = context.getAssets().open(ASSET)) {
             config = new JSONObject(new String(readBounded(input, 65536), StandardCharsets.UTF_8));
         }
         trace.at(AdmissionTrace.Stage.DEPLOYMENT_SCHEMA);
-        if (!"foldgpt.shizuku.deployment.v1".equals(config.getString("schema"))
+        directNative = "foldgpt.native.deployment.v1".equals(config.getString("schema"));
+        if ((!directNative && !"foldgpt.shizuku.deployment.v1".equals(config.getString("schema")))
                 || !context.getPackageName().equals(config.getString("packageName"))) {
             throw new SecurityException("Deployment does not identify this installed application");
         }
@@ -45,9 +48,29 @@ public final class Deployment {
         InstalledLibrary.verifyCwd(config.getJSONObject("backendOptions"), directory);
         // Shell-owned data are intentionally inaccessible to the application UID.
         // The real UserService repeats APK admission and checks them before fork.
-        if (android.system.Os.getuid() == 2000) PythonRuntime.verify(context, config, directory, trace);
-        executable = file.getPath();
-        argv = new String[] {executable, "-I", "-S", "-B", "-u", "-c", ENTRY, context.getApplicationInfo().sourceDir};
+        if (directNative) {
+            if (android.system.Os.getuid() == context.getApplicationInfo().uid) PythonRuntime.verifyApplication(context, config, directory, trace);
+            File bootstrap = InstalledLibrary.verify(directory, "libfoldgpt_native_bootstrap.so",
+                    config.getJSONObject("nativeLibraries").getString("libfoldgpt_native_bootstrap.so"));
+            executable = "/system/bin/run-as";
+            if (launchPath == null && nonce == null) { argv = new String[0]; }
+            else {
+                if (nonce == null || !nonce.matches("[0-9a-f]{32}")) throw new SecurityException("Invalid native session nonce");
+                String data = context.getApplicationInfo().dataDir;
+                // Shell cannot traverse the app-private path. Its canonical identity
+                // and contents are checked again by C after the run-as transition.
+                String expected = data + "/app_foldgpt_exec/" + nonce + "/launch.json";
+                if (!expected.equals(launchPath)) throw new SecurityException("Native launch path is outside the fixed private session");
+                argv = new String[] {executable, context.getPackageName(), bootstrap.getPath(), "--native-runtime-v1",
+                    Integer.toString(context.getApplicationInfo().uid), data, Integer.toString(android.system.Os.getpid()),
+                    nonce, context.getApplicationInfo().sourceDir, launchPath};
+            }
+        } else {
+            if (launchPath != null || nonce != null) throw new SecurityException("Native request requires the native deployment");
+            if (android.system.Os.getuid() == 2000) PythonRuntime.verify(context, config, directory, trace);
+            executable = file.getPath();
+            argv = new String[] {executable, "-I", "-S", "-B", "-u", "-c", ENTRY, context.getApplicationInfo().sourceDir};
+        }
         transportLibrary = new File(directory, "libfoldgpt_shizuku_transport.so").getPath();
     }
     static byte[] readBounded(InputStream input, int limit) throws Exception {

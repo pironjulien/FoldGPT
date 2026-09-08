@@ -5,6 +5,15 @@ import static org.junit.Assert.*;
 
 /** Tests the production ownership reducer. No native sandbox is mocked as passing. */
 public final class SessionStateTest {
+    @org.junit.Test public void nativeAdmissionRefusalRequiresBothRecordsAndActualWait() {
+        SessionState state = new SessionState(2000, 10412);
+        state.report("{\"schema\":\"foldgpt.shizuku.session.v1\",\"event\":\"setup_failed\",\"stage\":\"native_inventory\",\"errorType\":\"NativeAdmissionError\",\"errno\":null,\"source\":\"native-bootstrap.c\",\"line\":0,\"message\":\"runtime-data\"}");
+        org.junit.Assert.assertFalse(state.releasable());
+        state.report("{\"schema\":\"foldgpt.shizuku.session.v1\",\"event\":\"closed\",\"cleanupComplete\":true,\"exitCode\":70}");
+        org.junit.Assert.assertFalse(state.releasable());
+        state.reaped(70 << 8);
+        org.junit.Assert.assertTrue(state.releasable());
+    }
     private static final String PREFIX = "{\"schema\":\"foldgpt.shizuku.session.v1\",\"event\":\"";
     private static final String READY = PREFIX + "ready\"}";
     private static final String CLEAN = PREFIX + "closed\",\"cleanupComplete\":true,\"exitCode\":0}";

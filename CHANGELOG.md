@@ -1,12 +1,40 @@
 # Changelog
 
+- Correct Linux qualification portability without changing native runner policy:
+  accept the kernel-echoed atomic CLOEXEC flag while rejecting truncation, and
+  explicitly fit the secondary test thread stack inside its existing memory
+  allowance instead of inheriting GitHub's equally large default stack.
+
+- Add a manual private Ubuntu CI workflow for the exact recovery-exported
+  engine: real Linux native Python qualification, targeted engine integration
+  tests, and a separate GNU ARM64 controller/companion build. Pin Rust, test
+  tools, Actions, verified V8 inputs and the existing OpenSSL source hash;
+  retain failed logs and candidate artifacts without claiming phone qualification.
+
 ## Unreleased â€” 2026-09-06
+
+- Qualify real Android Java startup through Shizuku/run-as, direct native
+  channels and actual waitpid cleanup on the Fold. Correct framework endpoint
+  permissions, verified application-prefix identity and Shizuku initialization
+  order. Add the official SDK authorization request, a foreground diagnostic
+  entry and stable service version identity across our APK updates. The first
+  integrated Python project and official UI path remain unqualified.
+
+- Preserve twelve real Bionic startup tests including the native environment
+  snapshot. Install the independently verified production candidate r4 and
+  retain its first Android refusal before native launch: the framework-created
+  endpoint directory has mode0771 while the native contract requires0700.
+  Qualification retains actual Java session/wait records; UI completion remains
+  pending.
 
 - Prepare a separate human process owner and sealed native supervisor for real
   editor commands, including cwd `/`, uncapped output, stdin EOF and owned
   descendant cleanup. Preserve the qualified model runner and its mandatory
   policy. Add real kernel/lifecycle test sources and a separate app-server host
-  process injection; native compilation and transport qualification remain open.
+  process injection. Compile the human ARM64 supervisor twice with Windows NDK29
+  to identical bytes, retaining frozen headers and ELF checks. Prepare a frozen
+  real Fold/Bionic Python and shell workload; actual human execution, transport
+  qualification and official-editor open/save remain open.
 
 - Verify eleven real startup file/socket tests with Bionic Python on the Fold
   and measure actual shared file identities, bidirectional bytes, rename and

@@ -1,0 +1,1 @@
+{"appServerTested": false, "controllerGnuLibcVersion": "2.41", "controllerLibcUid": 10410, "controllerPid": 4282, "error": "ValueError: File channel does not bind the actual exec session", "nativeOwner": {"gid": 10412, "pid": 4224, "uid": 10412}, "nativeOwnerReaped": false, "passed": false, "phoneUiTested": false, "schema": "foldgpt.native-production-qualification.v1"}

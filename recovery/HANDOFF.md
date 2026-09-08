@@ -7,6 +7,67 @@ ancien checkpoint ; il ne reçoit pas cette sauvegarde privée.
 
 ## État courant : exécuteur sous identité FoldGPT prouvé sur le téléphone
 
+**Qualification production Python réelle PASS, 04:28** : APK r12
+`57b474f3f468e3c62470eef5e41da0385eaf2b45c944c06e2e0180b1ffaa4234`,
+versionCode3, installé. Essai4748f4f6 via vraie Activity/Service Java → Shizuku
+→ run-as → Bionic, contrôleur GNU avec vrais binds,3canaux authentifiés.
+Création native des fichiers,3tests Python réussis, zipapp construit et exécuté
+sortie42, octets recoupés sous GNU, UID10412/platform android/aarch64.
+Java waitStatus0/cleanupComplete, bootstrap10018 absent indépendamment.
+Boot/propriétés/APK officiel ChatGPT identiques au snapshot avant installation.
+Preuves figées `verification/native-production-python-20260908`.
+Le client laisse `nativeOwnerReaped:false` car seule la collecte Java indépendante
+prouve le wait ; le rapport global associe correctement les deux observations.
+**Cette qualification ne fait toujours pas intervenir l'app-server ni la
+conversation/éditeur officiel : projet non livré.** Le sous-ensemble ci-dessous
+est l'historique des corrections ; ne pas le prendre pour le blocage courant.
+
+Nouveau run moteur CI34180154848, branche privée
+`codex/native-engine-ci-r2-20260908`, commit0af61a1927eeee902a338817865619797743f1ca.
+Erreur anyhow corrigée en passant la dépendance workspace existante de dev à
+production, contrat OwnedProcessController inchangé. Export canonique
+`f7e73d475ab9bcaaaedbbbf895213d270126ab946f97db15d76993ffd8a95869`.
+
+Complément courant vers04:25 : le démarrage Java natif r10 a réussi dans l'essai
+`b4bace27`, bootstrap4224, manifeste réel, acquisition des3canaux et handshake
+ExecServer. Sa fermeture donne waitStatus0/cleanupComplete et PID4224 absent.
+Le client a refusé son propre champ `workspaceRoot` attendu à tort dans le
+canal config (`discoveryRoot` réel). Le client est corrigé, pas encore projet
+Python réussi. Historique figé `verification/native-java-startup-20260908`.
+
+Corrections Android réellement passées : dossier E0700 ; identité des préfixes
+système Java `/data/data` et run-as `/data/user/0` via même device/inode et suffixe
+privé exact ; autorisation officielle SDK Shizuku reçue ; attendre le callback
+bindApplication avant getUid/permissions. Pas de modification C/Python pour cela.
+Après mise à jour APK, le service Shizuku conservait sa bibliothèque périmée :
+r12 augmente versionCode à3 et maintient le tag IPC stable pour faire retirer
+l'ancien service par son destroy qui attend le nettoyage. En compilation.
+Le pilote utilise désormais NativePreparationActivity debug/DUMP au premier
+plan : le broadcast seul échouait au redémarrage à cause du refus Android FGS.
+Le vrai service et backend de production restent les mêmes.
+
+CI privée désormais réelle :116tests unittest +12probes noyau passent sans skip
+sur Linux, run34179808002, commit e0eeb8a. Les builds moteur Linux/ARM ont relevé
+`anyhow` absent des dépendances de production de host_v2_processes ; correction
+en cours. Le moteur courant n'est toujours pas installé/validé depuis l'UI.
+
+Point de reprise en cours, 8 septembre vers 03:50 : le candidat production r4
+est installé (`4230175209e34cd3defebd12d61aadefa76cc3b17b01fb78fde64ac423252f34`).
+Son premier PREPARE réel échoue avant création du propriétaire natif : Android
+`Context.getDir(MODE_PRIVATE)` crée `app_foldgpt_exec` en0771, incompatible avec
+notre contrat0700. Essai conservé `downloads/native-production-device-20260908/b3d1d1a7`.
+Ne pas corriger le téléphone à la main : la correction du créateur Java est en
+cours. Aucun lancement natif ni redémarrage dans cet essai. Le pilote est
+`tools/runtime/qualify-production-device.py` ; il exige l'empreinte APK installée
+et garde les réponses brutes Java pour vérifier les vrais wait/cleanup.
+
+Les tests du démarrage après ajout de `parentEnvironment` passent désormais
+12/12 sans skip sur le Fold. Preuves supplémentaires figées sous
+`verification/native-startup-parent-environment-20260908`. L'ancien résultat
+11/11 ci-dessous demeure une étape historique. Compilation actuelle du moteur
+et tâche réelle depuis l'interface toujours non validées ; CI privée en
+préparation pendant que WSL reste indisponible.
+
 Le 8 septembre, la chaîne **UserService Shizuku → run-as app.foldgpt → Bionic**
 a réussi sur le Fold avec UID/GID10412, quatre canaux exacts, vrai waitpid0,
 aucun des deux processus restant, boot et APK officiels inchangés. Preuves

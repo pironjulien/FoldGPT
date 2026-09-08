@@ -1,0 +1,33 @@
+[
+  {
+    "schema": "foldgpt.native.owner.v1",
+    "state": "unavailable",
+    "generation": 1,
+    "selected": true,
+    "officialLauncherReplaced": false,
+    "lastRemoteStatus": null,
+    "lastNativeSessionStatus": null,
+    "reason": "qualified_native_deployment_unavailable",
+    "errorDetail": "java.lang.SecurityException: Runtime path differs from the application-owned prefix: {\"actual\":\"\\/data\\/data\\/app.foldgpt\\/files\\/native-runtime-v1\\/python\",\"expected\":\"\\/data\\/user\\/0\\/app.foldgpt\\/files\\/native-runtime-v1\\/python\",\"dataDir\":\"\\/data\\/user\\/0\\/app.foldgpt\",\"filesDir\":\"\\/data\\/user\\/0\\/app.foldgpt\\/files\",\"canonicalDataDir\":\"\\/data\\/data\\/app.foldgpt\",\"canonicalFilesDir\":\"\\/data\\/data\\/app.foldgpt\\/files\"}"
+  },
+  {
+    "schema": "foldgpt.native.owner.v1",
+    "state": "preparing",
+    "generation": 1,
+    "selected": true,
+    "officialLauncherReplaced": false,
+    "lastRemoteStatus": null,
+    "lastNativeSessionStatus": null
+  },
+  {
+    "schema": "foldgpt.native.owner.v1",
+    "state": "unavailable",
+    "generation": 1,
+    "selected": true,
+    "officialLauncherReplaced": false,
+    "lastRemoteStatus": null,
+    "lastNativeSessionStatus": null,
+    "reason": "shizuku_authorization_or_binding_unavailable",
+    "errorDetail": "java.lang.SecurityException: Official Shizuku authorization is not granted"
+  }
+]
