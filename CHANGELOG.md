@@ -2,6 +2,10 @@
 
 ## Unreleased - 2026-09-08
 
+- Prepare a separately dispatched Bionic Bash build at the actual production
+  runtime prefix, preserving Bash features and checking two compiled binaries,
+  source inventory and Android imports. Fix relative source preparation paths.
+  Compilation and device integration are still pending; installed r19 is unchanged.
 - Preserve already-enabled kernel credentials on inherited native sockets instead
   of repeating a socket option change that Android rejects. Add real restricted
   Linux-thread coverage that still refuses endpoints without enabled credentials.

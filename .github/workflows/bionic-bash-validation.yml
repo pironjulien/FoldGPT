@@ -1,0 +1,58 @@
+name: Bionic Bash validation
+run-name: Bionic Bash production prefix (${{ github.sha }})
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bionic-bash-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  bash:
+    if: ${{ github.event.repository.private == true }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      ANDROID_USER_HOME: ${{ github.workspace }}/downloads/bionic-bash-sdk-user
+      ANDROID_NDK_HOME: ${{ github.workspace }}/downloads/bionic-bash-sdk/ndk/29.0.14206865
+      JOBS: '4'
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+          submodules: false
+      - name: Install the exact official NDK into the workspace
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p downloads/bionic-bash-sdk downloads/bionic-bash-sdk-user downloads/bionic-bash-preflight
+          cp -a "$ANDROID_HOME/licenses" downloads/bionic-bash-sdk/licenses
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" \
+            --sdk_root="$GITHUB_WORKSPACE/downloads/bionic-bash-sdk" \
+            --install 'ndk;29.0.14206865' > downloads/bionic-bash-preflight/sdkmanager.log 2>&1
+          for tool in python3 cc make patch curl; do command -v "$tool"; done
+          id > downloads/bionic-bash-preflight/build-identity.txt
+          git rev-parse HEAD > downloads/bionic-bash-preflight/source-commit.txt
+          test "$(id -u)" -ne 0
+      - name: Build full Bash twice at the actual production runtime prefix
+        shell: bash
+        run: |
+          bash tools/executor/bionic-runtime/build-bash.sh \
+            /data/user/0/app.foldgpt/files/native-runtime-v1/python \
+            "$GITHUB_WORKSPACE/downloads/bionic-bash-candidate"
+      - name: Preserve actual build and validation evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: bionic-bash-${{ github.sha }}-${{ github.run_attempt }}
+          path: |
+            downloads/bionic-bash-candidate/
+            downloads/bionic-bash-preflight/
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 14
