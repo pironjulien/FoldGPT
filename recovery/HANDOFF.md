@@ -5,7 +5,75 @@ Le dépôt de travail est **privé** : `pironjulien/FoldGPT-workspace`, branche
 sous-modules, moteur séparé et données locales. Le dépôt public `FoldGPT` est un
 ancien checkpoint ; il ne reçoit pas cette sauvegarde privée.
 
-## État courant du 8 septembre : erreur du moteur localisée, correction en validation
+## État courant vérifié le 8 septembre à 09:25, heure de Paris
+
+**Le projet ne permet pas encore de travailler depuis une conversation.**
+Ne pas confondre la réussite des commandes natives isolées avec celle de
+l'expérience complète. Le téléphone est actuellement en **r20/versionCode10,
+paquet natif v8 et moteur GNU R5**. La première conversation réelle du projet
+« Validation Python FoldGPT » s'est terminée en échec à 09:20.
+
+| Étape | Résultat vérifié |
+| --- | --- |
+| Exécution native Python sur le Fold | PASS : script, trois unittest, construction et exécution du zipapp, résultat42, Android/aarch64/UID10412 |
+| Démarrage ordinaire interface → moteur R5 | PASS : handshake215ms à09:13, wrapper normal conservant tous les arguments |
+| Création d'un projet par le sélecteur de l'interface | PASS : « Validation Python FoldGPT », dossier source réellement enregistré |
+| Commandes demandées dans la conversation | FAIL : `Bionic launch requires its complete portable sandbox context` |
+| Écriture par apply_patch dans cette conversation | FAIL : `Failed to write file .../addition.py` |
+| Fichiers effectivement créés par cette conversation | Zéro, inventaire Android indépendant à09:25 |
+| Éditeur puis fermeture/reprise du projet créé | Pas encore validés, dépendants de la création réelle |
+
+Le réglage existant de l'interface est **Accès complet**. Notre backend modèle
+exige actuellement un contexte de politique managed ; le mode Full access lui
+arrive sans ce contexte et il refuse avant lancement. La cause exacte de l'échec
+apply_patch est en cours de revue indépendante. Ne pas changer silencieusement
+le mode ni fabriquer une politique restreinte pour présenter un succès.
+
+La prise en charge générale reste aussi incomplète : le profil natif actuel
+refuse notamment le réseau, le TTY et plusieurs opérations de fichiers
+(rename/unlink/liens). Le refus Full access ne doit donc pas être présenté comme
+le dernier défaut certain du produit. L'objectif de validation immédiat reste
+le petit projet Python réel, puis éditeur et reprise.
+
+Architecture exacte : les commandes Bash/Python sont natives Android/Bionic ;
+l'interface et le contrôleur GNU restent dans PRoot. Aucune VM sur le téléphone.
+Les fichiers officiels contrôlés avant/après installation R5 sont identiques.
+La session native8507 est encore ouverte ; aucune fermeture de cette session
+UI n'est revendiquée. Boot `348d453e-f4e5-40e0-8ef0-030f4d5e38af` inchangé.
+
+Preuves locales figées sous
+`work/root-artifacts-20260907/native-ui-validation-20260908/` :
+
+- `r5-r20-conversation/completed-failure-report.json`, `completed-ui.json`,
+  `runtime-at-failure.log`, `native-status-at-failure.json` ;
+- `project-after-create/report.json` : zéro fichier ;
+- `r5-r20-first-ui/report.json` : démarrage normal réussi ;
+- `r20-native-results.json` : qualification native réussie ; la variante Bash
+  garde un avertissement HOME/.bash_profile et sa fixture reste FAIL ;
+- `r20-v8-independent-package-review.json` : paquet/signature/sources contrôlés.
+
+APK r20 SHA256 :
+`dd1a6beff3ea42f3a66f88f4fc254a169b1a12bcdc737834ca95b6e0372d112a`.
+Moteur R5 : run ARM34192631216, commit
+`8963acc8e961c0d34b068910b973cc6f9b9df3bc`, archive SHA256
+`cb9c5774ecd365340531344b1e060d97fd3872715e1b8c4273dc818221e8549b`.
+Bash production : run34196988639, double compilation identique, préfixe réel,
+intégré dans r20. Les sources de préparation Bash sont poussées au commit
+`1f327835efbe9f5a72331472d4390a242936d912`.
+
+La suite Linux R5 `34192652057` est encore en cours, étape compilation/tests
+ciblés au dernier contrôle live. L'ancienne suite complète `34190100825` a échoué
+(237échecs et2timeouts) malgré ses tests ciblés réussis ; ses échecs ne sont pas
+tous attribuables à l'environnement. Ne pas déclarer les vérifications globales
+réussies. Le complément de récupération v13 est préparé mais pas publié :
+**v12 reste la dernière archive intégralement restaurée, avec r16**.
+
+Prochaine action : corriger la transmission et l'application réelles des
+autorisations, qualifier les commandes et l'écriture via les mêmes appels que
+l'interface, puis reprendre cette même conversation. Les finitions restent
+hors priorité. Tous les fichiers de travail restent sous `C:\Dev\ChatgptFold`.
+
+## Historique : r19/R4 et préparation R5 (remplacé par l'état ci-dessus)
 
 Le parcours **conversation réelle → projet Python → éditeur → fermeture/reprise**
 reste à qualifier. Ne pas le décrire comme terminé à partir des tests des canaux.

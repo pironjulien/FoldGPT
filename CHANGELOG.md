@@ -2,10 +2,18 @@
 
 ## Unreleased - 2026-09-08
 
+- Install APK r20 with the independently reproduced production-prefix Bash,
+  explicit source/ELF admission and versionCode10. Native Python qualification
+  passes on the Fold. The Bash workdir fixture still reports a HOME profile
+  warning and remains failed; its previous lab-prefix warning is resolved.
+- Install the separate R5 engine and verify successful normal client startup.
+  Preserve the first real conversation failure: full-access commands lack the
+  currently required managed context, apply_patch fails, and an independent
+  Android inventory confirms no project files. End-to-end use remains unqualified.
 - Prepare a separately dispatched Bionic Bash build at the actual production
   runtime prefix, preserving Bash features and checking two compiled binaries,
   source inventory and Android imports. Fix relative source preparation paths.
-  Compilation and device integration are still pending; installed r19 is unchanged.
+  Build and r20 device integration completed as recorded above.
 - Preserve already-enabled kernel credentials on inherited native sockets instead
   of repeating a socket option change that Android rejects. Add real restricted
   Linux-thread coverage that still refuses endpoints without enabled credentials.

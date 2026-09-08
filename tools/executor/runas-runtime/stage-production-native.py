@@ -1,10 +1,13 @@
 """Stage authenticated native production inputs without executing Android code."""
 import argparse
 import hashlib
+import importlib.util
 import json
-from pathlib import Path
+from pathlib import Path, PurePosixPath
+import sys
 
 ROOT = Path(__file__).resolve().parents[3]
+RUNTIME_HOME = "/data/user/0/app.foldgpt/files/native-runtime-v1/python"
 
 
 def pinned(path, expected):
@@ -14,9 +17,103 @@ def pinned(path, expected):
     return data
 
 
+def production_bash(build):
+    """Admit only the explicit, source-attested production-prefix double build."""
+    build = build.resolve(strict=True)
+    build.relative_to(ROOT)
+    record_bytes = (build / "build.json").read_bytes()
+    record = json.loads(record_bytes)
+    if (record.get("schema") != "foldgpt.native-bash-build.v1"
+            or record.get("androidPrefix") != RUNTIME_HOME
+            or record.get("reproducible") is not True
+            or record.get("sourceFilesUnchanged") is not True
+            or record.get("ndk") != "29.0.14206865" or record.get("apiLevel") != 35):
+        raise ValueError("Bash requires an explicit reproducible production-prefix build")
+    manifest_bytes = pinned(build / "source/source-manifest.json", record["sourceManifestSha256"])
+    manifest = json.loads(manifest_bytes)
+    recipe_root = ROOT / "tools/executor/bionic-runtime"
+    if (manifest.get("androidPrefix") != RUNTIME_HOME
+            or manifest.get("upstream") != json.loads((recipe_root / "bash-inputs.json").read_bytes())
+            or manifest.get("sourceDateEpoch") != record.get("sourceDateEpoch")):
+        raise ValueError("Bash source manifest does not identify the pinned production sources")
+
+    def contained_file(parent, relative):
+        path = PurePosixPath(relative)
+        if (not isinstance(relative, str) or not relative or path.is_absolute()
+                or path.as_posix() != relative or ".." in path.parts
+                or "\\" in relative or ":" in relative):
+            raise ValueError("Invalid Bash evidence path")
+        target = parent.joinpath(*path.parts)
+        for index in range(1, len(path.parts) + 1):
+            component = parent.joinpath(*path.parts[:index])
+            if component.is_symlink() or component.is_junction():
+                raise ValueError("Bash evidence cannot contain path aliases")
+        target.resolve(strict=True).relative_to(parent.resolve(strict=True))
+        if not target.is_file():
+            raise ValueError("Bash evidence must be a regular file")
+        return target
+
+    prepared = manifest["preparedFiles"]
+    recorded = {row["path"] for row in prepared}
+    source = build / "source/bash-5.3"
+    actual = {path.relative_to(source).as_posix() for path in source.rglob("*") if path.is_file()}
+    if (not prepared or len(recorded) != len(prepared) or actual != recorded
+            or record.get("preparedSourceFilesVerified") != len(prepared)):
+        raise ValueError("Bash prepared source inventory differs")
+    for row in prepared:
+        data = pinned(contained_file(source, row["path"]), row["sha256"])
+        if len(data) != row["bytes"] or b"/data/local/tmp/foldgpt-shizuku-lab" in data:
+            raise ValueError("Bash prepared source length or runtime prefix differs")
+    recipe_names = {"build-bash.sh", "prepare-bash.py", "verify-bash-build.py",
+                    "shizuku-check-elf.py", "bash-inputs.json"}
+    recipe_names.update(path.relative_to(recipe_root).as_posix()
+                        for path in (recipe_root / "termux-bash").glob("*.patch"))
+    recipes = record["recipe"]
+    if len(recipes) != len(recipe_names) or {row["path"] for row in recipes} != recipe_names:
+        raise ValueError("Bash build recipe inventory differs")
+    for row in recipes:
+        pinned(contained_file(recipe_root, row["path"]), row["sha256"])
+    pinned(recipe_root / "prepare-bash.py", manifest["preparerSha256"])
+    patches = manifest["termuxPatches"]
+    patch_names = {path.name for path in (recipe_root / "termux-bash").glob("*.patch")}
+    if len(patches) != len(patch_names) or {row["name"] for row in patches} != patch_names:
+        raise ValueError("Bash source patch inventory differs")
+    for row in patches:
+        pinned(contained_file(recipe_root / "termux-bash", row["name"]), row["originalSha256"])
+        pinned(contained_file(build / "source", row["name"]), row["configuredSha256"])
+    elf = record["elf"]
+    expected = elf["sha256"]
+    if record.get("buildHashes") != [expected, expected]:
+        raise ValueError("Bash double-build hashes do not match its ELF")
+    data = pinned(contained_file(build, "libfoldgpt_bash.so"), expected)
+    if len(data) != elf["bytes"]:
+        raise ValueError("Bash build length differs")
+    for relative in ("first/bash", "second/bash"):
+        if pinned(contained_file(build, relative), expected) != data:
+            raise ValueError("Bash double-build evidence differs")
+    if sys.flags.optimize:
+        raise ValueError("Bash ELF admission requires normal Python assertions")
+    spec = importlib.util.spec_from_file_location("foldgpt_production_bash_elf", recipe_root / "shizuku-check-elf.py")
+    checker = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(checker)
+    if checker.check(build / "libfoldgpt_bash.so") != elf:
+        raise ValueError("Bash actual ELF differs from its build attestation")
+    suffixes = ("bin", "bin:.", "etc/profile", "etc/bash.bashrc", "etc/inputrc", "etc/hosts",
+                "tmp", "var/tmp", "share/locale", "share/bashdb/bashdb-main.inc")
+    if (b"/data/local/tmp/foldgpt-shizuku-lab" in data
+            or any((RUNTIME_HOME + "/" + suffix).encode() + b"\0" not in data for suffix in suffixes)):
+        raise ValueError("Bash compiled runtime paths differ from production")
+    return data, {"path": build.relative_to(ROOT).as_posix(),
+                  "buildManifestSha256": hashlib.sha256(record_bytes).hexdigest(),
+                  "sourceManifestSha256": hashlib.sha256(manifest_bytes).hexdigest(),
+                  "executableSha256": expected, "bytes": len(data), "androidPrefix": RUNTIME_HOME}
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--python-cli-build", type=Path, required=True)
+    parser.add_argument("--bash-build", type=Path, required=True,
+                        help="Explicit source-attested double Bash build at the production runtime prefix")
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--host-build", type=Path)
     parser.add_argument("--model-build", type=Path)
@@ -24,17 +121,19 @@ def main():
     cli_build, output = args.python_cli_build.resolve(), args.output.resolve()
     cli_build.relative_to(ROOT)
     output.relative_to(ROOT)
+    bash, bash_provenance = production_bash(args.bash_build)
     python = ROOT / "downloads/shizuku-lab/runtime-stage-20260907"
     runtime = json.loads(pinned(python / "manifest.json",
         "bc9ddcfc598c875337af9d114fe0314be4dd09920dff27131f8c61278c95a5cc"))
     cli_record = json.loads((cli_build / "build.json").read_text())
-    if cli_record["runtimeHome"] != "/data/user/0/app.foldgpt/files/native-runtime-v1/python":
+    if cli_record["runtimeHome"] != RUNTIME_HOME:
         raise ValueError("Python deployment prefix differs")
     native = {}
     for item in runtime["nativeFiles"]:
-        if item["name"] != "libfoldgpt_python_cli.so":
+        if item["name"] not in {"libfoldgpt_python_cli.so", "libfoldgpt_bash.so"}:
             native[item["name"]] = pinned(python / "jniLibs/arm64-v8a" / item["name"], item["sha256"])
     native["libfoldgpt_python_cli.so"] = pinned(cli_build / "libfoldgpt_python_cli.so", cli_record["executableSha256"])
+    native["libfoldgpt_bash.so"] = bash
     frozen = ROOT / "downloads/bionic-supervisor/foldgpt-bionic-supervisor-qKM94iHA"
     hashes = dict(reversed(row.split("  ", 1)) for row in pinned(frozen / "BINARIES.sha256",
         "a10ca7cc9ccb8c110cd7ca901d84b9066a7bf5ae73842935da88e1895437b40d").decode().splitlines())
@@ -121,7 +220,8 @@ def main():
               "sha256": hashlib.sha256(path.read_bytes()).hexdigest()}
              for path in sorted(output.rglob("*")) if path.is_file()]
     (output / "manifest.json").write_text(json.dumps({"schema": "foldgpt.native-production-stage.v1",
-        "androidExecuted": False, "runtimeHome": runtime["runtimeHome"], "files": files}, indent=2) + "\n")
+        "androidExecuted": False, "runtimeHome": runtime["runtimeHome"],
+        "bashBuild": bash_provenance, "files": files}, indent=2) + "\n")
     print(json.dumps({"output": str(output), "nativeLibraries": len(native), "dataFiles": len(data_files),
                       "runtimeAliases": len(runtime["runtimeAliases"])}))
 
