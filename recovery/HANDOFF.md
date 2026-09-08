@@ -23,9 +23,20 @@ reste à qualifier sur le Fold.
 réel via acquisition/canaux de production : fichiers modèle, Bash `-lc` et `-c`,
 trois tests Python, construction/exécution42 et lecture des mêmes octets par
 les canaux config/humain. Ces résultats Linux ne sont pas une validation Android.
-La suite Rust générale R5 `34192652057` reste en cours au contrôle du 8 septembre
-à08:45UTC, dans l'étape des tests complets. Le collecteur existant écrit dans
-`work/ci-results/34192652057` ; ne pas le dupliquer ni annoncer cette suite réussie.
+La suite Rust générale R5 `34192652057` est terminée en **échec**, résultat
+collecté à08:56–08:57UTC : 16 933 tests réussis, 238 échecs, deux timeouts,
+35 tests ignorés. Les étapes natives ciblées du même run passent. Le
+[triage des 240 cas](../docs/research/r5-failure-audit-20260908.md) distingue
+les symptômes ; il n'établit pas encore toutes les causes ni leur impact
+sur Android. Les preuves restent dans `work/ci-results/34192652057`.
+
+L'[audit des traces Android](../docs/research/device-evidence-audit-20260908.md)
+précise les lacunes : pas de capture intégrale des RPC de la conversation,
+pas de reçu final8507, aucun essai Android de r21. La
+[recherche de projets comparables](../docs/research/github-comparables-20260908.md)
+identifie notamment un port récent Bionic/V8 à étudier, sans intégration
+ni exécution de composant tiers. Voir aussi le
+[bilan des blocages et pistes](../docs/research/blockers-and-community-20260908.md).
 
 Le runner Android est compilé deux fois à l'identique avec NDK29/API35 :
 `work/root-artifacts-20260907/native-ui-validation-20260908/direct-runner-ndk-v7`.

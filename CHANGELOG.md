@@ -2,6 +2,11 @@
 
 ## Unreleased - 2026-09-08
 
+- Record the completed R5 full-suite failure and classify all 240 failing or
+  timed-out test cases without counting retries twice. Audit missing Android
+  RPC/cleanup evidence and research comparable native Android Codex ports.
+  Preserve the distinction between working targeted tests, the untested r21
+  Android candidate and unresolved full-suite failures; no device action.
 - Publish encrypted supplement v14 to the private recovery release, redownload
   and authenticate it, and verify all 10,695 restored files and 1,198 source
   files. Revalidate r21 using the restored source verifier. Preserve the earlier
