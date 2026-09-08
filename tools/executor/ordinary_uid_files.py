@@ -580,7 +580,13 @@ class OrdinaryUidFilesBackend:
 
     async def close(self, session_id):
         async with self.lock:
-            self._bind(session_id)
+            # The trusted owner may stop before ExecServer.initialize assigns
+            # a session. Only an unused backend can close without that identity.
+            if session_id is None:
+                if self.session is not None or self.handles:
+                    raise RpcError(-32000, "Cannot close an acquired filesystem without its session identity")
+            else:
+                self._bind(session_id)
             if not self.closed:
                 for identifier in list(self.handles):
                     self._drop(identifier)

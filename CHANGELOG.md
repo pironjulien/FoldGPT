@@ -2,6 +2,11 @@
 
 ## Unreleased - 2026-09-08
 
+- Fix ordinary UID backend shutdown before the first controller connection.
+  The returned Fold exposed r21 quarantining an unused owner on `close(None)`;
+  allow only an unbound backend with no handles to close without a session.
+  Preserve rejection after acquisition and add actual acquisition, descriptor
+  and workspace-lock regression coverage. Device requalification is pending.
 - Record the completed R5 full-suite failure and classify all 240 failing or
   timed-out test cases without counting retries twice. Audit missing Android
   RPC/cleanup evidence and research comparable native Android Codex ports.

@@ -14,7 +14,7 @@ import threading
 import unittest
 from unittest.mock import patch
 
-from tools.executor.exec_server import BackendCall, RpcError
+from tools.executor.exec_server import BackendCall, ExecServer, RpcError
 from tools.executor.ordinary_uid_files import OrdinaryUidFilesBackend, native_path
 from tools.executor import ordinary_uid_files as ordinary
 
@@ -271,13 +271,40 @@ class OrdinaryFilesTests(unittest.IsolatedAsyncioTestCase):
         with self.assertRaises(RpcError):
             await self.call("open", path=path.as_uri(), handleId="overflow")
 
+    async def test_server_shutdown_before_initialize_closes_unused_backend(self):
+        server = ExecServer(self.backend)
+        self.assertIsNone(server.session_id)
+        await server.close()
+        await server.close()
+        self.assertTrue(self.backend.closed)
+        self.assertIsNone(self.backend.session)
+        self.assertFalse(self.backend.handles)
+        with self.assertRaises(RpcError):
+            await self.write(self.root / "after-idle-stop")
+        self.assertFalse((self.root / "after-idle-stop").exists())
+
+    async def test_idle_shutdown_waits_for_shared_workspace_lease(self):
+        await self.backend.lock.acquire()
+        closing = asyncio.create_task(ExecServer(self.backend).close())
+        try:
+            await asyncio.sleep(0)
+            self.assertFalse(closing.done())
+            self.assertFalse(self.backend.closed)
+        finally:
+            self.backend.lock.release()
+        await asyncio.wait_for(closing, 2)
+        self.assertTrue(self.backend.closed)
+        self.assertFalse(self.backend.lock.locked())
+
     async def test_shutdown_closes_actual_handles_and_refuses_reuse(self):
         path = self.root / "file"
         path.write_bytes(b"x")
         await self.call("open", path=path.as_uri(), handleId="read")
         fd = self.backend.handles["read"].fd
-        with self.assertRaises(RpcError):
-            await self.backend.close("other")
+        for wrong_session in (None, "other"):
+            with self.subTest(session=wrong_session), self.assertRaises(RpcError):
+                await self.backend.close(wrong_session)
+            self.assertEqual(os.fstat(fd).st_size, 1)
         self.assertFalse(self.backend.closed)
         await self.backend.close("session-a")
         self.assertFalse(self.backend.handles)

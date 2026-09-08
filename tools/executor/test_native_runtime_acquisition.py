@@ -2,6 +2,7 @@
 import array
 import asyncio
 import base64
+import fcntl
 import importlib
 import json
 import os
@@ -141,6 +142,46 @@ class RuntimeAcquisitionTests(unittest.IsolatedAsyncioTestCase):
             await asyncio.gather(self.running, return_exceptions=True)
         self.assertFalse(self.path.exists())
         self.assertTrue(self.backend.files.closed)
+
+    async def test_idle_ordinary_profile_stop_closes_backend_and_releases_kernel_lease(self):
+        # Production r21 installs the ordinary profile before any controller
+        # can initialize. Exercise that composition over the actual native
+        # owner, listener and kernel flock; no synthetic session or backend.
+        direct_runner = os.environ.get("FOLDGPT_DIRECT_RUNNER")
+        self.assertTrue(direct_runner, "Actual direct runner required")
+        direct_module = importlib.import_module("tools.executor.bionic-supervisor.direct_processes")
+        from tools.executor.ordinary_uid_files import OrdinaryUidFilesBackend
+        direct = direct_module.DirectProcesses(direct_runner, self.workspace,
+            executables=self.backend.processes.executables, files_backend=self.backend.files,
+            parent_environment={}, quarantine_owner=self.backend.processes)
+        direct_files = OrdinaryUidFilesBackend(lock=self.backend.files.lock)
+        self.backend.install_ordinary_uid_profile(direct, direct_files)
+        contender = os.open(self.workspace, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW | os.O_CLOEXEC)
+        try:
+            with self.assertRaises(BlockingIOError):
+                fcntl.flock(contender, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            self.running = asyncio.create_task(self.owner.run())
+            await asyncio.sleep(0)
+            self.assertFalse(self.running.done())
+            self.assertIsNone(self.server.session_id)
+            self.assertTrue(self.path.is_socket())
+            self.running.cancel()
+            with self.assertRaises(asyncio.CancelledError):
+                await asyncio.wait_for(self.running, 5)
+            # The installed bootstrap closes again after acquisition returns.
+            # Its second close must observe the same successful owned result.
+            await asyncio.wait_for(self.backend.close(None), 5)
+            self.assertTrue(self.backend.files.closed)
+            self.assertTrue(direct_files.closed)
+            self.assertIsNone(direct_files.session)
+            self.assertFalse(self.backend.processes.quarantined)
+            self.assertFalse(direct.quarantined)
+            self.assertFalse(direct.processes)
+            self.assertFalse(self.backend.files.lock.locked())
+            self.assertFalse(self.path.exists())
+            fcntl.flock(contender, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        finally:
+            os.close(contender)
 
     async def test_connected_controller_must_send_its_handshake_on_time(self):
         with patch.object(native_runtime_acquisition, "STARTUP_SECONDS", 0.1):
