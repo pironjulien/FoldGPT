@@ -16,6 +16,10 @@ on:
         description: Qualify Linux engine tests without rebuilding unchanged ARM64 production code
         type: boolean
         default: false
+      arm_build_only:
+        description: Build ARM64 and qualify native Python while a Linux validation remains active
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -28,6 +32,8 @@ env:
   CARGO_BUILD_JOBS: "2"
   CARGO_PROFILE_DEV_DEBUG: "0"
   CARGO_PROFILE_TEST_DEBUG: "0"
+  CARGO_PROFILE_DEV_STRIP: symbols
+  CARGO_PROFILE_TEST_STRIP: symbols
   CARGO_PROFILE_RELEASE_DEBUG: "0"
   CARGO_INCREMENTAL: "0"
   CARGO_TERM_COLOR: never
@@ -70,7 +76,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include: ${{ fromJSON(inputs.linux_tests_only && '[{"stage":"linux-tests","target":"x86_64-unknown-linux-gnu"}]' || '[{"stage":"linux-tests","target":"x86_64-unknown-linux-gnu"},{"stage":"arm64-build","target":"aarch64-unknown-linux-gnu"}]') }}
+        include: ${{ fromJSON(inputs.arm_build_only && '[{"stage":"arm64-build","target":"aarch64-unknown-linux-gnu"}]' || inputs.linux_tests_only && '[{"stage":"linux-tests","target":"x86_64-unknown-linux-gnu"}]' || '[{"stage":"linux-tests","target":"x86_64-unknown-linux-gnu"},{"stage":"arm64-build","target":"aarch64-unknown-linux-gnu"}]') }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
@@ -95,9 +101,9 @@ jobs:
         uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
           path: work/ci/target/
-          key: native-target-v1-${{ runner.os }}-${{ matrix.target }}-${{ hashFiles('work/ci/engine/codex-rs/Cargo.lock') }}-${{ github.sha }}
+          key: native-target-${{ matrix.stage == 'linux-tests' && 'v2-stripped' || 'v1' }}-${{ runner.os }}-${{ matrix.target }}-${{ hashFiles('work/ci/engine/codex-rs/Cargo.lock') }}-${{ github.sha }}
           restore-keys: |
-            native-target-v1-${{ runner.os }}-${{ matrix.target }}-${{ hashFiles('work/ci/engine/codex-rs/Cargo.lock') }}-
+            native-target-${{ matrix.stage == 'linux-tests' && 'v2-stripped' || 'v1' }}-${{ runner.os }}-${{ matrix.target }}-${{ hashFiles('work/ci/engine/codex-rs/Cargo.lock') }}-
       - name: Fetch and verify the official V8 archive and matching bindings
         run: python3 -B tools/ci/native_validation.py v8 --target '${{ matrix.target }}'
       - name: Preserve verified tools before engine compilation

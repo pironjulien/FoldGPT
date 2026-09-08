@@ -13,6 +13,7 @@ from tools.executor.exec_server import RpcError
 from tools.executor.native_executor_backend import NativeExecutorBackend
 from tools.executor.native_files import _native_metadata
 from tools.policy.managed_policy import GuestPath, PolicyError
+from tools.executor.native_path_uri import path_uri
 
 _ISSUER = object()
 
@@ -49,7 +50,7 @@ class BootstrapReadAuthority:
         Engines must stop at this explicit root. Reads outside it return an
         actual denial, even if an outside path happens not to exist.
         """
-        return self._root.uri
+        return path_uri(self._root.path)
 
     async def read_file(self, uri):
         """Return exact bytes after a real bounded native read."""
@@ -77,7 +78,7 @@ class BootstrapReadAuthority:
             if type(uri) is not str:
                 raise ValueError("Bootstrap path must be a canonical file URI")
             path = GuestPath.from_uri(uri)
-            if uri != path.uri or not self._root.contains(path):
+            if uri != path_uri(path.path) or not self._root.contains(path):
                 raise PermissionError("Bootstrap read is outside its pinned discovery root or uses an alias")
             if operation == "read" and path == self._root:
                 raise PermissionError("Bootstrap file read requires an ordinary file below its root")
@@ -125,7 +126,7 @@ class BootstrapReadAuthority:
                 output = await files._native_operation([operation, str(files.root), relative, "0"],
                     empty_output=operation == "canonicalize")
                 if operation == "canonicalize":
-                    return path.uri
+                    return path_uri(path.path)
                 return output if operation == "read" else _native_metadata(output)
 
         self._owner._bind(self._session_id)

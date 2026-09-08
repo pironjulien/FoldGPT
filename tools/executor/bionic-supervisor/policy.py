@@ -19,14 +19,19 @@ class Policy:
         self.intent = prepare_policy_intent(context, session_id=session,
                                             request_id=request, method="process/start")
         self.policy = parse_context(self.intent.context_json)
-        self.cwd = GuestPath.from_uri(cwd)
-        if self.cwd != self.policy.cwd or not files.mount.contains(self.cwd):
-            raise ValueError("Process cwd must match its full policy within the executor workspace")
-        self.cwd_parts = self.cwd.parts[len(files.mount.parts):]
+        self.execution_cwd = GuestPath.from_uri(cwd)
+        self.policy_cwd = self.policy.cwd
+        if (not files.mount.contains(self.execution_cwd)
+                or not files.mount.contains(self.policy_cwd)):
+            raise ValueError("Process and policy cwd must remain within the executor workspace")
+        self.execution_cwd_parts = self.execution_cwd.parts[len(files.mount.parts):]
+        policy_cwd_parts = self.policy_cwd.parts[len(files.mount.parts):]
         metadata, directories, _, _ = files._inspect(self.policy)
-        if self.cwd_parts not in directories:
-            raise ValueError("Process cwd must already be an admitted ordinary directory")
-        files._require_read(self.policy, self.cwd_parts)
+        if self.execution_cwd_parts not in directories or policy_cwd_parts not in directories:
+            raise ValueError("Process and policy cwd must already be admitted ordinary directories")
+        # Keep the original policy base and all its resolved entries. Choosing
+        # a process workdir changes relative syscalls, never permission roots.
+        files._require_read(self.policy, self.execution_cwd_parts)
         self.root = files.root
         self.closed = False
 
@@ -53,7 +58,7 @@ class Policy:
             output = []
         else:
             raw = value.split("/")
-            output = list(self.cwd.parts)
+            output = list(self.execution_cwd.parts)
         for component in raw:
             if component in ("", "."):
                 continue

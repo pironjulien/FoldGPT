@@ -333,6 +333,12 @@ class NativeProcessesBackend:
             self._terminate(record)
         return {"running": running}
 
+    def _validate_launch_context(self, params):
+        # This original static profile executes at its policy cwd. Backends
+        # with a separate native cwd must validate both roles before spawning.
+        if params.get("sandbox") is None or params["cwd"] != params["sandbox"].get("cwd"):
+            raise RpcError(-32602, "Native launch requires its complete matching portable sandbox context")
+
     async def _start(self, call, notify):
         params = call.params
         if self.quarantined:
@@ -349,8 +355,7 @@ class NativeProcessesBackend:
         if arg0 is not None and "\0" in arg0:
             raise RpcError(-32602, "Invalid native argv0")
         environment = process_environment(params, self.parent_environment)
-        if params.get("sandbox") is None or params["cwd"] != params["sandbox"].get("cwd"):
-            raise RpcError(-32602, "Native launch requires its complete matching portable sandbox context")
+        self._validate_launch_context(params)
         key = (call.session_id, params["processId"])
         if key in self.processes:
             raise RpcError(-32600, "Process id already exists in this session")

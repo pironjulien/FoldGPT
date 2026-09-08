@@ -26,6 +26,13 @@ def main():
     fixed = OUT / "frozen-transport-root"
     env = dict(os.environ)
     env["JAVA_HOME"] = r"C:\Program Files\Microsoft\jdk-21.0.12.8-hotspot"
+    # Builds and transient output belong to the project, including Gradle state.
+    for name, relative in (("GRADLE_USER_HOME", "work/build-cache/gradle"),
+                           ("TEMP", "work/build-cache/tmp"),
+                           ("TMP", "work/build-cache/tmp")):
+        local = ROOT / relative
+        local.mkdir(parents=True, exist_ok=True)
+        env[name] = str(local)
     gradle = Path(os.environ["USERPROFILE"]) / ".gradle/wrapper/dists/gradle-9.7.1-bin/1w1c7tv4s851m17nbqdsro2tv/gradle-9.7.1/bin/gradle.bat"
     command = [str(gradle), "--no-daemon", "--max-workers=2", "--no-parallel",
         "-Dorg.gradle.jvmargs=-Xmx1g -Dfile.encoding=UTF-8",

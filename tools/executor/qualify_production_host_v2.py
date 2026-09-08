@@ -9,6 +9,7 @@ import argparse
 import array
 import base64
 import hashlib
+import importlib.util
 import json
 import os
 from pathlib import Path
@@ -18,7 +19,12 @@ import struct
 import sys
 import time
 import uuid
-from urllib.parse import unquote, urlsplit
+
+_uri_spec = importlib.util.spec_from_file_location("foldgpt_native_path_uri",
+    Path(__file__).with_name("native_path_uri.py"))
+_uri_module = importlib.util.module_from_spec(_uri_spec)
+_uri_spec.loader.exec_module(_uri_module)
+path_uri = _uri_module.path_uri
 
 
 def require(condition, message):
@@ -38,11 +44,8 @@ def decode(data):
 
 
 def canonical_uri(value):
-    uri = urlsplit(value)
-    require(uri.scheme == "file" and not uri.netloc and not uri.query and not uri.fragment,
-            "Expected a canonical local file URI")
-    path = Path(unquote(uri.path, errors="strict"))
-    require(path.is_absolute() and path.as_uri() == value and path.resolve(strict=True) == path,
+    path = Path(_uri_module.uri_path(value))
+    require(path.is_absolute() and path.resolve(strict=True) == path,
             "Noncanonical shared path")
     return path
 
@@ -270,7 +273,7 @@ class Client:
         stdout/stderr up to 64 KiB each, plus counts/hash/truncation for all bytes.
         No model result is synthesized from a human process or a file read.
         """
-        uri = cwd.as_uri()
+        uri = path_uri(cwd)
         sandbox = {"permissions": {"type": "managed", "file_system": {
             "type": "restricted", "entries": [{"path": {"type": "path", "path": uri}, "access": "write"}]},
             "network": "restricted"}, "cwd": uri, "workspaceRoots": [uri], "windowsSandboxLevel": "disabled"}
@@ -339,10 +342,10 @@ def qualify(startup):
               "humanPassed": False, "modelPythonPassed": False, "modelCases": []}
     try:
         report["connection"] = client.connect()
-        client.request("createDirectory", path=directory.as_uri(), recursive=False)
+        client.request("createDirectory", path=path_uri(directory), recursive=False)
         small = directory / "hello.py"
         source = b"def add(a, b):\n    return a + b\n\nassert add(20, 22) == 42\nprint('real native human Python pass')\n"
-        client.request("writeFile", path=small.as_uri(), upload=source)
+        client.request("writeFile", path=path_uri(small), upload=source)
         environment = dict(manifest["parentEnvironment"])
         def execute(argv, **kwargs):
             record, streams = client.process(argv, environment, **kwargs)
@@ -359,7 +362,7 @@ def qualify(startup):
         record, streams = execute(["sh", "-c", 'cat > "$1"', "sh", str(large)], stdin=payload)
         clean_exit(record)
         require(streams == {"stdout": b"", "stderr": b""}, "Real editor shell save output differs")
-        _, actual = client.request("readFile", path=large.as_uri())
+        _, actual = client.request("readFile", path=path_uri(large))
         require(actual == payload, "Native host file authority differs from real shell bytes")
         record, streams = execute(["cat", str(large)])
         clean_exit(record)
@@ -376,7 +379,7 @@ def qualify(startup):
         project = directory / "model-python"
         app, tests = project / "app", project / "tests"
         for target in (project, app, tests):
-            client.request("createDirectory", path=target.as_uri(), recursive=False)
+            client.request("createDirectory", path=path_uri(target), recursive=False)
         source = b"def add(a, b):\n    return a + b\n\nif __name__ == '__main__':\n    print(add(20, 22))\n"
         test_source = (b"import unittest\nfrom app.__main__ import add\nclass Addition(unittest.TestCase):\n"
                        b"    def test_positive(self): self.assertEqual(add(20,22),42)\n"
@@ -384,7 +387,7 @@ def qualify(startup):
                        b"    def test_zero(self): self.assertEqual(add(0,0),0)\n")
         for target, data in ((app / "__main__.py", source), (app / "__init__.py", b""),
                              (tests / "test_add.py", test_source)):
-            client.request("writeFile", path=target.as_uri(), upload=data)
+            client.request("writeFile", path=path_uri(target), upload=data)
         archive = project / "model-project.pyz"
         commands = [
             ("script", ["python3", "-I", "-S", "-B", str(app / "__main__.py")]),
@@ -406,7 +409,7 @@ def qualify(startup):
             else:
                 record["passed"] &= streams == {"stdout": b"", "stderr": b""}
                 if record["passed"]:
-                    _, built = client.request("readFile", path=archive.as_uri())
+                    _, built = client.request("readFile", path=path_uri(archive))
                     record["archive"] = {"bytes": len(built), "sha256": hashlib.sha256(built).hexdigest()}
                     record["passed"] &= bool(built)
         report["modelPythonPassed"] = all(case["passed"] for case in report["modelCases"])

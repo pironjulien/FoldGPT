@@ -1,0 +1,62 @@
+{
+  "scope": "Independent offline r19/v7 workdir package review; no inherited preflight attestation reused",
+  "apkSha256": "13db3dda291362c4c4658bb325714d1576bde07b7f1fac1a9c860565d5a32162",
+  "previousApkSha256": "91b7da7cc133554f8386cad2405f4303e089540de8922943b8167e0f2e7b94a7",
+  "sourceManifestSha256": "d6436f3f2f0f380dc3831efef1474b20f932e03f924faa7f0dc40b8dac1ac355",
+  "sourceFiles": 91,
+  "staticInternalImportsResolved": 148,
+  "sourceAssetsMatchV7": true,
+  "matchingCurrentLocalSourceFiles": 88,
+  "sourcesChangedFromV6": [
+    "tools/executor/bionic-supervisor/policy.py",
+    "tools/executor/bionic-supervisor/processes.py",
+    "tools/executor/bionic-supervisor/test_factory.py",
+    "tools/executor/native_processes.py"
+  ],
+  "sourceChanges": [
+    {
+      "path": "tools/executor/bionic-supervisor/policy.py",
+      "v6Sha256": "79f770df7be610f66b47e7911da38eb4e8320ed673a1a02fda258ed84d718640",
+      "v7Sha256": "c4be12b50c4da153011f77483d841df6f32c34b297dc77a0f994eb65520ccafd"
+    },
+    {
+      "path": "tools/executor/bionic-supervisor/processes.py",
+      "v6Sha256": "c756cba658a2e07d98f65f4ef28995682fd2e8a9a8547f3e596ac6c5ec3c8194",
+      "v7Sha256": "e2e96777d1cb189d0256a4c24d0cd274350322d8b2852417535c3113bd0ee1f8"
+    },
+    {
+      "path": "tools/executor/bionic-supervisor/test_factory.py",
+      "v6Sha256": "6acb47ca0ab5cbfcf7b1db381425878119d510e3019c7b8eee488087857f7af0",
+      "v7Sha256": "0618ffd514e0115f0795cc6857df869e0c6096cfe7c14f9df90de813d08d937a"
+    },
+    {
+      "path": "tools/executor/native_processes.py",
+      "v6Sha256": "b6fefdef7deb9df76e1effb659aced0f8c0cbdb9aa3d05625d75ee574c612182",
+      "v7Sha256": "056ee6aad3ee7dbef173966501b2ea83d39fc4036afdd1bf525113f59a956dff"
+    }
+  ],
+  "apkNativeLibraries": 117,
+  "allApkElfHashesEqualR18": true,
+  "stagedNativeLibraries": 84,
+  "allStagedElfHashesEqualV6": true,
+  "deploymentRuntimeAndHostSelectionUnchanged": true,
+  "workdirPolicySourceReview": "workdir-separation-implementation.md",
+  "requiredLinuxTests": [
+    "FactoryTests.test_05b_execution_workdir_preserves_original_project_policy",
+    "FactoryTests.test_05c_invalid_execution_and_policy_workdirs_never_spawn"
+  ],
+  "linuxExecutionQualification": {
+    "success": true,
+    "runId": "34192631216",
+    "commit": "8963acc8e961c0d34b068910b973cc6f9b9df3bc",
+    "allFourChangedSourcesMatchApkAndCiGitBlobExactly": true,
+    "factoryTestsPassed": 22,
+    "factoryTestsSkipped": false,
+    "linuxUid": 1001,
+    "sourceInventorySha256": "b61d89b024c5545a1e014c3960c954073fe88123cdb7e4d2ef2f253e74957f1a",
+    "testFactoryLogSha256": "5b87e7a92484f481c65e9afaa0feaa289da574821fe3ecb9545c06410c683471",
+    "androidExecuted": false
+  },
+  "androidExecuted": false,
+  "oldPreflightHostPackageReused": false
+}

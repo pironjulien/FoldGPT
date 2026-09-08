@@ -1,0 +1,6 @@
+{
+  "androidExecution": false,
+  "failures": [],
+  "scope": "Real nonroot Linux C/Python workers, files, permissions, credentials and lifecycle",
+  "success": true
+}

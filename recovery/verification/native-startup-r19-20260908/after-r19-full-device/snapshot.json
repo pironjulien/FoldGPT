@@ -1,0 +1,48 @@
+{
+  "schema": "foldgpt.runas-device-snapshot.v1",
+  "readOnly": true,
+  "serial": "R3GL808JN4A",
+  "bootId": "348d453e-f4e5-40e0-8ef0-030f4d5e38af",
+  "stayAwake": "2",
+  "properties": {
+    "ro.boot.verifiedbootstate": "green",
+    "ro.boot.flash.locked": "1",
+    "ro.boot.vbmeta.device_state": "locked",
+    "ro.boot.warranty_bit": "0",
+    "ro.product.model": "SM-F971B",
+    "ro.build.fingerprint": "samsung/h8qxeea/h8q:17/CP2A.260605.016/F971BXXS2AZH7_OXM2AZH7:user/release-keys"
+  },
+  "packages": {
+    "app.foldgpt": [
+      {
+        "path": "/data/app/~~R5LgXnB1jRFHcGn-HA8_9g==/app.foldgpt-r4KrN1YHEBOvbYRIXHJl7Q==/base.apk",
+        "sha256": "13db3dda291362c4c4658bb325714d1576bde07b7f1fac1a9c860565d5a32162"
+      }
+    ],
+    "com.openai.chatgpt": [
+      {
+        "path": "/data/app/~~OQZLTSH3rSeFiA1-zL6nZQ==/com.openai.chatgpt-e7wh79rzhEAtQ91IIwoKqQ==/base.apk",
+        "sha256": "20dd88a77ba80740cd2e13dd5d1ec88ee4b0ff67d4436f883fe65c7d11f7e1e3"
+      },
+      {
+        "path": "/data/app/~~OQZLTSH3rSeFiA1-zL6nZQ==/com.openai.chatgpt-e7wh79rzhEAtQ91IIwoKqQ==/split_config.arm64_v8a.apk",
+        "sha256": "d10e48108acbcabf17f4e35a1b2ea2a8e4fa61ba40f387caae7bd1011d4b2791"
+      },
+      {
+        "path": "/data/app/~~OQZLTSH3rSeFiA1-zL6nZQ==/com.openai.chatgpt-e7wh79rzhEAtQ91IIwoKqQ==/split_config.fr.apk",
+        "sha256": "792b84ea7d3f593d5d5fc11b8e5b1b010d96d67b9af1176ad9f29430810bc14e"
+      },
+      {
+        "path": "/data/app/~~OQZLTSH3rSeFiA1-zL6nZQ==/com.openai.chatgpt-e7wh79rzhEAtQ91IIwoKqQ==/split_config.xxhdpi.apk",
+        "sha256": "a92b0cd0a6aad246e154736a6f32b04b17f65e5f6ec1e304e6ec3411113ec424"
+      }
+    ],
+    "app.foldgpt.runasqualification.v1": [
+      {
+        "path": "/data/app/~~TBerZp9-x4sy6LBgqP5_2A==/app.foldgpt.runasqualification.v1-T7FvV1i5cOecKlh2_4MHbg==/base.apk",
+        "sha256": "53520415319a171b638a3bbd97f39218198f18ef1f02968fb5cc8d35dacc6ec5"
+      }
+    ]
+  },
+  "completed": true
+}

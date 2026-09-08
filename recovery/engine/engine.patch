@@ -4871,16 +4871,79 @@ index 833475ff2974a04c36499a9a23f4461fa765fbba..ca4ccc460a9c9619c9165d48db3c6a21
                          overrides,
 diff --git a/codex-rs/app-server/tests/native_startup.rs b/codex-rs/app-server/tests/native_startup.rs
 new file mode 100644
-index 0000000000000000000000000000000000000000..51457ec90a7cb547f139d27c10576b6119af7028
+index 0000000000000000000000000000000000000000..847ba28181e05dfb65555cda9176e464bbfb915c
 --- /dev/null
 +++ b/codex-rs/app-server/tests/native_startup.rs
-@@ -0,0 +1,89 @@
+@@ -0,0 +1,152 @@
 +#![cfg(target_os = "linux")]
 +
++use std::os::unix::fs::MetadataExt;
 +use std::os::unix::fs::PermissionsExt;
++use std::os::unix::net::UnixListener;
 +use std::time::Duration;
 +
++use codex_exec_server::NativeRuntimeStartup;
++use codex_utils_path_uri::PathUri;
 +use pretty_assertions::assert_eq;
++use serde_json::json;
++
++#[test]
++fn native_startup_preserves_apk_equals_and_reserved_path_bytes() -> anyhow::Result<()> {
++    let directory = tempfile::tempdir()?;
++    std::fs::set_permissions(directory.path(), std::fs::Permissions::from_mode(0o700))?;
++    let broker = directory.path().join("broker");
++    let workspace = directory.path().join("Fold == % #? é [x] +;:@&");
++    let runtime = directory.path().join("android-apk==");
++    for path in [&broker, &workspace, &runtime] {
++        std::fs::create_dir(path)?;
++        std::fs::set_permissions(path, std::fs::Permissions::from_mode(0o700))?;
++    }
++    let socket = broker.join("owner.sock");
++    let _listener = UnixListener::bind(&socket)?;
++    std::fs::set_permissions(&socket, std::fs::Permissions::from_mode(0o600))?;
++    let owner = std::fs::metadata(&broker)?;
++    assert_ne!(owner.uid(), 0, "real nonroot startup owner required");
++    let workspace_uri = PathUri::from_host_native_path(&workspace)?;
++    let runtime_uri = PathUri::from_host_native_path(&runtime)?;
++    let mut shared = Vec::new();
++    for path in [&workspace, &runtime] {
++        let metadata = std::fs::metadata(path)?;
++        shared.push(json!({
++            "path": PathUri::from_host_native_path(path)?,
++            "device": metadata.dev(), "inode": metadata.ino(),
++        }));
++    }
++    let mut value = json!({
++        "schema": "foldgpt.native-startup.v1",
++        "socketPath": socket,
++        "peer": {"pid": std::process::id(), "uid": owner.uid(), "gid": owner.gid()},
++        "workspaceRoot": workspace_uri,
++        "sharedPaths": shared,
++        "controllerRoots": [runtime_uri],
++        "parentEnvironment": {},
++    });
++    let manifest = broker.join("startup.json");
++    std::fs::write(&manifest, serde_json::to_vec(&value)?)?;
++    std::fs::set_permissions(&manifest, std::fs::Permissions::from_mode(0o600))?;
++    let startup = NativeRuntimeStartup::read(&manifest)?;
++    assert_eq!(startup.workspace()?.to_abs_path()?.as_path(), workspace);
++    assert_eq!(startup.controller_roots()?, vec![runtime_uri.clone()]);
++    startup.covers(&workspace_uri)?;
++    startup.covers(&runtime_uri)?;
++
++    // pathlib.Path.as_uri() encoded APK '=' bytes even though Rust's file-URL
++    // serializer preserves them. The same actual path is not a canonical URI.
++    value["controllerRoots"] = json!([runtime_uri.to_string().replace("==", "%3D%3D")]);
++    std::fs::write(&manifest, serde_json::to_vec(&value)?)?;
++    let error = NativeRuntimeStartup::read(&manifest)
++        .err()
++        .ok_or_else(|| anyhow::anyhow!("over-escaped APK root was incorrectly admitted"))?;
++    assert_eq!(
++        error.to_string(),
++        "native startup requires a canonical file URI"
++    );
++    Ok(())
++}
 +
 +#[tokio::test]
 +async fn production_entrypoints_reject_invalid_native_authority_before_starting_rpc()
@@ -6912,10 +6975,10 @@ index c7578dbed9766d8db9e7f8449b6018d82bc360ed..fa5956c26e50d73f5d019df8722a276f
  mod permission_profile_list;
 diff --git a/codex-rs/app-server/tests/suite/v2/native_app_server.rs b/codex-rs/app-server/tests/suite/v2/native_app_server.rs
 new file mode 100644
-index 0000000000000000000000000000000000000000..e2e59d722ae51107ca2ebb653a9830e9f27f29ff
+index 0000000000000000000000000000000000000000..6866e3382cafad7f21bbeedc06ee52d3fc59696f
 --- /dev/null
 +++ b/codex-rs/app-server/tests/suite/v2/native_app_server.rs
-@@ -0,0 +1,398 @@
+@@ -0,0 +1,400 @@
 +//! Public app-server qualification with the real native factory. Responses SSE
 +//! is a deterministic model fixture; filesystem and process operations are real.
 +use std::os::unix::fs::DirBuilderExt;
@@ -7049,7 +7112,9 @@ index 0000000000000000000000000000000000000000..e2e59d722ae51107ca2ebb653a9830e9
 +        .tempdir_in(&artifacts)?
 +        .keep();
 +    let base = tempfile::Builder::new()
-+        .prefix("foldgpt-native-app-")
++        // Exercise Python's actual startup serialization against Rust using
++        // the '=' bytes present in Android's installed APK directories.
++        .prefix("foldgpt-native-app-==")
 +        .tempdir_in("/var/tmp")?;
 +    let home = base.path().join("home");
 +    let workspace = base.path().join("workspace");
@@ -12489,10 +12554,10 @@ index 0000000000000000000000000000000000000000..98234e196fc08cfe18f21ffdce90f71c
 +}
 diff --git a/codex-rs/exec-server/src/bootstrap_files_socket.rs b/codex-rs/exec-server/src/bootstrap_files_socket.rs
 new file mode 100644
-index 0000000000000000000000000000000000000000..f4d8ef4a376aadeae2186846873e26095c2b7454
+index 0000000000000000000000000000000000000000..092090b97e8c986c283b87585c14c76f3faa8aba
 --- /dev/null
 +++ b/codex-rs/exec-server/src/bootstrap_files_socket.rs
-@@ -0,0 +1,253 @@
+@@ -0,0 +1,273 @@
 +//! Linux message transport owned by the trusted native-runtime bootstrap.
 +
 +use std::io;
@@ -12571,17 +12636,37 @@ index 0000000000000000000000000000000000000000..f4d8ef4a376aadeae2186846873e2609
 +        let mut length = mem::size_of_val(&address) as libc::socklen_t;
 +        // SAFETY: address and length point to writable storage of the indicated size.
 +        checked(unsafe { libc::getpeername(fd, (&raw mut address).cast(), &raw mut length) })?;
-+        let enabled: libc::c_int = 1;
-+        // SAFETY: enabled is a correctly sized SOL_SOCKET integer option.
-+        checked(unsafe {
-+            libc::setsockopt(
-+                fd,
-+                libc::SOL_SOCKET,
-+                libc::SO_PASSCRED,
-+                (&raw const enabled).cast(),
-+                mem::size_of_val(&enabled) as libc::socklen_t,
-+            )
-+        })?;
++        // The native owner enables credentials before handing off this endpoint.
++        // Android may permit using that capability while refusing to reconfigure
++        // it. Verify its actual state instead of repeating an already applied set.
++        match socket_option(fd, libc::SO_PASSCRED)? {
++            1 => {}
++            0 => {
++                let enabled: libc::c_int = 1;
++                // SAFETY: enabled is a correctly sized SOL_SOCKET integer option.
++                checked(unsafe {
++                    libc::setsockopt(
++                        fd,
++                        libc::SOL_SOCKET,
++                        libc::SO_PASSCRED,
++                        (&raw const enabled).cast(),
++                        mem::size_of_val(&enabled) as libc::socklen_t,
++                    )
++                })?;
++                if socket_option(fd, libc::SO_PASSCRED)? != 1 {
++                    return Err(io::Error::new(
++                        io::ErrorKind::PermissionDenied,
++                        "bootstrap socket credentials did not become enabled",
++                    ));
++                }
++            }
++            _ => {
++                return Err(io::Error::new(
++                    io::ErrorKind::InvalidData,
++                    "invalid bootstrap socket credential option",
++                ));
++            }
++        }
 +        // SAFETY: fcntl operates on the owned live descriptor; flags preserve existing bits.
 +        let status = checked(unsafe { libc::fcntl(fd, libc::F_GETFL) })?;
 +        checked(unsafe { libc::fcntl(fd, libc::F_SETFL, status | libc::O_NONBLOCK) })?;
@@ -12748,11 +12833,12 @@ index 0000000000000000000000000000000000000000..f4d8ef4a376aadeae2186846873e2609
 +mod tests;
 diff --git a/codex-rs/exec-server/src/bootstrap_files_socket_tests.rs b/codex-rs/exec-server/src/bootstrap_files_socket_tests.rs
 new file mode 100644
-index 0000000000000000000000000000000000000000..b98f773b1fc2da0db69241a311d05d2b5c06651f
+index 0000000000000000000000000000000000000000..57b706054219b1a6d38e7c60d90f0e7c06eeb7c6
 --- /dev/null
 +++ b/codex-rs/exec-server/src/bootstrap_files_socket_tests.rs
-@@ -0,0 +1,249 @@
+@@ -0,0 +1,354 @@
 +use super::*;
++use pretty_assertions::assert_eq;
 +use std::os::unix::ffi::OsStrExt;
 +use std::os::unix::net::UnixStream;
 +use std::os::unix::process::CommandExt;
@@ -12787,6 +12873,110 @@ index 0000000000000000000000000000000000000000..b98f773b1fc2da0db69241a311d05d2b
 +        uid: unsafe { libc::geteuid() },
 +        gid: unsafe { libc::getegid() },
 +    }
++}
++
++#[tokio::test]
++async fn unconfigured_endpoints_enable_real_packet_credentials() -> io::Result<()> {
++    let (first, second) = pair();
++    assert_eq!(socket_option(first.as_raw_fd(), libc::SO_PASSCRED)?, 0);
++    assert_eq!(socket_option(second.as_raw_fd(), libc::SO_PASSCRED)?, 0);
++    let first = CredentialedSocket::new(first, identity())?;
++    let second = CredentialedSocket::new(second, identity())?;
++    for endpoint in [&first, &second] {
++        assert_eq!(
++            socket_option(endpoint.descriptor.get_ref().as_raw_fd(), libc::SO_PASSCRED)?,
++            1
++        );
++    }
++    first.send(b"actual credentials").await?;
++    assert_eq!(second.receive(64).await?, b"actual credentials");
++    Ok(())
++}
++
++#[test]
++fn owner_configured_credentials_work_when_reconfiguration_is_denied() -> io::Result<()> {
++    // The real filter applies only to this disposable thread. It cannot change
++    // the test harness's permissions or those of concurrently running tests.
++    std::thread::spawn(|| -> io::Result<()> {
++        let runtime = tokio::runtime::Builder::new_current_thread()
++            .enable_all()
++            .build()?;
++        let (first, second) = pair();
++        let (unconfigured, _other) = pair();
++        let enabled: libc::c_int = 1;
++        for descriptor in [&first, &second] {
++            // SAFETY: the live descriptor and bounded integer option are valid.
++            checked(unsafe {
++                libc::setsockopt(
++                    descriptor.as_raw_fd(),
++                    libc::SOL_SOCKET,
++                    libc::SO_PASSCRED,
++                    (&raw const enabled).cast(),
++                    mem::size_of_val(&enabled) as libc::socklen_t,
++                )
++            })?;
++        }
++        let mut filter = [
++            libc::sock_filter {
++                code: (libc::BPF_LD | libc::BPF_W | libc::BPF_ABS) as u16,
++                jt: 0,
++                jf: 0,
++                k: mem::offset_of!(libc::seccomp_data, nr) as u32,
++            },
++            libc::sock_filter {
++                code: (libc::BPF_JMP | libc::BPF_JEQ | libc::BPF_K) as u16,
++                jt: 0,
++                jf: 1,
++                k: libc::SYS_setsockopt as u32,
++            },
++            libc::sock_filter {
++                code: (libc::BPF_RET | libc::BPF_K) as u16,
++                jt: 0,
++                jf: 0,
++                k: libc::SECCOMP_RET_ERRNO | libc::EACCES as u32,
++            },
++            libc::sock_filter {
++                code: (libc::BPF_RET | libc::BPF_K) as u16,
++                jt: 0,
++                jf: 0,
++                k: libc::SECCOMP_RET_ALLOW,
++            },
++        ];
++        let program = libc::sock_fprog {
++            len: filter.len() as u16,
++            filter: filter.as_mut_ptr(),
++        };
++        // SAFETY: these calls only restrict this thread; the kernel copies the
++        // bounded filter while all its storage is alive. No TSYNC is requested.
++        checked(unsafe { libc::prctl(libc::PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0) })?;
++        checked(unsafe { libc::prctl(libc::PR_SET_SECCOMP, libc::SECCOMP_MODE_FILTER, &program) })?;
++        let denied = checked(unsafe {
++            libc::setsockopt(
++                first.as_raw_fd(),
++                libc::SOL_SOCKET,
++                libc::SO_PASSCRED,
++                (&raw const enabled).cast(),
++                mem::size_of_val(&enabled) as libc::socklen_t,
++            )
++        })
++        .unwrap_err();
++        assert_eq!(denied.raw_os_error(), Some(libc::EACCES));
++        runtime.block_on(async {
++            let first = CredentialedSocket::new(first, identity())?;
++            let second = CredentialedSocket::host(second, identity())?;
++            first.send(b"owner enabled before handoff").await?;
++            assert_eq!(second.receive(64).await?, b"owner enabled before handoff");
++            second.send(b"authenticated reply").await?;
++            assert_eq!(first.receive(64).await?, b"authenticated reply");
++            let error = CredentialedSocket::new(unconfigured, identity())
++                .err()
++                .expect("disabled credentials cannot be admitted when enabling is denied");
++            assert_eq!(error.raw_os_error(), Some(libc::EACCES));
++            Ok(())
++        })
++    })
++    .join()
++    .expect("disposable credential test thread should not panic")
 +}
 +
 +#[tokio::test]

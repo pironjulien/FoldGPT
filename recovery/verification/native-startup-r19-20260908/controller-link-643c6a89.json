@@ -1,0 +1,157 @@
+{
+  "scope": "Native workdir qualification from ordinary Android application",
+  "uiQualified": false,
+  "qualification": {
+    "schema": "foldgpt.production-workdir-qualification.v1",
+    "passed": true,
+    "officialEditorQualified": false,
+    "cloudModelUsed": false,
+    "javaCleanupReceiptRequired": true,
+    "nativeOwner": {
+      "pid": 23476,
+      "uid": 10412,
+      "gid": 10412
+    },
+    "project": "/data/user/0/app.foldgpt/files/projects/workdir-production-63678a01ad234aef89ca270382928f85",
+    "executionCwd": "/data/user/0/app.foldgpt/files/projects/workdir-production-63678a01ad234aef89ca270382928f85/app",
+    "policyCwd": "/data/user/0/app.foldgpt/files/projects/workdir-production-63678a01ad234aef89ca270382928f85",
+    "manifestSha256": "ecf3849b19d1e2a4868b1e11836775c039611360802f8876f8308c7005beae90",
+    "connection": {
+      "sessionId": "6eb97996-75d4-43f7-8059-c432511efc01",
+      "hostReady": {
+        "type": "ready",
+        "schema": "foldgpt.host.v2",
+        "sessionId": "6eb97996-75d4-43f7-8059-c432511efc01",
+        "workspaceRoot": "file:///data/user/0/app.foldgpt/files/projects",
+        "chunkBytes": 32768,
+        "maxDataBytes": 16777216,
+        "maxPacketBytes": 65536,
+        "maxPendingRequests": 128,
+        "operations": [
+          "readFile",
+          "writeFile",
+          "getMetadata",
+          "canonicalize",
+          "readDirectory",
+          "createDirectory",
+          "processStart",
+          "processRead",
+          "processWrite",
+          "processTerminate"
+        ]
+      }
+    },
+    "processStartRequest": {
+      "processId": "workdir-native-c3ca1ae1c2eb427f84d37da00701eef5",
+      "argv": [
+        "python3",
+        "-I",
+        "-S",
+        "-B",
+        "-c",
+        "import errno,json,os,sys\ndenied=[]\nfor path,mode in (('../private/secret','rb'),('../private/secret','wb'),('../.git/config','wb')):\n    try:\n        with open(path,mode): pass\n    except OSError as error:\n        assert error.errno in (errno.EACCES,errno.EPERM),error\n        denied.append([path,mode])\n    else: raise AssertionError('Original policy denial or metadata protection was lost')\nwith open('result.txt','w') as target: target.write(str(6*7))\nprint(json.dumps({'cwd':os.getcwd(),'platform':sys.platform,'machine':os.uname().machine,\n                  'uid':os.getuid(),'result':6*7,'denied':denied},sort_keys=True))\n"
+      ],
+      "cwd": "file:///data/user/0/app.foldgpt/files/projects/workdir-production-63678a01ad234aef89ca270382928f85/app",
+      "env": {},
+      "envPolicy": {
+        "inherit": "all",
+        "ignoreDefaultExcludes": false,
+        "exclude": [],
+        "set": {},
+        "includeOnly": []
+      },
+      "tty": false,
+      "pipeStdin": false,
+      "sandbox": {
+        "permissions": {
+          "type": "managed",
+          "file_system": {
+            "type": "restricted",
+            "entries": [
+              {
+                "path": {
+                  "type": "path",
+                  "path": "file:///data/user/0/app.foldgpt/files/projects/workdir-production-63678a01ad234aef89ca270382928f85"
+                },
+                "access": "write"
+              },
+              {
+                "path": {
+                  "type": "path",
+                  "path": "file:///data/user/0/app.foldgpt/files/projects/workdir-production-63678a01ad234aef89ca270382928f85/private"
+                },
+                "access": "deny"
+              }
+            ]
+          },
+          "network": "restricted"
+        },
+        "cwd": "file:///data/user/0/app.foldgpt/files/projects/workdir-production-63678a01ad234aef89ca270382928f85",
+        "workspaceRoots": [
+          "file:///data/user/0/app.foldgpt/files/projects/workdir-production-63678a01ad234aef89ca270382928f85"
+        ],
+        "windowsSandboxLevel": "disabled"
+      }
+    },
+    "processStartResult": {
+      "processId": "workdir-native-c3ca1ae1c2eb427f84d37da00701eef5",
+      "sandboxType": "linuxSeccomp"
+    },
+    "processResult": {
+      "nextSeq": 4,
+      "exited": true,
+      "exitCode": 0,
+      "closed": true,
+      "failure": null,
+      "sandboxDenied": false
+    },
+    "stdout": {
+      "bytes": 276,
+      "sha256": "417ae23ac916ad4aae3d1a6472c6bc3c663e565da99db78a62676acf1e189812",
+      "base64": "eyJjd2QiOiAiL2RhdGEvdXNlci8wL2FwcC5mb2xkZ3B0L2ZpbGVzL3Byb2plY3RzL3dvcmtkaXItcHJvZHVjdGlvbi02MzY3OGEwMWFkMjM0YWVmODljYTI3MDM4MjkyOGY4NS9hcHAiLCAiZGVuaWVkIjogW1siLi4vcHJpdmF0ZS9zZWNyZXQiLCAicmIiXSwgWyIuLi9wcml2YXRlL3NlY3JldCIsICJ3YiJdLCBbIi4uLy5naXQvY29uZmlnIiwgIndiIl1dLCAibWFjaGluZSI6ICJhYXJjaDY0IiwgInBsYXRmb3JtIjogImFuZHJvaWQiLCAicmVzdWx0IjogNDIsICJ1aWQiOiAxMDQxMn0K"
+    },
+    "stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "base64": ""
+    },
+    "worker": {
+      "cwd": "/data/user/0/app.foldgpt/files/projects/workdir-production-63678a01ad234aef89ca270382928f85/app",
+      "denied": [
+        [
+          "../private/secret",
+          "rb"
+        ],
+        [
+          "../private/secret",
+          "wb"
+        ],
+        [
+          "../.git/config",
+          "wb"
+        ]
+      ],
+      "machine": "aarch64",
+      "platform": "android",
+      "result": 42,
+      "uid": 10412
+    },
+    "files": [
+      {
+        "path": "/data/user/0/app.foldgpt/files/projects/workdir-production-63678a01ad234aef89ca270382928f85/private/secret",
+        "bytes": 31,
+        "sha256": "e7811e8345ec89a7219d1253f7f89881d48da61b2d1fdb4bd82416ea2db43c0f"
+      },
+      {
+        "path": "/data/user/0/app.foldgpt/files/projects/workdir-production-63678a01ad234aef89ca270382928f85/.git/config",
+        "bytes": 32,
+        "sha256": "7817b76616b87e7cde10b65733ef57e82429606bbf8f55dc96e48adab59c3460"
+      },
+      {
+        "path": "/data/user/0/app.foldgpt/files/projects/workdir-production-63678a01ad234aef89ca270382928f85/app/result.txt",
+        "bytes": 2,
+        "sha256": "73475cb40a568e8da8a045ced110137e159f890ac4da883b6b17dc651b3a8049"
+      }
+    ]
+  }
+}

@@ -114,15 +114,19 @@ def main():
             text(["run-as", "app.foldgpt", "test", "-d", directory])
         client_source = "qualify_native_production.py" if args.qualification == "python" else "qualify_production_host_v2.py"
         source = (ROOT / "tools/executor" / client_source).read_bytes()
+        client_inputs = {"client.py": source,
+            "native_path_uri.py": (ROOT / "tools/executor/native_path_uri.py").read_bytes()}
         tar = io.BytesIO()
         with tarfile.open(fileobj=tar, mode="w", format=tarfile.GNU_FORMAT) as archive:
-            entry = tarfile.TarInfo("client.py")
-            entry.size, entry.uid, entry.gid, entry.mode = len(source), uid, uid, 0o600
-            archive.addfile(entry, io.BytesIO(source))
+            for name, content in client_inputs.items():
+                entry = tarfile.TarInfo(name)
+                entry.size, entry.uid, entry.gid, entry.mode = len(content), uid, uid, 0o600
+                archive.addfile(entry, io.BytesIO(content))
         run(["run-as", "app.foldgpt", "tar", "-xf", "-", "-C", base], tar.getvalue())
-        if text(["run-as", "app.foldgpt", "sha256sum", base + "/client.py"]).split()[0] != hashlib.sha256(source).hexdigest():
-            raise ValueError("Transferred GNU client differs")
-        (output / "client.py").write_bytes(source)
+        for name, content in client_inputs.items():
+            if text(["run-as", "app.foldgpt", "sha256sum", base + "/" + name]).split()[0] != hashlib.sha256(content).hexdigest():
+                raise ValueError("Transferred GNU client input differs: " + name)
+            (output / name).write_bytes(content)
         # Start only after the entire independent client is ready on device.
         prepared = True
         result["prepareResponse"] = action("PREPARE")

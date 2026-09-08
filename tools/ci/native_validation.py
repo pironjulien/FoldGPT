@@ -43,6 +43,7 @@ def command(name, argv, *, cwd=PROJECT, env=None, reject_skips=False):
     EVIDENCE.mkdir(parents=True, exist_ok=True)
     argv = list(map(str, argv))
     started = time.monotonic()
+    disk_before = shutil.disk_usage(PROJECT)._asdict()
     log_path = EVIDENCE / f"{name}.log"
     print(f"Running {name}: {argv}", flush=True)
     with log_path.open("w") as log:
@@ -57,6 +58,7 @@ def command(name, argv, *, cwd=PROJECT, env=None, reject_skips=False):
     save(EVIDENCE / f"{name}.result.json", {
         "argv": argv, "cwd": str(cwd), "exitCode": code,
         "seconds": round(time.monotonic() - started, 3), "pythonSkippedTests": skipped,
+        "diskBefore": disk_before, "diskAfter": shutil.disk_usage(PROJECT)._asdict(),
     })
     if code or (reject_skips and skipped):
         raise RuntimeError(f"{name} failed; exit={code}, skipped={skipped}; see {log_path}")
@@ -234,6 +236,16 @@ def engine_tests():
     save(EVIDENCE / "engine-linux-binaries.json", {
         name: {"sha256": sha(binaries / name), "bytes": (binaries / name).stat().st_size}
         for name in ("codex", "codex-app-server", "codex-code-mode-host")})
+    sections = {}
+    for name in ("codex", "codex-app-server", "codex-code-mode-host"):
+        output = subprocess.check_output(["readelf", "--wide", "--section-headers", binaries / name], text=True)
+        (EVIDENCE / f"{name}-linux-sections.log").write_text(output)
+        sections[name] = {"bytes": (binaries / name).stat().st_size,
+                          "staticSymbolTable": bool(re.search(r"\s\.symtab\s", output)),
+                          "debugSections": sorted(set(re.findall(r"\s(\.debug_[A-Za-z0-9_]+)\s", output)))}
+    save(EVIDENCE / "engine-linux-symbols.json", sections)
+    if any(record["staticSymbolTable"] or record["debugSections"] for record in sections.values()):
+        raise RuntimeError("Linux qualification binaries still contain removable compilation symbols")
     base = ["just", "--justfile", ENGINE / "justfile", "test", "--locked", "--test-threads", "2"]
     runs = [
         ("exec-server-tests", ["-p", "codex-exec-server", "--lib", "--test", "runtime_acquisition",
@@ -301,10 +313,12 @@ def engine_final_checks():
                         "UV_PYTHON_INSTALL_DIR": str(WORK / "cache/uv-python"),
                         "DOTSLASH_CACHE": str(WORK / "cache/dotslash")})
     base = ["just", "--justfile", ENGINE / "justfile"]
+    storage_snapshot("engine-full-before")
     try:
         command("engine-full-tests", [*base, "test", "--locked", "--test-threads", "2"],
                 cwd=ENGINE, env=environment)
     finally:
+        storage_snapshot("engine-full-after")
         report = Path(os.environ["CARGO_TARGET_DIR"]) / "nextest/local/junit.xml"
         if report.is_file():
             shutil.copyfile(report, EVIDENCE / "engine-full-tests.junit.xml")
@@ -339,6 +353,27 @@ def engine_final_checks():
     save(EVIDENCE / "engine-final-checks.json", {"passed": True, "androidExecution": False,
         "fullSuite": True, "fixPackages": sorted(packages), "format": True,
         "fixPatchSha256": sha(EVIDENCE / "engine-final-source-fixes.patch")})
+
+
+def storage_snapshot(name):
+    """Measure actual allocated target blocks, without counting hardlinks twice."""
+    target = Path(os.environ["CARGO_TARGET_DIR"])
+    seen, largest = set(), []
+    allocated = 0
+    for path in target.rglob("*"):
+        if path.is_symlink() or not path.is_file():
+            continue
+        info = path.stat()
+        identity = info.st_dev, info.st_ino
+        if identity in seen:
+            continue
+        seen.add(identity)
+        allocated += info.st_blocks * 512
+        largest.append({"path": path.relative_to(target).as_posix(), "bytes": info.st_size})
+    record = {"disk": shutil.disk_usage(PROJECT)._asdict(), "targetAllocatedBytes": allocated,
+              "targetFiles": len(seen), "largest": sorted(largest, key=lambda item: item["bytes"], reverse=True)[:20]}
+    print(json.dumps({name: record}), flush=True)
+    save(EVIDENCE / f"{name}-storage.json", record)
 
 
 def arm_dependencies():

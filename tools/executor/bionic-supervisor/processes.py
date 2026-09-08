@@ -88,6 +88,12 @@ class Processes(NativeProcessesBackend):
         for path, _ in self.runtime:
             require_outside_workspace(path, self.workspace)
 
+    def _validate_launch_context(self, params):
+        if params.get("sandbox") is None:
+            raise RpcError(-32602, "Bionic launch requires its complete portable sandbox context")
+        # Policy performs full admission under the workspace lease in _run:
+        # the process cwd and unchanged policy cwd have independent roles.
+
     async def _control(self, record, endpoint):
         ready = False
         input_closed = False
@@ -234,7 +240,7 @@ class Processes(NativeProcessesBackend):
                 self.cwd_shim.verify()
                 environment.append("LD_PRELOAD=" + self.cwd_shim.path)
             limits = self.limits
-            sealed = seal(envelope(workspace=self.workspace, cwd_relative="/".join(record.policy.cwd_parts) or ".",
+            sealed = seal(envelope(workspace=self.workspace, cwd_relative="/".join(record.policy.execution_cwd_parts) or ".",
                 executable=record.executable.path, argv=record.argv, environment=environment, runtime=self.runtime,
                 wall_ms=limits.wall_ms, data_bytes=limits.data_bytes, file_bytes=limits.file_bytes,
                 output_bytes=limits.output_bytes, uid_tasks=limits.uid_task_budget,

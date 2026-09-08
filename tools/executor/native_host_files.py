@@ -12,6 +12,7 @@ from tools.executor.exec_server import RpcError
 from tools.executor.native_executor_backend import NativeExecutorBackend
 from tools.executor.native_files import MAX_DATA, MAX_DEPTH, MAX_ENTRIES, _native_metadata
 from tools.policy.managed_policy import GuestPath, PolicyError
+from tools.executor.native_path_uri import path_uri
 
 _ISSUER = object()
 
@@ -46,7 +47,7 @@ class HostFileAuthority:
     @property
     def workspace_root_uri(self):
         """The inclusive native root already granted by the owner, never by JSON."""
-        return self._root.uri
+        return path_uri(self._root.path)
 
     async def read_file(self, uri):
         """Read exact bounded bytes from an ordinary native file."""
@@ -84,7 +85,7 @@ class HostFileAuthority:
             if type(uri) is not str:
                 raise ValueError("Host path must be a canonical file URI")
             path = GuestPath.from_uri(uri)
-            if uri != path.uri or not self._root.contains(path):
+            if uri != path_uri(path.path) or not self._root.contains(path):
                 raise PermissionError("Host operation is outside its owned workspace or uses an alias")
             if operation in {"read", "write"} and path == self._root:
                 raise PermissionError("Host file operation requires an ordinary file below its root")
@@ -151,7 +152,7 @@ class HostFileAuthority:
                 output = await files._native_operation(arguments, payload,
                     empty_output=operation in {"write", "mkdir", "mkdirs", "directory", "canonicalize"})
                 if operation == "canonicalize":
-                    return path.uri
+                    return path_uri(path.path)
                 if operation == "directory":
                     if entries is None:
                         raise RpcError(-32603, "Native directory validation admitted a missing target")

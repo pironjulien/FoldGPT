@@ -1,6 +1,7 @@
 """Actual composed factory and lifecycle tests, with Linux kernel enforcement."""
 import asyncio
 import base64
+import copy
 import importlib
 import hashlib
 import json
@@ -16,6 +17,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 factory = importlib.import_module("tools.executor.bionic-supervisor.factory").factory
 kernel = importlib.import_module("tools.executor.bionic-supervisor.test_kernel")
 from tools.executor.exec_server import BackendCall, RpcError, encode_message
+from tools.executor.policy_intent import prepare_policy_intent
 
 BUILD = Path(sys.argv.pop(1)) if len(sys.argv) > 1 and not sys.argv[1].startswith("-") else None
 OBSERVATIONS = []
@@ -147,6 +149,93 @@ class FactoryTests(unittest.IsolatedAsyncioTestCase):
         result = await self.complete(record)
         self.assertEqual(record.native_result["outcome"], "output_limit")
         self.assertEqual(len(self.output(result)), 32768)
+
+    async def test_05b_execution_workdir_preserves_original_project_policy(self):
+        project = self.workspace / "project"
+        app = project / "app"
+        app.mkdir(parents=True, mode=0o700)
+        (project / "private").mkdir(mode=0o700)
+        (project / ".git").mkdir(mode=0o700)
+        secret, metadata = project / "private/secret", project / ".git/config"
+        secret.write_bytes(b"original private bytes")
+        metadata.write_bytes(b"original metadata bytes")
+        before = {path: path.read_bytes() for path in (secret, metadata)}
+        context = kernel.context(project)
+        original = copy.deepcopy(context)
+        program = """import errno,json,os
+denied=[]
+for path,mode in (('../private/secret','rb'),('../private/secret','wb'),('../.git/config','wb')):
+    try:
+        with open(path,mode): pass
+    except OSError as error:
+        assert error.errno in (errno.EACCES,errno.EPERM),error
+        denied.append([path,mode])
+    else: raise AssertionError('original project policy was rebased or lost')
+with open('result.txt','w') as output: output.write(str(6*7))
+print(json.dumps({'cwd':os.getcwd(),'denied':denied,'result':6*7},sort_keys=True))
+"""
+        record = await self.start("exec /usr/bin/python3 -I -B -c " + shlex.quote(program),
+                                  cwd=app.as_uri(), sandbox=context)
+        result = await self.complete(record)
+        self.assertEqual(result["exitCode"], 0, result)
+        self.assertIsNone(result["failure"], result)
+        observed = json.loads(self.output(result))
+        self.assertEqual(observed, {"cwd": str(app), "result": 42,
+            "denied": [["../private/secret", "rb"], ["../private/secret", "wb"], ["../.git/config", "wb"]]})
+        self.assertEqual((app / "result.txt").read_bytes(), b"42")
+        for path, data in before.items():
+            self.assertEqual(path.read_bytes(), data)
+        expected = prepare_policy_intent(original, session_id=record.session,
+            request_id=type(record.request_id).__name__ + ":" + str(record.request_id), method="process/start")
+        self.assertEqual(record.policy.intent.context_json, expected.context_json)
+        self.assertEqual(context, original)
+        self.assertEqual(record.policy.policy_cwd.path, str(project))
+        self.assertEqual(record.policy.execution_cwd.path, str(app))
+        self.assertGreaterEqual(record.native_result["denials"], 3)
+
+    async def test_05c_invalid_execution_and_policy_workdirs_never_spawn(self):
+        project = self.workspace / "project"
+        app = project / "app"
+        app.mkdir(parents=True, mode=0o700)
+        (project / "private").mkdir(mode=0o700)
+        ordinary_file = project / "ordinary-file"
+        ordinary_file.write_bytes(b"not a directory")
+        context = kernel.context(project)
+        cases = [("execution-outside", self.base.as_uri(), context),
+                 ("execution-missing", (project / "missing").as_uri(), context),
+                 ("execution-file", ordinary_file.as_uri(), context),
+                 ("execution-denied", (project / "private").as_uri(), context),
+                 ("missing-context", app.as_uri(), None)]
+        for name, cwd in (("policy-outside", self.base.as_uri()),
+                          ("policy-missing", (project / "missing").as_uri()),
+                          ("policy-file", ordinary_file.as_uri())):
+            changed = copy.deepcopy(context)
+            changed["cwd"] = cwd
+            cases.append((name, app.as_uri(), changed))
+        unsupported = copy.deepcopy(context)
+        unsupported["permissions"]["network"] = "enabled"
+        cases.append(("unsupported-context", app.as_uri(), unsupported))
+        for key, cwd, policy in cases:
+            with self.subTest(case=key), self.assertRaises(RpcError):
+                await self.start("printf must-not-run > marker", key=key, cwd=cwd, sandbox=policy)
+            self.assertNotIn(("test", key), self.backend.processes.processes)
+            self.assertFalse(self.backend.files.lock.locked())
+            self.assertFalse((app / "marker").exists())
+            for record in self.backend.processes.failed:
+                if record.key == key:
+                    self.assertIsNone(record.process)
+                    self.assertIsNone(record.native_result)
+                    self.assertTrue(record.closed)
+        alias = project / "alias"
+        alias.symlink_to(app, target_is_directory=True)
+        try:
+            with self.assertRaises(RpcError):
+                await self.start("printf must-not-run > marker", key="execution-alias",
+                                 cwd=alias.as_uri(), sandbox=context)
+            self.assertIsNone(self.backend.processes.failed[-1].process)
+            self.assertFalse(self.backend.files.lock.locked())
+        finally:
+            alias.unlink()
 
     async def test_07_lstat_nofollow_and_bad_metadata_flags(self):
         program = """import ctypes,errno,os,stat

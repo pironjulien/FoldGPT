@@ -9,6 +9,12 @@ not a VM deployed as the FoldGPT execution solution.
 Three independent jobs preserve their logs and explicit proof files as private
 Actions artifacts for 14 days. A failed build or unavailable kernel capability
 fails its job; missing tools and Python test skips are not counted as success.
+When an earlier complete Linux suite is still active, publish with `--arm-only`
+to build the new ARM64 candidate and run the current native Python tests without
+canceling that suite. Queue `linux_tests_only=true,full_rust_checks=true` for the
+same published source snapshot separately; it waits for the current Linux job
+and can restore its compatible compilation cache. An ARM build does not replace
+the required Linux checks, and their conclusions remain separately recorded.
 
 The fixed kernel worker runs under its canonical dedicated nobody UID/GID
 (65534), measured before launch. Its two-task quota permits the worker and its
@@ -69,10 +75,20 @@ The tool/V8 cache is saved immediately after that verification, so a later
 engine compilation failure does not discard the installed pinned tools.
 Compiled targets are cached separately by architecture, lockfile and snapshot;
 Cargo still checks source fingerprints when a prior compatible cache is restored.
+Linux dev/test profiles strip static symbols as well as debug information.
+The previous full-suite attempt exhausted its 36GB of available storage even
+with Rust debug information disabled. `native-target-v2-stripped` separates the
+new profile from incompatible larger artifacts, retaining the tool/source cache;
+the first build under this profile recompiles those Rust targets. ARM release
+settings and its existing target cache are preserved. ELF section reports verify
+that the Linux executables really have no static symbol table or debug sections.
+Each command records free storage, and full-suite boundaries record allocated
+target blocks and the largest artifacts, counting hardlinks only once.
 The disposable hosted Linux job removes only its listed unused Android, .NET,
-Haskell and CodeQL SDK directories before compilation. This addresses the
-observed LLVM disk-full failure while preserving the required compilers and
-project inputs. Available disk space before and after is recorded in evidence.
+Haskell and CodeQL SDK directories and the redundant image Rust toolchains before
+compilation. Removal of the latter requires the explicit project-local
+`RUSTUP_HOME`; cargo/rustup shims and the selected pinned toolchain are retained.
+Available disk space before and after is recorded in evidence.
 
 The ARM64 OpenSSL input is the complete official 3.6.3 source archive, pinned to
 SHA256 `243a86649cf6f23eeb6a2ff2456e09e5d77dd9018a54d3d96b0c6bdd6ba6c7f1`,

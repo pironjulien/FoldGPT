@@ -1,0 +1,162 @@
+{
+  "scope": "GNU controller connection from ordinary Android application",
+  "stages": [
+    {
+      "stage": "shared-path",
+      "path": "/data/user/0/app.foldgpt/files/projects",
+      "sameIdentity": true
+    },
+    {
+      "stage": "shared-path",
+      "path": "/data/user/0/app.foldgpt/files/native-runtime-v1/python",
+      "sameIdentity": true
+    },
+    {
+      "stage": "shared-path",
+      "path": "/data/app/~~61RPt5xlzJhwf1ud9jFM4A==/app.foldgpt-8XmUPvJN_HzpkvG74Ygwcw==/lib/arm64",
+      "sameIdentity": true
+    },
+    {
+      "stage": "socket",
+      "passed": true
+    },
+    {
+      "stage": "setsockopt-SO_PASSCRED",
+      "passed": true
+    },
+    {
+      "stage": "connect",
+      "passed": true
+    },
+    {
+      "stage": "SO_PEERCRED",
+      "value": [
+        16862,
+        10412,
+        10412
+      ]
+    },
+    {
+      "stage": "getsockopt-39",
+      "value": 1
+    },
+    {
+      "stage": "getsockopt-3",
+      "value": 5
+    },
+    {
+      "stage": "send-acquire",
+      "passed": true
+    },
+    {
+      "stage": "recvmsg-rights",
+      "data": {
+        "type": "channels",
+        "schema": "foldgpt.native-runtime.v1",
+        "workspaceRoot": "file:///data/user/0/app.foldgpt/files/projects",
+        "fdRoles": [
+          "exec",
+          "config",
+          "host"
+        ]
+      },
+      "credentials": [
+        [
+          16862,
+          10412,
+          10412
+        ]
+      ],
+      "rightsCount": 3,
+      "flags": 1073741824
+    },
+    {
+      "stage": "received-socket-0",
+      "peer": [
+        16862,
+        10412,
+        10412
+      ],
+      "domain": 1,
+      "type": 1,
+      "localAddress": "''",
+      "peerAddress": "''"
+    },
+    {
+      "stage": "fcntl-F_SETFL",
+      "channel": 0,
+      "passed": true
+    },
+    {
+      "stage": "ioctl-FIONBIO",
+      "channel": 0,
+      "passed": true
+    },
+    {
+      "stage": "received-socket-1",
+      "peer": [
+        16862,
+        10412,
+        10412
+      ],
+      "domain": 1,
+      "type": 5,
+      "localAddress": "''",
+      "peerAddress": "''"
+    },
+    {
+      "stage": "received-SO_PASSCRED-1",
+      "before": 1,
+      "setPassed": false,
+      "errno": 13,
+      "after": 1
+    },
+    {
+      "stage": "fcntl-F_SETFL",
+      "channel": 1,
+      "passed": true
+    },
+    {
+      "stage": "ioctl-FIONBIO",
+      "channel": 1,
+      "passed": true
+    },
+    {
+      "stage": "received-socket-2",
+      "peer": [
+        16862,
+        10412,
+        10412
+      ],
+      "domain": 1,
+      "type": 5,
+      "localAddress": "''",
+      "peerAddress": "''"
+    },
+    {
+      "stage": "received-SO_PASSCRED-2",
+      "before": 1,
+      "setPassed": false,
+      "errno": 13,
+      "after": 1
+    },
+    {
+      "stage": "fcntl-F_SETFL",
+      "channel": 2,
+      "passed": true
+    },
+    {
+      "stage": "ioctl-FIONBIO",
+      "channel": 2,
+      "passed": true
+    }
+  ],
+  "manifestPath": "/data/user/0/app.foldgpt/app_foldgpt_exec/0b75ca1211b64fe69d1480035f2ea5fc/startup.json",
+  "nativePeer": {
+    "pid": 16862,
+    "uid": 10412,
+    "gid": 10412
+  },
+  "status": "Name:\tpython3\nPid:\t17489\nUid:\t10412\t10412\t10412\t10412\nGid:\t10412\t10412\t10412\t10412",
+  "attr/current": "u:r:untrusted_app:s0:c156,c257,c512,c768\u0000"
+}

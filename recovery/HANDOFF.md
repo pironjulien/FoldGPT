@@ -5,7 +5,55 @@ Le dépôt de travail est **privé** : `pironjulien/FoldGPT-workspace`, branche
 sous-modules, moteur séparé et données locales. Le dépôt public `FoldGPT` est un
 ancien checkpoint ; il ne reçoit pas cette sauvegarde privée.
 
-## État courant : exécuteur sous identité FoldGPT prouvé sur le téléphone
+## État courant du 8 septembre : erreur du moteur localisée, correction en validation
+
+Le parcours **conversation réelle → projet Python → éditeur → fermeture/reprise**
+reste à qualifier. Ne pas le décrire comme terminé à partir des tests des canaux.
+
+- **Installé : r19/versionCode9 et moteur GNU R4**, paquet natif v7.
+  R4 est installé à côté du client officiel depuis le run ARM `34183702604`.
+  Son archive SHA256 est
+  `4c0e6df5d9a5bd425cdf34e0a92c18c9efa58dae616eb65eb2990f38306e501e`.
+- La divergence URI `%3D`/`=` des chemins APK est corrigée, avec 97 comparaisons
+  contre la vraie crate Rust. L'incrément versionCode renouvelle le service
+  Shizuku par son mécanisme existant et évite son ancien nativeLibraryDir.
+- **Cause du refus restant errno13 reproduite** : Rust reconfigure SO_PASSCRED
+  sur les canaux config/host déjà activés par leur propriétaire. Android refuse
+  cette écriture ; la lecture confirme1 avant et après. Rust vérifie désormais
+  l'état déjà actif. L'activation reste obligatoire lorsqu'il vaut0, et les
+  contrôles de chaque message restent intacts. Revue indépendante passée ;
+  compilation ARM et tests du nouveau moteur en cours.
+- Les qualifications Python complètes passent depuis le vrai contexte de
+  l'application Android. Essai r19 `controller-link-8055df9e`, propriétaire
+  22200 arrêté/reapé, wait0 et PID absent. Les fichiers officiels Linux et Android,
+  le boot et les propriétés du téléphone sont inchangés après les diagnostics.
+- **r19/versionCode9 installé et commandes natives qualifiées** : paquet v7,
+  SHA256 APK `13db3dda291362c4c4658bb325714d1576bde07b7f1fac1a9c860565d5a32162`.
+  Il ajoute la séparation du sous-dossier d'exécution et de la base de politique,
+  sans modifier les permissions. Sources/ELF/signature et 22 tests FactoryTests
+  Linux passent dans `34192631216`, dont les deux régressions workdir ; 126 tests
+  Python au total, aucun skip. `controller-link-643c6a89` valide réellement sur
+  le Fold W/app avec politique W, identité Android/ARM64/UID10412, résultat42 et
+  trois refus d'accès attendus. La variante Bash `controller-link-062ed250`
+  exécute aussi ce travail avec exit0, mais son test signale deux avertissements
+  de profil sur stderr : conserver cette limite et son rapport distinct.
+- Nouveau moteur : run ARM `34192631216`, commit
+  `8963acc8e961c0d34b068910b973cc6f9b9df3bc`, patch
+  `806558ded307f46b76a278c5c81131f1d90bf6a4f7f72b9f66b29416fa9357ea`.
+  Ne l'installer qu'après le reçu du collecteur. La validation Linux précédente
+  `34190100825` a passé ses tests ciblés et poursuit sa suite complète ; la
+  validation du nouveau Rust est `34192652057`, actuellement en attente.
+- Le wrapper de production est restauré après chaque diagnostic et vérifié.
+  Aucun interposer de diagnostic ne constitue une correction installée.
+- **GitHub v12 demeure la dernière récupération intégralement restaurée**.
+  Elle contient r16, pas R4/r18/r19. Le complément v13 est en préparation.
+
+Preuves de cette passe :
+`work/root-artifacts-20260907/native-ui-validation-20260908/errno13-cause.md`,
+`passcred-independent-review.md` et `after-errno-diagnosis-device`.
+Les fichiers de travail restent sous `C:\Dev\ChatgptFold`.
+
+## Historique : r16 et récupération v12
 
 **Dernier contrôle, 8 septembre 06:17 : r16/versionCode7 installé et les quatre
 commandes Python modèle passent sur le Fold**, essai `3cd6ad7f` : script `.py`

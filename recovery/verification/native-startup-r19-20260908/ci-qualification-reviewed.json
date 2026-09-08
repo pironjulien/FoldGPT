@@ -1,0 +1,148 @@
+{
+  "run": "34192631216",
+  "job": "101953638455",
+  "commit": "8963acc8e961c0d34b068910b973cc6f9b9df3bc",
+  "success": true,
+  "androidExecution": false,
+  "sourceChecks": [
+    {
+      "path": "tools/executor/native_processes.py",
+      "commitSha256": "056ee6aad3ee7dbef173966501b2ea83d39fc4036afdd1bf525113f59a956dff",
+      "ciSha256": "056ee6aad3ee7dbef173966501b2ea83d39fc4036afdd1bf525113f59a956dff",
+      "matches": true
+    },
+    {
+      "path": "tools/executor/bionic-supervisor/policy.py",
+      "commitSha256": "c4be12b50c4da153011f77483d841df6f32c34b297dc77a0f994eb65520ccafd",
+      "ciSha256": "c4be12b50c4da153011f77483d841df6f32c34b297dc77a0f994eb65520ccafd",
+      "matches": true
+    },
+    {
+      "path": "tools/executor/bionic-supervisor/processes.py",
+      "commitSha256": "e2e96777d1cb189d0256a4c24d0cd274350322d8b2852417535c3113bd0ee1f8",
+      "ciSha256": "e2e96777d1cb189d0256a4c24d0cd274350322d8b2852417535c3113bd0ee1f8",
+      "matches": true
+    },
+    {
+      "path": "tools/executor/bionic-supervisor/test_factory.py",
+      "commitSha256": "0618ffd514e0115f0795cc6857df869e0c6096cfe7c14f9df90de813d08d937a",
+      "ciSha256": "0618ffd514e0115f0795cc6857df869e0c6096cfe7c14f9df90de813d08d937a",
+      "matches": true
+    }
+  ],
+  "requiredNewTests": [
+    "test_05b_execution_workdir_preserves_original_project_policy",
+    "test_05c_invalid_execution_and_policy_workdirs_never_spawn"
+  ],
+  "testCounts": {
+    "test_factory.log": 22,
+    "test_host_channel_v2.log": 2,
+    "test_host_kernel.log": 7,
+    "test_host_processes.log": 4,
+    "test_native_host_files.log": 15,
+    "test_native_host_files_channel.log": 30,
+    "test_native_runtime_acquisition.log": 9,
+    "test_native_runtime_startup.log": 15,
+    "test_production_host_v2.log": 1,
+    "test_runtime_paths.log": 16,
+    "test_runtime_qualification.log": 5
+  },
+  "totalUnittestCount": 126,
+  "results": [
+    {
+      "stage": "fd-abi.result.json",
+      "exitCode": 0,
+      "pythonSkippedTests": false
+    },
+    {
+      "stage": "gcc.result.json",
+      "exitCode": 0,
+      "pythonSkippedTests": false
+    },
+    {
+      "stage": "git.result.json",
+      "exitCode": 0,
+      "pythonSkippedTests": false
+    },
+    {
+      "stage": "kernel-qualification-identity.result.json",
+      "exitCode": 0,
+      "pythonSkippedTests": false
+    },
+    {
+      "stage": "kernel.result.json",
+      "exitCode": 0,
+      "pythonSkippedTests": false
+    },
+    {
+      "stage": "qualification.result.json",
+      "exitCode": 0,
+      "pythonSkippedTests": false
+    },
+    {
+      "stage": "runtime-paths-c.result.json",
+      "exitCode": 0,
+      "pythonSkippedTests": false
+    },
+    {
+      "stage": "test_factory.result.json",
+      "exitCode": 0,
+      "pythonSkippedTests": false
+    },
+    {
+      "stage": "test_host_channel_v2.result.json",
+      "exitCode": 0,
+      "pythonSkippedTests": false
+    },
+    {
+      "stage": "test_host_kernel.result.json",
+      "exitCode": 0,
+      "pythonSkippedTests": false
+    },
+    {
+      "stage": "test_host_processes.result.json",
+      "exitCode": 0,
+      "pythonSkippedTests": false
+    },
+    {
+      "stage": "test_kernel.result.json",
+      "exitCode": 0,
+      "pythonSkippedTests": false
+    },
+    {
+      "stage": "test_native_host_files.result.json",
+      "exitCode": 0,
+      "pythonSkippedTests": false
+    },
+    {
+      "stage": "test_native_host_files_channel.result.json",
+      "exitCode": 0,
+      "pythonSkippedTests": false
+    },
+    {
+      "stage": "test_native_runtime_acquisition.result.json",
+      "exitCode": 0,
+      "pythonSkippedTests": false
+    },
+    {
+      "stage": "test_native_runtime_startup.result.json",
+      "exitCode": 0,
+      "pythonSkippedTests": false
+    },
+    {
+      "stage": "test_production_host_v2.result.json",
+      "exitCode": 0,
+      "pythonSkippedTests": false
+    },
+    {
+      "stage": "test_runtime_paths.result.json",
+      "exitCode": 0,
+      "pythonSkippedTests": false
+    },
+    {
+      "stage": "test_runtime_qualification.result.json",
+      "exitCode": 0,
+      "pythonSkippedTests": false
+    }
+  ]
+}

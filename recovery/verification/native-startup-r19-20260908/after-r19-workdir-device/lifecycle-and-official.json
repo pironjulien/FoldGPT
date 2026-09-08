@@ -1,0 +1,63 @@
+{
+  "nativeStatus": {
+    "schema": "foldgpt.native.owner.v1",
+    "state": "closed",
+    "generation": 1,
+    "selected": true,
+    "officialLauncherReplaced": false,
+    "lastRemoteStatus": {
+      "schema": "foldgpt.shizuku.transport.v1",
+      "ready": true,
+      "cancelRequested": false,
+      "bootstrapReaped": true,
+      "cleanupComplete": true,
+      "ownerRetained": false,
+      "quarantined": false,
+      "refusedBeforeFork": false,
+      "setupError": null,
+      "transportFailed": false,
+      "waitStatus": 0,
+      "bootstrapPid": 24395,
+      "directNative": true,
+      "admission": {
+        "schema": "foldgpt.executor-admission.v1",
+        "admitted": true,
+        "stage": "complete",
+        "subject": "",
+        "facts": {},
+        "error": null
+      },
+      "preflight": null
+    },
+    "lastNativeSessionStatus": {
+      "schema": "foldgpt.shizuku.transport.v1",
+      "ready": true,
+      "cancelRequested": false,
+      "bootstrapReaped": true,
+      "cleanupComplete": true,
+      "ownerRetained": false,
+      "quarantined": false,
+      "refusedBeforeFork": false,
+      "setupError": null,
+      "transportFailed": false,
+      "waitStatus": 0,
+      "bootstrapPid": 24395,
+      "directNative": true
+    },
+    "socketPath": "/data/user/0/app.foldgpt/app_foldgpt_exec/e563f32191c14695850870fc59850c89/owner.sock",
+    "peerUid": 10412,
+    "directNative": true,
+    "startupManifest": "/data/user/0/app.foldgpt/app_foldgpt_exec/e563f32191c14695850870fc59850c89/startup.json",
+    "workspace": "/data/user/0/app.foldgpt/files/projects"
+  },
+  "ownerPidAbsent": true,
+  "officialLinuxUnchanged": true,
+  "officialLinux": {
+    "usr/lib/chatgpt/ChatGPT": "beb5071ee593cf34a858b3aa53132b8b99fc28fbf1fade1e6ef1e11c95e73afe",
+    "usr/lib/chatgpt/resources/app.asar": "1306be560e77fbfb68dd8b0bccac58d52396a3d445f12810a50438fb05f2e61d",
+    "usr/lib/chatgpt/resources/codex": "4d76e542c222ea8c75861d8c4ade60a1a332a63255ce1c60bdaebf7c2a2869e6"
+  },
+  "officialAndroidUnchanged": true,
+  "bootUnchanged": true,
+  "propertiesUnchanged": true
+}

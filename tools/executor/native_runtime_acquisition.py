@@ -19,6 +19,7 @@ from tools.executor.native_bootstrap_files import create_bootstrap_read_authorit
 from tools.executor.native_host_files import create_host_file_authority
 from tools.executor.native_host_files_channel import HostFileChannel
 from tools.executor.native_processes import _fd_ready, _finish
+from tools.executor.native_path_uri import path_uri
 
 SCHEMA = "foldgpt.native-runtime.v1"
 MAX_PACKET = 4096
@@ -196,7 +197,7 @@ class NativeRuntimeAcquisition:
                         descriptor.setsockopt(socket.SOL_SOCKET, socket.SO_PASSCRED, 1)
                 pairs.append((parent, client))
             await _send(endpoint, {"type": "channels", "schema": SCHEMA,
-                "workspaceRoot": self.server.backend.mount.uri, "fdRoles": ["exec", "config", "host"]},
+                "workspaceRoot": path_uri(self.server.backend.mount.path), "fdRoles": ["exec", "config", "host"]},
                 tuple(pair[1] for pair in pairs))
             for _, client in pairs:
                 client.close()
@@ -224,7 +225,7 @@ class NativeRuntimeAcquisition:
             host = host_factory(pairs[2][0],
                 create_host_file_authority(backend, session_id=session), peer=peer)
             await _send(endpoint, {"type": "ready", "schema": SCHEMA, "sessionId": session,
-                                   "workspaceRoot": backend.mount.uri})
+                                   "workspaceRoot": path_uri(backend.mount.path)})
             tasks.extend((asyncio.create_task(config.run()), asyncio.create_task(host.run())))
             tasks.remove(initialized)
             done, _ = await asyncio.wait(tasks, return_when=asyncio.FIRST_COMPLETED)

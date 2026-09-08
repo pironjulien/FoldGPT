@@ -77,6 +77,7 @@ def deployment(apk):
 
 
 def production_options(config, workspace):
+    from tools.executor.native_path_uri import path_uri
     options = installed_backend_options(config)
     native = Path(os.readlink("/proc/self/exe")).parent
     if not str(native).startswith("/data/app/") or native.resolve(strict=True) != native:
@@ -96,9 +97,9 @@ def production_options(config, workspace):
     temporary = str(Path(workspace) / ".foldgpt-tmp")
     options["parentEnvironment"] = {"HOME": workspace, "TMPDIR": temporary,
         "PATH": str(RUNTIME / "bin") + ":/system/bin", "SHELL": bash, "LANG": "C.UTF-8"}
-    info = {"cwd": Path(workspace).as_uri(), "userHomeDir": Path(workspace).as_uri(),
+    info = {"cwd": path_uri(workspace), "userHomeDir": path_uri(workspace),
         "platformOs": "android", "shell": {"name": "bash", "path": bash},
-        "temporaryDirectories": [Path(temporary).as_uri()], "tempDir": Path(temporary).as_uri()}
+        "temporaryDirectories": [path_uri(temporary)], "tempDir": path_uri(temporary)}
     return options, info, native
 
 
@@ -148,6 +149,7 @@ async def run(apk, uid, parent, nonce, launch_path, control_fd=3):
         stage = "imports"
         from tools.executor.native_runtime_acquisition import NativeRuntimeAcquisition, SessionExecServer
         from tools.executor.native_runtime_startup import StartupManifest, read_launch
+        from tools.executor.native_path_uri import path_uri
         from tools.executor.native_host_bootstrap_v2 import installed_host_factory
         from tools.executor.private_exec_broker import PrivateSessionOwner
         stage = "deployment"
@@ -173,7 +175,7 @@ async def run(apk, uid, parent, nonce, launch_path, control_fd=3):
         pinned = os.fstat(backend.files.root)
         if (not stat.S_ISDIR(pinned.st_mode)
                 or (declared.st_dev, declared.st_ino) != (pinned.st_dev, pinned.st_ino)
-                or backend.mount.uri != environment["cwd"]):
+                or path_uri(backend.mount.path) != environment["cwd"]):
             raise ValueError("Production workspace differs from the actual pinned backend")
         temporary_directory(backend)
         stage = "server_construct"

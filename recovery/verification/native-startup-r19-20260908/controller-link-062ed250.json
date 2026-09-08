@@ -1,0 +1,120 @@
+{
+  "scope": "Native workdir qualification from ordinary Android application",
+  "uiQualified": false,
+  "qualification": {
+    "schema": "foldgpt.production-workdir-qualification.v1",
+    "passed": false,
+    "officialEditorQualified": false,
+    "cloudModelUsed": false,
+    "javaCleanupReceiptRequired": true,
+    "nativeOwner": {
+      "pid": 24395,
+      "uid": 10412,
+      "gid": 10412
+    },
+    "project": "/data/user/0/app.foldgpt/files/projects/workdir-production-d8a12b665b7c4cb89f5f009666a53676",
+    "executionCwd": "/data/user/0/app.foldgpt/files/projects/workdir-production-d8a12b665b7c4cb89f5f009666a53676/app",
+    "policyCwd": "/data/user/0/app.foldgpt/files/projects/workdir-production-d8a12b665b7c4cb89f5f009666a53676",
+    "manifestSha256": "62da7b535aba2f1004646a812e9566fb32462d21b569accb6a3ec08100be576c",
+    "connection": {
+      "sessionId": "7c3fcdf1-cc56-4225-b6e8-d5e2487a088c",
+      "hostReady": {
+        "type": "ready",
+        "schema": "foldgpt.host.v2",
+        "sessionId": "7c3fcdf1-cc56-4225-b6e8-d5e2487a088c",
+        "workspaceRoot": "file:///data/user/0/app.foldgpt/files/projects",
+        "chunkBytes": 32768,
+        "maxDataBytes": 16777216,
+        "maxPacketBytes": 65536,
+        "maxPendingRequests": 128,
+        "operations": [
+          "readFile",
+          "writeFile",
+          "getMetadata",
+          "canonicalize",
+          "readDirectory",
+          "createDirectory",
+          "processStart",
+          "processRead",
+          "processWrite",
+          "processTerminate"
+        ]
+      }
+    },
+    "processStartRequest": {
+      "processId": "workdir-native-8eb124e2444044bfa3cf230505a8a7c0",
+      "argv": [
+        "bash",
+        "-lc",
+        "python3 -I -S -B -c 'import errno,json,os,sys\ndenied=[]\nfor path,mode in (('\"'\"'../private/secret'\"'\"','\"'\"'rb'\"'\"'),('\"'\"'../private/secret'\"'\"','\"'\"'wb'\"'\"'),('\"'\"'../.git/config'\"'\"','\"'\"'wb'\"'\"')):\n    try:\n        with open(path,mode): pass\n    except OSError as error:\n        assert error.errno in (errno.EACCES,errno.EPERM),error\n        denied.append([path,mode])\n    else: raise AssertionError('\"'\"'Original policy denial or metadata protection was lost'\"'\"')\nwith open('\"'\"'result.txt'\"'\"','\"'\"'w'\"'\"') as target: target.write(str(6*7))\nprint(json.dumps({'\"'\"'cwd'\"'\"':os.getcwd(),'\"'\"'platform'\"'\"':sys.platform,'\"'\"'machine'\"'\"':os.uname().machine,\n                  '\"'\"'uid'\"'\"':os.getuid(),'\"'\"'result'\"'\"':6*7,'\"'\"'denied'\"'\"':denied},sort_keys=True))\n'"
+      ],
+      "cwd": "file:///data/user/0/app.foldgpt/files/projects/workdir-production-d8a12b665b7c4cb89f5f009666a53676/app",
+      "env": {},
+      "envPolicy": {
+        "inherit": "all",
+        "ignoreDefaultExcludes": false,
+        "exclude": [],
+        "set": {},
+        "includeOnly": []
+      },
+      "tty": false,
+      "pipeStdin": false,
+      "sandbox": {
+        "permissions": {
+          "type": "managed",
+          "file_system": {
+            "type": "restricted",
+            "entries": [
+              {
+                "path": {
+                  "type": "path",
+                  "path": "file:///data/user/0/app.foldgpt/files/projects/workdir-production-d8a12b665b7c4cb89f5f009666a53676"
+                },
+                "access": "write"
+              },
+              {
+                "path": {
+                  "type": "path",
+                  "path": "file:///data/user/0/app.foldgpt/files/projects/workdir-production-d8a12b665b7c4cb89f5f009666a53676/private"
+                },
+                "access": "deny"
+              }
+            ]
+          },
+          "network": "restricted"
+        },
+        "cwd": "file:///data/user/0/app.foldgpt/files/projects/workdir-production-d8a12b665b7c4cb89f5f009666a53676",
+        "workspaceRoots": [
+          "file:///data/user/0/app.foldgpt/files/projects/workdir-production-d8a12b665b7c4cb89f5f009666a53676"
+        ],
+        "windowsSandboxLevel": "disabled"
+      }
+    },
+    "processStartResult": {
+      "processId": "workdir-native-8eb124e2444044bfa3cf230505a8a7c0",
+      "sandboxType": "linuxSeccomp"
+    },
+    "processResult": {
+      "nextSeq": 6,
+      "exited": true,
+      "exitCode": 0,
+      "closed": true,
+      "failure": null,
+      "sandboxDenied": false
+    },
+    "stdout": {
+      "bytes": 276,
+      "sha256": "ccfe931a50328698cc4dfcaf7bffda1b1827e80f5b7ca855d1676f782cba98ed",
+      "base64": "eyJjd2QiOiAiL2RhdGEvdXNlci8wL2FwcC5mb2xkZ3B0L2ZpbGVzL3Byb2plY3RzL3dvcmtkaXItcHJvZHVjdGlvbi1kOGExMmI2NjViN2M0Y2I4OWY1ZjAwOTY2NmE1MzY3Ni9hcHAiLCAiZGVuaWVkIjogW1siLi4vcHJpdmF0ZS9zZWNyZXQiLCAicmIiXSwgWyIuLi9wcml2YXRlL3NlY3JldCIsICJ3YiJdLCBbIi4uLy5naXQvY29uZmlnIiwgIndiIl1dLCAibWFjaGluZSI6ICJhYXJjaDY0IiwgInBsYXRmb3JtIjogImFuZHJvaWQiLCAicmVzdWx0IjogNDIsICJ1aWQiOiAxMDQxMn0K"
+    },
+    "stderr": {
+      "bytes": 152,
+      "sha256": "4c4851131751d93c0b027290b4ba52eaa4efa81c14f6062e1fc711b22d03d4ce",
+      "base64": "YmFzaDogL2RhdGEvbG9jYWwvdG1wL2ZvbGRncHQtc2hpenVrdS1sYWIvZXRjL3Byb2ZpbGU6IFBlcm1pc3Npb24gZGVuaWVkCmJhc2g6IC9kYXRhL3VzZXIvMC9hcHAuZm9sZGdwdC9maWxlcy9wcm9qZWN0cy8uYmFzaF9wcm9maWxlOiBQZXJtaXNzaW9uIGRlbmllZAo="
+    },
+    "error": {
+      "type": "ValueError",
+      "message": "Unexpected native workdir stderr"
+    }
+  }
+}

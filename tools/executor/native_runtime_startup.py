@@ -8,7 +8,7 @@ import json
 import os
 from pathlib import Path
 import stat
-from urllib.parse import unquote, urlsplit
+from tools.executor.native_path_uri import path_uri, uri_path
 
 MAX_MANIFEST_BYTES = 65536
 LAUNCH_SCHEMA = "foldgpt.native-launch.v1"
@@ -44,14 +44,7 @@ def canonical_path(value):
 
 
 def canonical_uri(value):
-    if type(value) is not str:
-        raise ValueError("Controller root must be a file URI")
-    parsed = urlsplit(value)
-    if parsed.scheme != "file" or parsed.netloc or parsed.query or parsed.fragment:
-        raise ValueError("Controller root must be an absolute local file URI")
-    path = absolute_path(unquote(parsed.path, errors="strict"))
-    if path.as_uri() != value:
-        raise ValueError("Controller root URI is not canonical")
+    path = absolute_path(uri_path(value))
     # These are controller paths. Their native names need not exist: the GNU
     # root filesystem supplies them later, where Rust verifies their routing.
     return path
@@ -166,7 +159,7 @@ class StartupManifest:
                 info = item.stat(follow_symlinks=False)
                 if not (stat.S_ISDIR(info.st_mode) or stat.S_ISREG(info.st_mode)):
                     raise ValueError("Shared native path must identify an ordinary file or directory")
-                identities.append({"path": item.as_uri(), "device": info.st_dev, "inode": info.st_ino})
+                identities.append({"path": path_uri(item), "device": info.st_dev, "inode": info.st_ino})
             if workspace not in seen:
                 raise ValueError("The actual workspace is absent from the shared path inventory")
             if type(controller_roots) is not list or not 1 <= len(controller_roots) <= 128:
@@ -185,7 +178,7 @@ class StartupManifest:
                 raise ValueError("Native parent environment must be a bounded variable snapshot")
             value = {"schema": STARTUP_SCHEMA, "socketPath": str(socket_path),
                 "peer": {"pid": os.getpid(), "uid": os.getuid(), "gid": os.getgid()},
-                "workspaceRoot": workspace.as_uri(), "sharedPaths": identities,
+                "workspaceRoot": path_uri(workspace), "sharedPaths": identities,
                 "controllerRoots": controller_roots, "parentEnvironment": parent_environment}
             if host_schema is not None:
                 value["hostSchema"] = host_schema

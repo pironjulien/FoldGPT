@@ -15,6 +15,7 @@ from unittest.mock import patch
 from tools.executor.native_executor_backend import NativeExecutorBackend
 from tools.executor.native_runtime_acquisition import NativeRuntimeAcquisition, SCHEMA, SessionExecServer
 from tools.executor import native_runtime_acquisition
+from tools.executor.native_path_uri import path_uri
 
 
 class RuntimeAcquisitionTests(unittest.IsolatedAsyncioTestCase):
@@ -24,7 +25,7 @@ class RuntimeAcquisitionTests(unittest.IsolatedAsyncioTestCase):
         self.assertTrue(all(inputs), "Actual native helpers required")
         self.temp = tempfile.TemporaryDirectory(prefix="foldgpt-acquire-", dir="/var/tmp")
         self.parent = Path(self.temp.name)
-        self.workspace = self.parent / "workspace"
+        self.workspace = self.parent / "workspace=+[] café"
         self.workspace.mkdir(mode=0o700)
         self.endpoint_dir = self.parent / "endpoint"
         self.endpoint_dir.mkdir(mode=0o700)
@@ -35,8 +36,8 @@ class RuntimeAcquisitionTests(unittest.IsolatedAsyncioTestCase):
                 runtime=(("/usr", True), ("/lib", True), ("/lib64", True), ("/etc/ld.so.cache", False)), **options)
         self.backend = NativeExecutorBackend(inputs[0], self.workspace, handle_helper=inputs[1],
             process_runner=inputs[2], process_factory=processes, guest_workspace=str(self.workspace), parent_environment={})
-        info = {"os": "linux", "arch": "x86_64", "cwd": self.workspace.as_uri(),
-                "userHomeDir": self.workspace.as_uri(), "shell": {"name": "bash", "path": "/usr/bin/bash"}}
+        info = {"os": "linux", "arch": "x86_64", "cwd": path_uri(self.workspace),
+                "userHomeDir": path_uri(self.workspace), "shell": {"name": "bash", "path": "/usr/bin/bash"}}
         self.server = SessionExecServer(self.backend, environment_info=info)
         self.path = self.endpoint_dir / "runtime.sock"
         self.owner = NativeRuntimeAcquisition(self.path, self.server, controller_uid=os.getuid())
@@ -89,7 +90,7 @@ class RuntimeAcquisitionTests(unittest.IsolatedAsyncioTestCase):
             client.send(json.dumps({"type": "acquire", "schema": SCHEMA}).encode())
             offered, rights = self.receive(client, 3)
             self.assertEqual(offered, {"type": "channels", "schema": SCHEMA,
-                "workspaceRoot": self.workspace.as_uri(), "fdRoles": ["exec", "config", "host"]})
+                "workspaceRoot": path_uri(self.workspace), "fdRoles": ["exec", "config", "host"]})
             descriptors = [socket.socket(fileno=fd) for fd in rights]
             for descriptor in descriptors:
                 descriptor.settimeout(15)
@@ -100,13 +101,16 @@ class RuntimeAcquisitionTests(unittest.IsolatedAsyncioTestCase):
             rpc.write(b'{"method":"initialized"}\n')
             ready, _ = self.receive(client, 0)
             self.assertEqual(ready, {"type": "ready", "schema": SCHEMA,
-                "workspaceRoot": self.workspace.as_uri(), "sessionId": session})
+                "workspaceRoot": path_uri(self.workspace), "sessionId": session})
             config, host = descriptors[1:]
             config_ready, _ = self.receive(config, 0)
             host_ready, _ = self.receive(host, 0)
             self.assertEqual(config_ready["sessionId"], session)
             self.assertEqual(host_ready["sessionId"], session)
-            uri = (self.workspace / "existing").as_uri()
+            self.assertEqual(config_ready["discoveryRoot"], path_uri(self.workspace))
+            self.assertEqual(host_ready["workspaceRoot"], path_uri(self.workspace))
+            self.assertNotEqual(self.workspace.as_uri(), path_uri(self.workspace))
+            uri = path_uri(self.workspace / "existing")
             config.send(json.dumps({"id": 1, "op": "readFile", "path": uri}).encode())
             chunk, _ = self.receive(config, 0)
             result, _ = self.receive(config, 0)

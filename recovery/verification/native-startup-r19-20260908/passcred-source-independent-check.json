@@ -1,0 +1,25 @@
+{
+  "bootstrap_files_socket.rs": {
+    "sha256": "e9e098a7850c13dc39ef8c26493d334cf432c346b3b3f8d1f420eaf5d0a497c5",
+    "unchangedFromRecovery": false
+  },
+  "bootstrap_files_socket_tests.rs": {
+    "sha256": "d6327f36cae262492666dbd354fb4352d3f94e38a706fee9215d4953b67d3293",
+    "unchangedFromRecovery": false
+  },
+  "runtime_acquisition_socket.rs": {
+    "sha256": "c55d204d9a4bf3bfdc11717705a6f0856ab80970a21a024c980a1ab1bfa5e69f",
+    "unchangedFromRecovery": true
+  },
+  "runtime_acquisition.rs": {
+    "sha256": "6f6a3e941cbe30888ebb0741e09b6df76be781fd72e28a67ca52cda12cfd4876",
+    "unchangedFromRecovery": true
+  },
+  "checks": {
+    "receiveSendAncillaryAndShutdownUnchanged": true,
+    "hostPeerAndAddressChecksUnchanged": true,
+    "newSocketStillHasSetAndReadVerificationWhenDisabled": true,
+    "realDeniedSyscallRegressionReviewed": true,
+    "linuxTestsExecutedByReviewer": false
+  }
+}

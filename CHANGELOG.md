@@ -2,6 +2,25 @@
 
 ## Unreleased - 2026-09-08
 
+- Preserve already-enabled kernel credentials on inherited native sockets instead
+  of repeating a socket option change that Android rejects. Add real restricted
+  Linux-thread coverage that still refuses endpoints without enabled credentials.
+- Align native path URI serialization with the engine's pinned Rust url crate,
+  including the literal `==` in real Android APK installation directories.
+  Preserve canonicality and actual device/inode checks. APK r18/versionCode8
+  refreshes the existing Shizuku service version after our APK update.
+- Reproduce the remaining engine startup refusal: Android rejects resetting
+  SO_PASSCRED on transferred channels where the native owner already enabled
+  it. Native Python qualification passes from the real application context;
+  the ordinary conversation/editor/resume workflow remains unqualified.
+- Separate native process workdir from the original project policy base, so
+  commands may enter an admitted project subdirectory without rebasing their
+  permissions. Preserve policy identity and add real Linux execution/refusal
+  regressions; device validation of this correction remains pending.
+- Add real Rust startup and Python-to-Rust integration coverage for Android APK
+  paths containing `==`, retaining the production URI validation. Reduce Linux
+  validation artifacts with stripped dev/test symbols and separately versioned
+  compatible build caches; retain every Rust test and the ARM release profile.
 - Fix direct Python script execution in the native model runner by admitting only
   FIOCLEX/FIONCLEX descriptor inheritance operations. APK r16 passes real script,
   unittest, zipapp build and execution on the Fold, plus all six human operations;

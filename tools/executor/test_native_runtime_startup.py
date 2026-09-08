@@ -11,6 +11,35 @@ from tools.executor.native_runtime_startup import (
     LAUNCH_SCHEMA, STARTUP_SCHEMA, StartupManifest, canonical_uri,
     private_directory, read_launch, read_private_json,
 )
+from tools.executor.native_path_uri import path_uri, uri_path
+
+
+class NativePathUriTests(unittest.TestCase):
+    def test_rust_url_path_segment_spellings_and_round_trips(self):
+        cases = (
+            ("/", "file:///"),
+            ("/data/app/~~token==/app.foldgpt-name==/lib/arm64",
+             "file:///data/app/~~token==/app.foldgpt-name==/lib/arm64"),
+            ("/project/!$&'()*+,-.:;=@[]^_|~", "file:///project/!$&'()*+,-.:;=@[]^_|~"),
+            ('/project/a b%#?"<>`{}\\', 'file:///project/a%20b%25%23%3F%22%3C%3E%60%7B%7D%5C'),
+            ("/project/café-☃", "file:///project/caf%C3%A9-%E2%98%83"),
+        )
+        for path, expected in cases:
+            with self.subTest(path=path):
+                self.assertEqual(path_uri(path), expected)
+                self.assertEqual(uri_path(expected), path)
+
+    def test_aliases_malformed_utf8_and_noncanonical_encodings_are_refused(self):
+        for uri in ("file:///x%3D", "file:///x%3d", "file:///%7Ex", "file:///x%2Fy",
+                    "file:///x%2fy", "file:///x%", "file:///x%GG", "file:///x%FF",
+                    "file:///x%00", "file:///x%0A", "file:///x/..", "file:///x/%2E",
+                    "file:///x/", "file:////x", "file://localhost/x", "FILE:///x",
+                    "file:///x?", "file:///x#", "file:///x\\y", "file:///C:/x"):
+            with self.subTest(uri=uri), self.assertRaises(ValueError):
+                uri_path(uri)
+        for path in ("relative", "/a//b", "/a/../b", "/a/", "/C:/x", "/a\0b", "/a\ud800"):
+            with self.subTest(path=repr(path)), self.assertRaises(ValueError):
+                path_uri(path)
 
 
 class NativeRuntimeStartupTests(unittest.TestCase):
@@ -88,6 +117,24 @@ class NativeRuntimeStartupTests(unittest.TestCase):
             self.manifest.remove()
         self.assertEqual(self.path.read_bytes(), b"different-owner")
         self.assertTrue(previous.is_file())
+
+    def test_real_android_and_unicode_paths_publish_canonical_engine_uris(self):
+        shared = self.runtime / "~~token==" / "app.foldgpt-name==" / "lib" / "arm64"
+        shared.mkdir(parents=True, mode=0o700)
+        workspace = self.projects / 'café + = % # ? [x] \\'
+        workspace.mkdir(mode=0o700)
+        self.manifest = self.publish(workspace=workspace, shared_paths=[workspace, shared],
+            controller_roots=["file:///home/name=+", "file:///tmp"])
+        actual = read_private_json(self.path, os.getuid())
+        prefix = self.root.as_uri()
+        self.assertEqual(actual["workspaceRoot"], prefix + "/projects/caf%C3%A9%20+%20=%20%25%20%23%20%3F%20[x]%20%5C")
+        self.assertEqual(actual["sharedPaths"][1], {
+            "path": prefix + "/runtime/~~token==/app.foldgpt-name==/lib/arm64",
+            "device": shared.stat().st_dev, "inode": shared.stat().st_ino})
+        self.assertEqual(canonical_uri(actual["workspaceRoot"]), workspace)
+        self.assertNotEqual(shared.as_uri(), actual["sharedPaths"][1]["path"])
+        self.manifest.remove()
+        self.assertFalse(self.path.exists())
 
     def test_launch_rejects_duplicate_and_unknown_fields(self):
         self.launch.write_bytes(b'{"schema":"foldgpt.native-launch.v1","schema":"foldgpt.native-launch.v1"}')

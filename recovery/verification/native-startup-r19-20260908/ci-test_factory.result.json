@@ -1,0 +1,22 @@
+{
+  "argv": [
+    "/usr/bin/python3",
+    "-B",
+    "/home/runner/work/FoldGPT-workspace/FoldGPT-workspace/work/ci/native-helpers/package/tools/executor/bionic-supervisor/test_factory.py",
+    "/home/runner/work/FoldGPT-workspace/FoldGPT-workspace/work/ci/native-helpers"
+  ],
+  "cwd": "/home/runner/work/FoldGPT-workspace/FoldGPT-workspace/work/ci/native-helpers/package",
+  "diskAfter": {
+    "free": 14209671168,
+    "total": 76887154688,
+    "used": 62660706304
+  },
+  "diskBefore": {
+    "free": 14210367488,
+    "total": 76887154688,
+    "used": 62660009984
+  },
+  "exitCode": 0,
+  "pythonSkippedTests": false,
+  "seconds": 19.325
+}

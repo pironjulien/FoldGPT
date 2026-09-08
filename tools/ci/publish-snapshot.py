@@ -17,10 +17,11 @@ def main():
     parser.add_argument("--branch", required=True)
     parser.add_argument("--python-only", action="store_true")
     parser.add_argument("--linux-only", action="store_true")
+    parser.add_argument("--arm-only", action="store_true")
     parser.add_argument("--append", action="store_true",
                         help="Append to an existing validation branch and reuse its compiled cache")
     args = parser.parse_args()
-    if args.python_only and args.linux_only:
+    if sum((args.python_only, args.linux_only, args.arm_only)) > 1:
         parser.error("Select one qualification scope")
     if not re.fullmatch(r"codex/native-[a-z0-9-]+", args.branch):
         raise ValueError("Explicit native CI branch required")
@@ -54,14 +55,15 @@ def main():
         commit = git("commit-tree", tree, *parents, input=("Qualify native production startup and official client routing\n").encode())
         git("push", URL, commit + ":refs/heads/" + args.branch)
     record = {"branch": args.branch, "commit": commit, "parent": parent, "sourceBase": source_base, "paths": paths,
-              "pythonOnly": args.python_only, "linuxOnly": args.linux_only,
+              "pythonOnly": args.python_only, "linuxOnly": args.linux_only, "armOnly": args.arm_only,
               "patch": json.loads((ROOT / "recovery/engine/manifest.json").read_text())["sha256"]}
     output = temporary / (commit + ".json")
     output.write_text(json.dumps(record, indent=2) + "\n")
     subprocess.run(["gh", "workflow", "run", "native-engine-validation.yml", "--repo", REPO,
                     "--ref", args.branch, "-f", "native_python_only=" + str(args.python_only).lower(),
                     "-f", "linux_tests_only=" + str(args.linux_only).lower(),
-                    "-f", "full_rust_checks=" + str(not args.python_only).lower()], cwd=ROOT, check=True)
+                    "-f", "arm_build_only=" + str(args.arm_only).lower(),
+                    "-f", "full_rust_checks=" + str(not (args.python_only or args.arm_only)).lower()], cwd=ROOT, check=True)
     print(json.dumps(record))
 
 

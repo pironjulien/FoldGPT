@@ -11,6 +11,7 @@ import array
 import base64
 import ctypes
 import hashlib
+import importlib.util
 import json
 import os
 from pathlib import Path
@@ -19,8 +20,13 @@ import stat
 import struct
 import sys
 import time
-from urllib.parse import unquote, urlsplit
 import uuid
+
+_uri_spec = importlib.util.spec_from_file_location("foldgpt_native_path_uri",
+    Path(__file__).with_name("native_path_uri.py"))
+_uri_module = importlib.util.module_from_spec(_uri_spec)
+_uri_spec.loader.exec_module(_uri_module)
+path_uri = _uri_module.path_uri
 
 SCHEMA = "foldgpt.native-runtime.v1"
 MAX_PACKET = 65536
@@ -49,11 +55,7 @@ def payload(value):
 
 
 def uri_path(value):
-    uri = urlsplit(value)
-    require(uri.scheme == "file" and not uri.netloc and not uri.query and not uri.fragment,
-            "Expected a local native file URI")
-    path = Path(unquote(uri.path, errors="strict"))
-    require(path.is_absolute() and path.as_uri() == value, "Noncanonical native file URI")
+    path = Path(_uri_module.uri_path(value))
     require(str(path) == os.path.realpath(path), "Native path alias is unsupported")
     return path
 
@@ -142,13 +144,13 @@ class FileChannel:
         operations = ["readFile", "writeFile", "getMetadata", "canonicalize", "readDirectory", "createDirectory"] if host else [
             "readFile", "getMetadata", "canonicalize", "readDirectory"]
         require(ready == {"type": "ready", "schema": "foldgpt.host-files.v1" if host else "foldgpt.bootstrap-files.v1",
-            "sessionId": session, "workspaceRoot" if host else "discoveryRoot": root.as_uri(), "chunkBytes": CHUNK,
+            "sessionId": session, "workspaceRoot" if host else "discoveryRoot": path_uri(root), "chunkBytes": CHUNK,
             "maxDataBytes": MAX_DATA, "maxPacketBytes": MAX_PACKET, "operations": operations},
             "File channel does not bind the actual exec session: " + str(ready))
 
     def request(self, op, path, *, data=None, **extra):
         number = self.number
-        request = {"id": number, "op": op, "path": path.as_uri(), **extra}
+        request = {"id": number, "op": op, "path": path_uri(path), **extra}
         if data is not None:
             request.update(bytes=len(data), chunks=(len(data) + CHUNK - 1) // CHUNK)
         self.endpoint.sendall(payload(request))
@@ -226,7 +228,7 @@ def qualify(path):
         channels, rights = receive(lifetime, peer, 3, maximum=4096)
         unowned.extend(rights)
         require(channels == {"type": "channels", "schema": SCHEMA,
-            "workspaceRoot": root.as_uri(), "fdRoles": ["exec", "config", "host"]}, "Channel offer differs")
+            "workspaceRoot": path_uri(root), "fdRoles": ["exec", "config", "host"]}, "Channel offer differs")
         for descriptor, kind in zip(rights, (socket.SOCK_STREAM, socket.SOCK_SEQPACKET, socket.SOCK_SEQPACKET), strict=True):
             endpoint = socket.socket(fileno=descriptor)
             sockets.append(endpoint)
@@ -241,7 +243,7 @@ def qualify(path):
         rpc.stream.write(b'{"method":"initialized"}\n')
         ready, _ = receive(lifetime, peer, maximum=4096)
         require(ready == {"type": "ready", "schema": SCHEMA, "sessionId": session,
-                         "workspaceRoot": root.as_uri()}, "Native ready differs from actual exec session")
+                         "workspaceRoot": path_uri(root)}, "Native ready differs from actual exec session")
         config = FileChannel(sockets[2], peer, session, root, False)
         host = FileChannel(sockets[3], peer, session, root, True)
         report["sessionId"] = session
@@ -272,7 +274,7 @@ record={'tests':result.testsRun,'builtOutput':captured.getvalue(),'platform':sys
 with open('native-result.json','w',encoding='utf-8') as output: json.dump(record,output,sort_keys=True)
 print(json.dumps(record,sort_keys=True))
 """
-        cwd = project.as_uri()
+        cwd = path_uri(project)
         sandbox = {"permissions": {"type": "managed", "file_system": {"type": "restricted", "entries": [
             {"path": {"type": "path", "path": cwd}, "access": "write"}]}, "network": "restricted"},
             "cwd": cwd, "workspaceRoots": [cwd], "windowsSandboxLevel": "disabled"}
