@@ -2,6 +2,11 @@
 
 ## Unreleased - 2026-09-08
 
+- Publish encrypted supplement v14 to the private recovery release, redownload
+  and authenticate it, and verify all 10,695 restored files and 1,198 source
+  files. Revalidate r21 using the restored source verifier. Preserve the earlier
+  archives and verify that all 15 pending GPU/PTY files match restored v13.
+  Document the exact Android return procedure; no phone action is performed.
 - Prepare an explicitly selected ordinary Android UID execution profile for
   the engine's Full access process and filesystem contracts. Keep managed
   requests on their existing backend, retain handle/session ownership and

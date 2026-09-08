@@ -2,6 +2,13 @@
 
 ## Préparation PC vérifiée — candidat r21, non installé
 
+Sources r21 figées et poussées : `9e1feeaff2e2501299f272c95ab5b2641d2044df`.
+Le [complément chiffré v14](supplement-v14.md) est publié sur GitHub privé,
+retéléchargé et restauré : **10 695 fichiers et 1 198 fichiers sources vérifiés**,
+APK restauré revérifié. Les archives antérieures restent nécessaires. Les
+15 fichiers GPU/PTY en attente sont inchangés face à la restauration v13 ;
+leur conservation ne constitue pas une qualification.
+
 Le candidat **r21/versionCode11**, paquet `native-ordinary-uid-20260908/production-package-v2`,
 est construit et sa signature Android existante est vérifiée. Il ajoute la
 route native ordinaire attendue par le mode **Accès complet** ; les requêtes
@@ -16,6 +23,9 @@ reste à qualifier sur le Fold.
 réel via acquisition/canaux de production : fichiers modèle, Bash `-lc` et `-c`,
 trois tests Python, construction/exécution42 et lecture des mêmes octets par
 les canaux config/humain. Ces résultats Linux ne sont pas une validation Android.
+La suite Rust générale R5 `34192652057` reste en cours au contrôle du 8 septembre
+à08:45UTC, dans l'étape des tests complets. Le collecteur existant écrit dans
+`work/ci-results/34192652057` ; ne pas le dupliquer ni annoncer cette suite réussie.
 
 Le runner Android est compilé deux fois à l'identique avec NDK29/API35 :
 `work/root-artifacts-20260907/native-ui-validation-20260908/direct-runner-ndk-v7`.
@@ -43,7 +53,9 @@ Ce client est préparé et testé sous Linux ; il n'a pas été exécuté sur An
 Ensuite reprendre la conversation « Créer et tester une addition Python » du
 projet « Validation Python FoldGPT », sans changer silencieusement son mode.
 Le plan comparatif et les critères de réussite sont dans
-`docs/research/ordinary-uid-execution-20260908.md`.
+`docs/research/ordinary-uid-execution-20260908.md`. Le [protocole de retour
+Android](android-return-r21.md) précise les commandes, la fermeture de la session
+historique et les preuves distinctes de conversation, sauvegarde et reprise.
 
 **Téléphone emporté par Julien à09:40 environ. Travail PC uniquement jusqu'à
 son retour.** La commande normale STOP_NATIVE_EXECUTOR a été reçue par notre

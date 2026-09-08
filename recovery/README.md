@@ -1,12 +1,15 @@
 # Reprise du projet FoldGPT
 
-**Dernière sauvegarde du 8 septembre :** le [complément v13](supplement-v13.md)
-conserve l'APK r20, le moteur R5, le Bash de production et les preuves du premier
-échec de conversation réelle. Ses 13 157 fichiers et les 1 169 fichiers du tar
-source exact ont été téléchargés, restaurés et vérifiés sur Windows.
-Conserver l'archive principale et tous les compléments jusqu'à v12.
-**L'exécution native isolée fonctionne ; le parcours depuis l'interface échoue
-encore.** Lire [l'état technique actuel](HANDOFF.md).
+**Dernière sauvegarde du 8 septembre :** le [complément v14](supplement-v14.md)
+conserve le candidat r21, ses sources et compilations natives, les 190 tests
+Python/natifs Linux réussis et le protocole de retour du téléphone. Ses
+10 695 fichiers et les 1 198 fichiers du tar source exact ont été téléchargés,
+restaurés et vérifiés sur Windows, puis l'APK restauré a repassé sa vérification.
+Conserver l'archive principale et tous les compléments jusqu'à v13 ; celui-ci
+conserve notamment le moteur R5 et l'état installé r20.
+**r21 est prêt sur PC, non installé sur le Fold. Le parcours depuis la
+conversation, l'éditeur et la reprise restent à valider.** Lire
+[l'état technique actuel](HANDOFF.md) et le [protocole de retour](android-return-r21.md).
 
 Le dépôt privé de travail est `pironjulien/FoldGPT-workspace`, branche
 `codex/foldgpt-beta`. Il contient les sources et les recherches en cours ; ce

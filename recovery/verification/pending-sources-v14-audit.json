@@ -1,0 +1,84 @@
+{
+  "schema": "foldgpt.pending-sources-recovery-audit.v1",
+  "checkedAtUtc": "2026-09-08T08:42:25.5699692Z",
+  "success": true,
+  "restoredSupplement": 13,
+  "unqualifiedSources": true,
+  "files": [
+    {
+      "path": "tools/executor/bionic-supervisor/build-pty-windows.py",
+      "bytes": 6160,
+      "sha256": "884d2a5493a3c1bc426aad7445f84471689e588d68f2ad38e62b439d8ff725e7"
+    },
+    {
+      "path": "tools/executor/bionic-supervisor/host_pty_processes.py",
+      "bytes": 24627,
+      "sha256": "bb2f83641137249fa5c72dd598c3e37d85ad20c1e840aec89c277fdf898174ec"
+    },
+    {
+      "path": "tools/executor/bionic-supervisor/host-pty-design.md",
+      "bytes": 3284,
+      "sha256": "8b7403d619f8f76d5e96c1056f09780b0b26e0dcd9c6f366fe4db459a7fd8a77"
+    },
+    {
+      "path": "tools/executor/bionic-supervisor/host-pty-runner.c",
+      "bytes": 50944,
+      "sha256": "249a37f20d8c6ea4012d3c277dba8b2ea00c18c9e9807a9b29a17a6a1a85909d"
+    },
+    {
+      "path": "tools/executor/bionic-supervisor/host-pty-seccomp.h",
+      "bytes": 19575,
+      "sha256": "733173e95670484239b75c9c0d39e51c3615f51d85f9e25600be88ed175d4da4"
+    },
+    {
+      "path": "tools/gpu/build-x11.sh",
+      "bytes": 11622,
+      "sha256": "d993b850dd91d01c53108df3d5e74583489b749a2ed29ec011054e3471f1b5ab"
+    },
+    {
+      "path": "tools/gpu/check-menu-effects.py",
+      "bytes": 7537,
+      "sha256": "6975eccc29fc0aaef0bb8617683c07bf32152ed247980bcf30bab6540b929b43"
+    },
+    {
+      "path": "tools/gpu/MENU-EFFECTS-DIAGNOSTIC.md",
+      "bytes": 3492,
+      "sha256": "c821f39f01ec476cb647bff081b150f718e569e9112d32c1f1469ebc3e904d11"
+    },
+    {
+      "path": "tools/gpu/menu-effects-patterns.html",
+      "bytes": 9017,
+      "sha256": "bd44dabe77325533ee4ccb82d4d13ce0b7d4f317ae98c4a14f90232108cc40f5"
+    },
+    {
+      "path": "tools/gpu/zink-retained-attachments-probe.c",
+      "bytes": 12054,
+      "sha256": "a26984ede1fd81f00e24d71f1fca4e293742d1bf564a12f72190d6eabcd23100"
+    },
+    {
+      "path": "tools/install/native/build-native.sh",
+      "bytes": 6448,
+      "sha256": "e5b2d5907957491ad7ffecb5a658ddc9a06cae665c4d891ed26b881f7e7283c4"
+    },
+    {
+      "path": "vendor/termux-x11/lorie/src/main/cpp/lorie/buffer.c",
+      "bytes": 21451,
+      "sha256": "f6365b392117564ca2d910bd506ba5c106bcd6be62f6b955fdd8633c087a82e7"
+    },
+    {
+      "path": "vendor/termux-x11/lorie/src/main/cpp/lorie/buffer.h",
+      "bytes": 7898,
+      "sha256": "3fe4d603af33ba8d709d53b9e82e9f780c1e88782f0ba824ce658887e50d340f"
+    },
+    {
+      "path": "vendor/termux-x11/lorie/src/main/cpp/lorie/dmabuf_sync.h",
+      "bytes": 1229,
+      "sha256": "2a16a875dea88c2d48e436eecbe28fdce5afa3cdf17e7db3143abba498b15c30"
+    },
+    {
+      "path": "vendor/termux-x11/lorie/src/main/cpp/lorie/InitOutput.c",
+      "bytes": 52932,
+      "sha256": "e530cf498f06872fc6325393f263970c48f41ff2467e60bf4d92acee3538c7e4"
+    }
+  ]
+}
