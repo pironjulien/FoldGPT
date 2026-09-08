@@ -2,6 +2,11 @@
 
 ## Unreleased - 2026-09-08
 
+- Document the actual bundled MCP startup/cache rules: cache keys include cwd,
+  selected plugins differ from globally installed plugins, and status-list
+  diagnostics can themselves start temporary services. Preserve this boundary
+  before implementing any process-count optimization; no tools are disabled.
+
 - Inventory the actual desktop client (26.901.41600) and compare it with the
   26.901.51231 reference: 9,737 installed JavaScript files parsed, 370/370 ASAR
   external members collected, 57 native ELF inspected per version. Record
