@@ -2,6 +2,11 @@
 
 Experimental Android host for the official ChatGPT Linux ARM64 desktop client on a Galaxy Z Fold.
 
+**Latest feasibility review, 8 September:** [comparative findings and decisive tests](docs/research/survey-20260908-verdict.md).
+The real Python workflow is demonstrated; autonomous startup, legacy conversation
+recovery and a wholly Android-native interface remain unqualified. A separate
+app-context diagnostic is compiled but has not run on the unavailable Fold.
+
 **Reprise privée sur un autre PC :** utiliser le dépôt `pironjulien/FoldGPT-workspace`
 et la [procédure de récupération complète](recovery/README.md). Elle conserve les
 modifications en cours, le moteur séparé, les dépendances locales et les preuves

@@ -2,6 +2,13 @@
 
 ## Unreleased - 2026-09-08
 
+- Complete a parallel, source-backed feasibility survey of Rust/Android engines,
+  Linux hosts, Samsung lifecycle limits and official Remote support. Preserve
+  the proven r25 workflow separately from unqualified autonomous startup and
+  full Android-native UI. Build a separate fixed app-context pipe/PTY diagnostic
+  from unchanged r25 payloads; add read-only device evidence collection. The
+  Fold was unavailable in ADB, so no new Android execution is claimed.
+
 - Diagnose legacy conversation resume failures on the connected Fold: valid TOML,
   but saved Linux project paths lie outside the current native workspace root.
   Record the outstanding migration defect and verify Local Desktop/UserLAnd
