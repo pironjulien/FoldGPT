@@ -3,6 +3,7 @@
 Both launchers use ADB/run-as. The GNU controller uses FoldRuntimeService's real
 PRoot flags and exact bind. This does not certify Shizuku or the production UI.
 """
+import base64
 import hashlib
 import io
 import json
@@ -31,10 +32,15 @@ def main():
     calls = []
 
     def command(args, data=None):
-        return prefix + ["exec-in" if data is not None else "shell", shlex.join(args)]
+        script = shlex.join(args)
+        if data is not None:
+            script = "base64 -d | " + script
+        return prefix + ["shell", "-T", script]
 
     def run(args, data=None):
-        completed = subprocess.run(command(args, data), input=data, capture_output=True, timeout=30)
+        completed = subprocess.run(command(args, data),
+                                   input=base64.b64encode(data) if data is not None else None,
+                                   capture_output=True, timeout=30)
         calls.append({"argv": args, "code": completed.returncode,
                       "stdout": completed.stdout.decode("utf-8", "replace"),
                       "stderr": completed.stderr.decode("utf-8", "replace")})

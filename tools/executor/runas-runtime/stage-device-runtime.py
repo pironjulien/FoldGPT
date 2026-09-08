@@ -4,12 +4,14 @@ Uses the reviewed independent APK's native libraries. Never changes Android
 system files, the official application, existing runtime trees or markers.
 """
 import argparse
+import base64
 import hashlib
 import io
 import json
 import os
 from pathlib import Path, PurePosixPath
 import re
+import shlex
 import subprocess
 import tarfile
 
@@ -112,7 +114,8 @@ def main():
         report["bootBefore"] = call(["shell", "cat", "/proc/sys/kernel/random/boot_id"]).decode().strip()
         # Exclusive mkdir: any earlier partial deployment is retained and refused.
         call(["shell", "run-as", "app.foldgpt", "mkdir", "-m", "700", base])
-        call(["exec-in", "run-as", "app.foldgpt", "tar", "-xf", "-", "-C", base], data=tar_path.read_bytes())
+        call(["shell", "-T", "base64 -d | " + shlex.join(["run-as", "app.foldgpt", "tar", "-xf", "-", "-C", base])],
+             data=base64.b64encode(tar_path.read_bytes()))
         readback = call(["exec-out", "run-as", "app.foldgpt", "tar", "-cf", "-", "-C", base, "python"])
         (output / "runtime-readback.tar").write_bytes(readback)
         seen = set()

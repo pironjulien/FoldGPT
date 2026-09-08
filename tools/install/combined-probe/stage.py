@@ -6,12 +6,14 @@ debug APK containing CombinedPreparationProbeService. No APK/runtime install,
 activation, root access, vault reads or live client operations are performed.
 """
 import argparse
+import base64
 import hashlib
 import json
 from pathlib import Path
 import re
 import shlex
 import subprocess
+import tempfile
 
 NAMES = {"fixture.properties", "base.tar.gz", "package.deb", "initialize_keyring.py",
          "supervise_keyring.py", "official_client_package.py", "install_official_client.py"}
@@ -90,9 +92,13 @@ def main():
         script = (f"set -eu; umask 077; [ ! -L {partial} ]; "
                   f"if [ -e {partial} ]; then [ -f {partial} ]; rm {partial}; fi; "
                   f"set -C; cat > {partial}")
-        with Path(item["source"]).open("rb") as source:
-            subprocess.run(adb + ["exec-in", "run-as app.foldgpt sh -c " + shlex.quote(script)],
-                           stdin=source, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        # Keep large packages streamed and the encoded temporary file beside
+        # its project plan. ASCII transport avoids Windows adb CRLF changes.
+        with Path(item["source"]).open("rb") as source, tempfile.TemporaryFile(dir=args.plan.resolve().parent) as encoded:
+            base64.encode(source, encoded)
+            encoded.seek(0)
+            subprocess.run(adb + ["shell", "-T", "base64 -d | run-as app.foldgpt sh -c " + shlex.quote(script)],
+                           stdin=encoded, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         copied = shell(f"sha256sum {partial}").split()[0]
         if copied != expected:
             raise ValueError("Device copy digest differs; partial retained")

@@ -2,6 +2,14 @@
 
 ## Unreleased - 2026-09-08
 
+- Qualify r22b on the Fold: unused-session shutdown, ordinary UID production
+  workload, actual conversation-created Python sources/tests/zipapp, editor
+  save/reopen, and clean shutdown pass. Preserve the subsequent restart failure:
+  CPython bytecode caches entered the signed runtime tree. Record actual model
+  tool outputs and independently collected Android files; full reprise remains
+  pending the cache placement correction.
+- Preserve remote upload completion and binary bytes in six ADB staging tools
+  using shell v2 and base64; retain post-transfer SHA256 admission.
 - Build and verify r22b/versionCode12 with bounded cleanup diagnostics shared
   by the native bootstrap and Java owner; preserve quarantine on any cleanup
   error. Native Linux CI 34215637059 passes 193 unittests and 25 commands.

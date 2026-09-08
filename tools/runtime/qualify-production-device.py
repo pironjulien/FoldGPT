@@ -4,6 +4,7 @@ The APK must already be installed and independently verified. Native workers
 run only in the Android run-as owner; PRoot runs the controller client alone.
 """
 import argparse
+import base64
 import hashlib
 import io
 import json
@@ -58,7 +59,15 @@ def main():
                 and service.get("bootstrapPid") == session.get("bootstrapPid") == pid)
 
     def run(argv, data=None, required=True, timeout=30):
-        completed = subprocess.run(prefix + ["exec-in" if data is not None else "shell", shlex.join(argv)],
+        # Shell v2 forwards stdin EOF and the remote exit status. exec-in can
+        # return while the app-UID tar is still alive, before PREPARE begins.
+        # Windows adb can normalize CRLF on stdin even without a PTY. Keep
+        # binary archives ASCII in transit, then verify every extracted hash.
+        command = shlex.join(argv)
+        if data is not None:
+            command = "base64 -d | " + command
+            data = base64.b64encode(data)
+        completed = subprocess.run(prefix + ["shell", "-T", command],
                                    input=data, capture_output=True, timeout=timeout)
         record = {"argv": argv, "code": completed.returncode,
                   "stdout": completed.stdout.decode("utf-8", "replace"),
@@ -176,7 +185,7 @@ def main():
             base + "/client.py", manifest_path])
         stdout_file, stderr_file = output / "client.stdout", output / "client.stderr"
         with stdout_file.open("wb") as stdout, stderr_file.open("wb") as stderr:
-            process = subprocess.Popen(prefix + ["shell", shlex.join(controller)], stdout=stdout, stderr=stderr)
+            process = subprocess.Popen(prefix + ["shell", "-T", shlex.join(controller)], stdout=stdout, stderr=stderr)
             returncode = process.wait(timeout=130)
         commands.append({"argv": controller, "code": returncode, "stdoutFile": stdout_file.name, "stderrFile": stderr_file.name})
         report = json.loads(stdout_file.read_text().splitlines()[-1])

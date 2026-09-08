@@ -4,6 +4,7 @@ The phone workspace must be stopped. This does not activate the workspace,
 replace an official file, or claim that a static ELF check proves execution.
 """
 import argparse
+import base64
 import hashlib
 import io
 import json
@@ -66,7 +67,12 @@ def main():
               "packageSha256": digest(args.package.read_bytes()), "engineManifest": manifest}
 
     def run(argv, data=None, check=True, timeout=30):
-        proc = subprocess.run(adb + ["exec-in" if data is not None else "shell", shlex.join(argv)],
+        # Preserve stdin EOF, distinct stderr and the actual remote completion.
+        command = shlex.join(argv)
+        if data is not None:
+            command = "base64 -d | " + command
+            data = base64.b64encode(data)
+        proc = subprocess.run(adb + ["shell", "-T", command],
                               input=data, capture_output=True, timeout=timeout)
         commands.append({"argv": argv, "code": proc.returncode,
             "stdout": proc.stdout.decode("utf-8", "replace"), "stderr": proc.stderr.decode("utf-8", "replace")})

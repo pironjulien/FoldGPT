@@ -3,6 +3,7 @@
 This independently tests POSIX publication on the Fold through ADB/run-as. It
 does not qualify the Shizuku production launcher or the ordinary application UI.
 """
+import base64
 import hashlib
 import io
 import json
@@ -31,8 +32,11 @@ def main():
     calls = []
 
     def call(args, data=None, timeout=30):
-        mode = "exec-in" if data is not None else "shell"
-        completed = subprocess.run(prefix + [mode, shlex.join(args)], input=data,
+        command = shlex.join(args)
+        if data is not None:
+            command = "base64 -d | " + command
+            data = base64.b64encode(data)
+        completed = subprocess.run(prefix + ["shell", "-T", command], input=data,
                                    capture_output=True, timeout=timeout)
         calls.append({"argv": args, "code": completed.returncode,
                       "stdout": completed.stdout.decode("utf-8", "replace"),
