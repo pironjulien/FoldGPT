@@ -1,6 +1,24 @@
 # Changelog
 
-## Unreleased — 2026-09-06
+## Unreleased â€” 2026-09-06
+
+- Prepare a separate human process owner and sealed native supervisor for real
+  editor commands, including cwd `/`, uncapped output, stdin EOF and owned
+  descendant cleanup. Preserve the qualified model runner and its mandatory
+  policy. Add real kernel/lifecycle test sources and a separate app-server host
+  process injection; native compilation and transport qualification remain open.
+
+- Verify eleven real startup file/socket tests with Bionic Python on the Fold
+  and measure actual shared file identities, bidirectional bytes, rename and
+  advisory locking across Bionic and GNU PRoot. Preserve the Android hardlink
+  creation refusal separately from application admission coverage. These ADB
+  measurements do not qualify the production launcher or the ordinary UI.
+
+- Connect an explicitly packaged native candidate to the Android runtime through
+  the fixed run-as admission, preserving the four lifecycle descriptors and real
+  child wait. Prepare private runtime data and startup manifests, bind declared
+  native roots into the controller, and select a separate engine through the
+  official CLI override. This wiring still requires full device qualification.
 
 - Verify Shizuku to run-as to Bionic under FoldGPT's actual UID on the Fold,
   including all four launch channels and independent cleanup evidence. Add
@@ -282,7 +300,7 @@
 - Added native Android isolation probes outside PRoot. On the test device, Landlock ABI 6 and seccomp notification are available; user namespace creation returns EINVAL and mount namespace creation EPERM. The official Codex 0.153.4 legacy Landlock route rejects the tested workspace policies; local commands remain blocked.
 - Built and installed `app.foldgpt` with embedded Termux:X11, a separate foreground runtime service and private Linux storage. The integrated host now runs the official ChatGPT client and Codex interface independently of the Termux runtime host.
 - Compiled PRoot and matching loaders from pinned commit `7266fb3e8516535682f5a9c8f3a7e70f6506eddb`, resolving the Termux-specific loader paths.
-- Added shared-memory mapping and an `xfwm4` session. Verified fullscreen at 2448 × 1848; XRandR reports 119.98 Hz, with application FPS still unmeasured.
+- Added shared-memory mapping and an `xfwm4` session. Verified fullscreen at 2448 Ã— 1848; XRandR reports 119.98 Hz, with application FPS still unmeasured.
 - Verified Samsung keyboard opening and closing through actual touch. Fixed unwanted reopening: only deliberate pointer input opens the keyboard. On-device tests confirmed automatic refocus stays closed, the next touch reopens, and Samsung key taps enter text.
 - Added explicit keyboard visibility requests over a Unix socket with peer UID checks. The CDP bridge follows page targets and reloads without transmitting field contents.
 - Added development build, migration, guest-script deployment and diagnostic tools. Migration refuses existing data and cleans private temporary archives on failure; the unvalidated legacy installer now exits explicitly.
@@ -297,7 +315,7 @@
 - Audited the shim: `chroot` returned success while an outside marker remained accessible. Recorded the isolation limits in `NATIVE-AUDIT.md`.
 - The initial keyboard daemon toggled visibility and was not validated for reliable everyday touch use. The original launcher depended on the separate Termux:X11 application.
 
-## 2026-09-07 — Organisation locale du poste
+## 2026-09-07 â€” Organisation locale du poste
 
 - Regroupe les worktrees, outils, archives et journaux FoldGPT dans `work/`, exclu localement de Git, au lieu de la racine de `C:\Dev`.
-- Répare les rattachements Git et adapte les chemins des scripts au nouvel emplacement du SDK Linux et des fichiers de travail.
+- RÃ©pare les rattachements Git et adapte les chemins des scripts au nouvel emplacement du SDK Linux et des fichiers de travail.

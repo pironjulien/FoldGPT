@@ -1,0 +1,55 @@
+{
+  "scope": "Actual Fold Bionic startup inputs and Bionic/GNU shared filesystem; ADB run-as launch, no UI qualification",
+  "files": [
+    {
+      "path": "shared-path-device-20260908/831c4905/commands.json",
+      "bytes": 5780,
+      "sha256": "4e884902d1cd05f3ac70c12aacaa7f22c227a17becb1583818151c25c184512a"
+    },
+    {
+      "path": "shared-path-device-20260908/831c4905/controller.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "shared-path-device-20260908/831c4905/controller.stdout",
+      "bytes": 951,
+      "sha256": "fc845b4d643d377285cc275f2f40117cda9508a0ff8ee698e7dd8b86713ab9b0"
+    },
+    {
+      "path": "shared-path-device-20260908/831c4905/measure.py",
+      "bytes": 9964,
+      "sha256": "59f0e7b31924e47509f24d973934490ade384bc4729520ea54ae71032dc9af28"
+    },
+    {
+      "path": "shared-path-device-20260908/831c4905/native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "shared-path-device-20260908/831c4905/native.stdout",
+      "bytes": 1273,
+      "sha256": "1598ccaa1f2e8254b96fd4a421469f86ad3ece64e88fcf010e58e37e759a976a"
+    },
+    {
+      "path": "shared-path-device-20260908/831c4905/report.json",
+      "bytes": 3860,
+      "sha256": "c1991e1a45d9b80f7e0eae29934c7a40b9f0c9986c849a915c9210740108e56c"
+    },
+    {
+      "path": "native-startup-device-20260908/1b62ba91/commands.json",
+      "bytes": 6244,
+      "sha256": "55e65a5baee087bc65b3adaef90b1a6d5e2a9a3699cbaa9ebbfb4a0fb85ac98a"
+    },
+    {
+      "path": "native-startup-device-20260908/1b62ba91/report.json",
+      "bytes": 1181,
+      "sha256": "f229368ebb724a72bcc2428a39bcf79763b646d14326b100b58bef47995747a6"
+    },
+    {
+      "path": "native-startup-device-20260908/1b62ba91/sources.tar",
+      "bytes": 30720,
+      "sha256": "74738715e1dc47576c1d59bbe2d7f0f629367aab3d865b94f5baced1b11cead8"
+    }
+  ]
+}

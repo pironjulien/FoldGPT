@@ -1,0 +1,189 @@
+[
+  {
+    "argv": [
+      "cat",
+      "/proc/sys/kernel/random/boot_id"
+    ],
+    "code": 0,
+    "stdout": "348d453e-f4e5-40e0-8ef0-030f4d5e38af\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "sha256sum",
+      "/data/app/~~tZhnS0-qQoodtbpJNewWIg==/app.foldgpt.runasbrokerqualification.v2-ZSYy4cDX8E6_L8n600Md9A==/lib/arm64/libfoldgpt_python_cli.so"
+    ],
+    "code": 0,
+    "stdout": "76f4de641c0d65b04c1a627e197f78bec224f9032165130acdd820c4c2801f67  /data/app/~~tZhnS0-qQoodtbpJNewWIg==/app.foldgpt.runasbrokerqualification.v2-ZSYy4cDX8E6_L8n600Md9A==/lib/arm64/libfoldgpt_python_cli.so\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/debian/etc/foldgpt-user"
+    ],
+    "code": 0,
+    "stdout": "julien\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/debian/etc/passwd"
+    ],
+    "code": 0,
+    "stdout": "root:x:0:0:root:/root:/bin/bash\r\ndaemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin\r\nbin:x:2:2:bin:/bin:/usr/sbin/nologin\r\nsys:x:3:3:sys:/dev:/usr/sbin/nologin\r\nsync:x:4:65534:sync:/bin:/bin/sync\r\ngames:x:5:60:games:/usr/games:/usr/sbin/nologin\r\nman:x:6:12:man:/var/cache/man:/usr/sbin/nologin\r\nlp:x:7:7:lp:/var/spool/lpd:/usr/sbin/nologin\r\nmail:x:8:8:mail:/var/mail:/usr/sbin/nologin\r\nnews:x:9:9:news:/var/spool/news:/usr/sbin/nologin\r\nuucp:x:10:10:uucp:/var/spool/uucp:/usr/sbin/nologin\r\nproxy:x:13:13:proxy:/bin:/usr/sbin/nologin\r\nwww-data:x:33:33:www-data:/var/www:/usr/sbin/nologin\r\nbackup:x:34:34:backup:/var/backups:/usr/sbin/nologin\r\nlist:x:38:38:Mailing List Manager:/var/list:/usr/sbin/nologin\r\nirc:x:39:39:ircd:/run/ircd:/usr/sbin/nologin\r\n_apt:x:42:65534::/nonexistent:/usr/sbin/nologin\r\nnobody:x:65534:65534:nobody:/nonexistent:/usr/sbin/nologin\r\naid_u0_a409:x:10409:10409:Termux:/:/sbin/nologin\r\njulien:x:10410:10410::/home/julien:/bin/bash\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "mkdir",
+      "-m",
+      "700",
+      "/data/user/0/app.foldgpt/files/sp-831c4905"
+    ],
+    "code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "mkdir",
+      "-m",
+      "700",
+      "/data/user/0/app.foldgpt/files/sp-831c4905/workspace"
+    ],
+    "code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "tar",
+      "-xf",
+      "-",
+      "-C",
+      "/data/user/0/app.foldgpt/files/sp-831c4905"
+    ],
+    "code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "sha256sum",
+      "/data/user/0/app.foldgpt/files/sp-831c4905/measure.py"
+    ],
+    "code": 0,
+    "stdout": "59f0e7b31924e47509f24d973934490ade384bc4729520ea54ae71032dc9af28  /data/user/0/app.foldgpt/files/sp-831c4905/measure.py\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "/data/app/~~tZhnS0-qQoodtbpJNewWIg==/app.foldgpt.runasbrokerqualification.v2-ZSYy4cDX8E6_L8n600Md9A==/lib/arm64/libfoldgpt_python_cli.so",
+      "-I",
+      "-S",
+      "-B",
+      "-u",
+      "/data/user/0/app.foldgpt/files/sp-831c4905/measure.py",
+      "native",
+      "--workspace",
+      "/data/user/0/app.foldgpt/files/sp-831c4905/workspace",
+      "--kernel-uid",
+      "10412",
+      "--timeout",
+      "30"
+    ],
+    "code": 0,
+    "stdoutFile": "native.stdout",
+    "stderrFile": "native.stderr"
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "/system/bin/env",
+      "LD_LIBRARY_PATH=/data/user/0/app.foldgpt/files/native:/data/app/~~5E59pSImRSmGlu92aovtbw==/app.foldgpt-yaFxXrtiXOjNFHnirC5pbw==/lib/arm64",
+      "PROOT_LOADER=/data/app/~~5E59pSImRSmGlu92aovtbw==/app.foldgpt-yaFxXrtiXOjNFHnirC5pbw==/lib/arm64/libproot-loader.so",
+      "PROOT_LOADER_32=/data/app/~~5E59pSImRSmGlu92aovtbw==/app.foldgpt-yaFxXrtiXOjNFHnirC5pbw==/lib/arm64/libproot-loader32.so",
+      "PROOT_TMP_DIR=/data/user/0/app.foldgpt/cache/x11",
+      "TMPDIR=/data/user/0/app.foldgpt/cache/x11",
+      "/system/bin/sh",
+      "-c",
+      "exec \"$@\"",
+      "foldgpt-measure",
+      "/data/app/~~5E59pSImRSmGlu92aovtbw==/app.foldgpt-yaFxXrtiXOjNFHnirC5pbw==/lib/arm64/libproot.so",
+      "--kill-on-exit",
+      "--link2symlink",
+      "--sysvipc",
+      "-r",
+      "/data/user/0/app.foldgpt/files/debian",
+      "-i",
+      "10410:10410",
+      "-w",
+      "/home/julien",
+      "-b",
+      "/dev",
+      "-b",
+      "/proc",
+      "-b",
+      "/sys",
+      "-b",
+      "/system",
+      "-b",
+      "/apex",
+      "-b",
+      "/data/user/0/app.foldgpt/cache/x11:/tmp",
+      "-b",
+      "/data/user/0/app.foldgpt/cache/shm:/dev/shm",
+      "-b",
+      "/data/user/0/app.foldgpt/files/sp-831c4905:/data/user/0/app.foldgpt/files/sp-831c4905",
+      "/usr/bin/env",
+      "-i",
+      "HOME=/home/julien",
+      "USER=julien",
+      "LOGNAME=julien",
+      "LANG=C.UTF-8",
+      "PATH=/usr/local/bin:/usr/bin:/bin",
+      "/usr/bin/python3",
+      "-I",
+      "-S",
+      "-B",
+      "-u",
+      "/data/user/0/app.foldgpt/files/sp-831c4905/measure.py",
+      "controller",
+      "--workspace",
+      "/data/user/0/app.foldgpt/files/sp-831c4905/workspace",
+      "--kernel-uid",
+      "10412",
+      "--timeout",
+      "30"
+    ],
+    "code": 0,
+    "stdoutFile": "controller.stdout",
+    "stderrFile": "controller.stderr"
+  },
+  {
+    "argv": [
+      "cat",
+      "/proc/sys/kernel/random/boot_id"
+    ],
+    "code": 0,
+    "stdout": "348d453e-f4e5-40e0-8ef0-030f4d5e38af\r\n",
+    "stderr": ""
+  }
+]

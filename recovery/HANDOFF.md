@@ -34,6 +34,27 @@ SHA256 `61ae60536ee44142d917a941d643642ff1cf4f9d4ac03a9ffb6349d502cf736e`.
 Le partage des chemins et le parcours complet depuis l'interface restent à
 qualifier ; le succès du broker ne les remplace pas.
 
+Mesures supplémentaires du 8 septembre : les **11 tests des fichiers et sockets
+de démarrage passent sur le vrai Python Bionic du Fold** (UID10412), par
+ADB/run-as sans superviseur. Android refuse de créer le hardlink du test ; ce
+refus système est consigné séparément et ne prouve pas notre admission d'un
+hardlink existant. Le partage Bionic/GNU sous les vrais flags PRoot passe aussi :
+mêmes device/inode, octets dans les deux sens, rename et flock bidirectionnel.
+Le contrôleur conserve son UID libc10410 et son vrai UID noyau10412. Le test
+confirme aussi qu'un écrivain sans lease peut muter ; la coordination des
+écritures humaines reste à raccorder. Aucun superviseur n'est lancé dans PRoot.
+Preuves : `verification/native-startup-and-shared-paths-20260908`.
+Ces mesures ADB ne sont pas encore le lancement Java complet ni l'interface.
+
+Le CLI Python et le lanceur C de production sont maintenant compilés avec le
+NDK Windows, sous `downloads/native-production-20260908`. Préfixe natif :
+`files/native-runtime-v1/python`, avec86aliases dont python/python3/bash/sh.
+Le C admission-r2 émet les vrais enregistrements Java setup_failed/closed70
+avant tout enfant s'il refuse. Le packaging Java est en vérification ; ne pas
+installer les candidats r1/r2 incomplets. La compilation moteur WSL28509 est
+toujours non terminale et les nouvelles commandes WSL ne répondent pas ; une
+demande d'interruption/reprise limitée est en attente auprès de Julien.
+
 Les sources du point d'entrée **de production**, du client UI fichiers et de
 leur acquisition native sont désormais écrites dans le moteur séparé ; elles
 ne sont pas encore compilées/qualifiées. Les tests Rust complets sont encore
