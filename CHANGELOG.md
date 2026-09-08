@@ -2,6 +2,9 @@
 
 ## Unreleased - 2026-09-08
 
+- Publish and restore encrypted supplement v11 with APK r15, its frozen inputs,
+  exact source checkpoint and new Fold/Linux proof. Reverify all 5,487 restored
+  artifact files, all 1,105 source files and the restored APK inventory.
 - Prepare explicit native human v2 production selection through an attested
   APK asset and startup manifest, including real editor cat/Bash execution and
   the native parent's environment. Preserve model authority and v1 admission.

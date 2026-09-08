@@ -47,9 +47,12 @@ fichiers officiels Linux. Il n'a pas encore installé le moteur R4. Le vrai proj
 UI vide est `/data/user/0/app.foldgpt/files/projects/ui-python-caae3a83d156` ;
 prompt sous `work/root-artifacts-20260907/native-ui-validation-20260908`.
 Ne pas prendre une ancienne conversation hors de ce chemin pour le test natif.
-PTY reste non sélectionné et non qualifié. Le complément GitHub v10 est publié,
-retéléchargé et restauré avec tous ses fichiers vérifiés ; il conserve r12 et
-49c610d, pas encore r15 ou les nouvelles preuves. Prévoir le complément suivant.
+PTY reste non sélectionné et non qualifié. Le complément GitHub v11 est publié,
+retéléchargé et restauré : 5487 fichiers et 1105 fichiers source revérifiés.
+Il conserve r15 et le commit `1eee8df66f43fb5af7caf965cd5b905db3660da4`, avec
+les nouvelles preuves natives. Le futur moteur livré nécessitera son propre
+complément. `just bazel-lock-update` Windows/Bazel9.0.0 est passé ; aucun
+changement de MODULE.bazel.lock. `just fmt` est passé avant l'export R4.
 
 **Qualification production Python réelle PASS, 04:28** : APK r12
 `57b474f3f468e3c62470eef5e41da0385eaf2b45c944c06e2e0180b1ffaa4234`,

@@ -1,0 +1,43 @@
+{
+  "repository": "https://github.com/pironjulien/FoldGPT-workspace",
+  "visibility": "PRIVATE",
+  "release": "https://github.com/pironjulien/FoldGPT-workspace/releases/tag/recovery-2026-09-07",
+  "sourceCommit": "1eee8df66f43fb5af7caf965cd5b905db3660da4",
+  "encryptedSha256": "2465b17cb39539b5ee6572432afb815ffc4037b27e525fbc6c798bfebe3a0747",
+  "assets": [
+    {
+      "name": "native-checkpoint-v11-manifest.json",
+      "bytes": 660,
+      "sha256": "9c0a4f139b77dec3d245e8b0d6b5e7abc76a9881e13c8834cb8e287eefea9403"
+    },
+    {
+      "name": "native-checkpoint-v11.tar.gz.age.part001",
+      "bytes": 115569908,
+      "sha256": "2465b17cb39539b5ee6572432afb815ffc4037b27e525fbc6c798bfebe3a0747"
+    }
+  ],
+  "downloadedAssetHashesVerified": true,
+  "restorationReport": "recovery/verification/github-supplement-v11-restoration.json",
+  "sourceFilesRestoredAndVerified": 1105,
+  "enginePatchSha256": "8b055f730e651c2bebac801373b92bf57bcc0e1d2701a4ce232f07e1d9f82a9e",
+  "r15ApkSha256": "d8f4ff35d0d06120d1ab004ce13e5f8a31e7a25b73258e8ef0cceea2a178fe7b",
+  "r15ApkInventoryReverified": true,
+  "earlierArchiveDependencies": [
+    "manifest.json",
+    "native-checkpoint-manifest.json",
+    "native-checkpoint-v2-manifest.json",
+    "native-checkpoint-v3-manifest.json",
+    "native-checkpoint-v4-manifest.json",
+    "native-checkpoint-v5-manifest.json",
+    "native-checkpoint-v6-manifest.json",
+    "native-checkpoint-v7-manifest.json",
+    "native-checkpoint-v8-manifest.json",
+    "native-checkpoint-v9-manifest.json",
+    "native-checkpoint-v10-manifest.json"
+  ],
+  "plaintextUploaded": false,
+  "keysIncluded": false,
+  "gitIndexOrHeadChanged": false,
+  "deviceActionPerformed": false,
+  "scope": "Recoverable encrypted checkpoint verified from redownloaded GitHub bytes; not ordinary GUI or complete engine qualification."
+}

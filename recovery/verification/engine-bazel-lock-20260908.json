@@ -1,0 +1,9 @@
+{
+  "command": "just bazel-lock-update",
+  "platform": "Windows",
+  "bazelVersion": "9.0.0",
+  "exitCode": 0,
+  "lockChanged": false,
+  "lockSha256": "9b378cefd60378ef1912b6b73f5fa12b5204608946c3498fc0d4c718c4d4901a",
+  "logSha256": "817a08463a7f3f1c9de2b435a2448c4797b747e035a509c2a492d9bdb90f637d"
+}
