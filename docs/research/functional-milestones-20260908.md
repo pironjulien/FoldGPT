@@ -1,5 +1,22 @@
 # Ce qui est acquis et ce qui permet de terminer — 8 septembre 2026
 
+**Priorité précisée par Julien : ouvrir FoldGPT, écrire une demande et travailler
+avec le PC éteint.** Le panneau de terminal manuel est reporté ; sa réalisation
+n'est pas un préalable à ce parcours. L'exécution locale est déjà démontrée
+pour Python ; le démarrage autonome est un contrôle distinct. Le lanceur Android
+existe, mais attend Shizuku actif. Les derniers essais ont démarré Shizuku via
+ADB depuis le PC. Ne pas confondre cette préparation avec l'endroit où les
+commandes du modèle s'exécutent, ni déduire une dépendance permanente au câble.
+
+Le [manuel officiel Shizuku](https://shizuku.rikka.app/guide/setup/#start-via-wireless-debugging),
+relu dans le navigateur intégré pendant cette clarification, documente le
+démarrage sans ordinateur via le débogage sans fil à partir d'Android 11.
+Il précise que les étapes de démarrage doivent être répétées après reboot.
+Le SDK et notre UserService existent déjà dans FoldGPT ; ils ne démarrent pas
+le serveur Shizuku. Intégrer un lanceur dédié et qualifier la procédure sur
+le Fold sont des travaux distincts. Aucun automatisme complet après reboot
+ni essai sans PC n'est revendiqué par cette lecture documentaire.
+
 **Mise à jour r25 :** le terminal utilisé par le modèle est maintenant validé
 depuis la conversation, avec saisie et Ctrl+C. Les cinq tests Python, le zipapp
 existant et rg passent ensuite ; arrêt et réouverture propres. Le jalon du
@@ -43,11 +60,17 @@ Une mesure passée n'est pas une promesse sur toutes les mises à jour futures.
 | Jalon | Test qui permet de le déclarer réussi | Ce qui interdit de le déclarer réussi |
 | --- | --- | --- |
 | Recherche et projet avec dépendance | Depuis la conversation habituelle, utiliser le vrai rg, télécharger et vérifier Packaging 26.3, l'installer réellement dans `.deps`, écrire les modules et tests de Dependency Inspector, produire JSON/Markdown et un zipapp qui embarque la dépendance, puis réexécuter après sauvegarde et reprise | Un `--help`, une commande lancée uniquement depuis le PC, une dépendance copiée depuis un autre runtime ou un rapport sans sorties et codes réels |
-| Terminal interactif intégré | Depuis le terminal de l'application, lancer un vrai Bash interactif, saisir, redimensionner, interrompre un processus, lancer puis fermer un travail avec descendants ; observer la sortie, les codes et la disparition réelle des processus/FD détenus | Une sonde fixe seule, un pipe présenté comme PTY, un enfant oublié ou une erreur de fermeture cachée |
 | Travail sans PC | Téléphone débranché : démarrer l'application, reprendre le projet et exécuter ses tests ; répéter après fermeture complète, pliage/reprise, passage en arrière-plan et redémarrage Android normal, avec un parcours d'autorisation documenté | Une préparation ADB depuis le PC indispensable à chaque séance, une session ancienne restée prête, ou l'affirmation que le SDK Shizuku suffit à relancer ses droits après reboot |
 | Installation et mises à jour | Installer/reprendre avec la procédure documentée ; qualifier une mise à jour réelle disponible de FoldGPT et du client officiel en conservant compte, conversation et fichiers ; vérifier les versions et reprendre les tests | Des fichiers officiels modifiés, une perte de données ou une compatibilité future annoncée sans essai ; l'absence de version amont disponible doit rester une limite explicite |
 | Contrôleur entièrement Bionic | Construire le moteur séparé avec son raccordement FoldGPT, exécuter réellement V8/code-mode, authentification, fichiers/processus, puis le même projet depuis l'interface avec arrêt/reprise | Un fork CLI générique qui perd notre intégration, une compilation ou un `--help` sans charge réelle, une fonction retirée pour faire passer le test |
 | Interface entièrement native Android | Démontrer un hôte Android conservant les services attendus de l'interface officielle, puis le parcours complet et sa mise à jour, sans Electron Linux ni PRoot pour l'interface | Le seul remplacement de la CLI, une page WebView de démonstration ou une nouvelle interface présentée comme l'application officielle inchangée |
+
+Le **panneau de terminal manuel**, distinct du terminal du modèle validé en r25,
+reste un travail reporté de parité fonctionnelle. Pour le qualifier ultérieurement :
+ouvrir un vrai Bash interactif, saisir, redimensionner, interrompre et fermer
+un travail avec descendants ; vérifier les sorties et la disparition réelle
+des processus détenus. Aucun composant n'est supprimé et aucun succès n'est
+attribué à ce panneau tant que ces contrôles n'ont pas été réalisés.
 
 Le projet Dependency Inspector créé utilise un wheel universel réel de
 Packaging 26.3 : SHA256
@@ -69,7 +92,7 @@ dans FoldGPT ou fourni par les recettes CLI comparées.
   l'addition, puis r24 pour le projet avec Packaging, les tests, la construction
   et la reprise. Il faut nommer cette portée lorsqu'on le dit à Julien.
 - **Utilisable au quotidien pour le développement visé** : le projet avec
-  dépendance, la recherche, le terminal et le parcours sans PC ont leurs
+  dépendance, la recherche, les commandes du modèle et le parcours sans PC ont leurs
   preuves dans l'interface, sans défaut connu bloquant ces opérations.
 - **Terminé pour l'objectif initial intégral** : les critères de fonctionnement,
   d'installation/mise à jour et de totalité native sont satisfaits. Les échecs

@@ -12,9 +12,22 @@ avant toute action, ces PID sont historiques. Aucun reboot du Fold.
 
 Le [rapport r25](../docs/research/r25-device-validation-20260908.md) et le
 [reçu indépendant](../work/r24-native-20260908/ui/r25-milestone.json)
-définissent la portée acquise. Prochain développement : **panneau de terminal
-utilisateur**, distinct du terminal du modèle ; puis autonomie sans PC et
-contrôleur/interface entièrement Bionic. Les nouveautés r24/r25 sont conservées
+définissent la portée acquise. **Priorité corrigée selon Julien : ouvrir
+FoldGPT et travailler PC éteint.** Le panneau de terminal manuel est reporté
+et ne conditionne pas cette preuve. FoldActivity lance déjà FoldRuntimeService
+sur le téléphone ; FoldExecutorRuntime attend cependant un serveur Shizuku
+actif et autorisé. Le dernier lot a démarré ce serveur via ADB depuis le PC
+(`work/r24-native-20260908/shizuku-start.json`). Cela ne démontre ni une
+exécution des commandes sur PC ni une obligation de garder le câble branché.
+Le démarrage de Shizuku et la reprise complète depuis le téléphone, notamment
+après reboot normal, restent à qualifier avant d'annoncer l'autonomie acquise.
+Le manuel officiel Shizuku relu documente un démarrage depuis Android 11+
+sans ordinateur via le débogage sans fil, avec étapes à refaire après reboot.
+Le SDK/UserService intégré ne remplace pas ce démarrage du serveur ; notre
+propre lanceur peut l'intégrer mais ne reçoit pas automatiquement ses droits.
+Voir les [critères et la source officielle](../docs/research/functional-milestones-20260908.md).
+Les contraintes du contrôleur/interface entièrement Android restent ouvertes.
+Les nouveautés r24/r25 sont conservées
 dans le [complément v16](supplement-v16.md), publié et restauré : 39 584 fichiers
 et 1 252 sources Git vérifiés, avec revérification des deux APK.
 

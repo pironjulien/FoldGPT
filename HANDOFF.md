@@ -5,6 +5,12 @@ validé depuis la conversation, cinq tests Python et rg toujours réussis.**
 Voir le [rapport r25](docs/research/r25-device-validation-20260908.md) pour les
 preuves, la dernière ouverture et les fonctions encore à terminer.
 
+**Priorité confirmée par Julien : ouvrir FoldGPT et travailler avec le PC
+éteint.** Le panneau de terminal manuel est reporté ; il n'est pas nécessaire
+pour qualifier le travail depuis la conversation. Le prochain essai doit
+isoler le démarrage de Shizuku depuis le téléphone, puis la reprise du projet
+sans commande de préparation envoyée par le PC.
+
 Le statut technique actuel et les prochaines étapes sont dans
 [recovery/HANDOFF.md](recovery/HANDOFF.md). Les commandes ordinaires depuis
 l'interface sont maintenant validées pour le parcours Python natif Android :

@@ -2,6 +2,11 @@
 
 ## Unreleased - 2026-09-08
 
+- Prioritize opening FoldGPT and working without a PC, as clarified by Julien.
+  Defer the manual terminal panel without removing its implementation. Distinguish
+  Android-local command execution from Shizuku startup, which the last device
+  validation initiated through PC ADB; autonomous startup remains unqualified.
+
 - Publish encrypted recovery supplement v16 to the private release, redownload
   and authenticate all 39,584 files, restore 1,252 committed source files and
   reverify both r24/r25 APKs. Preserve required Rust vendor sources and exact

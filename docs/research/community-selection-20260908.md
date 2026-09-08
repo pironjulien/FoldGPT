@@ -24,8 +24,9 @@ identiques et la réexécution du projet après fermeture/réouverture ;
 d'addition, sa sauvegarde dans l'éditeur et deux reprises. Le cache CPython
 reste actif et séparé du runtime inventorié.
 
-Conserver le moteur R5 pendant le raccordement du **panneau de terminal
-utilisateur**, puis qualifier le démarrage sans PC et les mises à jour.
+Conserver le moteur R5 et **qualifier en priorité le démarrage sans PC**, selon
+la clarification de Julien. Le panneau de terminal manuel est reporté et ne
+conditionne pas le travail depuis la conversation ; qualifier ensuite les mises à jour.
 Le contrôleur et l'interface entièrement Android exigent une décision et une
 qualification distinctes.
 
@@ -108,17 +109,21 @@ futures. Cette différence doit rester visible dans le bilan de fin de projet.
 La recherche rg, le projet avec dépendance et le terminal du modèle ont
 désormais leurs preuves. Les trois étapes suivantes ont des critères concrets :
 
-1. **Panneau de terminal utilisateur** : ouvrir un vrai Bash interactif depuis
-   le panneau, saisir, redimensionner, interrompre et fermer un travail avec
-   descendants ; vérifier les sorties et la disparition des processus détenus.
-2. **Usage sans PC et mises à jour** : téléphone débranché, démarrer et reprendre
+1. **Usage sans PC** : téléphone débranché, démarrer et reprendre
    le projet après fermeture, pliage, arrière-plan et reboot Android normal,
-   avec le parcours d'autorisation documenté. Tester ensuite une mise à jour
+   avec le parcours de démarrage de Shizuku et d'autorisation documenté.
+   FoldGPT sait lancer ses composants locaux ; les derniers essais avaient
+   toutefois démarré Shizuku depuis le PC. Ce préalable doit être traité depuis
+   le téléphone et testé avant de déclarer l'autonomie acquise.
+2. **Mises à jour** : tester une mise à jour
    réelle disponible en conservant compte, conversation et fichiers.
 3. **Totalité native Android** : construire notre contrôleur Bionic avec V8
    fonctionnel et le raccordement FoldGPT, puis réussir le même projet avec
    arrêt/reprise. Qualifier séparément un hôte Android pour l'interface et ses
    services ; ce port n'est fourni par aucune des recettes CLI examinées.
+
+Le panneau de terminal manuel reste un chantier reporté, sans suppression du
+prototype ni confusion avec le terminal du modèle déjà qualifié.
 
 Aucun chantier Git ne s'ajoute à ce lot. Pour une extension ultérieure,
 **Git natif Bionic adapté au préfixe FoldGPT** est une piste communautaire
