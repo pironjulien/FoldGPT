@@ -81,6 +81,30 @@ stack and system-only dynamic dependencies. They have no RUNPATH.
 `ripgrep-notices.txt` collects the upstream and vendored dependency licence
 notices for inclusion with the APK. Its bytes are part of build evidence.
 
+The separate Rust standard-library and NDK notices are admitted by
+`runas-runtime/ripgrep-notices.py` against the reviewed
+`runas-runtime/ripgrep-toolchain-notices.json` pins. Native staging requires
+`--ripgrep-toolchain-notices work/native-ripgrep-20260908/toolchain-notices`
+whenever `--ripgrep-build` is selected. The original 15-file capture manifest
+has SHA256 `48228a450f06e98d36efed235e4c4a79b3befb644d3f331fba5e22fafa321294`.
+
+The stage and package include these 15 notices under
+`assets/notices/ripgrep-toolchain/`, plus a normalized asset manifest without
+host installation paths. The qualification records the capture hash, canonical
+pin hash, asset-manifest hash, toolchain versions, file count and total length.
+Package assembly rechecks the captured source bytes. APK verification checks
+the complete notice asset closure against canonical pins, including rejection
+of missing/extra files and self-rehashed modified notices. Candidates without
+native rg continue to verify without these optional assets.
+
+This documentation addition does not alter the frozen rg build recipe or any
+runtime/executable inventory. The r24b stage/package use the exact r24 admission
+binary because `runtime-inventory.h` remains byte-identical (SHA256
+`7ca9ba3333c5ed9244bfca999a610d6b67d36522377456937a8b7d4955405d1a`).
+The new outputs are
+`downloads/native-ordinary-uid-20260908/production-stage-r24b` and
+`downloads/native-ordinary-uid-20260908/production-package-r24b`; r24 is retained.
+
 Host qualification does not execute Android code. The standalone JIT probe
 must subsequently run on the phone and successfully compile and directly
 execute JIT code for Unicode letters, lookbehind and a backreference. Zero JIT

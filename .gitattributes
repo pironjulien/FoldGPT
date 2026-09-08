@@ -1,6 +1,25 @@
 *.sh text eol=lf
 *.gdb text eol=lf
 *.patch text eol=lf
+# These candidate sources are matched byte-for-byte to the reviewed Android build.
+tools/executor/bionic-supervisor/tty-runner.c text eol=lf
+tools/executor/bionic-supervisor/tty_wire.py text eol=lf
+tools/executor/bionic-supervisor/tty_processes.py text eol=lf
+# Keep the qualified PTY import closure stable when checking out on another OS.
+tools/executor/bionic-supervisor/__init__.py text eol=lf
+tools/executor/bionic-supervisor/direct_processes.py text eol=lf
+tools/executor/bionic-supervisor/direct_wire.py text eol=lf
+tools/executor/bionic-supervisor/wire.py text eol=lf
+tools/executor/exec_server.py text eol=lf
+tools/executor/native_environment.py text eol=lf
+tools/executor/native_process_policy.py text eol=lf
+tools/executor/native_processes.py text eol=lf
+tools/executor/ordinary_uid_files.py text eol=lf
+tools/executor/policy_intent.py text eol=lf
+tools/policy/managed_policy.py text eol=lf
+# These two qualified sources contain recorded CRLF/mixed endings; retain bytes.
+tools/executor/native_environment_unicode.py -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+tools/executor/native_files.py -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 # Preserve recorded bytes, including Windows CRLF, while retaining whitespace checks.
 recovery/verification/native-v11-20260907/*.json -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 recovery/verification/engine-arm64-static-compatibility-20260907.json -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol

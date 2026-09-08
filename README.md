@@ -7,25 +7,42 @@ et la [procédure de récupération complète](recovery/README.md). Elle conserv
 modifications en cours, le moteur séparé, les dépendances locales et les preuves
 chiffrées, au-delà du checkpoint publié dans le dépôt public d'origine.
 
-**État du 8 septembre :** le petit projet Python natif a réussi sur le Fold,
-mais sa création depuis la conversation a échoué en r20/R5. Le candidat
-**r21/versionCode11** corrige sur PC le contrat du mode Accès complet : commandes
-et fichiers sous l'UID Android ordinaire. Les **190 tests Python/natifs Linux**
-passent, le paquet et la signature APK sont vérifiés. **r21 n'est pas encore
-installé ni qualifié sur Android** ; conversation, éditeur, sauvegarde et reprise
-restent le critère final. Lire l'[état de reprise](recovery/HANDOFF.md) pour les
-preuves et l'ordre des essais au retour du téléphone.
+**État du 8 septembre, r25/versionCode15 installé :** le modèle utilise un vrai
+terminal Android depuis la conversation : saisie et interruption Ctrl+C
+réussies, puis fermeture et réouverture propres. La régression Python et rg
+passe et les 104 fichiers du projet sont inchangés. Voir le
+[rapport r25](docs/research/r25-device-validation-20260908.md).
 
-**Status: working desktop interface in a development prototype; not a public beta.** The integrated `app.foldgpt` APK runs the unmodified client and Codex interface in its own Android app storage and UID, with native ARM64 execution and Adreno acceleration. The reproduced settings-menu corruption is fixed, selected integrated-browser operations pass, and the private guest-to-Android file bridge is verified. Native managed acquisition also passes 17 tests and 46 process observations with the GUI running. Inactive v3 installation and independent native inspection pass. Complete protected local task execution, an autonomous installer, Remote, updates and sustained background reliability remain unfinished or unverified. See [PUBLICATION.md](PUBLICATION.md) for the tested scope.
+Le parcours Python avec
+conversation, éditeur, sauvegarde et reprise est démontré depuis r22/r23. R24
+ajoute la recherche native : **15 cas rg/PCRE2/JIT et les six commandes de
+régression Python passent sur le Fold**, avec nouvelle admission et fermeture
+propres. Dans la conversation, pip a réellement téléchargé puis installé
+Packaging 26.3. Le projet Dependency Inspector passe cinq tests et produit un
+zipapp identique sur deux constructions. Après fermeture puis réouverture,
+les tests et cette archive existante s'exécutent de nouveau avec les résultats
+attendus ; les sources, le wheel et l'archive sont conservés. Les reçus
+d'exécution distinguent le code métier 1 des rapports et le code 0 des tests.
+
+Bash, Python et rg sont natifs Android/Bionic. **L'interface et le contrôleur
+GNU utilisent encore PRoot, sans VM sur le téléphone.** Le panneau de terminal
+utilisateur reste à raccorder, distinct des sessions interactives du modèle
+validées dans r25. Voir le [rapport r24](docs/research/r24-device-validation-20260908.md)
+et les [critères de réussite](docs/research/functional-milestones-20260908.md).
+Les fixtures et limites plus anciennes ci-dessous gardent leur portée
+historique ; elles ne remplacent pas ce bilan courant.
+
+**Status: working Python development workflow in an experimental desktop host; not a public beta.** The integrated `app.foldgpt` APK runs the unmodified client and Codex interface in its own Android storage and UID. Real conversation turns now create, test, build and resume Python projects through native Android/Bionic workers, including a downloaded dependency. The interface and GNU controller still use PRoot on the phone's ARM64 CPU. Human terminal integration, autonomous installation/startup, broader protected execution profiles, Remote, updates and sustained background reliability remain unfinished or unverified. See [PUBLICATION.md](PUBLICATION.md) for the tested scope.
 
 ## What works
 
+- Real conversation execution uses the ordinary Android UID route selected for Full access. The r22/r23 addition project passes creation, editor save/reopen and two resumed executions. R24 adds native rg/PCRE2/JIT and a real Packaging 26.3 dependency project with five tests, deterministic zipapp construction and successful execution after application close/reopen. The file collections independently preserve the sources and artifacts; this does not qualify every managed protection profile. See [r24 evidence](docs/research/r24-device-validation-20260908.md).
 - Termux:X11 is embedded in the FoldGPT display Activity. A separate foreground service owns the native ARM64 Linux runtime; Termux is no longer the running application's host. The old Termux applications were removed from the test device with their data retained, and FoldGPT still starts independently. Its display notification and help use FoldGPT's own interface.
 - PRoot is built from pinned source in `vendor/proot`. Matching loaders fix the previous Termux-specific loader paths. Shared-memory mapping and `xfwm4` provide the working X11 session.
 - The client fills the tested inner display at 2448 × 1848. XRandR mode reports have ranged from 59.95 to 119.98 Hz; application frame rate has not been measured.
 - The official client reports ANGLE on Zink/Turnip and Adreno 840, with GPU composition and rasterization enabled. The installed Mesa 26.2.2 foldgpt5 corrects two renderpass lifetime bugs without disabling GPU features. All 24 independent GLES pixel cases pass on the Fold, alongside Vulkan/GLX probes, all 20 settings sections and repeated real Plugins/Browser taps after a normal restart. These checks cover the reproduced corruption; broader display reliability and application FPS remain unmeasured. See [the GPU verification](docs/verification-gpu-renderpasses-2026-09-06.md).
 - Two real Codex turns on the Fold opened and read Example Domain in the official integrated browser, clicked its link to IANA and navigated back. Independent page inspection confirms the result. External links use a separate guest-to-Android bridge that opens Android's selected browser. Uploads, downloads, authentication, local development pages and PiP remain unverified. See [the browser evidence](tools/browser/README.md).
-- A debug service runs the real filesystem RPC endpoint with official Android/Bionic CPython outside PRoot. The initial fixture passes 34 responses and 12 grouped checks. A later GNU guest bridge under PRoot reaches the native Android broker through a private Unix socket: its latest 53 responses across two sessions verify reads/writes, directory listing/walking, copy/remove, policy refusals, block reads of a 37 MiB binary file and descriptor/lease cleanup. Independent collection binds the complete transcript and physical files to the eight packaged sources, 28 native libraries and exact tested APK. These are recorded diagnostic fixtures; no normal model task or production Desktop route is connected. See [the original RPC evidence](tools/executor/native-files-android-rpc.md) and [the private bridge](tools/executor/private-exec-android.md).
+- Earlier filesystem diagnostics run the real RPC endpoint with official Android/Bionic CPython outside PRoot. The initial fixture passes 34 responses and 12 grouped checks. A GNU guest bridge fixture under PRoot reaches the native Android broker through a private Unix socket: 53 responses across two sessions verify reads/writes, directory listing/walking, copy/remove, policy refusals, block reads of a 37 MiB binary file and descriptor/lease cleanup. Independent collection binds the transcript and physical files to the tested sources, libraries and APK. Those fixtures themselves do not prove model routing; the later ordinary UID conversation evidence above does. See [the original RPC evidence](tools/executor/native-files-android-rpc.md) and [the private bridge](tools/executor/private-exec-android.md).
 - A fixed static ARM64 executable passes 17 managed-acquisition tests and 46 actual process observations under native Landlock/seccomp, with the graphical client active. Cases cover real exec, allowed file acquisition, nested denials and metadata exceptions, copied-pointer mutation, exact FD flags, timeout, cancellation and forked descendant cleanup. The UID task limit accounts for the GUI's threads without raising inherited ceilings. Independent collection verifies the exact APK, 30 installed libraries, eight executed sources and all native events. This diagnostic has no general shell, stdin/TTY or official process RPC lifecycle. See [the Android managed evidence](tools/executor/native-managed-android.md).
 - Actual touch opens the Samsung keyboard in an editable field and touching outside closes it. The V5 bridge opens only on deliberate pointer input: automatic refocus leaves the dismissed keyboard closed. This was reproduced on-device without a model request; a new touch reopened it. Tapping Samsung keys entered `aet` in the official editor.
 - A process-owned IME endpoint survives display Activity replacement. Serialized shutdown fixes the reproduced socket conflict after reopening the display; requests still require the app's UID and a resumed inner-display Activity.
@@ -104,7 +121,9 @@ The guest session requires Debian's `python3-websockets`, `python3-secretstorage
 
 ## Next validation gates
 
-- Connect the verified native file and static-acquisition components to the complete official process lifecycle and production Desktop routing, then verify a normal protected Codex model task. General commands, shell/runtime admission, full filesystem compatibility, stdin/TTY and networking remain required. The original Debian `bwrap` failure remains a recorded blocker in the existing local execution path.
+- Integrate and qualify the real interactive PTY through the application's terminal, including input, resizing, interruption and descendant cleanup. The separate backend candidate passes nine real Android tests with clean owner waits and absence; it is not yet installed in r24 or qualified through the terminal UI.
+- Extend qualification beyond the working ordinary UID Python route to the remaining tools and managed protection profiles. The old Debian `bwrap` failure is historical for that path; it no longer blocks the demonstrated conversation Python workflow.
+- Qualify startup and project execution without the PC, including the authorization lifecycle after an ordinary Android reboot. Then decide explicitly how far to replace the GNU controller and desktop host: fully Android/Bionic operation remains a separate unproved requirement, not a visual finishing task.
 - Resolve the official workspace-runtime diagnostic failure. The 6 September runtime configuration has no Linux ARM64 entry and manifest retrieval returns HTTP 404. The Android/Bionic fixture interpreter is a separate supervisor component and does not repair that upstream dependency supply.
 - Verify the remaining browser operations, including file transfer, authentication and local development sites.
 - Broaden keyboard verification to field switching, Unicode, Samsung composition and dictation.

@@ -2,6 +2,7 @@
 import argparse
 import ast
 import hashlib
+import importlib.util
 import json
 from pathlib import Path, PurePosixPath
 import re
@@ -24,16 +25,19 @@ def strict_json(data):
         parse_constant=lambda _: (_ for _ in ()).throw(ValueError("Nonfinite package value")))
 
 
-def verify_model_selection(config, qualification, read_library, sources):
+def verify_model_selection(config, qualification, read_library, sources, *, read_source=None):
     """Validate the explicit installed option, independently of mere ELF presence."""
     options = config["backendOptions"]
+    pty_name = "libfoldgpt_direct_pty_supervisor.so"
     if "ordinaryUid" not in options:
-        if "ordinaryUidBuild" in qualification:
+        if ("ordinaryUidBuild" in qualification or "ordinaryPtyBuild" in qualification
+                or pty_name in config["nativeLibraries"]):
             raise ValueError("Ordinary UID attestation exists without explicit deployment selection")
         return ["managed"]
     direct = options["ordinaryUid"]
     name = "libfoldgpt_direct_runner.so"
-    if (type(direct) is not dict or set(direct) != {"processRunner", "limits"}
+    if (type(direct) is not dict or not {"processRunner", "limits"} <= set(direct)
+            or set(direct) - {"processRunner", "limits", "ptyProcessRunner"}
             or direct["processRunner"] != "@nativeLibraryDir/" + name
             or type(direct["limits"]) is not dict or direct["limits"]):
         raise ValueError("Ordinary UID package selection is not the exact installed contract")
@@ -58,6 +62,33 @@ def verify_model_selection(config, qualification, read_library, sources):
                 "tools/executor/bionic-supervisor/direct_processes.py", "tools/executor/bionic-supervisor/direct_wire.py"}
     if not required <= sources:
         raise ValueError("Ordinary UID selected without its complete model implementation")
+    has_pty = "ptyProcessRunner" in direct
+    if (("ordinaryPtyBuild" in qualification) != has_pty
+            or (pty_name in config["nativeLibraries"]) != has_pty):
+        raise ValueError("Model PTY requires explicit selection and complete build attestation")
+    if has_pty:
+        if direct["ptyProcessRunner"] != "@nativeLibraryDir/" + pty_name:
+            raise ValueError("Model PTY runner is not the admitted APK-owned library")
+        provenance = qualification["ordinaryPtyBuild"]
+        if type(provenance) is not dict or type(provenance.get("path")) is not str:
+            raise ValueError("Model PTY build provenance is malformed")
+        spec = importlib.util.spec_from_file_location("foldgpt_apk_pty_admission",
+            Path(__file__).with_name("pty-admission.py"))
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        binary, actual = module.production_pty(module.ROOT / provenance["path"])
+        if (provenance != actual or read_library(pty_name) != binary
+                or config["nativeLibraries"][pty_name] != digest(binary)):
+            raise ValueError("Packaged model PTY differs from its reviewed source and build")
+        if not {"tools/executor/bionic-supervisor/tty_processes.py",
+                "tools/executor/bionic-supervisor/tty_wire.py"} <= sources:
+            raise ValueError("Model PTY selected without its implementation")
+        if read_source is None:
+            raise ValueError("Model PTY requires verification of its actual packaged Python bytes")
+        for path, expected in actual["runtimeSourceSha256"].items():
+            if path not in sources or digest(read_source(path)) != expected:
+                raise ValueError("Packaged model PTY runtime source differs from qualification: " + path)
+        return ["managed", "ordinaryUid", "ordinaryPty"]
     return ["managed", "ordinaryUid"]
 
 
@@ -73,6 +104,14 @@ def verify_entrypoints(config, qualification, runtime, read_library):
         commands["rg"] = rg_name
     if (probe_name in native) != has_rg or ("ripgrepBuild" in qualification) != has_rg:
         raise ValueError("Ripgrep requires its complete native outputs and build attestation")
+    pty_name = "libfoldgpt_direct_pty_supervisor.so"
+    runtime_pty = [item for item in runtime["nativeFiles"] if item["name"] == pty_name]
+    if pty_name in native:
+        data = read_library(pty_name)
+        if runtime_pty != [{"name": pty_name, "bytes": len(data), "sha256": native[pty_name]}]:
+            raise ValueError("Model PTY is absent or changed in the admitted runtime inventory")
+    elif runtime_pty:
+        raise ValueError("Runtime inventories an unselected model PTY library")
     if config["backendOptions"]["executables"] != {name: marker + library for name, library in commands.items()}:
         raise ValueError("Package entrypoints differ from the exact native commands")
     aliases = runtime["runtimeAliases"]
@@ -143,6 +182,12 @@ def main():
                 raise ValueError("Ripgrep/PCRE2 notices are absent or changed")
         elif "ripgrepNoticesSha256" in qualification or "assets/notices/ripgrep.txt" in names:
             raise ValueError("Ripgrep notices present without the attested feature")
+        spec = importlib.util.spec_from_file_location("foldgpt_apk_ripgrep_notices",
+            Path(__file__).with_name("ripgrep-notices.py"))
+        notice_verifier = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(notice_verifier)
+        notice_files = notice_verifier.verify_assets(qualification, asset,
+            [name[len("assets/"):] for name in names if name.startswith("assets/")])
         host_schema = "foldgpt.host-files.v1"
         if "assets/foldgpt-host-deployment.json" in names:
             host_bytes = asset("foldgpt-host-deployment.json")
@@ -184,7 +229,8 @@ def main():
                     if module + ".py" not in sources and module + "/__init__.py" not in sources:
                         raise ValueError("Packaged source import is unresolved: " + node.module)
         profiles = verify_model_selection(config, qualification,
-            lambda name: archive.read("lib/arm64-v8a/" + name), sources)
+            lambda name: archive.read("lib/arm64-v8a/" + name), sources,
+            read_source=lambda path: asset("foldgpt-executor/" + path))
         commands = verify_entrypoints(config, qualification, runtime,
             lambda name: archive.read("lib/arm64-v8a/" + name))
         result = {"schema": "foldgpt.native-apk-verification.v1", "success": True,
@@ -192,6 +238,8 @@ def main():
             "nativeLibraries": len(config["nativeLibraries"]), "pythonDataFiles": len(runtime["dataFiles"]),
             "runtimeAliases": len(runtime["runtimeAliases"]), "sourceFiles": len(sources), "hostSchema": host_schema,
             "modelProfiles": profiles, "nativeCommands": commands}
+        if notice_files:
+            result["ripgrepToolchainNoticeFiles"] = notice_files
     args.output.write_text(json.dumps(result, indent=2) + "\n")
     print(json.dumps(result))
 

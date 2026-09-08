@@ -2,6 +2,39 @@
 
 ## Unreleased - 2026-09-08
 
+- Install r25/versionCode15 with explicit ordinary-UID model PTY routing.
+  Real conversation calls launch Android Python with three terminal descriptors,
+  exchange input through write_stdin and finish with codes23/130, including
+  keyboard Ctrl+C. Subsequent pipe commands pass five Python tests, existing
+  JSON/Markdown archive runs and rg search. All104 project files are unchanged;
+  normal owner cleanup and reopening pass. Human terminal UI remains separate.
+- Preserve exact qualified source line endings across Git checkouts, including
+  the PTY import closure; no executable or source behavior changes for this fix.
+
+- Qualify the separate PTY backend candidate with nine real Android tests,
+  including binary input, resizing, foreground/initial-group interruption,
+  detached descendant cleanup and saturated notifications. Eight native owners
+  have wait0 receipts and independent absence checks; the existing UI session,
+  boot and installed Python remain unchanged. Preserve the first 8/9 run:
+  its harness used Python pidfd bindings omitted by the official API24 build.
+  The revised test harness calls real Bionic symbols with exact errno and
+  retained assertions. This is not yet APK or terminal-UI integration.
+- Install and verify r24/versionCode14 with native rg 15.2.0 and static
+  PCRE2 10.47/JIT. Fifteen real Fold search cases and six Python production
+  commands pass, with fresh admission and clean shutdown. Explain the upstream
+  PCRE2 10.45 display constants separately from the linked library and real
+  10.47 JIT probe; preserve the initial Shizuku timeout and locked-screen launch.
+- Exercise a real dependency project in the normal conversation: download and
+  install Packaging 26.3, correct the CLI entrypoint and zipapp build, pass five
+  tests, and build byte-identical archives across two source timestamp sets.
+  Close/reopen the application and rerun the existing tests and archive with
+  captured subprocess results; independently retain all project sources and
+  artifacts. This qualifies the ordinary UID Python route, not integrated PTY,
+  autonomous reboot recovery or a wholly Bionic controller/interface.
+- Update the current README, publication scope and recovery handoff to distinguish
+  the working model route from earlier diagnostic fixtures. Keep v15 as the last
+  independently restored private backup until a newer delivery is verified.
+
 - Pause before APK r24: preserve r23 installed and its clean session shutdown.
   Build native ripgrep15.2.0 with external static PCRE2 10.47/JIT twice, admit
   its exact sources/binaries, and stage explicit rg commands/aliases/notices.

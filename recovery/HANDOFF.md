@@ -1,18 +1,72 @@
 # Reprise technique du 8 septembre 2026
 
-**Pause demandée par Julien : lire d'abord [le point d'arrêt r24](PAUSE-20260908-r24.md).**
-R23 reste installé ; sa session6893 est maintenant fermée proprement et le
-téléphone remis en veille. Rg est compilé et empaqueté sur PC, pas installé.
-Une sonde PTY fixe réussit sur le Fold ; le backend PTY reste à intégrer.
-La dernière archive distante complète reste v15. Le reste de ce document
-décrit le parcours r23 précédemment validé et ses preuves historiques.
+## Dernier état : r25, 16:14 UTC
+
+**R25/versionCode15 est installé**, APK
+`2618abba092af33ac387906d75b57ecfd7b76ec7aa02d80b6c20fee4f44a28a3`.
+Le terminal du modèle a réussi saisie et Ctrl+C depuis la conversation ;
+la régression Python/rg passe, les 104 fichiers du projet sont inchangés.
+Le propriétaire19391 est fermé et réapé ; une nouvelle ouverture a donné un
+handshake réussi et un propriétaire26951 prêt à16:14 UTC. Lire le statut réel
+avant toute action, ces PID sont historiques. Aucun reboot du Fold.
+
+Le [rapport r25](../docs/research/r25-device-validation-20260908.md) et le
+[reçu indépendant](../work/r24-native-20260908/ui/r25-milestone.json)
+définissent la portée acquise. Prochain développement : **panneau de terminal
+utilisateur**, distinct du terminal du modèle ; puis autonomie sans PC et
+contrôleur/interface entièrement Bionic. Les nouveautés r24/r25 restent locales
+jusqu'à la publication/restauration du complément v16.
+
+## Historique r24
+
+**Travail repris : r24/versionCode14 est installé et le projet Python avec
+dépendance a réellement repris après fermeture/réouverture.** Le
+[point d'arrêt précédent](PAUSE-20260908-r24.md) reste historique. Il ne décrit
+plus le paquet installé ni le statut de rg. La dernière archive distante
+retéléchargée et restaurée reste v15 ; les nouveautés r24 sont locales jusqu'à
+la vérification d'un nouveau complément.
 
 L'[ancien état r21 et ses détails](HANDOFF-r21-20260908.md) est conservé comme
 historique. Les consignes opérationnelles actuelles figurent ci-dessous.
 
-## État actuel : parcours Python, éditeur et reprise validé sur r23
+## État historique r24, recherche et projet avec dépendance
 
-Le Fold est en **r23/versionCode13, moteur GNU R5**. Le petit projet Python
+Photographie à **15:58:54 UTC** : r24, moteur GNU R5, propriétaire natif **4217
+`ready`** après reprise. Le propriétaire précédent **12780 est fermé**, avec
+ressources absentes et boot inchangé. La session 4217 est alors ouverte : les
+reçus de 12780 ne lui sont pas attribués. Ne pas réutiliser ces PID comme état
+courant sans relire le statut du propriétaire.
+
+| Étape r24 | Résultat vérifié |
+| --- | --- |
+| APK installé | `064b8302093361aee3c5b8bb0107dc12781fc4b63b794174a1d17144906421af`, versionCode14, signature et inventaire vérifiés |
+| Recherche native | 15 cas Android rg/PCRE2/JIT réussis ; arrêt puis nouvelle admission/arrêt propres |
+| Régression Python | Six commandes de production réussies avec caches actifs hors runtime ; arrêt et nouvelle admission propres |
+| Projet Dependency Inspector dans la conversation | Packaging 26.3 réellement téléchargé, installé et importé ; cinq tests passent ; deux constructions du zipapp sont identiques |
+| Reprise du projet existant | Après fermeture/réouverture, cinq tests code 0, archive JSON/Markdown code métier 1 attendu ; wheel et archive inchangés |
+| Fichiers indépendamment relus | Les 103 fichiers de la collecte précédente sont conservés ; seul `validation-resume.json` est ajouté |
+| Intégrité à 15:58:54 UTC | Même boot, propriétés contrôlées et quatre APK ChatGPT officiels identiques à la collecte de reprise du travail |
+
+APK : `downloads/native-production-20260908/foldgpt-native-candidate-r24.apk`.
+Projet : `ui-python-caae3a83d156/dependency-inspector`, sous le projet d'addition
+conservé. Zipapp : **133266 octets**, SHA256
+`b9fb352580451e18a5c9166a3c5dc99e1988cc8110101afc9db07423f98966c1`.
+Les preuves et limites sont reliées dans le
+[rapport r24](../docs/research/r24-device-validation-20260908.md).
+Le nom de collecte `project-after-editor` ne constitue pas une nouvelle preuve
+de sauvegarde dans l'éditeur : celle-ci reste démontrée par les essais r22/r23.
+
+Le prochain travail fonctionnel est l'intégration et la qualification du vrai
+terminal PTY, puis le parcours sans PC et la décision sur le contrôleur/interface
+entièrement Android. À 16:08 UTC, le candidat PTY séparé a aussi passé neuf
+tests Android, avec huit propriétaires attendus code 0 et absents ; cette
+exécution dans un dossier d'essai ne valide pas encore son installation ni
+le terminal de l'application. Voir les
+[critères de réussite](../docs/research/functional-milestones-20260908.md).
+
+## Historique r23 : parcours Python, éditeur et reprise
+
+Le Fold était en **r23/versionCode13, moteur GNU R5** lors de ces essais. Le petit projet Python
 créé depuis la conversation en r22 a été retrouvé et réellement exécuté après
 deux ouvertures successives en r23. La modification sauvegardée dans l'éditeur
 est conservée ; les trois tests et le zipapp affichant 42 passent à chaque
@@ -27,7 +81,8 @@ Les autres fonctions ne sont pas toutes qualifiées.
 **État laissé à Julien à 11:46 UTC : application r23 ouverte sur la même
 conversation, propriétaire 6893 `ready`, handshake réussi, boot inchangé.**
 Aucune commande modèle supplémentaire n'a été lancée dans cette dernière
-session et elle n'est pas déclarée fermée. Preuve :
+session à cet instant. Elle a ensuite fermé proprement au point d'arrêt lié
+en tête de ce document ; ne plus la traiter comme active. Preuve de lancement :
 `work/root-artifacts-20260907/native-ui-validation-20260908/r23-ready-for-user/`.
 
 | Étape | Dernière preuve vérifiée |
@@ -96,12 +151,12 @@ Le `-B` concerne ce pilote PC, pas les commandes natives du projet. Rapport :
 Les reprises UI ont ensuite été exécutées et vérifiées séparément : le succès
 du pilote n'est pas utilisé comme substitut de conversation ou d'éditeur.
 Les reçus de fermeture concernent chaque propriétaire identifié. La session
-6893 laissée ouverte ne reçoit pas les reçus des anciennes sessions ; ne pas
-rejouer les anciens essais ou la maintenance pour ouvrir l'application.
+6893 avait son propre arrêt au point de pause ; ne pas rejouer les anciens
+essais ou la maintenance des caches pour ouvrir l'application.
 
 ## Architecture et limites
 
-Les commandes Bash/Python s'exécutent nativement sous Android/Bionic et l'UID
+Les commandes Bash/Python/rg s'exécutent nativement sous Android/Bionic et l'UID
 ordinaire de FoldGPT. **L'interface et le contrôleur GNU restent sous PRoot ;
 aucune VM ne tourne sur le téléphone.** Le produit complet n'est donc pas encore
 « tout Bionic ». Le moteur séparé conserve nos adaptations ; l'application
@@ -114,7 +169,7 @@ générale R5 `34192652057` est terminée en **échec** : 16 933 tests réussis,
 conserve ces limites ; les succès ciblés ne valident pas cette suite générale.
 Les preuves sont sous `work/ci-results/34192652057`.
 
-`rg` était absent lors de la création r22 et n'a pas été ajouté par r23.
+`rg` était absent lors de la création r22 ; r24 l'ajoute et le qualifie sur Android.
 Le PTY (`tty=true`), les programmes interactifs, tous les outils du runtime,
 les autres profils et l'ensemble des comportements de reprise ne sont pas
 qualifiés par ce petit projet. Le [choix des adaptations communautaires](../docs/research/community-selection-20260908.md)
@@ -122,7 +177,7 @@ conserve les pistes Bionic/V8/verrous sans les présenter comme déployées.
 L'[audit historique des traces r20](../docs/research/device-evidence-audit-20260908.md)
 et le [bilan des blocages](../docs/research/blockers-and-community-20260908.md)
 restent des preuves datées ; leurs anciennes prochaines étapes ne remplacent
-pas l'état r22/r23 ci-dessus.
+pas l'état r24 ci-dessus.
 
 Aucun root, flash, déverrouillage du bootloader ou changement des protections
 du téléphone. Ne pas rejouer l'ancien diagnostic GNU/PRoot/ptrace associé aux

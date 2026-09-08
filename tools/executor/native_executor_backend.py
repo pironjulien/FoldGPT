@@ -44,15 +44,18 @@ class NativeExecutorBackend:
         # and the qualified managed-only constructor keeps its current behavior.
         self._model_profiles = None
 
-    def install_ordinary_uid_profile(self, processes, files):
+    def install_ordinary_uid_profile(self, processes, files, *, pty_processes=None):
         """Select direct model backends before binding the authenticated channel."""
         if self._model_profiles is not None:
             raise ValueError("Native model profiles are already selected")
         from tools.executor.native_model_profiles import NativeModelProfiles
-        profiles = NativeModelProfiles(self, processes, files)
+        profiles = NativeModelProfiles(self, processes, files, pty_processes)
         self._model_profiles = profiles
         self.supported_methods = frozenset(self.supported_methods | processes.supported_methods | files.supported_methods)
         self.capabilities = frozenset(self.capabilities | processes.capabilities | files.capabilities)
+        if pty_processes is not None:
+            self.supported_methods = frozenset(self.supported_methods | pty_processes.supported_methods)
+            self.capabilities = frozenset(self.capabilities | pty_processes.capabilities)
 
     def _bind(self, session):
         if self.session is None:
@@ -112,7 +115,7 @@ class NativeExecutorBackend:
         # allow a new connection to race surviving workers.
         other_processes = list(self._host_process_owners)
         if self._model_profiles is not None:
-            other_processes.append(self._model_profiles.direct_processes)
+            other_processes.extend(self._model_profiles.process_backends[1:])
         if other_processes:
             results = await asyncio.gather(self.processes.close(session_id),
                 *(owner.close(session_id) for owner in other_processes), return_exceptions=True)

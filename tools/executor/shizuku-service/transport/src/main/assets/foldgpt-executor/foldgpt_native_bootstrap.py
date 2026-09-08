@@ -78,8 +78,10 @@ def deployment(apk):
         raise ValueError("Native deployment must not supply a model workspace or inherited environment")
     if "ordinaryUid" in options:
         direct = options["ordinaryUid"]
-        if (type(direct) is not dict or set(direct) != {"processRunner", "limits"}
+        if (type(direct) is not dict or not {"processRunner", "limits"} <= set(direct)
+                or set(direct) - {"processRunner", "limits", "ptyProcessRunner"}
                 or direct["processRunner"] != "@nativeLibraryDir/libfoldgpt_direct_runner.so"
+                or "ptyProcessRunner" in direct and direct["ptyProcessRunner"] != "@nativeLibraryDir/libfoldgpt_direct_pty_supervisor.so"
                 or type(direct["limits"]) is not dict or direct["limits"]):
             raise ValueError("Ordinary UID production execution requires its installed runner and standard limits")
     return config
@@ -110,6 +112,9 @@ def production_options(config, workspace):
         raise ValueError("Production helper does not identify its installed executable")
     if "ordinaryUid" in options and options["ordinaryUid"]["processRunner"] != str(native / "libfoldgpt_direct_runner.so"):
         raise ValueError("Ordinary UID runner does not identify its installed executable")
+    if ("ordinaryUid" in options and "ptyProcessRunner" in options["ordinaryUid"]
+            and options["ordinaryUid"]["ptyProcessRunner"] != str(native / "libfoldgpt_direct_pty_supervisor.so")):
+        raise ValueError("Ordinary UID PTY runner does not identify its installed executable")
     bash, python = str(native / "libfoldgpt_bash.so"), str(native / "libfoldgpt_python_cli.so")
     options["executables"] = production_entrypoints(options["executables"], native, config["nativeLibraries"])
     options["workspace"] = workspace

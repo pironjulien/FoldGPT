@@ -186,6 +186,22 @@ def production_ripgrep(build):
     return module.production_ripgrep(build)
 
 
+def production_toolchain_notices(source):
+    spec = importlib.util.spec_from_file_location("foldgpt_production_ripgrep_notices",
+        Path(__file__).with_name("ripgrep-notices.py"))
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module.production_toolchain_notices(source)
+
+
+def production_pty(build):
+    spec = importlib.util.spec_from_file_location("foldgpt_production_pty_admission",
+        Path(__file__).with_name("pty-admission.py"))
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module.production_pty(build)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--python-cli-build", type=Path, required=True)
@@ -198,7 +214,15 @@ def main():
                         help="Explicit source-attested direct runner double build")
     parser.add_argument("--ripgrep-build", type=Path,
                         help="Explicit source-attested native ripgrep and PCRE2/JIT double build")
+    parser.add_argument("--ripgrep-toolchain-notices", type=Path,
+                        help="Pinned Rust/NDK notice capture required with native ripgrep")
+    parser.add_argument("--pty-build", type=Path,
+                        help="Reviewed ordinary UID model PTY double build")
     args = parser.parse_args()
+    if args.pty_build is not None and args.ordinary_uid_build is None:
+        raise ValueError("Model PTY requires the ordinary UID profile")
+    if (args.ripgrep_build is None) != (args.ripgrep_toolchain_notices is None):
+        raise ValueError("Native ripgrep and its pinned toolchain notices must be selected together")
     cli_build, output = args.python_cli_build.resolve(), args.output.resolve()
     cli_build.relative_to(ROOT)
     output.relative_to(ROOT)
@@ -216,14 +240,19 @@ def main():
     native["libfoldgpt_python_cli.so"] = pinned(cli_build / "libfoldgpt_python_cli.so", cli_record["executableSha256"])
     native["libfoldgpt_bash.so"] = bash
     ripgrep_provenance = None
+    toolchain_notices, toolchain_notice_provenance = {}, None
     if args.ripgrep_build is not None:
         ripgrep, ripgrep_provenance = production_ripgrep(args.ripgrep_build)
         if set(ripgrep) & set(native):
             raise ValueError("Ripgrep native library collision")
         native.update(ripgrep)
+        toolchain_notices, toolchain_notice_provenance = production_toolchain_notices(args.ripgrep_toolchain_notices)
     direct_provenance = None
     if args.ordinary_uid_build is not None:
         native["libfoldgpt_direct_runner.so"], direct_provenance = production_direct(args.ordinary_uid_build)
+    pty_provenance = None
+    if args.pty_build is not None:
+        native["libfoldgpt_direct_pty_supervisor.so"], pty_provenance = production_pty(args.pty_build)
     frozen = ROOT / "downloads/bionic-supervisor/foldgpt-bionic-supervisor-qKM94iHA"
     hashes = dict(reversed(row.split("  ", 1)) for row in pinned(frozen / "BINARIES.sha256",
         "a10ca7cc9ccb8c110cd7ca901d84b9066a7bf5ae73842935da88e1895437b40d").decode().splitlines())
@@ -291,6 +320,10 @@ def main():
         notices = (assets / "notices")
         notices.mkdir()
         (notices / "ripgrep.txt").write_bytes((args.ripgrep_build / "ripgrep-notices.txt").read_bytes())
+        for name, data in toolchain_notices.items():
+            path = assets / name
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes(data)
     for name, data in native.items():
         (libraries / name).write_bytes(data)
     for name, data in data_files.items():
@@ -321,8 +354,11 @@ def main():
         "bashBuild": bash_provenance, "files": files}
     if direct_provenance is not None:
         stage_manifest["ordinaryUidBuild"] = direct_provenance
+    if pty_provenance is not None:
+        stage_manifest["ordinaryPtyBuild"] = pty_provenance
     if ripgrep_provenance is not None:
         stage_manifest["ripgrepBuild"] = ripgrep_provenance
+        stage_manifest["ripgrepToolchainNotices"] = toolchain_notice_provenance
     (output / "manifest.json").write_text(json.dumps(stage_manifest, indent=2) + "\n")
     print(json.dumps({"output": str(output), "nativeLibraries": len(native), "dataFiles": len(data_files),
                       "runtimeAliases": len(runtime["runtimeAliases"])}))

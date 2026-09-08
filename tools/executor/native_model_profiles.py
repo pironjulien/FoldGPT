@@ -11,7 +11,7 @@ from tools.executor.native_processes import METHODS
 
 
 class NativeModelProfiles:
-    def __init__(self, owner, direct_processes, direct_files):
+    def __init__(self, owner, direct_processes, direct_files, pty_processes=None):
         if owner.session is not None or owner.closing or owner.files.closed:
             raise ValueError("Model profiles must be selected before session acquisition")
         if (direct_processes.files_backend is not owner.files
@@ -23,9 +23,24 @@ class NativeModelProfiles:
                 or direct_files.closed or direct_processes.quarantined
                 or owner.processes.processes or owner.files.handles or owner.files.lock.locked()):
             raise ValueError("A new model profile cannot import live handles")
+        if pty_processes is not None:
+            if (pty_processes.files_backend is not owner.files
+                    or pty_processes.lease is not owner.files.lock
+                    or pty_processes.quarantine_owner is not owner.processes):
+                raise ValueError("PTY model profile must share the actual native owner and lease")
+            if (pty_processes.processes or pty_processes.quarantined
+                    or pty_processes.quarantine_event.is_set() or pty_processes.closing_sessions):
+                raise ValueError("A new PTY model profile cannot import live handles or closing state")
+        process_backends = (owner.processes, direct_processes) + ((pty_processes,) if pty_processes is not None else ())
+        if (len({id(backend) for backend in process_backends}) != len(process_backends)
+                or len({id(backend.processes) for backend in process_backends}) != len(process_backends)
+                or any(backend is human for backend in process_backends for human in owner._host_process_owners)):
+            raise ValueError("Model process backends require separate owners and registries")
         self.owner = owner
         self.direct_processes = direct_processes
         self.direct_files = direct_files
+        self.pty_processes = pty_processes
+        self.process_backends = process_backends
         self.pending_processes = set()
         self.pending_files = set()
 
@@ -41,7 +56,7 @@ class NativeModelProfiles:
 
     def _process_backend(self, session, identifier):
         key = (session, identifier)
-        matches = [backend for backend in (self.owner.processes, self.direct_processes)
+        matches = [backend for backend in self.process_backends
                    if key in backend.processes]
         if len(matches) > 1:
             raise RpcError(-32603, "Native process handle has ambiguous ownership")
@@ -71,14 +86,14 @@ class NativeModelProfiles:
                     raise RpcError(-32600, "Unknown native process handle")
                 return await backend.handle(call, notify)
             if (key in self.pending_processes
-                    or key in self.owner.processes.processes
-                    or key in self.direct_processes.processes):
+                    or any(key in backend.processes for backend in self.process_backends)):
                 raise RpcError(-32600, "Process id already exists in this session")
-            occupied = (self.pending_processes | set(self.owner.processes.processes)
-                        | set(self.direct_processes.processes))
+            occupied = self.pending_processes.union(*(backend.processes for backend in self.process_backends))
             if len(occupied) >= 128:
                 raise RpcError(-32000, "Native process registry capacity exhausted")
             backend = self.direct_processes if params.get("sandbox") is None else self.owner.processes
+            if params.get("sandbox") is None and params["tty"] and self.pty_processes is not None:
+                backend = self.pty_processes
             self.pending_processes.add(key)
             try:
                 return await backend.handle(call, notify)

@@ -1,6 +1,16 @@
-# Source publication — 6 September 2026
+# Source publication — updated 8 September 2026
+
+**Private r25 development:** actual model PTY input/Ctrl+C calls now pass through
+the desktop conversation. The Python/rg regression and normal close/reopen pass;
+the human terminal panel and a fully Bionic interface remain unfinished.
+See [r25 evidence](docs/research/r25-device-validation-20260908.md).
 
 Repository: https://github.com/pironjulien/FoldGPT
+
+The URL above identifies the historical public source repository. Current
+work and encrypted recovery evidence are delivered separately to the private
+`pironjulien/FoldGPT-workspace` repository; this document does not claim that
+the public repository contains the latest working state.
 
 This publication contains reviewed source for an experimental Android host. It is not an APK release, a one-click installer or a validated beta. The public snapshot excludes historical screenshots, marketing mockups, generated binaries, account profiles and Linux images. The earlier development history is retained locally.
 
@@ -8,8 +18,10 @@ This publication contains reviewed source for an experimental Android host. It i
 
 | Area | Observation |
 | --- | --- |
+| Current Python workflow, r22–r24 | Real conversation turns create a Python project, run tests and build an archive through Android/Bionic workers under FoldGPT's ordinary UID. R22/r23 verify editor save/reopen and two resumed executions. R24 downloads and installs Packaging 26.3, passes five dependency-project tests, creates a deterministic zipapp and reruns the existing project after application close/reopen. Independent file collections preserve the sources, wheel and archive. See [r24 evidence](docs/research/r24-device-validation-20260908.md). |
+| Native search, r24 | The installed rg 15.2.0 and statically linked PCRE2 10.47 pass 15 real Android cases, including actual JIT execution, Unicode, JSON, stdin and a Bash pipeline. Fresh owner admission and cleanup pass. This production qualification client is separate from the UI conversation evidence. |
 | Integrated runtime | `app.foldgpt` runs the official ChatGPT Linux ARM64 client and Codex interface under Android UID 10412, using its own storage and service. This UID is an observation from the test device, not a required installation ID. |
-| Native execution | PRoot and matching loaders were compiled from `vendor/proot` commit `7266fb3e8516535682f5a9c8f3a7e70f6506eddb`. Execution uses the phone's ARM64 CPU. |
+| Execution architecture | Bash, Python and rg workers use Android/Bionic. The official desktop interface and GNU controller still run under PRoot on the phone's ARM64 CPU, without a phone VM. PRoot and matching loaders were compiled from `vendor/proot` commit `7266fb3e8516535682f5a9c8f3a7e70f6506eddb`. This is not a wholly Bionic product. |
 | Display | Shared-memory mapping and an `xfwm4` window manager enable the fullscreen client at 2448 × 1848. Observed XRandR modes range from 59.95 to 119.98 Hz; rendered FPS and latency have not been measured. |
 | GPU | Mesa 26.2.2 foldgpt5 is installed with corrected Xlorie. Two renderpass lifetime fixes preserve Adreno acceleration and pass all 24 independent GLES pixel cases, Vulkan/GLX probes, 20 settings sections and repeated actual Plugins/Browser taps after normal restart. The reproduced black-menu corruption is resolved; broader reliability and rendered FPS remain unmeasured. See [GPU evidence](docs/verification-gpu-renderpasses-2026-09-06.md). |
 | Integrated browser | Two real Codex turns created/read Example Domain, clicked through to IANA and navigated back, with actual CUA results and independent final-page inspection. Those operations pass; remaining browser features are not certified. See [browser evidence](tools/browser/README.md). |
@@ -49,7 +61,8 @@ The assembled fresh installer and general Codex executor remain unfinished.
 ## Known limits
 
 - V5 was verified on-device: touch opens, outside touch closes, programmatic editor refocus leaves the keyboard closed, and another deliberate touch reopens it. Samsung key taps entered `aet`; the test text was removed without submission. Composition, dictation and every modal have not been exhaustively tested.
-- Complete protected local Codex model execution has not passed. The private file bridge, static managed-acquisition and direct lifecycle suites are verified components; their composition, production Desktop routing, general shell/runtime admission, full filesystem compatibility, TTY and networking still need integration and validation. Native stdin is covered by the direct lifecycle suite, not yet a normal task. The existing path's Debian `bwrap` failure remains a recorded blocker.
+- Ordinary UID production routing now passes the Python conversation workflows above, including a real dependency download. This does not qualify every managed protection profile, all filesystem/process features or the interactive terminal. The earlier static acquisition and lifecycle fixtures retain their narrower scope. The Debian `bwrap` failure belongs to the old path and does not block the demonstrated native-worker Python workflow.
+- Integrated PTY qualification, startup without the PC after an Android reboot, and a wholly Bionic controller/interface remain unfinished. A native CLI port does not port Electron's desktop interface. Official files remain separate from FoldGPT's integration; compatibility with future official updates requires actual validation.
 - Settings → Configuration → Diagnostics still has an unresolved official workspace-runtime dependency failure. The recorded 6 September configuration provides no Linux ARM64 runtime entry; manifest retrieval reports `Failed to download primary runtime manifest (404 ).` The Bionic interpreter used by the debug native supervisor does not replace or repair this upstream runtime.
 - A recent 2,000-line live runtime-log inspection also records Electron's process sampler failing because `ps` cannot obtain system boot time, denied `pthread_getschedparam` calls and a deprecated GCM registration endpoint. Their impact remains unqualified; the logs are not error-free.
 - Integrated-browser creation, reading, clicking and history navigation are qualified only for the recorded pages. Uploads, downloads, authentication, local development sites and PiP remain unverified.

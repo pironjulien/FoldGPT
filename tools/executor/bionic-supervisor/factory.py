@@ -14,8 +14,10 @@ def factory(options):
     paths = tuple((item["path"], item["execute"]) for item in runtime)
     limits = Limits(**options.get("limits", {}))
     direct = options.get("ordinaryUid")
-    if "ordinaryUid" in options and (type(direct) is not dict or set(direct) != {"processRunner", "limits"}
-            or type(direct["processRunner"]) is not str or type(direct["limits"]) is not dict):
+    if "ordinaryUid" in options and (type(direct) is not dict or not {"processRunner", "limits"} <= set(direct)
+            or set(direct) - {"processRunner", "limits", "ptyProcessRunner"}
+            or type(direct["processRunner"]) is not str or type(direct["limits"]) is not dict
+            or "ptyProcessRunner" in direct and type(direct["ptyProcessRunner"]) is not str):
         raise ValueError("Direct model execution requires explicit bootstrap runner and limits")
 
     def processes(runner, workspace, **kwargs):
@@ -35,7 +37,14 @@ def factory(options):
                 parent_environment=options.get("parentEnvironment"),
                 limits=DirectLimits(**direct["limits"]), quarantine_owner=backend.processes)
             direct_files = OrdinaryUidFilesBackend(lock=backend.files.lock)
-            backend.install_ordinary_uid_profile(direct_processes, direct_files)
+            pty_processes = None
+            if "ptyProcessRunner" in direct:
+                from .tty_processes import TtyProcesses
+                pty_processes = TtyProcesses(direct["ptyProcessRunner"], options["workspace"],
+                    executables=options["executables"], files_backend=backend.files,
+                    parent_environment=options.get("parentEnvironment"),
+                    limits=DirectLimits(**direct["limits"]), quarantine_owner=backend.processes)
+            backend.install_ordinary_uid_profile(direct_processes, direct_files, pty_processes=pty_processes)
         except BaseException:
             # Selection precedes session binding and no child/stream exists.
             import os

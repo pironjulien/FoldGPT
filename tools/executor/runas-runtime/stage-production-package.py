@@ -14,6 +14,34 @@ def digest(data):
     return hashlib.sha256(data).hexdigest()
 
 
+def admit_stage_pty(stage, inventory, *, ordinary_uid):
+    """Validate the optional real stage before any package output is created."""
+    name = "libfoldgpt_direct_pty_supervisor.so"
+    binary = stage / "jniLibs/arm64-v8a" / name
+    if "ordinaryPtyBuild" not in inventory and not binary.exists():
+        return None
+    if not ordinary_uid:
+        raise ValueError("Model PTY cannot be selected outside the ordinary UID profile")
+    provenance = inventory.get("ordinaryPtyBuild")
+    if type(provenance) is not dict or type(provenance.get("path")) is not str:
+        raise ValueError("Model PTY requires its reviewed build attestation")
+    spec = importlib.util.spec_from_file_location("foldgpt_package_pty_stage",
+        Path(__file__).with_name("pty-admission.py"))
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    runner, actual = module.production_pty(ROOT / provenance["path"])
+    if provenance != actual or binary.read_bytes() != runner:
+        raise ValueError("Model PTY staged bytes differ from its reviewed build")
+    expected = {"name": name, "bytes": len(runner), "sha256": digest(runner)}
+    runtime = json.loads((stage / "assets/foldgpt-python-runtime.json").read_bytes())
+    if [row for row in runtime["nativeFiles"] if row["name"] == name] != [expected]:
+        raise ValueError("Model PTY stage lacks its exact runtime inventory entry")
+    recorded = {"path": "jniLibs/arm64-v8a/" + name, "bytes": len(runner), "sha256": digest(runner)}
+    if [row for row in inventory["files"] if row["path"] == recorded["path"]] != [recorded]:
+        raise ValueError("Model PTY stage lacks its exact frozen file inventory entry")
+    return actual
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--native-stage", type=Path, required=True)
@@ -52,6 +80,8 @@ def main():
         runner, actual = module.production_direct(ROOT / provenance["path"])
         if provenance != actual or (stage / "jniLibs/arm64-v8a" / direct_name).read_bytes() != runner:
             raise ValueError("Ordinary UID stage differs from its actual build provenance and compiled runner")
+    pty_name = "libfoldgpt_direct_pty_supervisor.so"
+    admit_stage_pty(stage, inventory, ordinary_uid=args.ordinary_uid)
     ripgrep_names = {"libfoldgpt_rg.so", "libfoldgpt_pcre2_jit_probe.so"}
     staged_ripgrep = {name for name in ripgrep_names if (stage / "jniLibs/arm64-v8a" / name).exists()}
     if staged_ripgrep or "ripgrepBuild" in inventory:
@@ -68,6 +98,19 @@ def main():
                 or any((stage / "jniLibs/arm64-v8a" / name).read_bytes() != data
                        for name, data in binaries.items())):
             raise ValueError("Ripgrep stage differs from its source-attested native build")
+        notices = inventory.get("ripgrepToolchainNotices")
+        if type(notices) is not dict or type(notices.get("path")) is not str:
+            raise ValueError("Ripgrep stage lacks its toolchain notice attestation")
+        notice_assets, actual_notices = module.production_toolchain_notices(ROOT / notices["path"])
+        if notices != actual_notices:
+            raise ValueError("Ripgrep toolchain notice stage provenance differs")
+        actual_names = {p.relative_to(stage / "assets").as_posix()
+                       for p in (stage / "assets/notices/ripgrep-toolchain").rglob("*") if p.is_file()}
+        if (actual_names != set(notice_assets)
+                or any((stage / "assets" / name).read_bytes() != data for name, data in notice_assets.items())):
+            raise ValueError("Ripgrep toolchain notice staged assets differ")
+    elif ("ripgrepToolchainNotices" in inventory or (stage / "assets/notices/ripgrep-toolchain").exists()):
+        raise ValueError("Toolchain notices staged without native ripgrep")
     output.mkdir(parents=True, exist_ok=False)
     shutil.copytree(stage / "assets", output / "assets")
     shutil.copytree(stage / "jniLibs", output / "jniLibs")
@@ -99,6 +142,8 @@ def main():
             "cwdShim": {"path": marker + "libfoldgpt_bionic_cwd.so", "sha256": native["libfoldgpt_bionic_cwd.so"]}}}
     if args.ordinary_uid:
         config["backendOptions"]["ordinaryUid"] = {"processRunner": marker + direct_name, "limits": {}}
+        if "ordinaryPtyBuild" in inventory:
+            config["backendOptions"]["ordinaryUid"]["ptyProcessRunner"] = marker + pty_name
     if "ripgrepBuild" in inventory:
         config["backendOptions"]["executables"]["rg"] = marker + "libfoldgpt_rg.so"
     (assets / "foldgpt-executor-deployment.json").write_text(json.dumps(config, indent=2) + "\n")
@@ -123,6 +168,9 @@ def main():
         "native_model_profiles", "ordinary_uid_files"))
     source_paths.update("tools/executor/bionic-supervisor/" + name + ".py" for name in (
         "direct_processes", "direct_wire"))
+    if "ordinaryPtyBuild" in inventory:
+        source_paths.update("tools/executor/bionic-supervisor/" + name + ".py" for name in (
+            "tty_processes", "tty_wire"))
     source_manifest = []
     for relative in sorted(source_paths):
         source = ROOT / relative
@@ -154,9 +202,12 @@ def main():
         qualification["hostDeploymentSha256"] = digest((assets / "foldgpt-host-deployment.json").read_bytes())
     if args.ordinary_uid:
         qualification["ordinaryUidBuild"] = inventory["ordinaryUidBuild"]
+    if "ordinaryPtyBuild" in inventory:
+        qualification["ordinaryPtyBuild"] = inventory["ordinaryPtyBuild"]
     if "ripgrepBuild" in inventory:
         qualification["ripgrepBuild"] = inventory["ripgrepBuild"]
         qualification["ripgrepNoticesSha256"] = digest((assets / "notices/ripgrep.txt").read_bytes())
+        qualification["ripgrepToolchainNotices"] = inventory["ripgrepToolchainNotices"]
     (assets / "foldgpt-executor-qualification.json").write_text(json.dumps(qualification, indent=2) + "\n")
     print(json.dumps({"output": str(output), "sources": len(source_manifest), "nativeLibraries": len(native),
                       "androidProductionExecuted": False}))
