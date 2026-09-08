@@ -1,0 +1,22 @@
+{
+  "command": "ps -A -o PID,UID",
+  "code": 0,
+  "totalProcesses": 1170,
+  "probeUid": 10415,
+  "probeProcesses": [
+    {
+      "pid": 17919,
+      "uid": 10415
+    }
+  ],
+  "javaPositiveControlObserved": true,
+  "expectedFinishedPids": [
+    18066,
+    18073,
+    18075,
+    18084,
+    18086
+  ],
+  "expectedFinishedPidsListed": [],
+  "scope": "independent shell process enumeration; primary cleanup proof remains wait and native receipts"
+}

@@ -1,8 +1,9 @@
 # Essai Bionic depuis une application Android ordinaire
 
-État au 8 septembre 2026 : **diagnostic construit et vérifié sur PC, jamais
-exécuté sur le Fold**. Le téléphone est indisponible pour cette qualification.
-Les réussites historiques ne sont pas attribuées à ce nouvel essai.
+**Mise à jour du 8 septembre 2026 : les deux cas ont réussi sur le Fold sans
+Shizuku actif.** Voir les [preuves Android](app-context-device-validation-20260908.md).
+Le protocole ci-dessous avait été préparé pendant l'absence du téléphone ;
+le raccordement à la production demeure une étape distincte.
 
 ## Question réellement testée
 
@@ -118,6 +119,6 @@ peuvent pas sélectionner les adaptateurs r25 actuels. Les résultats des
 6 septembre restent attribués à leurs anciens APK :
 [34 réponses / 12 groupes de fichiers](../../tools/executor/native-files-android-rpc.md)
 et [17 tests / 46 observations de processus gérés](../../tools/executor/native-managed-android.md).
-La prochaine preuve attendue est l'exécution de ce nouvel APK et une collecte
-indépendante vérifiant aussi que le propriétaire de production et le boot sont
-restés inchangés.
+La nouvelle preuve Android conserve ces limites : les deux cas réussissent,
+le boot et les APK sont inchangés. Le propriétaire de production était déjà
+indisponible avant l'essai ; sa coexistence active n'est pas validée.

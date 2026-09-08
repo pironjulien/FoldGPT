@@ -2,6 +2,13 @@
 
 ## Unreleased - 2026-09-08
 
+- Run the separate app-context diagnostic on the Fold with Shizuku absent:
+  real pipe/PTY commands, files, subprocesses, input, interrupt and cleanup pass
+  under Java/Zygote. Independently verify receipts, files, process enumeration,
+  unchanged boot and APK hashes. Preserve selected evidence in private Git.
+  Production was already unavailable before the test; its direct-app integration
+  and reboot recovery remain pending. Add the integration and migration analysis.
+
 - Complete a parallel, source-backed feasibility survey of Rust/Android engines,
   Linux hosts, Samsung lifecycle limits and official Remote support. Preserve
   the proven r25 workflow separately from unqualified autonomous startup and

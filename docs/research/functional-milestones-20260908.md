@@ -1,5 +1,11 @@
 # Ce qui est acquis et ce qui permet de terminer — 8 septembre 2026
 
+**Dernier résultat :** les vrais composants pipe/PTY r25 fonctionnent depuis
+une application Android ordinaire sans Shizuku. Deux cas réussis avec collecte
+indépendante ; [preuves](app-context-device-validation-20260908.md).
+Le lancement de production reste à raccorder ; ce résultat ne qualifie pas
+encore la reprise complète de FoldGPT sans PC après reboot.
+
 **Priorité précisée par Julien : ouvrir FoldGPT, écrire une demande et travailler
 avec le PC éteint.** Le panneau de terminal manuel est reporté ; sa réalisation
 n'est pas un préalable à ce parcours. L'exécution locale est déjà démontrée

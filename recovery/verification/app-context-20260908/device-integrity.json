@@ -1,0 +1,104 @@
+{
+  "before": {
+    "bootBefore": "348d453e-f4e5-40e0-8ef0-030f4d5e38af",
+    "bootAfter": "348d453e-f4e5-40e0-8ef0-030f4d5e38af",
+    "checks": {
+      "properties": {
+        "status": "observed",
+        "value": {
+          "ro.product.model": "SM-F971B",
+          "ro.product.device": "h8q",
+          "ro.soc.model": "SM8850",
+          "ro.soc.manufacturer": "QTI",
+          "ro.build.version.release": "17",
+          "ro.build.version.sdk": "37",
+          "ro.build.version.oneui": "90000",
+          "ro.build.version.security_patch": "2026-08-05",
+          "ro.boot.verifiedbootstate": "green",
+          "ro.boot.flash.locked": "1",
+          "ro.boot.warranty_bit": "0",
+          "ro.product.cpu.abilist": "arm64-v8a"
+        }
+      },
+      "kernel": {
+        "status": "observed",
+        "value": {
+          "configSha256": "aaf0dd7d905b4cf26ba595cc96db26ee58ea9da1b88aa98c9f6758ff998b3d2b",
+          "features": {
+            "CONFIG_USER_NS": "not set",
+            "CONFIG_PID_NS": "not set",
+            "CONFIG_NET_NS": "y",
+            "CONFIG_KVM": "y",
+            "CONFIG_SECCOMP": "y",
+            "CONFIG_SECCOMP_FILTER": "y",
+            "CONFIG_SECURITY_LANDLOCK": "y"
+          }
+        }
+      },
+      "memory": {
+        "status": "observed",
+        "value": {
+          "MemTotal": "11351456 kB",
+          "MemAvailable": "2971324 kB",
+          "SwapTotal": "12582908 kB",
+          "SwapFree": "5779440 kB"
+        }
+      },
+      "memoryLimiter": {
+        "status": "observed",
+        "value": "Memory limiter\r\n  disabled"
+      }
+    }
+  },
+  "after": {
+    "bootBefore": "348d453e-f4e5-40e0-8ef0-030f4d5e38af",
+    "bootAfter": "348d453e-f4e5-40e0-8ef0-030f4d5e38af",
+    "checks": {
+      "properties": {
+        "status": "observed",
+        "value": {
+          "ro.product.model": "SM-F971B",
+          "ro.product.device": "h8q",
+          "ro.soc.model": "SM8850",
+          "ro.soc.manufacturer": "QTI",
+          "ro.build.version.release": "17",
+          "ro.build.version.sdk": "37",
+          "ro.build.version.oneui": "90000",
+          "ro.build.version.security_patch": "2026-08-05",
+          "ro.boot.verifiedbootstate": "green",
+          "ro.boot.flash.locked": "1",
+          "ro.boot.warranty_bit": "0",
+          "ro.product.cpu.abilist": "arm64-v8a"
+        }
+      },
+      "kernel": {
+        "status": "observed",
+        "value": {
+          "configSha256": "aaf0dd7d905b4cf26ba595cc96db26ee58ea9da1b88aa98c9f6758ff998b3d2b",
+          "features": {
+            "CONFIG_USER_NS": "not set",
+            "CONFIG_PID_NS": "not set",
+            "CONFIG_NET_NS": "y",
+            "CONFIG_KVM": "y",
+            "CONFIG_SECCOMP": "y",
+            "CONFIG_SECCOMP_FILTER": "y",
+            "CONFIG_SECURITY_LANDLOCK": "y"
+          }
+        }
+      },
+      "memory": {
+        "status": "observed",
+        "value": {
+          "MemTotal": "11351456 kB",
+          "MemAvailable": "2515484 kB",
+          "SwapTotal": "12582908 kB",
+          "SwapFree": "5972548 kB"
+        }
+      },
+      "memoryLimiter": {
+        "status": "observed",
+        "value": "Memory limiter\r\n  disabled"
+      }
+    }
+  }
+}

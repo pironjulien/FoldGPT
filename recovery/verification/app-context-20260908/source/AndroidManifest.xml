@@ -1,0 +1,10 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="app.foldgpt.contextprobe" android:versionCode="1" android:versionName="1">
+  <uses-sdk android:minSdkVersion="30" android:targetSdkVersion="37" />
+  <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+  <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+  <application android:label="FoldGPT app-context diagnostic" android:debuggable="true" android:extractNativeLibs="true" android:allowBackup="false">
+    <service android:name=".ContextProbeService" android:exported="true" android:permission="android.permission.DUMP" android:foregroundServiceType="specialUse">
+      <property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE" android:value="Fixed r25 pipe and PTY feasibility test in separate private app storage; no commands accepted" />
+    </service>
+  </application>
+</manifest>

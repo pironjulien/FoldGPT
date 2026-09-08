@@ -1,0 +1,5 @@
+{
+  "code": 0,
+  "stdout": "Starting service: Intent { cmp=app.foldgpt.contextprobe/.ContextProbeService }\r\n",
+  "stderr": ""
+}

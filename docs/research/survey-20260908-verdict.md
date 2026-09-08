@@ -20,10 +20,10 @@ Les trois points doivent rester distincts :
    Bionic, crée des fichiers, installe une dépendance, passe cinq tests et
    réexécute l'archive après fermeture/réouverture. Le terminal du modèle échange
    des entrées et reçoit l'interruption. Les commandes tournent sur le Fold.
-2. **Démarrage sans PC ni Shizuku : voie crédible, test encore non exécuté.**
-   Le lancement actuel dépend de Shizuku. L'ancien contrat qui exigeait un
-   contexte shell n'établit pas que les outils Bionic en ont besoin. Le candidat
-   construit ici teste précisément le contexte d'une application Android normale.
+2. **Lancement des composants sans Shizuku : deux cas réussis sur le Fold.**
+   L'application diagnostic a lancé les vrais composants pipe/PTY depuis Zygote,
+   sans Shizuku actif. Le lancement de production reste à raccorder, puis la
+   reprise après reboot sans PC à qualifier.
 3. **Tout Android natif avec l'interface officielle : pas démontré.** L'interface
    Electron Linux et le contrôleur GNU utilisent encore PRoot. PRoot n'est pas
    une VM ni une émulation du CPU ARM64, mais reste une couche de compatibilité.
@@ -35,13 +35,15 @@ promettre sa réussite complète.** Le point bwrap n'est plus l'unique obstacle 
 le lancement autonome, les anciennes conversations, l'hôte de l'interface et
 les mises à jour réelles restent des critères de fonctionnement.
 
-Le Fold ne figurait pas dans ADB lors de cette recherche, confirmé par plusieurs
+Le Fold ne figurait pas dans ADB lors de la recherche initiale, confirmé par plusieurs
 lectures, et aucune interface USB Android n'était recensée sur le PC. La cause
 de cette absence n'est pas déduite. Le collecteur enregistre `unavailable` et
 `newExecutionTestPassed=false` dans
 `work/feasibility-survey-20260908/initial-connection/observation.json`.
-Aucun nouvel essai Android, installation, redémarrage ou changement de réglage
-du téléphone n'a été effectué pour cette revue.
+Après reconnexion, l'APK diagnostic distincte a été installée et les deux cas
+ont réussi : [preuves et limites](app-context-device-validation-20260908.md).
+Le boot et les APK officiels sont inchangés ; aucun réglage n'a été modifié.
+L'exécuteur de production était déjà indisponible avant cette intervention.
 
 ## Pourquoi Rust n'est pas la fonction manquante
 
@@ -149,7 +151,7 @@ pas interprétées comme une preuve d'absence de solution.
 | Depuis la conversation : créer un projet Python, installer Packaging, tester et construire | Réussi sur r24/r25 ; cinq tests, fichier et archive indépendamment relus | Les outils et les fichiers peuvent réellement être locaux au Fold. |
 | Entrée interactive et interruption depuis le modèle | Réussi r25, trois FDs tty, codes 23/130 ; neuf tests backend séparés | Le terminal du modèle fonctionne dans les cas qualifiés. Le panneau manuel n'est pas le blocage prioritaire. |
 | Ouvrir une ancienne conversation | Échec reproduit : ancien cwd Linux hors racine native ; TOML valide | Défaut de migration de chemins à corriger en conservant historique/fichiers. Ce n'est pas une erreur de syntaxe de `config.toml`. |
-| Lancer nos propriétaires pipe/PTY depuis un Service Android normal | APK distincte compilée et vérifiée sur PC ; **pas exécutée Android** | Si les deux cas passent avec leurs vrais enfants et nettoyage, la nécessité de Shizuku pour ces primitives est réfutée. Il reste à raccorder le propriétaire de production. |
+| Lancer nos propriétaires pipe/PTY depuis un Service Android normal | **Deux cas réussis sur le Fold**, vrais fichiers/enfants, entrée, interruption et nettoyage vérifiés | La nécessité de Shizuku pour ces composants est réfutée sur ce Fold. Il reste à raccorder le propriétaire de production. |
 | Ouvrir FoldGPT après redémarrage normal, sans préparation ADB/Shizuku | Non exécuté | Critère d'autonomie : reprendre le projet, demander un vrai changement, passer les tests et vérifier les fichiers. Aucun câble ne doit fournir le lancement. |
 | Mettre à jour client officiel et FoldGPT puis reprendre le même projet | Non qualifié | Les fichiers officiels intacts au contrôle actuel ne garantissent pas le prochain cycle de mise à jour. |
 | Même parcours avec contrôleur/interface entièrement Android | Non qualifié | Critère nécessaire à l'affirmation « tout natif Android ». La réussite du seul moteur Rust ne suffit pas. |
@@ -164,14 +166,13 @@ diagnostic est `process/signal`; seul le reçu r25 établit l'essai clavier Ctrl
 Sources versionnées : [app-context-probe](../../tools/runtime/app-context-probe/README.md).
 Candidat : `work/feasibility-survey-20260908/app-context/versioned-build-v1/foldgpt-app-context-probe.apk`,
 SHA256 `325b0bcfc6ef951d5a4ad71f067b1369c0ae44eaa15d89b1b8149e2806cae41b`.
-La compilation, signature et les contrôles de contenu sont passés. **Ce n'est
-pas encore un résultat téléphone.** Aucun garde du lancement r25 n'est retiré.
+La compilation, signature, les contrôles de contenu et les deux cas Android
+sont passés. Aucun garde du lancement r25 n'a été retiré.
 
-La prochaine intervention utile est cet essai court, puis le raccordement
-applicatif s'il passe. S'il échoue, conserver l'appel/errno et le contexte exacts
-avant de choisir une adaptation ; ne pas fermer toutes les pistes sur un échec
-de packaging ou de harnais. Un succès de ce test ne déclenche pas une promesse
-de produit terminé.
+La prochaine intervention utile est le raccordement applicatif, analysé dans
+[le plan d'intégration](app-launch-integration-20260908.md). Le défaut des
+anciens chemins dispose aussi d'une [voie de réparation par le protocole existant](legacy-path-repair-design-20260908.md).
+Le succès du diagnostic ne démontre pas ces deux corrections ni un produit terminé.
 
 ## Documentation OpenAI confrontée au code
 

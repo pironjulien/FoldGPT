@@ -1,0 +1,12 @@
+{
+  "apk": "C:\\Dev\\ChatgptFold\\work\\feasibility-survey-20260908\\app-context\\versioned-build-v1\\foldgpt-app-context-probe.apk",
+  "sha256": "325b0bcfc6ef951d5a4ad71f067b1369c0ae44eaa15d89b1b8149e2806cae41b",
+  "bytes": 23911825,
+  "libraries": 89,
+  "payloadFiles": 2543,
+  "r25ApkSha256": "2618abba092af33ac387906d75b57ecfd7b76ec7aa02d80b6c20fee4f44a28a3",
+  "javaSha256": "7853cf68ede7d6e4c8b804b0704a91115418f5276ce6a2f25a165a75fea9d4b5",
+  "probeSha256": "c907c279513fe820f73019ca6ec5c4968af81857b067eef7967076f20b00a139",
+  "compiledAndVerified": true,
+  "androidExecuted": false
+}

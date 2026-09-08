@@ -1,0 +1,35 @@
+{
+  "schema": "foldgpt.app-context-independent-receipts.v1",
+  "receiptsVerified": true,
+  "probeApkSha256": "325b0bcfc6ef951d5a4ad71f067b1369c0ae44eaa15d89b1b8149e2806cae41b",
+  "uid": 10415,
+  "javaPid": 17919,
+  "javaParentPid": 1903,
+  "supervisorPid": 18066,
+  "ownerPids": [
+    18073,
+    18084
+  ],
+  "workerPids": [
+    18075,
+    18086
+  ],
+  "measuredScope": "separate Android app pipe/PTY and subprocess primitive checks; no production bootstrap or UI",
+  "sourceLimits": {
+    "workerAlarmSeconds": 8,
+    "nativeWallMs": 12000,
+    "cleanupGraceMs": 5000
+  },
+  "externalLivenessStillRequired": false,
+  "externalBootAndProductionStillRequired": false,
+  "listedProcessesAbsent": true,
+  "javaParentIsZygote": true,
+  "bootUnchanged": true,
+  "productionAndOfficialApksUnchanged": true,
+  "productionWasAlreadyUnavailable": true,
+  "shizukuServerAbsentBeforeAndAfter": true,
+  "passed": true,
+  "independentProcessEnumerationPassed": true,
+  "procEnoentAloneProvesAbsence": false,
+  "cleanupBasis": "Native actual waits, cleanup receipts and EOF, corroborated by shell process enumeration; per-PID ENOENT alone is insufficient"
+}

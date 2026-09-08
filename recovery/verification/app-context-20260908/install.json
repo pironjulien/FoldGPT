@@ -1,0 +1,6 @@
+{
+  "code": 0,
+  "stdout": "Performing Incremental Install\r\nPerforming Streamed Install\r\nSuccess\r\n",
+  "stderr": "",
+  "sha256": "325b0bcfc6ef951d5a4ad71f067b1369c0ae44eaa15d89b1b8149e2806cae41b"
+}

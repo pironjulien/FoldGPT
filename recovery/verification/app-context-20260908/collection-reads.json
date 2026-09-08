@@ -1,0 +1,46 @@
+{
+  "report.json": {
+    "code": 0,
+    "stderr": ""
+  },
+  "java-identity.json": {
+    "code": 0,
+    "stderr": ""
+  },
+  "inventory.json": {
+    "code": 0,
+    "stderr": ""
+  },
+  "output.txt": {
+    "code": 0,
+    "stderr": ""
+  },
+  "android-completion.json": {
+    "code": 0,
+    "stderr": ""
+  },
+  "android-timeout.txt": {
+    "code": 1,
+    "stderr": "base64: files/probe-8027601606669417617/android-timeout.txt: No such file or directory\r\n"
+  },
+  "android-failure.txt": {
+    "code": 1,
+    "stderr": "base64: files/probe-8027601606669417617/android-failure.txt: No such file or directory\r\n"
+  },
+  "pipe/created.txt": {
+    "code": 0,
+    "stderr": ""
+  },
+  "pipe/identity.json": {
+    "code": 0,
+    "stderr": ""
+  },
+  "pty/created.txt": {
+    "code": 0,
+    "stderr": ""
+  },
+  "pty/identity.json": {
+    "code": 0,
+    "stderr": ""
+  }
+}

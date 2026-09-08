@@ -1,7 +1,9 @@
 # App-context feasibility probe
 
-Prepared on PC on 8 September 2026. **Not executed on Android yet.** The current
-source is this directory. Compiled candidates, keys and captured output remain
+**Executed on the Fold on 8 September 2026: both cases passed without Shizuku.**
+See the [device report](../../../docs/research/app-context-device-validation-20260908.md)
+for independently verified receipts and the production integration boundary.
+The current source is this directory. Compiled candidates, keys and captured output remain
 under `work/feasibility-survey-20260908/app-context/`. Earlier work-only build
 directories are preserved development artifacts; use the current build report.
 
@@ -79,7 +81,7 @@ reports a timeout at 90 seconds and preserves that ownership for examination.
 An ordinary successful test should finish in seconds. Evidence directories are
 retained after success/failure, never silently removed.
 
-## Device procedure (root agent only; not yet run)
+## Device procedure (root agent only)
 
 Build from the project root, with a new output directory:
 

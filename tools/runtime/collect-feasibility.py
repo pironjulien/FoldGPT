@@ -69,7 +69,7 @@ def main():
             if len(cols) != 4 or not all(c.isdigit() for c in cols[:3]):
                 continue
             values[int(cols[0])] = {"pid": int(cols[0]), "ppid": int(cols[1]),
-                                    "uid": int(cols[2]), "name": cols[3]}
+                                    "uid": int(cols[2]), "name": cols[3].split()[0]}
         # Include same-UID detached/reparented children, not only name/parent matches.
         owned = {pid for pid, item in values.items() if item["uid"] == app_uid}
         result = []
