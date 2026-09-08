@@ -80,8 +80,10 @@ def main():
     (output / "compiler.txt").write_bytes(version)
     (output / "ndk-source.properties").write_text(properties, encoding="utf-8")
     (output / "deployment-prefix.txt").write_text(runtime_home + "\n", encoding="utf-8")
+    (output / "pycache-prefix.txt").write_text(runtime_home + "-cache\n", encoding="utf-8")
     evidence = {"schema": "foldgpt.runas-python-windows-build.v1", "androidExecuted": False,
-                "runtimeHome": runtime_home, "archiveSha256": package.PIN["sha256"],
+                "runtimeHome": runtime_home, "defaultPycachePrefix": runtime_home + "-cache",
+                "archiveSha256": package.PIN["sha256"],
                 "sourceSha256": digest(cli_source), "executableSha256": digest(executable),
                 "pythonLibrarySha256": digest(prefix / "lib/libpython3.14.so"),
                 "ndk": "29.0.14206865", "compilerHost": "windows-x86_64"}

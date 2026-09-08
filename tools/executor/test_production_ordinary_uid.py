@@ -66,7 +66,20 @@ class ProductionOrdinaryUidTests(unittest.IsolatedAsyncioTestCase):
                     "directRunnerSha256": hashlib.sha256(self.direct_runner.read_bytes()).hexdigest(),
                     "qualification": result}, indent=2) + "\n", encoding="utf-8")
             self.assertTrue(result["passed"], result)
-            self.assertEqual(len(result["modelCases"]), 5)
+            self.assertEqual(len(result["modelCases"]), 6)
+            self.assertFalse(result["standardPythonCache"]["dontWriteBytecode"])
+            self.assertEqual(result["standardPythonCache"]["isolated"], 0)
+            self.assertEqual(result["standardPythonCache"]["ignoreEnvironment"], 0)
+            for row in result["standardPythonCache"]["modules"]:
+                # Host /usr stdlib can be read-only and need not ship .pyc;
+                # Android requires all three actual caches in the qualifier.
+                if row["bytes"] is None:
+                    self.assertNotEqual(row["module"], "app.addition")
+                    self.assertFalse(Path(row["cache"]).is_file())
+                    continue
+                content = Path(row["cache"]).read_bytes()
+                self.assertEqual(len(content), row["bytes"])
+                self.assertEqual(hashlib.sha256(content).hexdigest(), row["sha256"])
             self.assertEqual(len(result["independentReads"]), 5)
             self.assertEqual({case["sandboxField"] for case in result["modelCases"]}, {"absent", "null"})
             self.assertTrue(all(case["start"]["sandboxType"] == "none" and case["closed"]

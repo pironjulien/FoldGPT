@@ -40,6 +40,9 @@ final class NativeLaunch {
         if (socketPath.getBytes(StandardCharsets.UTF_8).length >= 108) throw new SecurityException("Native socket path exceeds Unix limit");
         nativeRoot = new File(context.getApplicationInfo().nativeLibraryDir).getCanonicalPath();
         pythonRoot = new File(privateDirectory(new File(files, "native-runtime-v1"), uid), "python").getPath();
+        // CPython's writable bytecode cache is separate from the signed runtime
+        // inventory. Ordinary imports must not add files to that immutable tree.
+        privateDirectory(new File(pythonRoot + "-cache"), uid);
         JSONObject config = new JSONObject(new String(asset(context, "foldgpt-executor-deployment.json", 65536), StandardCharsets.UTF_8));
         JSONObject runtime = config.getJSONObject("pythonRuntime");
         if (!pythonRoot.equals(runtime.getString("path"))) {

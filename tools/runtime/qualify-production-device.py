@@ -20,15 +20,38 @@ ROOT = Path(__file__).resolve().parents[2]
 DATA = "/data/user/0/app.foldgpt"
 
 
+def successful_cleanup(value, pid):
+    """Require both actual receipts for the selected bootstrap generation."""
+    if (not isinstance(value, dict) or value.get("state") != "closed"
+            or type(pid) is not int or pid <= 0):
+        return False
+    for key in ("lastNativeSessionStatus", "lastRemoteStatus"):
+        receipt = value.get(key)
+        if not isinstance(receipt, dict):
+            return False
+        if not (receipt.get("bootstrapPid") == pid and receipt.get("waitStatus") == 0
+                and receipt.get("bootstrapReaped") is True and receipt.get("cleanupComplete") is True
+                and receipt.get("ownerRetained") is False
+                and receipt.get("setupError") is None and receipt.get("cleanupError") is None
+                and all(receipt.get(flag) is False for flag in (
+                    "transportFailed", "quarantined", "refusedBeforeFork"))):
+            return False
+    return True
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--apk-sha256", required=True)
     parser.add_argument("--qualification", choices=("python", "host-v2", "ordinary-uid"), default="python")
     parser.add_argument("--controller-delay", type=float, default=0,
                         help="Deliberately delay the actual controller to qualify slow desktop startup")
+    parser.add_argument("--verify-restart", action="store_true",
+                        help="After ordinary Python and clean STOP, require fresh Java admission and idle STOP")
     args = parser.parse_args()
     if not 0 <= args.controller_delay <= 60:
         parser.error("Controller delay must be between 0 and 60 seconds")
+    if args.verify_restart and args.qualification != "ordinary-uid":
+        parser.error("--verify-restart requires --qualification ordinary-uid")
     trial = uuid.uuid4().hex[:8]
     directory = {"python": "native-production-device-20260908",
         "host-v2": "native-host-production-device-20260908",
@@ -43,20 +66,8 @@ def main():
     process = None
 
     def cleanup_verified(value):
-        if not isinstance(value, dict):
-            return False
-        session = value.get("lastNativeSessionStatus") or {}
-        service = value.get("lastRemoteStatus") or {}
         pid = (result.get("startup", {}).get("peer") or {}).get("pid")
-        return (session.get("bootstrapReaped") is True
-                and session.get("cleanupComplete") is True
-                and session.get("ownerRetained") is False
-                and service.get("bootstrapReaped") is True
-                and service.get("cleanupComplete") is True
-                and service.get("ownerRetained") is False
-                and service.get("waitStatus") == session.get("waitStatus")
-                and pid is not None
-                and service.get("bootstrapPid") == session.get("bootstrapPid") == pid)
+        return successful_cleanup(value, pid)
 
     def run(argv, data=None, required=True, timeout=30):
         # Shell v2 forwards stdin EOF and the remote exit status. exec-in can
@@ -93,6 +104,68 @@ def main():
     def action(name):
         return text(["am", "start", "-W", "-n", "app.foldgpt/.NativePreparationActivity",
                      "-a", "app.foldgpt.action." + name + "_NATIVE_EXECUTOR"])
+
+    def verify_restart():
+        restart = result["restart"] = {"passed": False, "clientConnected": False}
+        previous = status()
+        if not cleanup_verified(previous):
+            raise ValueError("First generation is not cleanly closed before restart")
+        restart["beforeStatus"] = previous
+        startup = None
+        ready = None
+        try:
+            restart["prepareResponse"] = action("PREPARE")
+            deadline = time.monotonic() + 80
+            while time.monotonic() < deadline:
+                current = status()
+                if current != previous and current is not None:
+                    if current.get("state") == "ready":
+                        ready = restart["readyStatus"] = current
+                        break
+                    if current.get("state") in ("unavailable", "closed"):
+                        raise RuntimeError("Native readmission failed: " + json.dumps(current))
+                time.sleep(0.2)
+            if ready is None:
+                raise TimeoutError("No fresh native readiness after standard Python")
+            startup = json.loads(text(["run-as", "app.foldgpt", "cat", ready["startupManifest"]]))
+            restart["startup"] = startup
+            (output / "restart-startup.json").write_text(json.dumps(startup, indent=2) + "\n")
+            if startup["socketPath"] == result["startup"]["socketPath"]:
+                raise ValueError("Restart reused the previous acquisition endpoint")
+            admission = restart["admission"] = (ready.get("lastRemoteStatus") or {}).get("admission")
+            if not (isinstance(admission, dict) and admission.get("admitted") is True
+                    and admission.get("stage") == "complete" and admission.get("error") is None):
+                raise ValueError("Fresh Java runtime admission receipt is absent")
+        except BaseException as error:
+            restart["error"] = type(error).__name__ + ": " + str(error)
+            raise
+        finally:
+            restart["stopResponse"] = action("STOP")
+            deadline = time.monotonic() + 30
+            pid = (startup or {}).get("peer", {}).get("pid")
+            while time.monotonic() < deadline:
+                current = status()
+                if current is not None:
+                    restart["finalStatus"] = current
+                if successful_cleanup(current, pid):
+                    restart["cleanupVerified"] = True
+                    break
+                if pid is None and current is not None and current.get("state") in ("closed", "unavailable"):
+                    break
+                time.sleep(0.2)
+            restart["bootUnchanged"] = text(["cat", "/proc/sys/kernel/random/boot_id"]) == boot
+            if startup is not None:
+                paths = ["/proc/" + str(pid), startup["socketPath"], ready["startupManifest"],
+                         DATA + "/app_foldgpt_exec/process-session.json"]
+                absences = restart["resourceAbsence"] = []
+                for path in paths:
+                    response = run(["run-as", "app.foldgpt", "ls", "-ld", path], required=False)
+                    absences.append({"path": path, "absent": response["code"] != 0
+                                     and "No such file" in response["stderr"]})
+                restart["resourcesAbsent"] = all(row["absent"] for row in absences)
+        restart["passed"] = bool(restart.get("cleanupVerified") and restart.get("resourcesAbsent")
+                                 and restart.get("bootUnchanged"))
+        return restart["passed"]
 
     try:
         boot = text(["cat", "/proc/sys/kernel/random/boot_id"])
@@ -227,7 +300,18 @@ def main():
                 if process is not None and process.poll() is None:
                     result["controllerReturncodeAfterStop"] = process.wait(timeout=15)
             except BaseException as error:
+                result["passed"] = False
                 result["cleanupCollectionError"] = type(error).__name__ + ": " + str(error)
+        if args.verify_restart and result.get("passed"):
+            result["firstCyclePassed"] = True
+            result["passed"] = False
+            try:
+                cache = (result.get("client") or {}).get("standardPythonCache") or {}
+                if cache.get("cacheOutsideRuntime") is not True:
+                    raise ValueError("Standard Python did not prove real caches outside its runtime")
+                result["passed"] = verify_restart()
+            except BaseException as error:
+                result["restartError"] = type(error).__name__ + ": " + str(error)
         run(["logcat", "-d", "-v", "threadtime", "-s", "FoldGPT-executor", "FoldGPT"], required=False)
         (output / "commands.json").write_text(json.dumps(commands, indent=2) + "\n")
         (output / "report.json").write_text(json.dumps(result, indent=2) + "\n")

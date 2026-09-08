@@ -14,9 +14,22 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <wchar.h>
 #ifndef FOLDGPT_PYTHON_HOME
 #error "Build with the actual application Python deployment prefix"
 #endif
+
+static int explicit_pycache_prefix(const PyConfig *config) {
+    const wchar_t *name = L"pycache_prefix";
+    size_t length = wcslen(name);
+    for (Py_ssize_t i = 0; i < config->xoptions.length; ++i) {
+        const wchar_t *option = config->xoptions.items[i];
+        if (wcsncmp(option, name, length) == 0 &&
+                (option[length] == L'\0' || option[length] == L'='))
+            return 1;
+    }
+    return 0;
+}
 
 int main(int argc, char **argv) {
     char executable[PATH_MAX];
@@ -42,6 +55,16 @@ int main(int argc, char **argv) {
         const char *home = config.use_environment ? getenv("PYTHONHOME") : NULL;
         if (home == NULL || *home == '\0') home = FOLDGPT_PYTHON_HOME;
         status = PyConfig_SetBytesString(&config, &config.home, home);
+    }
+    if (!PyStatus_Exception(status) && config.pycache_prefix == NULL &&
+            !explicit_pycache_prefix(&config)) {
+        /* Read first so CPython applies -X, PYTHONPYCACHEPREFIX and -I/-E.
+         * Preserve an explicit empty -X value as well as a configured path.
+         * The deployment sibling keeps normal bytecode caching outside the
+         * admitted Python tree, even with an empty subprocess environment.
+         * It is a writable cache, never part of the trusted runtime inventory. */
+        status = PyConfig_SetBytesString(&config, &config.pycache_prefix,
+                                        FOLDGPT_PYTHON_HOME "-cache");
     }
     if (!PyStatus_Exception(status)) status = Py_InitializeFromConfig(&config);
     PyConfig_Clear(&config);

@@ -20,14 +20,18 @@ def main() -> None:
     if sys.platform != "linux" or os.geteuid() == 0:
         raise SystemExit("Run as an ordinary Linux user with host Python development headers")
     source = Path(__file__).with_name("python-cli.c")
-    work = Path(tempfile.mkdtemp(prefix="foldgpt-bionic-cli-host-", dir="/var/tmp"))
+    work_root = Path(__file__).resolve().parents[3] / "work"
+    work_root.mkdir(exist_ok=True)
+    work = Path(tempfile.mkdtemp(prefix="foldgpt-bionic-cli-host-", dir=work_root))
+    deployment_home = work / "python-home"
+    deployment_home.symlink_to(Path(sys.base_prefix), target_is_directory=True)
     frozen = work / source.name
     frozen.write_bytes(source.read_bytes())
     binary = work / "python-cli"
     version = sysconfig.get_config_var("LDVERSION")
     command = ["cc", "-std=c11", "-O2", "-Wall", "-Wextra", "-Werror",
                "-fPIE", "-pie", "-Wl,-z,relro,-z,now,-z,noexecstack",
-               "-DFOLDGPT_PYTHON_HOME=" + json.dumps(sys.base_prefix),
+               "-DFOLDGPT_PYTHON_HOME=" + json.dumps(str(deployment_home)),
                "-I" + sysconfig.get_path("include"), str(frozen),
                "-L" + sysconfig.get_config_var("LIBDIR"), "-lpython" + version,
                *shlex.split(sysconfig.get_config_var("LIBS") or ""),
@@ -55,6 +59,19 @@ def main() -> None:
     try:
         run("version-with-empty-environment", ["--version"],
             expected=f"Python {sys.version.split()[0]}\n".encode())
+        cache_code = "import sys; print(sys.pycache_prefix,sys.dont_write_bytecode)"
+        cache_expected = (str(deployment_home) + "-cache False\n").encode()
+        run("cache-default-empty-environment", ["-c", cache_code], expected=cache_expected)
+        for flag in ("-I", "-E"):
+            run("cache-default-" + flag, [flag, "-c", cache_code],
+                env={"PYTHONPYCACHEPREFIX": str(work / "ignored-cache")}, expected=cache_expected)
+        explicit_cache = str(work / "explicit-cache")
+        run("cache-explicit-environment", ["-c", cache_code],
+            env={"PYTHONPYCACHEPREFIX": explicit_cache}, expected=(explicit_cache + " False\n").encode())
+        run("cache-cli-precedence", ["-X", "pycache_prefix=" + explicit_cache, "-c", cache_code],
+            env={"PYTHONPYCACHEPREFIX": str(work / "ignored-cache")}, expected=(explicit_cache + " False\n").encode())
+        run("cache-explicit-empty-cli", ["-B", "-X", "pycache_prefix=", "-c", cache_code],
+            env={"PYTHONPYCACHEPREFIX": explicit_cache}, expected=b"None True\n")
         arguments = ["espace ici", "écriture", "line\nbreak"]
         run("command-and-unicode-argv", ["-c", "import json,sys; print(json.dumps(sys.argv))", *arguments],
             expected=(json.dumps(["-c", *arguments]) + "\n").encode())
@@ -98,6 +115,10 @@ def main() -> None:
         package = work / "project.pyz"
         run("build-real-zipapp", ["-m", "zipapp", str(project), "-o", str(package)])
         run("execute-real-zipapp", [str(package)], expected=b"42\n")
+        if not list(Path(str(deployment_home) + "-cache").rglob("*.pyc")):
+            raise AssertionError("Real imports did not generate bytecode in the deployment cache")
+        if list(project.rglob("__pycache__")):
+            raise AssertionError("Default imports wrote a local cache instead of the configured prefix")
         report["projectZipSha256"] = hashlib.sha256(package.read_bytes()).hexdigest()
         report["passed"] = True
     finally:

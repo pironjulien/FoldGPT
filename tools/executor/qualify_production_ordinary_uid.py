@@ -223,12 +223,23 @@ def qualify(startup, *, expected_platform="android"):
         identity_code = ("import json,os,platform,sys; print(json.dumps({'platform':sys.platform,"
             "'machine':platform.machine(),'uid':os.getuid(),'pid':os.getpid(),'cwd':os.getcwd(),"
             "'executable':sys.executable}))")
+        cache_code = "\n".join((
+            "import hashlib,json,pathlib,sys,unittest,zipapp,app.addition",
+            "rows=[]",
+            "for module in (unittest,zipapp,app.addition):",
+            "    source=pathlib.Path(module.__file__).resolve()",
+            "    cache=pathlib.Path(module.__cached__).resolve()",
+            "    content=cache.read_bytes() if cache.is_file() else None",
+            "    rows.append({'module':module.__name__,'source':str(source),'cache':str(cache),'bytes':None if content is None else len(content),'sha256':None if content is None else hashlib.sha256(content).hexdigest()})",
+            "print(json.dumps({'runtimeRoot':str(pathlib.Path(sys.prefix).resolve()),'pycachePrefix':sys.pycache_prefix,'dontWriteBytecode':sys.dont_write_bytecode,'isolated':sys.flags.isolated,'ignoreEnvironment':sys.flags.ignore_environment,'modules':rows}))",
+        ))
         commands = (
-            ("bash-login-native-identity", [shell, "-lc", "python3 -I -B -c " + shlex.quote(identity_code)], False),
-            ("bash-nonlogin-native-identity", [shell, "-c", "python3 -I -B -c " + shlex.quote(identity_code)], True),
-            ("three-unittest", [shell, "-lc", "python3 -B -m unittest discover -s tests -v"], False),
-            ("zipapp-build", ["python3", "-I", "-B", "-m", "zipapp", str(project / "app"), "-o", str(project / "addition.pyz")], True),
-            ("zipapp-execute", ["python3", "-I", "-B", str(project / "addition.pyz")], False),
+            ("bash-login-native-identity", [shell, "-lc", "python3 -c " + shlex.quote(identity_code)], False),
+            ("bash-nonlogin-native-identity", [shell, "-c", "python3 -c " + shlex.quote(identity_code)], True),
+            ("three-unittest", [shell, "-lc", "python3 -m unittest discover -s tests -v"], False),
+            ("zipapp-build", ["python3", "-m", "zipapp", str(project / "app"), "-o", str(project / "addition.pyz")], True),
+            ("zipapp-execute", ["python3", str(project / "addition.pyz")], False),
+            ("standard-python-bytecode-cache", ["python3", "-c", cache_code], True),
         )
         for name, command, null_context in commands:
             record = {"case": name}
@@ -251,6 +262,32 @@ def qualify(startup, *, expected_platform="android"):
                     require(test in streams["stderr"], "A requested unittest case was not run")
             elif name == "zipapp-build":
                 require(streams == {"stdout": b"", "stderr": b""}, "Native zipapp build emitted errors")
+            elif name == "standard-python-bytecode-cache":
+                require(streams["stderr"] == b"", "Standard Python cache probe emitted an error")
+                cache = decode(streams["stdout"])
+                require(cache["dontWriteBytecode"] is False and cache["isolated"] == 0
+                        and cache["ignoreEnvironment"] == 0,
+                        "Qualification must exercise normal bytecode-enabled Python")
+                require({row["module"] for row in cache["modules"]} == {"unittest", "zipapp", "app.addition"}
+                        and all(isinstance(row["bytes"], int) and row["bytes"] > 0
+                                and len(row["sha256"]) == 64 for row in cache["modules"]
+                                if expected_platform == "android" or row["module"] == "app.addition"),
+                        "Actual standard-library and project bytecode files were not read")
+                if expected_platform == "android":
+                    runtime = Path(cache["runtimeRoot"])
+                    prefix = Path(cache["pycachePrefix"] or "")
+                    require(prefix.is_absolute() and not prefix.is_relative_to(runtime),
+                            "Native Python cache prefix overlaps its admitted runtime")
+                    require(all(Path(row["cache"]).is_relative_to(prefix)
+                                and not Path(row["cache"]).is_relative_to(runtime)
+                                for row in cache["modules"]),
+                            "Python wrote a bytecode file outside its separate cache prefix")
+                    require(all(Path(row["source"]).is_relative_to(runtime)
+                                for row in cache["modules"] if row["module"] != "app.addition"),
+                            "Bytecode probe did not import the admitted standard library")
+                    cache["cacheOutsideRuntime"] = True
+                record["bytecodeCache"] = cache
+                report["standardPythonCache"] = cache
             else:
                 require(streams == {"stdout": b"42\n", "stderr": b""}, "Built native zipapp did not print exactly 42")
             record["passed"] = True

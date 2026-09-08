@@ -15,7 +15,8 @@ test -d "$prefix/include/python3.14"
 test -f "$prefix/lib/libpython3.14.so"
 python3 -B "$here/python-package.py" "$archive" "$prefix"
 grep -qx 'Pkg.Revision = 29.0.14206865' "$ndk/source.properties"
-work=$(mktemp -d /var/tmp/foldgpt-bionic-python-XXXXXXXX)
+mkdir -p "$repo/work"
+work=$(mktemp -d "$repo/work/foldgpt-bionic-python-XXXXXXXX")
 compiler="$ndk/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android35-clang"
 cp "$here/python-cli.c" "$work/"
 "$compiler" -std=c11 -O2 -Wall -Wextra -Werror -fPIE -pie \
@@ -28,6 +29,7 @@ cp "$here/python-cli.c" "$work/"
 "$compiler" --version > "$work/compiler.txt"
 cp "$ndk/source.properties" "$work/ndk-source.properties"
 printf '%s\n' "$runtime_home" > "$work/deployment-prefix.txt"
+printf '%s\n' "$runtime_home-cache" > "$work/pycache-prefix.txt"
 "$ndk/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-readelf" \
   -h -l -d "$work/libfoldgpt_python_cli.so" > "$work/elf.txt"
 python3 -B - "$work/elf.txt" "$runtime_home/lib:\$ORIGIN" <<'PY'

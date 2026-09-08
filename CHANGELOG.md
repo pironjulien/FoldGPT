@@ -2,6 +2,22 @@
 
 ## Unreleased - 2026-09-08
 
+- Qualify r23/versionCode13 on the actual Fold with ordinary Python bytecode
+  enabled: six production commands, caches read outside the signed runtime,
+  clean shutdown, and fresh runtime admission pass. The same UI conversation
+  then passes three tests and runs the existing zipapp twice across two launches;
+  the editor reopens its saved comment and all project bytes remain identical.
+  Both UI owners close with real wait0 receipts and absent resources. Preserve
+  the 81 previous cache files in an incident archive; verify all 2,447 runtime
+  sources and 86 aliases before and after. Phone boot indicators and the four
+  official ChatGPT APKs remain unchanged. This qualifies the Python workflow,
+  not every Codex feature or the still-GNU/PRoot controller.
+- Place native Python's default bytecode cache in the deployment's sibling
+  `python-cache` directory, outside the admitted runtime. Preserve CPython's
+  explicit cache options and environment semantics, including isolated and
+  empty-environment launches. Two NDK r29 builds match; actual CPython 3.14.7
+  Windows checks generate bytecode while preserving all 2,477 copied runtime
+  files. Record the separate Android restart results in the r23 device report.
 - Qualify r22b on the Fold: unused-session shutdown, ordinary UID production
   workload, actual conversation-created Python sources/tests/zipapp, editor
   save/reopen, and clean shutdown pass. Preserve the subsequent restart failure:

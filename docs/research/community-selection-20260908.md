@@ -2,20 +2,28 @@
 
 ## Décision
 
-Conserver le moteur R5 actuel pour finir le parcours Python dans l'interface.
-Réutiliser les adaptations Android individuellement, après un test de leur cause,
-sans installer un fork complet ni supprimer une fonctionnalité pour compiler.
-La compilation Bionic du contrôleur reste une piste concrète, distincte du défaut
-de contrat r20 et du défaut de fermeture r21 constaté au retour du téléphone.
+Conserver le moteur R5 actuel : le parcours Python, éditeur et reprise a
+maintenant réussi sur le Fold. Après la création et la sauvegarde en r22,
+r23 a repris la même conversation et les fichiers existants, exécuté les trois
+tests et le zipapp42 après deux ouvertures, puis fermé chaque session proprement.
+Le cache CPython est actif et séparé du runtime inventorié. Le
+[rapport r23](r23-device-validation-20260908.md) distingue ces preuves du reste
+des fonctions encore non qualifiées.
+
+Réutiliser les adaptations Android individuellement, après un test de leur cause.
+La compilation Bionic du contrôleur reste une piste distincte. Elle n'est pas
+nécessaire pour corriger l'emplacement des caches et n'est pas livrée dans r23.
+L'interface et le contrôleur GNU restent sous PRoot ; seules les commandes
+Bash/Python sont natives Android/Bionic. Aucune VM sur le téléphone.
 
 | Sujet | Preuve comparée | Décision FoldGPT |
-|---|---|---|
+| --- | --- | --- |
 | V8 natif Android | DioNanos publie V8 150.4.0 `ptrcomp_sandbox_release`, avec binding et archive correspondant à notre dépendance et Rust 1.95.0 | Retenir cette recette pour un build isolé ; vérifier les octets et le fonctionnement réel de V8 avant intégration. Ne pas réduire la version ou retirer la sandbox V8. |
 | Base du moteur | La release wallentx `rust-v0.153.4-termux` est deux commits devant notre base officielle, sans modification du protocole app-server/exec-server dans le delta | Référence proche pour les ajustements de compilation. Elle ne contient pas notre raccordement natif FoldGPT. |
 | Recette V8 wallentx | Le workflow publié télécharge V8 147.4.0/profil `release`, alors que Cargo demande 150.4.0 avec sandbox | Ne pas reprendre cette recette telle quelle ; le test `--help` ne démontre pas V8 fonctionnel. |
 | Verrous Rust | Rust 1.95.0 omet Android du `cfg` des fonctions `File::lock`/`try_lock`/`unlock` utilisant flock ; le chemin Android retourne Unsupported sans syscall | Pour un contrôleur Bionic, appeler réellement `libc::flock`, puis tester contention et libération. L'erreur Rust seule ne démontre pas une absence du noyau. Notre exécuteur Python utilise déjà flock réel. |
 | Terminaux PTY | Le NDK r29 exporte `openpty`/`forkpty` depuis API23 ; le Fold a UNIX98_PTYS activé | Tester l'API Bionic existante. Ne pas importer le shim qui ignore des erreurs de configuration. Une probe ARM64 a été compilée, mais pas exécutée sur Android dans cette revue. |
-| DNS/TLS | Des utilisateurs de Codex Linux dans Termux résolvent leur DNS en compilant pour Bionic ; le modèle a déjà répondu dans notre scénario r20 | Piste pour un contrôleur Bionic, pas diagnostic établi de l'incident actuel. Pas de proxy ajouté par analogie. |
+| DNS/TLS | Des utilisateurs de Codex Linux dans Termux résolvent leur DNS en compilant pour Bionic ; le modèle a répondu dans nos scénarios r20 et r22 | Piste pour un contrôleur Bionic, pas diagnostic établi de l'incident de cache. Pas de proxy ajouté par analogie. |
 | Mises à jour | Les forks mettent à jour leurs propres exécutables ; notre moteur porte aussi un patch FoldGPT | Garder les applications officielles intactes et maintenir notre moteur séparé. Ne pas utiliser l'auto-updater d'un fork qui remplacerait notre intégration. |
 
 ## Références vérifiées
@@ -32,36 +40,77 @@ Les rapports détaillés, extraits et empreintes se trouvent dans
 `dns-launch/comparison.md` et `dns-launch/source-evidence.json`. Aucun témoignage
 Reddit directement vérifié n'est ajouté à ces conclusions.
 
-## Ce qui a réellement changé lors du retour du Fold
+## Résultats du retour du Fold
 
-Le téléphone avait le même boot qu'avant son absence. Une nouvelle session r20
-a été préparée puis arrêtée, avec les deux reçus propres pour PID28809 et absence
-réelle de ses ressources. r21 a ensuite été installé normalement, sans désinstallation.
-La reprise d'activité Android a créé PID29981 ; sa fermeture avant toute connexion
-du pilote a échoué, et le propriétaire est resté en quarantaine.
+Le défaut r20 de contrat Full access a été corrigé par la route UID ordinaire.
+Le défaut suivant, `OrdinaryUidFilesBackend.close(None)`, empêchait l'arrêt d'une
+session r21 inutilisée. Le correctif r22 accepte cette absence d'identité
+uniquement lorsqu'aucune session ni aucun handle n'ont été acquis. Les contrôles
+d'identité après acquisition et les diagnostics de nettoyage restent présents.
+L'incident r21/PID29981 et sa récupération sont conservés dans
+`work/r21-device-return-20260908/` ; cet arrêt raté n'est pas rebaptisé `closed/0`.
 
-Cause source reproduite : `OrdinaryUidFilesBackend.close(None)` refusait une session
-encore inutilisée. Le correctif accepte l'absence d'identité uniquement si aucune
-session et aucun handle n'ont été acquis. La fermeture avec une identité incorrecte
-après acquisition reste refusée. Le CI privé 34215637059 passe 25 commandes et
-193 unittest, sans exclusion ; le premier essai CI 34215414532 est conservé comme
-échec de construction de la fixture de régression, ensuite corrigée.
+**r22b/versionCode12 a été qualifié pour les étapes suivantes** :
+préparation/arrêt sans client, workload natif ordinaire, création réelle du projet
+Python par la conversation, trois unittest, zipapp affichant 42, sauvegarde puis
+réouverture dans l'éditeur et fermeture propre du propriétaire UI PID8815.
+Les sorties modèle indiquent Android/aarch64/UID10412 et les fichiers sont
+collectés indépendamment. Preuves :
+`work/r21-device-return-20260908/r22-idle-device-v1/report.json` et
+`work/r21-device-return-20260908/ui-r22/`, notamment `model-tool-evidence.json`,
+`project-after-create/report.json`, `project-after-editor-flushed/report.json`
+et `stop-first/report.json`.
 
-Le candidat r22b/versionCode12 ajoute ce correctif et un diagnostic `cleanupError`
-borné, distinct de `setupError`. Son SHA256 est
-`eedddbd13fa9b64a4be38e8ae2cf0a34ac91aadf48d5271cdea0f7014384b99b`.
-Ses 95 sources et 87 ELF ont été vérifiés ; signature v2 identique à r21.
-Les tests de diagnostic Python (7), de protocole Java (18) et d'observation Java (6)
-passent. Le premier build a aussi révélé que les tests HTTPS JVM existants demandent
-leur lanceur dédié `jdk.httpserver` et ne compilent pas sous le lanceur Android
-Gradle global ; cet échec reste dans `gradle-package-root-r22.log`. Le build
-canonique suivant et les tests JVM ciblés passent.
+La reprise r22 a ensuite été refusée par l'admission : Python avait ajouté
+14 répertoires `__pycache__` dans sa stdlib signée. Ce refus révèle une erreur
+d'emplacement des données générées. Il ne justifie ni l'abandon de l'inventaire
+ni la désactivation générale du bytecode.
 
-Ces preuves PC ne valident pas encore le projet Python depuis l'interface Android,
-sa sauvegarde dans l'éditeur et sa reprise. La récupération de la quarantaine r21
-doit préserver l'incident et reprendre réellement les ressources ; elle ne doit
-jamais transformer cet arrêt raté en `closed/0`.
+Le lanceur r23 configure `PyConfig.pycache_prefix` après `PyConfig_Read()` vers
+le dossier frère `python-cache`. CPython conserve ses options explicites et
+ses règles `-I`/`-E`/environnement. Deux compilations NDK r29 produisent le même
+ELF, et onze tests Windows CPython 3.14.7 créent 55 caches hors runtime en
+préservant 2 477 fichiers. Le code et les sources CPython utilisés sont détaillés
+dans `work/r22-cache-20260908/CLI-README.md`.
 
-Architecture conservée : commandes Bash/Python natives Android/Bionic ; interface
-et contrôleur GNU sous PRoot. Aucune VM sur le téléphone. La revue communautaire
-ne constitue pas une démonstration « tout natif » du produit complet.
+**r23/versionCode13 est installé et le parcours de reprise est vérifié.** APK
+`downloads/native-production-20260908/foldgpt-native-candidate-r23.apk`, SHA256
+`3a1bb00e73a828fa298884941514ad421a5f888c7fe483303b0ad514f2122c74` ;
+87 ELF, 2 447 fichiers Python, 86 alias, 95 sources et signature vérifiés dans
+`work/r22-cache-20260908/r23-apk-verification.json` et `r23-signature.txt`.
+La maintenance a archivé81fichiers dans14répertoires de caches sans changer leurs
+octets, les2 447sources ni les86alias, puis le runtime a été réadmis. Les six
+commandes de production passent avec Python normal et caches actifs hors runtime,
+suivies d'une nouvelle admission et d'une fermeture propre. Preuve :
+`downloads/native-ordinary-production-device-20260908/9d653b2d/report.json`.
+
+Les échanges modèle de11:41 et11:43UTC exécutent réellement les trois tests
+et l'ancien zipapp42 ; les fichiers et le commentaire de l'éditeur restent
+identiques après les deux reprises. Les propriétaires UI22808 et29860 ont
+leurs reçus propres et leurs ressources sont absentes. Ces preuves sont dans
+`work/r22-cache-20260908/ui-r23/`. Le rapport `integrity-comparison.json` conserve
+un boot, des propriétés contrôlées et quatre APK ChatGPT officiels inchangés.
+À11:46UTC, l'application est relancée sur la même conversation pour Julien :
+handshake réussi, propriétaire6893 `ready`, boot inchangé. Cette nouvelle session
+reste ouverte et aucune exécution modèle supplémentaire ne lui est attribuée.
+
+## Portée des validations
+
+Le CI natif ciblé `34215637059` passe 25 commandes et 193 unittest. Les tests
+cleanup Python (7), protocole Java (18) et observation Java (6) passent aussi.
+L'échec initial de fixture CI `34215414532` et celui du lanceur Gradle global
+inadapté aux tests HTTPS JVM restent conservés ; leurs causes ont été corrigées
+ou le lanceur canonique approprié exécuté, sans effacer ces résultats.
+
+La suite Rust générale R5 `34192652057` reste en **échec** : 16 933 réussites,
+238 échecs, deux timeouts et 35 ignorés. Le [triage des 240 cas](r5-failure-audit-20260908.md)
+ne conclut pas que toutes leurs causes ou conséquences Android sont résolues.
+`rg` était absent lors de la création r22 et r23 ne l'ajoute pas.
+Le parcours Python ciblé ne qualifie pas les PTY, tous les outils, les autres
+profils, toutes les reprises ou les mises à jour futures. Cette recherche
+communautaire ne démontre pas un produit complet « tout Bionic ».
+
+L'[état de reprise](../../recovery/HANDOFF.md) conserve les prochaines étapes
+et les liens de sauvegarde. La dernière restauration documentée est encore
+le [complément v14](../../recovery/supplement-v14.md), qui porte r21 ; la
+publication de cette nouvelle passe r22/r23 doit être vérifiée séparément.
