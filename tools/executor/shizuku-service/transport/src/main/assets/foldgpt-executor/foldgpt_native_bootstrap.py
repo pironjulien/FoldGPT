@@ -70,9 +70,16 @@ def deployment(apk):
             or re.fullmatch(r"[0-9a-f]{64}", runtime["manifestSha256"]) is None):
         raise ValueError("Native Python runtime differs from the admitted production prefix")
     options = config["backendOptions"]
-    if (type(options) is not dict or set(options) != {
-            "helper", "handleHelper", "processRunner", "executables", "runtime", "limits", "cwdShim"}):
+    required = {"helper", "handleHelper", "processRunner", "executables", "runtime", "limits", "cwdShim"}
+    if (type(options) is not dict or not required <= set(options)
+            or set(options) - required - {"ordinaryUid"}):
         raise ValueError("Native deployment must not supply a model workspace or inherited environment")
+    if "ordinaryUid" in options:
+        direct = options["ordinaryUid"]
+        if (type(direct) is not dict or set(direct) != {"processRunner", "limits"}
+                or direct["processRunner"] != "@nativeLibraryDir/libfoldgpt_direct_runner.so"
+                or type(direct["limits"]) is not dict or direct["limits"]):
+            raise ValueError("Ordinary UID production execution requires its installed runner and standard limits")
     return config
 
 
@@ -86,6 +93,8 @@ def production_options(config, workspace):
              "processRunner": "libfoldgpt_bionic_supervisor.so"}
     if any(options[name] != str(native / library) for name, library in names.items()):
         raise ValueError("Production helper does not identify its installed executable")
+    if "ordinaryUid" in options and options["ordinaryUid"]["processRunner"] != str(native / "libfoldgpt_direct_runner.so"):
+        raise ValueError("Ordinary UID runner does not identify its installed executable")
     bash, python = str(native / "libfoldgpt_bash.so"), str(native / "libfoldgpt_python_cli.so")
     if options["executables"] != {"bash": bash, "python": python, "python3": python}:
         raise ValueError("Production entrypoints must identify the installed Bash and Python")

@@ -1,5 +1,50 @@
 # Reprise technique du 8 septembre 2026
 
+## Préparation PC vérifiée — candidat r21, non installé
+
+Le candidat **r21/versionCode11**, paquet `native-ordinary-uid-20260908/production-package-v2`,
+est construit et sa signature Android existante est vérifiée. Il ajoute la
+route native ordinaire attendue par le mode **Accès complet** ; les requêtes
+managed gardent leur route propre. Le téléphone reste en **r20/R5**, et le
+parcours réel conversation → projet Python → éditeur/sauvegarde → reprise
+reste à qualifier sur le Fold.
+
+**Validation PC : PASS**, run privé GitHub **34203936964**, snapshot
+`f87566908e7245550ebc59783b0d85f80264b437` : 25 commandes terminées avec code0,
+190 tests unittest réussis, aucun test ignoré. Cela inclut 14 tests du C direct,
+18 de l'adaptateur processus, 20 des fichiers, 11 de composition et un parcours
+réel via acquisition/canaux de production : fichiers modèle, Bash `-lc` et `-c`,
+trois tests Python, construction/exécution42 et lecture des mêmes octets par
+les canaux config/humain. Ces résultats Linux ne sont pas une validation Android.
+
+Le runner Android est compilé deux fois à l'identique avec NDK29/API35 :
+`work/root-artifacts-20260907/native-ui-validation-20260908/direct-runner-ndk-v7`.
+Son SHA256 est `3569e0d2971c381a8118cd4b97ce7ddb2569846d39ccc99e92ec67a203f31bfb`.
+Admission du paquet sur Windows : 22 tests réussis, deux symlinks non disponibles ;
+les quatre tests d'assemblage réel réussissent aussi, dont les refus d'un
+binaire ou d'une provenance altérés avant création de la sortie.
+
+APK : `downloads/native-production-20260908/foldgpt-native-candidate-r21.apk`,
+SHA256 `cdfbe23c7ce9e89d499bf4fcbfdf97a9380ab4b7d1faa95db78b52aa8149e4a0`.
+Vérification du paquet : 87 bibliothèques natives inventoriées, 2447 données
+Python, 95 sources, host v2 et deux profils modèle distincts.
+
+Preuves : `work/ci-results/34203936964`, `work/ordinary-uid-20260908`,
+`work/uid-package-tests-v2`. Les deux premières passes CI sont conservées :
+34202735339 (écriture d'erreur C non vérifiée à la compilation GCC) et
+34203215153 (un test de réservation cherchait un handle après sa suppression).
+Les causes sont corrigées ; la dernière passe contient aussi le test d'une
+notification annulée sans délai maximal, avec arrêt et nettoyage réels.
+
+Au retour du téléphone : vérifier d'abord la fermeture réelle de l'ancienne
+session8507, puis installer le candidat vérifié et lancer
+`python -B tools/runtime/qualify-production-device.py --qualification ordinary-uid --apk-sha256 cdfbe23c7ce9e89d499bf4fcbfdf97a9380ab4b7d1faa95db78b52aa8149e4a0`.
+Ce client est préparé et testé sous Linux ; il n'a pas été exécuté sur Android.
+Ensuite reprendre la conversation « Créer et tester une addition Python » du
+projet « Validation Python FoldGPT », sans changer silencieusement son mode.
+Le plan comparatif et les critères de réussite sont dans
+`docs/research/ordinary-uid-execution-20260908.md`.
+
 **Téléphone emporté par Julien à09:40 environ. Travail PC uniquement jusqu'à
 son retour.** La commande normale STOP_NATIVE_EXECUTOR a été reçue par notre
 Activity avant débranchement (Status:ok). Le câble a été retiré avant la lecture
@@ -14,7 +59,7 @@ Le dépôt de travail est **privé** : `pironjulien/FoldGPT-workspace`, branche
 sous-modules, moteur séparé et données locales. Le dépôt public `FoldGPT` est un
 ancien checkpoint ; il ne reçoit pas cette sauvegarde privée.
 
-## État courant vérifié le 8 septembre à 09:25, heure de Paris
+## Dernier état Android vérifié le 8 septembre à 09:25, heure de Paris
 
 **Le projet ne permet pas encore de travailler depuis une conversation.**
 Ne pas confondre la réussite des commandes natives isolées avec celle de

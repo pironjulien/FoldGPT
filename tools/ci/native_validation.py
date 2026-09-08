@@ -126,6 +126,8 @@ def native_environment():
         "FOLDGPT_BIONIC_CWD_SHIM": str(HELPERS / "libfoldgpt_bionic_cwd.host.so"),
         "FOLDGPT_NATIVE_TEST_HELPERS": str(HELPERS), "FOLDGPT_NATIVE_TEST_RUNNER": str(HELPERS / "runner"),
         "FOLDGPT_NATIVE_TEST_ARTIFACTS": str(EVIDENCE / "native-app-server"),
+        "FOLDGPT_DIRECT_RUNNER": str(HELPERS / "direct-runner"),
+        "FOLDGPT_DIRECT_WORKER": str(HELPERS / "direct-worker"),
     })
     return environment
 
@@ -137,11 +139,13 @@ def python_tests():
             ("runtime-paths-c", [HELPERS / "runtime-paths-test"])]
     for module in ("test_native_runtime_startup", "test_native_runtime_acquisition",
                    "test_native_host_files", "test_native_host_files_channel",
-                   "test_production_host_v2"):
+                   "test_production_host_v2", "test_ordinary_uid_files", "test_production_ordinary_uid"):
         runs.append((module, [sys.executable, "-B", "-m", f"tools.executor.{module}"]))
     supervisor = HELPERS / "package/tools/executor/bionic-supervisor"
     host_evidence = EVIDENCE / "native-host-v2"
     host_evidence.mkdir(mode=0o700, exist_ok=False)
+    direct_evidence = EVIDENCE / "ordinary-uid"
+    direct_evidence.mkdir(mode=0o700, exist_ok=False)
     for script, arguments in (
         ("test_kernel", [HELPERS / "runner"]), ("test_factory", [HELPERS]),
         ("test_runtime_paths", [HELPERS]), ("qualification", [HELPERS]),
@@ -149,8 +153,15 @@ def python_tests():
         ("test_host_kernel", [HELPERS, host_evidence]),
         ("test_host_processes", [HELPERS, host_evidence]),
         ("test_host_channel_v2", [HELPERS, host_evidence]),
+        ("test_direct_runner", [HELPERS, direct_evidence]),
+        ("test_direct_processes", [HELPERS, direct_evidence]),
+        ("test_model_profiles", [HELPERS, direct_evidence]),
     ):
         runs.append((script, [sys.executable, "-B", supervisor / f"{script}.py", *arguments]))
+    runs.append(("ordinary-deployment-host", [sys.executable, "-B",
+        PROJECT / "tools/executor/shizuku-service/verify-deployment-host.py",
+        HELPERS / "libfoldgpt_bionic_cwd.host.so", "--direct-runner", HELPERS / "direct-runner",
+        "--output", direct_evidence / "deployment-host"]))
     for name, argv in runs:
         if name == "qualification":
             # Its canonical fixture requires nobody, and reserves exactly two

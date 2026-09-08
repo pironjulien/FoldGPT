@@ -2,6 +2,15 @@
 
 ## Unreleased - 2026-09-08
 
+- Prepare an explicitly selected ordinary Android UID execution profile for
+  the engine's Full access process and filesystem contracts. Keep managed
+  requests on their existing backend, retain handle/session ownership and
+  shared quarantine, and add actual lifecycle/filesystem/composition tests.
+  Cross-compile the direct runner and attest its sources and repeated ELF
+  output in production staging. Private Linux CI 34203936964 passes all 190
+  unittests with no skips, including the real production acquisition and Python
+  project workload. Build and verify APK r21/versionCode11; Android/UI
+  qualification remains pending until the phone returns.
 - Publish, redownload and authenticate encrypted supplement v13 for the installed
   r20/R5 state and its first real conversation failure. Restore and verify all
   13,157 files and 1,169 source files, all three APK/package inventories, the

@@ -22,14 +22,16 @@ DATA = "/data/user/0/app.foldgpt"
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--apk-sha256", required=True)
-    parser.add_argument("--qualification", choices=("python", "host-v2"), default="python")
+    parser.add_argument("--qualification", choices=("python", "host-v2", "ordinary-uid"), default="python")
     parser.add_argument("--controller-delay", type=float, default=0,
                         help="Deliberately delay the actual controller to qualify slow desktop startup")
     args = parser.parse_args()
     if not 0 <= args.controller_delay <= 60:
         parser.error("Controller delay must be between 0 and 60 seconds")
     trial = uuid.uuid4().hex[:8]
-    directory = "native-production-device-20260908" if args.qualification == "python" else "native-host-production-device-20260908"
+    directory = {"python": "native-production-device-20260908",
+        "host-v2": "native-host-production-device-20260908",
+        "ordinary-uid": "native-ordinary-production-device-20260908"}[args.qualification]
     output = ROOT / "downloads" / directory / trial
     output.mkdir(parents=True, exist_ok=False)
     prefix = [str(Path(os.environ["LOCALAPPDATA"]) / "Android/Sdk/platform-tools/adb.exe"), "-s", "R3GL808JN4A"]
@@ -112,10 +114,14 @@ def main():
             raise ValueError("Controller talloc alias differs from the installed APK")
         for directory in (DATA + "/cache/x11", DATA + "/cache/shm"):
             text(["run-as", "app.foldgpt", "test", "-d", directory])
-        client_source = "qualify_native_production.py" if args.qualification == "python" else "qualify_production_host_v2.py"
+        client_source = {"python": "qualify_native_production.py", "host-v2": "qualify_production_host_v2.py",
+            "ordinary-uid": "qualify_production_ordinary_uid.py"}[args.qualification]
         source = (ROOT / "tools/executor" / client_source).read_bytes()
         client_inputs = {"client.py": source,
             "native_path_uri.py": (ROOT / "tools/executor/native_path_uri.py").read_bytes()}
+        if args.qualification == "ordinary-uid":
+            client_inputs["qualify_production_host_v2.py"] = (
+                ROOT / "tools/executor/qualify_production_host_v2.py").read_bytes()
         tar = io.BytesIO()
         with tarfile.open(fileobj=tar, mode="w", format=tarfile.GNU_FORMAT) as archive:
             for name, content in client_inputs.items():

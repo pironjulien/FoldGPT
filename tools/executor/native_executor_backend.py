@@ -40,6 +40,19 @@ class NativeExecutorBackend:
         # Optional bootstrap-owned human processes share this exact filesystem.
         # They never enter the model method dispatch above.
         self._host_process_owners = []
+        # Optional bootstrap selection. No request field may add this profile,
+        # and the qualified managed-only constructor keeps its current behavior.
+        self._model_profiles = None
+
+    def install_ordinary_uid_profile(self, processes, files):
+        """Select direct model backends before binding the authenticated channel."""
+        if self._model_profiles is not None:
+            raise ValueError("Native model profiles are already selected")
+        from tools.executor.native_model_profiles import NativeModelProfiles
+        profiles = NativeModelProfiles(self, processes, files)
+        self._model_profiles = profiles
+        self.supported_methods = frozenset(self.supported_methods | processes.supported_methods | files.supported_methods)
+        self.capabilities = frozenset(self.capabilities | processes.capabilities | files.capabilities)
 
     def _bind(self, session):
         if self.session is None:
@@ -52,17 +65,19 @@ class NativeExecutorBackend:
         if self.closing:
             raise RpcError(-32600, "Native executor session is closing")
         if call.method in METHODS and call.method != "process/start":
+            if self._model_profiles is not None:
+                return await self._model_profiles.handle(call, notify)
             return await self.processes.handle(call, notify)
         if call.method != "process/start" and call.method not in self.files.supported_methods:
             raise RpcError(-32601, "Unsupported native executor method")
-        backend = self.processes if call.method == "process/start" else self.files
+        backend = self._model_profiles or (self.processes if call.method == "process/start" else self.files)
         return await self._run_owned_operation(lambda: backend.handle(call, notify))
 
     async def _run_owned_operation(self, operation_factory):
         """Common lifecycle gate for managed RPC and bootstrap-owned reads."""
         if self.closing:
             raise RpcError(-32600, "Native executor session is closing")
-        if self.processes.quarantined:
+        if self.processes.quarantined or self.processes.quarantine_event.is_set():
             raise RpcError(-32603, "Native process cleanup is unknown; filesystem access is quarantined")
         operation = asyncio.create_task(operation_factory())
         quarantined = asyncio.create_task(self.processes.quarantine_event.wait())
@@ -95,14 +110,19 @@ class NativeExecutorBackend:
         # Unknown process cleanup deliberately leaves the pinned root/lease
         # owned. Closing its file backend would release the kernel flock and
         # allow a new connection to race surviving workers.
-        if self._host_process_owners:
+        other_processes = list(self._host_process_owners)
+        if self._model_profiles is not None:
+            other_processes.append(self._model_profiles.direct_processes)
+        if other_processes:
             results = await asyncio.gather(self.processes.close(session_id),
-                *(owner.close(session_id) for owner in self._host_process_owners), return_exceptions=True)
+                *(owner.close(session_id) for owner in other_processes), return_exceptions=True)
             for result in results:
                 if isinstance(result, BaseException):
                     raise result
         else:
             await self.processes.close(session_id)
-        if self.processes.quarantined:
+        if self.processes.quarantined or self.processes.quarantine_event.is_set():
             raise RpcError(-32603, "Native executor cannot release an unknown process workspace")
+        if self._model_profiles is not None:
+            await self._model_profiles.direct_files.close(session_id)
         await self.files.close(session_id)

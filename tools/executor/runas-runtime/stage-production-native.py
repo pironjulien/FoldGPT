@@ -109,6 +109,75 @@ def production_bash(build):
                   "executableSha256": expected, "bytes": len(data), "androidPrefix": RUNTIME_HOME}
 
 
+def production_direct(build):
+    """Verify the exact sources and both compiled outputs before APK staging."""
+    build = build.resolve(strict=True)
+    build.relative_to(ROOT)
+
+    def artifact(relative, *, directory=False):
+        parts = PurePosixPath(relative)
+        if (parts.is_absolute() or parts.as_posix() != relative or ".." in parts.parts
+                or "\\" in relative or ":" in relative):
+            raise ValueError("Invalid ordinary UID evidence path")
+        target = build
+        for component in parts.parts:
+            target /= component
+            if target.is_symlink() or target.is_junction():
+                raise ValueError("Ordinary UID evidence cannot contain path aliases")
+        target.resolve(strict=True).relative_to(build)
+        if not (target.is_dir() if directory else target.is_file()):
+            raise ValueError("Ordinary UID evidence type differs")
+        return target
+
+    record_bytes = artifact("build.json").read_bytes()
+    record = json.loads(record_bytes)
+    if (record.get("schema") != "foldgpt.direct.native.compile.v1"
+            or record.get("ndk") != "29.0.14206865" or record.get("apiLevel") != 35):
+        raise ValueError("Ordinary UID runner requires the checked NDK r29/API35 build")
+    manifest_bytes = pinned(artifact("sources.json"), record["sourceManifestSha256"])
+    sources = json.loads(manifest_bytes)
+    recipe = ROOT / "tools/executor/bionic-supervisor"
+    expected = {name: recipe / name for name in (
+        "direct-runner.c", "direct-worker.c", "direct_wire.py", "direct-design.md", "direct-api.md",
+        "test_direct_runner.py", "build-direct-windows.py")}
+    expected["check-elf.py"] = ROOT / "tools/executor/bionic-runtime/shizuku-check-elf.py"
+    if (len(sources) != len(expected) or {row["path"] for row in sources} != set(expected)
+            or {p.name for p in artifact("source", directory=True).iterdir()} != set(expected)):
+        raise ValueError("Ordinary UID build source inventory differs")
+    for row in sources:
+        data = pinned(artifact("source/" + row["path"]), row["sha256"])
+        if len(data) != row["bytes"] or pinned(expected[row["path"]], row["sha256"]) != data:
+            raise ValueError("Ordinary UID compiled sources differ from the current recipe")
+    if "Pkg.Revision = 29.0.14206865" not in artifact("ndk-source.properties").read_text().splitlines():
+        raise ValueError("Ordinary UID NDK provenance differs")
+    binaries = record["binaries"]
+    names = {"libfoldgpt_direct_runner.so", "libfoldgpt_direct_worker.so"}
+    if len(binaries) != len(names) or {row["path"] for row in binaries} != names:
+        raise ValueError("Ordinary UID compiled binary inventory differs")
+    if sys.flags.optimize:
+        raise ValueError("Ordinary UID ELF admission requires normal Python assertions")
+    spec = importlib.util.spec_from_file_location("foldgpt_production_direct_elf", expected["check-elf.py"])
+    checker = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(checker)
+    runner = None
+    for row in binaries:
+        binary = artifact(row["path"])
+        data = pinned(binary, row["sha256"])
+        stem = row["path"][len("libfoldgpt_"):-len(".so")].replace("_", "-")
+        if (row.get("realRecompilationIdentical") is not True or len(data) != row["bytes"]
+                or pinned(artifact(stem + ".repeat.so"), row["sha256"]) != data):
+            raise ValueError("Ordinary UID double-build evidence differs")
+        elf = checker.check(binary)
+        if elf != json.loads(artifact(stem + ".elf.json").read_bytes()):
+            raise ValueError("Ordinary UID actual ELF differs from the recorded inspection")
+        if stem == "direct-runner":
+            runner = data
+    return runner, {"path": build.relative_to(ROOT).as_posix(),
+                    "buildManifestSha256": hashlib.sha256(record_bytes).hexdigest(),
+                    "sourceManifestSha256": hashlib.sha256(manifest_bytes).hexdigest(),
+                    "executableSha256": hashlib.sha256(runner).hexdigest(), "bytes": len(runner)}
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--python-cli-build", type=Path, required=True)
@@ -117,6 +186,8 @@ def main():
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--host-build", type=Path)
     parser.add_argument("--model-build", type=Path)
+    parser.add_argument("--ordinary-uid-build", type=Path,
+                        help="Explicit source-attested direct runner double build")
     args = parser.parse_args()
     cli_build, output = args.python_cli_build.resolve(), args.output.resolve()
     cli_build.relative_to(ROOT)
@@ -134,6 +205,9 @@ def main():
             native[item["name"]] = pinned(python / "jniLibs/arm64-v8a" / item["name"], item["sha256"])
     native["libfoldgpt_python_cli.so"] = pinned(cli_build / "libfoldgpt_python_cli.so", cli_record["executableSha256"])
     native["libfoldgpt_bash.so"] = bash
+    direct_provenance = None
+    if args.ordinary_uid_build is not None:
+        native["libfoldgpt_direct_runner.so"], direct_provenance = production_direct(args.ordinary_uid_build)
     frozen = ROOT / "downloads/bionic-supervisor/foldgpt-bionic-supervisor-qKM94iHA"
     hashes = dict(reversed(row.split("  ", 1)) for row in pinned(frozen / "BINARIES.sha256",
         "a10ca7cc9ccb8c110cd7ca901d84b9066a7bf5ae73842935da88e1895437b40d").decode().splitlines())
@@ -219,9 +293,12 @@ def main():
     files = [{"path": path.relative_to(output).as_posix(), "bytes": path.stat().st_size,
               "sha256": hashlib.sha256(path.read_bytes()).hexdigest()}
              for path in sorted(output.rglob("*")) if path.is_file()]
-    (output / "manifest.json").write_text(json.dumps({"schema": "foldgpt.native-production-stage.v1",
+    stage_manifest = {"schema": "foldgpt.native-production-stage.v1",
         "androidExecuted": False, "runtimeHome": runtime["runtimeHome"],
-        "bashBuild": bash_provenance, "files": files}, indent=2) + "\n")
+        "bashBuild": bash_provenance, "files": files}
+    if direct_provenance is not None:
+        stage_manifest["ordinaryUidBuild"] = direct_provenance
+    (output / "manifest.json").write_text(json.dumps(stage_manifest, indent=2) + "\n")
     print(json.dumps({"output": str(output), "nativeLibraries": len(native), "dataFiles": len(data_files),
                       "runtimeAliases": len(runtime["runtimeAliases"])}))
 

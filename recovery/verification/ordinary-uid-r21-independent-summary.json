@@ -1,0 +1,2507 @@
+{
+  "schema": "foldgpt.r21.independent-package-review.v1",
+  "success": true,
+  "androidExecution": false,
+  "officialEditorQualified": false,
+  "apkSha256": "cdfbe23c7ce9e89d499bf4fcbfdf97a9380ab4b7d1faa95db78b52aa8149e4a0",
+  "ciRun": "34203936964",
+  "ciCommit": "f87566908e7245550ebc59783b0d85f80264b437",
+  "failures": [],
+  "packageFilesCount": 2633,
+  "selection": {
+    "backendFactory": "tools.executor.bionic-supervisor.factory:factory",
+    "ordinaryUid": {
+      "processRunner": "@nativeLibraryDir/libfoldgpt_direct_runner.so",
+      "limits": {}
+    },
+    "hostSchema": "foldgpt.host.v2"
+  },
+  "elfComparisonR20": [
+    {
+      "path": "lib/arm64-v8a/libXlorie.so",
+      "status": "unchanged",
+      "r20Sha256": "94b09f06b8f9508be587266f5400d5a360fc787c69788310a2fa2b411783369b",
+      "r21Sha256": "94b09f06b8f9508be587266f5400d5a360fc787c69788310a2fa2b411783369b",
+      "r20Bytes": 3549360,
+      "r21Bytes": 3549360
+    },
+    {
+      "path": "lib/arm64-v8a/libandroid-shmem.so",
+      "status": "unchanged",
+      "r20Sha256": "c3b4af1fd0a6a3dcd798c83d67542137b715731d3d87fb9aab41a3374198c43d",
+      "r21Sha256": "c3b4af1fd0a6a3dcd798c83d67542137b715731d3d87fb9aab41a3374198c43d",
+      "r20Bytes": 16288,
+      "r21Bytes": 16288
+    },
+    {
+      "path": "lib/arm64-v8a/libcrypto_python.so",
+      "status": "unchanged",
+      "r20Sha256": "a0dd60d620cd61bac7306a8293bcb82103971a4dcfc8c11fd55be3653beb42c4",
+      "r21Sha256": "a0dd60d620cd61bac7306a8293bcb82103971a4dcfc8c11fd55be3653beb42c4",
+      "r20Bytes": 4537384,
+      "r21Bytes": 4537384
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt-broker-probe.so",
+      "status": "unchanged",
+      "r20Sha256": "f167bcfc3e18729524cc77e9ef05908b516921e11837f8b54f05757a933e777f",
+      "r21Sha256": "f167bcfc3e18729524cc77e9ef05908b516921e11837f8b54f05757a933e777f",
+      "r20Bytes": 20560,
+      "r21Bytes": 20560
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt-codex-probe.so",
+      "status": "unchanged",
+      "r20Sha256": "3359ec0b8b99d03054f19fb2533c231042f4ee039bc4f7c0f7bc54f831c27ec9",
+      "r21Sha256": "3359ec0b8b99d03054f19fb2533c231042f4ee039bc4f7c0f7bc54f831c27ec9",
+      "r20Bytes": 43336,
+      "r21Bytes": 43336
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt-exec-bridge.so",
+      "status": "unchanged",
+      "r20Sha256": "27668a3982a723ac1b22d57bfd61e027b7cbcb1b06e1c16d4cf5d221007d1931",
+      "r21Sha256": "27668a3982a723ac1b22d57bfd61e027b7cbcb1b06e1c16d4cf5d221007d1931",
+      "r20Bytes": 22592,
+      "r21Bytes": 22592
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt-gnu-loader.so",
+      "status": "unchanged",
+      "r20Sha256": "1d8b77f28b7cec0329dca107a28fb0a850193b1dcce59be68fa0b06b514548cc",
+      "r21Sha256": "1d8b77f28b7cec0329dca107a28fb0a850193b1dcce59be68fa0b06b514548cc",
+      "r20Bytes": 201344,
+      "r21Bytes": 201344
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt-gnu-managed.so",
+      "status": "unchanged",
+      "r20Sha256": "e66d7e26bd61f6ba31f7393583c4a4a4a61f17d1765a8a9c52ed48d72f03646d",
+      "r21Sha256": "e66d7e26bd61f6ba31f7393583c4a4a4a61f17d1765a8a9c52ed48d72f03646d",
+      "r20Bytes": 69248,
+      "r21Bytes": 69248
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt-gnu-project.so",
+      "status": "unchanged",
+      "r20Sha256": "f6ae13b3bce27ee88daced5b7013b6207f205d69ef7dc5488c4c90357a7446e4",
+      "r21Sha256": "f6ae13b3bce27ee88daced5b7013b6207f205d69ef7dc5488c4c90357a7446e4",
+      "r20Bytes": 38992,
+      "r21Bytes": 38992
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt-install.so",
+      "status": "unchanged",
+      "r20Sha256": "8d900e7c9a24abec1674393ed8ef003ebc8b165ec7bac6775a578e518922dd47",
+      "r21Sha256": "8d900e7c9a24abec1674393ed8ef003ebc8b165ec7bac6775a578e518922dd47",
+      "r20Bytes": 29784,
+      "r21Bytes": 29784
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt-l2s-fixture.so",
+      "status": "unchanged",
+      "r20Sha256": "dceedd46c6c3b928ffc4c9d228f11f56f1562af07a53bafde0cc96906b688aee",
+      "r21Sha256": "dceedd46c6c3b928ffc4c9d228f11f56f1562af07a53bafde0cc96906b688aee",
+      "r20Bytes": 653616,
+      "r21Bytes": 653616
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt-landlock-probe.so",
+      "status": "unchanged",
+      "r20Sha256": "fb46cb7c7c3a4e10b4c6a9e1c6436e43bc022a360d55193ac001eddd5da68489",
+      "r21Sha256": "fb46cb7c7c3a4e10b4c6a9e1c6436e43bc022a360d55193ac001eddd5da68489",
+      "r20Bytes": 12888,
+      "r21Bytes": 12888
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt-linux-shell-probe.so",
+      "status": "unchanged",
+      "r20Sha256": "2e042cb585ad1a910b75027d6fa6b4170e51e361f0f04c1f0d29d02934e85dd1",
+      "r21Sha256": "2e042cb585ad1a910b75027d6fa6b4170e51e361f0f04c1f0d29d02934e85dd1",
+      "r20Bytes": 27528,
+      "r21Bytes": 27528
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt-native-files-test.so",
+      "status": "unchanged",
+      "r20Sha256": "af211a7e4c3d1a1c501b01041007c01a74fe257b4f9c9f2ae9dc6be3850aab27",
+      "r21Sha256": "af211a7e4c3d1a1c501b01041007c01a74fe257b4f9c9f2ae9dc6be3850aab27",
+      "r20Bytes": 2158440,
+      "r21Bytes": 2158440
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt-native-files.so",
+      "status": "unchanged",
+      "r20Sha256": "c0a2b7c817344220053e7eb94ad544e05003f4b8a0e7ed1d6f7f64eff75da78d",
+      "r21Sha256": "c0a2b7c817344220053e7eb94ad544e05003f4b8a0e7ed1d6f7f64eff75da78d",
+      "r20Bytes": 2171696,
+      "r21Bytes": 2171696
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt-native-managed-fixture.so",
+      "status": "unchanged",
+      "r20Sha256": "ef96133a792e02553ec6096f50e047da665525ae2adb2d186c0fb34fb58e52cb",
+      "r21Sha256": "ef96133a792e02553ec6096f50e047da665525ae2adb2d186c0fb34fb58e52cb",
+      "r20Bytes": 2154384,
+      "r21Bytes": 2154384
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt-native-managed-runner.so",
+      "status": "unchanged",
+      "r20Sha256": "7b4605f3087140d1ffa68504190191b8f3bea546c17923931e4c33218080db0b",
+      "r21Sha256": "7b4605f3087140d1ffa68504190191b8f3bea546c17923931e4c33218080db0b",
+      "r20Bytes": 2216408,
+      "r21Bytes": 2216408
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt-native-process-fixture.so",
+      "status": "unchanged",
+      "r20Sha256": "9f4196351b636bc9a403a529aada07434785b9620c6442d6e175d9b35f1d1e1b",
+      "r21Sha256": "9f4196351b636bc9a403a529aada07434785b9620c6442d6e175d9b35f1d1e1b",
+      "r20Bytes": 2156800,
+      "r21Bytes": 2156800
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt-native-process-runner.so",
+      "status": "unchanged",
+      "r20Sha256": "bfe9cdfea084d7a5a8a664826b5a68359fadfc1051fba5be5ab540124ef8177a",
+      "r21Sha256": "bfe9cdfea084d7a5a8a664826b5a68359fadfc1051fba5be5ab540124ef8177a",
+      "r20Bytes": 2227376,
+      "r21Bytes": 2227376
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt-native-runner-fixture.so",
+      "status": "unchanged",
+      "r20Sha256": "0af8311b296115ba2529f94033b18ec9e520e4a36d8b639e170c0518746fef85",
+      "r21Sha256": "0af8311b296115ba2529f94033b18ec9e520e4a36d8b639e170c0518746fef85",
+      "r20Bytes": 2155304,
+      "r21Bytes": 2155304
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt-native-runner-probe.so",
+      "status": "unchanged",
+      "r20Sha256": "bafea6f8f6ce16615977989c83350d490059643fb450bc157f31301b8428a0be",
+      "r21Sha256": "bafea6f8f6ce16615977989c83350d490059643fb450bc157f31301b8428a0be",
+      "r20Bytes": 2180728,
+      "r21Bytes": 2180728
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt-native-runner.so",
+      "status": "unchanged",
+      "r20Sha256": "93fa1a08a23800e465f100e9dd891b0018276a5e6f5b3a0c7721521142c2fe4f",
+      "r21Sha256": "93fa1a08a23800e465f100e9dd891b0018276a5e6f5b3a0c7721521142c2fe4f",
+      "r20Bytes": 2187600,
+      "r21Bytes": 2187600
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt-proot-probe.so",
+      "status": "unchanged",
+      "r20Sha256": "9842bcaf4927f8517096ca9bf2888241c85f8c902c9a7207daf3633a4c1cb31a",
+      "r21Sha256": "9842bcaf4927f8517096ca9bf2888241c85f8c902c9a7207daf3633a4c1cb31a",
+      "r20Bytes": 12472,
+      "r21Bytes": 12472
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt-runtime-observe.so",
+      "status": "unchanged",
+      "r20Sha256": "9403f5571e984308dd375c3dbc7eee83862836965166e96d8b414afcb84fd708",
+      "r21Sha256": "9403f5571e984308dd375c3dbc7eee83862836965166e96d8b414afcb84fd708",
+      "r20Bytes": 2166352,
+      "r21Bytes": 2166352
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt-shell-probe.so",
+      "status": "unchanged",
+      "r20Sha256": "16d4a5bcc90284f4df6d6f8e93e8b146c087ebab245b2b8b26c46d8bf3666302",
+      "r21Sha256": "16d4a5bcc90284f4df6d6f8e93e8b146c087ebab245b2b8b26c46d8bf3666302",
+      "r20Bytes": 21712,
+      "r21Bytes": 21712
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt-strict-proot.so",
+      "status": "unchanged",
+      "r20Sha256": "eb55d3a719877e39649670fdc06b43bbb2b068e3cdc8b49d5d8b18d3c2bd2916",
+      "r21Sha256": "eb55d3a719877e39649670fdc06b43bbb2b068e3cdc8b49d5d8b18d3c2bd2916",
+      "r20Bytes": 234272,
+      "r21Bytes": 234272
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt_bash.so",
+      "status": "unchanged",
+      "r20Sha256": "94f8cd06291cfaee37f721b0836b204c1fa32b555bf5283139fe34fb128db4e9",
+      "r21Sha256": "94f8cd06291cfaee37f721b0836b204c1fa32b555bf5283139fe34fb128db4e9",
+      "r20Bytes": 1439696,
+      "r21Bytes": 1439696
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt_bionic_cwd.so",
+      "status": "unchanged",
+      "r20Sha256": "f65702d47130bf8f3098e7b9a5da5d982bbbc0d20cf50eeb61cc5fd489237157",
+      "r21Sha256": "f65702d47130bf8f3098e7b9a5da5d982bbbc0d20cf50eeb61cc5fd489237157",
+      "r20Bytes": 7096,
+      "r21Bytes": 7096
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt_bionic_supervisor.so",
+      "status": "unchanged",
+      "r20Sha256": "6335a5b8e4eb18595bece90825a95efe9adbecabffc30c5b84b39a3d420ce924",
+      "r21Sha256": "6335a5b8e4eb18595bece90825a95efe9adbecabffc30c5b84b39a3d420ce924",
+      "r20Bytes": 41152,
+      "r21Bytes": 41152
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt_direct_runner.so",
+      "status": "added",
+      "r21Sha256": "3569e0d2971c381a8118cd4b97ce7ddb2569846d39ccc99e92ec67a203f31bfb",
+      "r21Bytes": 24888
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt_file_handle.so",
+      "status": "unchanged",
+      "r20Sha256": "7516c73bac522e74867861336b3a0f54196cd00d1017ca1ffd1137653e4ae972",
+      "r21Sha256": "7516c73bac522e74867861336b3a0f54196cd00d1017ca1ffd1137653e4ae972",
+      "r20Bytes": 2141736,
+      "r21Bytes": 2141736
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt_host_supervisor.so",
+      "status": "unchanged",
+      "r20Sha256": "34b6aeca65b3e719947d6afe538ee58ea58348ceb2dded17c748366e048f65c1",
+      "r21Sha256": "34b6aeca65b3e719947d6afe538ee58ea58348ceb2dded17c748366e048f65c1",
+      "r20Bytes": 41280,
+      "r21Bytes": 41280
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt_native_bootstrap.so",
+      "status": "changed",
+      "r20Sha256": "ce29176b57c3710017efd414da21ded6867f74dd0763034cde40c794f7783eec",
+      "r21Sha256": "a97360c7545216e940034d716b2f44f9e3d3d7d85a67a80267ab2a3f1c2599e3",
+      "r20Bytes": 359000,
+      "r21Bytes": 359088
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt_native_file_handle.so",
+      "status": "unchanged",
+      "r20Sha256": "b11d2559ed85093142edc2a01cf0eb4d99f75baf13b0af84344ccd6c5b9c2c40",
+      "r21Sha256": "b11d2559ed85093142edc2a01cf0eb4d99f75baf13b0af84344ccd6c5b9c2c40",
+      "r20Bytes": 11344,
+      "r21Bytes": 11344
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt_native_files.so",
+      "status": "unchanged",
+      "r20Sha256": "20838f707db238213a46db6147a571b71a5f56c0af3dd4ad716e8d0203704cd7",
+      "r21Sha256": "20838f707db238213a46db6147a571b71a5f56c0af3dd4ad716e8d0203704cd7",
+      "r20Bytes": 22480,
+      "r21Bytes": 22480
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt_py_00544ebb34a9d7872ca7201a.so",
+      "status": "unchanged",
+      "r20Sha256": "00544ebb34a9d7872ca7201af170392e246a7877315a9d351bc3139d3fb0677a",
+      "r21Sha256": "00544ebb34a9d7872ca7201af170392e246a7877315a9d351bc3139d3fb0677a",
+      "r20Bytes": 17864,
+      "r21Bytes": 17864
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt_py_0776694bc2ab17dad56f7bb3.so",
+      "status": "unchanged",
+      "r20Sha256": "0776694bc2ab17dad56f7bb3712e4cdc6f207f4d6ab327a2b98d471f76d11b2e",
+      "r21Sha256": "0776694bc2ab17dad56f7bb3712e4cdc6f207f4d6ab327a2b98d471f76d11b2e",
+      "r20Bytes": 3624,
+      "r21Bytes": 3624
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt_py_08dc631a6e93236f339e2628.so",
+      "status": "unchanged",
+      "r20Sha256": "08dc631a6e93236f339e26284dafcedf573a5f97eb32f07860ce7b381dae7b93",
+      "r21Sha256": "08dc631a6e93236f339e26284dafcedf573a5f97eb32f07860ce7b381dae7b93",
+      "r20Bytes": 28064,
+      "r21Bytes": 28064
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt_py_0abacb9dbbb64585856e9e22.so",
+      "status": "unchanged",
+      "r20Sha256": "0abacb9dbbb64585856e9e22eda9ae9bd346bfa7d2839cca146beb2c7a6bad42",
+      "r21Sha256": "0abacb9dbbb64585856e9e22eda9ae9bd346bfa7d2839cca146beb2c7a6bad42",
+      "r20Bytes": 27328,
+      "r21Bytes": 27328
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt_py_0fdd6d98b8c9b81dedf07a24.so",
+      "status": "unchanged",
+      "r20Sha256": "0fdd6d98b8c9b81dedf07a244bceac1d75e2820b93b1eca593ed0a33561375d6",
+      "r21Sha256": "0fdd6d98b8c9b81dedf07a244bceac1d75e2820b93b1eca593ed0a33561375d6",
+      "r20Bytes": 94792,
+      "r21Bytes": 94792
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt_py_1068318bf8dc933497793d87.so",
+      "status": "unchanged",
+      "r20Sha256": "1068318bf8dc933497793d878a1a0098cbdb6769ea4c99057355bf4f94e092b5",
+      "r21Sha256": "1068318bf8dc933497793d878a1a0098cbdb6769ea4c99057355bf4f94e092b5",
+      "r20Bytes": 743240,
+      "r21Bytes": 743240
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt_py_11d9dd2ae3a1d5a34db96c67.so",
+      "status": "unchanged",
+      "r20Sha256": "11d9dd2ae3a1d5a34db96c675f2db43ce489d3d302e7d6bc1f0d492964480f5c",
+      "r21Sha256": "11d9dd2ae3a1d5a34db96c675f2db43ce489d3d302e7d6bc1f0d492964480f5c",
+      "r20Bytes": 108848,
+      "r21Bytes": 108848
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt_py_1460baee6f7da64693b4dd4d.so",
+      "status": "unchanged",
+      "r20Sha256": "1460baee6f7da64693b4dd4d9870401fa4818b5368b2a685f654322b30829a9a",
+      "r21Sha256": "1460baee6f7da64693b4dd4d9870401fa4818b5368b2a685f654322b30829a9a",
+      "r20Bytes": 193472,
+      "r21Bytes": 193472
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt_py_160aac8cc6f07f0147f69ce0.so",
+      "status": "unchanged",
+      "r20Sha256": "160aac8cc6f07f0147f69ce0798d4b1f0a0db37b7cfee043514ea35ae4492a30",
+      "r21Sha256": "160aac8cc6f07f0147f69ce0798d4b1f0a0db37b7cfee043514ea35ae4492a30",
+      "r20Bytes": 39064,
+      "r21Bytes": 39064
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt_py_1a6194fea12e95b84dfc3440.so",
+      "status": "unchanged",
+      "r20Sha256": "1a6194fea12e95b84dfc344019d6635fc908415a41b13d1c250f2f435d9675a7",
+      "r21Sha256": "1a6194fea12e95b84dfc344019d6635fc908415a41b13d1c250f2f435d9675a7",
+      "r20Bytes": 58168,
+      "r21Bytes": 58168
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt_py_24521eae69c20c997cf95fa6.so",
+      "status": "unchanged",
+      "r20Sha256": "24521eae69c20c997cf95fa68a8d12895d064abd8ab66be199bd46b443f1e66e",
+      "r21Sha256": "24521eae69c20c997cf95fa68a8d12895d064abd8ab66be199bd46b443f1e66e",
+      "r20Bytes": 10800,
+      "r21Bytes": 10800
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt_py_28fe3bd5cfb3b7edd5e8c684.so",
+      "status": "unchanged",
+      "r20Sha256": "28fe3bd5cfb3b7edd5e8c6846702421633ae2f3c3c7263914b1c0bf22712f792",
+      "r21Sha256": "28fe3bd5cfb3b7edd5e8c6846702421633ae2f3c3c7263914b1c0bf22712f792",
+      "r20Bytes": 36736,
+      "r21Bytes": 36736
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt_py_2aa3f00c35d90d0ae63c2e7d.so",
+      "status": "unchanged",
+      "r20Sha256": "2aa3f00c35d90d0ae63c2e7d1fae1fc880bc427bb3377dd61f62064553afb8ce",
+      "r21Sha256": "2aa3f00c35d90d0ae63c2e7d1fae1fc880bc427bb3377dd61f62064553afb8ce",
+      "r20Bytes": 121776,
+      "r21Bytes": 121776
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt_py_3260d0606b09773a2952f27f.so",
+      "status": "unchanged",
+      "r20Sha256": "3260d0606b09773a2952f27f04411723e4cda75b653c97a7a14495f5e91ffe9c",
+      "r21Sha256": "3260d0606b09773a2952f27f04411723e4cda75b653c97a7a14495f5e91ffe9c",
+      "r20Bytes": 131088,
+      "r21Bytes": 131088
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt_py_34ae3582fd453f85e6039b81.so",
+      "status": "unchanged",
+      "r20Sha256": "34ae3582fd453f85e6039b8134d144b71e4f37aa2b2f9101382bf780440becad",
+      "r21Sha256": "34ae3582fd453f85e6039b8134d144b71e4f37aa2b2f9101382bf780440becad",
+      "r20Bytes": 229088,
+      "r21Bytes": 229088
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt_py_373b3bdc168a7d2b1d9b87d9.so",
+      "status": "unchanged",
+      "r20Sha256": "373b3bdc168a7d2b1d9b87d91da90bc2a19ee9b547fd8ff5ca685c122441284f",
+      "r21Sha256": "373b3bdc168a7d2b1d9b87d91da90bc2a19ee9b547fd8ff5ca685c122441284f",
+      "r20Bytes": 65256,
+      "r21Bytes": 65256
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt_py_38f30364553113e75decb9f9.so",
+      "status": "unchanged",
+      "r20Sha256": "38f30364553113e75decb9f9ad6f298ecc543181a6d46dcc5f247bfa33d5bbe3",
+      "r21Sha256": "38f30364553113e75decb9f9ad6f298ecc543181a6d46dcc5f247bfa33d5bbe3",
+      "r20Bytes": 12752,
+      "r21Bytes": 12752
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt_py_42c54874c0a323d5e290ccab.so",
+      "status": "unchanged",
+      "r20Sha256": "42c54874c0a323d5e290ccabc32a7e8e74385a03179f5631f7f8a5f43b6d402e",
+      "r21Sha256": "42c54874c0a323d5e290ccabc32a7e8e74385a03179f5631f7f8a5f43b6d402e",
+      "r20Bytes": 18744,
+      "r21Bytes": 18744
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt_py_44f18f29c2838592d9850f6f.so",
+      "status": "unchanged",
+      "r20Sha256": "44f18f29c2838592d9850f6f68eb68d357fdab72dea5017f1bc8f87ed051275b",
+      "r21Sha256": "44f18f29c2838592d9850f6f68eb68d357fdab72dea5017f1bc8f87ed051275b",
+      "r20Bytes": 19832,
+      "r21Bytes": 19832
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt_py_46fd0b62d48c93c90f63a899.so",
+      "status": "unchanged",
+      "r20Sha256": "46fd0b62d48c93c90f63a89982a83c4197fe989c9b3b322fb4751a0ae58c4004",
+      "r21Sha256": "46fd0b62d48c93c90f63a89982a83c4197fe989c9b3b322fb4751a0ae58c4004",
+      "r20Bytes": 261768,
+      "r21Bytes": 261768
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt_py_553b92792b1ef030a51a64bf.so",
+      "status": "unchanged",
+      "r20Sha256": "553b92792b1ef030a51a64bf84ab6bd8f1b821318953535229f15fed3490bd98",
+      "r21Sha256": "553b92792b1ef030a51a64bf84ab6bd8f1b821318953535229f15fed3490bd98",
+      "r20Bytes": 48952,
+      "r21Bytes": 48952
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt_py_60bf5ab15142fd87c1001d7d.so",
+      "status": "unchanged",
+      "r20Sha256": "60bf5ab15142fd87c1001d7dd5565ed179a7f558f7a93df353cee65a32e9394c",
+      "r21Sha256": "60bf5ab15142fd87c1001d7dd5565ed179a7f558f7a93df353cee65a32e9394c",
+      "r20Bytes": 95864,
+      "r21Bytes": 95864
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt_py_659c4d2814ce6efe06f4fc99.so",
+      "status": "unchanged",
+      "r20Sha256": "659c4d2814ce6efe06f4fc990d599cda5e70f26862b968a6641526c42f5aacd2",
+      "r21Sha256": "659c4d2814ce6efe06f4fc990d599cda5e70f26862b968a6641526c42f5aacd2",
+      "r20Bytes": 34216,
+      "r21Bytes": 34216
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt_py_68acd8c38b4eaf08cdbe4ddb.so",
+      "status": "unchanged",
+      "r20Sha256": "68acd8c38b4eaf08cdbe4ddb01dd8368ca3b50b4237a93050cb7a5bd19f776b8",
+      "r21Sha256": "68acd8c38b4eaf08cdbe4ddb01dd8368ca3b50b4237a93050cb7a5bd19f776b8",
+      "r20Bytes": 241560,
+      "r21Bytes": 241560
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt_py_6d0b0f5e8909ae2d176f9b73.so",
+      "status": "unchanged",
+      "r20Sha256": "6d0b0f5e8909ae2d176f9b731a0997dd06da6959f082777533500ef193a25fe9",
+      "r21Sha256": "6d0b0f5e8909ae2d176f9b731a0997dd06da6959f082777533500ef193a25fe9",
+      "r20Bytes": 9584,
+      "r21Bytes": 9584
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt_py_74ec3163f186206e8e533f75.so",
+      "status": "unchanged",
+      "r20Sha256": "74ec3163f186206e8e533f75f0c23c97eb37b5a22f81aa2463394641e787e666",
+      "r21Sha256": "74ec3163f186206e8e533f75f0c23c97eb37b5a22f81aa2463394641e787e666",
+      "r20Bytes": 349464,
+      "r21Bytes": 349464
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt_py_76962934927e5b73d96d743b.so",
+      "status": "unchanged",
+      "r20Sha256": "76962934927e5b73d96d743be944249a6821b13bf6c3fd8591f4ac8857106fa5",
+      "r21Sha256": "76962934927e5b73d96d743be944249a6821b13bf6c3fd8591f4ac8857106fa5",
+      "r20Bytes": 236552,
+      "r21Bytes": 236552
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt_py_76ecb7e716c2cc0e0d2ff1b7.so",
+      "status": "unchanged",
+      "r20Sha256": "76ecb7e716c2cc0e0d2ff1b78339c19b06cf09eb99b49ee8cd33f42e5e648f6a",
+      "r21Sha256": "76ecb7e716c2cc0e0d2ff1b78339c19b06cf09eb99b49ee8cd33f42e5e648f6a",
+      "r20Bytes": 17960,
+      "r21Bytes": 17960
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt_py_77ad83a2ca7f87e06a876302.so",
+      "status": "unchanged",
+      "r20Sha256": "77ad83a2ca7f87e06a876302decfe0e807b33790ad65ef7c716e6f0418f3a2c4",
+      "r21Sha256": "77ad83a2ca7f87e06a876302decfe0e807b33790ad65ef7c716e6f0418f3a2c4",
+      "r20Bytes": 51784,
+      "r21Bytes": 51784
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt_py_7941c483c6e5a494d2dcaaf7.so",
+      "status": "unchanged",
+      "r20Sha256": "7941c483c6e5a494d2dcaaf724d067610aa774046603b3a9d2dead45f0d67c91",
+      "r21Sha256": "7941c483c6e5a494d2dcaaf724d067610aa774046603b3a9d2dead45f0d67c91",
+      "r20Bytes": 133456,
+      "r21Bytes": 133456
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt_py_7e285dae588f3fa7cb1e1f7b.so",
+      "status": "unchanged",
+      "r20Sha256": "7e285dae588f3fa7cb1e1f7b8bac0bbd3fad5afd0d81cc327b81fe31374df921",
+      "r21Sha256": "7e285dae588f3fa7cb1e1f7b8bac0bbd3fad5afd0d81cc327b81fe31374df921",
+      "r20Bytes": 39792,
+      "r21Bytes": 39792
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt_py_8280d4347519c03131ca3bcc.so",
+      "status": "unchanged",
+      "r20Sha256": "8280d4347519c03131ca3bcc671d17ec3578cf57a176d78e40ec208c6f09986f",
+      "r21Sha256": "8280d4347519c03131ca3bcc671d17ec3578cf57a176d78e40ec208c6f09986f",
+      "r20Bytes": 43264,
+      "r21Bytes": 43264
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt_py_83082513ac140b7d9a2966b8.so",
+      "status": "unchanged",
+      "r20Sha256": "83082513ac140b7d9a2966b88e6ef2f08d8b29796e66c33ae9c28786ba5db336",
+      "r21Sha256": "83082513ac140b7d9a2966b88e6ef2f08d8b29796e66c33ae9c28786ba5db336",
+      "r20Bytes": 29008,
+      "r21Bytes": 29008
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt_py_850d05a06212629dca669c2b.so",
+      "status": "unchanged",
+      "r20Sha256": "850d05a06212629dca669c2b49c40496e4440a8ce6ba0c64ceeab78b6601e79d",
+      "r21Sha256": "850d05a06212629dca669c2b49c40496e4440a8ce6ba0c64ceeab78b6601e79d",
+      "r20Bytes": 14392,
+      "r21Bytes": 14392
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt_py_88293699b20f6d3109011941.so",
+      "status": "unchanged",
+      "r20Sha256": "88293699b20f6d31090119411e7d9c5aa66a3765fb968694a449eeacafe0c174",
+      "r21Sha256": "88293699b20f6d31090119411e7d9c5aa66a3765fb968694a449eeacafe0c174",
+      "r20Bytes": 6560,
+      "r21Bytes": 6560
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt_py_9179e755633278091c20479a.so",
+      "status": "unchanged",
+      "r20Sha256": "9179e755633278091c20479aa3a34877d44afb63998cf9643971f5697bc2ff1c",
+      "r21Sha256": "9179e755633278091c20479aa3a34877d44afb63998cf9643971f5697bc2ff1c",
+      "r20Bytes": 20872,
+      "r21Bytes": 20872
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt_py_92c79672bf77fa2f9bdadd60.so",
+      "status": "unchanged",
+      "r20Sha256": "92c79672bf77fa2f9bdadd60b8701fefaa7925cfe13cb143e4c552d4f3974d79",
+      "r21Sha256": "92c79672bf77fa2f9bdadd60b8701fefaa7925cfe13cb143e4c552d4f3974d79",
+      "r20Bytes": 13760,
+      "r21Bytes": 13760
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt_py_934d178edb046dd6c026d4fc.so",
+      "status": "unchanged",
+      "r20Sha256": "934d178edb046dd6c026d4fc728abf8501d3a46abf7ddc6f948312e21e85b4f9",
+      "r21Sha256": "934d178edb046dd6c026d4fc728abf8501d3a46abf7ddc6f948312e21e85b4f9",
+      "r20Bytes": 82888,
+      "r21Bytes": 82888
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt_py_96f09c3f14468bbc7e554f4d.so",
+      "status": "unchanged",
+      "r20Sha256": "96f09c3f14468bbc7e554f4d7cf25035307639c994c83d442be0bb6111b87fe7",
+      "r21Sha256": "96f09c3f14468bbc7e554f4d7cf25035307639c994c83d442be0bb6111b87fe7",
+      "r20Bytes": 7208,
+      "r21Bytes": 7208
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt_py_971ca431f13a370dcfb4e06a.so",
+      "status": "unchanged",
+      "r20Sha256": "971ca431f13a370dcfb4e06a7f0226fc992ecaae7a10acdde59d89ed610c3cd3",
+      "r21Sha256": "971ca431f13a370dcfb4e06a7f0226fc992ecaae7a10acdde59d89ed610c3cd3",
+      "r20Bytes": 34712,
+      "r21Bytes": 34712
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt_py_9b885de1c1d9469d6c0287aa.so",
+      "status": "unchanged",
+      "r20Sha256": "9b885de1c1d9469d6c0287aa8b2bf256ed5b9815d60e4be146e0568ccdebfc36",
+      "r21Sha256": "9b885de1c1d9469d6c0287aa8b2bf256ed5b9815d60e4be146e0568ccdebfc36",
+      "r20Bytes": 15344,
+      "r21Bytes": 15344
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt_py_a0229a18abe9f25fe0f28201.so",
+      "status": "unchanged",
+      "r20Sha256": "a0229a18abe9f25fe0f28201c6e89fc8e39c4adb560545d6f3a5bcfbc40c3435",
+      "r21Sha256": "a0229a18abe9f25fe0f28201c6e89fc8e39c4adb560545d6f3a5bcfbc40c3435",
+      "r20Bytes": 125664,
+      "r21Bytes": 125664
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt_py_a7c069e95f552c843c79984d.so",
+      "status": "unchanged",
+      "r20Sha256": "a7c069e95f552c843c79984d19c83dec30905e1e50aa898fa567df75d03af76b",
+      "r21Sha256": "a7c069e95f552c843c79984d19c83dec30905e1e50aa898fa567df75d03af76b",
+      "r20Bytes": 34336,
+      "r21Bytes": 34336
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt_py_aaef9131e72e95dc9f44a146.so",
+      "status": "unchanged",
+      "r20Sha256": "aaef9131e72e95dc9f44a146c9301f39854a62cfea6a113027ac2c49b00a585b",
+      "r21Sha256": "aaef9131e72e95dc9f44a146c9301f39854a62cfea6a113027ac2c49b00a585b",
+      "r20Bytes": 26192,
+      "r21Bytes": 26192
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt_py_ac1726f2dbc135db99206233.so",
+      "status": "unchanged",
+      "r20Sha256": "ac1726f2dbc135db9920623364667769e12ba2c6fe6f344b324918e7becc989f",
+      "r21Sha256": "ac1726f2dbc135db9920623364667769e12ba2c6fe6f344b324918e7becc989f",
+      "r20Bytes": 27856,
+      "r21Bytes": 27856
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt_py_ad4a9d85586a65ecefbe84e9.so",
+      "status": "unchanged",
+      "r20Sha256": "ad4a9d85586a65ecefbe84e9d27b53e5ae37e1ff95627baf1771c80afeb61f91",
+      "r21Sha256": "ad4a9d85586a65ecefbe84e9d27b53e5ae37e1ff95627baf1771c80afeb61f91",
+      "r20Bytes": 41104,
+      "r21Bytes": 41104
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt_py_ae6e0aa750a118f4dbef201b.so",
+      "status": "unchanged",
+      "r20Sha256": "ae6e0aa750a118f4dbef201b52bdbbb10aaca6ec665df061bc17876f343cf20f",
+      "r21Sha256": "ae6e0aa750a118f4dbef201b52bdbbb10aaca6ec665df061bc17876f343cf20f",
+      "r20Bytes": 59784,
+      "r21Bytes": 59784
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt_py_b20fe600a2097436e80c9c08.so",
+      "status": "unchanged",
+      "r20Sha256": "b20fe600a2097436e80c9c08371d021bafc834673cdcc77fe259a1cc859f23df",
+      "r21Sha256": "b20fe600a2097436e80c9c08371d021bafc834673cdcc77fe259a1cc859f23df",
+      "r20Bytes": 45680,
+      "r21Bytes": 45680
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt_py_b7da8e474bdfe350721b7df8.so",
+      "status": "unchanged",
+      "r20Sha256": "b7da8e474bdfe350721b7df825ff2a1033a72e18ecaca99c3a29533ddbaa9ada",
+      "r21Sha256": "b7da8e474bdfe350721b7df825ff2a1033a72e18ecaca99c3a29533ddbaa9ada",
+      "r20Bytes": 9776,
+      "r21Bytes": 9776
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt_py_bb05f5ddaec2090d07bc520b.so",
+      "status": "unchanged",
+      "r20Sha256": "bb05f5ddaec2090d07bc520ba63cb2b83ef22db63e9a0b166eed3c31d1317d74",
+      "r21Sha256": "bb05f5ddaec2090d07bc520ba63cb2b83ef22db63e9a0b166eed3c31d1317d74",
+      "r20Bytes": 4784,
+      "r21Bytes": 4784
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt_py_c420110fad2f59d2be5466cb.so",
+      "status": "unchanged",
+      "r20Sha256": "c420110fad2f59d2be5466cb3e55c42204abee8131da4bd621757075556db09c",
+      "r21Sha256": "c420110fad2f59d2be5466cb3e55c42204abee8131da4bd621757075556db09c",
+      "r20Bytes": 1995320,
+      "r21Bytes": 1995320
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt_py_c467f77cc9fd8a4ce73f82d0.so",
+      "status": "unchanged",
+      "r20Sha256": "c467f77cc9fd8a4ce73f82d00f0ac139e5743f9b18160fce0e60319a3d060d50",
+      "r21Sha256": "c467f77cc9fd8a4ce73f82d00f0ac139e5743f9b18160fce0e60319a3d060d50",
+      "r20Bytes": 73296,
+      "r21Bytes": 73296
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt_py_c8bce8544fd1b1de5944ae69.so",
+      "status": "unchanged",
+      "r20Sha256": "c8bce8544fd1b1de5944ae692b96e87a31bb0fa49e0fd5cad0dff8f844305707",
+      "r21Sha256": "c8bce8544fd1b1de5944ae692b96e87a31bb0fa49e0fd5cad0dff8f844305707",
+      "r20Bytes": 98008,
+      "r21Bytes": 98008
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt_py_cd40e4573ab1d611e01e8546.so",
+      "status": "unchanged",
+      "r20Sha256": "cd40e4573ab1d611e01e85466b7ce3339a13fd94699e4a59c5cb0fd2a65106e0",
+      "r21Sha256": "cd40e4573ab1d611e01e85466b7ce3339a13fd94699e4a59c5cb0fd2a65106e0",
+      "r20Bytes": 68496,
+      "r21Bytes": 68496
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt_py_cf17db862d319469ce9effa9.so",
+      "status": "unchanged",
+      "r20Sha256": "cf17db862d319469ce9effa9fe71f07b13205e3cf592716b8378c5f94778b9c9",
+      "r21Sha256": "cf17db862d319469ce9effa9fe71f07b13205e3cf592716b8378c5f94778b9c9",
+      "r20Bytes": 113000,
+      "r21Bytes": 113000
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt_py_d007096a850434ecc75d00a9.so",
+      "status": "unchanged",
+      "r20Sha256": "d007096a850434ecc75d00a9bfc81f2ef23c53681e4201470c69990f546b5b1a",
+      "r21Sha256": "d007096a850434ecc75d00a9bfc81f2ef23c53681e4201470c69990f546b5b1a",
+      "r20Bytes": 3624,
+      "r21Bytes": 3624
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt_py_d3acd703a3d4ca7699dd05be.so",
+      "status": "unchanged",
+      "r20Sha256": "d3acd703a3d4ca7699dd05be7d518646d10f573e3f612386ba30f694ba419577",
+      "r21Sha256": "d3acd703a3d4ca7699dd05be7d518646d10f573e3f612386ba30f694ba419577",
+      "r20Bytes": 30768,
+      "r21Bytes": 30768
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt_py_d90b13e67647f6828ec93a44.so",
+      "status": "unchanged",
+      "r20Sha256": "d90b13e67647f6828ec93a441e14507a8ce7ba708d4fc94b92124f5b178dcdb0",
+      "r21Sha256": "d90b13e67647f6828ec93a441e14507a8ce7ba708d4fc94b92124f5b178dcdb0",
+      "r20Bytes": 23928,
+      "r21Bytes": 23928
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt_py_dd51c920e577b57c1e799bed.so",
+      "status": "unchanged",
+      "r20Sha256": "dd51c920e577b57c1e799bedb17537e1a512aacf830ce4afca8e3fb9e63653ab",
+      "r21Sha256": "dd51c920e577b57c1e799bedb17537e1a512aacf830ce4afca8e3fb9e63653ab",
+      "r20Bytes": 146416,
+      "r21Bytes": 146416
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt_py_ded4f84ab893a47edab6a4d5.so",
+      "status": "unchanged",
+      "r20Sha256": "ded4f84ab893a47edab6a4d5f2db4213c9c1356937b741043e5465783556a64c",
+      "r21Sha256": "ded4f84ab893a47edab6a4d5f2db4213c9c1356937b741043e5465783556a64c",
+      "r20Bytes": 15192,
+      "r21Bytes": 15192
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt_py_df437ff6eba53cd252f745cc.so",
+      "status": "unchanged",
+      "r20Sha256": "df437ff6eba53cd252f745cce6166adfeb4b58dc7a66a9e6c55847406b32b633",
+      "r21Sha256": "df437ff6eba53cd252f745cce6166adfeb4b58dc7a66a9e6c55847406b32b633",
+      "r20Bytes": 155304,
+      "r21Bytes": 155304
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt_py_dfb64b74bc6bb317029e3d38.so",
+      "status": "unchanged",
+      "r20Sha256": "dfb64b74bc6bb317029e3d387fccacbf9ad371d96a9965ef7fe63e7d52a18262",
+      "r21Sha256": "dfb64b74bc6bb317029e3d387fccacbf9ad371d96a9965ef7fe63e7d52a18262",
+      "r20Bytes": 40688,
+      "r21Bytes": 40688
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt_py_e3647095dc4206114daa54ec.so",
+      "status": "unchanged",
+      "r20Sha256": "e3647095dc4206114daa54ec3f5759ca6045d8b925b4c962aacfbb52d0f839f5",
+      "r21Sha256": "e3647095dc4206114daa54ec3f5759ca6045d8b925b4c962aacfbb52d0f839f5",
+      "r20Bytes": 371944,
+      "r21Bytes": 371944
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt_py_e96e5bef2c6cc553bf414845.so",
+      "status": "unchanged",
+      "r20Sha256": "e96e5bef2c6cc553bf4148453198879c8e6a94aa243b4993d5c7095332a3748c",
+      "r21Sha256": "e96e5bef2c6cc553bf4148453198879c8e6a94aa243b4993d5c7095332a3748c",
+      "r20Bytes": 15344,
+      "r21Bytes": 15344
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt_py_f07859d9032977ef9d471ada.so",
+      "status": "unchanged",
+      "r20Sha256": "f07859d9032977ef9d471ada7192dc66ed893091a0c910d3ea822bba6edd592a",
+      "r21Sha256": "f07859d9032977ef9d471ada7192dc66ed893091a0c910d3ea822bba6edd592a",
+      "r20Bytes": 43720,
+      "r21Bytes": 43720
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt_py_f0d68aa8e3875b317acea5ff.so",
+      "status": "unchanged",
+      "r20Sha256": "f0d68aa8e3875b317acea5ff8610eda9ac042076a4768bfe17de85591aa36861",
+      "r21Sha256": "f0d68aa8e3875b317acea5ff8610eda9ac042076a4768bfe17de85591aa36861",
+      "r20Bytes": 16280,
+      "r21Bytes": 16280
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt_py_f5f8125c2551f8b2a7d4cc0b.so",
+      "status": "unchanged",
+      "r20Sha256": "f5f8125c2551f8b2a7d4cc0b743b250fef3770aefda567d4ae36ea7acef600fc",
+      "r21Sha256": "f5f8125c2551f8b2a7d4cc0b743b250fef3770aefda567d4ae36ea7acef600fc",
+      "r20Bytes": 117352,
+      "r21Bytes": 117352
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt_py_f95be1b3c73ea116d829a3f7.so",
+      "status": "unchanged",
+      "r20Sha256": "f95be1b3c73ea116d829a3f7a10ddb4d5bd28dfdbfb029dd330f89fa9aeebd83",
+      "r21Sha256": "f95be1b3c73ea116d829a3f7a10ddb4d5bd28dfdbfb029dd330f89fa9aeebd83",
+      "r20Bytes": 45208,
+      "r21Bytes": 45208
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt_py_f9d0e896ca551a221177dfde.so",
+      "status": "unchanged",
+      "r20Sha256": "f9d0e896ca551a221177dfde9c27332a338782c0ba1f2e7d2163247bcd63d838",
+      "r21Sha256": "f9d0e896ca551a221177dfde9c27332a338782c0ba1f2e7d2163247bcd63d838",
+      "r20Bytes": 233008,
+      "r21Bytes": 233008
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt_py_fadc8223ec2fe2d496c5c646.so",
+      "status": "unchanged",
+      "r20Sha256": "fadc8223ec2fe2d496c5c64635857524412209580edd48feddd52914c64f7441",
+      "r21Sha256": "fadc8223ec2fe2d496c5c64635857524412209580edd48feddd52914c64f7441",
+      "r20Bytes": 13648,
+      "r21Bytes": 13648
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt_py_fd5b0fa9c824288704349253.so",
+      "status": "unchanged",
+      "r20Sha256": "fd5b0fa9c824288704349253f2102027e74f357ec276d24e810df6a945999622",
+      "r21Sha256": "fd5b0fa9c824288704349253f2102027e74f357ec276d24e810df6a945999622",
+      "r20Bytes": 74648,
+      "r21Bytes": 74648
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt_py_fec7673fe1718c84cd9a1c1e.so",
+      "status": "unchanged",
+      "r20Sha256": "fec7673fe1718c84cd9a1c1e5d3b9e4654ff32cddb7b0ce6835b5da6e0ebae1a",
+      "r21Sha256": "fec7673fe1718c84cd9a1c1e5d3b9e4654ff32cddb7b0ce6835b5da6e0ebae1a",
+      "r20Bytes": 21568,
+      "r21Bytes": 21568
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt_python.so",
+      "status": "unchanged",
+      "r20Sha256": "33dbb844735052ccf78162d34d8570ee1ea50fbc4f0298fbe59b02197745499f",
+      "r21Sha256": "33dbb844735052ccf78162d34d8570ee1ea50fbc4f0298fbe59b02197745499f",
+      "r20Bytes": 9816,
+      "r21Bytes": 9816
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt_python_cli.so",
+      "status": "unchanged",
+      "r20Sha256": "68c0beaa7c291092a0b4f404ff5886c1366b4d3ce0b25b44649eb25c877ebf5f",
+      "r21Sha256": "68c0beaa7c291092a0b4f404ff5886c1366b4d3ce0b25b44649eb25c877ebf5f",
+      "r20Bytes": 8856,
+      "r21Bytes": 8856
+    },
+    {
+      "path": "lib/arm64-v8a/libfoldgpt_shizuku_transport.so",
+      "status": "unchanged",
+      "r20Sha256": "d4bb423a0dbe354485337d947bec486d6012d7b37a2ae0d73d0def8f26fe4ca6",
+      "r21Sha256": "d4bb423a0dbe354485337d947bec486d6012d7b37a2ae0d73d0def8f26fe4ca6",
+      "r20Bytes": 31176,
+      "r21Bytes": 31176
+    },
+    {
+      "path": "lib/arm64-v8a/libproot-loader.so",
+      "status": "unchanged",
+      "r20Sha256": "b5b856b8b0d00d881d44d9fabfd6386499a607ceb9e8a5b95df94a3a2b7b451e",
+      "r21Sha256": "b5b856b8b0d00d881d44d9fabfd6386499a607ceb9e8a5b95df94a3a2b7b451e",
+      "r20Bytes": 18208,
+      "r21Bytes": 18208
+    },
+    {
+      "path": "lib/arm64-v8a/libproot-loader32.so",
+      "status": "unchanged",
+      "r20Sha256": "3c1eeac31c4263a56ad56a8c39b9257575e754b012782cfb2517a0d4442db150",
+      "r21Sha256": "3c1eeac31c4263a56ad56a8c39b9257575e754b012782cfb2517a0d4442db150",
+      "r20Bytes": 18532,
+      "r21Bytes": 18532
+    },
+    {
+      "path": "lib/arm64-v8a/libproot.so",
+      "status": "unchanged",
+      "r20Sha256": "7507fc16a7a1fa06e4c1baf0d54c8b17b3225ba128eae8eca4d316e5645f381c",
+      "r21Sha256": "7507fc16a7a1fa06e4c1baf0d54c8b17b3225ba128eae8eca4d316e5645f381c",
+      "r20Bytes": 233352,
+      "r21Bytes": 233352
+    },
+    {
+      "path": "lib/arm64-v8a/libpython3.14.so",
+      "status": "unchanged",
+      "r20Sha256": "ec0b46cd65f228fb2a750303227f83e9e8eed83bbb95dd1b746bff61199907b5",
+      "r21Sha256": "ec0b46cd65f228fb2a750303227f83e9e8eed83bbb95dd1b746bff61199907b5",
+      "r20Bytes": 5828520,
+      "r21Bytes": 5828520
+    },
+    {
+      "path": "lib/arm64-v8a/libpython3.so",
+      "status": "unchanged",
+      "r20Sha256": "dc03985487f45969d02010cf6ae1b2796d22f0df7685b66cdf4227928bf88eb7",
+      "r21Sha256": "dc03985487f45969d02010cf6ae1b2796d22f0df7685b66cdf4227928bf88eb7",
+      "r20Bytes": 3768,
+      "r21Bytes": 3768
+    },
+    {
+      "path": "lib/arm64-v8a/libsqlite3_python.so",
+      "status": "unchanged",
+      "r20Sha256": "6b0f0012ffff95d2420e88fd420d0d65dc4d63d943c1011567978f6203d118dd",
+      "r21Sha256": "6b0f0012ffff95d2420e88fd420d0d65dc4d63d943c1011567978f6203d118dd",
+      "r20Bytes": 886520,
+      "r21Bytes": 886520
+    },
+    {
+      "path": "lib/arm64-v8a/libssl_python.so",
+      "status": "unchanged",
+      "r20Sha256": "123743cc94922308a44a5a7d98854ca51fc708529d73f48ac1a380d7b7f04a2f",
+      "r21Sha256": "123743cc94922308a44a5a7d98854ca51fc708529d73f48ac1a380d7b7f04a2f",
+      "r20Bytes": 955984,
+      "r21Bytes": 955984
+    },
+    {
+      "path": "lib/arm64-v8a/libtalloc.so",
+      "status": "unchanged",
+      "r20Sha256": "040104b7605a83e2cb6fb393b926f0cb72b90deac8dc3ad860217361ed09dccf",
+      "r21Sha256": "040104b7605a83e2cb6fb393b926f0cb72b90deac8dc3ad860217361ed09dccf",
+      "r20Bytes": 37432,
+      "r21Bytes": 37432
+    }
+  ],
+  "pythonDataFiles": 2447,
+  "importClosure": {
+    "resolvedLocal": [
+      {
+        "source": "tools/executor/app_server_adapter.py",
+        "line": 17,
+        "kind": "absolute",
+        "module": "tools.executor.app_server_routing",
+        "resolved": "tools/executor/app_server_routing.py"
+      },
+      {
+        "source": "tools/executor/app_server_adapter.py",
+        "line": 18,
+        "kind": "absolute",
+        "module": "tools.executor.exec_server",
+        "resolved": "tools/executor/exec_server.py"
+      },
+      {
+        "source": "tools/executor/app_server_routing.py",
+        "line": 12,
+        "kind": "absolute",
+        "module": "tools.executor.exec_server",
+        "resolved": "tools/executor/exec_server.py"
+      },
+      {
+        "source": "tools/executor/bionic-supervisor/direct_processes.py",
+        "line": 15,
+        "kind": "absolute",
+        "module": "tools.executor.exec_server",
+        "resolved": "tools/executor/exec_server.py"
+      },
+      {
+        "source": "tools/executor/bionic-supervisor/direct_processes.py",
+        "line": 16,
+        "kind": "absolute",
+        "module": "tools.executor.native_environment",
+        "resolved": "tools/executor/native_environment.py"
+      },
+      {
+        "source": "tools/executor/bionic-supervisor/direct_processes.py",
+        "line": 17,
+        "kind": "absolute",
+        "module": "tools.executor.native_processes",
+        "resolved": "tools/executor/native_processes.py"
+      },
+      {
+        "source": "tools/executor/bionic-supervisor/direct_processes.py",
+        "line": 21,
+        "kind": "absolute",
+        "module": "tools.executor.ordinary_uid_files",
+        "resolved": "tools/executor/ordinary_uid_files.py"
+      },
+      {
+        "source": "tools/executor/bionic-supervisor/direct_processes.py",
+        "line": 22,
+        "kind": "relative",
+        "module": "tools.executor.bionic-supervisor.direct_wire",
+        "resolved": "tools/executor/bionic-supervisor/direct_wire.py"
+      },
+      {
+        "source": "tools/executor/bionic-supervisor/direct_wire.py",
+        "line": 4,
+        "kind": "relative",
+        "module": "tools.executor.bionic-supervisor.wire",
+        "resolved": "tools/executor/bionic-supervisor/wire.py"
+      },
+      {
+        "source": "tools/executor/bionic-supervisor/factory.py",
+        "line": 2,
+        "kind": "absolute",
+        "module": "tools.executor.native_executor_backend",
+        "resolved": "tools/executor/native_executor_backend.py"
+      },
+      {
+        "source": "tools/executor/bionic-supervisor/factory.py",
+        "line": 3,
+        "kind": "relative",
+        "module": "tools.executor.bionic-supervisor.processes",
+        "resolved": "tools/executor/bionic-supervisor/processes.py"
+      },
+      {
+        "source": "tools/executor/bionic-supervisor/factory.py",
+        "line": 31,
+        "kind": "relative",
+        "module": "tools.executor.bionic-supervisor.direct_processes",
+        "resolved": "tools/executor/bionic-supervisor/direct_processes.py"
+      },
+      {
+        "source": "tools/executor/bionic-supervisor/factory.py",
+        "line": 32,
+        "kind": "absolute",
+        "module": "tools.executor.ordinary_uid_files",
+        "resolved": "tools/executor/ordinary_uid_files.py"
+      },
+      {
+        "source": "tools/executor/bionic-supervisor/host_policy.py",
+        "line": 10,
+        "kind": "absolute",
+        "module": "tools.executor.native_host_files",
+        "resolved": "tools/executor/native_host_files.py"
+      },
+      {
+        "source": "tools/executor/bionic-supervisor/host_policy.py",
+        "line": 11,
+        "kind": "absolute",
+        "module": "tools.executor.native_files",
+        "resolved": "tools/executor/native_files.py"
+      },
+      {
+        "source": "tools/executor/bionic-supervisor/host_policy.py",
+        "line": 12,
+        "kind": "absolute",
+        "module": "tools.policy.managed_policy",
+        "resolved": "tools/policy/managed_policy.py"
+      },
+      {
+        "source": "tools/executor/bionic-supervisor/host_policy.py",
+        "line": 13,
+        "kind": "relative",
+        "module": "tools.executor.bionic-supervisor.runtime_paths",
+        "resolved": "tools/executor/bionic-supervisor/runtime_paths.py"
+      },
+      {
+        "source": "tools/executor/bionic-supervisor/host_processes.py",
+        "line": 15,
+        "kind": "absolute",
+        "module": "tools.executor.exec_server",
+        "resolved": "tools/executor/exec_server.py"
+      },
+      {
+        "source": "tools/executor/bionic-supervisor/host_processes.py",
+        "line": 16,
+        "kind": "absolute",
+        "module": "tools.executor.native_environment",
+        "resolved": "tools/executor/native_environment.py"
+      },
+      {
+        "source": "tools/executor/bionic-supervisor/host_processes.py",
+        "line": 17,
+        "kind": "absolute",
+        "module": "tools.executor.native_host_files",
+        "resolved": "tools/executor/native_host_files.py"
+      },
+      {
+        "source": "tools/executor/bionic-supervisor/host_processes.py",
+        "line": 18,
+        "kind": "absolute",
+        "module": "tools.executor.native_processes",
+        "resolved": "tools/executor/native_processes.py"
+      },
+      {
+        "source": "tools/executor/bionic-supervisor/host_processes.py",
+        "line": 19,
+        "kind": "relative",
+        "module": "tools.executor.bionic-supervisor.host_policy",
+        "resolved": "tools/executor/bionic-supervisor/host_policy.py"
+      },
+      {
+        "source": "tools/executor/bionic-supervisor/host_processes.py",
+        "line": 20,
+        "kind": "relative",
+        "module": "tools.executor.bionic-supervisor.host_wire",
+        "resolved": "tools/executor/bionic-supervisor/host_wire.py"
+      },
+      {
+        "source": "tools/executor/bionic-supervisor/host_processes.py",
+        "line": 21,
+        "kind": "relative",
+        "module": "tools.executor.bionic-supervisor.processes",
+        "resolved": "tools/executor/bionic-supervisor/processes.py"
+      },
+      {
+        "source": "tools/executor/bionic-supervisor/host_wire.py",
+        "line": 4,
+        "kind": "relative",
+        "module": "tools.executor.bionic-supervisor.runtime_paths",
+        "resolved": "tools/executor/bionic-supervisor/runtime_paths.py"
+      },
+      {
+        "source": "tools/executor/bionic-supervisor/host_wire.py",
+        "line": 5,
+        "kind": "relative",
+        "module": "tools.executor.bionic-supervisor.wire",
+        "resolved": "tools/executor/bionic-supervisor/wire.py"
+      },
+      {
+        "source": "tools/executor/bionic-supervisor/policy.py",
+        "line": 11,
+        "kind": "absolute",
+        "module": "tools.executor.policy_intent",
+        "resolved": "tools/executor/policy_intent.py"
+      },
+      {
+        "source": "tools/executor/bionic-supervisor/policy.py",
+        "line": 12,
+        "kind": "absolute",
+        "module": "tools.policy.managed_policy",
+        "resolved": "tools/policy/managed_policy.py"
+      },
+      {
+        "source": "tools/executor/bionic-supervisor/policy.py",
+        "line": 13,
+        "kind": "relative",
+        "module": "tools.executor.bionic-supervisor.runtime_paths",
+        "resolved": "tools/executor/bionic-supervisor/runtime_paths.py"
+      },
+      {
+        "source": "tools/executor/bionic-supervisor/processes.py",
+        "line": 12,
+        "kind": "absolute",
+        "module": "tools.executor.exec_server",
+        "resolved": "tools/executor/exec_server.py"
+      },
+      {
+        "source": "tools/executor/bionic-supervisor/processes.py",
+        "line": 13,
+        "kind": "absolute",
+        "module": "tools.executor.native_processes",
+        "resolved": "tools/executor/native_processes.py"
+      },
+      {
+        "source": "tools/executor/bionic-supervisor/processes.py",
+        "line": 14,
+        "kind": "relative",
+        "module": "tools.executor.bionic-supervisor.policy",
+        "resolved": "tools/executor/bionic-supervisor/policy.py"
+      },
+      {
+        "source": "tools/executor/bionic-supervisor/processes.py",
+        "line": 15,
+        "kind": "relative",
+        "module": "tools.executor.bionic-supervisor.runtime_paths",
+        "resolved": "tools/executor/bionic-supervisor/runtime_paths.py"
+      },
+      {
+        "source": "tools/executor/bionic-supervisor/processes.py",
+        "line": 16,
+        "kind": "relative",
+        "module": "tools.executor.bionic-supervisor.wire",
+        "resolved": "tools/executor/bionic-supervisor/wire.py"
+      },
+      {
+        "source": "tools/executor/bionic-supervisor/qualification.py",
+        "line": 19,
+        "kind": "absolute",
+        "module": "tools.executor.exec_server",
+        "resolved": "tools/executor/exec_server.py"
+      },
+      {
+        "source": "tools/executor/bionic-supervisor/qualification.py",
+        "line": 18,
+        "kind": "dynamic-literal",
+        "module": "tools.executor.bionic-supervisor.factory",
+        "resolved": "tools/executor/bionic-supervisor/factory.py"
+      },
+      {
+        "source": "tools/executor/bionic-supervisor/qualification_factory.py",
+        "line": 15,
+        "kind": "absolute",
+        "module": "tools.executor.exec_server",
+        "resolved": "tools/executor/exec_server.py"
+      },
+      {
+        "source": "tools/executor/bionic-supervisor/qualification_factory.py",
+        "line": 16,
+        "kind": "absolute",
+        "module": "tools.executor.native_processes",
+        "resolved": "tools/executor/native_processes.py"
+      },
+      {
+        "source": "tools/executor/bionic-supervisor/qualification_factory.py",
+        "line": 17,
+        "kind": "relative",
+        "module": "tools.executor.bionic-supervisor.factory",
+        "resolved": "tools/executor/bionic-supervisor/factory.py"
+      },
+      {
+        "source": "tools/executor/bionic-supervisor/qualification_factory.py",
+        "line": 18,
+        "kind": "relative",
+        "module": "tools.executor.bionic-supervisor.qualification",
+        "resolved": "tools/executor/bionic-supervisor/qualification.py"
+      },
+      {
+        "source": "tools/executor/bionic-supervisor/qualification_factory_v11.py",
+        "line": 4,
+        "kind": "relative",
+        "module": "tools.executor.bionic-supervisor.qualification_factory",
+        "resolved": "tools/executor/bionic-supervisor/qualification_factory.py"
+      },
+      {
+        "source": "tools/executor/bionic-supervisor/qualification_factory_v12.py",
+        "line": 4,
+        "kind": "relative",
+        "module": "tools.executor.bionic-supervisor.qualification_factory",
+        "resolved": "tools/executor/bionic-supervisor/qualification_factory.py"
+      },
+      {
+        "source": "tools/executor/bionic-supervisor/runtime_qualification_factory.py",
+        "line": 14,
+        "kind": "absolute",
+        "module": "tools.executor.exec_server",
+        "resolved": "tools/executor/exec_server.py"
+      },
+      {
+        "source": "tools/executor/bionic-supervisor/runtime_qualification_factory.py",
+        "line": 15,
+        "kind": "relative",
+        "module": "tools.executor.bionic-supervisor.factory",
+        "resolved": "tools/executor/bionic-supervisor/factory.py"
+      },
+      {
+        "source": "tools/executor/bionic-supervisor/runtime_qualification_factory.py",
+        "line": 16,
+        "kind": "relative",
+        "module": "tools.executor.bionic-supervisor.qualification_factory",
+        "resolved": "tools/executor/bionic-supervisor/qualification_factory.py"
+      },
+      {
+        "source": "tools/executor/bionic-supervisor/runtime_qualification_factory.py",
+        "line": 17,
+        "kind": "relative",
+        "module": "tools.executor.bionic-supervisor.runtime_qualification",
+        "resolved": "tools/executor/bionic-supervisor/runtime_qualification.py"
+      },
+      {
+        "source": "tools/executor/bionic-supervisor/runtime_qualification_factory_v2.py",
+        "line": 3,
+        "kind": "relative",
+        "module": "tools.executor.bionic-supervisor.runtime_qualification_factory",
+        "resolved": "tools/executor/bionic-supervisor/runtime_qualification_factory.py"
+      },
+      {
+        "source": "tools/executor/bionic-supervisor/test_control_termination.py",
+        "line": 23,
+        "kind": "absolute",
+        "module": "tools.executor.exec_server",
+        "resolved": "tools/executor/exec_server.py"
+      },
+      {
+        "source": "tools/executor/bionic-supervisor/test_control_termination.py",
+        "line": 21,
+        "kind": "dynamic-literal",
+        "module": "tools.executor.bionic-supervisor.test_factory",
+        "resolved": "tools/executor/bionic-supervisor/test_factory.py"
+      },
+      {
+        "source": "tools/executor/bionic-supervisor/test_control_termination.py",
+        "line": 22,
+        "kind": "dynamic-literal",
+        "module": "tools.executor.bionic-supervisor.processes",
+        "resolved": "tools/executor/bionic-supervisor/processes.py"
+      },
+      {
+        "source": "tools/executor/bionic-supervisor/test_executable_metadata_regression.py",
+        "line": 19,
+        "kind": "dynamic-literal",
+        "module": "tools.executor.bionic-supervisor.test_factory",
+        "resolved": "tools/executor/bionic-supervisor/test_factory.py"
+      },
+      {
+        "source": "tools/executor/bionic-supervisor/test_factory.py",
+        "line": 19,
+        "kind": "absolute",
+        "module": "tools.executor.exec_server",
+        "resolved": "tools/executor/exec_server.py"
+      },
+      {
+        "source": "tools/executor/bionic-supervisor/test_factory.py",
+        "line": 20,
+        "kind": "absolute",
+        "module": "tools.executor.policy_intent",
+        "resolved": "tools/executor/policy_intent.py"
+      },
+      {
+        "source": "tools/executor/bionic-supervisor/test_factory.py",
+        "line": 18,
+        "kind": "dynamic-literal",
+        "module": "tools.executor.bionic-supervisor.test_kernel",
+        "resolved": "tools/executor/bionic-supervisor/test_kernel.py"
+      },
+      {
+        "source": "tools/executor/bionic-supervisor/test_factory.py",
+        "line": 17,
+        "kind": "dynamic-literal",
+        "module": "tools.executor.bionic-supervisor.factory",
+        "resolved": "tools/executor/bionic-supervisor/factory.py"
+      },
+      {
+        "source": "tools/executor/bionic-supervisor/test_kernel.py",
+        "line": 18,
+        "kind": "absolute",
+        "module": "tools.executor.native_files",
+        "resolved": "tools/executor/native_files.py"
+      },
+      {
+        "source": "tools/executor/bionic-supervisor/test_kernel.py",
+        "line": 16,
+        "kind": "dynamic-literal",
+        "module": "tools.executor.bionic-supervisor.wire",
+        "resolved": "tools/executor/bionic-supervisor/wire.py"
+      },
+      {
+        "source": "tools/executor/bionic-supervisor/test_kernel.py",
+        "line": 17,
+        "kind": "dynamic-literal",
+        "module": "tools.executor.bionic-supervisor.policy",
+        "resolved": "tools/executor/bionic-supervisor/policy.py"
+      },
+      {
+        "source": "tools/executor/bionic-supervisor/test_qualification_factory.py",
+        "line": 14,
+        "kind": "absolute",
+        "module": "tools.executor.exec_server",
+        "resolved": "tools/executor/exec_server.py"
+      },
+      {
+        "source": "tools/executor/bionic-supervisor/test_qualification_factory.py",
+        "line": 13,
+        "kind": "dynamic-literal",
+        "module": "tools.executor.bionic-supervisor.qualification_factory",
+        "resolved": "tools/executor/bionic-supervisor/qualification_factory.py"
+      },
+      {
+        "source": "tools/executor/bionic-supervisor/test_runtime_paths.py",
+        "line": 20,
+        "kind": "absolute",
+        "module": "tools.executor.native_files",
+        "resolved": "tools/executor/native_files.py"
+      },
+      {
+        "source": "tools/executor/bionic-supervisor/test_runtime_paths.py",
+        "line": 16,
+        "kind": "dynamic-literal",
+        "module": "tools.executor.bionic-supervisor.runtime_paths",
+        "resolved": "tools/executor/bionic-supervisor/runtime_paths.py"
+      },
+      {
+        "source": "tools/executor/bionic-supervisor/test_runtime_paths.py",
+        "line": 19,
+        "kind": "dynamic-literal",
+        "module": "tools.executor.bionic-supervisor.test_kernel",
+        "resolved": "tools/executor/bionic-supervisor/test_kernel.py"
+      },
+      {
+        "source": "tools/executor/bionic-supervisor/test_runtime_paths.py",
+        "line": 17,
+        "kind": "dynamic-literal",
+        "module": "tools.executor.bionic-supervisor.policy",
+        "resolved": "tools/executor/bionic-supervisor/policy.py"
+      },
+      {
+        "source": "tools/executor/bionic-supervisor/test_runtime_paths.py",
+        "line": 18,
+        "kind": "dynamic-literal",
+        "module": "tools.executor.bionic-supervisor.processes",
+        "resolved": "tools/executor/bionic-supervisor/processes.py"
+      },
+      {
+        "source": "tools/executor/bionic-supervisor/test_runtime_qualification.py",
+        "line": 16,
+        "kind": "absolute",
+        "module": "tools.executor.exec_server",
+        "resolved": "tools/executor/exec_server.py"
+      },
+      {
+        "source": "tools/executor/bionic-supervisor/test_runtime_qualification.py",
+        "line": 14,
+        "kind": "dynamic-literal",
+        "module": "tools.executor.bionic-supervisor.runtime_qualification",
+        "resolved": "tools/executor/bionic-supervisor/runtime_qualification.py"
+      },
+      {
+        "source": "tools/executor/bionic-supervisor/test_runtime_qualification.py",
+        "line": 15,
+        "kind": "dynamic-literal",
+        "module": "tools.executor.bionic-supervisor.runtime_qualification_factory",
+        "resolved": "tools/executor/bionic-supervisor/runtime_qualification_factory.py"
+      },
+      {
+        "source": "tools/executor/bionic-supervisor/wire.py",
+        "line": 3,
+        "kind": "absolute",
+        "module": "tools.executor.native_processes",
+        "resolved": "tools/executor/native_processes.py"
+      },
+      {
+        "source": "tools/executor/host_rpc_mux.py",
+        "line": 20,
+        "kind": "absolute",
+        "module": "tools.executor.exec_server",
+        "resolved": "tools/executor/exec_server.py"
+      },
+      {
+        "source": "tools/executor/native-managed-test.py",
+        "line": 17,
+        "kind": "absolute",
+        "module": "tools.executor.native_process_policy",
+        "resolved": "tools/executor/native_process_policy.py"
+      },
+      {
+        "source": "tools/executor/native_bootstrap_channel.py",
+        "line": 15,
+        "kind": "absolute",
+        "module": "tools.executor.exec_server",
+        "resolved": "tools/executor/exec_server.py"
+      },
+      {
+        "source": "tools/executor/native_bootstrap_channel.py",
+        "line": 16,
+        "kind": "absolute",
+        "module": "tools.executor.native_bootstrap_files",
+        "resolved": "tools/executor/native_bootstrap_files.py"
+      },
+      {
+        "source": "tools/executor/native_bootstrap_channel.py",
+        "line": 17,
+        "kind": "absolute",
+        "module": "tools.executor.native_processes",
+        "resolved": "tools/executor/native_processes.py"
+      },
+      {
+        "source": "tools/executor/native_bootstrap_files.py",
+        "line": 12,
+        "kind": "absolute",
+        "module": "tools.executor.exec_server",
+        "resolved": "tools/executor/exec_server.py"
+      },
+      {
+        "source": "tools/executor/native_bootstrap_files.py",
+        "line": 13,
+        "kind": "absolute",
+        "module": "tools.executor.native_executor_backend",
+        "resolved": "tools/executor/native_executor_backend.py"
+      },
+      {
+        "source": "tools/executor/native_bootstrap_files.py",
+        "line": 14,
+        "kind": "absolute",
+        "module": "tools.executor.native_files",
+        "resolved": "tools/executor/native_files.py"
+      },
+      {
+        "source": "tools/executor/native_bootstrap_files.py",
+        "line": 15,
+        "kind": "absolute",
+        "module": "tools.policy.managed_policy",
+        "resolved": "tools/policy/managed_policy.py"
+      },
+      {
+        "source": "tools/executor/native_bootstrap_files.py",
+        "line": 16,
+        "kind": "absolute",
+        "module": "tools.executor.native_path_uri",
+        "resolved": "tools/executor/native_path_uri.py"
+      },
+      {
+        "source": "tools/executor/native_environment.py",
+        "line": 9,
+        "kind": "absolute",
+        "module": "tools.executor.exec_server",
+        "resolved": "tools/executor/exec_server.py"
+      },
+      {
+        "source": "tools/executor/native_environment.py",
+        "line": 10,
+        "kind": "absolute",
+        "module": "tools.executor.native_environment_unicode",
+        "resolved": "tools/executor/native_environment_unicode.py"
+      },
+      {
+        "source": "tools/executor/native_executor_android_fixture.py",
+        "line": 11,
+        "kind": "absolute",
+        "module": "tools.executor.native_files_rpc_fixture",
+        "resolved": "tools/executor/native_files_rpc_fixture.py"
+      },
+      {
+        "source": "tools/executor/native_executor_backend.py",
+        "line": 10,
+        "kind": "absolute",
+        "module": "tools.executor.exec_server",
+        "resolved": "tools/executor/exec_server.py"
+      },
+      {
+        "source": "tools/executor/native_executor_backend.py",
+        "line": 11,
+        "kind": "absolute",
+        "module": "tools.executor.native_file_streams",
+        "resolved": "tools/executor/native_file_streams.py"
+      },
+      {
+        "source": "tools/executor/native_executor_backend.py",
+        "line": 12,
+        "kind": "absolute",
+        "module": "tools.executor.native_processes",
+        "resolved": "tools/executor/native_processes.py"
+      },
+      {
+        "source": "tools/executor/native_executor_backend.py",
+        "line": 51,
+        "kind": "absolute",
+        "module": "tools.executor.native_model_profiles",
+        "resolved": "tools/executor/native_model_profiles.py"
+      },
+      {
+        "source": "tools/executor/native_file_streams.py",
+        "line": 20,
+        "kind": "absolute",
+        "module": "tools.executor.exec_server",
+        "resolved": "tools/executor/exec_server.py"
+      },
+      {
+        "source": "tools/executor/native_file_streams.py",
+        "line": 21,
+        "kind": "absolute",
+        "module": "tools.executor.native_files",
+        "resolved": "tools/executor/native_files.py"
+      },
+      {
+        "source": "tools/executor/native_file_streams.py",
+        "line": 22,
+        "kind": "absolute",
+        "module": "tools.executor.policy_intent",
+        "resolved": "tools/executor/policy_intent.py"
+      },
+      {
+        "source": "tools/executor/native_file_streams.py",
+        "line": 23,
+        "kind": "absolute",
+        "module": "tools.policy.managed_policy",
+        "resolved": "tools/policy/managed_policy.py"
+      },
+      {
+        "source": "tools/executor/native_files.py",
+        "line": 29,
+        "kind": "absolute",
+        "module": "tools.executor.exec_server",
+        "resolved": "tools/executor/exec_server.py"
+      },
+      {
+        "source": "tools/executor/native_files.py",
+        "line": 30,
+        "kind": "absolute",
+        "module": "tools.executor.policy_intent",
+        "resolved": "tools/executor/policy_intent.py"
+      },
+      {
+        "source": "tools/executor/native_files.py",
+        "line": 31,
+        "kind": "absolute",
+        "module": "tools.policy.managed_policy",
+        "resolved": "tools/policy/managed_policy.py"
+      },
+      {
+        "source": "tools/executor/native_files_rpc_fixture.py",
+        "line": 24,
+        "kind": "absolute",
+        "module": "tools.executor.exec_server",
+        "resolved": "tools/executor/exec_server.py"
+      },
+      {
+        "source": "tools/executor/native_files_rpc_fixture.py",
+        "line": 25,
+        "kind": "absolute",
+        "module": "tools.executor.native_files",
+        "resolved": "tools/executor/native_files.py"
+      },
+      {
+        "source": "tools/executor/native_files_server.py",
+        "line": 17,
+        "kind": "absolute",
+        "module": "tools.executor.exec_server",
+        "resolved": "tools/executor/exec_server.py"
+      },
+      {
+        "source": "tools/executor/native_files_server.py",
+        "line": 18,
+        "kind": "absolute",
+        "module": "tools.executor.native_files",
+        "resolved": "tools/executor/native_files.py"
+      },
+      {
+        "source": "tools/executor/native_host_bootstrap_v2.py",
+        "line": 34,
+        "kind": "absolute",
+        "module": "foldgpt_shizuku_bootstrap",
+        "resolved": "foldgpt_shizuku_bootstrap.py"
+      },
+      {
+        "source": "tools/executor/native_host_bootstrap_v2.py",
+        "line": 26,
+        "kind": "absolute",
+        "module": "tools.executor.native_host_channel_v2",
+        "resolved": "tools/executor/native_host_channel_v2.py"
+      },
+      {
+        "source": "tools/executor/native_host_bootstrap_v2.py",
+        "line": 27,
+        "kind": "dynamic-literal",
+        "module": "tools.executor.bionic-supervisor.host_processes",
+        "resolved": "tools/executor/bionic-supervisor/host_processes.py"
+      },
+      {
+        "source": "tools/executor/native_host_channel_v2.py",
+        "line": 13,
+        "kind": "absolute",
+        "module": "tools.executor.exec_server",
+        "resolved": "tools/executor/exec_server.py"
+      },
+      {
+        "source": "tools/executor/native_host_channel_v2.py",
+        "line": 14,
+        "kind": "absolute",
+        "module": "tools.executor.native_host_files_channel",
+        "resolved": "tools/executor/native_host_files_channel.py"
+      },
+      {
+        "source": "tools/executor/native_host_channel_v2.py",
+        "line": 18,
+        "kind": "absolute",
+        "module": "tools.executor.native_processes",
+        "resolved": "tools/executor/native_processes.py"
+      },
+      {
+        "source": "tools/executor/native_host_channel_v2.py",
+        "line": 20,
+        "kind": "dynamic-literal",
+        "module": "tools.executor.bionic-supervisor.host_processes",
+        "resolved": "tools/executor/bionic-supervisor/host_processes.py"
+      },
+      {
+        "source": "tools/executor/native_host_files.py",
+        "line": 11,
+        "kind": "absolute",
+        "module": "tools.executor.exec_server",
+        "resolved": "tools/executor/exec_server.py"
+      },
+      {
+        "source": "tools/executor/native_host_files.py",
+        "line": 12,
+        "kind": "absolute",
+        "module": "tools.executor.native_executor_backend",
+        "resolved": "tools/executor/native_executor_backend.py"
+      },
+      {
+        "source": "tools/executor/native_host_files.py",
+        "line": 13,
+        "kind": "absolute",
+        "module": "tools.executor.native_files",
+        "resolved": "tools/executor/native_files.py"
+      },
+      {
+        "source": "tools/executor/native_host_files.py",
+        "line": 14,
+        "kind": "absolute",
+        "module": "tools.policy.managed_policy",
+        "resolved": "tools/policy/managed_policy.py"
+      },
+      {
+        "source": "tools/executor/native_host_files.py",
+        "line": 15,
+        "kind": "absolute",
+        "module": "tools.executor.native_path_uri",
+        "resolved": "tools/executor/native_path_uri.py"
+      },
+      {
+        "source": "tools/executor/native_host_files_channel.py",
+        "line": 16,
+        "kind": "absolute",
+        "module": "tools.executor.exec_server",
+        "resolved": "tools/executor/exec_server.py"
+      },
+      {
+        "source": "tools/executor/native_host_files_channel.py",
+        "line": 17,
+        "kind": "absolute",
+        "module": "tools.executor.native_host_files",
+        "resolved": "tools/executor/native_host_files.py"
+      },
+      {
+        "source": "tools/executor/native_host_files_channel.py",
+        "line": 18,
+        "kind": "absolute",
+        "module": "tools.executor.native_processes",
+        "resolved": "tools/executor/native_processes.py"
+      },
+      {
+        "source": "tools/executor/native_managed_android_fixture.py",
+        "line": 15,
+        "kind": "absolute",
+        "module": "tools.executor.native_files_rpc_fixture",
+        "resolved": "tools/executor/native_files_rpc_fixture.py"
+      },
+      {
+        "source": "tools/executor/native_model_profiles.py",
+        "line": 9,
+        "kind": "absolute",
+        "module": "tools.executor.exec_server",
+        "resolved": "tools/executor/exec_server.py"
+      },
+      {
+        "source": "tools/executor/native_model_profiles.py",
+        "line": 10,
+        "kind": "absolute",
+        "module": "tools.executor.native_processes",
+        "resolved": "tools/executor/native_processes.py"
+      },
+      {
+        "source": "tools/executor/native_process_policy.py",
+        "line": 20,
+        "kind": "absolute",
+        "module": "tools.executor.native_files",
+        "resolved": "tools/executor/native_files.py"
+      },
+      {
+        "source": "tools/executor/native_process_policy.py",
+        "line": 21,
+        "kind": "absolute",
+        "module": "tools.executor.policy_intent",
+        "resolved": "tools/executor/policy_intent.py"
+      },
+      {
+        "source": "tools/executor/native_process_policy.py",
+        "line": 22,
+        "kind": "absolute",
+        "module": "tools.policy.managed_policy",
+        "resolved": "tools/policy/managed_policy.py"
+      },
+      {
+        "source": "tools/executor/native_processes.py",
+        "line": 23,
+        "kind": "absolute",
+        "module": "tools.executor.exec_server",
+        "resolved": "tools/executor/exec_server.py"
+      },
+      {
+        "source": "tools/executor/native_processes.py",
+        "line": 24,
+        "kind": "absolute",
+        "module": "tools.executor.native_environment",
+        "resolved": "tools/executor/native_environment.py"
+      },
+      {
+        "source": "tools/executor/native_processes.py",
+        "line": 25,
+        "kind": "absolute",
+        "module": "tools.executor.native_process_policy",
+        "resolved": "tools/executor/native_process_policy.py"
+      },
+      {
+        "source": "tools/executor/native_processes_android_fixture.py",
+        "line": 16,
+        "kind": "absolute",
+        "module": "tools.executor.native_files_rpc_fixture",
+        "resolved": "tools/executor/native_files_rpc_fixture.py"
+      },
+      {
+        "source": "tools/executor/native_runtime_acquisition.py",
+        "line": 16,
+        "kind": "absolute",
+        "module": "tools.executor.exec_server",
+        "resolved": "tools/executor/exec_server.py"
+      },
+      {
+        "source": "tools/executor/native_runtime_acquisition.py",
+        "line": 17,
+        "kind": "absolute",
+        "module": "tools.executor.native_bootstrap_channel",
+        "resolved": "tools/executor/native_bootstrap_channel.py"
+      },
+      {
+        "source": "tools/executor/native_runtime_acquisition.py",
+        "line": 18,
+        "kind": "absolute",
+        "module": "tools.executor.native_bootstrap_files",
+        "resolved": "tools/executor/native_bootstrap_files.py"
+      },
+      {
+        "source": "tools/executor/native_runtime_acquisition.py",
+        "line": 19,
+        "kind": "absolute",
+        "module": "tools.executor.native_host_files",
+        "resolved": "tools/executor/native_host_files.py"
+      },
+      {
+        "source": "tools/executor/native_runtime_acquisition.py",
+        "line": 20,
+        "kind": "absolute",
+        "module": "tools.executor.native_host_files_channel",
+        "resolved": "tools/executor/native_host_files_channel.py"
+      },
+      {
+        "source": "tools/executor/native_runtime_acquisition.py",
+        "line": 21,
+        "kind": "absolute",
+        "module": "tools.executor.native_processes",
+        "resolved": "tools/executor/native_processes.py"
+      },
+      {
+        "source": "tools/executor/native_runtime_acquisition.py",
+        "line": 22,
+        "kind": "absolute",
+        "module": "tools.executor.native_path_uri",
+        "resolved": "tools/executor/native_path_uri.py"
+      },
+      {
+        "source": "tools/executor/native_runtime_acquisition.py",
+        "line": 103,
+        "kind": "absolute",
+        "module": "tools.executor.native_host_bootstrap_v2",
+        "resolved": "tools/executor/native_host_bootstrap_v2.py"
+      },
+      {
+        "source": "tools/executor/native_runtime_startup.py",
+        "line": 11,
+        "kind": "absolute",
+        "module": "tools.executor.native_path_uri",
+        "resolved": "tools/executor/native_path_uri.py"
+      },
+      {
+        "source": "tools/executor/ordinary_uid_files.py",
+        "line": 25,
+        "kind": "absolute",
+        "module": "tools.executor.exec_server",
+        "resolved": "tools/executor/exec_server.py"
+      },
+      {
+        "source": "tools/executor/policy_intent.py",
+        "line": 13,
+        "kind": "absolute",
+        "module": "tools.policy.managed_policy",
+        "resolved": "tools/policy/managed_policy.py"
+      },
+      {
+        "source": "tools/executor/private_exec_broker.py",
+        "line": 22,
+        "kind": "absolute",
+        "module": "tools.executor.exec_server",
+        "resolved": "tools/executor/exec_server.py"
+      },
+      {
+        "source": "tools/executor/private_exec_broker.py",
+        "line": 23,
+        "kind": "absolute",
+        "module": "tools.executor.native_files",
+        "resolved": "tools/executor/native_files.py"
+      },
+      {
+        "source": "tools/executor/private_exec_broker.py",
+        "line": 339,
+        "kind": "absolute",
+        "module": "tools.executor.native_processes",
+        "resolved": "tools/executor/native_processes.py"
+      },
+      {
+        "source": "tools/executor/private_exec_broker.py",
+        "line": 188,
+        "kind": "absolute",
+        "module": "tools.executor.native_executor_backend",
+        "resolved": "tools/executor/native_executor_backend.py"
+      },
+      {
+        "source": "tools/executor/private_exec_broker.py",
+        "line": 195,
+        "kind": "absolute",
+        "module": "tools.executor.native_file_streams",
+        "resolved": "tools/executor/native_file_streams.py"
+      },
+      {
+        "source": "tools/executor/private_exec_fixture.py",
+        "line": 22,
+        "kind": "absolute",
+        "module": "tools.executor.native_files",
+        "resolved": "tools/executor/native_files.py"
+      },
+      {
+        "source": "tools/executor/private_exec_fixture.py",
+        "line": 23,
+        "kind": "absolute",
+        "module": "tools.executor.native_files_rpc_fixture",
+        "resolved": "tools/executor/native_files_rpc_fixture.py"
+      },
+      {
+        "source": "tools/executor/qualify_bootstrap_isolation.py",
+        "line": 26,
+        "kind": "absolute",
+        "module": "tools.executor.exec_server",
+        "resolved": "tools/executor/exec_server.py"
+      },
+      {
+        "source": "tools/executor/qualify_bootstrap_isolation.py",
+        "line": 27,
+        "kind": "absolute",
+        "module": "tools.executor.native_bootstrap_files",
+        "resolved": "tools/executor/native_bootstrap_files.py"
+      },
+      {
+        "source": "tools/executor/qualify_bootstrap_isolation.py",
+        "line": 28,
+        "kind": "absolute",
+        "module": "tools.executor.native_bootstrap_channel",
+        "resolved": "tools/executor/native_bootstrap_channel.py"
+      },
+      {
+        "source": "tools/executor/qualify_bootstrap_isolation.py",
+        "line": 29,
+        "kind": "absolute",
+        "module": "tools.executor.native_executor_backend",
+        "resolved": "tools/executor/native_executor_backend.py"
+      },
+      {
+        "source": "tools/executor/qualify_bootstrap_isolation.py",
+        "line": 30,
+        "kind": "dynamic-literal",
+        "module": "tools.executor.bionic-supervisor.processes",
+        "resolved": "tools/executor/bionic-supervisor/processes.py"
+      },
+      {
+        "source": "tools/executor/test_app_server_routing.py",
+        "line": 5,
+        "kind": "absolute",
+        "module": "tools.executor.app_server_routing",
+        "resolved": "tools/executor/app_server_routing.py"
+      },
+      {
+        "source": "tools/executor/test_app_server_routing.py",
+        "line": 6,
+        "kind": "absolute",
+        "module": "tools.executor.exec_server",
+        "resolved": "tools/executor/exec_server.py"
+      },
+      {
+        "source": "tools/executor/test_exec_server.py",
+        "line": 15,
+        "kind": "absolute",
+        "module": "tools.executor.exec_server",
+        "resolved": "tools/executor/exec_server.py"
+      },
+      {
+        "source": "tools/executor/test_native_bootstrap_channel.py",
+        "line": 11,
+        "kind": "absolute",
+        "module": "tools.executor",
+        "resolved": "tools/executor/__init__.py"
+      },
+      {
+        "source": "tools/executor/test_native_bootstrap_channel.py",
+        "line": 11,
+        "kind": "package-child",
+        "module": "tools.executor.test_native_bootstrap_files",
+        "resolved": "tools/executor/test_native_bootstrap_files.py"
+      },
+      {
+        "source": "tools/executor/test_native_bootstrap_channel.py",
+        "line": 12,
+        "kind": "absolute",
+        "module": "tools.executor.native_bootstrap_channel",
+        "resolved": "tools/executor/native_bootstrap_channel.py"
+      },
+      {
+        "source": "tools/executor/test_native_bootstrap_files.py",
+        "line": 17,
+        "kind": "absolute",
+        "module": "tools.executor.exec_server",
+        "resolved": "tools/executor/exec_server.py"
+      },
+      {
+        "source": "tools/executor/test_native_bootstrap_files.py",
+        "line": 18,
+        "kind": "absolute",
+        "module": "tools.executor.native_bootstrap_files",
+        "resolved": "tools/executor/native_bootstrap_files.py"
+      },
+      {
+        "source": "tools/executor/test_native_bootstrap_files.py",
+        "line": 19,
+        "kind": "absolute",
+        "module": "tools.executor.native_executor_backend",
+        "resolved": "tools/executor/native_executor_backend.py"
+      },
+      {
+        "source": "tools/executor/test_native_bootstrap_files.py",
+        "line": 20,
+        "kind": "absolute",
+        "module": "tools.executor.native_files",
+        "resolved": "tools/executor/native_files.py"
+      },
+      {
+        "source": "tools/executor/test_native_bootstrap_files.py",
+        "line": 21,
+        "kind": "absolute",
+        "module": "tools.executor.test_policy_intent",
+        "resolved": "tools/executor/test_policy_intent.py"
+      },
+      {
+        "source": "tools/executor/test_native_bootstrap_files.py",
+        "line": 27,
+        "kind": "dynamic-literal",
+        "module": "tools.executor.bionic-supervisor.processes",
+        "resolved": "tools/executor/bionic-supervisor/processes.py"
+      },
+      {
+        "source": "tools/executor/test_native_client.py",
+        "line": 8,
+        "kind": "absolute",
+        "module": "tools.executor.native_client",
+        "resolved": "tools/executor/native_client.py"
+      },
+      {
+        "source": "tools/executor/test_native_environment.py",
+        "line": 4,
+        "kind": "absolute",
+        "module": "tools.executor.exec_server",
+        "resolved": "tools/executor/exec_server.py"
+      },
+      {
+        "source": "tools/executor/test_native_environment.py",
+        "line": 5,
+        "kind": "absolute",
+        "module": "tools.executor.native_environment",
+        "resolved": "tools/executor/native_environment.py"
+      },
+      {
+        "source": "tools/executor/test_native_environment_live.py",
+        "line": 11,
+        "kind": "absolute",
+        "module": "tools.executor",
+        "resolved": "tools/executor/__init__.py"
+      },
+      {
+        "source": "tools/executor/test_native_environment_live.py",
+        "line": 11,
+        "kind": "package-child",
+        "module": "tools.executor.test_native_processes_live",
+        "resolved": "tools/executor/test_native_processes_live.py"
+      },
+      {
+        "source": "tools/executor/test_native_environment_live.py",
+        "line": 12,
+        "kind": "absolute",
+        "module": "tools.executor.exec_server",
+        "resolved": "tools/executor/exec_server.py"
+      },
+      {
+        "source": "tools/executor/test_native_environment_live.py",
+        "line": 13,
+        "kind": "absolute",
+        "module": "tools.executor.native_environment",
+        "resolved": "tools/executor/native_environment.py"
+      },
+      {
+        "source": "tools/executor/test_native_environment_live.py",
+        "line": 14,
+        "kind": "absolute",
+        "module": "tools.executor.native_processes",
+        "resolved": "tools/executor/native_processes.py"
+      },
+      {
+        "source": "tools/executor/test_native_environment_live.py",
+        "line": 15,
+        "kind": "absolute",
+        "module": "tools.executor.test_native_environment",
+        "resolved": "tools/executor/test_native_environment.py"
+      },
+      {
+        "source": "tools/executor/test_native_executor_transport.py",
+        "line": 25,
+        "kind": "absolute",
+        "module": "tools.executor.test_native_processes_live",
+        "resolved": "tools/executor/test_native_processes_live.py"
+      },
+      {
+        "source": "tools/executor/test_native_executor_transport.py",
+        "line": 409,
+        "kind": "absolute",
+        "module": "tools.executor.native_processes",
+        "resolved": "tools/executor/native_processes.py"
+      },
+      {
+        "source": "tools/executor/test_native_executor_transport.py",
+        "line": 216,
+        "kind": "absolute",
+        "module": "tools.executor.native_files_rpc_fixture",
+        "resolved": "tools/executor/native_files_rpc_fixture.py"
+      },
+      {
+        "source": "tools/executor/test_native_file_streams.py",
+        "line": 14,
+        "kind": "absolute",
+        "module": "tools.executor.exec_server",
+        "resolved": "tools/executor/exec_server.py"
+      },
+      {
+        "source": "tools/executor/test_native_file_streams.py",
+        "line": 15,
+        "kind": "absolute",
+        "module": "tools.executor.native_files",
+        "resolved": "tools/executor/native_files.py"
+      },
+      {
+        "source": "tools/executor/test_native_file_streams.py",
+        "line": 16,
+        "kind": "absolute",
+        "module": "tools.executor.native_file_streams",
+        "resolved": "tools/executor/native_file_streams.py"
+      },
+      {
+        "source": "tools/executor/test_native_file_streams.py",
+        "line": 17,
+        "kind": "absolute",
+        "module": "tools.executor.test_policy_intent",
+        "resolved": "tools/executor/test_policy_intent.py"
+      },
+      {
+        "source": "tools/executor/test_native_files_fixture_lifecycle.py",
+        "line": 10,
+        "kind": "absolute",
+        "module": "tools.executor.native_files_rpc_fixture",
+        "resolved": "tools/executor/native_files_rpc_fixture.py"
+      },
+      {
+        "source": "tools/executor/test_native_files_live.py",
+        "line": 14,
+        "kind": "absolute",
+        "module": "tools.executor.exec_server",
+        "resolved": "tools/executor/exec_server.py"
+      },
+      {
+        "source": "tools/executor/test_native_files_live.py",
+        "line": 15,
+        "kind": "absolute",
+        "module": "tools.executor.native_files",
+        "resolved": "tools/executor/native_files.py"
+      },
+      {
+        "source": "tools/executor/test_native_files_live.py",
+        "line": 16,
+        "kind": "absolute",
+        "module": "tools.executor.test_policy_intent",
+        "resolved": "tools/executor/test_policy_intent.py"
+      },
+      {
+        "source": "tools/executor/test_native_processes_live.py",
+        "line": 15,
+        "kind": "absolute",
+        "module": "tools.executor.exec_server",
+        "resolved": "tools/executor/exec_server.py"
+      },
+      {
+        "source": "tools/executor/test_native_processes_live.py",
+        "line": 16,
+        "kind": "absolute",
+        "module": "tools.executor.native_processes",
+        "resolved": "tools/executor/native_processes.py"
+      },
+      {
+        "source": "tools/executor/test_native_processes_live.py",
+        "line": 350,
+        "kind": "absolute",
+        "module": "tools.executor.native_files",
+        "resolved": "tools/executor/native_files.py"
+      },
+      {
+        "source": "tools/executor/test_native_processes_live.py",
+        "line": 413,
+        "kind": "absolute",
+        "module": "tools.executor.native_processes",
+        "resolved": "tools/executor/native_processes.py"
+      },
+      {
+        "source": "tools/executor/test_native_processes_live.py",
+        "line": 457,
+        "kind": "absolute",
+        "module": "tools.executor.native_process_policy",
+        "resolved": "tools/executor/native_process_policy.py"
+      },
+      {
+        "source": "tools/executor/test_native_processes_live.py",
+        "line": 458,
+        "kind": "absolute",
+        "module": "tools.executor.native_processes",
+        "resolved": "tools/executor/native_processes.py"
+      },
+      {
+        "source": "tools/executor/test_native_processes_live.py",
+        "line": 524,
+        "kind": "absolute",
+        "module": "tools.executor.native_processes",
+        "resolved": "tools/executor/native_processes.py"
+      },
+      {
+        "source": "tools/executor/test_native_processes_live.py",
+        "line": 554,
+        "kind": "absolute",
+        "module": "tools.executor.native_files",
+        "resolved": "tools/executor/native_files.py"
+      },
+      {
+        "source": "tools/executor/test_policy_intent.py",
+        "line": 8,
+        "kind": "absolute",
+        "module": "tools.executor.policy_intent",
+        "resolved": "tools/executor/policy_intent.py"
+      },
+      {
+        "source": "tools/executor/test_policy_intent.py",
+        "line": 9,
+        "kind": "absolute",
+        "module": "tools.policy.managed_policy",
+        "resolved": "tools/policy/managed_policy.py"
+      },
+      {
+        "source": "tools/executor/test_private_exec_broker.py",
+        "line": 19,
+        "kind": "absolute",
+        "module": "tools.executor.native_files",
+        "resolved": "tools/executor/native_files.py"
+      },
+      {
+        "source": "tools/executor/test_private_session_owner.py",
+        "line": 17,
+        "kind": "absolute",
+        "module": "tools.executor.private_exec_broker",
+        "resolved": "tools/executor/private_exec_broker.py"
+      },
+      {
+        "source": "tools/executor/verify_app_server_adapter.py",
+        "line": 17,
+        "kind": "absolute",
+        "module": "tools.executor.verify_official_environment",
+        "resolved": "tools/executor/verify_official_environment.py"
+      },
+      {
+        "source": "tools/executor/verify_host_rpc_mux.py",
+        "line": 20,
+        "kind": "absolute",
+        "module": "tools.executor.test_native_executor_transport",
+        "resolved": "tools/executor/test_native_executor_transport.py"
+      },
+      {
+        "source": "foldgpt_native_bootstrap.py",
+        "line": 17,
+        "kind": "absolute",
+        "module": "foldgpt_shizuku_bootstrap",
+        "resolved": "foldgpt_shizuku_bootstrap.py"
+      },
+      {
+        "source": "foldgpt_native_bootstrap.py",
+        "line": 87,
+        "kind": "absolute",
+        "module": "tools.executor.native_path_uri",
+        "resolved": "tools/executor/native_path_uri.py"
+      },
+      {
+        "source": "foldgpt_native_bootstrap.py",
+        "line": 159,
+        "kind": "absolute",
+        "module": "tools.executor.native_runtime_acquisition",
+        "resolved": "tools/executor/native_runtime_acquisition.py"
+      },
+      {
+        "source": "foldgpt_native_bootstrap.py",
+        "line": 160,
+        "kind": "absolute",
+        "module": "tools.executor.native_runtime_startup",
+        "resolved": "tools/executor/native_runtime_startup.py"
+      },
+      {
+        "source": "foldgpt_native_bootstrap.py",
+        "line": 161,
+        "kind": "absolute",
+        "module": "tools.executor.native_path_uri",
+        "resolved": "tools/executor/native_path_uri.py"
+      },
+      {
+        "source": "foldgpt_native_bootstrap.py",
+        "line": 162,
+        "kind": "absolute",
+        "module": "tools.executor.native_host_bootstrap_v2",
+        "resolved": "tools/executor/native_host_bootstrap_v2.py"
+      },
+      {
+        "source": "foldgpt_native_bootstrap.py",
+        "line": 163,
+        "kind": "absolute",
+        "module": "tools.executor.private_exec_broker",
+        "resolved": "tools/executor/private_exec_broker.py"
+      },
+      {
+        "source": "foldgpt_shizuku_bootstrap.py",
+        "line": 188,
+        "kind": "absolute",
+        "module": "tools.executor.exec_server",
+        "resolved": "tools/executor/exec_server.py"
+      },
+      {
+        "source": "foldgpt_shizuku_bootstrap.py",
+        "line": 189,
+        "kind": "absolute",
+        "module": "tools.executor.private_exec_broker",
+        "resolved": "tools/executor/private_exec_broker.py"
+      }
+    ],
+    "nonliteralDynamic": [
+      {
+        "source": "tools/executor/collect-native-executor.py",
+        "line": 22,
+        "expression": "importlib.util.spec_from_file_location('lifecycle_collector', SHARED)",
+        "reviewedResolution": "tools/executor/collect-native-processes.py"
+      },
+      {
+        "source": "tools/executor/native-runner-client-live-test.py",
+        "line": 21,
+        "expression": "importlib.util.spec_from_file_location('runner_fixture', HERE / 'native-runner-test.py')",
+        "reviewedResolution": "tools/executor/native-runner-test.py"
+      },
+      {
+        "source": "tools/executor/test_collect_native_executor.py",
+        "line": 9,
+        "expression": "importlib.util.spec_from_file_location('composite_collector', Path(__file__).with_name('collect-native-executor.py'))",
+        "reviewedResolution": "tools/executor/collect-native-executor.py"
+      },
+      {
+        "source": "tools/executor/test_collect_native_processes.py",
+        "line": 13,
+        "expression": "importlib.util.spec_from_file_location('native_process_collector', Path(__file__).with_name('collect-native-processes.py'))",
+        "reviewedResolution": "tools/executor/collect-native-processes.py"
+      },
+      {
+        "source": "tools/executor/test_native_client.py",
+        "line": 82,
+        "expression": "__import__('time')",
+        "reviewedResolution": "Python standard library time"
+      },
+      {
+        "source": "foldgpt_native_bootstrap.py",
+        "line": 176,
+        "expression": "importlib.import_module(FACTORY.split(':', 1)[0])",
+        "reviewedResolution": "tools/executor/bionic-supervisor/factory.py"
+      },
+      {
+        "source": "foldgpt_shizuku_bootstrap.py",
+        "line": 208,
+        "expression": "importlib.import_module(module_name)",
+        "reviewedResolution": "tools/executor/bionic-supervisor/factory.py"
+      }
+    ],
+    "scope": "All packaged local imports, including relative and dynamic literal imports; external standard library not reimplemented"
+  },
+  "directBuild": {
+    "ndk": "29.0.14206865",
+    "apiLevel": 35,
+    "sourceCorrelation": [
+      {
+        "path": "build-direct-windows.py",
+        "sha256": "fe6e28c22eb84b54ddf0cdd924a3e8a3ff968975e5bbc2d777097074cf59305e",
+        "ciCorrelation": "byte-identical",
+        "ciSha256": "fe6e28c22eb84b54ddf0cdd924a3e8a3ff968975e5bbc2d777097074cf59305e"
+      },
+      {
+        "path": "check-elf.py",
+        "sha256": "1e87a9e1f8d6bd93645b1b5a258cbb48d5b85710bb03dffe3b6de0c3432f9b2a",
+        "ciCorrelation": "not-in-native-helper-manifest",
+        "ciSha256": null
+      },
+      {
+        "path": "direct-api.md",
+        "sha256": "d47553ac4b92c264dd3adb98a6613a6f1d21526d78df8caa44a1e78dfd6bf136",
+        "ciCorrelation": "not-in-native-helper-manifest",
+        "ciSha256": null
+      },
+      {
+        "path": "direct-design.md",
+        "sha256": "17871b54448dbb79a91fdbfae620d700e4126f8da6421b3d220c83ed36fe4b2e",
+        "ciCorrelation": "not-in-native-helper-manifest",
+        "ciSha256": null
+      },
+      {
+        "path": "direct-runner.c",
+        "sha256": "7388a6298ec6b853db661a86fbe0e43bd20690bbfef36e275053660ccd9f04bd",
+        "ciCorrelation": "byte-identical",
+        "ciSha256": "7388a6298ec6b853db661a86fbe0e43bd20690bbfef36e275053660ccd9f04bd"
+      },
+      {
+        "path": "direct-worker.c",
+        "sha256": "3502d62fbec92b9478f93d122eeb20dd9b06e2bfe204cac186464cde5892a70d",
+        "ciCorrelation": "byte-identical",
+        "ciSha256": "3502d62fbec92b9478f93d122eeb20dd9b06e2bfe204cac186464cde5892a70d"
+      },
+      {
+        "path": "direct_wire.py",
+        "sha256": "e7ae3049cb506f4ef55e08684ee52ac1ef7baadc5d15ce13bb8dfe5f8ef10f1e",
+        "ciCorrelation": "byte-identical",
+        "ciSha256": "e7ae3049cb506f4ef55e08684ee52ac1ef7baadc5d15ce13bb8dfe5f8ef10f1e"
+      },
+      {
+        "path": "test_direct_runner.py",
+        "sha256": "8dea0dc4d6c58b3d0858d1217cef27dc44c08119f5fe8b11e0b567169cbba53c",
+        "ciCorrelation": "byte-identical",
+        "ciSha256": "8dea0dc4d6c58b3d0858d1217cef27dc44c08119f5fe8b11e0b567169cbba53c"
+      }
+    ],
+    "androidElfSha256": "3569e0d2971c381a8118cd4b97ce7ddb2569846d39ccc99e92ec67a203f31bfb",
+    "linuxElfSha256": "b706eb218e76bcd1ae5bfae305533c7d44973e9d4dbb2e732c93518c0bcc553f",
+    "sameBinaryClaim": false,
+    "explanation": "CI compiles Linux x86_64/glibc; APK contains independently compiled NDK AArch64/Bionic ELF from correlated source."
+  },
+  "admissionBuild": {
+    "schema": "foldgpt.native-admission-build.v1",
+    "androidExecuted": false,
+    "sourceSha256": "f45e9fb4ef47f88d1784c07a6c07021c3ded9a78083773790a5459a9737c8923",
+    "inventorySha256": "90cd6327b42bbd2b38b698209c80a5ed0963a0b9dc5d395c83c5c2f4dd9878a3",
+    "cryptoSha256": "a0dd60d620cd61bac7306a8293bcb82103971a4dcfc8c11fd55be3653beb42c4",
+    "executableSha256": "a97360c7545216e940034d716b2f44f9e3d3d7d85a67a80267ab2a3f1c2599e3",
+    "runtimeHome": "/data/user/0/app.foldgpt/files/native-runtime-v1/python",
+    "ndk": "29.0.14206865"
+  },
+  "ciCommandCount": 25,
+  "ciUnittestCount": 190,
+  "ciSummary": {
+    "androidExecution": false,
+    "failures": [],
+    "scope": "Real nonroot Linux C/Python workers, files, permissions, credentials and lifecycle",
+    "success": true
+  },
+  "ciScope": "Native Python job only; engine job explicitly skipped in CI3, no Rust or Android result inferred.",
+  "signatures": {
+    "r21": {
+      "certificateSha256": "30930ffce7c10b673e95e69f2d78bb9e60aa71132db3c21cdc15cf56df77fa16",
+      "v2Verified": true,
+      "debugCertificate": true
+    },
+    "r20": {
+      "certificateSha256": "30930ffce7c10b673e95e69f2d78bb9e60aa71132db3c21cdc15cf56df77fa16",
+      "v2Verified": true,
+      "debugCertificate": true
+    }
+  },
+  "apkPackage": "package: name='app.foldgpt' versionCode='11' versionName='0.2.0-dev' platformBuildVersionName='17' platformBuildVersionCode='37' compileSdkVersion='37' compileSdkVersionCodename='17'",
+  "fullReport": {
+    "path": "work/ordinary-uid-20260908/r21-independent-package-review.json",
+    "sha256": "25db9ea0aa21edb3924028b5c5849efb682bd0c18ae4c99d02bc2d1fc2cc3428"
+  }
+}

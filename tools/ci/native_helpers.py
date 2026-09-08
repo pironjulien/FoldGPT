@@ -21,6 +21,8 @@ def build(project: Path, destination: Path) -> None:
     inputs = {
         "runner": "bionic-supervisor/runner.c",
         "host-runner": "bionic-supervisor/host-runner.c",
+        "direct-runner": "bionic-supervisor/direct-runner.c",
+        "direct-worker": "bionic-supervisor/direct-worker.c",
         "host-search-only-cwd": "bionic-supervisor/test_host_search_only_cwd.c",
         "native-files": "native-files.c",
         "native-file-handle": "native-file-handle.c",
@@ -37,7 +39,7 @@ def build(project: Path, destination: Path) -> None:
         shutil.copyfile(project / "tools/executor" / relative, output)
     common = ["gcc", "-std=c11", "-O2", "-Wall", "-Wextra", "-Werror", "-I", str(source)]
     for name, relative in inputs.items():
-        extra = ["-pthread"] if name in ("qualification-worker", "executable-metadata-test") else []
+        extra = ["-pthread"] if name in ("qualification-worker", "executable-metadata-test", "direct-worker") else []
         subprocess.run([*common, *extra, str(source / relative), "-o", str(destination / name)], check=True)
     # The same two narrowly scoped fault fixtures as the canonical host builder.
     original = (source / "bionic-supervisor/runner.c").read_text()

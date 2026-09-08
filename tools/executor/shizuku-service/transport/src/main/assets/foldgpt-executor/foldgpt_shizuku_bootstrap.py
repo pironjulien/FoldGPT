@@ -98,6 +98,11 @@ def installed_backend_options(config):
     """
     options = dict(config["backendOptions"])
     libraries = config.get("nativeLibraries")
+    if "ordinaryUid" in options:
+        direct = options["ordinaryUid"]
+        if (type(direct) is not dict or set(direct) != {"processRunner", "limits"}
+                or type(direct["limits"]) is not dict or libraries is None):
+            raise ValueError("Ordinary UID runner requires the installed native inventory")
     if "cwdShim" not in options and libraries is None:
         return options
     executable = os.readlink("/proc/self/exe")
@@ -119,6 +124,9 @@ def installed_backend_options(config):
 
         for key in ("helper", "handleHelper", "processRunner"):
             options[key] = installed(options[key])
+        if "ordinaryUid" in options:
+            options["ordinaryUid"] = {**options["ordinaryUid"],
+                                     "processRunner": installed(options["ordinaryUid"]["processRunner"])}
         options["executables"] = {name: installed(path) for name, path in options["executables"].items()}
         options["runtime"] = [{**grant, "path": installed(grant["path"]) if grant["path"].startswith("@")
                                else grant["path"]} for grant in options["runtime"]]

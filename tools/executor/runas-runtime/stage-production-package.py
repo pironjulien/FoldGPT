@@ -1,6 +1,7 @@
 """Package the explicit native candidate without claiming end-to-end qualification."""
 import argparse
 import hashlib
+import importlib.util
 import json
 from pathlib import Path
 import shutil
@@ -19,6 +20,8 @@ def main():
     parser.add_argument("--admission-build", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--host-v2", action="store_true")
+    parser.add_argument("--ordinary-uid", action="store_true",
+                        help="Explicitly include ordinary Android UID execution for upstream Full access")
     args = parser.parse_args()
     stage, admission, output = (getattr(args, name).resolve() for name in ("native_stage", "admission_build", "output"))
     for path in (stage, admission, output):
@@ -34,6 +37,21 @@ def main():
     bootstrap = (admission / "libfoldgpt_native_bootstrap.so").read_bytes()
     if digest(bootstrap) != build["executableSha256"]:
         raise ValueError("Admission build digest differs")
+    direct_name = "libfoldgpt_direct_runner.so"
+    if args.ordinary_uid and ("ordinaryUidBuild" not in inventory
+            or not (stage / "jniLibs/arm64-v8a" / direct_name).is_file()):
+        raise ValueError("Ordinary UID selection requires its source-attested native-stage runner")
+    if args.ordinary_uid:
+        provenance = inventory["ordinaryUidBuild"]
+        if type(provenance) is not dict or type(provenance.get("path")) is not str:
+            raise ValueError("Ordinary UID build provenance is malformed")
+        spec = importlib.util.spec_from_file_location("foldgpt_package_native_stage",
+            Path(__file__).with_name("stage-production-native.py"))
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        runner, actual = module.production_direct(ROOT / provenance["path"])
+        if provenance != actual or (stage / "jniLibs/arm64-v8a" / direct_name).read_bytes() != runner:
+            raise ValueError("Ordinary UID stage differs from its actual build provenance and compiled runner")
     output.mkdir(parents=True, exist_ok=False)
     shutil.copytree(stage / "assets", output / "assets")
     shutil.copytree(stage / "jniLibs", output / "jniLibs")
@@ -63,6 +81,8 @@ def main():
                 ("/apex/com.android.tzdata/etc/tz/tzdata", False), (runtime_path, False))],
             "limits": {},
             "cwdShim": {"path": marker + "libfoldgpt_bionic_cwd.so", "sha256": native["libfoldgpt_bionic_cwd.so"]}}}
+    if args.ordinary_uid:
+        config["backendOptions"]["ordinaryUid"] = {"processRunner": marker + direct_name, "limits": {}}
     (assets / "foldgpt-executor-deployment.json").write_text(json.dumps(config, indent=2) + "\n")
     if args.host_v2:
         runner = "libfoldgpt_host_supervisor.so"
@@ -79,6 +99,12 @@ def main():
     source_paths.add("tools/executor/native_host_channel_v2.py")
     source_paths.update("tools/executor/bionic-supervisor/" + name + ".py" for name in (
         "host_policy", "host_wire", "host_processes"))
+    # Keep the source import closure complete in both candidates. Only the
+    # attested deployment option selects this profile; shipping code cannot.
+    source_paths.update("tools/executor/" + name + ".py" for name in (
+        "native_model_profiles", "ordinary_uid_files"))
+    source_paths.update("tools/executor/bionic-supervisor/" + name + ".py" for name in (
+        "direct_processes", "direct_wire"))
     source_manifest = []
     for relative in sorted(source_paths):
         source = ROOT / relative
@@ -108,6 +134,8 @@ def main():
         "evidenceSha256": digest(evidence)}
     if args.host_v2:
         qualification["hostDeploymentSha256"] = digest((assets / "foldgpt-host-deployment.json").read_bytes())
+    if args.ordinary_uid:
+        qualification["ordinaryUidBuild"] = inventory["ordinaryUidBuild"]
     (assets / "foldgpt-executor-qualification.json").write_text(json.dumps(qualification, indent=2) + "\n")
     print(json.dumps({"output": str(output), "sources": len(source_manifest), "nativeLibraries": len(native),
                       "androidProductionExecuted": False}))

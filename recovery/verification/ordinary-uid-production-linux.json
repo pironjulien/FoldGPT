@@ -1,0 +1,488 @@
+{
+  "schema": "foldgpt.production-ordinary-uid-linux-evidence.v1",
+  "androidExecution": false,
+  "officialEditorQualified": false,
+  "directRunnerSha256": "b706eb218e76bcd1ae5bfae305533c7d44973e9d4dbb2e732c93518c0bcc553f",
+  "qualification": {
+    "schema": "foldgpt.production-ordinary-uid-qualification.v1",
+    "passed": true,
+    "officialEditorQualified": false,
+    "javaCleanupReceiptRequired": true,
+    "controllerPid": 3113,
+    "controllerUid": 1001,
+    "startupOwner": {
+      "pid": 3113,
+      "uid": 1001,
+      "gid": 1001
+    },
+    "directory": "/var/tmp/foldgpt-production-ymr_hhz2/workspace/.ordinary-uid-qualification-12153a4d62454348beabc7547e27c6b1",
+    "modelFileCases": [
+      {
+        "method": "fs/createDirectory",
+        "case": "create-reserved-project",
+        "context": "absent",
+        "path": "file:///var/tmp/foldgpt-production-ymr_hhz2/workspace/.ordinary-uid-qualification-12153a4d62454348beabc7547e27c6b1",
+        "passed": true
+      },
+      {
+        "method": "fs/createDirectory",
+        "case": "create-reserved-project",
+        "context": "absent",
+        "path": "file:///var/tmp/foldgpt-production-ymr_hhz2/workspace/.ordinary-uid-qualification-12153a4d62454348beabc7547e27c6b1/app",
+        "passed": true
+      },
+      {
+        "method": "fs/createDirectory",
+        "case": "create-reserved-project",
+        "context": "absent",
+        "path": "file:///var/tmp/foldgpt-production-ymr_hhz2/workspace/.ordinary-uid-qualification-12153a4d62454348beabc7547e27c6b1/tests",
+        "passed": true
+      },
+      {
+        "method": "fs/writeFile",
+        "case": "create-python-source",
+        "context": "null",
+        "path": "file:///var/tmp/foldgpt-production-ymr_hhz2/workspace/.ordinary-uid-qualification-12153a4d62454348beabc7547e27c6b1/app/addition.py",
+        "passed": true
+      },
+      {
+        "method": "fs/readFile",
+        "case": "read-model-source",
+        "context": "disabled",
+        "path": "file:///var/tmp/foldgpt-production-ymr_hhz2/workspace/.ordinary-uid-qualification-12153a4d62454348beabc7547e27c6b1/app/addition.py",
+        "passed": true
+      },
+      {
+        "method": "fs/writeFile",
+        "case": "create-python-source",
+        "context": "disabled",
+        "path": "file:///var/tmp/foldgpt-production-ymr_hhz2/workspace/.ordinary-uid-qualification-12153a4d62454348beabc7547e27c6b1/app/__init__.py",
+        "passed": true
+      },
+      {
+        "method": "fs/readFile",
+        "case": "read-model-source",
+        "context": "disabled",
+        "path": "file:///var/tmp/foldgpt-production-ymr_hhz2/workspace/.ordinary-uid-qualification-12153a4d62454348beabc7547e27c6b1/app/__init__.py",
+        "passed": true
+      },
+      {
+        "method": "fs/writeFile",
+        "case": "create-python-source",
+        "context": "null",
+        "path": "file:///var/tmp/foldgpt-production-ymr_hhz2/workspace/.ordinary-uid-qualification-12153a4d62454348beabc7547e27c6b1/app/__main__.py",
+        "passed": true
+      },
+      {
+        "method": "fs/readFile",
+        "case": "read-model-source",
+        "context": "disabled",
+        "path": "file:///var/tmp/foldgpt-production-ymr_hhz2/workspace/.ordinary-uid-qualification-12153a4d62454348beabc7547e27c6b1/app/__main__.py",
+        "passed": true
+      },
+      {
+        "method": "fs/writeFile",
+        "case": "create-python-source",
+        "context": "disabled",
+        "path": "file:///var/tmp/foldgpt-production-ymr_hhz2/workspace/.ordinary-uid-qualification-12153a4d62454348beabc7547e27c6b1/tests/test_addition.py",
+        "passed": true
+      },
+      {
+        "method": "fs/readFile",
+        "case": "read-model-source",
+        "context": "disabled",
+        "path": "file:///var/tmp/foldgpt-production-ymr_hhz2/workspace/.ordinary-uid-qualification-12153a4d62454348beabc7547e27c6b1/tests/test_addition.py",
+        "passed": true
+      },
+      {
+        "method": "fs/canonicalize",
+        "case": "canonical-project",
+        "context": "null",
+        "path": "file:///var/tmp/foldgpt-production-ymr_hhz2/workspace/.ordinary-uid-qualification-12153a4d62454348beabc7547e27c6b1",
+        "passed": true
+      },
+      {
+        "method": "fs/readFile",
+        "case": "model-built-archive",
+        "context": "null",
+        "path": "file:///var/tmp/foldgpt-production-ymr_hhz2/workspace/.ordinary-uid-qualification-12153a4d62454348beabc7547e27c6b1/addition.pyz",
+        "passed": true
+      }
+    ],
+    "modelCases": [
+      {
+        "case": "bash-login-native-identity",
+        "command": [
+          "/usr/bin/bash",
+          "-lc",
+          "python3 -I -B -c 'import json,os,platform,sys; print(json.dumps({'\"'\"'platform'\"'\"':sys.platform,'\"'\"'machine'\"'\"':platform.machine(),'\"'\"'uid'\"'\"':os.getuid(),'\"'\"'pid'\"'\"':os.getpid(),'\"'\"'cwd'\"'\"':os.getcwd(),'\"'\"'executable'\"'\"':sys.executable}))'"
+        ],
+        "cwd": "/var/tmp/foldgpt-production-ymr_hhz2/workspace/.ordinary-uid-qualification-12153a4d62454348beabc7547e27c6b1",
+        "processId": "ordinary-cli-a8f080bcd187475fbec28f5eecd10ee1",
+        "channel": "exec",
+        "sandboxField": "absent",
+        "admitted": true,
+        "closed": true,
+        "passed": true,
+        "start": {
+          "processId": "ordinary-cli-a8f080bcd187475fbec28f5eecd10ee1",
+          "sandboxType": "none"
+        },
+        "result": {
+          "nextSeq": 4,
+          "exited": true,
+          "exitCode": 0,
+          "closed": true,
+          "failure": null,
+          "sandboxDenied": false
+        },
+        "streams": {
+          "stdout": {
+            "bytes": 221,
+            "sha256": "7be92077c26264a5ac261e53d7f56cf3752317ef95d000073c62347c67c60aed",
+            "diagnosticUtf8": "{\"platform\": \"linux\", \"machine\": \"x86_64\", \"uid\": 1001, \"pid\": 3150, \"cwd\": \"/var/tmp/foldgpt-production-ymr_hhz2/workspace/.ordinary-uid-qualification-12153a4d62454348beabc7547e27c6b1\", \"executable\": \"/usr/bin/python3\"}\n",
+            "diagnosticBase64": "eyJwbGF0Zm9ybSI6ICJsaW51eCIsICJtYWNoaW5lIjogIng4Nl82NCIsICJ1aWQiOiAxMDAxLCAicGlkIjogMzE1MCwgImN3ZCI6ICIvdmFyL3RtcC9mb2xkZ3B0LXByb2R1Y3Rpb24teW1yX2hoejIvd29ya3NwYWNlLy5vcmRpbmFyeS11aWQtcXVhbGlmaWNhdGlvbi0xMjE1M2E0ZDYyNDU0MzQ4YmVhYmM3NTQ3ZTI3YzZiMSIsICJleGVjdXRhYmxlIjogIi91c3IvYmluL3B5dGhvbjMifQo=",
+            "diagnosticTruncated": false
+          },
+          "stderr": {
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "diagnosticUtf8": "",
+            "diagnosticBase64": "",
+            "diagnosticTruncated": false
+          }
+        },
+        "workerIdentity": {
+          "platform": "linux",
+          "machine": "x86_64",
+          "uid": 1001,
+          "pid": 3150,
+          "cwd": "/var/tmp/foldgpt-production-ymr_hhz2/workspace/.ordinary-uid-qualification-12153a4d62454348beabc7547e27c6b1",
+          "executable": "/usr/bin/python3"
+        }
+      },
+      {
+        "case": "bash-nonlogin-native-identity",
+        "command": [
+          "/usr/bin/bash",
+          "-c",
+          "python3 -I -B -c 'import json,os,platform,sys; print(json.dumps({'\"'\"'platform'\"'\"':sys.platform,'\"'\"'machine'\"'\"':platform.machine(),'\"'\"'uid'\"'\"':os.getuid(),'\"'\"'pid'\"'\"':os.getpid(),'\"'\"'cwd'\"'\"':os.getcwd(),'\"'\"'executable'\"'\"':sys.executable}))'"
+        ],
+        "cwd": "/var/tmp/foldgpt-production-ymr_hhz2/workspace/.ordinary-uid-qualification-12153a4d62454348beabc7547e27c6b1",
+        "processId": "ordinary-cli-4f69f89b019d42a1a89e13d4393e59c7",
+        "channel": "exec",
+        "sandboxField": "null",
+        "admitted": true,
+        "closed": true,
+        "passed": true,
+        "start": {
+          "processId": "ordinary-cli-4f69f89b019d42a1a89e13d4393e59c7",
+          "sandboxType": "none"
+        },
+        "result": {
+          "nextSeq": 4,
+          "exited": true,
+          "exitCode": 0,
+          "closed": true,
+          "failure": null,
+          "sandboxDenied": false
+        },
+        "streams": {
+          "stdout": {
+            "bytes": 221,
+            "sha256": "181f558a72ac4667e838d9779116fe7b4c852bf6e8de5fede8d17ccf4695a304",
+            "diagnosticUtf8": "{\"platform\": \"linux\", \"machine\": \"x86_64\", \"uid\": 1001, \"pid\": 3164, \"cwd\": \"/var/tmp/foldgpt-production-ymr_hhz2/workspace/.ordinary-uid-qualification-12153a4d62454348beabc7547e27c6b1\", \"executable\": \"/usr/bin/python3\"}\n",
+            "diagnosticBase64": "eyJwbGF0Zm9ybSI6ICJsaW51eCIsICJtYWNoaW5lIjogIng4Nl82NCIsICJ1aWQiOiAxMDAxLCAicGlkIjogMzE2NCwgImN3ZCI6ICIvdmFyL3RtcC9mb2xkZ3B0LXByb2R1Y3Rpb24teW1yX2hoejIvd29ya3NwYWNlLy5vcmRpbmFyeS11aWQtcXVhbGlmaWNhdGlvbi0xMjE1M2E0ZDYyNDU0MzQ4YmVhYmM3NTQ3ZTI3YzZiMSIsICJleGVjdXRhYmxlIjogIi91c3IvYmluL3B5dGhvbjMifQo=",
+            "diagnosticTruncated": false
+          },
+          "stderr": {
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "diagnosticUtf8": "",
+            "diagnosticBase64": "",
+            "diagnosticTruncated": false
+          }
+        },
+        "workerIdentity": {
+          "platform": "linux",
+          "machine": "x86_64",
+          "uid": 1001,
+          "pid": 3164,
+          "cwd": "/var/tmp/foldgpt-production-ymr_hhz2/workspace/.ordinary-uid-qualification-12153a4d62454348beabc7547e27c6b1",
+          "executable": "/usr/bin/python3"
+        }
+      },
+      {
+        "case": "three-unittest",
+        "command": [
+          "/usr/bin/bash",
+          "-lc",
+          "python3 -B -m unittest discover -s tests -v"
+        ],
+        "cwd": "/var/tmp/foldgpt-production-ymr_hhz2/workspace/.ordinary-uid-qualification-12153a4d62454348beabc7547e27c6b1",
+        "processId": "ordinary-cli-9924b61296614654a779181960262121",
+        "channel": "exec",
+        "sandboxField": "absent",
+        "admitted": true,
+        "closed": true,
+        "passed": true,
+        "start": {
+          "processId": "ordinary-cli-9924b61296614654a779181960262121",
+          "sandboxType": "none"
+        },
+        "result": {
+          "nextSeq": 5,
+          "exited": true,
+          "exitCode": 0,
+          "closed": true,
+          "failure": null,
+          "sandboxDenied": false
+        },
+        "streams": {
+          "stdout": {
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "diagnosticUtf8": "",
+            "diagnosticBase64": "",
+            "diagnosticTruncated": false
+          },
+          "stderr": {
+            "bytes": 294,
+            "sha256": "fd55f0b324afbc64a5c331b304d63112a59f1650df9c69bc5f77fdb60591d77c",
+            "diagnosticUtf8": "test_1_plus_2 (test_addition.Addition.test_1_plus_2) ... ok\ntest_20_plus_22 (test_addition.Addition.test_20_plus_22) ... ok\ntest_minus_2_plus_2 (test_addition.Addition.test_minus_2_plus_2) ... ok\n\n----------------------------------------------------------------------\nRan 3 tests in 0.000s\n\nOK\n",
+            "diagnosticBase64": "dGVzdF8xX3BsdXNfMiAodGVzdF9hZGRpdGlvbi5BZGRpdGlvbi50ZXN0XzFfcGx1c18yKSAuLi4gb2sKdGVzdF8yMF9wbHVzXzIyICh0ZXN0X2FkZGl0aW9uLkFkZGl0aW9uLnRlc3RfMjBfcGx1c18yMikgLi4uIG9rCnRlc3RfbWludXNfMl9wbHVzXzIgKHRlc3RfYWRkaXRpb24uQWRkaXRpb24udGVzdF9taW51c18yX3BsdXNfMikgLi4uIG9rCgotLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tClJhbiAzIHRlc3RzIGluIDAuMDAwcwoKT0sK",
+            "diagnosticTruncated": false
+          }
+        }
+      },
+      {
+        "case": "zipapp-build",
+        "command": [
+          "python3",
+          "-I",
+          "-B",
+          "-m",
+          "zipapp",
+          "/var/tmp/foldgpt-production-ymr_hhz2/workspace/.ordinary-uid-qualification-12153a4d62454348beabc7547e27c6b1/app",
+          "-o",
+          "/var/tmp/foldgpt-production-ymr_hhz2/workspace/.ordinary-uid-qualification-12153a4d62454348beabc7547e27c6b1/addition.pyz"
+        ],
+        "cwd": "/var/tmp/foldgpt-production-ymr_hhz2/workspace/.ordinary-uid-qualification-12153a4d62454348beabc7547e27c6b1",
+        "processId": "ordinary-cli-5f12851dbf4042c38f423717ff1ae90f",
+        "channel": "exec",
+        "sandboxField": "null",
+        "admitted": true,
+        "closed": true,
+        "passed": true,
+        "start": {
+          "processId": "ordinary-cli-5f12851dbf4042c38f423717ff1ae90f",
+          "sandboxType": "none"
+        },
+        "result": {
+          "nextSeq": 3,
+          "exited": true,
+          "exitCode": 0,
+          "closed": true,
+          "failure": null,
+          "sandboxDenied": false
+        },
+        "streams": {
+          "stdout": {
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "diagnosticUtf8": "",
+            "diagnosticBase64": "",
+            "diagnosticTruncated": false
+          },
+          "stderr": {
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "diagnosticUtf8": "",
+            "diagnosticBase64": "",
+            "diagnosticTruncated": false
+          }
+        }
+      },
+      {
+        "case": "zipapp-execute",
+        "command": [
+          "python3",
+          "-I",
+          "-B",
+          "/var/tmp/foldgpt-production-ymr_hhz2/workspace/.ordinary-uid-qualification-12153a4d62454348beabc7547e27c6b1/addition.pyz"
+        ],
+        "cwd": "/var/tmp/foldgpt-production-ymr_hhz2/workspace/.ordinary-uid-qualification-12153a4d62454348beabc7547e27c6b1",
+        "processId": "ordinary-cli-2d941798eda14a22ad9e3162aa765e65",
+        "channel": "exec",
+        "sandboxField": "absent",
+        "admitted": true,
+        "closed": true,
+        "passed": true,
+        "start": {
+          "processId": "ordinary-cli-2d941798eda14a22ad9e3162aa765e65",
+          "sandboxType": "none"
+        },
+        "result": {
+          "nextSeq": 4,
+          "exited": true,
+          "exitCode": 0,
+          "closed": true,
+          "failure": null,
+          "sandboxDenied": false
+        },
+        "streams": {
+          "stdout": {
+            "bytes": 3,
+            "sha256": "084c799cd551dd1d8d5c5f9a5d593b2e931f5e36122ee5c793c1d08a19839cc0",
+            "diagnosticUtf8": "42\n",
+            "diagnosticBase64": "NDIK",
+            "diagnosticTruncated": false
+          },
+          "stderr": {
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "diagnosticUtf8": "",
+            "diagnosticBase64": "",
+            "diagnosticTruncated": false
+          }
+        }
+      }
+    ],
+    "independentReads": [
+      {
+        "path": "/var/tmp/foldgpt-production-ymr_hhz2/workspace/.ordinary-uid-qualification-12153a4d62454348beabc7547e27c6b1/app/addition.py",
+        "bytes": 37,
+        "sha256": "889f7098d0ed1ba605a636fe29be17f3dea88243b3a971fc065e2f17bb73a8db",
+        "configMatched": true,
+        "humanMatched": true,
+        "humanReceipt": {
+          "bytes": 37,
+          "chunks": 1
+        }
+      },
+      {
+        "path": "/var/tmp/foldgpt-production-ymr_hhz2/workspace/.ordinary-uid-qualification-12153a4d62454348beabc7547e27c6b1/app/__init__.py",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "configMatched": true,
+        "humanMatched": true,
+        "humanReceipt": {
+          "bytes": 0,
+          "chunks": 0
+        }
+      },
+      {
+        "path": "/var/tmp/foldgpt-production-ymr_hhz2/workspace/.ordinary-uid-qualification-12153a4d62454348beabc7547e27c6b1/app/__main__.py",
+        "bytes": 54,
+        "sha256": "98f5f6f91d100ad7645025ebb5055a469399c978b36f0642efb15198b97201b4",
+        "configMatched": true,
+        "humanMatched": true,
+        "humanReceipt": {
+          "bytes": 54,
+          "chunks": 1
+        }
+      },
+      {
+        "path": "/var/tmp/foldgpt-production-ymr_hhz2/workspace/.ordinary-uid-qualification-12153a4d62454348beabc7547e27c6b1/tests/test_addition.py",
+        "bytes": 292,
+        "sha256": "65a9352c81e50eca1a0e9ff020a3eb5284bf584351124992e16310fdf538187d",
+        "configMatched": true,
+        "humanMatched": true,
+        "humanReceipt": {
+          "bytes": 292,
+          "chunks": 1
+        }
+      },
+      {
+        "path": "/var/tmp/foldgpt-production-ymr_hhz2/workspace/.ordinary-uid-qualification-12153a4d62454348beabc7547e27c6b1/addition.pyz",
+        "bytes": 407,
+        "sha256": "f3feff571adc88adc0c9602be2ea23fb5e53391cf212bad53c29bb277da12e53",
+        "configMatched": true,
+        "humanMatched": true,
+        "humanReceipt": {
+          "bytes": 407,
+          "chunks": 1
+        }
+      }
+    ],
+    "connection": {
+      "sessionId": "804a7e5f-a468-444d-b8af-b2b72fc3047f",
+      "environmentInfo": {
+        "os": "linux",
+        "arch": "x86_64",
+        "cwd": "file:///var/tmp/foldgpt-production-ymr_hhz2/workspace",
+        "userHomeDir": "file:///var/tmp/foldgpt-production-ymr_hhz2/workspace",
+        "shell": {
+          "name": "bash",
+          "path": "/usr/bin/bash"
+        },
+        "platformOs": "linux",
+        "capabilities": {
+          "capabilityDiscoverySandbox": false,
+          "environmentConfigRead": false,
+          "httpHeaderEnvVars": false,
+          "networkProxyLaunch": false,
+          "sandboxedFileStreaming": true,
+          "shellSnapshotV2": false
+        }
+      },
+      "hostReady": {
+        "type": "ready",
+        "schema": "foldgpt.host.v2",
+        "sessionId": "804a7e5f-a468-444d-b8af-b2b72fc3047f",
+        "workspaceRoot": "file:///var/tmp/foldgpt-production-ymr_hhz2/workspace",
+        "chunkBytes": 32768,
+        "maxDataBytes": 16777216,
+        "maxPacketBytes": 65536,
+        "maxPendingRequests": 128,
+        "operations": [
+          "readFile",
+          "writeFile",
+          "getMetadata",
+          "canonicalize",
+          "readDirectory",
+          "createDirectory",
+          "processStart",
+          "processRead",
+          "processWrite",
+          "processTerminate"
+        ]
+      },
+      "configReady": {
+        "type": "ready",
+        "schema": "foldgpt.bootstrap-files.v1",
+        "sessionId": "804a7e5f-a468-444d-b8af-b2b72fc3047f",
+        "discoveryRoot": "file:///var/tmp/foldgpt-production-ymr_hhz2/workspace",
+        "chunkBytes": 32768,
+        "maxDataBytes": 16777216,
+        "maxPacketBytes": 65536,
+        "operations": [
+          "readFile",
+          "getMetadata",
+          "canonicalize",
+          "readDirectory"
+        ]
+      }
+    },
+    "environmentInfo": {
+      "os": "linux",
+      "arch": "x86_64",
+      "cwd": "file:///var/tmp/foldgpt-production-ymr_hhz2/workspace",
+      "userHomeDir": "file:///var/tmp/foldgpt-production-ymr_hhz2/workspace",
+      "shell": {
+        "name": "bash",
+        "path": "/usr/bin/bash"
+      },
+      "platformOs": "linux",
+      "capabilities": {
+        "capabilityDiscoverySandbox": false,
+        "environmentConfigRead": false,
+        "httpHeaderEnvVars": false,
+        "networkProxyLaunch": false,
+        "sandboxedFileStreaming": true,
+        "shellSnapshotV2": false
+      }
+    },
+    "execNotifications": 15
+  }
+}
