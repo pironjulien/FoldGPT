@@ -1,9 +1,9 @@
 # Reprise du projet FoldGPT
 
-**Dernière sauvegarde du 8 septembre :** le [complément v11](supplement-v11.md)
-conserve l'APK r15 et les nouveaux essais réels du Fold. Ses 5 487 fichiers et
-les 1 105 fichiers du tar source exact ont été retéléchargés, restaurés et
-vérifiés sur Windows. Conserver aussi le [complément v10](supplement-v10.md)
+**Dernière sauvegarde du 8 septembre :** le [complément v12](supplement-v12.md)
+conserve l'APK r16 et les commandes Python modèle désormais réussies sur le Fold.
+Ses 5 506 fichiers et les 1 141 fichiers du tar source exact ont été téléchargés,
+restaurés et vérifiés sur Windows. Conserver aussi le [complément v11](supplement-v11.md)
 et ses prédécesseurs. La qualification de l'interface habituelle reste ouverte.
 
 Le dépôt privé de travail est `pironjulien/FoldGPT-workspace`, branche

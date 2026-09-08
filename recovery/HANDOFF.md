@@ -18,6 +18,10 @@ APK : `downloads/native-production-20260908/foldgpt-native-candidate-r16.apk`,
 SHA256 `a46512293c30eb644a7abef502917c4eb68bae1c40fc6bace2e539ee671e18cd`.
 Paquet figé `downloads/native-host-runner-20260908/production-package-v4`.
 **Ne pas réinstaller r15. L'interface habituelle reste à qualifier.**
+Le complément GitHub v12 conserve ce résultat et le commit `ceb9058` :
+5 506 fichiers et 1 141 fichiers source téléchargés, restaurés et revérifiés.
+Consulter [supplement-v12.md](supplement-v12.md) ; le binaire ARM R4 à venir
+n'est pas inclus dans cette sauvegarde.
 
 Python Linux corrigé PASS dans `34186068559`. R4 Linux valide353tests exec-server,
 33tests injectés et le projet Python via app-server. Seules les deux fixtures

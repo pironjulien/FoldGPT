@@ -8,6 +8,9 @@
   independent native cleanup and unchanged official Android packages are verified.
 - Correct the private directories in the two real app-server startup fixtures;
   retain the production permissions check and reuse the Linux compilation cache.
+- Publish and independently restore encrypted supplement v12 with APK r16,
+  its frozen inputs, exact source commit and real native Python evidence.
+  Verify all 5,506 artifact files and 1,141 source files after restoration.
 - Publish and restore encrypted supplement v11 with APK r15, its frozen inputs,
   exact source checkpoint and new Fold/Linux proof. Reverify all 5,487 restored
   artifact files, all 1,105 source files and the restored APK inventory.
