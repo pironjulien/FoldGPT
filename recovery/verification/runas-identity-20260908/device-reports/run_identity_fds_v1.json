@@ -1,0 +1,171 @@
+{
+  "installation": {
+    "schema": "foldgpt.runas.installation.v1",
+    "target": {
+      "packageName": "app.foldgpt",
+      "uid": 10412,
+      "dataDir": "\/data\/user\/0\/app.foldgpt",
+      "sourceDir": "\/data\/app\/~~5E59pSImRSmGlu92aovtbw==\/app.foldgpt-yaFxXrtiXOjNFHnirC5pbw==\/base.apk",
+      "nativeLibraryDir": "\/data\/app\/~~5E59pSImRSmGlu92aovtbw==\/app.foldgpt-yaFxXrtiXOjNFHnirC5pbw==\/lib\/arm64",
+      "versionCode": 2,
+      "lastUpdateTime": 1788731366933,
+      "debuggable": true,
+      "signerSha256": "30930ffce7c10b673e95e69f2d78bb9e60aa71132db3c21cdc15cf56df77fa16",
+      "apkSha256": "97cabf15011d15980a2d913a7fb42fa2e9a878fd9383e54233d5afc782b239f7"
+    },
+    "qualification": {
+      "packageName": "app.foldgpt.runasqualification.v1",
+      "uid": 10404,
+      "dataDir": "\/data\/user\/0\/app.foldgpt.runasqualification.v1",
+      "sourceDir": "\/data\/app\/~~TBerZp9-x4sy6LBgqP5_2A==\/app.foldgpt.runasqualification.v1-T7FvV1i5cOecKlh2_4MHbg==\/base.apk",
+      "nativeLibraryDir": "\/data\/app\/~~TBerZp9-x4sy6LBgqP5_2A==\/app.foldgpt.runasqualification.v1-T7FvV1i5cOecKlh2_4MHbg==\/lib\/arm64",
+      "versionCode": 1,
+      "lastUpdateTime": 1788826236756,
+      "debuggable": true,
+      "signerSha256": "30930ffce7c10b673e95e69f2d78bb9e60aa71132db3c21cdc15cf56df77fa16",
+      "apkSha256": "53520415319a171b638a3bbd97f39218198f18ef1f02968fb5cc8d35dacc6ec5"
+    },
+    "probeSha256": "43f27cd43cac34c37a213b9c6431cb18478e738cb4b92860a89c1aa156dfd48b",
+    "transportSha256": "d4bb423a0dbe354485337d947bec486d6012d7b37a2ae0d73d0def8f26fe4ca6"
+  },
+  "preflight": {
+    "schema": "foldgpt.runas.installation.v1",
+    "target": {
+      "packageName": "app.foldgpt",
+      "uid": 10412,
+      "dataDir": "\/data\/user\/0\/app.foldgpt",
+      "sourceDir": "\/data\/app\/~~5E59pSImRSmGlu92aovtbw==\/app.foldgpt-yaFxXrtiXOjNFHnirC5pbw==\/base.apk",
+      "nativeLibraryDir": "\/data\/app\/~~5E59pSImRSmGlu92aovtbw==\/app.foldgpt-yaFxXrtiXOjNFHnirC5pbw==\/lib\/arm64",
+      "versionCode": 2,
+      "lastUpdateTime": 1788731366933,
+      "debuggable": true,
+      "signerSha256": "30930ffce7c10b673e95e69f2d78bb9e60aa71132db3c21cdc15cf56df77fa16",
+      "apkSha256": "97cabf15011d15980a2d913a7fb42fa2e9a878fd9383e54233d5afc782b239f7"
+    },
+    "qualification": {
+      "packageName": "app.foldgpt.runasqualification.v1",
+      "uid": 10404,
+      "dataDir": "\/data\/user\/0\/app.foldgpt.runasqualification.v1",
+      "sourceDir": "\/data\/app\/~~TBerZp9-x4sy6LBgqP5_2A==\/app.foldgpt.runasqualification.v1-T7FvV1i5cOecKlh2_4MHbg==\/base.apk",
+      "nativeLibraryDir": "\/data\/app\/~~TBerZp9-x4sy6LBgqP5_2A==\/app.foldgpt.runasqualification.v1-T7FvV1i5cOecKlh2_4MHbg==\/lib\/arm64",
+      "versionCode": 1,
+      "lastUpdateTime": 1788826236756,
+      "debuggable": true,
+      "signerSha256": "30930ffce7c10b673e95e69f2d78bb9e60aa71132db3c21cdc15cf56df77fa16",
+      "apkSha256": "53520415319a171b638a3bbd97f39218198f18ef1f02968fb5cc8d35dacc6ec5"
+    },
+    "probeSha256": "43f27cd43cac34c37a213b9c6431cb18478e738cb4b92860a89c1aa156dfd48b",
+    "transportSha256": "d4bb423a0dbe354485337d947bec486d6012d7b37a2ae0d73d0def8f26fe4ca6"
+  },
+  "service": {
+    "schema": "foldgpt.runas.identity-service.v1",
+    "installation": {
+      "schema": "foldgpt.runas.installation.v1",
+      "target": {
+        "packageName": "app.foldgpt",
+        "uid": 10412,
+        "dataDir": "\/data\/user\/0\/app.foldgpt",
+        "sourceDir": "\/data\/app\/~~5E59pSImRSmGlu92aovtbw==\/app.foldgpt-yaFxXrtiXOjNFHnirC5pbw==\/base.apk",
+        "nativeLibraryDir": "\/data\/app\/~~5E59pSImRSmGlu92aovtbw==\/app.foldgpt-yaFxXrtiXOjNFHnirC5pbw==\/lib\/arm64",
+        "versionCode": 2,
+        "lastUpdateTime": 1788731366933,
+        "debuggable": true,
+        "signerSha256": "30930ffce7c10b673e95e69f2d78bb9e60aa71132db3c21cdc15cf56df77fa16",
+        "apkSha256": "97cabf15011d15980a2d913a7fb42fa2e9a878fd9383e54233d5afc782b239f7"
+      },
+      "qualification": {
+        "packageName": "app.foldgpt.runasqualification.v1",
+        "uid": 10404,
+        "dataDir": "\/data\/user\/0\/app.foldgpt.runasqualification.v1",
+        "sourceDir": "\/data\/app\/~~TBerZp9-x4sy6LBgqP5_2A==\/app.foldgpt.runasqualification.v1-T7FvV1i5cOecKlh2_4MHbg==\/base.apk",
+        "nativeLibraryDir": "\/data\/app\/~~TBerZp9-x4sy6LBgqP5_2A==\/app.foldgpt.runasqualification.v1-T7FvV1i5cOecKlh2_4MHbg==\/lib\/arm64",
+        "versionCode": 1,
+        "lastUpdateTime": 1788826236756,
+        "debuggable": true,
+        "signerSha256": "30930ffce7c10b673e95e69f2d78bb9e60aa71132db3c21cdc15cf56df77fa16",
+        "apkSha256": "53520415319a171b638a3bbd97f39218198f18ef1f02968fb5cc8d35dacc6ec5"
+      },
+      "probeSha256": "43f27cd43cac34c37a213b9c6431cb18478e738cb4b92860a89c1aa156dfd48b",
+      "transportSha256": "d4bb423a0dbe354485337d947bec486d6012d7b37a2ae0d73d0def8f26fe4ca6"
+    },
+    "serviceUid": 2000,
+    "servicePid": 12716,
+    "clientUid": 10404,
+    "nonce": "61b9b25ab7cf4351b1f096950329ce6b",
+    "state": "complete",
+    "nativeSpawnAttempted": true,
+    "argv": [
+      "\/system\/bin\/run-as",
+      "app.foldgpt",
+      "\/data\/app\/~~TBerZp9-x4sy6LBgqP5_2A==\/app.foldgpt.runasqualification.v1-T7FvV1i5cOecKlh2_4MHbg==\/lib\/arm64\/libfoldgpt_runas_identity.so",
+      "--identity-fds-v1",
+      "10412",
+      "\/data\/user\/0\/app.foldgpt",
+      "12716",
+      "61b9b25ab7cf4351b1f096950329ce6b"
+    ],
+    "ownerPid": 12887,
+    "waitStatus": 0,
+    "childReaped": true,
+    "stdout": "{\"schema\":\"foldgpt.runas.identity-child.v1\",\"nonce\":\"61b9b25ab7cf4351b1f096950329ce6b\",\"pid\":12887,\"parentPid\":12716,\"uid\":[10412,10412,10412],\"gid\":[10412,10412,10412],\"identityMatches\":true,\"parentMatches\":true,\"zeroCapabilities\":true,\"noNewPrivileges\":0,\"seccomp\":0,\"cwdMatches\":true,\"targetOwned\":true,\"noExtraDescriptors\":true,\"descriptorContract\":true,\"stdinChallengeMatches\":true,\"controlChallengeMatches\":true,\"contextMatches\":true,\"passed\":true,\"cwd\":\"\/data\/user\/0\/app.foldgpt\",\"context\":\"u:r:runas_app:s0:c156,c257,c512,c768\",\"procStatus\":\"Name:\\u0009libfoldgpt_runa\\u000aUmask:\\u00090000\\u000aState:\\u0009R (running)\\u000aTgid:\\u000912887\\u000aNgid:\\u00090\\u000aPid:\\u000912887\\u000aPPid:\\u000912716\\u000aTracerPid:\\u00090\\u000aUid:\\u000910412\\u000910412\\u000910412\\u000910412\\u000aGid:\\u000910412\\u000910412\\u000910412\\u000910412\\u000aFDSize:\\u0009128\\u000aGroups:\\u00091004 1007 1011 1015 1028 1078 1079 3001 3002 3003 3006 3009 3011 3012 50412 \\u000aKthread:\\u00090\\u000aVmPeak:\\u000910782620 kB\\u000aVmSize:\\u000910782428 kB\\u000aVmLck:\\u0009       0 kB\\u000aVmPin:\\u0009       0 kB\\u000aVmHWM:\\u0009    2996 kB\\u000aVmRSS:\\u0009    2996 kB\\u000aRssAnon:\\u0009     580 kB\\u000aRssFile:\\u0009    2004 kB\\u000aRssShmem:\\u0009     412 kB\\u000aVmData:\\u0009    1804 kB\\u000aVmStk:\\u0009     132 kB\\u000aVmExe:\\u0009       8 kB\\u000aVmLib:\\u0009    2824 kB\\u000aVmPTE:\\u0009      80 kB\\u000aVmSwap:\\u0009       0 kB\\u000aCoreDumping:\\u00090\\u000aTHP_enabled:\\u00091\\u000auntag_mask:\\u00090xffffffffffffff\\u000aThreads:\\u00091\\u000aSigQ:\\u00090\/38443\\u000aSigPnd:\\u00090000000000000000\\u000aShdPnd:\\u00090000000000000000\\u000aSigBlk:\\u00090000000080001204\\u000aSigIgn:\\u00090000002000000000\\u000aSigCgt:\\u00090000004c400084f8\\u000aCapInh:\\u00090000000000000000\\u000aCapPrm:\\u00090000000000000000\\u000aCapEff:\\u00090000000000000000\\u000aCapBnd:\\u000900000000008000c0\\u000aCapAmb:\\u00090000000000000000\\u000aNoNewPrivs:\\u00090\\u000aSeccomp:\\u00090\\u000aSeccomp_filters:\\u00090\\u000aSpeculation_Store_Bypass:\\u0009thread vulnerable\\u000aSpeculationIndirectBranch:\\u0009unknown\\u000aCpus_allowed:\\u0009ff\\u000aCpus_allowed_list:\\u00090-7\\u000aMems_allowed:\\u00091\\u000aMems_allowed_list:\\u00090\\u000avoluntary_ctxt_switches:\\u00097\\u000anonvoluntary_ctxt_switches:\\u000911\",\"fdFlags\":[0,1,1,0]}\n",
+    "stderr": "{\"schema\":\"foldgpt.runas.identity-report.v1\",\"nonce\":\"61b9b25ab7cf4351b1f096950329ce6b\",\"pid\":12887,\"reportFd\":2,\"stdoutFlushed\":true,\"passed\":true}\n",
+    "pipeReadersComplete": true,
+    "child": {
+      "schema": "foldgpt.runas.identity-child.v1",
+      "nonce": "61b9b25ab7cf4351b1f096950329ce6b",
+      "pid": 12887,
+      "parentPid": 12716,
+      "uid": [
+        10412,
+        10412,
+        10412
+      ],
+      "gid": [
+        10412,
+        10412,
+        10412
+      ],
+      "identityMatches": true,
+      "parentMatches": true,
+      "zeroCapabilities": true,
+      "noNewPrivileges": 0,
+      "seccomp": 0,
+      "cwdMatches": true,
+      "targetOwned": true,
+      "noExtraDescriptors": true,
+      "descriptorContract": true,
+      "stdinChallengeMatches": true,
+      "controlChallengeMatches": true,
+      "contextMatches": true,
+      "passed": true,
+      "cwd": "\/data\/user\/0\/app.foldgpt",
+      "context": "u:r:runas_app:s0:c156,c257,c512,c768",
+      "procStatus": "Name:\tlibfoldgpt_runa\nUmask:\t0000\nState:\tR (running)\nTgid:\t12887\nNgid:\t0\nPid:\t12887\nPPid:\t12716\nTracerPid:\t0\nUid:\t10412\t10412\t10412\t10412\nGid:\t10412\t10412\t10412\t10412\nFDSize:\t128\nGroups:\t1004 1007 1011 1015 1028 1078 1079 3001 3002 3003 3006 3009 3011 3012 50412 \nKthread:\t0\nVmPeak:\t10782620 kB\nVmSize:\t10782428 kB\nVmLck:\t       0 kB\nVmPin:\t       0 kB\nVmHWM:\t    2996 kB\nVmRSS:\t    2996 kB\nRssAnon:\t     580 kB\nRssFile:\t    2004 kB\nRssShmem:\t     412 kB\nVmData:\t    1804 kB\nVmStk:\t     132 kB\nVmExe:\t       8 kB\nVmLib:\t    2824 kB\nVmPTE:\t      80 kB\nVmSwap:\t       0 kB\nCoreDumping:\t0\nTHP_enabled:\t1\nuntag_mask:\t0xffffffffffffff\nThreads:\t1\nSigQ:\t0\/38443\nSigPnd:\t0000000000000000\nShdPnd:\t0000000000000000\nSigBlk:\t0000000080001204\nSigIgn:\t0000002000000000\nSigCgt:\t0000004c400084f8\nCapInh:\t0000000000000000\nCapPrm:\t0000000000000000\nCapEff:\t0000000000000000\nCapBnd:\t00000000008000c0\nCapAmb:\t0000000000000000\nNoNewPrivs:\t0\nSeccomp:\t0\nSeccomp_filters:\t0\nSpeculation_Store_Bypass:\tthread vulnerable\nSpeculationIndirectBranch:\tunknown\nCpus_allowed:\tff\nCpus_allowed_list:\t0-7\nMems_allowed:\t1\nMems_allowed_list:\t0\nvoluntary_ctxt_switches:\t7\nnonvoluntary_ctxt_switches:\t11",
+      "fdFlags": [
+        0,
+        1,
+        1,
+        0
+      ]
+    },
+    "receipt": {
+      "schema": "foldgpt.runas.identity-report.v1",
+      "nonce": "61b9b25ab7cf4351b1f096950329ce6b",
+      "pid": 12887,
+      "reportFd": 2,
+      "stdoutFlushed": true,
+      "passed": true
+    },
+    "installationUnchanged": true,
+    "passed": true,
+    "pipesClosed": true,
+    "cleanupComplete": true,
+    "quarantined": false
+  },
+  "passed": true,
+  "state": "complete",
+  "schema": "foldgpt.runas.identity-activity.v1",
+  "action": "app.foldgpt.runasqualification.v1.RUN_IDENTITY_FDS_V1",
+  "recordedWallTimeMs": 1788826325039,
+  "recordedElapsedRealtimeMs": 94731633
+}

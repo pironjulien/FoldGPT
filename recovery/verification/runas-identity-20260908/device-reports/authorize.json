@@ -1,0 +1,10 @@
+{
+  "state": "complete",
+  "authorized": true,
+  "shizukuUid": 2000,
+  "nativeSpawnAttempted": false,
+  "schema": "foldgpt.runas.identity-activity.v1",
+  "action": "app.foldgpt.runasqualification.v1.AUTHORIZE",
+  "recordedWallTimeMs": 1788826291164,
+  "recordedElapsedRealtimeMs": 94697759
+}

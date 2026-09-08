@@ -1,0 +1,28 @@
+plugins { id 'com.android.application' }
+apply from: '../../../recovery/android-signing.gradle'
+
+// A new package and output tree: never reuse a prior device attempt.
+layout.buildDirectory = rootProject.layout.projectDirectory.dir('build/runasqualification-v1/modules/runasqualification')
+android {
+    namespace 'app.foldgpt.runasqualification'
+    compileSdk 37
+    ndkVersion '29.0.14206865'
+    defaultConfig {
+        applicationId 'app.foldgpt.runasqualification.v1'
+        minSdk 30
+        targetSdk 37
+        versionCode 1
+        versionName '1.0-runas-identity-fds'
+        ndk { abiFilters 'arm64-v8a' }
+        externalNativeBuild { cmake { arguments '-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON' } }
+    }
+    externalNativeBuild { cmake { path 'src/main/cpp/CMakeLists.txt'; version '3.22.1' } }
+    buildFeatures { aidl true }
+    compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
+    packaging { jniLibs { useLegacyPackaging true; keepDebugSymbols += ['**/*.so'] } }
+    buildTypes { debug { debuggable true } }
+}
+dependencies {
+    implementation project(':transport')
+    compileOnly 'androidx.annotation:annotation:1.3.0'
+}

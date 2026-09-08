@@ -5,7 +5,41 @@ Le dépôt de travail est **privé** : `pironjulien/FoldGPT-workspace`, branche
 sous-modules, moteur séparé et données locales. Le dépôt public `FoldGPT` est un
 ancien checkpoint ; il ne reçoit pas cette sauvegarde privée.
 
-## État courant : projet Python complet via app-server natif prouvé sur PC
+## État courant : exécuteur sous identité FoldGPT prouvé sur le téléphone
+
+Le 8 septembre, la chaîne **UserService Shizuku → run-as app.foldgpt → Bionic**
+a réussi sur le Fold avec UID/GID10412, quatre canaux exacts, vrai waitpid0,
+aucun des deux processus restant, boot et APK officiels inchangés. Preuves
+versionnées : `verification/runas-identity-20260908`. Cette phase ne prouve pas
+les primitives du superviseur ni l'interface.
+
+Le premier essai du broker sous cette identité a ensuite démarré le vrai
+superviseur et son worker, mais le worker figé vérifiait encore UID2000 avant
+ses douze probes. Il a donc refusé à `required-enforcement`, code70, sans
+exécuter ces probes. Nettoyage natif et Java complet ; bootstrap17661,
+superviseur17667 et UserService17538 indépendamment absents. Aucun redémarrage
+et APK FoldGPT/ChatGPT inchangés. Conserver l'échec dans
+`downloads/runas-broker-v1` ; ne jamais rejouer `.RUN_BROKER_V1`.
+
+La qualification V2 séparée a réussi ses **douze primitives réelles sur le
+Fold**, sous UID/GID10412. Son worker conserve tous les contrôles, avec identité
+attendue compilée depuis le vrai PackageManager et recoupée avant lancement.
+Le superviseur et le worker terminent avec code0, nettoyage complet ; les PID
+20535, 20540 et 20454 sont indépendamment absents. Boot, APK FoldGPT/ChatGPT et
+propriétés de sécurité inchangés. Preuves scellées :
+`verification/runas-broker-20260908` (11 fichiers, manifeste SHA256).
+Nouvelle base `runas-native-v2`, APK `app.foldgpt.runasbrokerqualification.v2`,
+SHA256 `61ae60536ee44142d917a941d643642ff1cf4f9d4ac03a9ffb6349d502cf736e`.
+**Ne jamais rejouer RUN_BROKER_V2 ni effacer son marker.** V1 reste conservé.
+Le partage des chemins et le parcours complet depuis l'interface restent à
+qualifier ; le succès du broker ne les remplace pas.
+
+Les sources du point d'entrée **de production**, du client UI fichiers et de
+leur acquisition native sont désormais écrites dans le moteur séparé ; elles
+ne sont pas encore compilées/qualifiées. Les tests Rust complets sont encore
+en compilation, avec une erreur déjà corrigée dans le sample Config et des
+linkers WSL toujours vivants. Ne pas annoncer le raccordement livré à partir
+de la seule présence de ces sources.
 
 Le test public `thread/start` puis `turn/start` utilise le vrai moteur Rust,
 la fabrique Python/native, le canal de configuration authentifié et six vrais

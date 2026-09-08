@@ -1,0 +1,9 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <queries><package android:name="app.foldgpt" /></queries>
+    <application android:allowBackup="false" android:label="FoldGPT run-as broker qualification V1"
+        android:theme="@android:style/Theme.Material.Light.NoActionBar">
+        <activity android:name="app.foldgpt.runasbrokerqualification.RunAsBrokerQualificationActivity"
+            android:exported="true" android:permission="android.permission.DUMP"
+            android:configChanges="orientation|keyboardHidden|screenSize|smallestScreenSize" />
+    </application>
+</manifest>

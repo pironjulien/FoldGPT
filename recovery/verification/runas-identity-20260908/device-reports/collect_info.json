@@ -1,0 +1,34 @@
+{
+  "schema": "foldgpt.runas.identity-activity.v1",
+  "target": {
+    "packageName": "app.foldgpt",
+    "uid": 10412,
+    "dataDir": "\/data\/user\/0\/app.foldgpt",
+    "sourceDir": "\/data\/app\/~~5E59pSImRSmGlu92aovtbw==\/app.foldgpt-yaFxXrtiXOjNFHnirC5pbw==\/base.apk",
+    "nativeLibraryDir": "\/data\/app\/~~5E59pSImRSmGlu92aovtbw==\/app.foldgpt-yaFxXrtiXOjNFHnirC5pbw==\/lib\/arm64",
+    "versionCode": 2,
+    "lastUpdateTime": 1788731366933,
+    "debuggable": true,
+    "signerSha256": "30930ffce7c10b673e95e69f2d78bb9e60aa71132db3c21cdc15cf56df77fa16",
+    "apkSha256": "97cabf15011d15980a2d913a7fb42fa2e9a878fd9383e54233d5afc782b239f7"
+  },
+  "qualification": {
+    "packageName": "app.foldgpt.runasqualification.v1",
+    "uid": 10404,
+    "dataDir": "\/data\/user\/0\/app.foldgpt.runasqualification.v1",
+    "sourceDir": "\/data\/app\/~~TBerZp9-x4sy6LBgqP5_2A==\/app.foldgpt.runasqualification.v1-T7FvV1i5cOecKlh2_4MHbg==\/base.apk",
+    "nativeLibraryDir": "\/data\/app\/~~TBerZp9-x4sy6LBgqP5_2A==\/app.foldgpt.runasqualification.v1-T7FvV1i5cOecKlh2_4MHbg==\/lib\/arm64",
+    "versionCode": 1,
+    "lastUpdateTime": 1788826236756,
+    "debuggable": true,
+    "signerSha256": "30930ffce7c10b673e95e69f2d78bb9e60aa71132db3c21cdc15cf56df77fa16",
+    "apkSha256": "53520415319a171b638a3bbd97f39218198f18ef1f02968fb5cc8d35dacc6ec5"
+  },
+  "probeSha256": "43f27cd43cac34c37a213b9c6431cb18478e738cb4b92860a89c1aa156dfd48b",
+  "transportSha256": "d4bb423a0dbe354485337d947bec486d6012d7b37a2ae0d73d0def8f26fe4ca6",
+  "state": "complete",
+  "nativeSpawnAttempted": false,
+  "action": "app.foldgpt.runasqualification.v1.COLLECT_INFO",
+  "recordedWallTimeMs": 1788826237111,
+  "recordedElapsedRealtimeMs": 94643705
+}

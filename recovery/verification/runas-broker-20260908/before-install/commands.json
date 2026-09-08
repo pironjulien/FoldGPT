@@ -1,0 +1,193 @@
+[
+  {
+    "argv": [
+      "cat",
+      "/proc/sys/kernel/random/boot_id"
+    ],
+    "code": 0,
+    "stdout": "348d453e-f4e5-40e0-8ef0-030f4d5e38af\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "settings",
+      "get",
+      "global",
+      "stay_on_while_plugged_in"
+    ],
+    "code": 0,
+    "stdout": "2\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "getprop",
+      "ro.boot.verifiedbootstate"
+    ],
+    "code": 0,
+    "stdout": "green\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "getprop",
+      "ro.boot.flash.locked"
+    ],
+    "code": 0,
+    "stdout": "1\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "getprop",
+      "ro.boot.vbmeta.device_state"
+    ],
+    "code": 0,
+    "stdout": "locked\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "getprop",
+      "ro.boot.warranty_bit"
+    ],
+    "code": 0,
+    "stdout": "0\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "getprop",
+      "ro.product.model"
+    ],
+    "code": 0,
+    "stdout": "SM-F971B\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "getprop",
+      "ro.build.fingerprint"
+    ],
+    "code": 0,
+    "stdout": "samsung/h8qxeea/h8q:17/CP2A.260605.016/F971BXXS2AZH7_OXM2AZH7:user/release-keys\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "pm",
+      "list",
+      "packages",
+      "app.foldgpt"
+    ],
+    "code": 0,
+    "stdout": "package:app.foldgpt.runasqualification.v1\r\npackage:app.foldgpt.kernelqualification\r\npackage:app.foldgpt.shizukuprobe\r\npackage:app.foldgpt\r\npackage:app.foldgpt.runtimequalification.v1\r\npackage:app.foldgpt.kernelqualification.v12\r\npackage:app.foldgpt.runtimequalification.v2\r\npackage:app.foldgpt.kernelqualification.v11\r\npackage:app.foldgpt.runasbrokerqualification.v1\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "pm",
+      "path",
+      "app.foldgpt"
+    ],
+    "code": 0,
+    "stdout": "package:/data/app/~~5E59pSImRSmGlu92aovtbw==/app.foldgpt-yaFxXrtiXOjNFHnirC5pbw==/base.apk\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "sha256sum",
+      "/data/app/~~5E59pSImRSmGlu92aovtbw==/app.foldgpt-yaFxXrtiXOjNFHnirC5pbw==/base.apk"
+    ],
+    "code": 0,
+    "stdout": "97cabf15011d15980a2d913a7fb42fa2e9a878fd9383e54233d5afc782b239f7  /data/app/~~5E59pSImRSmGlu92aovtbw==/app.foldgpt-yaFxXrtiXOjNFHnirC5pbw==/base.apk\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "pm",
+      "list",
+      "packages",
+      "com.openai.chatgpt"
+    ],
+    "code": 0,
+    "stdout": "package:com.openai.chatgpt\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "pm",
+      "path",
+      "com.openai.chatgpt"
+    ],
+    "code": 0,
+    "stdout": "package:/data/app/~~OQZLTSH3rSeFiA1-zL6nZQ==/com.openai.chatgpt-e7wh79rzhEAtQ91IIwoKqQ==/base.apk\r\npackage:/data/app/~~OQZLTSH3rSeFiA1-zL6nZQ==/com.openai.chatgpt-e7wh79rzhEAtQ91IIwoKqQ==/split_config.arm64_v8a.apk\r\npackage:/data/app/~~OQZLTSH3rSeFiA1-zL6nZQ==/com.openai.chatgpt-e7wh79rzhEAtQ91IIwoKqQ==/split_config.fr.apk\r\npackage:/data/app/~~OQZLTSH3rSeFiA1-zL6nZQ==/com.openai.chatgpt-e7wh79rzhEAtQ91IIwoKqQ==/split_config.xxhdpi.apk\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "sha256sum",
+      "/data/app/~~OQZLTSH3rSeFiA1-zL6nZQ==/com.openai.chatgpt-e7wh79rzhEAtQ91IIwoKqQ==/base.apk"
+    ],
+    "code": 0,
+    "stdout": "20dd88a77ba80740cd2e13dd5d1ec88ee4b0ff67d4436f883fe65c7d11f7e1e3  /data/app/~~OQZLTSH3rSeFiA1-zL6nZQ==/com.openai.chatgpt-e7wh79rzhEAtQ91IIwoKqQ==/base.apk\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "sha256sum",
+      "/data/app/~~OQZLTSH3rSeFiA1-zL6nZQ==/com.openai.chatgpt-e7wh79rzhEAtQ91IIwoKqQ==/split_config.arm64_v8a.apk"
+    ],
+    "code": 0,
+    "stdout": "d10e48108acbcabf17f4e35a1b2ea2a8e4fa61ba40f387caae7bd1011d4b2791  /data/app/~~OQZLTSH3rSeFiA1-zL6nZQ==/com.openai.chatgpt-e7wh79rzhEAtQ91IIwoKqQ==/split_config.arm64_v8a.apk\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "sha256sum",
+      "/data/app/~~OQZLTSH3rSeFiA1-zL6nZQ==/com.openai.chatgpt-e7wh79rzhEAtQ91IIwoKqQ==/split_config.fr.apk"
+    ],
+    "code": 0,
+    "stdout": "792b84ea7d3f593d5d5fc11b8e5b1b010d96d67b9af1176ad9f29430810bc14e  /data/app/~~OQZLTSH3rSeFiA1-zL6nZQ==/com.openai.chatgpt-e7wh79rzhEAtQ91IIwoKqQ==/split_config.fr.apk\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "sha256sum",
+      "/data/app/~~OQZLTSH3rSeFiA1-zL6nZQ==/com.openai.chatgpt-e7wh79rzhEAtQ91IIwoKqQ==/split_config.xxhdpi.apk"
+    ],
+    "code": 0,
+    "stdout": "a92b0cd0a6aad246e154736a6f32b04b17f65e5f6ec1e304e6ec3411113ec424  /data/app/~~OQZLTSH3rSeFiA1-zL6nZQ==/com.openai.chatgpt-e7wh79rzhEAtQ91IIwoKqQ==/split_config.xxhdpi.apk\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "pm",
+      "list",
+      "packages",
+      "app.foldgpt.runasqualification.v1"
+    ],
+    "code": 0,
+    "stdout": "package:app.foldgpt.runasqualification.v1\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "pm",
+      "path",
+      "app.foldgpt.runasqualification.v1"
+    ],
+    "code": 0,
+    "stdout": "package:/data/app/~~TBerZp9-x4sy6LBgqP5_2A==/app.foldgpt.runasqualification.v1-T7FvV1i5cOecKlh2_4MHbg==/base.apk\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "sha256sum",
+      "/data/app/~~TBerZp9-x4sy6LBgqP5_2A==/app.foldgpt.runasqualification.v1-T7FvV1i5cOecKlh2_4MHbg==/base.apk"
+    ],
+    "code": 0,
+    "stdout": "53520415319a171b638a3bbd97f39218198f18ef1f02968fb5cc8d35dacc6ec5  /data/app/~~TBerZp9-x4sy6LBgqP5_2A==/app.foldgpt.runasqualification.v1-T7FvV1i5cOecKlh2_4MHbg==/base.apk\r\n",
+    "stderr": ""
+  }
+]

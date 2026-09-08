@@ -1,0 +1,10 @@
+{
+  "schema": "foldgpt.runas-runtime-install.v1",
+  "base": "/data/user/0/app.foldgpt/files/runas-native-v2",
+  "apkSha256": "61ae60536ee44142d917a941d643642ff1cf4f9d4ac03a9ffb6349d502cf736e",
+  "nativeLibraryDir": "/data/app/~~tZhnS0-qQoodtbpJNewWIg==/app.foldgpt.runasbrokerqualification.v2-ZSYy4cDX8E6_L8n600Md9A==/lib/arm64",
+  "runtimeFiles": 2528,
+  "verified": true,
+  "bootBefore": "348d453e-f4e5-40e0-8ef0-030f4d5e38af",
+  "bootAfter": "348d453e-f4e5-40e0-8ef0-030f4d5e38af"
+}

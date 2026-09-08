@@ -1,0 +1,60 @@
+{
+  "schema": "foldgpt.runas-broker-verification.v2",
+  "passed": true,
+  "kernelProofs": 12,
+  "targetUid": 10412,
+  "bootstrapPid": 20535,
+  "supervisorPid": 20540,
+  "scope": "Actual UserService/run-as/Bionic native broker; PRoot shared paths and UI remain unqualified",
+  "bootUnchanged": true,
+  "packagesUnchanged": true,
+  "propertiesUnchanged": true,
+  "processesAbsent": [
+    20535,
+    20540,
+    20454
+  ],
+  "bootId": "348d453e-f4e5-40e0-8ef0-030f4d5e38af",
+  "readOnlyCommands": [
+    {
+      "argv": [
+        "cat",
+        "/proc/sys/kernel/random/boot_id"
+      ],
+      "code": 0,
+      "stdout": "348d453e-f4e5-40e0-8ef0-030f4d5e38af\r\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "ls",
+        "-d",
+        "/proc/20535"
+      ],
+      "code": 1,
+      "stdout": "",
+      "stderr": "ls: /proc/20535: No such file or directory\r\n"
+    },
+    {
+      "argv": [
+        "ls",
+        "-d",
+        "/proc/20540"
+      ],
+      "code": 1,
+      "stdout": "",
+      "stderr": "ls: /proc/20540: No such file or directory\r\n"
+    },
+    {
+      "argv": [
+        "ls",
+        "-d",
+        "/proc/20454"
+      ],
+      "code": 1,
+      "stdout": "",
+      "stderr": "ls: /proc/20454: No such file or directory\r\n"
+    }
+  ],
+  "verifierSha256": "189f40c57c43f552bdd0bf5e19065208af13ea2c05bbb6245377f77de065f00a"
+}

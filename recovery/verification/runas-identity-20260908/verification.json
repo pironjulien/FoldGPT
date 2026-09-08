@@ -1,0 +1,25 @@
+{
+  "schema": "foldgpt.runas.identity-verification.v1",
+  "passed": true,
+  "targetUid": 10412,
+  "ownerPid": 12887,
+  "servicePid": 12716,
+  "scope": "UserService to run-as to Bionic identity and fd0..3 only; no broker or shared-workspace proof",
+  "bootUnchanged": true,
+  "packagesUnchanged": true,
+  "targetPackageUnchanged": true,
+  "qualificationApkMatches": true,
+  "processAbsence": [
+    {
+      "pid": 12887,
+      "code": 1,
+      "stderr": "ls: /proc/12887: No such file or directory\r\n"
+    },
+    {
+      "pid": 12716,
+      "code": 1,
+      "stderr": "ls: /proc/12716: No such file or directory\r\n"
+    }
+  ],
+  "bootId": "348d453e-f4e5-40e0-8ef0-030f4d5e38af"
+}

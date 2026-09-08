@@ -1,0 +1,50 @@
+plugins { id 'com.android.application' }
+apply from: '../../../recovery/android-signing.gradle'
+
+// A new package and output tree: never reuse a prior device attempt.
+layout.buildDirectory = rootProject.layout.projectDirectory.dir('build/runasbrokerqualification-v1/modules/runasbrokerqualification')
+android {
+    namespace 'app.foldgpt.runasbrokerqualification'
+    compileSdk 37
+    ndkVersion '29.0.14206865'
+    defaultConfig {
+        applicationId 'app.foldgpt.runasbrokerqualification.v1'
+        minSdk 30
+        targetSdk 37
+        versionCode 1
+        versionName '1.0-runas-broker'
+        ndk { abiFilters 'arm64-v8a' }
+        externalNativeBuild { cmake { arguments '-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON' } }
+    }
+    externalNativeBuild { cmake { path 'src/main/cpp/CMakeLists.txt'; version '3.22.1' } }
+    buildFeatures { aidl true }
+    compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
+    packaging { jniLibs { useLegacyPackaging true; keepDebugSymbols += ['**/*.so'] } }
+    buildTypes { debug { debuggable true } }
+}
+dependencies {
+    implementation project(':transport')
+    compileOnly 'androidx.annotation:annotation:1.3.0'
+}
+
+def staged = rootProject.layout.projectDirectory.dir('build/runasbrokerqualification-v1/stage-r2')
+android.sourceSets.main.assets.srcDir(staged.dir('assets').asFile)
+android.sourceSets.main.jniLibs.srcDir(staged.dir('jniLibs').asFile)
+tasks.named('preBuild').configure {
+    doFirst {
+        def record = staged.file('build-inventory.json').asFile
+        if (!record.isFile()) throw new GradleException('Stage the reviewed run-as broker inputs before building')
+        def inventory = new groovy.json.JsonSlurper().parse(record)
+        if (inventory.schema != 'foldgpt.runas-broker-build.v1'
+                || inventory.package != 'app.foldgpt.runasbrokerqualification.v1') {
+            throw new GradleException('Wrong run-as broker staging identity')
+        }
+        inventory.files.each { entry ->
+            def file = new File(staged.asFile, entry.path)
+            if (!file.isFile() || !file.canonicalPath.startsWith(staged.asFile.canonicalPath + File.separator)
+                    || java.security.MessageDigest.getInstance('SHA-256').digest(file.bytes).encodeHex().toString() != entry.sha256) {
+                throw new GradleException('Run-as staged input differs: ' + entry.path)
+            }
+        }
+    }
+}

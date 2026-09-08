@@ -2,6 +2,26 @@
 
 ## Unreleased — 2026-09-06
 
+- Verify Shizuku to run-as to Bionic under FoldGPT's actual UID on the Fold,
+  including all four launch channels and independent cleanup evidence. Add
+  a reproducible Windows NDK build of the official Python CLI and an exclusive
+  private runtime installer with full byte/alias readback. Preserve the first
+  broker trial's old-UID test failure. Its separate corrected V2 passes all
+  twelve real kernel probes on the Fold under UID10412, with independently
+  verified process cleanup and unchanged boot and official APK hashes.
+
+- Wire a startup-only native bootstrap into the separate engine CLI and
+  app-server. It acquires three direct credentialed channels, binds the real
+  exec session, checks shared path identities and native-written bytes, and
+  retains owner-loss shutdown separately from native cleanup. Descriptor
+  adversary tests are added; compilation and runtime qualification are pending.
+
+- Add a reproducible GNU ARM64 engine build/package procedure from the exact
+  recovery export, with frozen source and dependency hashes, official sandbox
+  V8 artifacts, separate symbols, and static ELF import checks against the
+  libraries collected from the Fold. The checker passes on the historical
+  binaries; the current build and production native launcher remain pending.
+
 - Add a separate native file authority and credentialed private transport for
   human UI operations. Complete write framing and commit precede mutation;
   operations share the actual worker lease and quarantine. Thirty nonroot PC

@@ -1,0 +1,72 @@
+{
+  "scope": "Actual UserService/run-as/Bionic native broker; PRoot shared paths and UI remain unqualified",
+  "passed": true,
+  "files": [
+    {
+      "path": "verification.json",
+      "source": "downloads/runas-broker-v2/verification.json",
+      "size": 1409,
+      "sha256": "efae72235baf6092b84b13f826dc2fbb756260c7dfc656e039ad644c842c5546"
+    },
+    {
+      "path": "before-install/commands.json",
+      "source": "downloads/runas-broker-v2/before-install/commands.json",
+      "size": 5649,
+      "sha256": "ae89b97f350c2b66c83b067705052e73aae4d1ce6168b0a201202ece90918ae4"
+    },
+    {
+      "path": "before-install/snapshot.json",
+      "source": "downloads/runas-broker-v2/before-install/snapshot.json",
+      "size": 2009,
+      "sha256": "403f5ed0802dd2ef5f2e9e14446447e1e9bcb8997aa43c09b563873305b1a56b"
+    },
+    {
+      "path": "device-reports/authorize.json",
+      "source": "downloads/runas-broker-v2/device-reports/authorize.json",
+      "size": 296,
+      "sha256": "d6f5848d2e0c1a0d4a581561a8d039412f687d4d7f75a495288ee69b67ce4b08"
+    },
+    {
+      "path": "device-reports/collect_info.json",
+      "source": "downloads/runas-broker-v2/device-reports/collect_info.json",
+      "size": 11487,
+      "sha256": "cb0ffc0c21302445ae9b7ac22edaa2f30e0ffa2b3284e043055e174c866ee52a"
+    },
+    {
+      "path": "device-reports/preflight.json",
+      "source": "downloads/runas-broker-v2/device-reports/preflight.json",
+      "size": 23325,
+      "sha256": "21d1c4d404cf8d7ed6ab446307b9e6a1f178db1fa7ac994be3b0f3860167e527"
+    },
+    {
+      "path": "device-reports/run_broker_v2.json",
+      "source": "downloads/runas-broker-v2/device-reports/run_broker_v2.json",
+      "size": 52269,
+      "sha256": "5f956ba81c2ff00b213154d46c996394ce972d071da1106e69fe2400036e3aa9"
+    },
+    {
+      "path": "after-run/commands.json",
+      "source": "downloads/runas-broker-v2/after-run/commands.json",
+      "size": 5700,
+      "sha256": "6fd44f5e1a44b47794c16c31a9d4b590dfd1d470252a130bab7e13f8e2a8eef5"
+    },
+    {
+      "path": "after-run/snapshot.json",
+      "source": "downloads/runas-broker-v2/after-run/snapshot.json",
+      "size": 2009,
+      "sha256": "403f5ed0802dd2ef5f2e9e14446447e1e9bcb8997aa43c09b563873305b1a56b"
+    },
+    {
+      "path": "runtime-deployment/commands.json",
+      "source": "downloads/runas-broker-v2/runtime-deployment/commands.json",
+      "size": 1364,
+      "sha256": "b86275acbcb962d6ccff25584d1a68d0a7e611c1f64a7e8119192e40fb6b854c"
+    },
+    {
+      "path": "runtime-deployment/report.json",
+      "source": "downloads/runas-broker-v2/runtime-deployment/report.json",
+      "size": 496,
+      "sha256": "6e512d25df15594005db8e47545197d5e6f805d8588977938ee4c4a0fac8472f"
+    }
+  ]
+}

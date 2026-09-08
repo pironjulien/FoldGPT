@@ -1,0 +1,60 @@
+{
+  "scope": "UserService to run-as to Bionic identity and fd0..3 only; no broker or shared-workspace proof",
+  "passed": true,
+  "files": [
+    {
+      "path": "verification.json",
+      "source": "downloads/runas-identity-v1/verification.json",
+      "size": 705,
+      "sha256": "3bd9d1cee2bf5eb966713d524e4cb7dcadd7af4d3d3fabd95334fadaa1ff8860"
+    },
+    {
+      "path": "before-install-verified/commands.json",
+      "source": "downloads/runas-identity-v1/before-install-verified/commands.json",
+      "size": 4839,
+      "sha256": "7a1b9fae8c21a7a773e2957836fd9fb0b47195d4fe3283289af32c192bbf3d14"
+    },
+    {
+      "path": "before-install-verified/snapshot.json",
+      "source": "downloads/runas-identity-v1/before-install-verified/snapshot.json",
+      "size": 1774,
+      "sha256": "102ceb7db3c7c18b8b6dea91f0a575ed709f08ac67902ac729f99d7c3f4855e2"
+    },
+    {
+      "path": "device-reports/authorize.json",
+      "source": "downloads/runas-identity-v1/device-reports/authorize.json",
+      "size": 302,
+      "sha256": "a091bbe80c3d4d328aa2492c12d27bc1f63bf64d14d69dc2d1471923787e68f8"
+    },
+    {
+      "path": "device-reports/collect_info.json",
+      "source": "downloads/runas-identity-v1/device-reports/collect_info.json",
+      "size": 1750,
+      "sha256": "8834706ff22b2ed7dec93352ce411d72ced4e5e4e6330f8b2bcf79b946455656"
+    },
+    {
+      "path": "device-reports/preflight.json",
+      "source": "downloads/runas-identity-v1/device-reports/preflight.json",
+      "size": 3506,
+      "sha256": "515ee4117ce49b47dc3211ed711798c8d407c19161d4efadc1f5f77423c5f87b"
+    },
+    {
+      "path": "device-reports/run_identity_fds_v1.json",
+      "source": "downloads/runas-identity-v1/device-reports/run_identity_fds_v1.json",
+      "size": 11143,
+      "sha256": "b592d32deddcc814602426fcc1eccf4c3916ce83566f82fc1384c8469a354bf6"
+    },
+    {
+      "path": "after-run/commands.json",
+      "source": "downloads/runas-identity-v1/after-run/commands.json",
+      "size": 5598,
+      "sha256": "9cb27a7148724c87e801c69ebf76296703fc69f264abef6b35315bac9d741ce0"
+    },
+    {
+      "path": "after-run/snapshot.json",
+      "source": "downloads/runas-identity-v1/after-run/snapshot.json",
+      "size": 2009,
+      "sha256": "403f5ed0802dd2ef5f2e9e14446447e1e9bcb8997aa43c09b563873305b1a56b"
+    }
+  ]
+}

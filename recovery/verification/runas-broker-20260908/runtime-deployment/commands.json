@@ -1,0 +1,77 @@
+[
+  {
+    "argv": [
+      "shell",
+      "sha256sum",
+      "/data/app/~~tZhnS0-qQoodtbpJNewWIg==/app.foldgpt.runasbrokerqualification.v2-ZSYy4cDX8E6_L8n600Md9A==/base.apk"
+    ],
+    "code": 0,
+    "stdoutBytes": 178,
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "shell",
+      "cat",
+      "/proc/sys/kernel/random/boot_id"
+    ],
+    "code": 0,
+    "stdoutBytes": 38,
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "shell",
+      "run-as",
+      "app.foldgpt",
+      "mkdir",
+      "-m",
+      "700",
+      "/data/user/0/app.foldgpt/files/runas-native-v2"
+    ],
+    "code": 0,
+    "stdoutBytes": 0,
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "exec-in",
+      "run-as",
+      "app.foldgpt",
+      "tar",
+      "-xf",
+      "-",
+      "-C",
+      "/data/user/0/app.foldgpt/files/runas-native-v2"
+    ],
+    "code": 0,
+    "stdoutBytes": 0,
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "exec-out",
+      "run-as",
+      "app.foldgpt",
+      "tar",
+      "-cf",
+      "-",
+      "-C",
+      "/data/user/0/app.foldgpt/files/runas-native-v2",
+      "python"
+    ],
+    "code": 0,
+    "stdoutBytes": 50895360,
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "shell",
+      "cat",
+      "/proc/sys/kernel/random/boot_id"
+    ],
+    "code": 0,
+    "stdoutBytes": 38,
+    "stderr": ""
+  }
+]

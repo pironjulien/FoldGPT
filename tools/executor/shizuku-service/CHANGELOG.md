@@ -1,5 +1,31 @@
 # Changelog
 
+## 2026-09-08
+
+- Verify the actual Shizuku/run-as/Bionic identity and four pipe channels on the
+  Fold, including real app UID, waitpid and complete cleanup. Preserve the
+  independent evidence. A subsequent broker trial exposed its frozen worker's
+  old UID2000 expectation before its mechanism probes; keep that failed trial
+  and run a fresh V2 with the actual installed target identity. All twelve
+  broker probes pass under UID10412, with real waitpid and independently
+  confirmed cleanup and unchanged boot/APKs. Preserve both one-shot attempts.
+
+- Prepare separate `app.foldgpt.runasbrokerqualification.v1` with the preserved
+  qKM94iHA Bionic supervisor/worker, the new private-prefix Python CLI and exact
+  authenticated runtime inventory. A small APK-owned C launcher verifies the
+  private data before interpreter imports; Python owns the fixed broker trial
+  and real cancellation/cleanup. Native cleanup evidence is required in
+  addition to Java waitpid. Build/signature and frozen ELF hashes verify on PC;
+  Android broker execution remains a separate qualification.
+
+- Add independent `app.foldgpt.runasqualification.v1` APK for a fresh fixed
+  UserService→run-as app.foldgpt→Bionic identity/fd0..3 trial. Reuse the frozen
+  production NativeSpawn JNI, attest installed package/signing/native inputs,
+  exchange bounded nonce challenges over all four real pipes, record actual
+  credentials/context and waitpid, and retain one-shot markers and failures.
+  The APK signature and real identity/pipe trial pass. Broker access and shared
+  paths remain separate qualifications.
+
 ## 2026-09-07
 
 - Add explicit runtime V2 alongside preserved V1. Its separate package/base,
