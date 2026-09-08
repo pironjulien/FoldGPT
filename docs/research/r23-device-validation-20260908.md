@@ -157,9 +157,9 @@ Rust générale R5 `34192652057` reste en échec : 16 933 réussites, 238 échec
 deux timeouts et 35 ignorés. Le [triage des 240 cas](r5-failure-audit-20260908.md)
 reste applicable. Cette réussite Android ciblée n'annule pas ces échecs.
 
-La dernière sauvegarde privée documentée et restaurée reste le
-[complément v14](../../recovery/supplement-v14.md), qui conserve r21.
-Les nouveaux éléments r22/r23 ne sont pas encore déclarés sauvegardés à distance.
+Le [complément privé v15](../../recovery/supplement-v15.md) conserve maintenant
+ces éléments r22/r23, après envoi chiffré, téléchargement et restauration :
+8 707 fichiers vérifiés, 1 219 sources Git et APK r23 restauré revérifié.
 L'[état de reprise](../../recovery/HANDOFF.md) conserve les liens cumulatifs
 nécessaires et la suite de la livraison ; les finitions sont distinctes du
 parcours fonctionnel validé ici.

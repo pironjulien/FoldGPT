@@ -1,20 +1,20 @@
 # Reprise du projet FoldGPT
 
-**Dernière sauvegarde du 8 septembre :** le [complément v14](supplement-v14.md)
-conserve le candidat r21, ses sources et compilations natives, les 190 tests
-Python/natifs Linux réussis et le protocole de retour du téléphone. Ses
-10 695 fichiers et les 1 198 fichiers du tar source exact ont été téléchargés,
-restaurés et vérifiés sur Windows, puis l'APK restauré a repassé sa vérification.
-Conserver l'archive principale et tous les compléments jusqu'à v13 ; celui-ci
-conserve notamment le moteur R5 et l'état installé r20.
-**r21 est prêt sur PC, non installé sur le Fold. Le parcours depuis la
-conversation, l'éditeur et la reprise restent à valider.** Lire
-[l'état technique actuel](HANDOFF.md) et le [protocole de retour](android-return-r21.md).
+**Dernière sauvegarde du 8 septembre :** le [complément v15](supplement-v15.md)
+conserve r23, ses sources et compilations, les recherches communautaires et les
+preuves Android. Les 8 707 fichiers et 1 219 sources Git ont été retéléchargés,
+restaurés et vérifiés ; l'APK restauré a repassé sa vérification.
+Conserver l'archive principale et les compléments 1 à 14 avant v15.
+**r23 est installé sur le Fold : le parcours Python depuis la conversation,
+l'éditeur et deux reprises ont réussi.** Lire [l'état actuel](HANDOFF.md) et
+le [rapport Android](../docs/research/r23-device-validation-20260908.md).
+Les sections historiques ci-dessous décrivent les étapes antérieures et ne
+remplacent pas cet état. Le protocole r21 n'est plus une consigne de réinstallation.
 
 Le dépôt privé de travail est `pironjulien/FoldGPT-workspace`, branche
-`codex/foldgpt-beta`. Il contient les sources et les recherches en cours ; ce
-checkpoint ne signifie pas que les commandes ordinaires fonctionnent déjà sur
-le téléphone.
+`codex/foldgpt-beta`. Le parcours Python ordinaire est vérifié sur Android/Bionic ;
+l'interface et le contrôleur GNU restent sous PRoot. Tous les outils, PTY et
+comportements du produit ne sont pas encore qualifiés.
 
 **Session reprise le 7 septembre après la clôture de nuit :** lire d'abord
 [HANDOFF.md](HANDOFF.md). Le projet Python natif V2 a réussi sur le Fold ;

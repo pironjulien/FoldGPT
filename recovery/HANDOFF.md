@@ -134,17 +134,17 @@ Le remote nommé `origin` doit être vérifié avant publication : son nom seul
 ne désigne pas le dépôt privé. Le moteur de travail reste dans
 `work/worktrees/FoldgptEngine`, sous le dossier du projet.
 
-La dernière sauvegarde documentée et intégralement restaurée est le
-[complément v14](supplement-v14.md) : 10 695 fichiers et 1 198 sources vérifiés,
-candidat r21 compris, checkpoint `9e1feeaff2e2501299f272c95ab5b2641d2044df`.
-**Elle ne contient pas encore les nouveautés r22/r23 de cette passe.** Leur
-publication et leur restauration doivent être vérifiées avant d'affirmer que
-tout est récupérable sur l'autre PC.
+La dernière sauvegarde privée retéléchargée et restaurée est le
+[complément v15](supplement-v15.md) : **8 707 fichiers et 1 219 sources Git
+vérifiés**, APK r23 restauré revérifié. Le checkpoint
+`6337c98e93e70d302ed7098549735dc9bfd4b783` contient les nouveautés r22/r23,
+les recherches et les preuves de reprise. Les conversations et journaux privés
+sont chiffrés. Les sources GPU/PTY en attente sont inchangées depuis v13.
 
 Commencer par la [procédure de restauration](README.md). Conserver l'archive
 principale et tous les compléments : [v10](supplement-v10.md),
 [v11](supplement-v11.md), [v12](supplement-v12.md),
-[v13](supplement-v13.md) et [v14](supplement-v14.md), ainsi que les précédents
+[v13](supplement-v13.md), [v14](supplement-v14.md) et [v15](supplement-v15.md), ainsi que les précédents
 référencés dans cette procédure. V13 conserve notamment r20, R5 et Bash
 production ; v14 ne remplace pas ces archives. La [restauration v9](README.md#complément-v9--python-natif-v2-réussi-sur-le-fold)
 et son [rapport exact](verification/github-supplement-v9-restoration.json)

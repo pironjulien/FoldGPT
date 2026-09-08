@@ -2,6 +2,10 @@
 
 ## Unreleased - 2026-09-08
 
+- Publish encrypted recovery supplement v15 to the existing private release,
+  redownload and authenticate all 8,707 files, restore 1,219 committed sources,
+  and reverify the restored r23 APK. Preserve main + supplements 1-14 as required
+  dependencies, including the unchanged pending GPU/PTY sources.
 - Qualify r23/versionCode13 on the actual Fold with ordinary Python bytecode
   enabled: six production commands, caches read outside the signed runtime,
   clean shutdown, and fresh runtime admission pass. The same UI conversation

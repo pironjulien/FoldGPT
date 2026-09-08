@@ -1,0 +1,59 @@
+{
+  "repository": "https://github.com/pironjulien/FoldGPT-workspace",
+  "visibility": "PRIVATE",
+  "release": "https://github.com/pironjulien/FoldGPT-workspace/releases/tag/recovery-2026-09-07",
+  "sourceCommit": "6337c98e93e70d302ed7098549735dc9bfd4b783",
+  "encryptedSha256": "a927344626f8a0b98c5e3fec9efb32885e6790cc3fe0c49f19be827b1c868830",
+  "assets": [
+    {
+      "name": "native-checkpoint-v15-manifest.json",
+      "bytes": 660,
+      "sha256": "a33fd7fafd87aeac3da807a8a0b0fb7aec390bd0e93e83200d0e0665470c7efe"
+    },
+    {
+      "name": "native-checkpoint-v15.tar.gz.age.part001",
+      "bytes": 215774163,
+      "sha256": "a927344626f8a0b98c5e3fec9efb32885e6790cc3fe0c49f19be827b1c868830"
+    }
+  ],
+  "downloadedAssetHashesVerified": true,
+  "restorationReport": "work/FoldGPT-recovery/verification-v15-20260908/github-supplement-v15-restoration.json",
+  "sourceFilesRestoredAndVerified": 1219,
+  "restoredFilesVerified": 8707,
+  "apkReverified": {
+    "schema": "foldgpt.native-apk-verification.v1",
+    "success": true,
+    "androidProductionExecuted": false,
+    "apkSha256": "3a1bb00e73a828fa298884941514ad421a5f888c7fe483303b0ad514f2122c74",
+    "nativeLibraries": 87,
+    "pythonDataFiles": 2447,
+    "runtimeAliases": 86,
+    "sourceFiles": 95,
+    "hostSchema": "foldgpt.host.v2",
+    "modelProfiles": [
+      "managed",
+      "ordinaryUid"
+    ]
+  },
+  "earlierArchiveDependencies": [
+    "manifest.json",
+    "native-checkpoint-manifest.json",
+    "native-checkpoint-v2-manifest.json",
+    "native-checkpoint-v3-manifest.json",
+    "native-checkpoint-v4-manifest.json",
+    "native-checkpoint-v5-manifest.json",
+    "native-checkpoint-v6-manifest.json",
+    "native-checkpoint-v7-manifest.json",
+    "native-checkpoint-v8-manifest.json",
+    "native-checkpoint-v9-manifest.json",
+    "native-checkpoint-v10-manifest.json",
+    "native-checkpoint-v11-manifest.json",
+    "native-checkpoint-v12-manifest.json",
+    "native-checkpoint-v13-manifest.json",
+    "native-checkpoint-v14-manifest.json"
+  ],
+  "plaintextUploaded": false,
+  "keysIncluded": false,
+  "deviceActionPerformed": false,
+  "scope": "# Compl\u00e9ment priv\u00e9 v15 \u2014 r22/r23, preuves de reprise et erreurs conserv\u00e9es\n\nCe compl\u00e9ment d\u00e9pend de l'archive principale et des compl\u00e9ments 1 \u00e0 14, dans cet ordre. Il ajoute les captures originales r21 de r\u00e9cup\u00e9ration, r22/r22b de qualification et r23 de reprise r\u00e9elle, les travaux de recherche et les artefacts correspondants. Les conversations, les contenus de projet collect\u00e9s, les erreurs et journaux restent exclusivement dans la charge chiffr\u00e9e age publi\u00e9e sur le d\u00e9p\u00f4t priv\u00e9 existant.\n\nLes APK disponibles sont r22b et r23. Le build r22 a retourn\u00e9 exitCode=1 et aucun APK r22 autonome n'a \u00e9t\u00e9 conserv\u00e9 : son journal et sa commande sont inclus comme preuve de cet \u00e9chec. Le package r22 est v\u00e9rifi\u00e9 int\u00e9gralement contre l'APK r22b ; le package, le stage, l'admission et le CLI r23 sont li\u00e9s aux empreintes r\u00e9ellement compil\u00e9es. Le source Git final n'est choisi que par l'agent principal apr\u00e8s finalisation et doit correspondre aux sources Python empaquet\u00e9es et aux deux sources C compil\u00e9es r23. Cette liaison ne constitue pas une revendication de recompilation bit-identique de tout l'APK Android.\n\nSont inclus : work/r21-device-return-20260908 ; work/r22-cache-20260908 ; work/native-port-review-20260908 ; work/research-20260908 ; les documents CPython initconfig effectivement utilis\u00e9s ; CI34215637059 ; les deux qualifications appareil f65b833a et9d653b2d ; les captures r22b-resume-ui, r23-first-ui, r23-second-ui et r23-ready-for-user. L'application a \u00e9t\u00e9 laiss\u00e9e pr\u00eate lors de la derni\u00e8re capture ; cette observation n'est pas une surveillance ult\u00e9rieure.\n\nLa cr\u00e9ation Python depuis l'interface, les deux reprises et les fermetures propres sont conserv\u00e9es s\u00e9par\u00e9ment de la qualification cliente et des contr\u00f4les PC. Les journaux initiaux de r\u00e9cup\u00e9ration r21 et de refus d'admission des caches r22 restent intacts. Un r\u00e9sultat absent ou n\u00e9gatif n'est pas transform\u00e9 en r\u00e9ussite. Le re\u00e7u d'archivage des caches conserve leurs octets et leurs inodes dans le journal appareil captur\u00e9.\n\nSeules les copies reproductibles de la biblioth\u00e8que Windows sous host-v1/host-home et les fixtures temporaires de tests sont exclues explicitement. Le rapport, les commandes, la source CLI, les artefacts de compilation et les caches externes de ce test restent inclus. La recette de reproduction Windows est conserv\u00e9e dans work/r22-cache-20260908/CLI-README.md et dans le source Git. Les exclusions g\u00e9n\u00e9riques de caches de compilation et de noms de secrets suivent les compl\u00e9ments pr\u00e9c\u00e9dents. Aucun fichier de cl\u00e9 n'est inclus ou imprim\u00e9.\n\nAucun chemin d\u00e9j\u00e0 pr\u00e9sent dans le delta v14 n'est r\u00e9inclus silencieusement : l'inventaire v\u00e9rifie l'absence de recoupement des chemins. Les packages et stages versionn\u00e9s r22/r23 contiennent volontairement des octets de base identiques \u00e0 v14 sous de nouveaux chemins pour permettre leur v\u00e9rification autonome. Leur nombre et volume sont calcul\u00e9s dans overlapV14 ; il ne s'agit pas d'un delta par contenu d\u00e9dupliqu\u00e9.\n\nLa publication ne t\u00e9l\u00e9verse que le manifeste technique et les fragments age. Elle v\u00e9rifie la visibilit\u00e9 priv\u00e9e et les empreintes des d\u00e9pendances, puis ret\u00e9l\u00e9charge v15, le d\u00e9chiffre vers un dossier neuf, v\u00e9rifie chaque fichier, l'archive Git et l'APK r23 restaur\u00e9. Une r\u00e9ussite de pr\u00e9paration ne vaut ni cr\u00e9ation ni publication ni restauration.\n"
+}

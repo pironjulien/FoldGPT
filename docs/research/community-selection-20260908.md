@@ -111,6 +111,7 @@ profils, toutes les reprises ou les mises à jour futures. Cette recherche
 communautaire ne démontre pas un produit complet « tout Bionic ».
 
 L'[état de reprise](../../recovery/HANDOFF.md) conserve les prochaines étapes
-et les liens de sauvegarde. La dernière restauration documentée est encore
-le [complément v14](../../recovery/supplement-v14.md), qui porte r21 ; la
-publication de cette nouvelle passe r22/r23 doit être vérifiée séparément.
+et les liens de sauvegarde. Le [complément v15](../../recovery/supplement-v15.md)
+a été publié chiffré sur GitHub privé, retéléchargé et restauré : 8 707 fichiers,
+1 219 sources Git et APK r23 vérifiés. Il conserve cette passe r22/r23 et dépend
+de l'archive principale et des compléments 1 à 14.
