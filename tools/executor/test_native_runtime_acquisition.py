@@ -152,7 +152,8 @@ class RuntimeAcquisitionTests(unittest.IsolatedAsyncioTestCase):
         direct_module = importlib.import_module("tools.executor.bionic-supervisor.direct_processes")
         from tools.executor.ordinary_uid_files import OrdinaryUidFilesBackend
         direct = direct_module.DirectProcesses(direct_runner, self.workspace,
-            executables=self.backend.processes.executables, files_backend=self.backend.files,
+            executables={name: executable.path for name, executable in self.backend.processes.executables.items()},
+            files_backend=self.backend.files,
             parent_environment={}, quarantine_owner=self.backend.processes)
         direct_files = OrdinaryUidFilesBackend(lock=self.backend.files.lock)
         self.backend.install_ordinary_uid_profile(direct, direct_files)
