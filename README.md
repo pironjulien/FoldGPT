@@ -20,6 +20,9 @@ original ni celui des serveurs OpenAI.
 et la [procédure de récupération complète](recovery/README.md). Elle conserve les
 modifications en cours, le moteur séparé, les dépendances locales et les preuves
 chiffrées, au-delà du checkpoint publié dans le dépôt public d'origine.
+Le [complément v17](recovery/supplement-v17.md) est publié et sa récupération
+vérifiée : 20 008 fichiers restaurés, sources et APK contrôlés, corpus d'audit
+reconstruit depuis ses originaux.
 
 **Historique r25/versionCode15 :** le modèle utilise un vrai
 terminal Android depuis la conversation : saisie et interruption Ctrl+C

@@ -14,6 +14,16 @@ est livré ; la [pression des processus](../docs/research/native-process-pressur
 reste le défaut courant à corriger. Ne pas réinstaller r25 ni supprimer un
 marqueur de propriétaire sur la seule disparition d'un PID.
 
+Pour reprendre sur un autre PC, suivre [les commandes de récupération](README.md)
+depuis la branche explicite `codex/foldgpt-beta`.
+[V17](supplement-v17.md), avec r28 et l'audit desktop, est publié, retéléchargé
+et restauré : 20 008 fichiers et 1 433 sources Git vérifiés, trois APK
+revérifiés et 24 346 fichiers d'audit reconstruits depuis les originaux.
+Conserver l'archive principale et chaque complément historique jusqu'à v17.
+Les snapshots restent dans des sous-dossiers neufs de
+`C:\Dev\ChatgptFold\work\FoldGPT-recovery` ; ils sont compatibles avec
+l'hydratation/fusion actuelle, sans remplacer les sources ou leurs propres octets.
+
 ## Historique r25, 16:14 UTC
 
 **Réexamen après la question sur une application Android ordinaire :** la

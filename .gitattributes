@@ -54,3 +54,6 @@ recovery/verification/legacy-projects-20260908/** -text whitespace=blank-at-eol,
 # JUnit emits a final blank line; preserve its recorded output exactly.
 recovery/verification/r26b-20260908/**/*.log -text whitespace=-blank-at-eof,cr-at-eol
 recovery/verification/r28-20260908/**/*.log -text whitespace=-blank-at-eof,cr-at-eol
+# Preserve delivery receipts and the exact downloaded v17 manifest.
+recovery/verification/*v17*.json -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+recovery/verification/recovery-paths-20260908.json -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol

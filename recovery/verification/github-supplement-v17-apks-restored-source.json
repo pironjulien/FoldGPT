@@ -1,0 +1,348 @@
+{
+  "verified": true,
+  "sourceCommit": "34f9e603e3f1b305043661e446a6626f83824f07",
+  "sourceFilesRestoredAndVerified": 1433,
+  "v17EncryptedSha256": "e5887bf1ea0650933e6a051002d659eee63f91112c1916abb00e7ce7113888fe",
+  "v16EncryptedSha256": "2db3a46eddb35b6d5e2ef033f5df0cba327e4ba00dc0e5e4552a2839c7e62264",
+  "inheritedFiles": [
+    {
+      "path": "tools/executor/runas-runtime/ripgrep-toolchain-notices.json",
+      "bytes": 2740,
+      "sha256": "dc3e930c1c90ef1dc7651c5164236ceee4e882f570e00be7e4d022602317d3b4"
+    },
+    {
+      "path": "work/native-pty-20260908/candidate-ndk-v1/build.json",
+      "bytes": 2479,
+      "sha256": "3ff59f211024b9f25abd2aabf3eab49dad9e506c360da13f80b0b12f1b5d309c"
+    },
+    {
+      "path": "work/native-pty-20260908/candidate-ndk-v1/compile.command.json",
+      "bytes": 623,
+      "sha256": "b723ace1716083de60cea6198b41092d566fb0ea3b76f444c8f52aed411f6b7b"
+    },
+    {
+      "path": "work/native-pty-20260908/candidate-ndk-v1/compile.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "work/native-pty-20260908/candidate-ndk-v1/compile.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "work/native-pty-20260908/candidate-ndk-v1/compiler.command.json",
+      "bytes": 154,
+      "sha256": "f8ee523fb55b9576aab46f2fffbcf4bcb134de2fb1027f82d741937b7cce5dd5"
+    },
+    {
+      "path": "work/native-pty-20260908/candidate-ndk-v1/compiler.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "work/native-pty-20260908/candidate-ndk-v1/compiler.stdout",
+      "bytes": 326,
+      "sha256": "2f2c8d68bc804b228a80932b1bf8878ab5733fc252ace6307190d94db03db844"
+    },
+    {
+      "path": "work/native-pty-20260908/candidate-ndk-v1/elf.command.json",
+      "bytes": 298,
+      "sha256": "98637b2f1c4f8edb90e6421b6b9d00fc0d39d5f42b82df6031daf35f41445384"
+    },
+    {
+      "path": "work/native-pty-20260908/candidate-ndk-v1/elf.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "work/native-pty-20260908/candidate-ndk-v1/elf.stdout",
+      "bytes": 8524,
+      "sha256": "adb7d19e052dbc7c3dd02bed5a1d626f572af5dd827c7215ba467ebc29408fdd"
+    },
+    {
+      "path": "work/native-pty-20260908/candidate-ndk-v1/headers/asm-generic/ioctls.h",
+      "bytes": 2758,
+      "sha256": "a1bf55713f7ccbb679f06e93d7915c58aef4cf7f94804509f4706286f891fd92"
+    },
+    {
+      "path": "work/native-pty-20260908/candidate-ndk-v1/headers/linux/pidfd.h",
+      "bytes": 1147,
+      "sha256": "652550421eff582201cb5aa263f3ba897486701f0bc2148d8ce0c41b4cdcc9e1"
+    },
+    {
+      "path": "work/native-pty-20260908/candidate-ndk-v1/headers/pty.h",
+      "bytes": 2644,
+      "sha256": "1cae4b1b5d52cc45279722fa32a74fe8e5852f89b47c1def1e2f64a5a7bdffed"
+    },
+    {
+      "path": "work/native-pty-20260908/candidate-ndk-v1/headers/sys/wait.h",
+      "bytes": 2049,
+      "sha256": "25e8afe444d62121fb93f8bb1619e8ce663b97d2db068ad00ff21635fda86c5d"
+    },
+    {
+      "path": "work/native-pty-20260908/candidate-ndk-v1/libfoldgpt_direct_pty_supervisor.so",
+      "bytes": 26520,
+      "sha256": "c56558b4d1e76a766e17cfb2861642aa55942497bfb0f5d8dcdba5a4e96baa11"
+    },
+    {
+      "path": "work/native-pty-20260908/candidate-ndk-v1/python-closure/tools/executor/bionic-supervisor/__init__.py",
+      "bytes": 83,
+      "sha256": "a46bd99c12d9d547d1d9d9cdaa2e9dcfc2e6780fede44ec0751ad9806274c1ee"
+    },
+    {
+      "path": "work/native-pty-20260908/candidate-ndk-v1/python-closure/tools/executor/bionic-supervisor/direct_processes.py",
+      "bytes": 26017,
+      "sha256": "23ede0170a4596fc4004441e8e1bbb3091e9f261822961e50c050ce0dd6b77a1"
+    },
+    {
+      "path": "work/native-pty-20260908/candidate-ndk-v1/python-closure/tools/executor/bionic-supervisor/direct_wire.py",
+      "bytes": 2011,
+      "sha256": "e7ae3049cb506f4ef55e08684ee52ac1ef7baadc5d15ce13bb8dfe5f8ef10f1e"
+    },
+    {
+      "path": "work/native-pty-20260908/candidate-ndk-v1/python-closure/tools/executor/bionic-supervisor/wire.py",
+      "bytes": 2041,
+      "sha256": "9bb2a7b765ea7c3d80f55211e168b52c0343a13b617326c3a850ff0a3c6f9616"
+    },
+    {
+      "path": "work/native-pty-20260908/candidate-ndk-v1/python-closure/tools/executor/exec_server.py",
+      "bytes": 26509,
+      "sha256": "d054089c34b8ddfc935569f1db441c8c080992d512b810385de2a13be4acdc53"
+    },
+    {
+      "path": "work/native-pty-20260908/candidate-ndk-v1/python-closure/tools/executor/native_environment.py",
+      "bytes": 6071,
+      "sha256": "ff68b91af77877b1736b6bdccbfc3b31f7d41e95de826b48651a3dffda5e6f5e"
+    },
+    {
+      "path": "work/native-pty-20260908/candidate-ndk-v1/python-closure/tools/executor/native_environment_unicode.py",
+      "bytes": 5944,
+      "sha256": "912669d2c135cda550f0bdae211b3d72c3a0163e44df1c4aaec9832887bd1b20"
+    },
+    {
+      "path": "work/native-pty-20260908/candidate-ndk-v1/python-closure/tools/executor/native_files.py",
+      "bytes": 30504,
+      "sha256": "83f93f028768d0b2afc340e3b8d11c7c066d80c285b847c5667d743baff652c0"
+    },
+    {
+      "path": "work/native-pty-20260908/candidate-ndk-v1/python-closure/tools/executor/native_process_policy.py",
+      "bytes": 9833,
+      "sha256": "dad1b38fefdd8962681eda20534aca0fb670e02eb3361cd86ebec3e5db7b6ff1"
+    },
+    {
+      "path": "work/native-pty-20260908/candidate-ndk-v1/python-closure/tools/executor/native_processes.py",
+      "bytes": 40419,
+      "sha256": "056ee6aad3ee7dbef173966501b2ea83d39fc4036afdd1bf525113f59a956dff"
+    },
+    {
+      "path": "work/native-pty-20260908/candidate-ndk-v1/python-closure/tools/executor/ordinary_uid_files.py",
+      "bytes": 25034,
+      "sha256": "d15ad4a61396a585bf3073001877df52f45f680b305b1a759aa93923496fcd74"
+    },
+    {
+      "path": "work/native-pty-20260908/candidate-ndk-v1/python-closure/tools/executor/policy_intent.py",
+      "bytes": 3988,
+      "sha256": "32a04ab8c8c459926df875cd15524a92902044c8847f462597d23a1c474de4cb"
+    },
+    {
+      "path": "work/native-pty-20260908/candidate-ndk-v1/python-closure/tools/policy/managed_policy.py",
+      "bytes": 17855,
+      "sha256": "3442491adc9fe9b45391cefb0ad7a3b53e54dd9c1f4dc98e5eaef6ebde680eff"
+    },
+    {
+      "path": "work/native-pty-20260908/candidate-ndk-v1/python-closure/work/native-pty-20260908/test_candidate_host.py",
+      "bytes": 10628,
+      "sha256": "abaced569cb9aa4e45a61aacfb69d03f5086fd9466d60748b5cfa853dcf1da62"
+    },
+    {
+      "path": "work/native-pty-20260908/candidate-ndk-v1/python-closure/work/native-pty-20260908/tty_processes.py",
+      "bytes": 20977,
+      "sha256": "f70181e741ecfc36e2543480f01fa748a0cfa41d111bb8a97f2cf298233d7071"
+    },
+    {
+      "path": "work/native-pty-20260908/candidate-ndk-v1/python-closure/work/native-pty-20260908/tty_wire.py",
+      "bytes": 2309,
+      "sha256": "b8b09e89a12d066491d12e8db6874b0331cfb968ee422513bdcbcf16d8eeadec"
+    },
+    {
+      "path": "work/native-pty-20260908/candidate-ndk-v1/python-source-closure.json",
+      "bytes": 3270,
+      "sha256": "2434b4c892df6b0edc4114508668f5c71b2c693d52206dbe07bb4a642f97b342"
+    },
+    {
+      "path": "work/native-pty-20260908/candidate-ndk-v1/repeat.command.json",
+      "bytes": 597,
+      "sha256": "0e3298f189bc357fd0087e8d7ff5ac89775b5dc5dbf6a257de291bc2ad4aec5c"
+    },
+    {
+      "path": "work/native-pty-20260908/candidate-ndk-v1/repeat.so",
+      "bytes": 26520,
+      "sha256": "c56558b4d1e76a766e17cfb2861642aa55942497bfb0f5d8dcdba5a4e96baa11"
+    },
+    {
+      "path": "work/native-pty-20260908/candidate-ndk-v1/repeat.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "work/native-pty-20260908/candidate-ndk-v1/repeat.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "work/native-pty-20260908/candidate-ndk-v1/source/basis.json",
+      "bytes": 3142,
+      "sha256": "63bd7366be7d50c668eac68c4de395e246fcdf24e10afb6dc669d85fbc9838a9"
+    },
+    {
+      "path": "work/native-pty-20260908/candidate-ndk-v1/source/build-candidate-ndk.py",
+      "bytes": 4921,
+      "sha256": "feea2a851a44d32c26b04f996c97208a77fa57059d2ce9fc1e24a0f339de3d2f"
+    },
+    {
+      "path": "work/native-pty-20260908/candidate-ndk-v1/source/prepare-candidate.py",
+      "bytes": 18465,
+      "sha256": "67f0205f160e64fe9ac25afb4193bda95a8951a49f01014bfb95ef4538a0b322"
+    },
+    {
+      "path": "work/native-pty-20260908/candidate-ndk-v1/source/signal-contract.md",
+      "bytes": 3643,
+      "sha256": "6df067447a8b401a004cb72f556c1daf03299cfd77448230972ab16a10bab1d9"
+    },
+    {
+      "path": "work/native-pty-20260908/candidate-ndk-v1/source/tty-runner.c",
+      "bytes": 27237,
+      "sha256": "02f1099e7e2fc9a087c03e44b60f1505795a69425f33683522e657bef917a34b"
+    },
+    {
+      "path": "work/native-pty-20260908/candidate-ndk-v1/source/tty_processes.py",
+      "bytes": 20977,
+      "sha256": "f70181e741ecfc36e2543480f01fa748a0cfa41d111bb8a97f2cf298233d7071"
+    },
+    {
+      "path": "work/native-pty-20260908/candidate-ndk-v1/source/tty_wire.py",
+      "bytes": 2309,
+      "sha256": "b8b09e89a12d066491d12e8db6874b0331cfb968ee422513bdcbcf16d8eeadec"
+    }
+  ],
+  "inputFilesCopiedAndVerified": 5363,
+  "lineEndingNormalizations": [
+    {
+      "source": "tools/executor/bionic-supervisor/host_processes.py",
+      "artifact": "downloads/native-app-launch-20260908/package-r27/assets/foldgpt-executor/tools/executor/bionic-supervisor/host_processes.py",
+      "gitSha256": "cf0a991049b9b2faac3db70b194e51a6539196c70a0abf92ba0669c089b507bf",
+      "artifactSha256": "dde823a2e3fcb30ac6559a81b3b42469b64f178f95c6fedd3b4d1812b77a1078",
+      "rule": "Verified equal after CRLF-to-LF; restored exact artifact bytes only in isolated verification source"
+    },
+    {
+      "source": "tools/executor/collect-native-managed.py",
+      "artifact": "downloads/native-app-launch-20260908/package-r27/assets/foldgpt-executor/tools/executor/collect-native-managed.py",
+      "gitSha256": "a58639609fc45d43f7480b39caf0cd3dcf46b14e9840b434831ce90557ba1284",
+      "artifactSha256": "fbee4aeef4e0454761e42b97beccc4dae71711027f3fdc6c2c8985d1755d37aa",
+      "rule": "Verified equal after CRLF-to-LF; restored exact artifact bytes only in isolated verification source"
+    },
+    {
+      "source": "tools/executor/native_executor_backend.py",
+      "artifact": "downloads/native-app-launch-20260908/package-r27/assets/foldgpt-executor/tools/executor/native_executor_backend.py",
+      "gitSha256": "060b6caaeb02b56209b6eb680773f335bc189a948ae28ecdf8c1bae4cfb0c1ba",
+      "artifactSha256": "b30768f2fee039f712f70b1fe95247363dd34cdcd955b2924ae9edb99f77a92f",
+      "rule": "Verified equal after CRLF-to-LF; restored exact artifact bytes only in isolated verification source"
+    },
+    {
+      "source": "tools/executor/test_native_bootstrap_files.py",
+      "artifact": "downloads/native-app-launch-20260908/package-r27/assets/foldgpt-executor/tools/executor/test_native_bootstrap_files.py",
+      "gitSha256": "8bcadea6085937d3e888727d03e66ec58c2bdf6ca23f48d716243260cf80a466",
+      "artifactSha256": "f706678eadd5be8e6a3fb558c5961ec86061e13d8a700556aad1f7679b583489",
+      "rule": "Verified equal after CRLF-to-LF; restored exact artifact bytes only in isolated verification source"
+    },
+    {
+      "source": "tools/executor/runas-runtime/ripgrep-toolchain-notices.json",
+      "artifact": "tools/executor/runas-runtime/ripgrep-toolchain-notices.json",
+      "gitSha256": "2be3207ade45ba689f9d9247847fcc5c9847a2a41dedc3ff5812dd0ddea5f7a4",
+      "artifactSha256": "dc3e930c1c90ef1dc7651c5164236ceee4e882f570e00be7e4d022602317d3b4",
+      "rule": "Verified equal after CRLF-to-LF; restored exact artifact bytes only in isolated verification source"
+    }
+  ],
+  "apks": [
+    {
+      "revision": "r26b",
+      "schema": "foldgpt.native-apk-verification.v1",
+      "success": true,
+      "androidProductionExecuted": false,
+      "apkSha256": "632012aa8dd355fcede9a11b2483e8c48d22d2d170c9f4803c3d55cdd8e2723f",
+      "nativeLibraries": 91,
+      "pythonDataFiles": 2447,
+      "runtimeAliases": 87,
+      "sourceFiles": 98,
+      "hostSchema": "foldgpt.host.v2",
+      "modelProfiles": [
+        "managed",
+        "ordinaryUid",
+        "ordinaryPty"
+      ],
+      "nativeCommands": [
+        "bash",
+        "python",
+        "python3",
+        "rg"
+      ],
+      "launchOrigin": "android-app",
+      "ripgrepToolchainNoticeFiles": 15
+    },
+    {
+      "revision": "r27",
+      "schema": "foldgpt.native-apk-verification.v1",
+      "success": true,
+      "androidProductionExecuted": false,
+      "apkSha256": "9813ecd0d2a308eae4881b7f3d2d06db5f201f21178d93d8d7932af82367f348",
+      "nativeLibraries": 91,
+      "pythonDataFiles": 2447,
+      "runtimeAliases": 87,
+      "sourceFiles": 98,
+      "hostSchema": "foldgpt.host.v2",
+      "modelProfiles": [
+        "managed",
+        "ordinaryUid",
+        "ordinaryPty"
+      ],
+      "nativeCommands": [
+        "bash",
+        "python",
+        "python3",
+        "rg"
+      ],
+      "launchOrigin": "android-app",
+      "ripgrepToolchainNoticeFiles": 15
+    },
+    {
+      "revision": "r28",
+      "schema": "foldgpt.native-apk-verification.v1",
+      "success": true,
+      "androidProductionExecuted": false,
+      "apkSha256": "d1b218f25cff6b260570c767e68f838ea412dd99e1a69b30ba857c5ed8f32db4",
+      "nativeLibraries": 91,
+      "pythonDataFiles": 2447,
+      "runtimeAliases": 87,
+      "sourceFiles": 98,
+      "hostSchema": "foldgpt.host.v2",
+      "modelProfiles": [
+        "managed",
+        "ordinaryUid",
+        "ordinaryPty"
+      ],
+      "nativeCommands": [
+        "bash",
+        "python",
+        "python3",
+        "rg"
+      ],
+      "launchOrigin": "android-app",
+      "ripgrepToolchainNoticeFiles": 15
+    }
+  ],
+  "deviceActionPerformed": false,
+  "publishedByThisScript": false,
+  "restoredInputsModified": false,
+  "verificationWorkspace": "C:\\Dev\\ChatgptFold\\work\\FoldGPT-recovery\\v17-restored-apk-check"
+}

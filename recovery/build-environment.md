@@ -2,9 +2,12 @@
 
 Projet local : `C:\Dev\ChatgptFold` ; moteur séparé sous
 `C:\Dev\ChatgptFold\work\worktrees\FoldgptEngine`.
-Les productions et rapports Windows restent dans ce projet. Les emplacements
-Linux `/opt/foldgpt` et `/var/tmp` décrits ci-dessous sont ceux de l'environnement
-WSL existant, nécessaire aux permissions et liens Linux des tests.
+Les productions et rapports Windows restent dans ce projet. Les snapshots de
+reprise restent sous `work/FoldGPT-recovery`, également lorsqu'ils sont lus
+depuis WSL par `/mnt/c/Dev/ChatgptFold/work/FoldGPT-recovery`.
+Les emplacements Linux `/opt/foldgpt` et `/var/tmp` mentionnés dans les anciens
+rapports sont ceux de l'environnement de build initial ; ils ne sont pas des
+destinations de restauration à créer sur le nouveau poste.
 Les sources sont dans Git ; l'archive privée conserve les dépendances et les
 résultats locaux. Les installations globales suivantes se réinstallent sur le
 PC de reprise et ne font pas partie de l'archive du projet.
@@ -92,7 +95,11 @@ sur un autre PC n'autorise pas à effacer une réservation d'essai, un marqueur
 de broker ou une preuve sur le téléphone.
 
 `hydrate-project.py` exige une destination encore absente pour chaque racine
-ignorée qu'il copie, y compris `downloads/` et les dossiers `build/`. Un
+ignorée qu'il copie, y compris `downloads/` et les dossiers `build/`. Il traverse
+seulement les ancêtres existants de `work/FoldGPT-recovery`, qui contient les
+archives téléchargées, les snapshots et les rapports ; leurs fichiers existants
+restent protégés. Un snapshot interne doit être strictement sous ce dossier.
+Les liens/jonctions de racine et les sorties vers le snapshot sont refusés. Un
 complément ne doit pas être réhydraté aveuglément sur ces racines déjà
 restaurées. Le restaurer à part, puis ne fusionner que les fichiers absents,
 en acceptant les fichiers déjà présents seulement si leurs octets et leur

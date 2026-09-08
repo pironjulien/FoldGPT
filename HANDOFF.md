@@ -35,7 +35,13 @@ La récupération des sources, dépendances et preuves est décrite dans
 `pironjulien/FoldGPT-workspace`, branche `codex/foldgpt-beta`.
 Le [complément v16](recovery/supplement-v16.md) est publié, retéléchargé et
 restauré : 39 584 fichiers et 1 252 sources Git vérifiés, APK r24/r25 revérifiés.
-Conserver l'archive principale et les compléments 1 à 15 avant v16.
+Le [complément v17](recovery/supplement-v17.md) est publié, retéléchargé et
+restauré : 20 008 fichiers, 1 433 sources Git, trois APK revérifiés et
+24 346 copies d'audit reconstruites. Il complète l'archive principale et les
+compléments 1 à 16. Une copie chiffrée redondante de 1,76 Go a été retirée.
+Tous les téléchargements, snapshots et rapports de reprise vont sous
+`C:\Dev\ChatgptFold\work\FoldGPT-recovery`. Les outils de fusion acceptent
+ce confinement précis et protègent les sources Git ainsi que leurs snapshots.
 
 Les preuves et limites de chaque essai sont consignées dans les documents liés.
 Les consulter avant toute action sur le téléphone ; aucune publication publique

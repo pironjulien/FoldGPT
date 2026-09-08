@@ -2,6 +2,19 @@
 
 ## Unreleased - 2026-09-08
 
+- Deliver encrypted recovery supplement v17 privately, redownload and authenticate
+  it, and verify 20,008 restored files plus 1,433 Git source files. Reverify
+  r26b/r27/r28 APKs from restored source and authenticated v16 inputs; reconstruct
+  all 24,346 omitted desktop corpus files from retained original archives.
+  Preserve the initial Windows destination-prefix rejection and its correction.
+  Remove the verified redundant 1,760,858,355-byte combined encrypted local copy.
+
+- Allow authenticated recovery snapshots strictly below the project's
+  `work/FoldGPT-recovery` directory during initial hydration and additive merges.
+  Reject self-copying, source/destination links and Windows junction traversal,
+  preserve tracked paths even when missing, and protect hydration reports.
+  Keep cross-PC recovery commands and snapshots within the project directory.
+
 - Document the actual bundled MCP startup/cache rules: cache keys include cwd,
   selected plugins differ from globally installed plugins, and status-list
   diagnostics can themselves start temporary services. Preserve this boundary

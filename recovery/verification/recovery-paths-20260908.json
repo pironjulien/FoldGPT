@@ -1,0 +1,30 @@
+{
+  "scope": "in-project snapshot hydration and additive merge",
+  "linux": {
+    "command": "wsl --distribution Ubuntu-24.04 --exec python3 -B -m unittest discover -s /mnt/c/Dev/ChatgptFold/tools/recovery -p test_*.py -v",
+    "discoveredTests": 19,
+    "passedTests": 15,
+    "skippedTests": 4,
+    "skipReason": "Windows junction and path namespace tests executed separately on Windows",
+    "exitCode": 0
+  },
+  "windows": {
+    "command": "python -B -m unittest discover -s tools/recovery -p test_nested_recovery.py -k windows -v",
+    "tests": 4,
+    "junctionSubcases": 6,
+    "coverage": "DOS/extended and UNC aliases, root containment, mixed-prefix reports, device namespace refusals, and junctions",
+    "exitCode": 0
+  },
+  "originalWindowsAliasReproduction": {
+    "sameProjectInBothPrefixOrdersRefused": true,
+    "extendedRecoveryRootRefused": true
+  },
+  "initialWindowsSuite": {
+    "exitCode": 1,
+    "fixtureFailure": "WinError 1314 while creating symbolic-link fixtures; the full applicable suite subsequently passed under WSL",
+    "systemPermissionsChanged": false
+  },
+  "fixturesUnder": "work/recovery-tests",
+  "phoneExecuted": false,
+  "fullArchiveChainRestored": false
+}

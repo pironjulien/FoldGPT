@@ -15,7 +15,10 @@ spec.loader.exec_module(module)
 
 class MergeTests(unittest.TestCase):
     def setUp(self):
-        self.temp = tempfile.TemporaryDirectory()
+        test_root = Path(__file__).resolve().parents[2] / 'work/recovery-tests'
+        test_root.mkdir(parents=True, exist_ok=True)
+        self.temp = tempfile.TemporaryDirectory(dir=test_root)
+        Path(self.temp.name).resolve().relative_to(test_root.resolve())
         self.addCleanup(self.temp.cleanup)
         self.base = Path(self.temp.name)
         self.project, self.source = self.base / 'project', self.base / 'source'

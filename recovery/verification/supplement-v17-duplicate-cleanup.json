@@ -1,0 +1,14 @@
+{
+  "verified": true,
+  "removedPath": "work/FoldGPT-recovery/native-supplement-v17-20260908/workspace.tar.gz.age",
+  "removedBytes": 1760858355,
+  "sha256": "e5887bf1ea0650933e6a051002d659eee63f91112c1916abb00e7ce7113888fe",
+  "retainedAssets": [
+    "native-checkpoint-v17-manifest.json",
+    "native-checkpoint-v17.tar.gz.age.part001",
+    "native-checkpoint-v17.tar.gz.age.part002"
+  ],
+  "retainedUnder": "work/FoldGPT-recovery/downloaded-supplement-v17-20260908",
+  "privateReleaseVerified": true,
+  "uniqueProjectFilesRemoved": false
+}

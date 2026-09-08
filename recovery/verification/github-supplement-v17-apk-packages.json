@@ -1,0 +1,101 @@
+[
+  {
+    "revision": "r26b",
+    "package": "downloads/native-app-launch-20260908/package-r26",
+    "report": "work/app-transport-20260908/apk-r26b-verification.json",
+    "path": "downloads/native-production-20260908/foldgpt-native-candidate-r26b.apk",
+    "bytes": 81360189,
+    "sha256": "632012aa8dd355fcede9a11b2483e8c48d22d2d170c9f4803c3d55cdd8e2723f",
+    "packageFilesVerified": 2658,
+    "receipt": {
+      "schema": "foldgpt.native-apk-verification.v1",
+      "success": true,
+      "androidProductionExecuted": false,
+      "apkSha256": "632012aa8dd355fcede9a11b2483e8c48d22d2d170c9f4803c3d55cdd8e2723f",
+      "nativeLibraries": 91,
+      "pythonDataFiles": 2447,
+      "runtimeAliases": 87,
+      "sourceFiles": 98,
+      "hostSchema": "foldgpt.host.v2",
+      "modelProfiles": [
+        "managed",
+        "ordinaryUid",
+        "ordinaryPty"
+      ],
+      "nativeCommands": [
+        "bash",
+        "python",
+        "python3",
+        "rg"
+      ],
+      "launchOrigin": "android-app",
+      "ripgrepToolchainNoticeFiles": 15
+    }
+  },
+  {
+    "revision": "r27",
+    "package": "downloads/native-app-launch-20260908/package-r27",
+    "report": "work/boot-recovery-20260908/apk-r27-verification.json",
+    "path": "downloads/native-production-20260908/foldgpt-native-candidate-r27.apk",
+    "bytes": 81373025,
+    "sha256": "9813ecd0d2a308eae4881b7f3d2d06db5f201f21178d93d8d7932af82367f348",
+    "packageFilesVerified": 2658,
+    "receipt": {
+      "schema": "foldgpt.native-apk-verification.v1",
+      "success": true,
+      "androidProductionExecuted": false,
+      "apkSha256": "9813ecd0d2a308eae4881b7f3d2d06db5f201f21178d93d8d7932af82367f348",
+      "nativeLibraries": 91,
+      "pythonDataFiles": 2447,
+      "runtimeAliases": 87,
+      "sourceFiles": 98,
+      "hostSchema": "foldgpt.host.v2",
+      "modelProfiles": [
+        "managed",
+        "ordinaryUid",
+        "ordinaryPty"
+      ],
+      "nativeCommands": [
+        "bash",
+        "python",
+        "python3",
+        "rg"
+      ],
+      "launchOrigin": "android-app",
+      "ripgrepToolchainNoticeFiles": 15
+    }
+  },
+  {
+    "revision": "r28",
+    "package": "downloads/native-app-launch-20260908/package-r27",
+    "report": "work/app-transport-20260908/apk-r28-verification.json",
+    "path": "downloads/native-production-20260908/foldgpt-native-candidate-r28.apk",
+    "bytes": 81380149,
+    "sha256": "d1b218f25cff6b260570c767e68f838ea412dd99e1a69b30ba857c5ed8f32db4",
+    "packageFilesVerified": 2658,
+    "receipt": {
+      "schema": "foldgpt.native-apk-verification.v1",
+      "success": true,
+      "androidProductionExecuted": false,
+      "apkSha256": "d1b218f25cff6b260570c767e68f838ea412dd99e1a69b30ba857c5ed8f32db4",
+      "nativeLibraries": 91,
+      "pythonDataFiles": 2447,
+      "runtimeAliases": 87,
+      "sourceFiles": 98,
+      "hostSchema": "foldgpt.host.v2",
+      "modelProfiles": [
+        "managed",
+        "ordinaryUid",
+        "ordinaryPty"
+      ],
+      "nativeCommands": [
+        "bash",
+        "python",
+        "python3",
+        "rg"
+      ],
+      "launchOrigin": "android-app",
+      "ripgrepToolchainNoticeFiles": 15
+    }
+  }
+]

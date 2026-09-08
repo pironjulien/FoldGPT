@@ -1,20 +1,24 @@
 # Reprise du projet FoldGPT
 
-**Dernière sauvegarde du 8 septembre :** le [complément v16](supplement-v16.md)
-conserve r24/r25, leurs sources et compilations, les recherches communautaires
-et les preuves Android. Les 39 584 fichiers et 1 252 sources Git ont été
-retéléchargés, restaurés et vérifiés ; les deux APK restaurés ont repassé
-leur vérification. Conserver l'archive principale et les compléments 1 à 15.
-**R25 est installé sur le Fold : le modèle utilise un vrai terminal Android
-depuis la conversation et le projet Python passe ses cinq tests.** Lire
-[l'état actuel](HANDOFF.md) et le [rapport r25](../docs/research/r25-device-validation-20260908.md).
+**État du téléphone : r28/versionCode18.** Le lancement direct depuis FoldGPT,
+la création d'un projet Python, ses six tests et son zipapp sont vérifiés,
+y compris après reboot Android sans préparation du moteur par le PC. Lire
+[l'état actuel](HANDOFF.md) et le [rapport r28](../docs/research/r28-device-validation-20260908.md).
+La stabilité durable avec plusieurs conversations reste ouverte.
+
+**Sauvegardes :** le [complément v17](supplement-v17.md), qui conserve
+r26b/r27/r28 et l'audit du client, est publié, retéléchargé et restauré :
+20 008 fichiers et 1 433 sources Git vérifiés, trois APK revérifiés et
+24 346 fichiers d'audit reconstruits depuis les originaux. Conserver l'archive
+principale et les compléments 1 à 16 avant v17. Le clone Git seul ne contient
+ni les APK ni toutes les dépendances et preuves privées.
 Les sections historiques ci-dessous décrivent les étapes antérieures et ne
 remplacent pas cet état. Le protocole r21 n'est plus une consigne de réinstallation.
 
 Le dépôt privé de travail est `pironjulien/FoldGPT-workspace`, branche
 `codex/foldgpt-beta`. Le parcours Python ordinaire est vérifié sur Android/Bionic ;
 l'interface et le contrôleur GNU restent sous PRoot. Le panneau de terminal
-utilisateur, le fonctionnement sans PC et les mises à jour restent à qualifier.
+utilisateur, les mises à jour et l'utilisation prolongée restent à qualifier.
 
 **Session reprise le 7 septembre après la clôture de nuit :** lire d'abord
 [HANDOFF.md](HANDOFF.md). Le projet Python natif V2 a réussi sur le Fold ;
@@ -22,7 +26,7 @@ le canal de lecture et le chargeur de configuration ont ensuite réussi sur PC
 entre deux UID distincts. L'intégration à une tâche complète reste en cours.
 
 ```powershell
-gh repo clone pironjulien/FoldGPT-workspace C:\Dev\ChatgptFold -- -c core.autocrlf=false
+gh repo clone pironjulien/FoldGPT-workspace C:\Dev\ChatgptFold -- --branch codex/foldgpt-beta -c core.autocrlf=false
 Set-Location C:\Dev\ChatgptFold
 python tools/recovery/restore-submodules.py
 ```
@@ -61,13 +65,14 @@ $ErrorActionPreference = 'Stop'
 $foldRecoveryKey = (Join-Path $env:OneDrive 'Documents\NexusSecure\projects\FoldGPT\recovery.agekey').Replace('\','/')
 $foldRecoveryKeyLinux = (& wsl --distribution Ubuntu-24.04 --exec wslpath -u $foldRecoveryKey).Trim()
 if ($LASTEXITCODE -ne 0) { throw 'Impossible de résoudre le chemin du coffre' }
-wsl --distribution Ubuntu-24.04 --exec python3 /mnt/c/Dev/ChatgptFold/tools/recovery/restore-archive.py --assets /mnt/c/Dev/ChatgptFold/work/FoldGPT-recovery/downloaded --identity $foldRecoveryKeyLinux --destination /var/tmp/foldgpt-recovered --report /mnt/c/Dev/ChatgptFold/work/FoldGPT-recovery/archive-verification.json
+wsl --distribution Ubuntu-24.04 --exec python3 /mnt/c/Dev/ChatgptFold/tools/recovery/restore-archive.py --assets /mnt/c/Dev/ChatgptFold/work/FoldGPT-recovery/downloaded --identity $foldRecoveryKeyLinux --destination /mnt/c/Dev/ChatgptFold/work/FoldGPT-recovery/restored-main --report /mnt/c/Dev/ChatgptFold/work/FoldGPT-recovery/archive-verification.json
 ```
 
 Le PC doit disposer de WSL Ubuntu, Python 3.12 ou plus récent et `age` dans
 Ubuntu ; voir [l'environnement de build](build-environment.md). WSL est utilisé
 sur le PC pour conserver les liens Linux de l'archive. Les destinations doivent
-être nouvelles. Le script vérifie les dix morceaux, authentifie entièrement le
+être nouvelles et rester sous `C:\Dev\ChatgptFold\work\FoldGPT-recovery`.
+Le script vérifie les dix morceaux, authentifie entièrement le
 déchiffrement avant extraction, compare l'inventaire et contrôle les octets de
 chaque fichier effectivement restauré. La clé n'est jamais affichée.
 
@@ -77,7 +82,7 @@ restauration, également vérifiée après retéléchargement GitHub, s'effectue
 un dossier distinct :
 
 ```powershell
-wsl --distribution Ubuntu-24.04 --exec python3 /mnt/c/Dev/ChatgptFold/tools/recovery/restore-archive.py --assets /mnt/c/Dev/ChatgptFold/work/FoldGPT-recovery/downloaded --manifest native-checkpoint-v2-manifest.json --identity $foldRecoveryKeyLinux --destination /var/tmp/foldgpt-native-recovered --report /mnt/c/Dev/ChatgptFold/work/FoldGPT-recovery/native-verification.json
+wsl --distribution Ubuntu-24.04 --exec python3 /mnt/c/Dev/ChatgptFold/tools/recovery/restore-archive.py --assets /mnt/c/Dev/ChatgptFold/work/FoldGPT-recovery/downloaded --manifest native-checkpoint-v2-manifest.json --identity $foldRecoveryKeyLinux --destination /mnt/c/Dev/ChatgptFold/work/FoldGPT-recovery/restored-v2 --report /mnt/c/Dev/ChatgptFold/work/FoldGPT-recovery/native-verification.json
 ```
 
 Ce complément contient 123 fichiers vérifiés et l'APK debug de FoldGPT
@@ -95,11 +100,17 @@ les plus récentes sont celles de la branche Git**, pas celles de l'archive.
 Hydrater ensuite le clone neuf avec seulement ses données ignorées par Git :
 
 ```powershell
-wsl --distribution Ubuntu-24.04 --exec python3 /mnt/c/Dev/ChatgptFold/tools/recovery/hydrate-project.py --snapshot /var/tmp/foldgpt-recovered/ChatgptFold --project /mnt/c/Dev/ChatgptFold --report /mnt/c/Dev/ChatgptFold/work/FoldGPT-recovery/hydration.json
+wsl --distribution Ubuntu-24.04 --exec python3 /mnt/c/Dev/ChatgptFold/tools/recovery/hydrate-project.py --snapshot /mnt/c/Dev/ChatgptFold/work/FoldGPT-recovery/restored-main/ChatgptFold --project /mnt/c/Dev/ChatgptFold --report /mnt/c/Dev/ChatgptFold/work/FoldGPT-recovery/hydration.json
 ```
 
 La procédure conserve les fichiers suivis par Git et les sous-modules déjà
 restaurés. Elle refuse les collisions avec des données locales préexistantes.
+Le snapshot peut se trouver dans le projet uniquement sous
+`work/FoldGPT-recovery`, dans son propre sous-dossier. L'outil parcourt les
+ancêtres déjà présents de ce dossier sans recopier le snapshot dans lui-même.
+Toute sortie vers le snapshot, racine reliée par un lien/jonction ou parent de
+destination lié est refusé avant la copie. Les autres racines ignorées doivent
+rester absentes pour l'hydratation initiale.
 Cette étape a été exécutée sur un clone Windows réel : **100 332 fichiers de
 données (13 460 048 339 octets) et 441 liens ont été comparés à l'inventaire
 après copie**, avec contrôle de l'absence de modification des sources Git.
@@ -108,6 +119,23 @@ Les liens absolus sont conservés avec leur cible originale ; les sorties de
 build dépendant d'un ancien chemin doivent être reconstruites, pas exécutées
 aveuglément. `android/local.properties` conserve le chemin SDK du premier PC :
 le régénérer si l'emplacement du SDK diffère sur le second.
+
+Après l'hydratation principale, ajouter les données de v2 depuis son snapshot :
+
+```powershell
+wsl --distribution Ubuntu-24.04 --exec python3 /mnt/c/Dev/ChatgptFold/tools/recovery/merge-supplement.py --snapshot /mnt/c/Dev/ChatgptFold/work/FoldGPT-recovery/restored-v2/foldgpt-native-artifacts-v2-20260907 --project /mnt/c/Dev/ChatgptFold --report /mnt/c/Dev/ChatgptFold/work/FoldGPT-recovery/native-v2-merge.json
+```
+
+Le manifeste `native-checkpoint-manifest.json` correspond au complément 1,
+historique et remplacé opérationnellement par v2. Le conserver avec ses
+fragments et le restaurer séparément pour compléter les preuves de la chaîne :
+
+```powershell
+wsl --distribution Ubuntu-24.04 --exec python3 /mnt/c/Dev/ChatgptFold/tools/recovery/restore-archive.py --assets /mnt/c/Dev/ChatgptFold/work/FoldGPT-recovery/downloaded --manifest native-checkpoint-manifest.json --identity $foldRecoveryKeyLinux --destination /mnt/c/Dev/ChatgptFold/work/FoldGPT-recovery/restored-v1 --report /mnt/c/Dev/ChatgptFold/work/FoldGPT-recovery/native-v1-verification.json
+```
+
+Les étapes v3 à v9 ci-dessous conservent chacune leur snapshot ; ne pas
+réappliquer les anciens fichiers sur une configuration téléphone plus récente.
 
 ## Complément v3 : qualification Android v6/v7
 
@@ -125,8 +153,8 @@ puis ajouter ses fichiers ignorés au clone. Le rapport doit être un fichier ne
 hors des fichiers suivis du clone et du snapshot ; aucune donnée différente n'est écrasée.
 
 ```powershell
-wsl --distribution Ubuntu-24.04 --exec python3 /mnt/c/Dev/ChatgptFold/tools/recovery/restore-archive.py --assets /mnt/c/Dev/ChatgptFold/work/FoldGPT-recovery/downloaded --manifest native-checkpoint-v3-manifest.json --identity $foldRecoveryKeyLinux --destination /var/tmp/foldgpt-native-v3 --report /mnt/c/Dev/ChatgptFold/work/FoldGPT-recovery/native-v3-verification.json
-wsl --distribution Ubuntu-24.04 --exec python3 /mnt/c/Dev/ChatgptFold/tools/recovery/merge-supplement.py --snapshot /var/tmp/foldgpt-native-v3/foldgpt-native-artifacts-v3-20260907 --project /mnt/c/Dev/ChatgptFold --report /mnt/c/Dev/ChatgptFold/work/FoldGPT-recovery/native-v3-merge.json
+wsl --distribution Ubuntu-24.04 --exec python3 /mnt/c/Dev/ChatgptFold/tools/recovery/restore-archive.py --assets /mnt/c/Dev/ChatgptFold/work/FoldGPT-recovery/downloaded --manifest native-checkpoint-v3-manifest.json --identity $foldRecoveryKeyLinux --destination /mnt/c/Dev/ChatgptFold/work/FoldGPT-recovery/restored-v3 --report /mnt/c/Dev/ChatgptFold/work/FoldGPT-recovery/native-v3-verification.json
+wsl --distribution Ubuntu-24.04 --exec python3 /mnt/c/Dev/ChatgptFold/tools/recovery/merge-supplement.py --snapshot /mnt/c/Dev/ChatgptFold/work/FoldGPT-recovery/restored-v3/foldgpt-native-artifacts-v3-20260907 --project /mnt/c/Dev/ChatgptFold --report /mnt/c/Dev/ChatgptFold/work/FoldGPT-recovery/native-v3-merge.json
 ```
 
 Le runtime Python recompilé et ses preuves sont alors sous
@@ -158,8 +186,8 @@ Voir la [preuve de restauration](verification/github-supplement-v4-restoration.j
 Après la fusion du v3, suivre la même procédure additive dans des dossiers neufs :
 
 ```powershell
-wsl --distribution Ubuntu-24.04 --exec python3 /mnt/c/Dev/ChatgptFold/tools/recovery/restore-archive.py --assets /mnt/c/Dev/ChatgptFold/work/FoldGPT-recovery/downloaded --manifest native-checkpoint-v4-manifest.json --identity $foldRecoveryKeyLinux --destination /var/tmp/foldgpt-native-v4 --report /mnt/c/Dev/ChatgptFold/work/FoldGPT-recovery/native-v4-verification.json
-wsl --distribution Ubuntu-24.04 --exec python3 /mnt/c/Dev/ChatgptFold/tools/recovery/merge-supplement.py --snapshot /var/tmp/foldgpt-native-v4/foldgpt-native-artifacts-v4-20260907 --project /mnt/c/Dev/ChatgptFold --report /mnt/c/Dev/ChatgptFold/work/FoldGPT-recovery/native-v4-merge.json
+wsl --distribution Ubuntu-24.04 --exec python3 /mnt/c/Dev/ChatgptFold/tools/recovery/restore-archive.py --assets /mnt/c/Dev/ChatgptFold/work/FoldGPT-recovery/downloaded --manifest native-checkpoint-v4-manifest.json --identity $foldRecoveryKeyLinux --destination /mnt/c/Dev/ChatgptFold/work/FoldGPT-recovery/restored-v4 --report /mnt/c/Dev/ChatgptFold/work/FoldGPT-recovery/native-v4-verification.json
+wsl --distribution Ubuntu-24.04 --exec python3 /mnt/c/Dev/ChatgptFold/tools/recovery/merge-supplement.py --snapshot /mnt/c/Dev/ChatgptFold/work/FoldGPT-recovery/restored-v4/foldgpt-native-artifacts-v4-20260907 --project /mnt/c/Dev/ChatgptFold --report /mnt/c/Dev/ChatgptFold/work/FoldGPT-recovery/native-v4-merge.json
 ```
 
 Cette fusion a été exécutée sur le clone Windows déjà hydraté : **2 927 fichiers
@@ -189,8 +217,8 @@ Voir la [preuve de restauration](verification/github-supplement-v5-restoration.j
 Après la fusion du v4, utiliser de nouveaux dossiers :
 
 ```powershell
-wsl --distribution Ubuntu-24.04 --exec python3 /mnt/c/Dev/ChatgptFold/tools/recovery/restore-archive.py --assets /mnt/c/Dev/ChatgptFold/work/FoldGPT-recovery/downloaded --manifest native-checkpoint-v5-manifest.json --identity $foldRecoveryKeyLinux --destination /var/tmp/foldgpt-native-v5 --report /mnt/c/Dev/ChatgptFold/work/FoldGPT-recovery/native-v5-verification.json
-wsl --distribution Ubuntu-24.04 --exec python3 /mnt/c/Dev/ChatgptFold/tools/recovery/merge-supplement.py --snapshot /var/tmp/foldgpt-native-v5/foldgpt-native-artifacts-v5-20260907 --project /mnt/c/Dev/ChatgptFold --report /mnt/c/Dev/ChatgptFold/work/FoldGPT-recovery/native-v5-merge.json
+wsl --distribution Ubuntu-24.04 --exec python3 /mnt/c/Dev/ChatgptFold/tools/recovery/restore-archive.py --assets /mnt/c/Dev/ChatgptFold/work/FoldGPT-recovery/downloaded --manifest native-checkpoint-v5-manifest.json --identity $foldRecoveryKeyLinux --destination /mnt/c/Dev/ChatgptFold/work/FoldGPT-recovery/restored-v5 --report /mnt/c/Dev/ChatgptFold/work/FoldGPT-recovery/native-v5-verification.json
+wsl --distribution Ubuntu-24.04 --exec python3 /mnt/c/Dev/ChatgptFold/tools/recovery/merge-supplement.py --snapshot /mnt/c/Dev/ChatgptFold/work/FoldGPT-recovery/restored-v5/foldgpt-native-artifacts-v5-20260907 --project /mnt/c/Dev/ChatgptFold --report /mnt/c/Dev/ChatgptFold/work/FoldGPT-recovery/native-v5-merge.json
 ```
 
 L'APK est `tools/executor/shizuku-lab/build/kernel-v10-stdio/app-debug.apk`.
@@ -217,8 +245,8 @@ Voir la [preuve de restauration](verification/github-supplement-v6-restoration.j
 Après la fusion du v5 :
 
 ```powershell
-wsl --distribution Ubuntu-24.04 --exec python3 /mnt/c/Dev/ChatgptFold/tools/recovery/restore-archive.py --assets /mnt/c/Dev/ChatgptFold/work/FoldGPT-recovery/downloaded --manifest native-checkpoint-v6-manifest.json --identity $foldRecoveryKeyLinux --destination /var/tmp/foldgpt-native-v6 --report /mnt/c/Dev/ChatgptFold/work/FoldGPT-recovery/native-v6-verification.json
-wsl --distribution Ubuntu-24.04 --exec python3 /mnt/c/Dev/ChatgptFold/tools/recovery/merge-supplement.py --snapshot /var/tmp/foldgpt-native-v6/foldgpt-native-artifacts-v6-20260907 --project /mnt/c/Dev/ChatgptFold --report /mnt/c/Dev/ChatgptFold/work/FoldGPT-recovery/native-v6-merge.json
+wsl --distribution Ubuntu-24.04 --exec python3 /mnt/c/Dev/ChatgptFold/tools/recovery/restore-archive.py --assets /mnt/c/Dev/ChatgptFold/work/FoldGPT-recovery/downloaded --manifest native-checkpoint-v6-manifest.json --identity $foldRecoveryKeyLinux --destination /mnt/c/Dev/ChatgptFold/work/FoldGPT-recovery/restored-v6 --report /mnt/c/Dev/ChatgptFold/work/FoldGPT-recovery/native-v6-verification.json
+wsl --distribution Ubuntu-24.04 --exec python3 /mnt/c/Dev/ChatgptFold/tools/recovery/merge-supplement.py --snapshot /mnt/c/Dev/ChatgptFold/work/FoldGPT-recovery/restored-v6/foldgpt-native-artifacts-v6-20260907 --project /mnt/c/Dev/ChatgptFold --report /mnt/c/Dev/ChatgptFold/work/FoldGPT-recovery/native-v6-merge.json
 ```
 
 La fusion v6 a également été exécutée sur le clone Windows : **467 fichiers
@@ -242,8 +270,8 @@ Voir la [preuve de restauration](verification/github-supplement-v7-restoration.j
 Après la fusion du v6, utiliser des dossiers neufs :
 
 ```powershell
-wsl --distribution Ubuntu-24.04 --exec python3 /mnt/c/Dev/ChatgptFold/tools/recovery/restore-archive.py --assets /mnt/c/Dev/ChatgptFold/work/FoldGPT-recovery/downloaded --manifest native-checkpoint-v7-manifest.json --identity $foldRecoveryKeyLinux --destination /var/tmp/foldgpt-native-v7 --report /mnt/c/Dev/ChatgptFold/work/FoldGPT-recovery/native-v7-verification.json
-wsl --distribution Ubuntu-24.04 --exec python3 /mnt/c/Dev/ChatgptFold/tools/recovery/merge-supplement.py --snapshot /var/tmp/foldgpt-native-v7/foldgpt-native-artifacts-v7-20260907 --project /mnt/c/Dev/ChatgptFold --report /mnt/c/Dev/ChatgptFold/work/FoldGPT-recovery/native-v7-merge.json
+wsl --distribution Ubuntu-24.04 --exec python3 /mnt/c/Dev/ChatgptFold/tools/recovery/restore-archive.py --assets /mnt/c/Dev/ChatgptFold/work/FoldGPT-recovery/downloaded --manifest native-checkpoint-v7-manifest.json --identity $foldRecoveryKeyLinux --destination /mnt/c/Dev/ChatgptFold/work/FoldGPT-recovery/restored-v7 --report /mnt/c/Dev/ChatgptFold/work/FoldGPT-recovery/native-v7-verification.json
+wsl --distribution Ubuntu-24.04 --exec python3 /mnt/c/Dev/ChatgptFold/tools/recovery/merge-supplement.py --snapshot /mnt/c/Dev/ChatgptFold/work/FoldGPT-recovery/restored-v7/foldgpt-native-artifacts-v7-20260907 --project /mnt/c/Dev/ChatgptFold --report /mnt/c/Dev/ChatgptFold/work/FoldGPT-recovery/native-v7-merge.json
 ```
 
 Les sources actuelles restent celles de Git. Les APK et stages historiques
@@ -278,8 +306,8 @@ Après les fusions précédentes, restaurer puis fusionner ce complément dans d
 dossiers neufs, avec les mêmes outils :
 
 ```powershell
-wsl --distribution Ubuntu-24.04 --exec python3 /mnt/c/Dev/ChatgptFold/tools/recovery/restore-archive.py --assets /mnt/c/Dev/ChatgptFold/work/FoldGPT-recovery/downloaded --manifest native-checkpoint-v8-manifest.json --identity $foldRecoveryKeyLinux --destination /var/tmp/foldgpt-native-v8 --report /mnt/c/Dev/ChatgptFold/work/FoldGPT-recovery/native-v8-verification.json
-wsl --distribution Ubuntu-24.04 --exec python3 /mnt/c/Dev/ChatgptFold/tools/recovery/merge-supplement.py --snapshot /var/tmp/foldgpt-native-v8/foldgpt-native-artifacts-v8-20260907 --project /mnt/c/Dev/ChatgptFold --report /mnt/c/Dev/ChatgptFold/work/FoldGPT-recovery/native-v8-merge.json
+wsl --distribution Ubuntu-24.04 --exec python3 /mnt/c/Dev/ChatgptFold/tools/recovery/restore-archive.py --assets /mnt/c/Dev/ChatgptFold/work/FoldGPT-recovery/downloaded --manifest native-checkpoint-v8-manifest.json --identity $foldRecoveryKeyLinux --destination /mnt/c/Dev/ChatgptFold/work/FoldGPT-recovery/restored-v8 --report /mnt/c/Dev/ChatgptFold/work/FoldGPT-recovery/native-v8-verification.json
+wsl --distribution Ubuntu-24.04 --exec python3 /mnt/c/Dev/ChatgptFold/tools/recovery/merge-supplement.py --snapshot /mnt/c/Dev/ChatgptFold/work/FoldGPT-recovery/restored-v8/foldgpt-native-artifacts-v8-20260907 --project /mnt/c/Dev/ChatgptFold --report /mnt/c/Dev/ChatgptFold/work/FoldGPT-recovery/native-v8-merge.json
 ```
 
 Les artefacts se retrouvent sous `downloads/engine-gnu-arm64-20260907` :
@@ -308,14 +336,60 @@ porte sur la restauration Linux complète.
 Après les compléments précédents, utiliser des dossiers neufs :
 
 ```powershell
-wsl --distribution Ubuntu-24.04 --exec python3 /mnt/c/Dev/ChatgptFold/tools/recovery/restore-archive.py --assets /mnt/c/Dev/ChatgptFold/work/FoldGPT-recovery/downloaded --manifest native-checkpoint-v9-manifest.json --identity $foldRecoveryKeyLinux --destination /var/tmp/foldgpt-native-v9 --report /mnt/c/Dev/ChatgptFold/work/FoldGPT-recovery/native-v9-verification.json
-wsl --distribution Ubuntu-24.04 --exec python3 /mnt/c/Dev/ChatgptFold/tools/recovery/merge-supplement.py --snapshot /var/tmp/foldgpt-native-v9/foldgpt-native-artifacts-v9-20260907 --project /mnt/c/Dev/ChatgptFold --report /mnt/c/Dev/ChatgptFold/work/FoldGPT-recovery/native-v9-merge.json
+wsl --distribution Ubuntu-24.04 --exec python3 /mnt/c/Dev/ChatgptFold/tools/recovery/restore-archive.py --assets /mnt/c/Dev/ChatgptFold/work/FoldGPT-recovery/downloaded --manifest native-checkpoint-v9-manifest.json --identity $foldRecoveryKeyLinux --destination /mnt/c/Dev/ChatgptFold/work/FoldGPT-recovery/restored-v9 --report /mnt/c/Dev/ChatgptFold/work/FoldGPT-recovery/native-v9-verification.json
+wsl --distribution Ubuntu-24.04 --exec python3 /mnt/c/Dev/ChatgptFold/tools/recovery/merge-supplement.py --snapshot /mnt/c/Dev/ChatgptFold/work/FoldGPT-recovery/restored-v9/foldgpt-native-artifacts-v9-20260907 --project /mnt/c/Dev/ChatgptFold --report /mnt/c/Dev/ChatgptFold/work/FoldGPT-recovery/native-v9-merge.json
 ```
 
 Lire le [rapport V2](../docs/research/native-runtime-v2-device-result-2026-09-07.md)
 avant toute reprise. Les actions de qualification V12/V1/V2 sont consommées ;
 restaurer leurs preuves ne les autorise pas à nouveau. Le raccordement aux
 commandes ordinaires de l'interface reste en développement.
+
+## Compléments v10 à v17 et corpus desktop
+
+Après l'archive principale et v1 à v9, récupérer les compléments suivants dans
+l'ordre. Les reçus des sauvegardes sont dans
+[v10](supplement-v10.md), [v11](supplement-v11.md), [v12](supplement-v12.md),
+[v13](supplement-v13.md), [v14](supplement-v14.md), [v15](supplement-v15.md),
+[v16](supplement-v16.md) et [v17](supplement-v17.md). La dernière page distingue
+la création locale, la publication et la restauration réellement vérifiée.
+Les commandes suivantes supposent le téléchargement complet précédent, le
+coffre synchronisé et des destinations encore absentes :
+
+```powershell
+$foldRecoveryLinux = '/mnt/c/Dev/ChatgptFold/work/FoldGPT-recovery'
+foreach ($foldSupplementVersion in 10..17) {
+    $foldSupplementManifest = "native-checkpoint-v$foldSupplementVersion-manifest.json"
+    $foldSupplementDestination = "$foldRecoveryLinux/restored-v$foldSupplementVersion"
+    wsl --distribution Ubuntu-24.04 --exec python3 /mnt/c/Dev/ChatgptFold/tools/recovery/restore-archive.py --assets "$foldRecoveryLinux/downloaded" --manifest $foldSupplementManifest --identity $foldRecoveryKeyLinux --destination $foldSupplementDestination --report "$foldRecoveryLinux/native-v$foldSupplementVersion-verification.json"
+    if ($LASTEXITCODE -ne 0) { throw "Restauration v$foldSupplementVersion interrompue" }
+    wsl --distribution Ubuntu-24.04 --exec python3 /mnt/c/Dev/ChatgptFold/tools/recovery/merge-supplement.py --snapshot "$foldSupplementDestination/foldgpt-native-artifacts-v$foldSupplementVersion-20260908" --project /mnt/c/Dev/ChatgptFold --report "$foldRecoveryLinux/native-v$foldSupplementVersion-merge.json"
+    if ($LASTEXITCODE -ne 0) { throw "Fusion v$foldSupplementVersion interrompue : conserver et examiner la collision" }
+}
+```
+
+La fusion n'écrase ni les sources suivies ni des données différentes. Une
+collision est conservée et doit être comparée aux checkpoints avant reprise ;
+aucune suppression automatique ne fait partie de cette recette. Les tar sources
+des anciens checkpoints restent dans leurs snapshots. Le code courant provient
+du clone de la branche, avec les sous-modules et le moteur restaurés séparément.
+Les restaurations unitaires vérifiées ne constituent pas une nouvelle exécution
+complète de cette chaîne sur le second PC.
+
+V17 conserve les originaux tar/Debian et permet de recréer les 24 346 copies
+desktop omises. Après fusion de v17, le script ci-dessous est disponible dans
+le dossier de travail du projet. Il compare chaque fichier reconstruit à sa
+taille et son SHA256 ; les originaux restaurés restent intacts :
+
+```powershell
+$foldV17Snapshot = 'C:\Dev\ChatgptFold\work\FoldGPT-recovery\restored-v17\foldgpt-native-artifacts-v17-20260908'
+python -B work/FoldGPT-recovery/restore-reconstructible-v17.py --project $foldV17Snapshot --manifest "$foldV17Snapshot/work/FoldGPT-recovery/reconstruction-v17.json" --destination C:\Dev\ChatgptFold\work\FoldGPT-recovery\reconstructed-v17 --report C:\Dev\ChatgptFold\work\FoldGPT-recovery\desktop-reconstruction-v17.json
+if ($LASTEXITCODE -ne 0) { throw 'Reconstruction desktop interrompue' }
+wsl --distribution Ubuntu-24.04 --exec python3 /mnt/c/Dev/ChatgptFold/tools/recovery/merge-supplement.py --snapshot /mnt/c/Dev/ChatgptFold/work/FoldGPT-recovery/reconstructed-v17 --project /mnt/c/Dev/ChatgptFold --report /mnt/c/Dev/ChatgptFold/work/FoldGPT-recovery/desktop-reconstruction-v17-merge.json
+```
+
+Il s'agit de copies régulières d'audit, pas d'une installation du client : les
+permissions Unix, liens et métadonnées des originaux restent dans les archives.
 
 ## Récupérer le moteur séparé
 
@@ -327,7 +401,7 @@ commit officiel exact et le SHA-256 du patch dans `manifest.json` :
 
 ```powershell
 python tools/recovery/restore-engine.py --destination C:\Dev\ChatgptFold\work\worktrees\FoldgptEngine
-wsl --distribution Ubuntu-24.04 --exec python3 /mnt/c/Dev/ChatgptFold/tools/recovery/hydrate-project.py --snapshot /var/tmp/foldgpt-recovered/FoldgptEngine --project /mnt/c/Dev/ChatgptFold/work/worktrees/FoldgptEngine --report /mnt/c/Dev/ChatgptFold/work/FoldGPT-recovery/engine-hydration.json
+wsl --distribution Ubuntu-24.04 --exec python3 /mnt/c/Dev/ChatgptFold/tools/recovery/hydrate-project.py --snapshot /mnt/c/Dev/ChatgptFold/work/FoldGPT-recovery/restored-main/FoldgptEngine --project /mnt/c/Dev/ChatgptFold/work/worktrees/FoldgptEngine --report /mnt/c/Dev/ChatgptFold/work/FoldGPT-recovery/engine-hydration.json
 ```
 
 Le script récupère la release officielle, vérifie son commit, applique le patch

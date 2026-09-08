@@ -1,0 +1,83 @@
+{
+  "repository": "https://github.com/pironjulien/FoldGPT-workspace",
+  "visibility": "PRIVATE",
+  "release": "https://github.com/pironjulien/FoldGPT-workspace/releases/tag/recovery-2026-09-07",
+  "sourceCommit": "34f9e603e3f1b305043661e446a6626f83824f07",
+  "encryptedSha256": "e5887bf1ea0650933e6a051002d659eee63f91112c1916abb00e7ce7113888fe",
+  "assets": [
+    {
+      "name": "native-checkpoint-v17-manifest.json",
+      "bytes": 744,
+      "sha256": "f989454713344322ddd44fc19884a9ee3eabdd260bfa1de35a41dd6b0cbc0ae3"
+    },
+    {
+      "name": "native-checkpoint-v17.tar.gz.age.part001",
+      "bytes": 1073741824,
+      "sha256": "fdb04cc9486a4f9fc1b2e85206df0f2f509c40afcbd0134f9fb0eb8c39eaa460"
+    },
+    {
+      "name": "native-checkpoint-v17.tar.gz.age.part002",
+      "bytes": 687116531,
+      "sha256": "e8d93001f3e11ab08b1735c4adc988f93b26cad4095d5816a83a3df95436f84f"
+    }
+  ],
+  "downloadedAssetHashesVerified": true,
+  "restorationReport": "work/FoldGPT-recovery/verification-v17-20260908/github-supplement-v17-restoration.json",
+  "sourceFilesRestoredAndVerified": 1433,
+  "restoredFilesVerified": 20008,
+  "apkPackagesReverified": [
+    {
+      "revision": "r26b",
+      "sha256": "632012aa8dd355fcede9a11b2483e8c48d22d2d170c9f4803c3d55cdd8e2723f",
+      "packageFilesVerified": 2658
+    },
+    {
+      "revision": "r27",
+      "sha256": "9813ecd0d2a308eae4881b7f3d2d06db5f201f21178d93d8d7932af82367f348",
+      "packageFilesVerified": 2658
+    },
+    {
+      "revision": "r28",
+      "sha256": "d1b218f25cff6b260570c767e68f838ea412dd99e1a69b30ba857c5ed8f32db4",
+      "packageFilesVerified": 2658
+    }
+  ],
+  "desktopCorpusReconstructed": {
+    "verified": true,
+    "files": 24346,
+    "bytes": 3624194578,
+    "clientExecuted": false,
+    "destination": "C:\\Dev\\ChatgptFold\\work\\FoldGPT-recovery\\restored-supplement-v17-20260908\\reconstructed-desktop-corpus"
+  },
+  "earlierArchiveDependencies": [
+    "manifest.json",
+    "native-checkpoint-manifest.json",
+    "native-checkpoint-v2-manifest.json",
+    "native-checkpoint-v3-manifest.json",
+    "native-checkpoint-v4-manifest.json",
+    "native-checkpoint-v5-manifest.json",
+    "native-checkpoint-v6-manifest.json",
+    "native-checkpoint-v7-manifest.json",
+    "native-checkpoint-v8-manifest.json",
+    "native-checkpoint-v9-manifest.json",
+    "native-checkpoint-v10-manifest.json",
+    "native-checkpoint-v11-manifest.json",
+    "native-checkpoint-v12-manifest.json",
+    "native-checkpoint-v13-manifest.json",
+    "native-checkpoint-v14-manifest.json",
+    "native-checkpoint-v15-manifest.json",
+    "native-checkpoint-v16-manifest.json"
+  ],
+  "plaintextUploaded": false,
+  "keysIncluded": false,
+  "deviceActionPerformed": false,
+  "scope": "# Compl\u00e9ment priv\u00e9 v17 : d\u00e9marrage Android r26b/r28 et audit du client r\u00e9el\n\nCe compl\u00e9ment exige l'archive principale puis les compl\u00e9ments 1 \u00e0 16, dans cet\nordre. La cr\u00e9ation utilise le commit explicitement fourni par l'agent principal.\nLe commit n'est jamais d\u00e9duit de HEAD et aucun commit n'est cr\u00e9\u00e9 par la recette.\n\nLa s\u00e9lection couvre les trois APK r26b/r27/r28, les packages r26 et r27 r\u00e9ellement\nembarqu\u00e9s (r28 r\u00e9emploie package-r27), les commandes et journaux de build, les\npreuves de work/app-transport-20260908 et work/boot-recovery-20260908, les essais\nde d\u00e9marrage depuis l'application, les diagnostics et work/process-pressure-20260908.\nLes compilations et observations pr\u00e9alables de feasibility-survey ainsi que les\nfixtures de r\u00e9paration des anciens projets sont conserv\u00e9es avec leurs r\u00e9sultats.\nLes binaires de bootstrap Android et JNI sont donc archiv\u00e9s avec leurs sources\nde build et leurs re\u00e7us. Les outils et fermetures NDK/ripgrep/PTY ant\u00e9rieurs\ndemeurent dans les compl\u00e9ments historiques requis.\n\nLe dossier desktop-audit conserve ses r\u00e9sultats, m\u00e9tadonn\u00e9es, erreurs et scripts.\nLes archives originales priv\u00e9es comprennent le tar exact du client install\u00e9\n26.901.41600, ASAR SHA1306 inclus, et le paquet Debian de r\u00e9f\u00e9rence 26.901.51231\navec sa provenance. Acorn 8.18.0 et son cache de t\u00e9l\u00e9chargement sont conserv\u00e9s.\nLes fichiers officiels extraits en plusieurs exemplaires sont exclus seulement\napr\u00e8s avoir v\u00e9rifi\u00e9 que les archives originales reproduisent chaque fichier\nomis \u00e0 la taille et au SHA256 exacts. reconstruction-v17.json associe les 24 346\nchemins actuels aux membres du tar/Debian/ASAR ; le nombre final est celui du\nmanifeste v\u00e9rifi\u00e9. restore-reconstructible-v17.py peut les v\u00e9rifier sans \u00e9crire,\nou les restituer dans un dossier neuf sous le projet. Il n'ex\u00e9cute aucun code\ndu client ni commande ADB. Cette \u00e9conomie ne supprime aucun original.\n\nL'inspection initiale a mesur\u00e9 3 444 082 706 octets s\u00e9lectionn\u00e9s et 3 624 194 578\noctets de copies reconstructibles omises, avant process-pressure, scripts v17,\nmanifestes et checkpoint Git. Le gel final enregistre chaque fichier s\u00e9lectionn\u00e9\net chaque omission. Les captures de conversation et journaux restent uniquement\ndans la charge chiffr\u00e9e. Les caches .git/.gradle/.cxx/__pycache__ et fichiers de\ncl\u00e9s reconnus par le workflow historique sont exclus. node_modules et target\nne sont pas exclus g\u00e9n\u00e9riquement : ils peuvent contenir du code distribu\u00e9 requis.\n\nLe gel refuse les corpus non reproductibles ; la cr\u00e9ation rev\u00e9rifie les donn\u00e9es\nfig\u00e9es, les trois APK contre leurs packages, la liaison du package r27 au source\nGit final et les dix-sept manifestes historiques. Le staging est int\u00e9gralement\ncontr\u00f4l\u00e9 avant d'utiliser l'\u00e9metteur age existant avec la s\u00e9lection exacte.\nLa cl\u00e9 priv\u00e9e n'est jamais copi\u00e9e dans le projet : seul age/age-keygen re\u00e7oit son\nchemin existant du coffre NexusSecure. Aucun texte secret n'est affich\u00e9.\n\nLa cr\u00e9ation chiffr\u00e9e n'est ni une publication ni une restauration r\u00e9ussie. La\npublication attend une instruction s\u00e9par\u00e9e ; elle doit v\u00e9rifier la visibilit\u00e9\npriv\u00e9e et les fragments distants, puis ret\u00e9l\u00e9charger, authentifier et restaurer\nl'archive dans un dossier neuf. Les r\u00e9sultats Android, les v\u00e9rifications PC et\nla r\u00e9cup\u00e9ration sont des preuves distinctes.\n",
+  "resumedAfter": {
+    "phase": "desktopCorpusReconstruction",
+    "cause": "Win32 extended destination prefix did not match the canonical project path",
+    "correction": "Pass canonical destination; reconstructeur retains extended paths for file I/O",
+    "archiveAltered": false,
+    "downloadRepeated": false,
+    "authenticatedRestoreRepeated": false
+  }
+}

@@ -13,6 +13,8 @@ import shutil
 import stat
 import subprocess
 
+from recovery_paths import canonical_path, checked_tree, destination_boundary, linked, plain_path, snapshot_roots
+
 
 def digest(path):
     with path.open('rb') as stream:
@@ -20,12 +22,10 @@ def digest(path):
 
 
 def merge(source, project):
-    source, project = source.resolve(strict=True), project.resolve(strict=True)
-    if source == project or source.is_relative_to(project) or project.is_relative_to(source):
-        raise ValueError('Supplement and Git project must be separate directories')
+    source, project = snapshot_roots(source, project)
     git = ['git', '-C', str(project)]
     root = subprocess.check_output(git + ['rev-parse', '--show-toplevel'], text=True).strip()
-    if Path(root).resolve() != project:
+    if canonical_path(root, strict=True) != project:
         raise ValueError('Project must be the Git root')
     index = subprocess.check_output(git + ['ls-files', '--stage', '-z']).split(b'\0')
     tracked = set()
@@ -34,7 +34,7 @@ def merge(source, project):
         name = os.fsdecode(raw)
         tracked.add(name)
     candidates = []
-    for base, directories, files in os.walk(source, followlinks=False):
+    for base, directories, files in checked_tree(source):
         directories[:] = sorted(name for name in directories if name != '.git')
         paths = [Path(base) / name for name in sorted(files) if name != '.git']
         paths += [Path(base) / name for name in directories]
@@ -55,13 +55,8 @@ def merge(source, project):
         if name not in ignored:
             continue
         destination = project / relative
-        # Never follow a link in the destination's parent chain, even inside Git.
-        parent = destination.parent
-        while parent != project:
-            if parent.is_symlink() or (parent.exists() and not parent.is_dir()):
-                raise ValueError('Unsafe existing supplemental parent: ' + name)
-            parent = parent.parent
         mode = path.lstat().st_mode
+        destination_boundary(destination, source, project, directory=stat.S_ISDIR(mode))
         if stat.S_ISLNK(mode):
             expected = ('link', os.readlink(path))
         elif stat.S_ISDIR(mode):
@@ -110,14 +105,13 @@ def main():
     parser.add_argument('--project', required=True, type=Path)
     parser.add_argument('--report', required=True, type=Path)
     args = parser.parse_args()
-    report_path = args.report.absolute()
-    if report_path.exists() or report_path.is_symlink():
+    report_path = plain_path(args.report).absolute()
+    if report_path.exists() or linked(report_path):
         raise FileExistsError('The recovery report must be a new file')
-    if any(parent.is_symlink() for parent in report_path.parents):
-        raise ValueError('Recovery report parents must not be symbolic links')
-    report_path = report_path.resolve()
-    source = args.snapshot.resolve(strict=True)
-    project = args.project.resolve(strict=True)
+    if any(linked(parent) for parent in report_path.parents):
+        raise ValueError('Recovery report parents must not be links or junctions')
+    report_path = canonical_path(report_path)
+    source, project = snapshot_roots(args.snapshot, args.project)
     if report_path.is_relative_to(source):
         raise ValueError('Recovery report must be outside the snapshot')
     if report_path.is_relative_to(project):
