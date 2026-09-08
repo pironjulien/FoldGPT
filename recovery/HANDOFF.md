@@ -14,8 +14,9 @@ Le [rapport r25](../docs/research/r25-device-validation-20260908.md) et le
 [reçu indépendant](../work/r24-native-20260908/ui/r25-milestone.json)
 définissent la portée acquise. Prochain développement : **panneau de terminal
 utilisateur**, distinct du terminal du modèle ; puis autonomie sans PC et
-contrôleur/interface entièrement Bionic. Les nouveautés r24/r25 restent locales
-jusqu'à la publication/restauration du complément v16.
+contrôleur/interface entièrement Bionic. Les nouveautés r24/r25 sont conservées
+dans le [complément v16](supplement-v16.md), publié et restauré : 39 584 fichiers
+et 1 252 sources Git vérifiés, avec revérification des deux APK.
 
 ## Historique r24
 
@@ -197,16 +198,17 @@ ne désigne pas le dépôt privé. Le moteur de travail reste dans
 `work/worktrees/FoldgptEngine`, sous le dossier du projet.
 
 La dernière sauvegarde privée retéléchargée et restaurée est le
-[complément v15](supplement-v15.md) : **8 707 fichiers et 1 219 sources Git
-vérifiés**, APK r23 restauré revérifié. Le checkpoint
-`6337c98e93e70d302ed7098549735dc9bfd4b783` contient les nouveautés r22/r23,
-les recherches et les preuves de reprise. Les conversations et journaux privés
-sont chiffrés. Les sources GPU/PTY en attente sont inchangées depuis v13.
+[complément v16](supplement-v16.md) : **39 584 fichiers et 1 252 sources Git
+vérifiés**, APK r24/r25 restaurés revérifiés. Le checkpoint
+`c674ad714d44b98c1baee3a370a75d16f08185f8` contient les nouveautés r24/r25,
+les recherches et les preuves de reprise et PTY. Les conversations et journaux
+privés sont chiffrés. Les sources GPU/PTY en attente sont inchangées depuis v13.
 
 Commencer par la [procédure de restauration](README.md). Conserver l'archive
 principale et tous les compléments : [v10](supplement-v10.md),
 [v11](supplement-v11.md), [v12](supplement-v12.md),
-[v13](supplement-v13.md), [v14](supplement-v14.md) et [v15](supplement-v15.md), ainsi que les précédents
+[v13](supplement-v13.md), [v14](supplement-v14.md), [v15](supplement-v15.md)
+et [v16](supplement-v16.md), ainsi que les précédents
 référencés dans cette procédure. V13 conserve notamment r20, R5 et Bash
 production ; v14 ne remplace pas ces archives. La [restauration v9](README.md#complément-v9--python-natif-v2-réussi-sur-le-fold)
 et son [rapport exact](verification/github-supplement-v9-restoration.json)

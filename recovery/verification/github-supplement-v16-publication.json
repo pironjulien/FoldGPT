@@ -1,0 +1,94 @@
+{
+  "repository": "https://github.com/pironjulien/FoldGPT-workspace",
+  "visibility": "PRIVATE",
+  "release": "https://github.com/pironjulien/FoldGPT-workspace/releases/tag/recovery-2026-09-07",
+  "sourceCommit": "c674ad714d44b98c1baee3a370a75d16f08185f8",
+  "encryptedSha256": "2db3a46eddb35b6d5e2ef033f5df0cba327e4ba00dc0e5e4552a2839c7e62264",
+  "assets": [
+    {
+      "name": "native-checkpoint-v16-manifest.json",
+      "bytes": 582,
+      "sha256": "6f71ce0f57f69db83074d259be386605f466e5b2af9afa92971b6af9ab0d10c0"
+    },
+    {
+      "name": "native-checkpoint-v16.tar.gz.age.part001",
+      "bytes": 461293252,
+      "sha256": "2db3a46eddb35b6d5e2ef033f5df0cba327e4ba00dc0e5e4552a2839c7e62264"
+    }
+  ],
+  "downloadedAssetHashesVerified": true,
+  "restorationReport": "work/FoldGPT-recovery/verification-v16-20260908/github-supplement-v16-restoration.json",
+  "sourceFilesRestoredAndVerified": 1252,
+  "restoredFilesVerified": 39584,
+  "apkReverified": [
+    {
+      "revision": "r24",
+      "schema": "foldgpt.native-apk-verification.v1",
+      "success": true,
+      "androidProductionExecuted": false,
+      "apkSha256": "064b8302093361aee3c5b8bb0107dc12781fc4b63b794174a1d17144906421af",
+      "nativeLibraries": 89,
+      "pythonDataFiles": 2447,
+      "runtimeAliases": 87,
+      "sourceFiles": 95,
+      "hostSchema": "foldgpt.host.v2",
+      "modelProfiles": [
+        "managed",
+        "ordinaryUid"
+      ],
+      "nativeCommands": [
+        "bash",
+        "python",
+        "python3",
+        "rg"
+      ],
+      "ripgrepToolchainNoticeFiles": 15
+    },
+    {
+      "revision": "r25",
+      "schema": "foldgpt.native-apk-verification.v1",
+      "success": true,
+      "androidProductionExecuted": false,
+      "apkSha256": "2618abba092af33ac387906d75b57ecfd7b76ec7aa02d80b6c20fee4f44a28a3",
+      "nativeLibraries": 90,
+      "pythonDataFiles": 2447,
+      "runtimeAliases": 87,
+      "sourceFiles": 97,
+      "hostSchema": "foldgpt.host.v2",
+      "modelProfiles": [
+        "managed",
+        "ordinaryUid",
+        "ordinaryPty"
+      ],
+      "nativeCommands": [
+        "bash",
+        "python",
+        "python3",
+        "rg"
+      ],
+      "ripgrepToolchainNoticeFiles": 15
+    }
+  ],
+  "earlierArchiveDependencies": [
+    "manifest.json",
+    "native-checkpoint-manifest.json",
+    "native-checkpoint-v2-manifest.json",
+    "native-checkpoint-v3-manifest.json",
+    "native-checkpoint-v4-manifest.json",
+    "native-checkpoint-v5-manifest.json",
+    "native-checkpoint-v6-manifest.json",
+    "native-checkpoint-v7-manifest.json",
+    "native-checkpoint-v8-manifest.json",
+    "native-checkpoint-v9-manifest.json",
+    "native-checkpoint-v10-manifest.json",
+    "native-checkpoint-v11-manifest.json",
+    "native-checkpoint-v12-manifest.json",
+    "native-checkpoint-v13-manifest.json",
+    "native-checkpoint-v14-manifest.json",
+    "native-checkpoint-v15-manifest.json"
+  ],
+  "plaintextUploaded": false,
+  "keysIncluded": false,
+  "deviceActionPerformed": false,
+  "scope": "# Compl\u00e9ment priv\u00e9 v16 : r24 ripgrep et r25 PTY\n\nCe compl\u00e9ment exige l'archive principale puis les compl\u00e9ments 1 \u00e0 15 dans l'ordre. Le manifeste v15 et ses fragments chiffr\u00e9s restent des pr\u00e9requis priv\u00e9s v\u00e9rifi\u00e9s ; v16 ne les remplace pas.\n\nLa s\u00e9lection explicite se trouve dans supplement-v16-scope.json. Elle comprend les sources et archives amont ripgrep/PCRE2, Cargo.lock et les sources vendor, les compilations initiales et finales, les deux ELF r\u00e9ellement compil\u00e9s \u00e0 chaque passe conserv\u00e9e, les configurations PCRE2 attest\u00e9es, les notices Rust/NDK, les journaux et preuves de reproductibilit\u00e9. Elle comprend aussi tout le dossier de travail PTY, les sources C/Python, les fermetures de d\u00e9pendances, les binaires h\u00f4te et Android, les bundles et r\u00e9sultats de tests, y compris leurs \u00e9checs.\n\nLes stages et packages r24, r24b et r25 sont conserv\u00e9s avec leurs admissions r24/r25. L'APK intitul\u00e9 r24 contient le package r24b avec les notices finales ; le package historique r24 reste conserv\u00e9 s\u00e9par\u00e9ment. Les deux APK sont li\u00e9s aux inventaires, aux ELF et \u00e0 leurs rapports de v\u00e9rification structurelle. Le sourceCommit final doit correspondre aux sources Python empaquet\u00e9es r25, au C de l'admission, au C PTY et aux recettes rg. Cela ne pr\u00e9tend pas d\u00e9montrer une recompilation identique de l'int\u00e9gralit\u00e9 des APK Android.\n\nLes qualifications rg/Python, les journaux de work/r24-native-20260908 et les captures r24/r25 explicitement ajout\u00e9es au p\u00e9rim\u00e8tre restent dans la charge chiffr\u00e9e. Les conversations et les journaux bruts ne doivent pas \u00eatre ajout\u00e9s au Git source. Les r\u00e9sultats PC, les r\u00e9sultats appareil et les tests \u00e0 travers l'interface restent des observations distinctes ; aucun r\u00e9sultat absent ou n\u00e9gatif n'est transform\u00e9 en r\u00e9ussite.\n\nLes caches Cargo (cargo-home, cargo-target et target), caches Gradle/Python et tmp de compilation/h\u00f4te sont exclus. Les objets CMake PCRE2 sont r\u00e9g\u00e9n\u00e9rables ; CMakeCache.txt et src/config.h restent inclus, ainsi que les biblioth\u00e8ques statiques de prefix, les journaux, les m\u00e9tadonn\u00e9es de liaison et les ELF first/second. Les sources amont et vendor ne sont jamais assimil\u00e9es \u00e0 des caches : cc/src/target contient quatre fichiers Rust indispensables. L'\u00e9metteur historique est r\u00e9utilis\u00e9 sur le staging contr\u00f4l\u00e9 sans r\u00e9appliquer son exclusion g\u00e9n\u00e9rique target ; la liste compl\u00e8te des fichiers admis est v\u00e9rifi\u00e9e avant chiffrement et tout fichier suppl\u00e9mentaire est refus\u00e9. Les tmp des captures appareil ne sont pas supprim\u00e9s par cette r\u00e8gle.\n\nApr\u00e8s la fin des tests, le gel produit une liste explicite de chaque chemin avec longueur et SHA256. Tout ajout, retrait, changement d'octets ou changement d'exclusion impose un nouveau gel revu. Le gel v\u00e9rifie aussi l'absence de chemins d\u00e9j\u00e0 s\u00e9lectionn\u00e9s dans le delta v15. Les copies \u00e0 de nouveaux chemins versionn\u00e9s restent volontaires pour permettre la v\u00e9rification autonome des builds et des packages.\n\nLa cr\u00e9ation exige un commit Git final explicite et un destinataire public age existant. La publication exige la visibilit\u00e9 priv\u00e9e et les empreintes de toutes les d\u00e9pendances distantes, t\u00e9l\u00e9verse uniquement le manifeste et les fragments age, puis ret\u00e9l\u00e9charge et authentifie une restauration vers un dossier neuf. Seul age lit la cl\u00e9 priv\u00e9e existante du coffre ; elle n'est ni affich\u00e9e, ni copi\u00e9e dans le projet, ni incluse dans le payload.\n\nLa v\u00e9rification restaur\u00e9e contr\u00f4le chaque fichier, le Git source et les deux APK avec le v\u00e9rificateur du commit archiv\u00e9. Le dossier PTY est copi\u00e9 dans une zone de v\u00e9rification neuve afin que son admission retrouve ses preuves locales ; la conversion CRLF/LF est permise seulement apr\u00e8s comparaison explicite avec les sources empaquet\u00e9es et compil\u00e9es. Les archives pr\u00e9c\u00e9dentes demeurent n\u00e9cessaires pour reconstituer le projet entier. Une pr\u00e9paration r\u00e9ussie ne vaut ni publication ni restauration r\u00e9ussie.\n"
+}

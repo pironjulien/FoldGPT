@@ -2,32 +2,39 @@
 
 **Actualisation r25, 16:14 UTC :** les neuf tests du backend PTY passent sur
 Android et les vraies sessions du modèle sont exercées depuis la conversation
-(saisie, Ctrl+C, codes23/130). Les commandes Python/rg ordinaires passent
-ensuite. Le panneau de terminal humain reste distinct et inachevé.
+(saisie, Ctrl+C, codes 23/130). Les commandes Python/rg ordinaires passent
+ensuite. Le panneau de terminal utilisateur reste distinct et inachevé.
 Voir le [rapport r25](r25-device-validation-20260908.md). La comparaison des
 ports CLI et la limite Electron/PRoot ci-dessous restent applicables.
 
 ## Décision
 
-**FoldGPT a démontré un vrai parcours Python sur le Fold ; le produit complet
-n'est pas terminé.** R24 a désormais passé 15 cas rg/PCRE2/JIT sur le Fold,
-ainsi que la régression Python. Le projet avec dépendance a passé cinq tests,
-deux builds identiques et la réexécution de son archive après fermeture puis
-réouverture. Les fichiers précédents sont conservés par collecte indépendante.
-Conserver le moteur R5 actuel pendant ce lot et l’intégration du terminal.
-Voir le [rapport r24](r24-device-validation-20260908.md). Le parcours Python, éditeur et reprise a
-maintenant réussi sur le Fold. Après la création et la sauvegarde en r22,
-r23 a repris la même conversation et les fichiers existants, exécuté les trois
-tests et le zipapp affichant 42 après deux ouvertures, puis fermé chaque session proprement.
-Le cache CPython est actif et séparé du runtime inventorié. Le
-[rapport r23](r23-device-validation-20260908.md) distingue ces preuves du reste
-des fonctions encore non qualifiées.
+**R25 permet au modèle de travailler sur un projet Python et d'utiliser un vrai
+terminal Android depuis la conversation. Le produit complet n'est pas terminé.**
+La recherche rg, les cinq tests du projet avec Packaging 26.3 et son archive
+JSON/Markdown fonctionnent après l'intégration PTY. Les 104 fichiers du projet
+sont identiques avant et après les essais r25 ; la session ferme proprement et
+l'application se rouvre. Cette dernière ouverture n'a pas reçu de nouvelle
+commande modèle et ne compte pas comme une répétition du test PTY.
+
+Les étapes précédentes gardent leur preuve propre : [r24](r24-device-validation-20260908.md)
+a validé 15 cas rg/PCRE2/JIT, l'installation réelle de Packaging, deux builds
+identiques et la réexécution du projet après fermeture/réouverture ;
+[r22/r23](r23-device-validation-20260908.md) ont validé la création du projet
+d'addition, sa sauvegarde dans l'éditeur et deux reprises. Le cache CPython
+reste actif et séparé du runtime inventorié.
+
+Conserver le moteur R5 pendant le raccordement du **panneau de terminal
+utilisateur**, puis qualifier le démarrage sans PC et les mises à jour.
+Le contrôleur et l'interface entièrement Android exigent une décision et une
+qualification distinctes.
 
 Réutiliser les adaptations Android individuellement, après un test de leur cause.
 La compilation Bionic du contrôleur reste une piste distincte. Elle n'est pas
-nécessaire pour corriger l'emplacement des caches et n'est pas livrée dans r24.
-L'interface et le contrôleur GNU restent sous PRoot ; seules les commandes
-Bash/Python/rg sont natives Android/Bionic. Aucune VM sur le téléphone.
+nécessaire pour corriger l'emplacement des caches et n'est pas livrée dans r25.
+L'interface et le contrôleur GNU restent sous PRoot ; Bash/Python/rg et le
+propriétaire des sessions PTY du modèle sont Android/Bionic. Aucune VM sur le
+téléphone.
 
 Le [plan de réussite mesurable](functional-milestones-20260908.md) fixe les
 preuves nécessaires et les conditions d'arrêt. Son nombre de lignes n'est pas
@@ -36,19 +43,21 @@ que l'ajout d'une commande.
 
 ## Ce que nous utilisons déjà
 
-| Apport amont | Adoption réelle dans FoldGPT | Ce que cela ne prouve pas |
+| Ce que fournit l'amont | Ce que FoldGPT reprend réellement | Limite actuelle |
 | --- | --- | --- |
-| Bash et adaptations Termux | Bash 5.3.15 reconstruit pour le préfixe privé FoldGPT, avec correctifs de chemins examinés ; commandes Bash/Python exercées dans les sessions r23 | Copier des paquets liés à `/data/data/com.termux/files` ne fournirait pas notre runtime ; Termux complet n'est pas requis pour exécuter ce parcours |
-| CPython Android officiel | CPython 3.14.7 Android, lanceur Bionic et cache extérieur ; Packaging 26.3 téléchargé/installé, cinq tests et zipapp avec reprise réussis dans la conversation r24 | Ce wheel universel et ce projet ne qualifient pas toutes les dépendances, extensions compilées ou fonctions du produit |
+| Bash et adaptations Termux | Bash 5.3.15 reconstruit pour le préfixe privé FoldGPT, avec correctifs de chemins examinés ; commandes ordinaires utilisées depuis la conversation, régression Python/rg réussie après r25 | Le Bash interactif du panneau utilisateur reste à raccorder ; copier des paquets liés au préfixe Termux ne fournirait pas notre runtime |
+| CPython Android officiel | CPython 3.14.7 Android, lanceur Bionic et cache extérieur ; Packaging 26.3 téléchargé/installé en r24, cinq tests et zipapp avec reprise réussis ; régression et sessions Python PTY exercées en r25 | Ce wheel universel et ce projet ne qualifient pas toutes les dépendances, extensions compilées ou fonctions du produit |
 | Shizuku officiel et son API | UserService réel dans les essais initiaux, puis lancement de production séparé avec commandes sous l'UID Android 10412 de FoldGPT | Le SDK ne transforme pas une application ordinaire en root et ne démontre pas un démarrage autonome après chaque redémarrage Android |
-| ripgrep et PCRE2, versions également utilisées par Termux | Sources rg 15.2.0 et PCRE2 10.47 épinglées, deux builds ARM64 Bionic identiques et PCRE2 lié statiquement avec JIT dans `work/native-ripgrep-20260908/build-v4/build.json` | Le manifeste de compilation conserve sa portée PC ; le rapport Android a0ec1f9f ajoute 15 cas réels avec JIT, fermeture et nouvelle admission, sans qualifier à lui seul l’interface |
-| PTY fourni par Bionic | Après la sonde v4a, le backend candidat passe neuf tests Android séparés : saisie, taille, interruptions, descendants et saturation, huit propriétaires attendus et absents | Le candidat est testé dans son propre répertoire ; il n'est pas installé dans r24 ni qualifié depuis le terminal de l'interface |
+| ripgrep et PCRE2, versions également utilisées par Termux | rg 15.2.0 et PCRE2 10.47/JIT épinglés et reconstruits deux fois à l'identique ; 15 cas Android en r24, puis recherche réelle réussie dans la conversation r25 | Le manifeste de build garde sa portée PC ; les qualifications Android et les sorties de conversation sont des preuves séparées, sans promesse sur tous les projets |
+| PTY fourni par Bionic | Backend intégré dans r25 : une vraie session modèle vérifie la saisie et le code 23, une autre Ctrl+C et le code 130. Neuf tests Android séparés couvrent aussi taille, groupes de processus, descendants et saturation | Le panneau de terminal utilisateur reste à raccorder ; le redimensionnement et les cas complexes de nettoyage sont vérifiés dans le backend séparé, pas dans ce panneau |
 
 Le [préflight pip Android](../../work/r24-native-20260908/pip-preflight-63a2aba2/report.json)
 a exécuté pip 26.2.1 depuis son wheel réel avec code 0, `viaModel=false`. Depuis,
 la conversation r24 a téléchargé puis installé Packaging 26.3 ; le
 [rapport r24](r24-device-validation-20260908.md) sépare ces preuves, les
-corrections de revue et les limites des contrôles. La
+corrections de revue et les limites des contrôles. R25 réexécute ensuite les
+cinq tests et l'archive existante, sans modifier les 104 fichiers du projet.
+La sonde précédente reste un résultat historique : la
 [sonde PTY v4a](../../work/r24-native-20260908/pty-probe-bc976fd3/report.json)
 conserve aussi les refus `tcgetsid`/`TIOCGSID` avec errno 13. Son contrôle de
 session repose sur les observations réelles `getsid`, `tcgetpgrp` et `/dev/tty` ;
@@ -62,7 +71,7 @@ ces refus ne deviennent pas des appels réussis.
 | Base du moteur | La release wallentx `rust-v0.153.4-termux` est deux commits devant notre base officielle, sans modification du protocole app-server/exec-server dans le delta | Référence proche pour les ajustements de compilation. Elle ne contient pas notre raccordement natif FoldGPT. |
 | Recette V8 wallentx | Le workflow publié télécharge V8 147.4.0/profil `release`, alors que Cargo demande 150.4.0 avec sandbox | Ne pas reprendre cette recette telle quelle ; le test `--help` ne démontre pas V8 fonctionnel. |
 | Verrous Rust | Rust 1.95.0 omet Android du `cfg` des fonctions `File::lock`/`try_lock`/`unlock` utilisant flock ; le chemin Android retourne Unsupported sans syscall | Pour un contrôleur Bionic, appeler réellement `libc::flock`, puis tester contention et libération. L'erreur Rust seule ne démontre pas une absence du noyau. Notre exécuteur Python utilise déjà flock réel. |
-| Terminaux PTY | Le NDK r29 exporte `openpty`/`forkpty` depuis API23 ; la sonde v4a a désormais exécuté les primitives réelles sur le Fold | Utiliser l'API Bionic existante. Ne pas importer le shim qui ignore des erreurs de configuration ; finir le backend et la qualification dans l'interface. |
+| Terminaux PTY | Le NDK r29 exporte `openpty`/`forkpty` depuis API23 ; les sessions modèle de r25 utilisent désormais notre backend PTY Bionic | Garder l'implémentation Bionic qualifiée et raccorder le panneau utilisateur. Le shim qui ignore des erreurs de configuration n'a pas été repris. |
 | DNS/TLS | Des utilisateurs de Codex Linux dans Termux résolvent leur DNS en compilant pour Bionic ; le modèle a répondu dans nos scénarios r20 et r22 | Piste pour un contrôleur Bionic, pas diagnostic établi de l'incident de cache. Pas de proxy ajouté par analogie. |
 | Mises à jour | Les forks mettent à jour leurs propres exécutables ; notre moteur porte aussi un patch FoldGPT | Garder les applications officielles intactes et maintenir notre moteur séparé. Ne pas utiliser l'auto-updater d'un fork qui remplacerait notre intégration. |
 
@@ -94,12 +103,26 @@ de notre interfaçage lors d'une nouvelle version. Préserver leur mise à jour 
 signifie pas garantir à l'avance la compatibilité avec toutes les versions
 futures. Cette différence doit rester visible dans le bilan de fin de projet.
 
-## Prochaine amélioration communautaire justifiée
+## Prochaines étapes et apport communautaire
 
-La priorité reste **rg, le terminal et le projet avec dépendance**, puis une
-décision explicite sur le contrôleur et l’interface natifs. Aucun chantier Git
-ne s’ajoute à ce lot. Pour une extension ultérieure, **Git natif Bionic adapté
-au préfixe FoldGPT** est une piste communautaire justifiée : il permet de
+La recherche rg, le projet avec dépendance et le terminal du modèle ont
+désormais leurs preuves. Les trois étapes suivantes ont des critères concrets :
+
+1. **Panneau de terminal utilisateur** : ouvrir un vrai Bash interactif depuis
+   le panneau, saisir, redimensionner, interrompre et fermer un travail avec
+   descendants ; vérifier les sorties et la disparition des processus détenus.
+2. **Usage sans PC et mises à jour** : téléphone débranché, démarrer et reprendre
+   le projet après fermeture, pliage, arrière-plan et reboot Android normal,
+   avec le parcours d'autorisation documenté. Tester ensuite une mise à jour
+   réelle disponible en conservant compte, conversation et fichiers.
+3. **Totalité native Android** : construire notre contrôleur Bionic avec V8
+   fonctionnel et le raccordement FoldGPT, puis réussir le même projet avec
+   arrêt/reprise. Qualifier séparément un hôte Android pour l'interface et ses
+   services ; ce port n'est fourni par aucune des recettes CLI examinées.
+
+Aucun chantier Git ne s'ajoute à ce lot. Pour une extension ultérieure,
+**Git natif Bionic adapté au préfixe FoldGPT** est une piste communautaire
+justifiée : il permet de
 reprendre un vrai dépôt, voir les différences, créer un commit local et gérer
 le travail courant. La recette Termux relue fournit Git 2.55.0 et vérifie la
 présence effective de `git-remote-https`. Elle dépend aussi de bibliothèques et
@@ -108,10 +131,9 @@ les sources, la fermeture des dépendances, le stockage des identifiants,
 les certificats et le contrat Git depuis la même interface. Ce Git n'a pas été
 construit, installé ou qualifié par cette revue.
 
-Après le lot fonctionnel en cours, le contrôleur Bionic/V8 doit faire l’objet
-d’une décision explicite puis d’une qualification distincte,
-car il vise la réduction de PRoot plutôt qu'une commande manquante. Il doit
-conserver le raccordement FoldGPT et passer le même parcours utilisateur avant
+Le contrôleur Bionic/V8 doit faire l'objet d'une décision explicite et d'une
+qualification distincte : son objectif est de supprimer PRoot pour le moteur.
+Il doit conserver le raccordement FoldGPT et passer le même parcours utilisateur avant
 adoption. Ni Git natif ni le contrôleur Bionic ne résolvent à eux seuls le port
 complet de l'interface. Aucune nouvelle compilation n'est engagée par ce bilan.
 
@@ -201,13 +223,15 @@ ou le lanceur canonique approprié exécuté, sans effacer ces résultats.
 La suite Rust générale R5 `34192652057` reste en **échec** : 16 933 réussites,
 238 échecs, deux timeouts et 35 ignorés. Le [triage des 240 cas](r5-failure-audit-20260908.md)
 ne conclut pas que toutes leurs causes ou conséquences Android sont résolues.
-`rg` était absent lors de la création r22 et r23 ne l'ajoute pas.
-Le parcours Python ciblé ne qualifie pas les PTY, tous les outils, les autres
-profils, toutes les reprises ou les mises à jour futures. Cette recherche
-communautaire ne démontre pas un produit complet « tout Bionic ».
+L'absence de `rg` en r22/r23 est historique : r24 l'ajoute et r25 l'exerce
+depuis la conversation. Le PTY du modèle a sa propre preuve r25 ; le parcours
+Python seul ne l'établissait pas. Le panneau utilisateur, la totalité des outils,
+les autres profils, toutes les reprises et les mises à jour futures ne sont
+pas qualifiés par ces succès ciblés. Cette recherche communautaire ne démontre
+pas un produit complet « tout Bionic ».
 
 L'[état de reprise](../../recovery/HANDOFF.md) conserve les prochaines étapes
-et les liens de sauvegarde. Le [complément v15](../../recovery/supplement-v15.md)
-a été publié chiffré sur GitHub privé, retéléchargé et restauré : 8 707 fichiers,
-1 219 sources Git et APK r23 vérifiés. Il conserve cette passe r22/r23 et dépend
-de l'archive principale et des compléments 1 à 14.
+et les liens de sauvegarde. Le [complément v16](../../recovery/supplement-v16.md)
+conserve r24/r25 et leurs preuves : publié chiffré sur GitHub privé,
+retéléchargé et restauré, avec 39 584 fichiers, 1 252 sources Git et les deux
+APK vérifiés. Il dépend de l'archive principale et des compléments 1 à 15.

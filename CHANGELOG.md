@@ -2,6 +2,12 @@
 
 ## Unreleased - 2026-09-08
 
+- Publish encrypted recovery supplement v16 to the private release, redownload
+  and authenticate all 39,584 files, restore 1,252 committed source files and
+  reverify both r24/r25 APKs. Preserve required Rust vendor sources and exact
+  artifact bytes across Git line-ending normalization. Keep main and supplements
+  1-15 as dependencies; update the handoff and community comparison for r25.
+
 - Install r25/versionCode15 with explicit ordinary-UID model PTY routing.
   Real conversation calls launch Android Python with three terminal descriptors,
   exchange input through write_stdin and finish with codes23/130, including

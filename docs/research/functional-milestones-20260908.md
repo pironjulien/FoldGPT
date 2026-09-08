@@ -124,8 +124,9 @@ le [handoff technique](../../recovery/HANDOFF.md), la
 [portée de publication](../../PUBLICATION.md) et le
 [changelog](../../CHANGELOG.md) ont été actualisés avec les preuves r24.
 Ils distinguent la route UID ordinaire réellement utilisée des anciennes
-fixtures protégées. V15 reste la dernière sauvegarde distante restaurée tant
-qu'un nouveau complément n'a pas été publié puis vérifié.
+fixtures protégées. Le [complément v16](../../recovery/supplement-v16.md) est
+la dernière sauvegarde distante restaurée : 39 584 fichiers, 1 252 sources Git
+et les deux APK r24/r25 vérifiés.
 
 Le point de pause r24, le rapport r23, le bilan des blocages r20 et les notes
 Bionic du 7 septembre sont des photographies historiques. Leurs anciennes

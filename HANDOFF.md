@@ -15,8 +15,9 @@ sous r24. Le panneau de terminal utilisateur et le fonctionnement sans PC après
 La récupération des sources, dépendances et preuves est décrite dans
 [recovery/README.md](recovery/README.md). Le dépôt de travail est **privé** :
 `pironjulien/FoldGPT-workspace`, branche `codex/foldgpt-beta`.
-Le dernier complément distant restauré et vérifié reste v15 ; les nouveautés
-r24/r25 doivent figurer dans une livraison suivante avant d'être annoncées récupérables.
+Le [complément v16](recovery/supplement-v16.md) est publié, retéléchargé et
+restauré : 39 584 fichiers et 1 252 sources Git vérifiés, APK r24/r25 revérifiés.
+Conserver l'archive principale et les compléments 1 à 15 avant v16.
 
 Les preuves et limites de chaque essai sont consignées dans les documents liés.
 Les consulter avant toute action sur le téléphone ; aucune publication publique

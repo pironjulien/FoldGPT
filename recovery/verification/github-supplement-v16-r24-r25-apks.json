@@ -1,0 +1,49 @@
+[
+  {
+    "revision": "r24",
+    "schema": "foldgpt.native-apk-verification.v1",
+    "success": true,
+    "androidProductionExecuted": false,
+    "apkSha256": "064b8302093361aee3c5b8bb0107dc12781fc4b63b794174a1d17144906421af",
+    "nativeLibraries": 89,
+    "pythonDataFiles": 2447,
+    "runtimeAliases": 87,
+    "sourceFiles": 95,
+    "hostSchema": "foldgpt.host.v2",
+    "modelProfiles": [
+      "managed",
+      "ordinaryUid"
+    ],
+    "nativeCommands": [
+      "bash",
+      "python",
+      "python3",
+      "rg"
+    ],
+    "ripgrepToolchainNoticeFiles": 15
+  },
+  {
+    "revision": "r25",
+    "schema": "foldgpt.native-apk-verification.v1",
+    "success": true,
+    "androidProductionExecuted": false,
+    "apkSha256": "2618abba092af33ac387906d75b57ecfd7b76ec7aa02d80b6c20fee4f44a28a3",
+    "nativeLibraries": 90,
+    "pythonDataFiles": 2447,
+    "runtimeAliases": 87,
+    "sourceFiles": 97,
+    "hostSchema": "foldgpt.host.v2",
+    "modelProfiles": [
+      "managed",
+      "ordinaryUid",
+      "ordinaryPty"
+    ],
+    "nativeCommands": [
+      "bash",
+      "python",
+      "python3",
+      "rg"
+    ],
+    "ripgrepToolchainNoticeFiles": 15
+  }
+]

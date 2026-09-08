@@ -1,0 +1,19 @@
+{
+  "format": 1,
+  "startedUtc": "2026-09-08T16:37:42.505690+00:00",
+  "completedUtc": "2026-09-08T16:38:01.360388+00:00",
+  "roots": [
+    "foldgpt-native-artifacts-v16-20260908"
+  ],
+  "entries": 46309,
+  "uncompressedFileBytes": 1310339887,
+  "excludedDirectoryNames": [],
+  "encryptedSha256": "2db3a46eddb35b6d5e2ef033f5df0cba327e4ba00dc0e5e4552a2839c7e62264",
+  "parts": [
+    {
+      "name": "native-checkpoint-v16.tar.gz.age.part001",
+      "bytes": 461293252,
+      "sha256": "2db3a46eddb35b6d5e2ef033f5df0cba327e4ba00dc0e5e4552a2839c7e62264"
+    }
+  ]
+}

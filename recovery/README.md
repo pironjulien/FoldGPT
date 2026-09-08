@@ -1,20 +1,20 @@
 # Reprise du projet FoldGPT
 
-**Dernière sauvegarde du 8 septembre :** le [complément v15](supplement-v15.md)
-conserve r23, ses sources et compilations, les recherches communautaires et les
-preuves Android. Les 8 707 fichiers et 1 219 sources Git ont été retéléchargés,
-restaurés et vérifiés ; l'APK restauré a repassé sa vérification.
-Conserver l'archive principale et les compléments 1 à 14 avant v15.
-**r23 est installé sur le Fold : le parcours Python depuis la conversation,
-l'éditeur et deux reprises ont réussi.** Lire [l'état actuel](HANDOFF.md) et
-le [rapport Android](../docs/research/r23-device-validation-20260908.md).
+**Dernière sauvegarde du 8 septembre :** le [complément v16](supplement-v16.md)
+conserve r24/r25, leurs sources et compilations, les recherches communautaires
+et les preuves Android. Les 39 584 fichiers et 1 252 sources Git ont été
+retéléchargés, restaurés et vérifiés ; les deux APK restaurés ont repassé
+leur vérification. Conserver l'archive principale et les compléments 1 à 15.
+**R25 est installé sur le Fold : le modèle utilise un vrai terminal Android
+depuis la conversation et le projet Python passe ses cinq tests.** Lire
+[l'état actuel](HANDOFF.md) et le [rapport r25](../docs/research/r25-device-validation-20260908.md).
 Les sections historiques ci-dessous décrivent les étapes antérieures et ne
 remplacent pas cet état. Le protocole r21 n'est plus une consigne de réinstallation.
 
 Le dépôt privé de travail est `pironjulien/FoldGPT-workspace`, branche
 `codex/foldgpt-beta`. Le parcours Python ordinaire est vérifié sur Android/Bionic ;
-l'interface et le contrôleur GNU restent sous PRoot. Tous les outils, PTY et
-comportements du produit ne sont pas encore qualifiés.
+l'interface et le contrôleur GNU restent sous PRoot. Le panneau de terminal
+utilisateur, le fonctionnement sans PC et les mises à jour restent à qualifier.
 
 **Session reprise le 7 septembre après la clôture de nuit :** lire d'abord
 [HANDOFF.md](HANDOFF.md). Le projet Python natif V2 a réussi sur le Fold ;
