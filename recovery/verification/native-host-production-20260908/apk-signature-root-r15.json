@@ -1,0 +1,5 @@
+{
+  "stdout": "Signer #1 certificate DN: C=US, O=Android, CN=Android Debug\nSigner #1 certificate SHA-256 digest: 30930ffce7c10b673e95e69f2d78bb9e60aa71132db3c21cdc15cf56df77fa16\nSigner #1 certificate SHA-1 digest: 12f11807512a476d3b29e7515201d7f5c75dfaf9\nSigner #1 certificate MD5 digest: bd30f350694a9bb0eb09233c22404b65",
+  "expectedCertificateSha256": "30930ffce7c10b673e95e69f2d78bb9e60aa71132db3c21cdc15cf56df77fa16",
+  "verified": true
+}

@@ -48,7 +48,7 @@ def main():
     frozen.mkdir()
     inputs = {
         "host-runner.c": ROOT / "tools/executor/bionic-supervisor/host-runner.c",
-        "native-runner-seccomp.h": ROOT / "tools/executor/native-runner-seccomp.h",
+        "host-fd-seccomp.h": ROOT / "tools/executor/bionic-supervisor/host-fd-seccomp.h",
         "check-elf.py": ROOT / "tools/executor/bionic-runtime/shizuku-check-elf.py",
         "build-host-windows.py": Path(__file__).resolve(),
     }
@@ -109,7 +109,7 @@ def main():
         "wslExecuted": False, "ndk": "29.0.14206865", "apiLevel": 35,
         "compilerSha256": digest(compiler), "readelfSha256": digest(readelf),
         "sourceSha256": digest(frozen / "host-runner.c"),
-        "profileHeaderSha256": digest(frozen / "native-runner-seccomp.h"),
+        "profileHeaderSha256": digest(frozen / "host-fd-seccomp.h"),
         "includedHeaders": len(headers), "reproducible": True,
         "elf": evidence, "modelRunnerChanged": False}
     (output / "build.json").write_text(json.dumps(report, indent=2) + "\n")

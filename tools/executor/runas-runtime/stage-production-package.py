@@ -18,6 +18,7 @@ def main():
     parser.add_argument("--native-stage", type=Path, required=True)
     parser.add_argument("--admission-build", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--host-v2", action="store_true")
     args = parser.parse_args()
     stage, admission, output = (getattr(args, name).resolve() for name in ("native_stage", "admission_build", "output"))
     for path in (stage, admission, output):
@@ -63,11 +64,21 @@ def main():
             "limits": {},
             "cwdShim": {"path": marker + "libfoldgpt_bionic_cwd.so", "sha256": native["libfoldgpt_bionic_cwd.so"]}}}
     (assets / "foldgpt-executor-deployment.json").write_text(json.dumps(config, indent=2) + "\n")
+    if args.host_v2:
+        runner = "libfoldgpt_host_supervisor.so"
+        if runner not in native:
+            raise ValueError("Explicit human v2 selection requires its attested native-stage ELF")
+        (assets / "foldgpt-host-deployment.json").write_text(json.dumps({
+            "schema": "foldgpt.host.v2", "runner": runner, "runnerSha256": native[runner]}, indent=2) + "\n")
     snapshot = json.loads((ROOT / "downloads/native-app-server-host-v3-20260908/manifest.json").read_text())
     source_paths = {entry["path"][len("package/"):] for entry in snapshot["files"]
                     if entry["path"].startswith("package/") and entry["path"].endswith(".py")}
     source_paths.update("tools/executor/" + name + ".py" for name in (
-        "native_runtime_startup", "native_runtime_acquisition", "native_host_files", "native_host_files_channel"))
+        "native_runtime_startup", "native_runtime_acquisition", "native_host_files", "native_host_files_channel",
+        "native_host_bootstrap_v2"))
+    source_paths.add("tools/executor/native_host_channel_v2.py")
+    source_paths.update("tools/executor/bionic-supervisor/" + name + ".py" for name in (
+        "host_policy", "host_wire", "host_processes"))
     source_manifest = []
     for relative in sorted(source_paths):
         source = ROOT / relative
@@ -95,6 +106,8 @@ def main():
         "deploymentSha256": digest((assets / "foldgpt-executor-deployment.json").read_bytes()),
         "sourceManifestSha256": digest((assets / "foldgpt-executor-manifest.json").read_bytes()),
         "evidenceSha256": digest(evidence)}
+    if args.host_v2:
+        qualification["hostDeploymentSha256"] = digest((assets / "foldgpt-host-deployment.json").read_bytes())
     (assets / "foldgpt-executor-qualification.json").write_text(json.dumps(qualification, indent=2) + "\n")
     print(json.dumps({"output": str(output), "sources": len(source_manifest), "nativeLibraries": len(native),
                       "androidProductionExecuted": False}))

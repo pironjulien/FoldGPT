@@ -7,9 +7,53 @@ ancien checkpoint ; il ne reçoit pas cette sauvegarde privée.
 
 ## État courant : exécuteur sous identité FoldGPT prouvé sur le téléphone
 
+Point courant du 8 septembre : **r15/versionCode6 est installé et le canal
+humain v2 est qualifié sur le Fold**, essais `016fe324` puis `70cf3a99` après
+35 secondes d'attente volontaire avant la connexion du contrôleur. Les six cas
+réels passent : lecture, sauvegarde stdin de 2097408 octets et relecture exacte,
+exécution Python, refus hors du projet et annulation des descendants. Java donne
+waitStatus0 et cleanupComplete ; les propriétaires natifs18082 puis19050 sont
+absents indépendamment. Boot, propriétés et quatre APK ChatGPT officiels inchangés.
+Preuves exactes : `verification/native-host-production-20260908`.
+APK : `downloads/native-production-20260908/foldgpt-native-candidate-r15.apk`,
+SHA256 `d8f4ff35d0d06120d1ab004ce13e5f8a31e7a25b73258e8ef0cceea2a178fe7b`.
+Payload : `downloads/native-host-runner-20260908/production-package-v3`.
+Les anciennes tentatives sont conservées ; ne pas réinstaller r12/r13/r14.
+
+Corrections établies : FIOCLEX/FIONCLEX pour Python dans le seul profil humain,
+cwd '/' fixé par O_PATH (la sonde réelle prouve O_RDONLY=EACCES et fchdir=PASS),
+délai de handshake commencé à la connexion réelle. Le mode natif attend le
+contrôleur sous la durée de vie du service Android, qui conserve son arrêt.
+
+**Moteur et interface encore à qualifier : projet non livré.** Le client officiel
+commence par `-c features.code_mode_host=true app-server ...` ; l'ancien wrapper
+omettait alors le bootstrap. La source corrigée lit FOLDGPT_NATIVE_BOOTSTRAP
+dans le démarrage app-server après le vrai parseur CLI ; le wrapper conserve
+tous les arguments. Ne pas installer ce wrapper avec un ancien moteur.
+La garde Rust de socket accepte désormais l'adresse abstraite que Linux
+attribue à SO_PASSCRED ; les credentials noyau restent vérifiés.
+
+CI courante : `34183702604`, branche privée `codex/native-engine-ci-r4-20260908`,
+commit `100844688340a16597b556641d93e42427760082`, patch moteur
+`8b055f730e651c2bebac801373b92bf57bcc0e1d2701a4ce232f07e1d9f82a9e`.
+La qualification native Python Linux est PASS ; tests Rust et ARM en cours.
+R2 Linux avait 18 refus de socket erronés puis un disque plein ; R4 libère les
+SDK inutilisés sur le seul runner jetable et conserve les cibles compilées.
+Les anciens binaires R2/R3 ne contiennent pas ces corrections.
+
+Le script `tools/runtime/install-native-engine-device.py` vérifie le nouveau
+paquet, les deux reçus de fermeture, les bibliothèques GNU du Fold et les
+fichiers officiels Linux. Il n'a pas encore installé le moteur R4. Le vrai projet
+UI vide est `/data/user/0/app.foldgpt/files/projects/ui-python-caae3a83d156` ;
+prompt sous `work/root-artifacts-20260907/native-ui-validation-20260908`.
+Ne pas prendre une ancienne conversation hors de ce chemin pour le test natif.
+PTY reste non sélectionné et non qualifié. Le complément GitHub v10 est publié,
+retéléchargé et restauré avec tous ses fichiers vérifiés ; il conserve r12 et
+49c610d, pas encore r15 ou les nouvelles preuves. Prévoir le complément suivant.
+
 **Qualification production Python réelle PASS, 04:28** : APK r12
 `57b474f3f468e3c62470eef5e41da0385eaf2b45c944c06e2e0180b1ffaa4234`,
-versionCode3, installé. Essai4748f4f6 via vraie Activity/Service Java → Shizuku
+versionCode3, installé lors de ce test historique. Essai4748f4f6 via vraie Activity/Service Java → Shizuku
 → run-as → Bionic, contrôleur GNU avec vrais binds,3canaux authentifiés.
 Création native des fichiers,3tests Python réussis, zipapp construit et exécuté
 sortie42, octets recoupés sous GNU, UID10412/platform android/aarch64.

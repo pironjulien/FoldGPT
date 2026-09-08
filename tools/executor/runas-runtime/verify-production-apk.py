@@ -31,6 +31,19 @@ def main():
         config = json.loads(asset("foldgpt-executor-deployment.json"))
         if config["schema"] != "foldgpt.native.deployment.v1":
             raise ValueError("Native deployment schema differs")
+        host_schema = "foldgpt.host-files.v1"
+        if "assets/foldgpt-host-deployment.json" in names:
+            host_bytes = asset("foldgpt-host-deployment.json")
+            host = json.loads(host_bytes)
+            if (digest(host_bytes) != qualification.get("hostDeploymentSha256")
+                    or set(host) != {"schema", "runner", "runnerSha256"}
+                    or host["schema"] != "foldgpt.host.v2"
+                    or host["runner"] != "libfoldgpt_host_supervisor.so"
+                    or config["nativeLibraries"].get(host["runner"]) != host["runnerSha256"]):
+                raise ValueError("Human host selection differs from its attested native package")
+            host_schema = host["schema"]
+        elif "hostDeploymentSha256" in qualification:
+            raise ValueError("Attested human host deployment asset is absent")
         for name, sha in config["nativeLibraries"].items():
             data = archive.read("lib/arm64-v8a/" + name)
             if digest(data) != sha:
@@ -61,7 +74,7 @@ def main():
         result = {"schema": "foldgpt.native-apk-verification.v1", "success": True,
             "androidProductionExecuted": False, "apkSha256": digest(args.apk.read_bytes()),
             "nativeLibraries": len(config["nativeLibraries"]), "pythonDataFiles": len(runtime["dataFiles"]),
-            "runtimeAliases": len(runtime["runtimeAliases"]), "sourceFiles": len(sources)}
+            "runtimeAliases": len(runtime["runtimeAliases"]), "sourceFiles": len(sources), "hostSchema": host_schema}
     args.output.write_text(json.dumps(result, indent=2) + "\n")
     print(json.dumps(result))
 

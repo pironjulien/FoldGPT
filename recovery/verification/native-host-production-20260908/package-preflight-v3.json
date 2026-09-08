@@ -1,0 +1,14 @@
+{
+  "schema": "foldgpt.host-package-preflight.v2",
+  "success": true,
+  "sourceFiles": 90,
+  "androidExecuted": false,
+  "modelSourcesUnchanged": true,
+  "hashes": {
+    "downloads\\native-host-runner-20260908\\production-package-v3\\assets\\foldgpt-executor-deployment.json": "6996c8e877f0dd0847a6f387b8622edf23ae9f6182cd58a14fb4755ae05b6353",
+    "downloads\\native-host-runner-20260908\\production-package-v3\\assets\\foldgpt-host-deployment.json": "a01a984f0e8665e4d9bf5837b10fd51ce017d672020aff13fbeba685bba37cc7",
+    "downloads\\native-host-runner-20260908\\production-package-v3\\assets\\foldgpt-executor-manifest.json": "c7323cddd7f91262a5d79d77c81492f7f9ba33bc23b424dcceb7e90a49193502",
+    "downloads\\native-host-runner-20260908\\production-package-v3\\jniLibs\\arm64-v8a\\libfoldgpt_host_supervisor.so": "34b6aeca65b3e719947d6afe538ee58ea58348ceb2dded17c748366e048f65c1",
+    "tools\\executor\\qualify_production_host_v2.py": "e86a1c298d3a39f5555db724e9221596e3df0fbdd4ec600e9e0cd974cf45c7cd"
+  }
+}

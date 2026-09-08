@@ -22,13 +22,20 @@ DATA = "/data/user/0/app.foldgpt"
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--apk-sha256", required=True)
+    parser.add_argument("--qualification", choices=("python", "host-v2"), default="python")
+    parser.add_argument("--controller-delay", type=float, default=0,
+                        help="Deliberately delay the actual controller to qualify slow desktop startup")
     args = parser.parse_args()
+    if not 0 <= args.controller_delay <= 60:
+        parser.error("Controller delay must be between 0 and 60 seconds")
     trial = uuid.uuid4().hex[:8]
-    output = ROOT / "downloads/native-production-device-20260908" / trial
+    directory = "native-production-device-20260908" if args.qualification == "python" else "native-host-production-device-20260908"
+    output = ROOT / "downloads" / directory / trial
     output.mkdir(parents=True, exist_ok=False)
     prefix = [str(Path(os.environ["LOCALAPPDATA"]) / "Android/Sdk/platform-tools/adb.exe"), "-s", "R3GL808JN4A"]
     commands, statuses = [], []
-    result = {"passed": False, "scope": "Actual Java/Shizuku/run-as owner and GNU client; app-server and UI not tested"}
+    result = {"passed": False, "qualification": args.qualification,
+              "scope": "Actual Java/Shizuku/run-as owner and GNU client; app-server and UI not tested"}
     prepared = False
     process = None
 
@@ -105,7 +112,8 @@ def main():
             raise ValueError("Controller talloc alias differs from the installed APK")
         for directory in (DATA + "/cache/x11", DATA + "/cache/shm"):
             text(["run-as", "app.foldgpt", "test", "-d", directory])
-        source = (ROOT / "tools/executor/qualify_native_production.py").read_bytes()
+        client_source = "qualify_native_production.py" if args.qualification == "python" else "qualify_production_host_v2.py"
+        source = (ROOT / "tools/executor" / client_source).read_bytes()
         tar = io.BytesIO()
         with tarfile.open(fileobj=tar, mode="w", format=tarfile.GNU_FORMAT) as archive:
             entry = tarfile.TarInfo("client.py")
@@ -135,6 +143,11 @@ def main():
         manifest = json.loads(text(["run-as", "app.foldgpt", "cat", manifest_path]))
         result["startup"] = manifest
         (output / "startup.json").write_text(json.dumps(manifest, indent=2) + "\n")
+        if args.controller_delay:
+            began = time.monotonic()
+            time.sleep(args.controller_delay)
+            result["controllerDelaySeconds"] = time.monotonic() - began
+            result["ownerPresentAfterDelay"] = text(["test", "-d", "/proc/" + str(manifest["peer"]["pid"])]) == ""
         temp = DATA + "/cache/x11"
         controller = ["run-as", "app.foldgpt", "/system/bin/env",
             "LD_LIBRARY_PATH=" + base + ":" + DATA + "/files/native:" + native,

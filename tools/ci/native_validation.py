@@ -13,6 +13,7 @@ import sys
 import tarfile
 import tempfile
 import time
+import tomllib
 import urllib.request
 
 from native_helpers import build as build_helpers
@@ -133,7 +134,8 @@ def python_tests():
     runs = [("fd-abi", [HELPERS / "native-process-fd-abi"]),
             ("runtime-paths-c", [HELPERS / "runtime-paths-test"])]
     for module in ("test_native_runtime_startup", "test_native_runtime_acquisition",
-                   "test_native_host_files", "test_native_host_files_channel"):
+                   "test_native_host_files", "test_native_host_files_channel",
+                   "test_production_host_v2"):
         runs.append((module, [sys.executable, "-B", "-m", f"tools.executor.{module}"]))
     supervisor = HELPERS / "package/tools/executor/bionic-supervisor"
     host_evidence = EVIDENCE / "native-host-v2"
@@ -259,6 +261,86 @@ def engine_tests():
         raise RuntimeError("Engine tests failed; all selected independent suites were attempted")
 
 
+def format_tools():
+    """Install exact upstream formatter binaries, verified before extraction."""
+    specs = (
+        ("uv", "0.12.5", "https://github.com/astral-sh/uv/releases/download/0.12.5/uv-x86_64-unknown-linux-gnu.tar.gz",
+         "68a509da24b06b4223a1c0175fb5eb5bc79342b76cbeff0cfe51ac3f5b17b6b2", "uv-x86_64-unknown-linux-gnu/uv"),
+        ("dotslash", "0.5.9", "https://github.com/facebook/dotslash/releases/download/v0.5.9/dotslash-linux-musl.x86_64.v0.5.9.tar.gz",
+         "4c75c6eb7890ae35993b962073f6d9bbe78b42b81a5691303ad70f63bfbf7196", "dotslash"),
+    )
+    result = []
+    cache = WORK / "cache/format-tools"
+    cache.mkdir(parents=True, exist_ok=True)
+    bin_dir = WORK / "tools/bin"
+    bin_dir.mkdir(parents=True, exist_ok=True)
+    for name, version, url, digest, member in specs:
+        archive = cache / f"{name}-{version}.tar.gz"
+        if not archive.exists():
+            with urllib.request.urlopen(url, timeout=120) as response, archive.open("wb") as output:
+                shutil.copyfileobj(response, output)
+        if sha(archive) != digest:
+            raise RuntimeError(f"Official formatter archive checksum mismatch: {name}")
+        with tarfile.open(archive) as stream:
+            info = stream.getmember(member)
+            if not info.isfile():
+                raise RuntimeError(f"Formatter archive member is not a regular executable: {name}")
+            with stream.extractfile(info) as source, (bin_dir / name).open("wb") as output:
+                shutil.copyfileobj(source, output)
+        (bin_dir / name).chmod(0o755)
+        command(f"{name}-version", [bin_dir / name, "--version"])
+        result.append({"name": name, "version": version, "url": url,
+                       "archiveSha256": digest, "binarySha256": sha(bin_dir / name)})
+    save(EVIDENCE / "format-tools.json", result)
+
+
+def engine_final_checks():
+    """Run broad tests only after the selected integration step succeeds."""
+    environment = native_environment()
+    environment.update({"UV_CACHE_DIR": str(WORK / "cache/uv"),
+                        "UV_PYTHON_INSTALL_DIR": str(WORK / "cache/uv-python"),
+                        "DOTSLASH_CACHE": str(WORK / "cache/dotslash")})
+    base = ["just", "--justfile", ENGINE / "justfile"]
+    try:
+        command("engine-full-tests", [*base, "test", "--locked", "--test-threads", "2"],
+                cwd=ENGINE, env=environment)
+    finally:
+        report = Path(os.environ["CARGO_TARGET_DIR"]) / "nextest/local/junit.xml"
+        if report.is_file():
+            shutil.copyfile(report, EVIDENCE / "engine-full-tests.junit.xml")
+    # Scope Clippy to actual changed Rust packages, including newly added sources.
+    changed = subprocess.check_output(["git", "diff", "HEAD", "--name-only", "-z"], cwd=ENGINE).split(b"\0")
+    packages = set()
+    for raw in changed:
+        if not raw:
+            continue
+        path = ENGINE / raw.decode()
+        if not path.is_relative_to(ENGINE / "codex-rs") or (path.suffix != ".rs" and path.name != "Cargo.toml"):
+            continue
+        for parent in path.parents:
+            if parent == ENGINE:
+                break
+            manifest = parent / "Cargo.toml"
+            if manifest.is_file():
+                package = tomllib.loads(manifest.read_text()).get("package", {}).get("name")
+                if package:
+                    packages.add(package)
+                    break
+    if not packages:
+        raise RuntimeError("Expected private engine changes for the scoped final Clippy pass")
+    save(EVIDENCE / "engine-fix-packages.json", sorted(packages))
+    command("engine-fix", [*base, "fix", "--locked", *[arg for package in sorted(packages) for arg in ("-p", package)]],
+            cwd=ENGINE, env=environment)
+    format_tools()
+    command("engine-format", [*base, "fmt"], cwd=ENGINE, env=environment)
+    # Preserve only final fixer changes relative to the exact restored source index.
+    (EVIDENCE / "engine-final-source-fixes.patch").write_bytes(
+        subprocess.check_output(["git", "diff", "--binary", "--full-index"], cwd=ENGINE))
+    save(EVIDENCE / "engine-final-checks.json", {"passed": True, "androidExecution": False,
+        "fullSuite": True, "fixPackages": sorted(packages), "format": True,
+        "fixPatchSha256": sha(EVIDENCE / "engine-final-source-fixes.patch")})
+
+
 def arm_dependencies():
     source_root = WORK / "openssl-source"
     source_root.mkdir(exist_ok=False)
@@ -329,7 +411,7 @@ def identity():
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("stage", choices=("identity", "restore", "v8", "helpers", "python-tests",
-                                        "engine-tests", "arm-dependencies", "arm-build"))
+                                        "engine-tests", "engine-final-checks", "arm-dependencies", "arm-build"))
     parser.add_argument("--target", default="x86_64-unknown-linux-gnu")
     args = parser.parse_args()
     if sys.platform != "linux" or os.getuid() == 0:

@@ -1,5 +1,48 @@
 # Changelog
 
+## Unreleased - 2026-09-08
+
+- Prepare explicit native human v2 production selection through an attested
+  APK asset and startup manifest, including real editor cat/Bash execution and
+  the native parent's environment. Preserve model authority and v1 admission.
+  Freeze the ARM64 native package and standalone GNU-controller qualification;
+  add a real production-channel Linux test. Device/editor qualification remains
+  pending and PTY is explicitly unsupported.
+
+- Correct Python file opening in the human native executor by admitting only
+  the descriptor inheritance operations FIOCLEX/FIONCLEX. Preserve the model
+  runner and all other ioctl refusals. Reproduce the ARM64 build byte for byte;
+  real Linux production-channel qualification passes. APK r15 now also passes
+  all six production human-channel cases on the Fold: file reads, exact 2 MiB
+  stdin save/readback, Python script, outside-workspace refusal and descendant
+  cancellation, with independent Java reaping and unchanged official APKs.
+- Pin the human cwd with O_PATH so Android can enter a directory without
+  demanding its read permission. Start the handshake deadline at the actual
+  controller connection, preserving service-owned idle cancellation. Repeat the
+  complete real Fold qualification after a deliberate 35-second controller delay.
+- Correct native selection for the official client's global CLI options by
+  resolving its existing startup environment inside app-server startup. Preserve
+  the complete argument vector and utility commands; add an integration check
+  for the exact official launch arguments. Engine/UI validation remains pending.
+
+- Publish encrypted recovery supplement v10 to the private repository, download
+  and authenticate it again, and verify every restored file and the restored r12
+  APK. Preserve the exact 49c610d source checkpoint separately from ongoing v2 work.
+
+- Publish encrypted recovery supplement v10 for commit 49c610d and APK r12.
+  Redownload it from the private GitHub release and restore/verify all 25,232
+  files on Windows, plus 1,057 frozen source files and the complete APK inventory.
+  Preserve explicit dependencies on the prior archives and keep keys in the vault.
+
+- Complete the real production Python qualification on the Fold with APK r12:
+  create source files through the native channels, pass three tests, build a
+  zipapp and execute it with output 42. Independently verify Java wait status 0,
+  complete native cleanup and unchanged boot, protection properties and official
+  Android ChatGPT package bytes. Conversation and editor qualification is pending.
+- Preserve the exact evidence bytes in Git and add a separate-engine installer
+  that checks the package, source identity, live GNU libraries and stopped owner,
+  then verifies the official Linux client is unchanged after installation.
+
 - Correct Linux qualification portability without changing native runner policy:
   accept the kernel-echoed atomic CLOEXEC flag while rejecting truncation, and
   explicitly fit the secondary test thread stack inside its existing memory
@@ -18,7 +61,8 @@
   permissions, verified application-prefix identity and Shizuku initialization
   order. Add the official SDK authorization request, a foreground diagnostic
   entry and stable service version identity across our APK updates. The first
-  integrated Python project and official UI path remain unqualified.
+  official UI path remains unqualified; the production Python result is recorded
+  in the 8 September entry above.
 
 - Preserve twelve real Bionic startup tests including the native environment
   snapshot. Install the independently verified production candidate r4 and

@@ -8,6 +8,10 @@ on:
         description: Run only native Linux Python qualification
         type: boolean
         default: false
+      full_rust_checks:
+        description: After targeted tests pass, run the complete Rust suite and final fix/format
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -74,8 +78,11 @@ jobs:
           submodules: false
       - name: Restore exact engine source from the checked recovery export
         run: python3 -B tools/ci/native_validation.py restore
+      - name: Recover unused SDK space on this disposable Linux runner
+        run: python3 -B tools/ci/prepare-runner-storage.py
       - name: Restore versioned tool and source caches
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        id: native-cache
+        uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
           path: |
             work/ci/cache/
@@ -83,14 +90,33 @@ jobs:
           key: native-ci-v1-${{ runner.os }}-${{ matrix.target }}-rust1.95.0-just1.58.0-nextest0.9.143-${{ hashFiles('work/ci/engine/codex-rs/Cargo.lock') }}
       - name: Install the pinned Linux toolchain
         run: bash tools/ci/setup-linux.sh '${{ matrix.stage }}'
+      - name: Restore compatible compiled engine dependencies
+        id: target-cache
+        uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: work/ci/target/
+          key: native-target-v1-${{ runner.os }}-${{ matrix.target }}-${{ hashFiles('work/ci/engine/codex-rs/Cargo.lock') }}-${{ github.sha }}
+          restore-keys: |
+            native-target-v1-${{ runner.os }}-${{ matrix.target }}-${{ hashFiles('work/ci/engine/codex-rs/Cargo.lock') }}-
       - name: Fetch and verify the official V8 archive and matching bindings
         run: python3 -B tools/ci/native_validation.py v8 --target '${{ matrix.target }}'
+      - name: Preserve verified tools before engine compilation
+        if: steps.native-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: |
+            work/ci/cache/
+            work/ci/tools/
+          key: ${{ steps.native-cache.outputs.cache-primary-key }}
       - name: Compile frozen native Linux helpers
         if: matrix.stage == 'linux-tests'
         run: python3 -B tools/ci/native_validation.py helpers
       - name: Compile the engine and run selected real integration tests
         if: matrix.stage == 'linux-tests'
         run: python3 -B tools/ci/native_validation.py engine-tests
+      - name: Run the complete Rust suite and final source checks
+        if: matrix.stage == 'linux-tests' && inputs.full_rust_checks
+        run: python3 -B tools/ci/native_validation.py engine-final-checks
       - name: Compile the verified official OpenSSL source for GNU ARM64
         if: matrix.stage == 'arm64-build'
         run: python3 -B tools/ci/native_validation.py arm-dependencies
@@ -108,3 +134,9 @@ jobs:
             work/ci/target/cargo-timings/
           if-no-files-found: error
           retention-days: 14
+      - name: Preserve compiled dependencies after success or failure
+        if: always() && steps.target-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: work/ci/target/
+          key: ${{ steps.target-cache.outputs.cache-primary-key }}

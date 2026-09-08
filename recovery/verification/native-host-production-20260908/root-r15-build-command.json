@@ -1,0 +1,16 @@
+{
+  "argv": [
+    "C:\\Users\\julie\\.gradle\\wrapper\\dists\\gradle-9.7.1-bin\\1w1c7tv4s851m17nbqdsro2tv\\gradle-9.7.1\\bin\\gradle.bat",
+    "--no-daemon",
+    "--max-workers=2",
+    "--no-parallel",
+    "-Dorg.gradle.jvmargs=-Xmx1g -Dfile.encoding=UTF-8",
+    "-PfoldgptExecutorAssets=C:\\Dev\\ChatgptFold\\downloads\\native-host-runner-20260908\\production-package-v3\\assets",
+    "-PfoldgptExecutorJni=C:\\Dev\\ChatgptFold\\downloads\\native-host-runner-20260908\\production-package-v3\\jniLibs",
+    "-PfoldgptFrozenTransportJni=C:\\Dev\\ChatgptFold\\downloads\\native-production-20260908\\frozen-transport-root",
+    ":app:assembleDebug",
+    ":shizukuTransport:testDebugUnitTest"
+  ],
+  "exitCode": 0,
+  "log": "C:\\Dev\\ChatgptFold\\downloads\\native-production-20260908\\gradle-package-root-r15.log"
+}

@@ -1,0 +1,49 @@
+{
+  "repository": "https://github.com/pironjulien/FoldGPT-workspace",
+  "visibility": "PRIVATE",
+  "release": "https://github.com/pironjulien/FoldGPT-workspace/releases/tag/recovery-2026-09-07",
+  "sourceCommit": "49c610d2345d639eda6339629b25169e48266729",
+  "encryptedSha256": "15e10f26b1323ce24274b01217645d5ee2ece62afa454f958ce1535f1f88f40f",
+  "assets": [
+    {
+      "name": "native-checkpoint-v10-manifest.json",
+      "bytes": 847,
+      "sha256": "caf296b13daf2ffc908574227afe980082f2c0b68d06804c17a8fe112035bda0"
+    },
+    {
+      "name": "native-checkpoint-v10.tar.gz.age.part001",
+      "bytes": 1073741824,
+      "sha256": "022cff3d36c5f781eecc6265ca20964ced6bdd45dba3cc1a47c26b2405a828ca"
+    },
+    {
+      "name": "native-checkpoint-v10.tar.gz.age.part002",
+      "bytes": 94405681,
+      "sha256": "94c726dcc9cb161cd0b0799723f8ecc73a5ec36bd10c761e598f8669c279f9d7"
+    }
+  ],
+  "downloadedAssetHashesVerified": true,
+  "restorationReport": "recovery/verification/github-supplement-v10-restoration.json",
+  "sourceFilesRestoredAndVerified": 1057,
+  "sourceRestoredTo": "\\\\?\\C:\\Dev\\ChatgptFold\\work\\FoldGPT-recovery\\restored-supplement-v10-20260908\\source-checkpoint-49c610d-verified",
+  "enginePatchSha256": "f7e73d475ab9bcaaaedbbbf895213d270126ab946f97db15d76993ffd8a95869",
+  "r12ApkSha256": "57b474f3f468e3c62470eef5e41da0385eaf2b45c944c06e2e0180b1ffaa4234",
+  "r12ApkInventoryReverified": true,
+  "earlierArchiveDependencies": [
+    "manifest.json",
+    "native-checkpoint-manifest.json",
+    "native-checkpoint-v2-manifest.json",
+    "native-checkpoint-v3-manifest.json",
+    "native-checkpoint-v4-manifest.json",
+    "native-checkpoint-v5-manifest.json",
+    "native-checkpoint-v6-manifest.json",
+    "native-checkpoint-v7-manifest.json",
+    "native-checkpoint-v8-manifest.json",
+    "native-checkpoint-v9-manifest.json"
+  ],
+  "plaintextUploaded": false,
+  "keysIncluded": false,
+  "gitIndexOrHeadChanged": false,
+  "deviceActionPerformed": false,
+  "scope": "Recoverable encrypted checkpoint verified from redownloaded GitHub bytes; not ordinary GUI or unfinished host-v2 qualification.",
+  "retainedToolFailure": "The full canonical restore passed. The first additional source tar extractall hit Windows mixed separators during delayed directory metadata. A fresh per-member extraction then verified all source files/directories."
+}

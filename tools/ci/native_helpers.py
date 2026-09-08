@@ -21,6 +21,7 @@ def build(project: Path, destination: Path) -> None:
     inputs = {
         "runner": "bionic-supervisor/runner.c",
         "host-runner": "bionic-supervisor/host-runner.c",
+        "host-search-only-cwd": "bionic-supervisor/test_host_search_only_cwd.c",
         "native-files": "native-files.c",
         "native-file-handle": "native-file-handle.c",
         "paused-helper": "test_bootstrap_paused_helper.c",
@@ -29,7 +30,8 @@ def build(project: Path, destination: Path) -> None:
         "executable-metadata-test": "bionic-supervisor/test_executable_metadata_worker.c",
         "native-process-fd-abi": "native-process-fd-abi.c",
     }
-    for relative in (*inputs.values(), "native-runner-seccomp.h", "bionic-cwd/cwd.c", "bionic-cwd/exports.map"):
+    for relative in (*inputs.values(), "native-runner-seccomp.h", "bionic-supervisor/host-fd-seccomp.h",
+                     "bionic-cwd/cwd.c", "bionic-cwd/exports.map"):
         output = source / relative
         output.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(project / "tools/executor" / relative, output)

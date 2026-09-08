@@ -28,14 +28,19 @@ and every real secondary-thread probe remains mandatory. No runner policy change
 - `native-python`: compile the frozen current C helpers and run actual nonroot
   Python/file/process/credential/lifecycle tests, including the Python project.
   This also tests the separately developed host v2 channel and human process
-  owner; production startup keeps its existing v1 host selection until device
-  qualification explicitly changes it.
+  owner. Production APK r15 explicitly selects v2 and passed the six real Fold
+  cases with independent native cleanup; official-editor validation remains open.
 - `engine (linux-tests)`: restore the exact exported engine, compile its real
   CLI, app-server and code-mode companion, then use upstream `just test` for
   selected exec-server and app-server integration tests. The explicitly ignored
   native Python project test is selected by its exact name. Its private child
   test is launched by that parent fixture only. Model responses in this software
   test come from deterministic Responses SSE fixtures; process operations are real.
+  With `full_rust_checks=true`, a successful targeted step is followed by the
+  complete `just test` suite, `just fix` scoped to the changed Rust packages,
+  and `just fmt`. The final source patch is retained for review and replay in
+  the maintained engine; tests are not repeated after fix/format. Formatters
+  uv 0.12.5 and DotSlash 0.5.9 come from checksum-verified official archives.
 - `engine (arm64-build)`: cross-compile release `codex` and adjacent
   `codex-code-mode-host` for **GNU ARM64**, retaining the existing controller
   architecture. GNU controller code is distinct from the Bionic workers that
@@ -60,6 +65,14 @@ installed through pinned, locked Cargo packages. Each target obtains the
 official `ptrcomp_sandbox_release` V8 archive **and** bindings via the restored
 upstream `scripts/codex_package/v8.py`; the exact upstream checksum pair is
 checked on every run. No alternate V8 build mode is set.
+The tool/V8 cache is saved immediately after that verification, so a later
+engine compilation failure does not discard the installed pinned tools.
+Compiled targets are cached separately by architecture, lockfile and snapshot;
+Cargo still checks source fingerprints when a prior compatible cache is restored.
+The disposable hosted Linux job removes only its listed unused Android, .NET,
+Haskell and CodeQL SDK directories before compilation. This addresses the
+observed LLVM disk-full failure while preserving the required compilers and
+project inputs. Available disk space before and after is recorded in evidence.
 
 The ARM64 OpenSSL input is the complete official 3.6.3 source archive, pinned to
 SHA256 `243a86649cf6f23eeb6a2ff2456e09e5d77dd9018a54d3d96b0c6bdd6ba6c7f1`,

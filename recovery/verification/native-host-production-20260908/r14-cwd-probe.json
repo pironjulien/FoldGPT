@@ -1,0 +1,16 @@
+{
+  "argv": [
+    "run-as",
+    "app.foldgpt",
+    "/data/app/~~sNrgHSlLStek3M2Z72Jg2A==/app.foldgpt-4nt6n4hPSsl0Fs6gZSrRdQ==/lib/arm64/libfoldgpt_python_cli.so",
+    "-I",
+    "-S",
+    "-B",
+    "-c",
+    "import os,json\nresults=[]\nfor name,flags in [('read',os.O_RDONLY),('path',os.O_PATH)]:\n    entry={'kind':name}\n    try:\n        fd=os.open('/',flags|os.O_DIRECTORY|os.O_CLOEXEC|os.O_NOFOLLOW)\n        try:\n            entry['opened']=True\n            os.fchdir(fd)\n            entry['fchdir']=os.getcwd()\n        finally:\n            os.close(fd)\n    except OSError as error:\n        entry.update(errno=error.errno,error=str(error))\n    results.append(entry)\nprint(json.dumps({'uid':os.getuid(),'results':results}))\n"
+  ],
+  "source": "import os,json\nresults=[]\nfor name,flags in [('read',os.O_RDONLY),('path',os.O_PATH)]:\n    entry={'kind':name}\n    try:\n        fd=os.open('/',flags|os.O_DIRECTORY|os.O_CLOEXEC|os.O_NOFOLLOW)\n        try:\n            entry['opened']=True\n            os.fchdir(fd)\n            entry['fchdir']=os.getcwd()\n        finally:\n            os.close(fd)\n    except OSError as error:\n        entry.update(errno=error.errno,error=str(error))\n    results.append(entry)\nprint(json.dumps({'uid':os.getuid(),'results':results}))\n",
+  "code": 0,
+  "stdout": "{\"uid\": 10412, \"results\": [{\"kind\": \"read\", \"errno\": 13, \"error\": \"[Errno 13] Permission denied: '/'\"}, {\"kind\": \"path\", \"opened\": true, \"fchdir\": \"/\"}]}\r\n",
+  "stderr": ""
+}

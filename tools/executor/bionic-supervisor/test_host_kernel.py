@@ -55,7 +55,7 @@ class HostKernelTests(unittest.IsolatedAsyncioTestCase):
         else:
             await self.owner.close("host-real-test")
 
-    def run_native(self, command, *, cwd="/", input_data=b"", cancel_marker=None):
+    def run_native(self, command, *, cwd="/", input_data=b"", cancel_marker=None, runner_wrapper=None):
         policy = HostProcessPolicy(self.authority, cwd)
         control, peer = socket.socketpair(socket.AF_UNIX, socket.SOCK_SEQPACKET)
         commands, command_peer = socket.socketpair(socket.AF_UNIX, socket.SOCK_SEQPACKET)
@@ -67,7 +67,10 @@ class HostKernelTests(unittest.IsolatedAsyncioTestCase):
             data_bytes=268435456, file_bytes=16777216, uid_tasks=8, descriptors=128)
         envelope = wire.seal(encoded)
         inherited = (self.owner.files.root, read_fd, peer.fileno(), command_peer.fileno(), envelope)
-        child = subprocess.Popen([str(BUILD / "host-runner"), *map(str, inherited)],
+        native_command = [str(BUILD / "host-runner"), *map(str, inherited)]
+        if runner_wrapper is not None:
+            native_command.insert(0, str(BUILD / runner_wrapper))
+        child = subprocess.Popen(native_command,
             env={}, pass_fds=inherited, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         peer.close(); command_peer.close(); os.close(read_fd); os.close(envelope)
         os.set_blocking(write_fd, False)
@@ -174,12 +177,41 @@ class HostKernelTests(unittest.IsolatedAsyncioTestCase):
                 "path": path.as_uri(), "sandbox": context(self.workspace)})), notify)
         self.assertEqual(path.read_bytes(), b"actual host private file\0")
 
+    async def test_real_root_cwd_without_root_directory_read_permission(self):
+        stdout, stderr, final = await self.run_owned("pwd",
+            runner_wrapper="host-search-only-cwd")
+        self.assertEqual((stdout, stderr, final["exitCode"]), (b"/\n", b"", 0))
+
     async def test_real_shell_streams_large_binary_stdin_then_eof(self):
         payload = bytes(range(256)) * 8193
         path = self.workspace / "written.bin"
         stdout, stderr, final = await self.run_owned("cat > " + shlex.quote(str(path)), input_data=payload)
         self.assertEqual((stdout, stderr, final["exitCode"]), (b"", b"", 0))
         self.assertEqual(path.read_bytes(), payload)
+
+    async def test_descriptor_inheritance_ioctls_preserve_other_ioctl_refusal(self):
+        path = self.workspace / "descriptor-flags"
+        path.write_bytes(b"private descriptor")
+        script = "\n".join([
+            "import errno, fcntl, os, termios",
+            "fd = os.open(" + repr(str(path)) + ", os.O_RDONLY)",
+            "fcntl.ioctl(fd, termios.FIONCLEX)",
+            "assert not (fcntl.fcntl(fd, fcntl.F_GETFD) & fcntl.FD_CLOEXEC)",
+            "fcntl.ioctl(fd, termios.FIOCLEX)",
+            "assert fcntl.fcntl(fd, fcntl.F_GETFD) & fcntl.FD_CLOEXEC",
+            "try:",
+            "    fcntl.ioctl(0, termios.FIONREAD, bytearray(4))",
+            "except OSError as error:",
+            "    assert error.errno == errno.EPERM, error",
+            "else:",
+            "    raise AssertionError('Unrelated ioctl unexpectedly admitted')",
+            "os.close(fd)",
+            "print('real descriptor inheritance and ioctl refusal pass')",
+        ])
+        stdout, stderr, final = await self.run_owned(
+            "/usr/bin/python3 -I -S -B -c " + shlex.quote(script))
+        self.assertEqual((stdout, stderr, final["exitCode"]),
+            (b"real descriptor inheritance and ioctl refusal pass\n", b"", 0))
 
     async def test_no_hidden_eight_megabyte_output_cap(self):
         path = self.workspace / "large.bin"

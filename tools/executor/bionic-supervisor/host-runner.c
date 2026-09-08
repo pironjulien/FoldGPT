@@ -4,7 +4,7 @@
  * is mediated; no pointer-bearing syscall is approved with CONTINUE.
  */
 #define _GNU_SOURCE
-#include "native-runner-seccomp.h"
+#include "host-fd-seccomp.h"
 #include <dirent.h>
 #include <linux/capability.h>
 #include <linux/openat2.h>
@@ -197,9 +197,10 @@ static int setup_paths(void) {
   struct stat root,actual;
   if(fstat(cfg.root,&root)<0||!S_ISDIR(root.st_mode)||root.st_uid!=getuid()||(root.st_mode&0077)||
      lstat(cfg.workspace,&actual)<0||!S_ISDIR(actual.st_mode)||root.st_dev!=actual.st_dev||root.st_ino!=actual.st_ino){errno=EPERM;return -1;}
-    /* Human cwd is real. Pin / before confinement without granting directory
-   * reads or file access there. All workspace acquisitions still use rootFD. */
-  if(!strcmp(cfg.cwd,"/"))cfg.cwd_fd=open("/",O_RDONLY|O_DIRECTORY|O_CLOEXEC|O_NOFOLLOW);
+  /* A cwd pin needs search, not directory-read authority. Android may permit
+   * fchdir(/) while refusing O_RDONLY on /. O_PATH preserves the exact real
+   * directory without requesting content access. Acquisitions use rootFD. */
+  if(!strcmp(cfg.cwd,"/"))cfg.cwd_fd=open("/",O_PATH|O_DIRECTORY|O_CLOEXEC|O_NOFOLLOW);
   else {
     size_t length=strlen(cfg.workspace);
     if(strncmp(cfg.cwd,cfg.workspace,length)||(cfg.cwd[length]&&cfg.cwd[length]!='/')){errno=EPERM;return -1;}

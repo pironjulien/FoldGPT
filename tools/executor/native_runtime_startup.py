@@ -133,12 +133,14 @@ def read_launch(path, *, uid, broker_directory, projects_directory):
 class StartupManifest:
     """Publish once; remove only this inode after native cleanup is verified."""
     def __init__(self, path, *, socket_path, workspace, shared_paths, controller_roots,
-                 parent_environment, directory_fd):
+                 parent_environment, directory_fd, host_schema=None):
         self.path = absolute_path(str(path))
         self.identity = None
         self.directory_fd = os.dup(directory_fd)
         os.set_inheritable(self.directory_fd, False)
         try:
+            if host_schema not in (None, "foldgpt.host.v2"):
+                raise ValueError("Unsupported explicitly selected human host schema")
             if os.getuid() <= 0 or os.getuid() != os.geteuid():
                 raise ValueError("Native startup manifest requires an ordinary nonroot owner")
             directory = os.fstat(self.directory_fd)
@@ -185,6 +187,8 @@ class StartupManifest:
                 "peer": {"pid": os.getpid(), "uid": os.getuid(), "gid": os.getgid()},
                 "workspaceRoot": workspace.as_uri(), "sharedPaths": identities,
                 "controllerRoots": controller_roots, "parentEnvironment": parent_environment}
+            if host_schema is not None:
+                value["hostSchema"] = host_schema
             data = (json.dumps(value, ensure_ascii=True, allow_nan=False, separators=(",", ":")) + "\n").encode("ascii")
             if len(data) > MAX_MANIFEST_BYTES:
                 raise ValueError("Native startup manifest exceeds its bound")

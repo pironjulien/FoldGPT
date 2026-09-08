@@ -18,6 +18,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--python-cli-build", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--host-build", type=Path)
     args = parser.parse_args()
     cli_build, output = args.python_cli_build.resolve(), args.output.resolve()
     cli_build.relative_to(ROOT)
@@ -44,6 +45,18 @@ def main():
         "libfoldgpt_bionic_cwd.so": "f65702d47130bf8f3098e7b9a5da5d982bbbc0d20cf50eeb61cc5fd489237157"
     }.items():
         native[name] = pinned(transport / name, expected)
+    if args.host_build is not None:
+        host = args.host_build.resolve(strict=True)
+        host.relative_to(ROOT)
+        record = json.loads((host / "build.json").read_text())
+        if (record.get("schema") != "foldgpt.native-host-build.v1" or record.get("reproducible") is not True
+                or record.get("ndk") != "29.0.14206865" or record["elf"]["architecture"] != "aarch64"
+                or record["elf"]["interpreter"] != "/system/bin/linker64"):
+            raise ValueError("Human runner requires the reproducible checked Windows ARM64 build")
+        name = "libfoldgpt_host_supervisor.so"
+        native[name] = pinned(host / name, record["elf"]["sha256"])
+        if len(native[name]) != record["elf"]["bytes"]:
+            raise ValueError("Human runner build length differs")
     aliases = {item["path"] for item in runtime["runtimeAliases"]}
     for command, library in (("python", "libfoldgpt_python_cli.so"),
                              ("python3", "libfoldgpt_python_cli.so"),

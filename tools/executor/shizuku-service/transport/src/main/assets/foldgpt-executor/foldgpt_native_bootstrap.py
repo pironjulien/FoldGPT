@@ -148,6 +148,7 @@ async def run(apk, uid, parent, nonce, launch_path, control_fd=3):
         stage = "imports"
         from tools.executor.native_runtime_acquisition import NativeRuntimeAcquisition, SessionExecServer
         from tools.executor.native_runtime_startup import StartupManifest, read_launch
+        from tools.executor.native_host_bootstrap_v2 import installed_host_factory
         from tools.executor.private_exec_broker import PrivateSessionOwner
         stage = "deployment"
         config = deployment(apk)
@@ -155,6 +156,7 @@ async def run(apk, uid, parent, nonce, launch_path, control_fd=3):
                              projects_directory=PROJECTS)
         stage = "native_inventory"
         options, environment, native = production_options(config, launch["workspace"])
+        host_factory = installed_host_factory(apk, config, options, native)
         stage = "broker_open"
         owner = PrivateSessionOwner(BROKER)
         stage = "workspace_claim"
@@ -176,11 +178,13 @@ async def run(apk, uid, parent, nonce, launch_path, control_fd=3):
         temporary_directory(backend)
         stage = "server_construct"
         server = SessionExecServer(backend, environment_info=environment)
-        acquisition = NativeRuntimeAcquisition(launch["socketPath"], server, controller_uid=uid)
+        acquisition = NativeRuntimeAcquisition(launch["socketPath"], server, controller_uid=uid,
+            host_channel_factory=host_factory)
         manifest = StartupManifest(launch["manifestPath"], socket_path=acquisition.path,
             workspace=launch["workspace"], shared_paths=[launch["workspace"], str(RUNTIME), str(native)],
             controller_roots=launch["controllerRoots"],
-            parent_environment=dict(backend.processes.parent_environment), directory_fd=acquisition.directory_fd)
+            parent_environment=dict(backend.processes.parent_environment), directory_fd=acquisition.directory_fd,
+            host_schema=host_factory.schema if host_factory is not None else None)
         # The C setup alarm stays active throughout imports and publication.
         # The acquisition now owns bounded admission and the persistent native
         # owner owns cleanup/quarantine; no process has been admitted yet.

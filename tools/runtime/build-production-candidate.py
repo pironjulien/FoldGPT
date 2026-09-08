@@ -13,6 +13,7 @@ OUT = ROOT / "downloads/native-production-20260908"
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--candidate", required=True)
+    parser.add_argument("--package", type=Path, default=OUT / "package-r3")
     args = parser.parse_args()
     if not args.candidate.isalnum():
         raise ValueError("Candidate must be an ordinary alphanumeric name")
@@ -20,14 +21,16 @@ def main():
     log_path = OUT / f"gradle-package-root-{args.candidate}.log"
     if apk.exists() or log_path.exists():
         raise FileExistsError("Existing attempts are retained")
+    package = args.package.resolve(strict=True)
+    package.relative_to(ROOT)
     fixed = OUT / "frozen-transport-root"
     env = dict(os.environ)
     env["JAVA_HOME"] = r"C:\Program Files\Microsoft\jdk-21.0.12.8-hotspot"
     gradle = Path(os.environ["USERPROFILE"]) / ".gradle/wrapper/dists/gradle-9.7.1-bin/1w1c7tv4s851m17nbqdsro2tv/gradle-9.7.1/bin/gradle.bat"
     command = [str(gradle), "--no-daemon", "--max-workers=2", "--no-parallel",
         "-Dorg.gradle.jvmargs=-Xmx1g -Dfile.encoding=UTF-8",
-        "-PfoldgptExecutorAssets=" + str(OUT / "package-r3/assets"),
-        "-PfoldgptExecutorJni=" + str(OUT / "package-r3/jniLibs"),
+        "-PfoldgptExecutorAssets=" + str(package / "assets"),
+        "-PfoldgptExecutorJni=" + str(package / "jniLibs"),
         "-PfoldgptFrozenTransportJni=" + str(fixed),
         ":app:assembleDebug", ":shizukuTransport:testDebugUnitTest"]
     with log_path.open("xb") as log:

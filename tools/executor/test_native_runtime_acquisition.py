@@ -10,9 +10,11 @@ import socket
 import struct
 import tempfile
 import unittest
+from unittest.mock import patch
 
 from tools.executor.native_executor_backend import NativeExecutorBackend
 from tools.executor.native_runtime_acquisition import NativeRuntimeAcquisition, SCHEMA, SessionExecServer
+from tools.executor import native_runtime_acquisition
 
 
 class RuntimeAcquisitionTests(unittest.IsolatedAsyncioTestCase):
@@ -124,6 +126,30 @@ class RuntimeAcquisitionTests(unittest.IsolatedAsyncioTestCase):
                 rpc.close()
             for descriptor in descriptors:
                 descriptor.close()
+
+    async def test_idle_owner_survives_desktop_startup_and_cancels_cleanly(self):
+        with patch.object(native_runtime_acquisition, "STARTUP_SECONDS", 0.1):
+            self.running = asyncio.create_task(self.owner.run())
+            await asyncio.sleep(0.2)
+            self.assertFalse(self.running.done(), "No protocol deadline may expire before the controller connects")
+            self.assertTrue(self.path.is_socket())
+            self.running.cancel()
+            await asyncio.gather(self.running, return_exceptions=True)
+        self.assertFalse(self.path.exists())
+        self.assertTrue(self.backend.files.closed)
+
+    async def test_connected_controller_must_send_its_handshake_on_time(self):
+        with patch.object(native_runtime_acquisition, "STARTUP_SECONDS", 0.1):
+            self.running = asyncio.create_task(self.owner.run())
+            client = self.connect()
+            try:
+                with self.assertRaises(TimeoutError):
+                    await asyncio.wait_for(asyncio.shield(self.running), 5)
+            finally:
+                client.close()
+        self.assertTrue(self.running.done())
+        self.assertFalse(self.path.exists())
+        self.assertTrue(self.backend.files.closed)
 
     async def test_direct_channels_real_session_file_work_and_eof_cleanup(self):
         self.running = asyncio.create_task(self.owner.run())

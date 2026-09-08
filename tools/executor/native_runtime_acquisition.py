@@ -93,11 +93,16 @@ class NativeRuntimeAcquisition:
     Closing this transport cancels its tasks and awaits the server's existing
     cleanup. Its return alone never certifies the Android owner's waitpid.
     """
-    def __init__(self, path, server, *, controller_uid):
+    def __init__(self, path, server, *, controller_uid, host_channel_factory=None):
         if type(server) is not SessionExecServer or server.session_id is not None:
             raise TypeError("A fresh native session server is required")
         if type(controller_uid) is not int or controller_uid <= 0 or controller_uid != os.getuid():
             raise ValueError("Runtime acquisition requires its real nonroot application UID")
+        if host_channel_factory is not None:
+            from tools.executor.native_host_bootstrap_v2 import HostChannelFactoryV2
+            if type(host_channel_factory) is not HostChannelFactoryV2:
+                raise TypeError("An explicit native host v2 factory is required")
+        self.host_channel_factory = host_channel_factory
         path = Path(path)
         if not path.is_absolute() or str(path) != os.path.realpath(path) or len(os.fsencode(path)) >= 108:
             raise ValueError("Runtime endpoint must have a canonical bounded Unix path")
@@ -163,7 +168,7 @@ class NativeRuntimeAcquisition:
         peer = struct.unpack("iII", endpoint.getsockopt(socket.SOL_SOCKET, socket.SO_PEERCRED, 12))
         if peer[0] <= 0 or peer[1] != self.uid or peer[2] != os.getgid():
             raise ValueError("Runtime controller has unexpected kernel credentials")
-        request = json.loads((await _receive(endpoint, peer)).decode("utf-8"), object_pairs_hook=_object,
+        request = json.loads((await asyncio.wait_for(_receive(endpoint, peer), STARTUP_SECONDS)).decode("utf-8"), object_pairs_hook=_object,
                              parse_constant=lambda _: (_ for _ in ()).throw(ValueError("Non-finite startup JSON")))
         if request != {"type": "acquire", "schema": SCHEMA}:
             raise ValueError("Unknown native runtime startup request")
@@ -175,7 +180,12 @@ class NativeRuntimeAcquisition:
         self.started = True
         tasks, sockets, streams = [], [], []
         try:
-            endpoint, peer = await asyncio.wait_for(self._accept(), STARTUP_SECONDS)
+            # The Android service owns this idle listener through its lifetime
+            # FD. Desktop/X11/keyring startup can precede the controller by more
+            # than a protocol handshake deadline. Start that deadline only once
+            # an actual peer connects; service cancellation still closes idle
+            # acquisition and the native owner through the existing finally.
+            endpoint, peer = await self._accept()
             pairs = []
             for kind in (socket.SOCK_STREAM, socket.SOCK_SEQPACKET, socket.SOCK_SEQPACKET):
                 parent, client = socket.socketpair(socket.AF_UNIX, kind)
@@ -210,7 +220,8 @@ class NativeRuntimeAcquisition:
             backend, session = self.server.backend, self.server.session_id
             config = BootstrapReadChannel(pairs[1][0],
                 create_bootstrap_read_authority(backend, session_id=session), peer=peer)
-            host = HostFileChannel(pairs[2][0],
+            host_factory = self.host_channel_factory or HostFileChannel
+            host = host_factory(pairs[2][0],
                 create_host_file_authority(backend, session_id=session), peer=peer)
             await _send(endpoint, {"type": "ready", "schema": SCHEMA, "sessionId": session,
                                    "workspaceRoot": backend.mount.uri})

@@ -294,7 +294,9 @@ class HostProcesses(Processes):
                     raise RpcError(-32603, "Bionic final record violates its schema")
                 record.native_result = message
                 if not record.started.done():
-                    record.started.set_exception(RpcError(-32603, "Bionic command failed before setup completed"))
+                    record.started.set_exception(RpcError(-32603,
+                        "Bionic command failed before setup completed: "
+                        f"outcome={message['outcome']} stage={message['stage']} errno={message['errno']}"))
             else:
                 raise RpcError(-32603, "Unknown Bionic lifecycle record")
 

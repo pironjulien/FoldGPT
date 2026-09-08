@@ -1,0 +1,177 @@
+{
+  "scope": "Actual native human v2 file/process channel on the Fold; conversation and official editor remain unqualified",
+  "passedTrials": [
+    "016fe324",
+    "70cf3a99"
+  ],
+  "failedPrecursor": "6af7d155",
+  "delayedControllerSeconds": 35,
+  "apkSha256": "d8f4ff35d0d06120d1ab004ce13e5f8a31e7a25b73258e8ef0cceea2a178fe7b",
+  "files": [
+    {
+      "path": "016fe324/client.py",
+      "bytes": 16594,
+      "sha256": "e86a1c298d3a39f5555db724e9221596e3df0fbdd4ec600e9e0cd974cf45c7cd"
+    },
+    {
+      "path": "016fe324/client.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "016fe324/client.stdout",
+      "bytes": 7692,
+      "sha256": "d7e99de15f4cd1cfe0fba92590d9902983a53ec125cae3437d651272bcda42d9"
+    },
+    {
+      "path": "016fe324/commands.json",
+      "bytes": 44717,
+      "sha256": "5633478a3fa0113a7411863ce27ba352b2b80eb9c0b5af26016047f734288d2e"
+    },
+    {
+      "path": "016fe324/report.json",
+      "bytes": 21170,
+      "sha256": "bfdb49f342d1e2790788ab82e4507604e2f6be3afd386a51b154653b2df548a6"
+    },
+    {
+      "path": "016fe324/startup.json",
+      "bytes": 1275,
+      "sha256": "2fe3f53b26b91f74157f9c07f5f16e22061e1639a9a2dc3ec54f35f3cbd63ee3"
+    },
+    {
+      "path": "016fe324/statuses.json",
+      "bytes": 6388,
+      "sha256": "b0e883f76c5502650a7f63f32fb933e9c716713b62405b20afe0271cb8528b19"
+    },
+    {
+      "path": "6af7d155/client.py",
+      "bytes": 16594,
+      "sha256": "e86a1c298d3a39f5555db724e9221596e3df0fbdd4ec600e9e0cd974cf45c7cd"
+    },
+    {
+      "path": "6af7d155/client.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "6af7d155/client.stdout",
+      "bytes": 936,
+      "sha256": "72b2a13b925db960dfb02bff0c67e5c4e97fea0f6252746c5007226ef1c10abf"
+    },
+    {
+      "path": "6af7d155/commands.json",
+      "bytes": 52349,
+      "sha256": "b18d07964b6fd02175c513ec15e51782d7fa85e012e86f3121e9fd36e57a20d1"
+    },
+    {
+      "path": "6af7d155/report.json",
+      "bytes": 6932,
+      "sha256": "e25a6ecedcf6298a30878a1572981cb52129c3084037bfe20a69bee8acfc801a"
+    },
+    {
+      "path": "6af7d155/startup.json",
+      "bytes": 1275,
+      "sha256": "005335557adfca8ab150ad16fb73bea51e9455c02e160387156430210dd9e4d5"
+    },
+    {
+      "path": "6af7d155/statuses.json",
+      "bytes": 6388,
+      "sha256": "d1a925ea470ccffd508e4dc91b46fddddc127c85f50b3ccccfd24d687ac55d42"
+    },
+    {
+      "path": "70cf3a99/client.py",
+      "bytes": 16594,
+      "sha256": "e86a1c298d3a39f5555db724e9221596e3df0fbdd4ec600e9e0cd974cf45c7cd"
+    },
+    {
+      "path": "70cf3a99/client.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "70cf3a99/client.stdout",
+      "bytes": 7602,
+      "sha256": "82a38c360d0999969fdc1a9fd356f7b650a24e1649fd1181342d3e3681f5f948"
+    },
+    {
+      "path": "70cf3a99/commands.json",
+      "bytes": 44766,
+      "sha256": "0e3bfc98e5ccd14b0706f455a31de5ee0a3473fdfbd31603a4163328dd562d96"
+    },
+    {
+      "path": "70cf3a99/report.json",
+      "bytes": 21127,
+      "sha256": "76a845fbf9e43d97daf0082141432966ea90b7aa9811f9b6899d745ce7575e1d"
+    },
+    {
+      "path": "70cf3a99/startup.json",
+      "bytes": 1275,
+      "sha256": "04bb68f46d1cc68210c12d3005a9e47a5afeb41ec63ac46e399deacc70f7e820"
+    },
+    {
+      "path": "70cf3a99/statuses.json",
+      "bytes": 6388,
+      "sha256": "b0337f56e4ab82ca3d4d669884d8e3528bfc01bb2f2ba3003c56fe215f999cdb"
+    },
+    {
+      "path": "apk-signature-root-r14.json",
+      "bytes": 452,
+      "sha256": "c3aea49d2fa62b7745f0c9b88748b163b47fb3d11a75425a8273787aa9e04860"
+    },
+    {
+      "path": "apk-signature-root-r15.json",
+      "bytes": 452,
+      "sha256": "ba6090b50fa0b8cd341c666baa5e2ef09ac2bd069d842855d1f4ae59b1a1cf39"
+    },
+    {
+      "path": "apk-verification-root-r14.json",
+      "bytes": 336,
+      "sha256": "0be944387a1f5317fdb0e49562a5564059176dd30332fd0cc1b117f14d2ddf00"
+    },
+    {
+      "path": "apk-verification-root-r15.json",
+      "bytes": 336,
+      "sha256": "630174765e559784df270c1c251603a964e4436aa2403ff709a55d7f7ad2a80f"
+    },
+    {
+      "path": "comparison.json",
+      "bytes": 121,
+      "sha256": "c9a392a6a0243b159296c8d5fd3518869e40a0a77798b9cb0d2b73e6e90cc470"
+    },
+    {
+      "path": "package-preflight-v3.json",
+      "bytes": 1026,
+      "sha256": "1eaec9a6389662485261a9db0fa87d16cc710eeb7ad2acb8efac86b6b9e20a0d"
+    },
+    {
+      "path": "r14-before/commands.json",
+      "bytes": 5700,
+      "sha256": "d2a2da7b994e20945ab1b5376e7a1dbfca8e06d31e11c0fd88ee35892982ade9"
+    },
+    {
+      "path": "r14-before/snapshot.json",
+      "bytes": 2009,
+      "sha256": "343d6cab124917940d16c73a738bcdc791d7792838dddd458baa5efb37651763"
+    },
+    {
+      "path": "r14-cwd-probe.json",
+      "bytes": 1536,
+      "sha256": "293b50a953763b8f7b8cc89bad860272e6ff24456a5a76fd945aa90736947a21"
+    },
+    {
+      "path": "r15-delayed-after/commands.json",
+      "bytes": 5700,
+      "sha256": "fd14046279534b2ea54cdeb7b4a848d3578f48d7c36052997186c21415caec25"
+    },
+    {
+      "path": "r15-delayed-after/snapshot.json",
+      "bytes": 2009,
+      "sha256": "9acbedd52a5f3e4ef361cb1e93d288b9e4b103791a7214e2ff2048ad841f945d"
+    },
+    {
+      "path": "root-r15-build-command.json",
+      "bytes": 829,
+      "sha256": "d2b45a4626fd32a2171741df79a14fa49398f153a5032d3ed4027dcc35de31a7"
+    }
+  ]
+}
