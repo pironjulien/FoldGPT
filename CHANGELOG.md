@@ -2,6 +2,11 @@
 
 ## Unreleased - 2026-09-08
 
+- Publish, redownload and authenticate encrypted supplement v13 for the installed
+  r20/R5 state and its first real conversation failure. Restore and verify all
+  13,157 files and 1,169 source files, all three APK/package inventories, the
+  ARM engine and complete production Bash provenance. This is a recovery
+  checkpoint; normal conversation execution remains unsupported in Full access.
 - Install APK r20 with the independently reproduced production-prefix Bash,
   explicit source/ELF admission and versionCode10. Native Python qualification
   passes on the Fold. The Bash workdir fixture still reports a HOME profile

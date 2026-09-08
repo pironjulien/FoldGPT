@@ -1,5 +1,14 @@
 # Reprise technique du 8 septembre 2026
 
+**Téléphone emporté par Julien à09:40 environ. Travail PC uniquement jusqu'à
+son retour.** La commande normale STOP_NATIVE_EXECUTOR a été reçue par notre
+Activity avant débranchement (Status:ok). Le câble a été retiré avant la lecture
+du statut final : aucun nettoyage/reaping de la session8507 n'est donc encore
+revendiqué. Le snapshot `phone-departure-device` est incomplet et reste une
+preuve de déconnexion, pas une fermeture validée. Ne pas lancer d'autres essais
+Android en son absence. Julien autorise la poursuite locale et la préparation
+de plusieurs options concrètes à tester à son retour.
+
 Le dépôt de travail est **privé** : `pironjulien/FoldGPT-workspace`, branche
 `codex/foldgpt-beta`. Commencer par [README.md](README.md) pour restaurer sources,
 sous-modules, moteur séparé et données locales. Le dépôt public `FoldGPT` est un
@@ -25,8 +34,11 @@ paquet natif v8 et moteur GNU R5**. La première conversation réelle du projet
 
 Le réglage existant de l'interface est **Accès complet**. Notre backend modèle
 exige actuellement un contexte de politique managed ; le mode Full access lui
-arrive sans ce contexte et il refuse avant lancement. La cause exacte de l'échec
-apply_patch est en cours de revue indépendante. Ne pas changer silencieusement
+arrive sans ce contexte et il refuse avant lancement. La revue indépendante
+retrouve le même refus dans le chemin apply_patch : le backend fichiers exige
+aussi un contexte managed et l'erreur affichée masque celle du parseur. La
+réponse RPC exacte n'a pas été capturée ; la chaîne source et le refus du parseur
+sont vérifiés. Ne pas changer silencieusement
 le mode ni fabriquer une politique restreinte pour présenter un succès.
 
 La prise en charge générale reste aussi incomplète : le profil natif actuel
@@ -65,11 +77,18 @@ La suite Linux R5 `34192652057` est encore en cours, étape compilation/tests
 ciblés au dernier contrôle live. L'ancienne suite complète `34190100825` a échoué
 (237échecs et2timeouts) malgré ses tests ciblés réussis ; ses échecs ne sont pas
 tous attribuables à l'environnement. Ne pas déclarer les vérifications globales
-réussies. Le complément de récupération v13 est préparé mais pas publié :
-**v12 reste la dernière archive intégralement restaurée, avec r16**.
+réussies. Le [complément v13](supplement-v13.md) est désormais publié,
+retéléchargé et intégralement restauré : **13 157 fichiers et 1 169 fichiers
+source revérifiés**, dont r20, R5 et Bash production. Il fixe le commit
+`7a1d6cdfeb15a3e4defceca519f02f0d17060851`. Les prototypes Full access en cours
+ne font pas partie de ce checkpoint de la version installée.
 
-Prochaine action : corriger la transmission et l'application réelles des
-autorisations, qualifier les commandes et l'écriture via les mêmes appels que
+Prochaine action : implémenter le contrat upstream d'exécution directe sous
+l'UID Android ordinaire, séparément du mode managed. L'absence de contexte est
+légitime dans le protocole officiel ; la remplir artificiellement ne corrige
+pas le problème. Les prototypes processus/nettoyage et fichiers/streams sont
+en développement sur PC, sans sélection ni installation sur le Fold.
+Qualifier les commandes et l'écriture via les mêmes appels que
 l'interface, puis reprendre cette même conversation. Les finitions restent
 hors priorité. Tous les fichiers de travail restent sous `C:\Dev\ChatgptFold`.
 

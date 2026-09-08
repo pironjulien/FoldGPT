@@ -1,0 +1,194 @@
+{
+  "repository": "https://github.com/pironjulien/FoldGPT-workspace",
+  "visibility": "PRIVATE",
+  "release": "https://github.com/pironjulien/FoldGPT-workspace/releases/tag/recovery-2026-09-07",
+  "sourceCommit": "7a1d6cdfeb15a3e4defceca519f02f0d17060851",
+  "encryptedSha256": "bcbb1f93c3d2e774179a15700b5b1c6e78abcfc3869b56954690411d24e1a54c",
+  "assets": [
+    {
+      "name": "native-checkpoint-v13-manifest.json",
+      "bytes": 661,
+      "sha256": "2b5ecaa1e3d5ebad1bb91d506f8cef936147f9b56408199aaa248f762cca2b9b"
+    },
+    {
+      "name": "native-checkpoint-v13.tar.gz.age.part001",
+      "bytes": 450529801,
+      "sha256": "bcbb1f93c3d2e774179a15700b5b1c6e78abcfc3869b56954690411d24e1a54c"
+    }
+  ],
+  "downloadedAssetHashesVerified": true,
+  "restorationReport": "recovery/verification/github-supplement-v13-restoration.json",
+  "sourceFilesRestoredAndVerified": 1169,
+  "enginePatchSha256": "806558ded307f46b76a278c5c81131f1d90bf6a4f7f72b9f66b29416fa9357ea",
+  "arm": {
+    "runId": "34192631216",
+    "sourceCommit": "8963acc8e961c0d34b068910b973cc6f9b9df3bc",
+    "collectorRoot": "work/ci-results/34192631216/arm_engine-download",
+    "patchSha256": "806558ded307f46b76a278c5c81131f1d90bf6a4f7f72b9f66b29416fa9357ea",
+    "archive": {
+      "path": "work/ci-results/34192631216/arm_engine-download/artifact/evidence/foldgpt-gnu-engine-aarch64.tar.gz",
+      "bytes": 118367687,
+      "sha256": "cb9c5774ecd365340531344b1e060d97fd3872715e1b8c4273dc818221e8549b"
+    },
+    "files": [
+      {
+        "bytes": 232597608,
+        "path": "codex",
+        "sha256": "e4bd77457ed60e2794d87e3db9f5b156b217f84659ad1cd30e9b78715f1dbe98"
+      },
+      {
+        "bytes": 68101248,
+        "path": "codex-code-mode-host",
+        "sha256": "7bcc27f05c57a0f8940656d0243b6495fc47a81ebb1b57d82fed6ff82f4028f4"
+      }
+    ],
+    "packageManifest": {
+      "androidExecution": false,
+      "deviceLibrariesValidated": false,
+      "files": [
+        {
+          "bytes": 232597608,
+          "path": "codex",
+          "sha256": "e4bd77457ed60e2794d87e3db9f5b156b217f84659ad1cd30e9b78715f1dbe98"
+        },
+        {
+          "bytes": 68101248,
+          "path": "codex-code-mode-host",
+          "sha256": "7bcc27f05c57a0f8940656d0243b6495fc47a81ebb1b57d82fed6ff82f4028f4"
+        }
+      ],
+      "patchSha256": "806558ded307f46b76a278c5c81131f1d90bf6a4f7f72b9f66b29416fa9357ea",
+      "phoneUiTested": false,
+      "profile": "release",
+      "target": "aarch64-unknown-linux-gnu"
+    },
+    "engineManifest": {
+      "upstream": "https://github.com/openai/codex.git",
+      "tag": "rust-v0.153.4",
+      "base": "3d2ee51ca2d5db578f328aa75e20aa22c0197c9a",
+      "branch": "codex/android-native-engine",
+      "patch": "engine.patch",
+      "sha256": "806558ded307f46b76a278c5c81131f1d90bf6a4f7f72b9f66b29416fa9357ea",
+      "appliesToCleanBase": true
+    },
+    "staticCompatibility": true
+  },
+  "bash": {
+    "runId": "34196988639",
+    "sourceCommit": "1f327835efbe9f5a72331472d4390a242936d912",
+    "root": "downloads/native-bash-production-20260908",
+    "build": "downloads/native-bash-production-20260908/ci-artifact/bionic-bash-candidate",
+    "stage": "downloads/native-host-runner-20260908/production-stage-v5",
+    "admission": "downloads/native-host-runner-20260908/production-admission-v5",
+    "package": "downloads/native-host-runner-20260908/production-package-v8",
+    "elfSha256": "94f8cd06291cfaee37f721b0836b204c1fa32b555bf5283139fe34fb128db4e9",
+    "elfBytes": 1439696,
+    "buildManifestSha256": "d0a1263f0e94619d7b2d0e3735503b8815464de4658b08ce98878167840c7194",
+    "sourceManifestSha256": "0b67e73b35ac08184003c8553bd865c8d3791fa571bc2793447b5bb59640f865",
+    "provenance": {
+      "path": "downloads/native-bash-production-20260908/ci-artifact/bionic-bash-candidate",
+      "buildManifestSha256": "d0a1263f0e94619d7b2d0e3735503b8815464de4658b08ce98878167840c7194",
+      "sourceManifestSha256": "0b67e73b35ac08184003c8553bd865c8d3791fa571bc2793447b5bb59640f865",
+      "executableSha256": "94f8cd06291cfaee37f721b0836b204c1fa32b555bf5283139fe34fb128db4e9",
+      "bytes": 1439696,
+      "androidPrefix": "/data/user/0/app.foldgpt/files/native-runtime-v1/python"
+    },
+    "preparedSourceFilesVerified": 1574,
+    "stageFilesVerified": 2534,
+    "recipe": [
+      {
+        "path": "build-bash.sh",
+        "sha256": "8172151e3fabefa3596ed4b7aac659acf8ed0c0b1bfa699fb2bbf8ad45c54e31"
+      },
+      {
+        "path": "prepare-bash.py",
+        "sha256": "8597e9f413277bd76a5309b941c62e00ee7a9d0eab6e584f0ce667e39588835d"
+      },
+      {
+        "path": "verify-bash-build.py",
+        "sha256": "f948a82daa46fa15527fe1ebd72565d0b7b7c0887b609f626c7235ec6d3047ef"
+      },
+      {
+        "path": "shizuku-check-elf.py",
+        "sha256": "1e87a9e1f8d6bd93645b1b5a258cbb48d5b85710bb03dffe3b6de0c3432f9b2a"
+      },
+      {
+        "path": "bash-inputs.json",
+        "sha256": "9a32b2aab70bd2d6306e006a9e2e5473002c112b7dfde5f663ff5898f01c3382"
+      },
+      {
+        "path": "termux-bash/config-top.h.patch",
+        "sha256": "2bda95a228601d57d947aba63f43a1712c94109aebbc946f5f242801ff371aaa"
+      },
+      {
+        "path": "termux-bash/error.c.patch",
+        "sha256": "841c7fc72c47dd88bcbf7e773217319d37edfd6d3ead974de44014087ac3b6ef"
+      },
+      {
+        "path": "termux-bash/lib-readline-complete.c.patch",
+        "sha256": "120ce78ad43a99c506f0bc650260c038fd8d61db9d023739705479ee5c183d85"
+      },
+      {
+        "path": "termux-bash/lib-readline-rlconf.h.patch",
+        "sha256": "a24176745a0d479e170132371f1bc882f4c8a768a2c75aa5244e115807df0289"
+      },
+      {
+        "path": "termux-bash/lib-readline-util.c.patch",
+        "sha256": "663fb9d2b963f165b5a981a2e7c1a4726122e36c331b3c9b2d68f77d4e62a7b1"
+      },
+      {
+        "path": "termux-bash/lib-sh-tmpfile.c.patch",
+        "sha256": "21cbddfa6d6e2148df423d108c90920142063096d1ffe56176f17df170163dc0"
+      },
+      {
+        "path": "termux-bash/pathnames.h.in.patch",
+        "sha256": "854490111d8785bf6dbfd4ae992b640f776aa22d2a53535f8a4f7028a8f6eb4b"
+      },
+      {
+        "path": "termux-bash/shell.c.patch",
+        "sha256": "3e94b85c8429e9f964e69a53afa03393de04b7d3649c935c6ca442f2980b25be"
+      }
+    ],
+    "admissionBuildSha256": "d3fcc131035b73b262fcd9f9010a2b2b418203a8cf593874f1aa1cd80c3511e5",
+    "admissionExecutableSha256": "ce29176b57c3710017efd414da21ded6867f74dd0763034cde40c794f7783eec",
+    "androidExecuted": false
+  },
+  "apksReverified": [
+    {
+      "revision": "r18",
+      "sha256": "91b7da7cc133554f8386cad2405f4303e089540de8922943b8167e0f2e7b94a7",
+      "report": "recovery/verification/github-supplement-v13-r18-apk.json"
+    },
+    {
+      "revision": "r19",
+      "sha256": "13db3dda291362c4c4658bb325714d1576bde07b7f1fac1a9c860565d5a32162",
+      "report": "recovery/verification/github-supplement-v13-r19-apk.json"
+    },
+    {
+      "revision": "r20",
+      "sha256": "dd1a6beff3ea42f3a66f88f4fc254a169b1a12bcdc737834ca95b6e0372d112a",
+      "report": "recovery/verification/github-supplement-v13-r20-apk.json"
+    }
+  ],
+  "earlierArchiveDependencies": [
+    "manifest.json",
+    "native-checkpoint-manifest.json",
+    "native-checkpoint-v2-manifest.json",
+    "native-checkpoint-v3-manifest.json",
+    "native-checkpoint-v4-manifest.json",
+    "native-checkpoint-v5-manifest.json",
+    "native-checkpoint-v6-manifest.json",
+    "native-checkpoint-v7-manifest.json",
+    "native-checkpoint-v8-manifest.json",
+    "native-checkpoint-v9-manifest.json",
+    "native-checkpoint-v10-manifest.json",
+    "native-checkpoint-v11-manifest.json",
+    "native-checkpoint-v12-manifest.json"
+  ],
+  "plaintextUploaded": false,
+  "keysIncluded": false,
+  "gitIndexOrHeadChanged": false,
+  "deviceActionPerformed": false,
+  "scope": "Checkpoint du 8 septembre 2026 : r20/versionCode10 et moteur GNU R5 install\u00e9s.\nLes sources finales sont au commit 7a1d6cdfeb15a3e4defceca519f02f0d17060851.\n\nLe d\u00e9marrage normal de l'interface vers le moteur R5 passe sur le Fold (handshake\n215 ms \u00e0 07:13 UTC). Les commandes natives Python via les canaux de qualification\npassent : script, trois unittest, construction/ex\u00e9cution zipapp r\u00e9sultat42,\nAndroid/aarch64/UID10412. La qualification Bash de sous-dossier conserve un\navertissement HOME/.bash_profile : son processus r\u00e9ussit mais la fixture reste FAIL.\n\nLa premi\u00e8re conversation r\u00e9elle du projet Validation Python FoldGPT \u00e9choue :\nle mode Acc\u00e8s complet arrive sans le contexte managed exig\u00e9 par notre backend.\nLes commandes sont refus\u00e9es avant lancement, apply_patch \u00e9choue et l'inventaire\nAndroid ind\u00e9pendant \u00e0 07:25 UTC confirme z\u00e9ro fichier. L'\u00e9diteur puis la\nfermeture/reprise de ce projet ne sont pas valid\u00e9s. Le produit n'est pas termin\u00e9.\nLa session native8507 reste ouverte \u00e0 ce relev\u00e9, sans fermeture revendiqu\u00e9e.\n\nArchitecture : commandes natives Bionic, interface et contr\u00f4leur GNU sous PRoot,\naucune VM sur le t\u00e9l\u00e9phone. Les fichiers officiels compar\u00e9s avant/apr\u00e8s\nl'installation R5 sont identiques. Aucun root, flash ou d\u00e9verrouillage.\nLe profil actuel ne couvre pas encore le r\u00e9seau des commandes, le TTY et\nplusieurs op\u00e9rations de fichiers : le refus Full access n'est pas le dernier\nd\u00e9faut certain d'un produit g\u00e9n\u00e9ral.\n\nL'archive conserve r18/r19/r20, paquets v6/v7/v8, preuves Android, correctifs de\nchemins et SO_PASSCRED, et le moteur R5 li\u00e9 au v\u00e9ritable commit ARM\n8963acc8e961c0d34b068910b973cc6f9b9df3bc (run34192631216).\nLe Bash production du run34196988639 est conserv\u00e9 avec ses sources et recettes\nexactes, deux ELF identiques, stage v5, admission v5 et preuves d'int\u00e9gration r20.\n\nLa suite Linux pr\u00e9c\u00e9dente34190100825 a r\u00e9ellement \u00e9chou\u00e9 : 237\u00e9checs et2timeouts,\nmalgr\u00e9 les tests cibl\u00e9s r\u00e9ussis. Le d\u00e9faut disque est lev\u00e9 ; les \u00e9checs restants\nne sont pas tous environnementaux. La suite exacte R5 34192652057 est encore en\ncours au moment du checkpoint. Aucun succ\u00e8s global de cette suite n'est affirm\u00e9.\n\nLes 15 sources GPU/PTY non qualifi\u00e9es et le patch du sous-module restent conserv\u00e9s\ns\u00e9par\u00e9ment dans pending-sources-20260908 ; leur inclusion ne signifie pas leur\nactivation ou leur validation. Les archives principale et compl\u00e9ments1\u00e012 restent\ndes d\u00e9pendances. Seul le r\u00e9sultat r\u00e9el de publication puis restauration peut\nfaire de v13 une r\u00e9cup\u00e9ration v\u00e9rifi\u00e9e ; cette note n'anticipe pas ce r\u00e9sultat.\n",
+  "verificationScope": "Actual downloaded encrypted bytes, complete per-file restoration, exact source commits, all three APK/package inventories, ARM executables and Bash source/double-build/stage/admission hashes."
+}

@@ -1,0 +1,11 @@
+{
+  "schema": "foldgpt.native-apk-verification.v1",
+  "success": true,
+  "androidProductionExecuted": false,
+  "apkSha256": "dd1a6beff3ea42f3a66f88f4fc254a169b1a12bcdc737834ca95b6e0372d112a",
+  "nativeLibraries": 86,
+  "pythonDataFiles": 2447,
+  "runtimeAliases": 86,
+  "sourceFiles": 91,
+  "hostSchema": "foldgpt.host.v2"
+}
