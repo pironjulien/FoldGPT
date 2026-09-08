@@ -19,6 +19,9 @@ public final class SessionStateTest {
     private static final String CLEAN = PREFIX + "closed\",\"cleanupComplete\":true,\"exitCode\":0}";
     private static final String SETUP = PREFIX + "setup_failed\",\"stage\":\"broker_open\",\"errorType\":\"NotImplementedError\","
         + "\"errno\":null,\"source\":\"private_exec_broker.py\",\"line\":98,\"message\":\"chmod: cannot use dir_fd and follow_symlinks together\"}";
+    private static final String CLEANUP = PREFIX + "cleanup_failed\",\"stage\":\"backend_close\",\"errorType\":\"RuntimeError\","
+        + "\"errno\":null,\"source\":\"ordinary_uid_files.py\",\"line\":98,\"message\":\"Unknown session identifier\"}";
+    private static final String QUARANTINED = PREFIX + "quarantined\",\"cleanupComplete\":false}";
     private SessionState state() { return new SessionState(2000, 10412); }
 
     @Test public void authenticatesActualApplicationUidOnly() {
@@ -116,6 +119,57 @@ public final class SessionStateTest {
             SETUP.replace("chmod:", "\\nchmod:"), SETUP.replace("private_exec_broker.py", "../../file.py"), SETUP + "tail"
         }) {
             SessionState state = state();
+            assertThrows(IllegalArgumentException.class, () -> state.report(invalid));
+            assertFalse(state.releasable());
+        }
+    }
+    @Test public void cleanupCauseSurvivesThreeFramesAndCannotReleaseOwnership() throws Exception {
+        SessionState state = state();
+        for (String frame : new String[] {READY, CLEANUP, QUARANTINED}) state.report(frame);
+        state.reaped(0);
+        assertFalse(state.releasable());
+        org.json.JSONObject result = new org.json.JSONObject(state.json());
+        assertTrue(result.isNull("setupError"));
+        assertEquals("backend_close", result.getJSONObject("cleanupError").getString("stage"));
+        assertEquals("Unknown session identifier", result.getJSONObject("cleanupError").getString("message"));
+        assertTrue(result.getBoolean("quarantined"));
+        assertTrue(result.getBoolean("ownerRetained"));
+        assertFalse(result.getBoolean("cleanupComplete"));
+        assertFalse(result.getBoolean("transportFailed"));
+    }
+    @Test public void setupAndCleanupCausesRemainSeparate() throws Exception {
+        SessionState state = state(); state.report(SETUP);
+        state.report(CLEANUP.replace("backend_close", "owner_close").replace("null", "13"));
+        state.report(QUARANTINED); state.reaped(70 << 8);
+        org.json.JSONObject result = new org.json.JSONObject(state.json());
+        assertEquals("broker_open", result.getJSONObject("setupError").getString("stage"));
+        assertEquals("owner_close", result.getJSONObject("cleanupError").getString("stage"));
+        assertEquals(13, result.getJSONObject("cleanupError").getInt("errno"));
+        assertFalse(state.releasable());
+    }
+    @Test public void cleanupDiagnosticRejectsEarlyDuplicateLateAndCleanClose() {
+        assertThrows(IllegalArgumentException.class, () -> state().report(CLEANUP));
+        SessionState state = state(); state.report(READY); state.report(CLEANUP);
+        for (String invalid : new String[] {CLEANUP, READY, SETUP, CLEAN, CLEAN.replace(":0}", ":70}")})
+            assertThrows(IllegalArgumentException.class, () -> state.report(invalid));
+        state.report(QUARANTINED);
+        assertThrows(IllegalArgumentException.class, () -> state.report(CLEANUP));
+        SessionState closed = state(); closed.report(CLEAN);
+        assertThrows(IllegalArgumentException.class, () -> closed.report(CLEANUP));
+        assertFalse(state.releasable());
+    }
+    @Test public void cleanupDiagnosticRejectsUnboundedOrCoercedFields() {
+        for (String invalid : new String[] {
+            CLEANUP.replace("backend_close", "factory_construct"), CLEANUP.replace("null", "\"null\""),
+            CLEANUP.replace("null", "4096"), CLEANUP.replace("null", "01"),
+            CLEANUP.replace("\"line\":98", "\"line\":-1"),
+            CLEANUP.replace("\"line\":98", "\"line\":1000000"),
+            CLEANUP.replace("\"line\":98", "\"line\":98,\"line\":98"),
+            CLEANUP.replace("Unknown session identifier", "x".repeat(161)),
+            CLEANUP.replace("Unknown session identifier", "bad\\nmessage"),
+            CLEANUP.replace("ordinary_uid_files.py", "../secret.py"), CLEANUP + "tail"
+        }) {
+            SessionState state = state(); state.report(READY);
             assertThrows(IllegalArgumentException.class, () -> state.report(invalid));
             assertFalse(state.releasable());
         }

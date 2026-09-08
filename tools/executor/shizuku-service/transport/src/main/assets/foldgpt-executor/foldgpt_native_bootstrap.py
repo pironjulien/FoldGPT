@@ -14,7 +14,9 @@ import stat
 import sys
 import zipfile
 
-from foldgpt_shizuku_bootstrap import installed_backend_options, report, report_setup_failure, strict_json
+from foldgpt_shizuku_bootstrap import (
+    installed_backend_options, report, report_cleanup_failure, report_setup_failure, strict_json,
+)
 
 DATA = Path("/data/user/0/app.foldgpt")
 RUNTIME = DATA / "files/native-runtime-v1/python"
@@ -130,6 +132,37 @@ def temporary_directory(backend):
         os.close(descriptor)
 
 
+async def cleanup_resources(backend, server, acquisition, manifest, owner, factory_entered):
+    """Return actual cleanup outcome and its first bounded diagnostic input."""
+    clean = not factory_entered
+    stage = "backend_close"
+    try:
+        if backend is not None:
+            await backend.close(server.session_id if server is not None else None)
+            stage = "process_cleanup"
+            if backend.processes.quarantined:
+                raise RuntimeError("Production native process cleanup is unresolved")
+            clean = True
+        if clean:
+            if acquisition is not None:
+                stage = "acquisition_close"
+                acquisition.close_endpoint()
+            if manifest is not None:
+                stage = "manifest_remove"
+                manifest.remove()
+                stage = "manifest_close"
+                manifest.close()
+            if owner is not None:
+                if owner.process_identity is not None:
+                    stage = "session_finish"
+                    owner.finish_process_session()
+                stage = "owner_close"
+                owner.close()
+    except BaseException as error:
+        return False, (stage, error)
+    return clean, None
+
+
 async def run(apk, uid, parent, nonce, launch_path, control_fd=3):
     backend = server = owner = acquisition = manifest = None
     factory_entered = ready = reader_registered = False
@@ -226,38 +259,24 @@ async def run(apk, uid, parent, nonce, launch_path, control_fd=3):
             if task is not None and not task.done():
                 task.cancel()
         await asyncio.gather(*(task for task in (stopping, serving) if task is not None), return_exceptions=True)
-        clean = not factory_entered
-        try:
-            if backend is not None:
-                await backend.close(server.session_id if server is not None else None)
-                if backend.processes.quarantined:
-                    raise RuntimeError("Production native process cleanup is unresolved")
-                clean = True
-            if clean:
-                if acquisition is not None:
-                    acquisition.close_endpoint()
-                if manifest is not None:
-                    manifest.remove()
-                    manifest.close()
-                if owner is not None:
-                    if owner.process_identity is not None:
-                        owner.finish_process_session()
-                    owner.close()
-        except BaseException:
-            clean = False
+        clean, cleanup_error = await cleanup_resources(backend, server, acquisition, manifest, owner, factory_entered)
         if not clean:
             if owner is not None:
                 owner.quarantined = True
                 owner.retained_backend = backend
-            report("quarantined", cleanupComplete=False)
-            for descriptor in (0, 1):
-                try:
-                    os.close(descriptor)
-                except OSError:
-                    pass
-            # The same owner, lock, marker, backend and any native children stay
-            # alive. Transport loss is never used as proof that they were reaped.
-            await asyncio.Event().wait()
+            try:
+                if cleanup_error is not None:
+                    report_cleanup_failure(*cleanup_error)
+                report("quarantined", cleanupComplete=False)
+            finally:
+                for descriptor in (0, 1):
+                    try:
+                        os.close(descriptor)
+                    except OSError:
+                        pass
+                # A broken diagnostic pipe cannot release an unresolved owner.
+                # The same lock, marker, backend and native children stay alive.
+                await asyncio.Event().wait()
         report("closed", cleanupComplete=True, exitCode=exit_code)
     return exit_code
 

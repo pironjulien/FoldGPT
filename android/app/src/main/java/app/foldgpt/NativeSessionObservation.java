@@ -8,7 +8,8 @@ final class NativeSessionObservation {
 
     static Outcome outcome(JSONObject status) throws Exception {
         if (status.getBoolean("transportFailed") || status.getBoolean("quarantined")
-                || status.getBoolean("refusedBeforeFork") || !status.isNull("setupError")) return Outcome.FAILED;
+                || status.getBoolean("refusedBeforeFork") || !status.isNull("setupError")
+                || !status.isNull("cleanupError")) return Outcome.FAILED;
         if (!status.getBoolean("bootstrapReaped")) return Outcome.ACTIVE;
         // A successful native terminal record and the real zero wait status
         // are both required; reaping alone is not successful cleanup.

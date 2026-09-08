@@ -198,7 +198,7 @@ public final class ExecutorService extends IExecutorService.Stub {
                 int value, frames = 0;
                 while ((value = stream.read()) != -1) {
                     if (value == '\n') {
-                        if (++frames > 2) throw new IllegalStateException("Too many private lifecycle reports");
+                        if (++frames > SessionState.MAX_REPORTS) throw new IllegalStateException("Too many private lifecycle reports");
                         state.report(line.toString(StandardCharsets.US_ASCII)); line.reset();
                     } else {
                         if (value > 127 || line.size() >= 512) throw new IllegalStateException("Invalid private report frame");

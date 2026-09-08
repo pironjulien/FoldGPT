@@ -21,6 +21,8 @@ CWD_PATH = "@nativeLibraryDir/" + CWD_NAME
 NATIVE_PREFIX = "@nativeLibraryDir/"
 SETUP_STAGES = frozenset({"imports", "control", "deployment", "native_inventory", "broker_open",
                          "workspace_claim", "factory_import", "factory_construct", "workspace_verify", "server_construct"})
+CLEANUP_STAGES = frozenset({"backend_close", "process_cleanup", "acquisition_close", "manifest_remove",
+                           "manifest_close", "session_finish", "owner_close"})
 
 
 def report(event, **fields):
@@ -34,6 +36,17 @@ def report_setup_failure(stage, error):
     """A bounded diagnostic only; never substitutes for cleanup or wait evidence."""
     if stage not in SETUP_STAGES:
         raise ValueError("Unknown bootstrap setup stage")
+    report_failure("setup_failed", stage, error)
+
+
+def report_cleanup_failure(stage, error):
+    """Preserve the cleanup cause without claiming any resource was released."""
+    if stage not in CLEANUP_STAGES:
+        raise ValueError("Unknown bootstrap cleanup stage")
+    report_failure("cleanup_failed", stage, error)
+
+
+def report_failure(event, stage, error):
     kind = type(error).__name__
     if re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]{0,63}", kind) is None:
         kind = "Exception"
@@ -51,7 +64,7 @@ def report_setup_failure(stage, error):
     # admits only printable ASCII without JSON escapes and bounds every field.
     message = "".join(char if 32 <= ord(char) <= 126 and char not in '\\"' else "?"
                       for char in str(error)[:160])
-    report("setup_failed", stage=stage, errorType=kind, errno=number, source=source, line=line, message=message)
+    report(event, stage=stage, errorType=kind, errno=number, source=source, line=line, message=message)
 
 
 def strict_json(data):

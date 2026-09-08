@@ -2,6 +2,13 @@
 
 ## 2026-09-08
 
+- Preserve a bounded `cleanup_failed` cause for each native cleanup stage in
+  the authenticated Java session status, separately from `setupError`. Admit
+  ready/setup, cleanup failure and quarantine as at most three private frames;
+  a failed cleanup cannot become a clean close or release ownership. Diagnostic
+  pipe failure also retains the unresolved native owner. PC tests cover the
+  resource failure sequence, exact encoder bounds and Java state transitions.
+
 - Verify the actual Shizuku/run-as/Bionic identity and four pipe channels on the
   Fold, including real app UID, waitpid and complete cleanup. Preserve the
   independent evidence. A subsequent broker trial exposed its frozen worker's

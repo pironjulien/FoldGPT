@@ -2,6 +2,11 @@
 
 ## Unreleased - 2026-09-08
 
+- Build and verify r22b/versionCode12 with bounded cleanup diagnostics shared
+  by the native bootstrap and Java owner; preserve quarantine on any cleanup
+  error. Native Linux CI 34215637059 passes 193 unittests and 25 commands.
+  Record the source-level selection of Android community adaptations, including
+  the Rust 1.95 Android flock gap and the matching V8 150.4.0 build recipe.
 - Fix ordinary UID backend shutdown before the first controller connection.
   The returned Fold exposed r21 quarantining an unused owner on `close(None)`;
   allow only an unbound backend with no handles to close without a session.

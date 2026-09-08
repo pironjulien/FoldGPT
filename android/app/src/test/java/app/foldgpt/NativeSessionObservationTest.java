@@ -38,4 +38,11 @@ public final class NativeSessionObservationTest {
     @Test public void unReapedSessionRemainsActive() throws Exception {
         assertEquals(NativeSessionObservation.Outcome.ACTIVE, NativeSessionObservation.outcome(active()));
     }
+    @Test public void cleanupDiagnosticFailsBeforeTerminalReportOrWait() throws Exception {
+        JSONObject diagnostic = new JSONObject().put("stage", "backend_close");
+        assertEquals(NativeSessionObservation.Outcome.FAILED,
+                NativeSessionObservation.outcome(active().put("cleanupError", diagnostic)));
+        assertEquals(NativeSessionObservation.Outcome.FAILED,
+                NativeSessionObservation.outcome(closed().put("cleanupError", diagnostic)));
+    }
 }
