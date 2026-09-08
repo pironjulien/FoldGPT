@@ -8,7 +8,7 @@ historique. Les consignes opérationnelles actuelles figurent ci-dessous.
 Le Fold est en **r23/versionCode13, moteur GNU R5**. Le petit projet Python
 créé depuis la conversation en r22 a été retrouvé et réellement exécuté après
 deux ouvertures successives en r23. La modification sauvegardée dans l'éditeur
-est conservée ; les trois tests et le zipapp affichant42 passent à chaque
+est conservée ; les trois tests et le zipapp affichant 42 passent à chaque
 reprise. Les deux sessions UI ont ensuite fermé proprement.
 
 **Ce parcours concret est démontré sur le téléphone.** Le défaut de caches
@@ -17,21 +17,21 @@ des commandes réelles et la reprise de la même conversation. Voir le
 [rapport r23 et ses preuves](../docs/research/r23-device-validation-20260908.md).
 Les autres fonctions ne sont pas toutes qualifiées.
 
-**État laissé à Julien à11:46UTC : application r23 ouverte sur la même
-conversation, propriétaire6893 `ready`, handshake réussi, boot inchangé.**
+**État laissé à Julien à 11:46 UTC : application r23 ouverte sur la même
+conversation, propriétaire 6893 `ready`, handshake réussi, boot inchangé.**
 Aucune commande modèle supplémentaire n'a été lancée dans cette dernière
 session et elle n'est pas déclarée fermée. Preuve :
 `work/root-artifacts-20260907/native-ui-validation-20260908/r23-ready-for-user/`.
 
 | Étape | Dernière preuve vérifiée |
 | --- | --- |
-| Conversation → création du projet Python en r22 | PASS, trois tests et zipapp42 ; fichiers collectés indépendamment |
+| Conversation → création du projet Python en r22 | PASS, trois tests et zipapp affichant 42 ; fichiers collectés indépendamment |
 | Sauvegarde dans l'éditeur en r22 | PASS, commentaire relu après réouverture en r23 |
-| Six commandes ordinaires r23 avec cache actif | PASS, Android/aarch64/UID10412, caches réellement lus hors runtime |
-| Admission après les commandes et nouvelle fermeture | PASS, propriétaires22244 puis22535 nettoyés et attendus, ressources absentes |
-| Première reprise dans la conversation, 11:41UTC | PASS, trois unittest, zipapp existant42, cache extérieur confirmé |
-| Seconde ouverture et nouvel échange, 11:43UTC | PASS, commentaire conservé, trois unittest et zipapp existant42 |
-| Fermetures des deux sessions UI r23 | PASS, propriétaires22808 et29860, deux reçus propres et ressources absentes |
+| Six commandes ordinaires r23 avec cache actif | PASS, Android/aarch64/UID 10412, caches réellement lus hors runtime |
+| Admission après les commandes et nouvelle fermeture | PASS, propriétaires 22244 puis 22535 nettoyés et attendus, ressources absentes |
+| Première reprise dans la conversation, 11:41 UTC | PASS, trois unittest, zipapp existant affichant 42, cache extérieur confirmé |
+| Seconde ouverture et nouvel échange, 11:43 UTC | PASS, commentaire conservé, trois unittest et zipapp existant affichant 42 |
+| Fermetures des deux sessions UI r23 | PASS, propriétaires 22808 et 29860, deux reçus propres et ressources absentes |
 | Intégrité pendant l'essai | Boot, propriétés contrôlées et quatre APK ChatGPT officiels inchangés |
 
 Projet à conserver : **« Validation Python FoldGPT »**, conversation
@@ -72,9 +72,9 @@ les 2 477 fichiers du runtime de test. Ce test hôte ne valide pas Android.
 Les rapports, commandes exactes et vérifications du paquet sont sous
 `work/r22-cache-20260908/` : `CLI-README.md`, `host-v1/verification.json`,
 `r23-packaging-and-validation.md`, `r23-apk-verification.json` et
-`r23-signature.txt`. La maintenance Android a préservé les81fichiers des
-14répertoires stdlib `__pycache__` hors du runtime. La lecture indépendante
-confirme leurs octets ; l'inventaire vérifie les2 447sources et86alias.
+`r23-signature.txt`. La maintenance Android a préservé les 81 fichiers des
+14 répertoires stdlib `__pycache__` hors du runtime. La lecture indépendante
+confirme leurs octets ; l'inventaire vérifie les 2 447 sources et 86 alias.
 Aucune permission existante n'a été modifiée. Preuves :
 `device-archive-v2/receipt.json` et `device-archive-v2/independent-readback.json`.
 

@@ -5,7 +5,7 @@
 Conserver le moteur R5 actuel : le parcours Python, éditeur et reprise a
 maintenant réussi sur le Fold. Après la création et la sauvegarde en r22,
 r23 a repris la même conversation et les fichiers existants, exécuté les trois
-tests et le zipapp42 après deux ouvertures, puis fermé chaque session proprement.
+tests et le zipapp affichant 42 après deux ouvertures, puis fermé chaque session proprement.
 Le cache CPython est actif et séparé du runtime inventorié. Le
 [rapport r23](r23-device-validation-20260908.md) distingue ces preuves du reste
 des fonctions encore non qualifiées.
@@ -54,7 +54,7 @@ L'incident r21/PID29981 et sa récupération sont conservés dans
 préparation/arrêt sans client, workload natif ordinaire, création réelle du projet
 Python par la conversation, trois unittest, zipapp affichant 42, sauvegarde puis
 réouverture dans l'éditeur et fermeture propre du propriétaire UI PID8815.
-Les sorties modèle indiquent Android/aarch64/UID10412 et les fichiers sont
+Les sorties modèle indiquent Android/aarch64/UID 10412 et les fichiers sont
 collectés indépendamment. Preuves :
 `work/r21-device-return-20260908/r22-idle-device-v1/report.json` et
 `work/r21-device-return-20260908/ui-r22/`, notamment `model-tool-evidence.json`,
@@ -78,20 +78,20 @@ dans `work/r22-cache-20260908/CLI-README.md`.
 `3a1bb00e73a828fa298884941514ad421a5f888c7fe483303b0ad514f2122c74` ;
 87 ELF, 2 447 fichiers Python, 86 alias, 95 sources et signature vérifiés dans
 `work/r22-cache-20260908/r23-apk-verification.json` et `r23-signature.txt`.
-La maintenance a archivé81fichiers dans14répertoires de caches sans changer leurs
-octets, les2 447sources ni les86alias, puis le runtime a été réadmis. Les six
+La maintenance a archivé 81 fichiers dans 14 répertoires de caches sans changer leurs
+octets, les 2 447 sources ni les 86 alias, puis le runtime a été réadmis. Les six
 commandes de production passent avec Python normal et caches actifs hors runtime,
 suivies d'une nouvelle admission et d'une fermeture propre. Preuve :
 `downloads/native-ordinary-production-device-20260908/9d653b2d/report.json`.
 
-Les échanges modèle de11:41 et11:43UTC exécutent réellement les trois tests
-et l'ancien zipapp42 ; les fichiers et le commentaire de l'éditeur restent
-identiques après les deux reprises. Les propriétaires UI22808 et29860 ont
+Les échanges modèle de 11:41 et 11:43 UTC exécutent réellement les trois tests
+et l'ancien zipapp affichant 42 ; les fichiers et le commentaire de l'éditeur restent
+identiques après les deux reprises. Les propriétaires UI 22808 et 29860 ont
 leurs reçus propres et leurs ressources sont absentes. Ces preuves sont dans
 `work/r22-cache-20260908/ui-r23/`. Le rapport `integrity-comparison.json` conserve
 un boot, des propriétés contrôlées et quatre APK ChatGPT officiels inchangés.
-À11:46UTC, l'application est relancée sur la même conversation pour Julien :
-handshake réussi, propriétaire6893 `ready`, boot inchangé. Cette nouvelle session
+À 11:46 UTC, l'application est relancée sur la même conversation pour Julien :
+handshake réussi, propriétaire 6893 `ready`, boot inchangé. Cette nouvelle session
 reste ouverte et aucune exécution modèle supplémentaire ne lui est attribuée.
 
 ## Portée des validations
