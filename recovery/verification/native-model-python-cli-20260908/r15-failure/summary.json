@@ -1,0 +1,36 @@
+{
+  "passed": false,
+  "trial": "e3c8b2fe",
+  "apk": "r15",
+  "humanCasesPassed": 6,
+  "modelCases": [
+    {
+      "case": "script",
+      "passed": false,
+      "exitCode": 2,
+      "stderr": "/data/app/~~aZUC8w2KTppKSWMS6kmHgg==/app.foldgpt-BP6Y-BVIx1qx6Y73VpV2Pg==/lib/arm64/libfoldgpt_python_cli.so: can't open file '/data/user/0/app.foldgpt/files/projects/.host-v2-qualification-f972f65129fb4c809b004c1928d389db/model-python/app/__main__.py': [Errno 1] Operation not permitted\n"
+    },
+    {
+      "case": "unittest",
+      "passed": true,
+      "exitCode": 0,
+      "stderr": "test_negative (test_add.Addition.test_negative) ... ok\ntest_positive (test_add.Addition.test_positive) ... ok\ntest_zero (test_add.Addition.test_zero) ... ok\n\n----------------------------------------------------------------------\nRan 3 tests in 0.000s\n\nOK\n"
+    },
+    {
+      "case": "zipapp-build",
+      "passed": true,
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "case": "zipapp-execute",
+      "passed": true,
+      "exitCode": 0,
+      "stderr": ""
+    }
+  ],
+  "cleanupVerified": true,
+  "ownerPidAbsent": 23189,
+  "bootAndPackageSnapshotsUnchanged": true,
+  "phoneUiTested": false
+}

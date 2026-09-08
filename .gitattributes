@@ -16,3 +16,4 @@ recovery/verification/native-java-startup-20260908/** -text whitespace=blank-at-
 recovery/verification/native-production-python-20260908/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 recovery/verification/native-startup-parent-environment-20260908/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 recovery/verification/native-host-production-20260908/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+recovery/verification/native-model-python-cli-20260908/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol

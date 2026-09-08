@@ -34,6 +34,21 @@ static int mechanisms(void) {
      * its pinned /proc/TID/mem FD, then inject a real file descriptor. */
     int file=(int)syscall(SYS_openat,AT_FDCWD,"input",O_RDONLY|O_CLOEXEC,0);
     NEED(file>=0,"memory-path-read-and-addfd");
+    NEED(ioctl(file,FIONCLEX)==0,"descriptor-inheritance-clear");
+    int flags=fcntl(file,F_GETFD);
+    NEED(flags>=0&&!(flags&FD_CLOEXEC),"descriptor-inheritance-cleared-value");
+    NEED(ioctl(file,FIOCLEX)==0,"descriptor-inheritance-set");
+    flags=fcntl(file,F_GETFD);
+    NEED(flags>=0&&(flags&FD_CLOEXEC),"descriptor-inheritance-set-value");
+    /* A raw syscall retains bits that libc ioctl may truncate on Android. */
+    errno=0;
+    NEED(syscall(SYS_ioctl,file,(UINT64_C(1)<<32)|FIOCLEX,0)==-1&&errno==EPERM,
+         "descriptor-inheritance-high-bits-set-refused");
+    errno=0;
+    NEED(syscall(SYS_ioctl,file,(UINT64_C(1)<<32)|FIONCLEX,0)==-1&&errno==EPERM,
+         "descriptor-inheritance-high-bits-clear-refused");
+    int available=0;errno=0;
+    NEED(ioctl(0,FIONREAD,&available)==-1&&errno==EPERM,"unrelated-ioctl-refused");
     char input[32]={0};ssize_t bytes=read(file,input,sizeof(input));int closed=close(file);
     NEED(bytes==14&&!memcmp(input,"pin-memory-ok\n",14)&&closed==0,"real-file-content");
     /* newfstatat is USER_NOTIF, unlike plain fstat: this stat result must be

@@ -1,0 +1,479 @@
+[
+  {
+    "argv": [
+      "cat",
+      "/proc/sys/kernel/random/boot_id"
+    ],
+    "code": 0,
+    "stdout": "348d453e-f4e5-40e0-8ef0-030f4d5e38af\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "pm",
+      "path",
+      "app.foldgpt"
+    ],
+    "code": 0,
+    "stdout": "package:/data/app/~~gfP_sLgLJPyahYp8JYDPug==/app.foldgpt-v-6zKrD3ig20Yev-NYZHXg==/base.apk\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "sha256sum",
+      "/data/app/~~gfP_sLgLJPyahYp8JYDPug==/app.foldgpt-v-6zKrD3ig20Yev-NYZHXg==/base.apk"
+    ],
+    "code": 0,
+    "stdout": "a46512293c30eb644a7abef502917c4eb68bae1c40fc6bace2e539ee671e18cd  /data/app/~~gfP_sLgLJPyahYp8JYDPug==/app.foldgpt-v-6zKrD3ig20Yev-NYZHXg==/base.apk\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "id",
+      "-u"
+    ],
+    "code": 0,
+    "stdout": "10412\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"closed\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": {\r\n    \"schema\": \"foldgpt.shizuku.transport.v1\",\r\n    \"ready\": true,\r\n    \"cancelRequested\": true,\r\n    \"bootstrapReaped\": true,\r\n    \"cleanupComplete\": true,\r\n    \"ownerRetained\": false,\r\n    \"quarantined\": false,\r\n    \"refusedBeforeFork\": false,\r\n    \"setupError\": null,\r\n    \"transportFailed\": false,\r\n    \"waitStatus\": 0,\r\n    \"bootstrapPid\": 25384,\r\n    \"directNative\": true,\r\n    \"admission\": {\r\n      \"schema\": \"foldgpt.executor-admission.v1\",\r\n      \"admitted\": true,\r\n      \"stage\": \"complete\",\r\n      \"subject\": \"\",\r\n      \"facts\": {},\r\n      \"error\": null\r\n    },\r\n    \"preflight\": null\r\n  },\r\n  \"lastNativeSessionStatus\": {\r\n    \"schema\": \"foldgpt.shizuku.transport.v1\",\r\n    \"ready\": true,\r\n    \"cancelRequested\": true,\r\n    \"bootstrapReaped\": true,\r\n    \"cleanupComplete\": true,\r\n    \"ownerRetained\": false,\r\n    \"quarantined\": false,\r\n    \"refusedBeforeFork\": false,\r\n    \"setupError\": null,\r\n    \"transportFailed\": false,\r\n    \"waitStatus\": 0,\r\n    \"bootstrapPid\": 25384,\r\n    \"directNative\": true\r\n  },\r\n  \"socketPath\": \"\\/data\\/user\\/0\\/app.foldgpt\\/app_foldgpt_exec\\/0c096b8e65354aff804bc92263ff87c4\\/owner.sock\",\r\n  \"peerUid\": 10412,\r\n  \"directNative\": true,\r\n  \"startupManifest\": \"\\/data\\/user\\/0\\/app.foldgpt\\/app_foldgpt_exec\\/0c096b8e65354aff804bc92263ff87c4\\/startup.json\",\r\n  \"workspace\": \"\\/data\\/user\\/0\\/app.foldgpt\\/files\\/projects\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/debian/etc/foldgpt-user"
+    ],
+    "code": 0,
+    "stdout": "julien\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/debian/etc/passwd"
+    ],
+    "code": 0,
+    "stdout": "root:x:0:0:root:/root:/bin/bash\r\ndaemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin\r\nbin:x:2:2:bin:/bin:/usr/sbin/nologin\r\nsys:x:3:3:sys:/dev:/usr/sbin/nologin\r\nsync:x:4:65534:sync:/bin:/bin/sync\r\ngames:x:5:60:games:/usr/games:/usr/sbin/nologin\r\nman:x:6:12:man:/var/cache/man:/usr/sbin/nologin\r\nlp:x:7:7:lp:/var/spool/lpd:/usr/sbin/nologin\r\nmail:x:8:8:mail:/var/mail:/usr/sbin/nologin\r\nnews:x:9:9:news:/var/spool/news:/usr/sbin/nologin\r\nuucp:x:10:10:uucp:/var/spool/uucp:/usr/sbin/nologin\r\nproxy:x:13:13:proxy:/bin:/usr/sbin/nologin\r\nwww-data:x:33:33:www-data:/var/www:/usr/sbin/nologin\r\nbackup:x:34:34:backup:/var/backups:/usr/sbin/nologin\r\nlist:x:38:38:Mailing List Manager:/var/list:/usr/sbin/nologin\r\nirc:x:39:39:ircd:/run/ircd:/usr/sbin/nologin\r\n_apt:x:42:65534::/nonexistent:/usr/sbin/nologin\r\nnobody:x:65534:65534:nobody:/nonexistent:/usr/sbin/nologin\r\naid_u0_a409:x:10409:10409:Termux:/:/sbin/nologin\r\njulien:x:10410:10410::/home/julien:/bin/bash\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "mkdir",
+      "-m",
+      "700",
+      "/data/user/0/app.foldgpt/files/pc-3cd6ad7f"
+    ],
+    "code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "ln",
+      "-s",
+      "/data/app/~~gfP_sLgLJPyahYp8JYDPug==/app.foldgpt-v-6zKrD3ig20Yev-NYZHXg==/lib/arm64/libtalloc.so",
+      "/data/user/0/app.foldgpt/files/pc-3cd6ad7f/libtalloc.so.2"
+    ],
+    "code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "readlink",
+      "-f",
+      "/data/user/0/app.foldgpt/files/pc-3cd6ad7f/libtalloc.so.2"
+    ],
+    "code": 0,
+    "stdout": "/data/app/~~gfP_sLgLJPyahYp8JYDPug==/app.foldgpt-v-6zKrD3ig20Yev-NYZHXg==/lib/arm64/libtalloc.so\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "test",
+      "-d",
+      "/data/user/0/app.foldgpt/cache/x11"
+    ],
+    "code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "test",
+      "-d",
+      "/data/user/0/app.foldgpt/cache/shm"
+    ],
+    "code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "tar",
+      "-xf",
+      "-",
+      "-C",
+      "/data/user/0/app.foldgpt/files/pc-3cd6ad7f"
+    ],
+    "code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "sha256sum",
+      "/data/user/0/app.foldgpt/files/pc-3cd6ad7f/client.py"
+    ],
+    "code": 0,
+    "stdout": "baa6d1a13104d5c99f02683ece6f0aaf8b0d587e8eea20616a09b6ea1bc2e0fb  /data/user/0/app.foldgpt/files/pc-3cd6ad7f/client.py\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "am",
+      "start",
+      "-W",
+      "-n",
+      "app.foldgpt/.NativePreparationActivity",
+      "-a",
+      "app.foldgpt.action.PREPARE_NATIVE_EXECUTOR"
+    ],
+    "code": 0,
+    "stdout": "Starting: Intent { act=app.foldgpt.action.PREPARE_NATIVE_EXECUTOR cmp=app.foldgpt/.NativePreparationActivity }\r\nWarning: Activity not started, intent has been delivered to currently running top-most instance.\r\nStatus: ok\r\nLaunchState: UNKNOWN (0)\r\nActivity: app.foldgpt/.NativePreparationActivity\r\nTotalTime: 0\r\nWaitTime: 6\r\nComplete\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"closed\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": {\r\n    \"schema\": \"foldgpt.shizuku.transport.v1\",\r\n    \"ready\": true,\r\n    \"cancelRequested\": true,\r\n    \"bootstrapReaped\": true,\r\n    \"cleanupComplete\": true,\r\n    \"ownerRetained\": false,\r\n    \"quarantined\": false,\r\n    \"refusedBeforeFork\": false,\r\n    \"setupError\": null,\r\n    \"transportFailed\": false,\r\n    \"waitStatus\": 0,\r\n    \"bootstrapPid\": 25384,\r\n    \"directNative\": true,\r\n    \"admission\": {\r\n      \"schema\": \"foldgpt.executor-admission.v1\",\r\n      \"admitted\": true,\r\n      \"stage\": \"complete\",\r\n      \"subject\": \"\",\r\n      \"facts\": {},\r\n      \"error\": null\r\n    },\r\n    \"preflight\": null\r\n  },\r\n  \"lastNativeSessionStatus\": {\r\n    \"schema\": \"foldgpt.shizuku.transport.v1\",\r\n    \"ready\": true,\r\n    \"cancelRequested\": true,\r\n    \"bootstrapReaped\": true,\r\n    \"cleanupComplete\": true,\r\n    \"ownerRetained\": false,\r\n    \"quarantined\": false,\r\n    \"refusedBeforeFork\": false,\r\n    \"setupError\": null,\r\n    \"transportFailed\": false,\r\n    \"waitStatus\": 0,\r\n    \"bootstrapPid\": 25384,\r\n    \"directNative\": true\r\n  },\r\n  \"socketPath\": \"\\/data\\/user\\/0\\/app.foldgpt\\/app_foldgpt_exec\\/0c096b8e65354aff804bc92263ff87c4\\/owner.sock\",\r\n  \"peerUid\": 10412,\r\n  \"directNative\": true,\r\n  \"startupManifest\": \"\\/data\\/user\\/0\\/app.foldgpt\\/app_foldgpt_exec\\/0c096b8e65354aff804bc92263ff87c4\\/startup.json\",\r\n  \"workspace\": \"\\/data\\/user\\/0\\/app.foldgpt\\/files\\/projects\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"preparing\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"preparing\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"preparing\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"preparing\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"preparing\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"preparing\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"preparing\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"preparing\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": null,\r\n  \"lastNativeSessionStatus\": null\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"preparing\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": {\r\n    \"schema\": \"foldgpt.shizuku.transport.v1\",\r\n    \"ready\": false,\r\n    \"cancelRequested\": false,\r\n    \"bootstrapReaped\": false,\r\n    \"cleanupComplete\": false,\r\n    \"ownerRetained\": true,\r\n    \"quarantined\": false,\r\n    \"refusedBeforeFork\": false,\r\n    \"setupError\": null,\r\n    \"transportFailed\": false,\r\n    \"waitStatus\": -1,\r\n    \"bootstrapPid\": 25698,\r\n    \"directNative\": true,\r\n    \"admission\": {\r\n      \"schema\": \"foldgpt.executor-admission.v1\",\r\n      \"admitted\": true,\r\n      \"stage\": \"complete\",\r\n      \"subject\": \"\",\r\n      \"facts\": {},\r\n      \"error\": null\r\n    },\r\n    \"preflight\": null\r\n  },\r\n  \"lastNativeSessionStatus\": {\r\n    \"schema\": \"foldgpt.shizuku.transport.v1\",\r\n    \"ready\": false,\r\n    \"cancelRequested\": false,\r\n    \"bootstrapReaped\": false,\r\n    \"cleanupComplete\": false,\r\n    \"ownerRetained\": true,\r\n    \"quarantined\": false,\r\n    \"refusedBeforeFork\": false,\r\n    \"setupError\": null,\r\n    \"transportFailed\": false,\r\n    \"waitStatus\": -1,\r\n    \"bootstrapPid\": 25698,\r\n    \"directNative\": true\r\n  }\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"preparing\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": {\r\n    \"schema\": \"foldgpt.shizuku.transport.v1\",\r\n    \"ready\": false,\r\n    \"cancelRequested\": false,\r\n    \"bootstrapReaped\": false,\r\n    \"cleanupComplete\": false,\r\n    \"ownerRetained\": true,\r\n    \"quarantined\": false,\r\n    \"refusedBeforeFork\": false,\r\n    \"setupError\": null,\r\n    \"transportFailed\": false,\r\n    \"waitStatus\": -1,\r\n    \"bootstrapPid\": 25698,\r\n    \"directNative\": true,\r\n    \"admission\": {\r\n      \"schema\": \"foldgpt.executor-admission.v1\",\r\n      \"admitted\": true,\r\n      \"stage\": \"complete\",\r\n      \"subject\": \"\",\r\n      \"facts\": {},\r\n      \"error\": null\r\n    },\r\n    \"preflight\": null\r\n  },\r\n  \"lastNativeSessionStatus\": {\r\n    \"schema\": \"foldgpt.shizuku.transport.v1\",\r\n    \"ready\": false,\r\n    \"cancelRequested\": false,\r\n    \"bootstrapReaped\": false,\r\n    \"cleanupComplete\": false,\r\n    \"ownerRetained\": true,\r\n    \"quarantined\": false,\r\n    \"refusedBeforeFork\": false,\r\n    \"setupError\": null,\r\n    \"transportFailed\": false,\r\n    \"waitStatus\": -1,\r\n    \"bootstrapPid\": 25698,\r\n    \"directNative\": true\r\n  }\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"preparing\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": {\r\n    \"schema\": \"foldgpt.shizuku.transport.v1\",\r\n    \"ready\": false,\r\n    \"cancelRequested\": false,\r\n    \"bootstrapReaped\": false,\r\n    \"cleanupComplete\": false,\r\n    \"ownerRetained\": true,\r\n    \"quarantined\": false,\r\n    \"refusedBeforeFork\": false,\r\n    \"setupError\": null,\r\n    \"transportFailed\": false,\r\n    \"waitStatus\": -1,\r\n    \"bootstrapPid\": 25698,\r\n    \"directNative\": true,\r\n    \"admission\": {\r\n      \"schema\": \"foldgpt.executor-admission.v1\",\r\n      \"admitted\": true,\r\n      \"stage\": \"complete\",\r\n      \"subject\": \"\",\r\n      \"facts\": {},\r\n      \"error\": null\r\n    },\r\n    \"preflight\": null\r\n  },\r\n  \"lastNativeSessionStatus\": {\r\n    \"schema\": \"foldgpt.shizuku.transport.v1\",\r\n    \"ready\": false,\r\n    \"cancelRequested\": false,\r\n    \"bootstrapReaped\": false,\r\n    \"cleanupComplete\": false,\r\n    \"ownerRetained\": true,\r\n    \"quarantined\": false,\r\n    \"refusedBeforeFork\": false,\r\n    \"setupError\": null,\r\n    \"transportFailed\": false,\r\n    \"waitStatus\": -1,\r\n    \"bootstrapPid\": 25698,\r\n    \"directNative\": true\r\n  }\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"ready\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": {\r\n    \"schema\": \"foldgpt.shizuku.transport.v1\",\r\n    \"ready\": true,\r\n    \"cancelRequested\": false,\r\n    \"bootstrapReaped\": false,\r\n    \"cleanupComplete\": false,\r\n    \"ownerRetained\": true,\r\n    \"quarantined\": false,\r\n    \"refusedBeforeFork\": false,\r\n    \"setupError\": null,\r\n    \"transportFailed\": false,\r\n    \"waitStatus\": -1,\r\n    \"bootstrapPid\": 25698,\r\n    \"directNative\": true,\r\n    \"admission\": {\r\n      \"schema\": \"foldgpt.executor-admission.v1\",\r\n      \"admitted\": true,\r\n      \"stage\": \"complete\",\r\n      \"subject\": \"\",\r\n      \"facts\": {},\r\n      \"error\": null\r\n    },\r\n    \"preflight\": null\r\n  },\r\n  \"lastNativeSessionStatus\": {\r\n    \"schema\": \"foldgpt.shizuku.transport.v1\",\r\n    \"ready\": true,\r\n    \"cancelRequested\": false,\r\n    \"bootstrapReaped\": false,\r\n    \"cleanupComplete\": false,\r\n    \"ownerRetained\": true,\r\n    \"quarantined\": false,\r\n    \"refusedBeforeFork\": false,\r\n    \"setupError\": null,\r\n    \"transportFailed\": false,\r\n    \"waitStatus\": -1,\r\n    \"bootstrapPid\": 25698,\r\n    \"directNative\": true\r\n  },\r\n  \"socketPath\": \"\\/data\\/user\\/0\\/app.foldgpt\\/app_foldgpt_exec\\/9fa7182ec08b4c829e4d1159c0e32675\\/owner.sock\",\r\n  \"peerUid\": 10412,\r\n  \"directNative\": true,\r\n  \"startupManifest\": \"\\/data\\/user\\/0\\/app.foldgpt\\/app_foldgpt_exec\\/9fa7182ec08b4c829e4d1159c0e32675\\/startup.json\",\r\n  \"workspace\": \"\\/data\\/user\\/0\\/app.foldgpt\\/files\\/projects\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "/data/user/0/app.foldgpt/app_foldgpt_exec/9fa7182ec08b4c829e4d1159c0e32675/startup.json"
+    ],
+    "code": 0,
+    "stdout": "{\"schema\":\"foldgpt.native-startup.v1\",\"socketPath\":\"/data/user/0/app.foldgpt/app_foldgpt_exec/9fa7182ec08b4c829e4d1159c0e32675/owner.sock\",\"peer\":{\"pid\":25698,\"uid\":10412,\"gid\":10412},\"workspaceRoot\":\"file:///data/user/0/app.foldgpt/files/projects\",\"sharedPaths\":[{\"path\":\"file:///data/user/0/app.foldgpt/files/projects\",\"device\":65097,\"inode\":471258},{\"path\":\"file:///data/user/0/app.foldgpt/files/native-runtime-v1/python\",\"device\":65097,\"inode\":472354},{\"path\":\"file:///data/app/~~gfP_sLgLJPyahYp8JYDPug%3D%3D/app.foldgpt-v-6zKrD3ig20Yev-NYZHXg%3D%3D/lib/arm64\",\"device\":65097,\"inode\":475240}],\"controllerRoots\":[\"file:///home/julien\",\"file:///tmp\"],\"parentEnvironment\":{\"HOME\":\"/data/user/0/app.foldgpt/files/projects\",\"TMPDIR\":\"/data/user/0/app.foldgpt/files/projects/.foldgpt-tmp\",\"PATH\":\"/data/user/0/app.foldgpt/files/native-runtime-v1/python/bin:/system/bin\",\"SHELL\":\"/data/app/~~gfP_sLgLJPyahYp8JYDPug==/app.foldgpt-v-6zKrD3ig20Yev-NYZHXg==/lib/arm64/libfoldgpt_bash.so\",\"LANG\":\"C.UTF-8\"},\"hostSchema\":\"foldgpt.host.v2\"}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "/system/bin/env",
+      "LD_LIBRARY_PATH=/data/user/0/app.foldgpt/files/pc-3cd6ad7f:/data/user/0/app.foldgpt/files/native:/data/app/~~gfP_sLgLJPyahYp8JYDPug==/app.foldgpt-v-6zKrD3ig20Yev-NYZHXg==/lib/arm64",
+      "PROOT_LOADER=/data/app/~~gfP_sLgLJPyahYp8JYDPug==/app.foldgpt-v-6zKrD3ig20Yev-NYZHXg==/lib/arm64/libproot-loader.so",
+      "PROOT_LOADER_32=/data/app/~~gfP_sLgLJPyahYp8JYDPug==/app.foldgpt-v-6zKrD3ig20Yev-NYZHXg==/lib/arm64/libproot-loader32.so",
+      "PROOT_TMP_DIR=/data/user/0/app.foldgpt/cache/x11",
+      "TMPDIR=/data/user/0/app.foldgpt/cache/x11",
+      "/system/bin/sh",
+      "-c",
+      "exec \"$@\"",
+      "foldgpt-client",
+      "/data/app/~~gfP_sLgLJPyahYp8JYDPug==/app.foldgpt-v-6zKrD3ig20Yev-NYZHXg==/lib/arm64/libproot.so",
+      "--kill-on-exit",
+      "--link2symlink",
+      "--sysvipc",
+      "-r",
+      "/data/user/0/app.foldgpt/files/debian",
+      "-i",
+      "10410:10410",
+      "-w",
+      "/home/julien",
+      "-b",
+      "/dev",
+      "-b",
+      "/proc",
+      "-b",
+      "/sys",
+      "-b",
+      "/system",
+      "-b",
+      "/apex",
+      "-b",
+      "/data/user/0/app.foldgpt/cache/x11:/tmp",
+      "-b",
+      "/data/user/0/app.foldgpt/cache/shm:/dev/shm",
+      "-b",
+      "/data/user/0/app.foldgpt/files/projects:/data/user/0/app.foldgpt/files/projects",
+      "-b",
+      "/data/user/0/app.foldgpt/app_foldgpt_exec:/data/user/0/app.foldgpt/app_foldgpt_exec",
+      "-b",
+      "/data/user/0/app.foldgpt/files/native-runtime-v1/python:/data/user/0/app.foldgpt/files/native-runtime-v1/python",
+      "-b",
+      "/data/app/~~gfP_sLgLJPyahYp8JYDPug==/app.foldgpt-v-6zKrD3ig20Yev-NYZHXg==/lib/arm64:/data/app/~~gfP_sLgLJPyahYp8JYDPug==/app.foldgpt-v-6zKrD3ig20Yev-NYZHXg==/lib/arm64",
+      "-b",
+      "/data/user/0/app.foldgpt/files/pc-3cd6ad7f:/data/user/0/app.foldgpt/files/pc-3cd6ad7f",
+      "/usr/bin/env",
+      "-i",
+      "HOME=/home/julien",
+      "USER=julien",
+      "LOGNAME=julien",
+      "LANG=C.UTF-8",
+      "PATH=/usr/local/bin:/usr/bin:/bin",
+      "/usr/bin/python3",
+      "-I",
+      "-S",
+      "-B",
+      "-u",
+      "/data/user/0/app.foldgpt/files/pc-3cd6ad7f/client.py",
+      "/data/user/0/app.foldgpt/app_foldgpt_exec/9fa7182ec08b4c829e4d1159c0e32675/startup.json"
+    ],
+    "code": 0,
+    "stdoutFile": "client.stdout",
+    "stderrFile": "client.stderr"
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"ready\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": {\r\n    \"schema\": \"foldgpt.shizuku.transport.v1\",\r\n    \"ready\": true,\r\n    \"cancelRequested\": false,\r\n    \"bootstrapReaped\": false,\r\n    \"cleanupComplete\": false,\r\n    \"ownerRetained\": true,\r\n    \"quarantined\": false,\r\n    \"refusedBeforeFork\": false,\r\n    \"setupError\": null,\r\n    \"transportFailed\": false,\r\n    \"waitStatus\": -1,\r\n    \"bootstrapPid\": 25698,\r\n    \"directNative\": true,\r\n    \"admission\": {\r\n      \"schema\": \"foldgpt.executor-admission.v1\",\r\n      \"admitted\": true,\r\n      \"stage\": \"complete\",\r\n      \"subject\": \"\",\r\n      \"facts\": {},\r\n      \"error\": null\r\n    },\r\n    \"preflight\": null\r\n  },\r\n  \"lastNativeSessionStatus\": {\r\n    \"schema\": \"foldgpt.shizuku.transport.v1\",\r\n    \"ready\": true,\r\n    \"cancelRequested\": false,\r\n    \"bootstrapReaped\": false,\r\n    \"cleanupComplete\": false,\r\n    \"ownerRetained\": true,\r\n    \"quarantined\": false,\r\n    \"refusedBeforeFork\": false,\r\n    \"setupError\": null,\r\n    \"transportFailed\": false,\r\n    \"waitStatus\": -1,\r\n    \"bootstrapPid\": 25698,\r\n    \"directNative\": true\r\n  },\r\n  \"socketPath\": \"\\/data\\/user\\/0\\/app.foldgpt\\/app_foldgpt_exec\\/9fa7182ec08b4c829e4d1159c0e32675\\/owner.sock\",\r\n  \"peerUid\": 10412,\r\n  \"directNative\": true,\r\n  \"startupManifest\": \"\\/data\\/user\\/0\\/app.foldgpt\\/app_foldgpt_exec\\/9fa7182ec08b4c829e4d1159c0e32675\\/startup.json\",\r\n  \"workspace\": \"\\/data\\/user\\/0\\/app.foldgpt\\/files\\/projects\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "logcat",
+      "-d",
+      "-v",
+      "threadtime",
+      "-s",
+      "FoldGPT-executor",
+      "FoldGPT"
+    ],
+    "code": 0,
+    "stdout": "--------- beginning of main\r\n09-08 05:13:00.444 16156 16156 I FoldGPT : Authenticated native executor endpoint prepared; desktop launcher unchanged\r\n09-08 05:25:32.639 17960 17960 I FoldGPT : Authenticated native executor endpoint prepared; desktop launcher unchanged\r\n09-08 05:30:31.165 19003 19003 I FoldGPT : Authenticated native executor endpoint prepared; desktop launcher unchanged\r\n09-08 06:04:49.156 23084 23084 I FoldGPT : Authenticated native executor endpoint prepared; desktop launcher unchanged\r\n09-08 06:16:28.021 25071 25071 I FoldGPT : Authenticated native executor endpoint prepared; desktop launcher unchanged\r\n09-08 06:17:25.134 25605 25605 I FoldGPT : Authenticated native executor endpoint prepared; desktop launcher unchanged\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "am",
+      "start",
+      "-W",
+      "-n",
+      "app.foldgpt/.NativePreparationActivity",
+      "-a",
+      "app.foldgpt.action.STOP_NATIVE_EXECUTOR"
+    ],
+    "code": 0,
+    "stdout": "Starting: Intent { act=app.foldgpt.action.STOP_NATIVE_EXECUTOR cmp=app.foldgpt/.NativePreparationActivity }\r\nWarning: Activity not started, intent has been delivered to currently running top-most instance.\r\nStatus: ok\r\nLaunchState: UNKNOWN (0)\r\nActivity: app.foldgpt/.NativePreparationActivity\r\nTotalTime: 0\r\nWaitTime: 5\r\nComplete\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "run-as",
+      "app.foldgpt",
+      "cat",
+      "files/native-executor-status.json"
+    ],
+    "code": 0,
+    "stdout": "{\r\n  \"schema\": \"foldgpt.native.owner.v1\",\r\n  \"state\": \"closed\",\r\n  \"generation\": 1,\r\n  \"selected\": true,\r\n  \"officialLauncherReplaced\": false,\r\n  \"lastRemoteStatus\": {\r\n    \"schema\": \"foldgpt.shizuku.transport.v1\",\r\n    \"ready\": true,\r\n    \"cancelRequested\": false,\r\n    \"bootstrapReaped\": true,\r\n    \"cleanupComplete\": true,\r\n    \"ownerRetained\": false,\r\n    \"quarantined\": false,\r\n    \"refusedBeforeFork\": false,\r\n    \"setupError\": null,\r\n    \"transportFailed\": false,\r\n    \"waitStatus\": 0,\r\n    \"bootstrapPid\": 25698,\r\n    \"directNative\": true,\r\n    \"admission\": {\r\n      \"schema\": \"foldgpt.executor-admission.v1\",\r\n      \"admitted\": true,\r\n      \"stage\": \"complete\",\r\n      \"subject\": \"\",\r\n      \"facts\": {},\r\n      \"error\": null\r\n    },\r\n    \"preflight\": null\r\n  },\r\n  \"lastNativeSessionStatus\": {\r\n    \"schema\": \"foldgpt.shizuku.transport.v1\",\r\n    \"ready\": true,\r\n    \"cancelRequested\": false,\r\n    \"bootstrapReaped\": true,\r\n    \"cleanupComplete\": true,\r\n    \"ownerRetained\": false,\r\n    \"quarantined\": false,\r\n    \"refusedBeforeFork\": false,\r\n    \"setupError\": null,\r\n    \"transportFailed\": false,\r\n    \"waitStatus\": 0,\r\n    \"bootstrapPid\": 25698,\r\n    \"directNative\": true\r\n  },\r\n  \"socketPath\": \"\\/data\\/user\\/0\\/app.foldgpt\\/app_foldgpt_exec\\/9fa7182ec08b4c829e4d1159c0e32675\\/owner.sock\",\r\n  \"peerUid\": 10412,\r\n  \"directNative\": true,\r\n  \"startupManifest\": \"\\/data\\/user\\/0\\/app.foldgpt\\/app_foldgpt_exec\\/9fa7182ec08b4c829e4d1159c0e32675\\/startup.json\",\r\n  \"workspace\": \"\\/data\\/user\\/0\\/app.foldgpt\\/files\\/projects\"\r\n}\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "cat",
+      "/proc/sys/kernel/random/boot_id"
+    ],
+    "code": 0,
+    "stdout": "348d453e-f4e5-40e0-8ef0-030f4d5e38af\r\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "ls",
+      "-d",
+      "/proc/25698"
+    ],
+    "code": 1,
+    "stdout": "",
+    "stderr": "ls: /proc/25698: No such file or directory\r\n"
+  },
+  {
+    "argv": [
+      "logcat",
+      "-d",
+      "-v",
+      "threadtime",
+      "-s",
+      "FoldGPT-executor",
+      "FoldGPT"
+    ],
+    "code": 0,
+    "stdout": "--------- beginning of main\r\n09-08 05:13:00.444 16156 16156 I FoldGPT : Authenticated native executor endpoint prepared; desktop launcher unchanged\r\n09-08 05:25:32.639 17960 17960 I FoldGPT : Authenticated native executor endpoint prepared; desktop launcher unchanged\r\n09-08 05:30:31.165 19003 19003 I FoldGPT : Authenticated native executor endpoint prepared; desktop launcher unchanged\r\n09-08 06:04:49.156 23084 23084 I FoldGPT : Authenticated native executor endpoint prepared; desktop launcher unchanged\r\n09-08 06:16:28.021 25071 25071 I FoldGPT : Authenticated native executor endpoint prepared; desktop launcher unchanged\r\n09-08 06:17:25.134 25605 25605 I FoldGPT : Authenticated native executor endpoint prepared; desktop launcher unchanged\r\n",
+    "stderr": ""
+  }
+]

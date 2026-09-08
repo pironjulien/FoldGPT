@@ -26,7 +26,8 @@ def context(workspace):
         "cwd": uri, "workspaceRoots": [uri], "windowsSandboxLevel": "disabled"}
 
 
-def run(runner, command, *, input=b"", wall=3000, cancel=False, directory=None, env_extra=None):
+def run(runner, command, *, input=b"", wall=3000, cancel=False, directory=None, env_extra=None,
+        fixture_files=None):
     base = Path(tempfile.mkdtemp(prefix="foldgpt-bionic-case-", dir="/var/tmp"))
     root = base / "workspace"
     root.mkdir(mode=0o700)
@@ -34,6 +35,10 @@ def run(runner, command, *, input=b"", wall=3000, cancel=False, directory=None, 
     (root / "private/secret").write_text("private bytes")
     (root / "private/secret").chmod(0o600)
     (root / ".git").mkdir(mode=0o700)
+    for relative, content in (fixture_files or {}).items():
+        target = (root / relative).resolve()
+        target.relative_to(root)
+        target.write_bytes(content)
     if directory:
         (root / directory).mkdir(mode=0o700)
     files = NativeFilesBackend(runner, root, guest_workspace=str(root))
@@ -128,3 +133,11 @@ print('python-native-policy-pass')
     assert result["stdout"] == "python-native-policy-pass\n", result
     assert result["stderr"] == "", result
     assert result["events"][-1]["exitCode"] == 0, result
+
+    # CPython's real CLI opens this file with fopen/FIOCLEX before executing
+    # any Python code. A -c/runpy substitute misses that entrypoint failure.
+    result, base = run(Path(sys.argv[1]), "/usr/bin/python3 -I -S -B model-entry.py",
+        fixture_files={"model-entry.py": b"print(42)\n"})
+    assert result["stdout"] == "42\n" and result["stderr"] == "", result
+    assert result["events"][-1]["exitCode"] == 0, result
+    assert result["events"][-1]["cleanupComplete"], result

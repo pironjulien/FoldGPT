@@ -7,7 +7,42 @@ ancien checkpoint ; il ne reçoit pas cette sauvegarde privée.
 
 ## État courant : exécuteur sous identité FoldGPT prouvé sur le téléphone
 
-Point courant du 8 septembre : **r15/versionCode6 est installé et le canal
+**Dernier contrôle, 8 septembre 06:17 : r16/versionCode7 installé et les quatre
+commandes Python modèle passent sur le Fold**, essai `3cd6ad7f` : script `.py`
+sortie42, trois unittest, construction zipapp, exécution du zipapp sortie42.
+Les six cas humains passent aussi. Le test emploie les vrais canaux de production,
+sans app-server ni conversation. Java confirme wait0/cleanup/reaping, PID25698
+absent indépendamment ; boot, propriétés et quatre APK ChatGPT officiels identiques.
+Preuves : `verification/native-model-python-cli-20260908/r16-pass`.
+APK : `downloads/native-production-20260908/foldgpt-native-candidate-r16.apk`,
+SHA256 `a46512293c30eb644a7abef502917c4eb68bae1c40fc6bace2e539ee671e18cd`.
+Paquet figé `downloads/native-host-runner-20260908/production-package-v4`.
+**Ne pas réinstaller r15. L'interface habituelle reste à qualifier.**
+
+Python Linux corrigé PASS dans `34186068559`. R4 Linux valide353tests exec-server,
+33tests injectés et le projet Python via app-server. Seules les deux fixtures
+native_startup étaient refusées avant leur assertion, faute de parent0700.
+Correction de ces fixtures uniquement, export
+`322733dd1f62f1ebcf8781da13d24f7f98db63d76861aaf06eb03bb079408fc9`,
+run Linux seul `34186637209`, commit `49f0ef697190216cef5d7f836a2096b17b77dc3d`.
+La comparaison complète des deux arbres prouve que seule
+`codex-rs/app-server/tests/native_startup.rs` diffère du moteur ARM R4 :
+`verification/engine-r4-test-only-equivalence-20260908.json`.
+Le moteur ARM R4 continue à compiler ; son collecteur écrit
+`work/ci-results/34183702604/arm_engine-download/ready.json` à la fin.
+
+**Historique du contrôle du 8 septembre 06:05 : r15 ne passait pas le lancement
+direct d'un fichier Python côté modèle.** Essai `e3c8b2fe` : `python3 fichier.py`
+retourne exit2/EPERM. Les trois autres commandes modèle passent : trois unittest,
+construction zipapp et exécution42. Les six opérations humaines passent encore.
+Les nouveaux appels utilisent le vrai canal exec, sans `-c` ni `runpy`.
+Les deux reçus Java confirment wait0/cleanup/reaping ; PID23189 absent et
+snapshots boot/propriétés/APK identiques avant/après. Preuve exacte conservée
+dans `verification/native-model-python-cli-20260908/r15-failure`.
+La correction ciblée FIOCLEX/FIONCLEX du profil modèle est désormais qualifiée
+par r16 ci-dessus. Le moteur Rust R4 n'est pas modifié par cette correction native.
+
+Historique du 8 septembre : **r15/versionCode6 était installé et le canal
 humain v2 est qualifié sur le Fold**, essais `016fe324` puis `70cf3a99` après
 35 secondes d'attente volontaire avant la connexion du contrôleur. Les six cas
 réels passent : lecture, sauvegarde stdin de 2097408 octets et relecture exacte,

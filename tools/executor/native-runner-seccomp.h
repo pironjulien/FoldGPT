@@ -35,6 +35,7 @@
 #include <linux/filter.h>
 #include <linux/sched.h>
 #include <linux/seccomp.h>
+#include <sys/ioctl.h>
 #include <sys/prctl.h>
 #include <sys/syscall.h>
 #include <unistd.h>
@@ -132,6 +133,22 @@ static int nr_install_seccomp(void)
 #endif
 #ifdef __NR_sched_getaffinity
         NR_SC_SELF_QUERY(sched_getaffinity),
+#endif
+#ifdef __NR_ioctl
+        /* FIOCLEX/FIONCLEX only change the calling process's descriptor
+         * inheritance flag, as already-admitted fcntl(F_SETFD) does. CPython
+         * fopen uses FIOCLEX before returning a script's real file handle.
+         * Neither operation reads a pointer or controls a terminal/device.
+         * Require a native, zero-extended request; deny every other ioctl.
+         * high check(3), low load(1), pairs(4), deny(1) = 9 instructions. */
+        BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, __NR_ioctl, 0, 9),
+        BPF_STMT(BPF_LD | BPF_W | BPF_ABS, NR_SC_ARG_HI(1)),
+        BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, 0, 1, 0),
+        BPF_STMT(BPF_RET | BPF_K, NR_SC_DENY),
+        BPF_STMT(BPF_LD | BPF_W | BPF_ABS, NR_SC_ARG_LO(1)),
+        NR_SC_ALLOW_NR(FIOCLEX),
+        NR_SC_ALLOW_NR(FIONCLEX),
+        BPF_STMT(BPF_RET | BPF_K, NR_SC_DENY),
 #endif
 #ifdef __NR_fcntl
         /* cmd is a kernel int. Do not admit locks, leases, F_NOTIFY, F_SETOWN,

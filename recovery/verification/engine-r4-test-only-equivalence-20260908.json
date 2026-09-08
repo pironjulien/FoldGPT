@@ -1,0 +1,16 @@
+{
+  "productionSourceUnchanged": true,
+  "comparedCompleteRestoredTrees": true,
+  "oldCommit": "100844688340a16597b556641d93e42427760082",
+  "base": "3d2ee51ca2d5db578f328aa75e20aa22c0197c9a",
+  "trees": [
+    "db32ebb502450f14094b623d3daddc55816772ce",
+    "72c3caa31bf85899df92e403d6669c1023d88bd6"
+  ],
+  "changedPaths": [
+    "codex-rs/app-server/tests/native_startup.rs"
+  ],
+  "oldPatchSha256": "8b055f730e651c2bebac801373b92bf57bcc0e1d2701a4ce232f07e1d9f82a9e",
+  "newPatchSha256": "322733dd1f62f1ebcf8781da13d24f7f98db63d76861aaf06eb03bb079408fc9",
+  "differenceSha256": "df25d7d88c0a62f8a9e5155710131ad74898505fe2d2117f7cdfcb9437925291"
+}

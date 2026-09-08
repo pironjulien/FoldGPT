@@ -1,0 +1,955 @@
+{
+  "passed": true,
+  "qualification": "host-v2",
+  "scope": "Actual Java/Shizuku/run-as owner and GNU client; app-server and UI not tested",
+  "prepareResponse": "Starting: Intent { act=app.foldgpt.action.PREPARE_NATIVE_EXECUTOR cmp=app.foldgpt/.NativePreparationActivity }\r\nWarning: Activity not started, intent has been delivered to currently running top-most instance.\r\nStatus: ok\r\nLaunchState: UNKNOWN (0)\r\nActivity: app.foldgpt/.NativePreparationActivity\r\nTotalTime: 0\r\nWaitTime: 6\r\nComplete",
+  "startup": {
+    "schema": "foldgpt.native-startup.v1",
+    "socketPath": "/data/user/0/app.foldgpt/app_foldgpt_exec/9fa7182ec08b4c829e4d1159c0e32675/owner.sock",
+    "peer": {
+      "pid": 25698,
+      "uid": 10412,
+      "gid": 10412
+    },
+    "workspaceRoot": "file:///data/user/0/app.foldgpt/files/projects",
+    "sharedPaths": [
+      {
+        "path": "file:///data/user/0/app.foldgpt/files/projects",
+        "device": 65097,
+        "inode": 471258
+      },
+      {
+        "path": "file:///data/user/0/app.foldgpt/files/native-runtime-v1/python",
+        "device": 65097,
+        "inode": 472354
+      },
+      {
+        "path": "file:///data/app/~~gfP_sLgLJPyahYp8JYDPug%3D%3D/app.foldgpt-v-6zKrD3ig20Yev-NYZHXg%3D%3D/lib/arm64",
+        "device": 65097,
+        "inode": 475240
+      }
+    ],
+    "controllerRoots": [
+      "file:///home/julien",
+      "file:///tmp"
+    ],
+    "parentEnvironment": {
+      "HOME": "/data/user/0/app.foldgpt/files/projects",
+      "TMPDIR": "/data/user/0/app.foldgpt/files/projects/.foldgpt-tmp",
+      "PATH": "/data/user/0/app.foldgpt/files/native-runtime-v1/python/bin:/system/bin",
+      "SHELL": "/data/app/~~gfP_sLgLJPyahYp8JYDPug==/app.foldgpt-v-6zKrD3ig20Yev-NYZHXg==/lib/arm64/libfoldgpt_bash.so",
+      "LANG": "C.UTF-8"
+    },
+    "hostSchema": "foldgpt.host.v2"
+  },
+  "client": {
+    "schema": "foldgpt.production-host-qualification.v1",
+    "passed": true,
+    "officialEditorQualified": false,
+    "javaCleanupReceiptRequired": true,
+    "controllerPid": 25737,
+    "controllerUid": 10410,
+    "startupOwner": {
+      "pid": 25698,
+      "uid": 10412,
+      "gid": 10412
+    },
+    "directory": "/data/user/0/app.foldgpt/files/projects/.host-v2-qualification-6dd1824f7d714b81a60b6a313be439bc",
+    "cases": [
+      {
+        "command": [
+          "cat",
+          "/data/user/0/app.foldgpt/files/projects/.host-v2-qualification-6dd1824f7d714b81a60b6a313be439bc/hello.py"
+        ],
+        "cwd": "/",
+        "events": [
+          {
+            "seq": 1,
+            "type": "output",
+            "stream": "stdout"
+          },
+          {
+            "seq": 2,
+            "type": "exited",
+            "exitCode": 0
+          },
+          {
+            "seq": 3,
+            "type": "closed",
+            "failure": null
+          }
+        ],
+        "terminationRequested": false,
+        "streams": {
+          "stdout": {
+            "bytes": 97,
+            "sha256": "0c9dce17ffd6595d4a634d3b5f1b7f6ceb4a73e80dbd5fad0901dc3bd653c0b1"
+          },
+          "stderr": {
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "diagnosticUtf8": "",
+            "diagnosticBase64": "",
+            "diagnosticTruncated": false
+          }
+        }
+      },
+      {
+        "command": [
+          "sh",
+          "-c",
+          "cat > \"$1\"",
+          "sh",
+          "/data/user/0/app.foldgpt/files/projects/.host-v2-qualification-6dd1824f7d714b81a60b6a313be439bc/streamed.bin"
+        ],
+        "cwd": "/",
+        "events": [
+          {
+            "seq": 1,
+            "type": "exited",
+            "exitCode": 0
+          },
+          {
+            "seq": 2,
+            "type": "closed",
+            "failure": null
+          }
+        ],
+        "terminationRequested": false,
+        "streams": {
+          "stdout": {
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "stderr": {
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "diagnosticUtf8": "",
+            "diagnosticBase64": "",
+            "diagnosticTruncated": false
+          }
+        }
+      },
+      {
+        "command": [
+          "cat",
+          "/data/user/0/app.foldgpt/files/projects/.host-v2-qualification-6dd1824f7d714b81a60b6a313be439bc/streamed.bin"
+        ],
+        "cwd": "/",
+        "events": [
+          {
+            "seq": 1,
+            "type": "output",
+            "stream": "stdout"
+          },
+          {
+            "seq": 2,
+            "type": "output",
+            "stream": "stdout"
+          },
+          {
+            "seq": 3,
+            "type": "output",
+            "stream": "stdout"
+          },
+          {
+            "seq": 4,
+            "type": "output",
+            "stream": "stdout"
+          },
+          {
+            "seq": 5,
+            "type": "output",
+            "stream": "stdout"
+          },
+          {
+            "seq": 6,
+            "type": "output",
+            "stream": "stdout"
+          },
+          {
+            "seq": 7,
+            "type": "output",
+            "stream": "stdout"
+          },
+          {
+            "seq": 8,
+            "type": "output",
+            "stream": "stdout"
+          },
+          {
+            "seq": 9,
+            "type": "output",
+            "stream": "stdout"
+          },
+          {
+            "seq": 10,
+            "type": "output",
+            "stream": "stdout"
+          },
+          {
+            "seq": 11,
+            "type": "output",
+            "stream": "stdout"
+          },
+          {
+            "seq": 12,
+            "type": "output",
+            "stream": "stdout"
+          },
+          {
+            "seq": 13,
+            "type": "output",
+            "stream": "stdout"
+          },
+          {
+            "seq": 14,
+            "type": "output",
+            "stream": "stdout"
+          },
+          {
+            "seq": 15,
+            "type": "output",
+            "stream": "stdout"
+          },
+          {
+            "seq": 16,
+            "type": "output",
+            "stream": "stdout"
+          },
+          {
+            "seq": 17,
+            "type": "output",
+            "stream": "stdout"
+          },
+          {
+            "seq": 18,
+            "type": "output",
+            "stream": "stdout"
+          },
+          {
+            "seq": 19,
+            "type": "output",
+            "stream": "stdout"
+          },
+          {
+            "seq": 20,
+            "type": "output",
+            "stream": "stdout"
+          },
+          {
+            "seq": 21,
+            "type": "output",
+            "stream": "stdout"
+          },
+          {
+            "seq": 22,
+            "type": "output",
+            "stream": "stdout"
+          },
+          {
+            "seq": 23,
+            "type": "output",
+            "stream": "stdout"
+          },
+          {
+            "seq": 24,
+            "type": "output",
+            "stream": "stdout"
+          },
+          {
+            "seq": 25,
+            "type": "output",
+            "stream": "stdout"
+          },
+          {
+            "seq": 26,
+            "type": "output",
+            "stream": "stdout"
+          },
+          {
+            "seq": 27,
+            "type": "output",
+            "stream": "stdout"
+          },
+          {
+            "seq": 28,
+            "type": "output",
+            "stream": "stdout"
+          },
+          {
+            "seq": 29,
+            "type": "output",
+            "stream": "stdout"
+          },
+          {
+            "seq": 30,
+            "type": "output",
+            "stream": "stdout"
+          },
+          {
+            "seq": 31,
+            "type": "output",
+            "stream": "stdout"
+          },
+          {
+            "seq": 32,
+            "type": "output",
+            "stream": "stdout"
+          },
+          {
+            "seq": 33,
+            "type": "output",
+            "stream": "stdout"
+          },
+          {
+            "seq": 34,
+            "type": "output",
+            "stream": "stdout"
+          },
+          {
+            "seq": 35,
+            "type": "output",
+            "stream": "stdout"
+          },
+          {
+            "seq": 36,
+            "type": "output",
+            "stream": "stdout"
+          },
+          {
+            "seq": 37,
+            "type": "output",
+            "stream": "stdout"
+          },
+          {
+            "seq": 38,
+            "type": "output",
+            "stream": "stdout"
+          },
+          {
+            "seq": 39,
+            "type": "output",
+            "stream": "stdout"
+          },
+          {
+            "seq": 40,
+            "type": "output",
+            "stream": "stdout"
+          },
+          {
+            "seq": 41,
+            "type": "output",
+            "stream": "stdout"
+          },
+          {
+            "seq": 42,
+            "type": "output",
+            "stream": "stdout"
+          },
+          {
+            "seq": 43,
+            "type": "output",
+            "stream": "stdout"
+          },
+          {
+            "seq": 44,
+            "type": "output",
+            "stream": "stdout"
+          },
+          {
+            "seq": 45,
+            "type": "output",
+            "stream": "stdout"
+          },
+          {
+            "seq": 46,
+            "type": "output",
+            "stream": "stdout"
+          },
+          {
+            "seq": 47,
+            "type": "output",
+            "stream": "stdout"
+          },
+          {
+            "seq": 48,
+            "type": "output",
+            "stream": "stdout"
+          },
+          {
+            "seq": 49,
+            "type": "output",
+            "stream": "stdout"
+          },
+          {
+            "seq": 50,
+            "type": "output",
+            "stream": "stdout"
+          },
+          {
+            "seq": 51,
+            "type": "output",
+            "stream": "stdout"
+          },
+          {
+            "seq": 52,
+            "type": "output",
+            "stream": "stdout"
+          },
+          {
+            "seq": 53,
+            "type": "output",
+            "stream": "stdout"
+          },
+          {
+            "seq": 54,
+            "type": "output",
+            "stream": "stdout"
+          },
+          {
+            "seq": 55,
+            "type": "output",
+            "stream": "stdout"
+          },
+          {
+            "seq": 56,
+            "type": "output",
+            "stream": "stdout"
+          },
+          {
+            "seq": 57,
+            "type": "output",
+            "stream": "stdout"
+          },
+          {
+            "seq": 58,
+            "type": "output",
+            "stream": "stdout"
+          },
+          {
+            "seq": 59,
+            "type": "output",
+            "stream": "stdout"
+          },
+          {
+            "seq": 60,
+            "type": "output",
+            "stream": "stdout"
+          },
+          {
+            "seq": 61,
+            "type": "output",
+            "stream": "stdout"
+          },
+          {
+            "seq": 62,
+            "type": "exited",
+            "exitCode": 0
+          },
+          {
+            "seq": 63,
+            "type": "output",
+            "stream": "stdout"
+          },
+          {
+            "seq": 64,
+            "type": "output",
+            "stream": "stdout"
+          },
+          {
+            "seq": 65,
+            "type": "output",
+            "stream": "stdout"
+          },
+          {
+            "seq": 66,
+            "type": "output",
+            "stream": "stdout"
+          },
+          {
+            "seq": 67,
+            "type": "output",
+            "stream": "stdout"
+          },
+          {
+            "seq": 68,
+            "type": "output",
+            "stream": "stdout"
+          },
+          {
+            "seq": 69,
+            "type": "closed",
+            "failure": null
+          }
+        ],
+        "terminationRequested": false,
+        "streams": {
+          "stdout": {
+            "bytes": 2097408,
+            "sha256": "ad4707187ce2c9c3d16909bd20eb1c440fa9d2717bff5b836db2d32f997da4d2"
+          },
+          "stderr": {
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "diagnosticUtf8": "",
+            "diagnosticBase64": "",
+            "diagnosticTruncated": false
+          }
+        }
+      },
+      {
+        "command": [
+          "python",
+          "-I",
+          "-S",
+          "-B",
+          "/data/user/0/app.foldgpt/files/projects/.host-v2-qualification-6dd1824f7d714b81a60b6a313be439bc/hello.py"
+        ],
+        "cwd": "/",
+        "events": [
+          {
+            "seq": 1,
+            "type": "output",
+            "stream": "stdout"
+          },
+          {
+            "seq": 2,
+            "type": "exited",
+            "exitCode": 0
+          },
+          {
+            "seq": 3,
+            "type": "closed",
+            "failure": null
+          }
+        ],
+        "terminationRequested": false,
+        "streams": {
+          "stdout": {
+            "bytes": 30,
+            "sha256": "92523c614f8c2b5dc646d287f1c5f1bd886dfb498b3efee987143f98fa4966dc"
+          },
+          "stderr": {
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "diagnosticUtf8": "",
+            "diagnosticBase64": "",
+            "diagnosticTruncated": false
+          }
+        }
+      },
+      {
+        "command": [
+          "cat",
+          "/data/user/0/app.foldgpt/app_foldgpt_exec/9fa7182ec08b4c829e4d1159c0e32675/startup.json"
+        ],
+        "cwd": "/",
+        "events": [
+          {
+            "seq": 1,
+            "type": "exited",
+            "exitCode": 1
+          },
+          {
+            "seq": 2,
+            "type": "output",
+            "stream": "stderr"
+          },
+          {
+            "seq": 3,
+            "type": "closed",
+            "failure": null
+          }
+        ],
+        "terminationRequested": false,
+        "streams": {
+          "stdout": {
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "stderr": {
+            "bytes": 112,
+            "sha256": "9ac94a970e0f9f9209e65821252bbcc7fce3af628cd0fcdfa4d11a3865bb5bce",
+            "diagnosticUtf8": "cat: /data/user/0/app.foldgpt/app_foldgpt_exec/9fa7182ec08b4c829e4d1159c0e32675/startup.json: Permission denied\n",
+            "diagnosticBase64": "Y2F0OiAvZGF0YS91c2VyLzAvYXBwLmZvbGRncHQvYXBwX2ZvbGRncHRfZXhlYy85ZmE3MTgyZWMwOGI0YzgyOWU0ZDExNTljMGUzMjY3NS9zdGFydHVwLmpzb246IFBlcm1pc3Npb24gZGVuaWVkCg==",
+            "diagnosticTruncated": false
+          }
+        }
+      },
+      {
+        "command": [
+          "sh",
+          "-c",
+          "sleep 20 & printf ready; wait"
+        ],
+        "cwd": "/",
+        "events": [
+          {
+            "seq": 1,
+            "type": "output",
+            "stream": "stdout"
+          },
+          {
+            "seq": 2,
+            "type": "output",
+            "stream": "stderr"
+          },
+          {
+            "seq": 3,
+            "type": "exited",
+            "exitCode": 137
+          },
+          {
+            "seq": 4,
+            "type": "closed",
+            "failure": null
+          }
+        ],
+        "terminationRequested": true,
+        "streams": {
+          "stdout": {
+            "bytes": 5,
+            "sha256": "b24d6d33736ecd5604a4b17bc9c6481039fac362bb7df044ef1c10a2bfd21db6"
+          },
+          "stderr": {
+            "bytes": 77,
+            "sha256": "058d7b0b569888013b4fa8940a58aed53a1a58a1164b296c4b6b649b03086948",
+            "diagnosticUtf8": "sh: line 1: cannot redirect standard input from /dev/null: Permission denied\n",
+            "diagnosticBase64": "c2g6IGxpbmUgMTogY2Fubm90IHJlZGlyZWN0IHN0YW5kYXJkIGlucHV0IGZyb20gL2Rldi9udWxsOiBQZXJtaXNzaW9uIGRlbmllZAo=",
+            "diagnosticTruncated": false
+          }
+        }
+      }
+    ],
+    "humanPassed": true,
+    "modelPythonPassed": true,
+    "modelCases": [
+      {
+        "case": "script",
+        "command": [
+          "python3",
+          "-I",
+          "-S",
+          "-B",
+          "/data/user/0/app.foldgpt/files/projects/.host-v2-qualification-6dd1824f7d714b81a60b6a313be439bc/model-python/app/__main__.py"
+        ],
+        "cwd": "/data/user/0/app.foldgpt/files/projects/.host-v2-qualification-6dd1824f7d714b81a60b6a313be439bc/model-python",
+        "processId": "model-cli-8a009d1085a94fff88abf3c2b137e16c",
+        "channel": "exec",
+        "admitted": true,
+        "closed": true,
+        "passed": true,
+        "start": {
+          "processId": "model-cli-8a009d1085a94fff88abf3c2b137e16c",
+          "sandboxType": "linuxSeccomp"
+        },
+        "result": {
+          "nextSeq": 4,
+          "exited": true,
+          "exitCode": 0,
+          "closed": true,
+          "failure": null,
+          "sandboxDenied": false
+        },
+        "outputChunks": 1,
+        "streams": {
+          "stdout": {
+            "bytes": 3,
+            "sha256": "084c799cd551dd1d8d5c5f9a5d593b2e931f5e36122ee5c793c1d08a19839cc0",
+            "diagnosticUtf8": "42\n",
+            "diagnosticBase64": "NDIK",
+            "diagnosticTruncated": false
+          },
+          "stderr": {
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "diagnosticUtf8": "",
+            "diagnosticBase64": "",
+            "diagnosticTruncated": false
+          }
+        }
+      },
+      {
+        "case": "unittest",
+        "command": [
+          "python3",
+          "-S",
+          "-B",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tests",
+          "-v"
+        ],
+        "cwd": "/data/user/0/app.foldgpt/files/projects/.host-v2-qualification-6dd1824f7d714b81a60b6a313be439bc/model-python",
+        "processId": "model-cli-fa41959beb824eecbdc53f894d36adba",
+        "channel": "exec",
+        "admitted": true,
+        "closed": true,
+        "passed": true,
+        "start": {
+          "processId": "model-cli-fa41959beb824eecbdc53f894d36adba",
+          "sandboxType": "linuxSeccomp"
+        },
+        "result": {
+          "nextSeq": 4,
+          "exited": true,
+          "exitCode": 0,
+          "closed": true,
+          "failure": null,
+          "sandboxDenied": false
+        },
+        "outputChunks": 1,
+        "streams": {
+          "stdout": {
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "diagnosticUtf8": "",
+            "diagnosticBase64": "",
+            "diagnosticTruncated": false
+          },
+          "stderr": {
+            "bytes": 255,
+            "sha256": "b1597fa20bf7a161561718cbfa6a7efafc03bd9bb4228337725be2a808d3fe64",
+            "diagnosticUtf8": "test_negative (test_add.Addition.test_negative) ... ok\ntest_positive (test_add.Addition.test_positive) ... ok\ntest_zero (test_add.Addition.test_zero) ... ok\n\n----------------------------------------------------------------------\nRan 3 tests in 0.000s\n\nOK\n",
+            "diagnosticBase64": "dGVzdF9uZWdhdGl2ZSAodGVzdF9hZGQuQWRkaXRpb24udGVzdF9uZWdhdGl2ZSkgLi4uIG9rCnRlc3RfcG9zaXRpdmUgKHRlc3RfYWRkLkFkZGl0aW9uLnRlc3RfcG9zaXRpdmUpIC4uLiBvawp0ZXN0X3plcm8gKHRlc3RfYWRkLkFkZGl0aW9uLnRlc3RfemVybykgLi4uIG9rCgotLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tClJhbiAzIHRlc3RzIGluIDAuMDAwcwoKT0sK",
+            "diagnosticTruncated": false
+          }
+        }
+      },
+      {
+        "case": "zipapp-build",
+        "command": [
+          "python3",
+          "-I",
+          "-S",
+          "-B",
+          "-m",
+          "zipapp",
+          "/data/user/0/app.foldgpt/files/projects/.host-v2-qualification-6dd1824f7d714b81a60b6a313be439bc/model-python/app",
+          "-o",
+          "/data/user/0/app.foldgpt/files/projects/.host-v2-qualification-6dd1824f7d714b81a60b6a313be439bc/model-python/model-project.pyz"
+        ],
+        "cwd": "/data/user/0/app.foldgpt/files/projects/.host-v2-qualification-6dd1824f7d714b81a60b6a313be439bc/model-python",
+        "processId": "model-cli-6663d1d9af0246d2919f40457e17fd50",
+        "channel": "exec",
+        "admitted": true,
+        "closed": true,
+        "passed": true,
+        "start": {
+          "processId": "model-cli-6663d1d9af0246d2919f40457e17fd50",
+          "sandboxType": "linuxSeccomp"
+        },
+        "result": {
+          "nextSeq": 3,
+          "exited": true,
+          "exitCode": 0,
+          "closed": true,
+          "failure": null,
+          "sandboxDenied": false
+        },
+        "outputChunks": 0,
+        "streams": {
+          "stdout": {
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "diagnosticUtf8": "",
+            "diagnosticBase64": "",
+            "diagnosticTruncated": false
+          },
+          "stderr": {
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "diagnosticUtf8": "",
+            "diagnosticBase64": "",
+            "diagnosticTruncated": false
+          }
+        },
+        "archive": {
+          "bytes": 301,
+          "sha256": "e58460dacb9494cc004fbd75b3d291a20409cf240054789f3ef5cd747fab45f1"
+        }
+      },
+      {
+        "case": "zipapp-execute",
+        "command": [
+          "python3",
+          "-I",
+          "-S",
+          "-B",
+          "/data/user/0/app.foldgpt/files/projects/.host-v2-qualification-6dd1824f7d714b81a60b6a313be439bc/model-python/model-project.pyz"
+        ],
+        "cwd": "/data/user/0/app.foldgpt/files/projects/.host-v2-qualification-6dd1824f7d714b81a60b6a313be439bc/model-python",
+        "processId": "model-cli-0444ce5bc06b4033b8f5993627079750",
+        "channel": "exec",
+        "admitted": true,
+        "closed": true,
+        "passed": true,
+        "start": {
+          "processId": "model-cli-0444ce5bc06b4033b8f5993627079750",
+          "sandboxType": "linuxSeccomp"
+        },
+        "result": {
+          "nextSeq": 4,
+          "exited": true,
+          "exitCode": 0,
+          "closed": true,
+          "failure": null,
+          "sandboxDenied": false
+        },
+        "outputChunks": 1,
+        "streams": {
+          "stdout": {
+            "bytes": 3,
+            "sha256": "084c799cd551dd1d8d5c5f9a5d593b2e931f5e36122ee5c793c1d08a19839cc0",
+            "diagnosticUtf8": "42\n",
+            "diagnosticBase64": "NDIK",
+            "diagnosticTruncated": false
+          },
+          "stderr": {
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "diagnosticUtf8": "",
+            "diagnosticBase64": "",
+            "diagnosticTruncated": false
+          }
+        }
+      }
+    ],
+    "connection": {
+      "sessionId": "11566145-4389-43c4-ab67-ef4524d9e49e",
+      "hostReady": {
+        "type": "ready",
+        "schema": "foldgpt.host.v2",
+        "sessionId": "11566145-4389-43c4-ab67-ef4524d9e49e",
+        "workspaceRoot": "file:///data/user/0/app.foldgpt/files/projects",
+        "chunkBytes": 32768,
+        "maxDataBytes": 16777216,
+        "maxPacketBytes": 65536,
+        "maxPendingRequests": 128,
+        "operations": [
+          "readFile",
+          "writeFile",
+          "getMetadata",
+          "canonicalize",
+          "readDirectory",
+          "createDirectory",
+          "processStart",
+          "processRead",
+          "processWrite",
+          "processTerminate"
+        ]
+      }
+    },
+    "execNotifications": 11
+  },
+  "clientPassed": true,
+  "beforeStopStatus": {
+    "schema": "foldgpt.native.owner.v1",
+    "state": "ready",
+    "generation": 1,
+    "selected": true,
+    "officialLauncherReplaced": false,
+    "lastRemoteStatus": {
+      "schema": "foldgpt.shizuku.transport.v1",
+      "ready": true,
+      "cancelRequested": false,
+      "bootstrapReaped": false,
+      "cleanupComplete": false,
+      "ownerRetained": true,
+      "quarantined": false,
+      "refusedBeforeFork": false,
+      "setupError": null,
+      "transportFailed": false,
+      "waitStatus": -1,
+      "bootstrapPid": 25698,
+      "directNative": true,
+      "admission": {
+        "schema": "foldgpt.executor-admission.v1",
+        "admitted": true,
+        "stage": "complete",
+        "subject": "",
+        "facts": {},
+        "error": null
+      },
+      "preflight": null
+    },
+    "lastNativeSessionStatus": {
+      "schema": "foldgpt.shizuku.transport.v1",
+      "ready": true,
+      "cancelRequested": false,
+      "bootstrapReaped": false,
+      "cleanupComplete": false,
+      "ownerRetained": true,
+      "quarantined": false,
+      "refusedBeforeFork": false,
+      "setupError": null,
+      "transportFailed": false,
+      "waitStatus": -1,
+      "bootstrapPid": 25698,
+      "directNative": true
+    },
+    "socketPath": "/data/user/0/app.foldgpt/app_foldgpt_exec/9fa7182ec08b4c829e4d1159c0e32675/owner.sock",
+    "peerUid": 10412,
+    "directNative": true,
+    "startupManifest": "/data/user/0/app.foldgpt/app_foldgpt_exec/9fa7182ec08b4c829e4d1159c0e32675/startup.json",
+    "workspace": "/data/user/0/app.foldgpt/files/projects"
+  },
+  "stopResponse": "Starting: Intent { act=app.foldgpt.action.STOP_NATIVE_EXECUTOR cmp=app.foldgpt/.NativePreparationActivity }\r\nWarning: Activity not started, intent has been delivered to currently running top-most instance.\r\nStatus: ok\r\nLaunchState: UNKNOWN (0)\r\nActivity: app.foldgpt/.NativePreparationActivity\r\nTotalTime: 0\r\nWaitTime: 5\r\nComplete",
+  "finalStatus": {
+    "schema": "foldgpt.native.owner.v1",
+    "state": "closed",
+    "generation": 1,
+    "selected": true,
+    "officialLauncherReplaced": false,
+    "lastRemoteStatus": {
+      "schema": "foldgpt.shizuku.transport.v1",
+      "ready": true,
+      "cancelRequested": false,
+      "bootstrapReaped": true,
+      "cleanupComplete": true,
+      "ownerRetained": false,
+      "quarantined": false,
+      "refusedBeforeFork": false,
+      "setupError": null,
+      "transportFailed": false,
+      "waitStatus": 0,
+      "bootstrapPid": 25698,
+      "directNative": true,
+      "admission": {
+        "schema": "foldgpt.executor-admission.v1",
+        "admitted": true,
+        "stage": "complete",
+        "subject": "",
+        "facts": {},
+        "error": null
+      },
+      "preflight": null
+    },
+    "lastNativeSessionStatus": {
+      "schema": "foldgpt.shizuku.transport.v1",
+      "ready": true,
+      "cancelRequested": false,
+      "bootstrapReaped": true,
+      "cleanupComplete": true,
+      "ownerRetained": false,
+      "quarantined": false,
+      "refusedBeforeFork": false,
+      "setupError": null,
+      "transportFailed": false,
+      "waitStatus": 0,
+      "bootstrapPid": 25698,
+      "directNative": true
+    },
+    "socketPath": "/data/user/0/app.foldgpt/app_foldgpt_exec/9fa7182ec08b4c829e4d1159c0e32675/owner.sock",
+    "peerUid": 10412,
+    "directNative": true,
+    "startupManifest": "/data/user/0/app.foldgpt/app_foldgpt_exec/9fa7182ec08b4c829e4d1159c0e32675/startup.json",
+    "workspace": "/data/user/0/app.foldgpt/files/projects"
+  },
+  "bootUnchanged": true,
+  "nativeOwnerAbsent": true,
+  "cleanupVerified": true
+}

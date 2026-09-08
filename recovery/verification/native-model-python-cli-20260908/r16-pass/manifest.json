@@ -1,0 +1,79 @@
+{
+  "files": [
+    {
+      "path": "after-device.json",
+      "bytes": 2009,
+      "sha256": "f810227e74eb6af08f7eaa9d4e94a4ff443f0ed143729077033620440f6422fb"
+    },
+    {
+      "path": "apk-verification.json",
+      "bytes": 336,
+      "sha256": "200459bd05cc22ee28c814745a2325159cabcc019e0ce61505d9a2bce190808f"
+    },
+    {
+      "path": "before-device.json",
+      "bytes": 2009,
+      "sha256": "9acbedd52a5f3e4ef361cb1e93d288b9e4b103791a7214e2ff2048ad841f945d"
+    },
+    {
+      "path": "client.py",
+      "bytes": 24645,
+      "sha256": "baa6d1a13104d5c99f02683ece6f0aaf8b0d587e8eea20616a09b6ea1bc2e0fb"
+    },
+    {
+      "path": "client.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "client.stdout",
+      "bytes": 12470,
+      "sha256": "326ece60b81037b749ff2a326c2dba9dfd808719ebf00e8bc7fdd678590fd28e"
+    },
+    {
+      "path": "commands.json",
+      "bytes": 29387,
+      "sha256": "bfe92f70dab4abefaede8004eb5413d32573c337c003d96c78bf6001ebb66554"
+    },
+    {
+      "path": "r16-build-result.json",
+      "bytes": 187,
+      "sha256": "a7fba0508c7bd3b23277e0ca88ed6b11cf9f239fdb1623d2455342d09b464948"
+    },
+    {
+      "path": "r16-recreated-preparation-after-stop.json",
+      "bytes": 1533,
+      "sha256": "dac6cb5784f47651618abb152c0ee085015d9ec28fa52ce8c75025b5ead4227f"
+    },
+    {
+      "path": "r16-recreated-preparation-before-stop.json",
+      "bytes": 1538,
+      "sha256": "0a764cbc35840d8ac047eebfb8c1d42041078fdadc5d5ead5d5bc3583caf7f02"
+    },
+    {
+      "path": "r16-signature.txt",
+      "bytes": 311,
+      "sha256": "05580fc7cfc7e4b9b45962ae762e11c7ea55137ec132c0618f573fdde0b172d3"
+    },
+    {
+      "path": "report.json",
+      "bytes": 28438,
+      "sha256": "4fca02d7e8c3858dabbbd3578d52adc5caaaf1261b53d7eb71aba3ff2c43dbaa"
+    },
+    {
+      "path": "startup.json",
+      "bytes": 1275,
+      "sha256": "6c155dd0c6e9a633c3e3186bdb221eaf7dda8166c4cb2825c45c1b22a9bfa1cf"
+    },
+    {
+      "path": "statuses.json",
+      "bytes": 6386,
+      "sha256": "56405c0b021557e6d13e0583b614ff00c2efa95fdd45b28f38fbf329f384eee7"
+    },
+    {
+      "path": "summary.json",
+      "bytes": 1044,
+      "sha256": "b5b31decc626f106efc498cce9b2458a855202cf565136cbdf150b4f5ebdaf42"
+    }
+  ]
+}

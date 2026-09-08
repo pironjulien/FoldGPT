@@ -4871,10 +4871,10 @@ index 833475ff2974a04c36499a9a23f4461fa765fbba..ca4ccc460a9c9619c9165d48db3c6a21
                          overrides,
 diff --git a/codex-rs/app-server/tests/native_startup.rs b/codex-rs/app-server/tests/native_startup.rs
 new file mode 100644
-index 0000000000000000000000000000000000000000..803c7c668ac3395b8e283ed8a4e3873261fb06b1
+index 0000000000000000000000000000000000000000..51457ec90a7cb547f139d27c10576b6119af7028
 --- /dev/null
 +++ b/codex-rs/app-server/tests/native_startup.rs
-@@ -0,0 +1,85 @@
+@@ -0,0 +1,89 @@
 +#![cfg(target_os = "linux")]
 +
 +use std::os::unix::fs::PermissionsExt;
@@ -4886,6 +4886,7 @@ index 0000000000000000000000000000000000000000..803c7c668ac3395b8e283ed8a4e38732
 +async fn production_entrypoints_reject_invalid_native_authority_before_starting_rpc()
 +-> anyhow::Result<()> {
 +    let directory = tempfile::tempdir()?;
++    std::fs::set_permissions(directory.path(), std::fs::Permissions::from_mode(0o700))?;
 +    let manifest = directory.path().join("native.json");
 +    std::fs::write(&manifest, b"[]")?;
 +    std::fs::set_permissions(&manifest, std::fs::Permissions::from_mode(0o600))?;
@@ -4925,10 +4926,13 @@ index 0000000000000000000000000000000000000000..803c7c668ac3395b8e283ed8a4e38732
 +async fn official_desktop_global_options_preserve_native_environment_selection()
 +-> anyhow::Result<()> {
 +    let directory = tempfile::tempdir()?;
++    std::fs::set_permissions(directory.path(), std::fs::Permissions::from_mode(0o700))?;
 +    let manifest = directory.path().join("native.json");
 +    std::fs::write(&manifest, b"[]")?;
 +    std::fs::set_permissions(&manifest, std::fs::Permissions::from_mode(0o600))?;
 +    let binary = codex_utils_cargo_bin::cargo_bin("codex")?;
++    let home = directory.path().join("home");
++    std::fs::create_dir(&home)?;
 +    let mut command = tokio::process::Command::new(&binary);
 +    command
 +        .args([
@@ -4938,7 +4942,7 @@ index 0000000000000000000000000000000000000000..803c7c668ac3395b8e283ed8a4e38732
 +            "--analytics-default-enabled",
 +        ])
 +        .env("FOLDGPT_NATIVE_BOOTSTRAP", &manifest)
-+        .env("CODEX_HOME", directory.path().join("home"))
++        .env("CODEX_HOME", home)
 +        .kill_on_drop(true);
 +    let output = tokio::time::timeout(Duration::from_secs(15), command.output()).await??;
 +    assert!(!output.status.success());

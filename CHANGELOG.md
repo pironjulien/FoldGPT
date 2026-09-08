@@ -2,6 +2,12 @@
 
 ## Unreleased - 2026-09-08
 
+- Fix direct Python script execution in the native model runner by admitting only
+  FIOCLEX/FIONCLEX descriptor inheritance operations. APK r16 passes real script,
+  unittest, zipapp build and execution on the Fold, plus all six human operations;
+  independent native cleanup and unchanged official Android packages are verified.
+- Correct the private directories in the two real app-server startup fixtures;
+  retain the production permissions check and reuse the Linux compilation cache.
 - Publish and restore encrypted supplement v11 with APK r15, its frozen inputs,
   exact source checkpoint and new Fold/Linux proof. Reverify all 5,487 restored
   artifact files, all 1,105 source files and the restored APK inventory.

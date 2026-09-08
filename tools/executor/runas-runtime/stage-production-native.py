@@ -19,6 +19,7 @@ def main():
     parser.add_argument("--python-cli-build", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--host-build", type=Path)
+    parser.add_argument("--model-build", type=Path)
     args = parser.parse_args()
     cli_build, output = args.python_cli_build.resolve(), args.output.resolve()
     cli_build.relative_to(ROOT)
@@ -39,6 +40,18 @@ def main():
         "a10ca7cc9ccb8c110cd7ca901d84b9066a7bf5ae73842935da88e1895437b40d").decode().splitlines())
     for name in ("libfoldgpt_bionic_supervisor.so", "libfoldgpt_native_files.so", "libfoldgpt_native_file_handle.so"):
         native[name] = pinned(frozen / name, hashes[name])
+    if args.model_build is not None:
+        model = args.model_build.resolve(strict=True)
+        model.relative_to(ROOT)
+        record = json.loads((model / "build.json").read_text())
+        if (record.get("schema") != "foldgpt.native-model-build.v1" or record.get("reproducible") is not True
+                or record.get("ndk") != "29.0.14206865" or record["elf"]["architecture"] != "aarch64"
+                or record["elf"]["interpreter"] != "/system/bin/linker64"):
+            raise ValueError("Model runner requires the reproducible checked Windows ARM64 build")
+        name = "libfoldgpt_bionic_supervisor.so"
+        native[name] = pinned(model / name, record["elf"]["sha256"])
+        if len(native[name]) != record["elf"]["bytes"]:
+            raise ValueError("Model runner build length differs")
     transport = ROOT / "tools/executor/shizuku-lab/build/frozen-transport-jni/arm64-v8a"
     for name, expected in {
         "libfoldgpt_shizuku_transport.so": "d4bb423a0dbe354485337d947bec486d6012d7b37a2ae0d73d0def8f26fe4ca6",

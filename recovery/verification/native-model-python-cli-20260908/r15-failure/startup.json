@@ -1,0 +1,39 @@
+{
+  "schema": "foldgpt.native-startup.v1",
+  "socketPath": "/data/user/0/app.foldgpt/app_foldgpt_exec/1911cce78b8842b69836c69f8180bb5e/owner.sock",
+  "peer": {
+    "pid": 23189,
+    "uid": 10412,
+    "gid": 10412
+  },
+  "workspaceRoot": "file:///data/user/0/app.foldgpt/files/projects",
+  "sharedPaths": [
+    {
+      "path": "file:///data/user/0/app.foldgpt/files/projects",
+      "device": 65097,
+      "inode": 471258
+    },
+    {
+      "path": "file:///data/user/0/app.foldgpt/files/native-runtime-v1/python",
+      "device": 65097,
+      "inode": 472354
+    },
+    {
+      "path": "file:///data/app/~~aZUC8w2KTppKSWMS6kmHgg%3D%3D/app.foldgpt-BP6Y-BVIx1qx6Y73VpV2Pg%3D%3D/lib/arm64",
+      "device": 65097,
+      "inode": 476397
+    }
+  ],
+  "controllerRoots": [
+    "file:///home/julien",
+    "file:///tmp"
+  ],
+  "parentEnvironment": {
+    "HOME": "/data/user/0/app.foldgpt/files/projects",
+    "TMPDIR": "/data/user/0/app.foldgpt/files/projects/.foldgpt-tmp",
+    "PATH": "/data/user/0/app.foldgpt/files/native-runtime-v1/python/bin:/system/bin",
+    "SHELL": "/data/app/~~aZUC8w2KTppKSWMS6kmHgg==/app.foldgpt-BP6Y-BVIx1qx6Y73VpV2Pg==/lib/arm64/libfoldgpt_bash.so",
+    "LANG": "C.UTF-8"
+  },
+  "hostSchema": "foldgpt.host.v2"
+}

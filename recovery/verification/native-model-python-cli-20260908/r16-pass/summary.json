@@ -1,0 +1,40 @@
+{
+  "passed": true,
+  "trial": "3cd6ad7f",
+  "apk": "r16",
+  "humanCasesPassed": 6,
+  "modelCases": [
+    {
+      "case": "script",
+      "passed": true,
+      "exitCode": 0,
+      "stdout": "42\n",
+      "stderr": ""
+    },
+    {
+      "case": "unittest",
+      "passed": true,
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": "test_negative (test_add.Addition.test_negative) ... ok\ntest_positive (test_add.Addition.test_positive) ... ok\ntest_zero (test_add.Addition.test_zero) ... ok\n\n----------------------------------------------------------------------\nRan 3 tests in 0.000s\n\nOK\n"
+    },
+    {
+      "case": "zipapp-build",
+      "passed": true,
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "case": "zipapp-execute",
+      "passed": true,
+      "exitCode": 0,
+      "stdout": "42\n",
+      "stderr": ""
+    }
+  ],
+  "cleanupVerified": true,
+  "ownerPidAbsent": 25698,
+  "bootPropertiesAndOfficialPackagesUnchanged": true,
+  "phoneUiTested": false
+}
