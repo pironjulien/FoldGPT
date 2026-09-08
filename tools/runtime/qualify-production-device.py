@@ -20,6 +20,18 @@ ROOT = Path(__file__).resolve().parents[2]
 DATA = "/data/user/0/app.foldgpt"
 
 
+def qualification_inputs(qualification):
+    sources = {"python": "qualify_native_production.py", "host-v2": "qualify_production_host_v2.py",
+        "ordinary-uid": "qualify_production_ordinary_uid.py", "ripgrep": "qualify_production_ripgrep.py"}
+    inputs = {"client.py": (ROOT / "tools/executor" / sources[qualification]).read_bytes(),
+              "native_path_uri.py": (ROOT / "tools/executor/native_path_uri.py").read_bytes()}
+    if qualification in ("ordinary-uid", "ripgrep"):
+        inputs["qualify_production_host_v2.py"] = (ROOT / "tools/executor/qualify_production_host_v2.py").read_bytes()
+    if qualification == "ripgrep":
+        inputs["qualify_production_ordinary_uid.py"] = (ROOT / "tools/executor/qualify_production_ordinary_uid.py").read_bytes()
+    return inputs
+
+
 def successful_cleanup(value, pid):
     """Require both actual receipts for the selected bootstrap generation."""
     if (not isinstance(value, dict) or value.get("state") != "closed"
@@ -42,20 +54,21 @@ def successful_cleanup(value, pid):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--apk-sha256", required=True)
-    parser.add_argument("--qualification", choices=("python", "host-v2", "ordinary-uid"), default="python")
+    parser.add_argument("--qualification", choices=("python", "host-v2", "ordinary-uid", "ripgrep"), default="python")
     parser.add_argument("--controller-delay", type=float, default=0,
                         help="Deliberately delay the actual controller to qualify slow desktop startup")
     parser.add_argument("--verify-restart", action="store_true",
-                        help="After ordinary Python and clean STOP, require fresh Java admission and idle STOP")
+                        help="After ordinary Python or ripgrep and clean STOP, require fresh Java admission and idle STOP")
     args = parser.parse_args()
     if not 0 <= args.controller_delay <= 60:
         parser.error("Controller delay must be between 0 and 60 seconds")
-    if args.verify_restart and args.qualification != "ordinary-uid":
-        parser.error("--verify-restart requires --qualification ordinary-uid")
+    if args.verify_restart and args.qualification not in ("ordinary-uid", "ripgrep"):
+        parser.error("--verify-restart requires --qualification ordinary-uid or ripgrep")
     trial = uuid.uuid4().hex[:8]
     directory = {"python": "native-production-device-20260908",
         "host-v2": "native-host-production-device-20260908",
-        "ordinary-uid": "native-ordinary-production-device-20260908"}[args.qualification]
+        "ordinary-uid": "native-ordinary-production-device-20260908",
+        "ripgrep": "native-ripgrep-production-device-20260908"}[args.qualification]
     output = ROOT / "downloads" / directory / trial
     output.mkdir(parents=True, exist_ok=False)
     prefix = [str(Path(os.environ["LOCALAPPDATA"]) / "Android/Sdk/platform-tools/adb.exe"), "-s", "R3GL808JN4A"]
@@ -126,7 +139,7 @@ def main():
                         raise RuntimeError("Native readmission failed: " + json.dumps(current))
                 time.sleep(0.2)
             if ready is None:
-                raise TimeoutError("No fresh native readiness after standard Python")
+                raise TimeoutError("No fresh native readiness after production qualification")
             startup = json.loads(text(["run-as", "app.foldgpt", "cat", ready["startupManifest"]]))
             restart["startup"] = startup
             (output / "restart-startup.json").write_text(json.dumps(startup, indent=2) + "\n")
@@ -196,14 +209,7 @@ def main():
             raise ValueError("Controller talloc alias differs from the installed APK")
         for directory in (DATA + "/cache/x11", DATA + "/cache/shm"):
             text(["run-as", "app.foldgpt", "test", "-d", directory])
-        client_source = {"python": "qualify_native_production.py", "host-v2": "qualify_production_host_v2.py",
-            "ordinary-uid": "qualify_production_ordinary_uid.py"}[args.qualification]
-        source = (ROOT / "tools/executor" / client_source).read_bytes()
-        client_inputs = {"client.py": source,
-            "native_path_uri.py": (ROOT / "tools/executor/native_path_uri.py").read_bytes()}
-        if args.qualification == "ordinary-uid":
-            client_inputs["qualify_production_host_v2.py"] = (
-                ROOT / "tools/executor/qualify_production_host_v2.py").read_bytes()
+        client_inputs = qualification_inputs(args.qualification)
         tar = io.BytesIO()
         with tarfile.open(fileobj=tar, mode="w", format=tarfile.GNU_FORMAT) as archive:
             for name, content in client_inputs.items():
@@ -306,9 +312,10 @@ def main():
             result["firstCyclePassed"] = True
             result["passed"] = False
             try:
-                cache = (result.get("client") or {}).get("standardPythonCache") or {}
-                if cache.get("cacheOutsideRuntime") is not True:
-                    raise ValueError("Standard Python did not prove real caches outside its runtime")
+                if args.qualification == "ordinary-uid":
+                    cache = (result.get("client") or {}).get("standardPythonCache") or {}
+                    if cache.get("cacheOutsideRuntime") is not True:
+                        raise ValueError("Standard Python did not prove real caches outside its runtime")
                 result["passed"] = verify_restart()
             except BaseException as error:
                 result["restartError"] = type(error).__name__ + ": " + str(error)

@@ -52,6 +52,22 @@ def main():
         runner, actual = module.production_direct(ROOT / provenance["path"])
         if provenance != actual or (stage / "jniLibs/arm64-v8a" / direct_name).read_bytes() != runner:
             raise ValueError("Ordinary UID stage differs from its actual build provenance and compiled runner")
+    ripgrep_names = {"libfoldgpt_rg.so", "libfoldgpt_pcre2_jit_probe.so"}
+    staged_ripgrep = {name for name in ripgrep_names if (stage / "jniLibs/arm64-v8a" / name).exists()}
+    if staged_ripgrep or "ripgrepBuild" in inventory:
+        provenance = inventory.get("ripgrepBuild")
+        if (staged_ripgrep != ripgrep_names or type(provenance) is not dict
+                or type(provenance.get("path")) is not str):
+            raise ValueError("Ripgrep selection requires both attested native outputs")
+        spec = importlib.util.spec_from_file_location("foldgpt_package_ripgrep_stage",
+            Path(__file__).with_name("stage-production-native.py"))
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        binaries, actual = module.production_ripgrep(ROOT / provenance["path"])
+        if (provenance != actual or set(binaries) != ripgrep_names
+                or any((stage / "jniLibs/arm64-v8a" / name).read_bytes() != data
+                       for name, data in binaries.items())):
+            raise ValueError("Ripgrep stage differs from its source-attested native build")
     output.mkdir(parents=True, exist_ok=False)
     shutil.copytree(stage / "assets", output / "assets")
     shutil.copytree(stage / "jniLibs", output / "jniLibs")
@@ -83,6 +99,8 @@ def main():
             "cwdShim": {"path": marker + "libfoldgpt_bionic_cwd.so", "sha256": native["libfoldgpt_bionic_cwd.so"]}}}
     if args.ordinary_uid:
         config["backendOptions"]["ordinaryUid"] = {"processRunner": marker + direct_name, "limits": {}}
+    if "ripgrepBuild" in inventory:
+        config["backendOptions"]["executables"]["rg"] = marker + "libfoldgpt_rg.so"
     (assets / "foldgpt-executor-deployment.json").write_text(json.dumps(config, indent=2) + "\n")
     if args.host_v2:
         runner = "libfoldgpt_host_supervisor.so"
@@ -136,6 +154,9 @@ def main():
         qualification["hostDeploymentSha256"] = digest((assets / "foldgpt-host-deployment.json").read_bytes())
     if args.ordinary_uid:
         qualification["ordinaryUidBuild"] = inventory["ordinaryUidBuild"]
+    if "ripgrepBuild" in inventory:
+        qualification["ripgrepBuild"] = inventory["ripgrepBuild"]
+        qualification["ripgrepNoticesSha256"] = digest((assets / "notices/ripgrep.txt").read_bytes())
     (assets / "foldgpt-executor-qualification.json").write_text(json.dumps(qualification, indent=2) + "\n")
     print(json.dumps({"output": str(output), "sources": len(source_manifest), "nativeLibraries": len(native),
                       "androidProductionExecuted": False}))

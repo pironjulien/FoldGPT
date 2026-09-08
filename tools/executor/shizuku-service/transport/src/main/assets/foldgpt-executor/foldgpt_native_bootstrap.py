@@ -85,6 +85,19 @@ def deployment(apk):
     return config
 
 
+def production_entrypoints(executables, native, libraries):
+    """Admit only the exact installed commands, with their identical absolute paths."""
+    bash, python = str(native / "libfoldgpt_bash.so"), str(native / "libfoldgpt_python_cli.so")
+    expected = {"bash": bash, "python": python, "python3": python}
+    if "libfoldgpt_rg.so" in libraries:
+        expected["rg"] = str(native / "libfoldgpt_rg.so")
+    if executables != expected:
+        raise ValueError("Production entrypoints must identify the exact installed native commands")
+    # environment/info advertises absolute shell paths. They must name these
+    # same admitted executables; no RPC-selected or external ELF is admitted.
+    return {**expected, **{path: path for path in expected.values()}}
+
+
 def production_options(config, workspace):
     from tools.executor.native_path_uri import path_uri
     options = installed_backend_options(config)
@@ -98,11 +111,7 @@ def production_options(config, workspace):
     if "ordinaryUid" in options and options["ordinaryUid"]["processRunner"] != str(native / "libfoldgpt_direct_runner.so"):
         raise ValueError("Ordinary UID runner does not identify its installed executable")
     bash, python = str(native / "libfoldgpt_bash.so"), str(native / "libfoldgpt_python_cli.so")
-    if options["executables"] != {"bash": bash, "python": python, "python3": python}:
-        raise ValueError("Production entrypoints must identify the installed Bash and Python")
-    # Absolute shell paths advertised by environment/info must name the exact
-    # same admitted executable. This adds no external or model-selected ELF.
-    options["executables"].update({bash: bash, python: python})
+    options["executables"] = production_entrypoints(options["executables"], native, config["nativeLibraries"])
     options["workspace"] = workspace
     options["runtime"] = [*options["runtime"], {"path": str(native), "execute": True}]
     temporary = str(Path(workspace) / ".foldgpt-tmp")

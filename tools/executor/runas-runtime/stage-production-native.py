@@ -178,6 +178,14 @@ def production_direct(build):
                     "executableSha256": hashlib.sha256(runner).hexdigest(), "bytes": len(runner)}
 
 
+def production_ripgrep(build):
+    spec = importlib.util.spec_from_file_location("foldgpt_production_ripgrep_admission",
+        Path(__file__).with_name("ripgrep-admission.py"))
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module.production_ripgrep(build)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--python-cli-build", type=Path, required=True)
@@ -188,6 +196,8 @@ def main():
     parser.add_argument("--model-build", type=Path)
     parser.add_argument("--ordinary-uid-build", type=Path,
                         help="Explicit source-attested direct runner double build")
+    parser.add_argument("--ripgrep-build", type=Path,
+                        help="Explicit source-attested native ripgrep and PCRE2/JIT double build")
     args = parser.parse_args()
     cli_build, output = args.python_cli_build.resolve(), args.output.resolve()
     cli_build.relative_to(ROOT)
@@ -205,6 +215,12 @@ def main():
             native[item["name"]] = pinned(python / "jniLibs/arm64-v8a" / item["name"], item["sha256"])
     native["libfoldgpt_python_cli.so"] = pinned(cli_build / "libfoldgpt_python_cli.so", cli_record["executableSha256"])
     native["libfoldgpt_bash.so"] = bash
+    ripgrep_provenance = None
+    if args.ripgrep_build is not None:
+        ripgrep, ripgrep_provenance = production_ripgrep(args.ripgrep_build)
+        if set(ripgrep) & set(native):
+            raise ValueError("Ripgrep native library collision")
+        native.update(ripgrep)
     direct_provenance = None
     if args.ordinary_uid_build is not None:
         native["libfoldgpt_direct_runner.so"], direct_provenance = production_direct(args.ordinary_uid_build)
@@ -244,11 +260,14 @@ def main():
         if len(native[name]) != record["elf"]["bytes"]:
             raise ValueError("Human runner build length differs")
     aliases = {item["path"] for item in runtime["runtimeAliases"]}
-    for command, library in (("python", "libfoldgpt_python_cli.so"),
+    commands = [("python", "libfoldgpt_python_cli.so"),
                              ("python3", "libfoldgpt_python_cli.so"),
                              ("python3.14", "libfoldgpt_python_cli.so"),
                              ("bash", "libfoldgpt_bash.so"),
-                             ("sh", "libfoldgpt_bash.so")):
+                ("sh", "libfoldgpt_bash.so")]
+    if ripgrep_provenance is not None:
+        commands.append(("rg", "libfoldgpt_rg.so"))
+    for command, library in commands:
         path = "bin/" + command
         if path in aliases:
             raise ValueError("Runtime command alias collision: " + path)
@@ -268,6 +287,10 @@ def main():
     libraries.mkdir(parents=True)
     assets = output / "assets"
     assets.mkdir()
+    if ripgrep_provenance is not None:
+        notices = (assets / "notices")
+        notices.mkdir()
+        (notices / "ripgrep.txt").write_bytes((args.ripgrep_build / "ripgrep-notices.txt").read_bytes())
     for name, data in native.items():
         (libraries / name).write_bytes(data)
     for name, data in data_files.items():
@@ -298,6 +321,8 @@ def main():
         "bashBuild": bash_provenance, "files": files}
     if direct_provenance is not None:
         stage_manifest["ordinaryUidBuild"] = direct_provenance
+    if ripgrep_provenance is not None:
+        stage_manifest["ripgrepBuild"] = ripgrep_provenance
     (output / "manifest.json").write_text(json.dumps(stage_manifest, indent=2) + "\n")
     print(json.dumps({"output": str(output), "nativeLibraries": len(native), "dataFiles": len(data_files),
                       "runtimeAliases": len(runtime["runtimeAliases"])}))

@@ -1,5 +1,12 @@
 # Reprise technique du 8 septembre 2026
 
+**Pause demandée par Julien : lire d'abord [le point d'arrêt r24](PAUSE-20260908-r24.md).**
+R23 reste installé ; sa session6893 est maintenant fermée proprement et le
+téléphone remis en veille. Rg est compilé et empaqueté sur PC, pas installé.
+Une sonde PTY fixe réussit sur le Fold ; le backend PTY reste à intégrer.
+La dernière archive distante complète reste v15. Le reste de ce document
+décrit le parcours r23 précédemment validé et ses preuves historiques.
+
 L'[ancien état r21 et ses détails](HANDOFF-r21-20260908.md) est conservé comme
 historique. Les consignes opérationnelles actuelles figurent ci-dessous.
 

@@ -2,6 +2,15 @@
 
 ## Unreleased - 2026-09-08
 
+- Pause before APK r24: preserve r23 installed and its clean session shutdown.
+  Build native ripgrep15.2.0 with external static PCRE2 10.47/JIT twice, admit
+  its exact sources/binaries, and stage explicit rg commands/aliases/notices.
+  No rg Android execution or r24 installation is claimed. Native pip version
+  preflight and a controlled one-child PTY probe pass on the Fold; PTY backend,
+  dependency project and rg production/UI qualification remain pending.
+  Record actual failures, restart point and the local-only artifact boundary
+  in recovery/PAUSE-20260908-r24.md.
+
 - Publish encrypted recovery supplement v15 to the existing private release,
   redownload and authenticate all 8,707 files, restore 1,219 committed sources,
   and reverify the restored r23 APK. Preserve main + supplements 1-14 as required

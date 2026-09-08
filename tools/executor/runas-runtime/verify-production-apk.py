@@ -61,6 +61,61 @@ def verify_model_selection(config, qualification, read_library, sources):
     return ["managed", "ordinaryUid"]
 
 
+def verify_entrypoints(config, qualification, runtime, read_library):
+    """Check command selection, runtime aliases and the optional native rg build."""
+    marker = "@nativeLibraryDir/"
+    commands = {"bash": "libfoldgpt_bash.so", "python": "libfoldgpt_python_cli.so",
+                "python3": "libfoldgpt_python_cli.so"}
+    rg_name, probe_name = "libfoldgpt_rg.so", "libfoldgpt_pcre2_jit_probe.so"
+    native = config["nativeLibraries"]
+    has_rg = rg_name in native
+    if has_rg:
+        commands["rg"] = rg_name
+    if (probe_name in native) != has_rg or ("ripgrepBuild" in qualification) != has_rg:
+        raise ValueError("Ripgrep requires its complete native outputs and build attestation")
+    if config["backendOptions"]["executables"] != {name: marker + library for name, library in commands.items()}:
+        raise ValueError("Package entrypoints differ from the exact native commands")
+    aliases = runtime["runtimeAliases"]
+    by_path = {item["path"]: item for item in aliases}
+    if len(by_path) != len(aliases):
+        raise ValueError("Duplicate runtime alias")
+    for item in aliases:
+        library = item["nativeLibrary"]
+        if library not in native or item["sha256"] != native[library]:
+            raise ValueError("Runtime alias differs from its packaged native library")
+    for name, library in commands.items():
+        if by_path.get("bin/" + name) != {"path": "bin/" + name, "nativeLibrary": library,
+                                         "sha256": native[library]}:
+            raise ValueError("Native command lacks its exact runtime alias: " + name)
+    if not has_rg:
+        if "bin/rg" in by_path:
+            raise ValueError("Unattested rg runtime alias")
+        return sorted(commands)
+    provenance = qualification["ripgrepBuild"]
+    fields = {"path", "buildManifestSha256", "sourceManifestSha256", "executableSha256", "bytes",
+              "probeSha256", "probeBytes", "ripgrepVersion", "pcre2Version", "pcre2Jit", "androidExecuted"}
+    if type(provenance) is not dict or set(provenance) != fields:
+        raise ValueError("Ripgrep package lacks its complete source/build attestation")
+    relative = provenance["path"]
+    if (type(relative) is not str or not relative or PurePosixPath(relative).is_absolute()
+            or PurePosixPath(relative).as_posix() != relative or ".." in PurePosixPath(relative).parts
+            or "\\" in relative or ":" in relative):
+        raise ValueError("Ripgrep build provenance path is not project-relative")
+    for field in ("buildManifestSha256", "sourceManifestSha256", "executableSha256", "probeSha256"):
+        if type(provenance[field]) is not str or re.fullmatch("[0-9a-f]{64}", provenance[field]) is None:
+            raise ValueError("Ripgrep provenance digest is malformed")
+    if (provenance["ripgrepVersion"] != "15.2.0" or provenance["pcre2Version"] != "10.47"
+            or provenance["pcre2Jit"] is not True or provenance["androidExecuted"] is not False):
+        raise ValueError("Ripgrep/PCRE2 provenance versions differ from the reviewed build")
+    for name, hash_key, size_key in ((rg_name, "executableSha256", "bytes"),
+                                     (probe_name, "probeSha256", "probeBytes")):
+        data = read_library(name)
+        if (type(provenance[size_key]) is not int or provenance[size_key] != len(data)
+                or native[name] != provenance[hash_key] or digest(data) != provenance[hash_key]):
+            raise ValueError("Ripgrep attestation differs from its actual packaged ELF: " + name)
+    return sorted(commands)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("apk", type=Path)
@@ -81,6 +136,13 @@ def main():
         config = strict_json(asset("foldgpt-executor-deployment.json"))
         if config["schema"] != "foldgpt.native.deployment.v1":
             raise ValueError("Native deployment schema differs")
+        if "ripgrepBuild" in qualification:
+            notices = asset("notices/ripgrep.txt")
+            if (not notices or digest(notices) != qualification.get("ripgrepNoticesSha256")
+                    or b"ripgrep-15.2.0" not in notices or b"pcre2-10.47" not in notices):
+                raise ValueError("Ripgrep/PCRE2 notices are absent or changed")
+        elif "ripgrepNoticesSha256" in qualification or "assets/notices/ripgrep.txt" in names:
+            raise ValueError("Ripgrep notices present without the attested feature")
         host_schema = "foldgpt.host-files.v1"
         if "assets/foldgpt-host-deployment.json" in names:
             host_bytes = asset("foldgpt-host-deployment.json")
@@ -123,11 +185,13 @@ def main():
                         raise ValueError("Packaged source import is unresolved: " + node.module)
         profiles = verify_model_selection(config, qualification,
             lambda name: archive.read("lib/arm64-v8a/" + name), sources)
+        commands = verify_entrypoints(config, qualification, runtime,
+            lambda name: archive.read("lib/arm64-v8a/" + name))
         result = {"schema": "foldgpt.native-apk-verification.v1", "success": True,
             "androidProductionExecuted": False, "apkSha256": digest(args.apk.read_bytes()),
             "nativeLibraries": len(config["nativeLibraries"]), "pythonDataFiles": len(runtime["dataFiles"]),
             "runtimeAliases": len(runtime["runtimeAliases"]), "sourceFiles": len(sources), "hostSchema": host_schema,
-            "modelProfiles": profiles}
+            "modelProfiles": profiles, "nativeCommands": commands}
     args.output.write_text(json.dumps(result, indent=2) + "\n")
     print(json.dumps(result))
 
