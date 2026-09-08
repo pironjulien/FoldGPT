@@ -2,6 +2,11 @@
 
 ## Unreleased - 2026-09-08
 
+- Diagnose legacy conversation resume failures on the connected Fold: valid TOML,
+  but saved Linux project paths lie outside the current native workspace root.
+  Record the outstanding migration defect and verify Local Desktop/UserLAnd
+  upstream architectures. No device configuration, history or runtime changed.
+
 - Reassess the Shizuku launch dependency using the historical Bionic app-context
   RPC receipt and verified artifact hashes. Document the unqualified direct-app
   runner alternative, Store/signature limits, AVF tradeoffs and local/cloud
