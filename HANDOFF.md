@@ -7,9 +7,11 @@ preuves, la dernière ouverture et les fonctions encore à terminer.
 
 **Priorité confirmée par Julien : ouvrir FoldGPT et travailler avec le PC
 éteint.** Le panneau de terminal manuel est reporté ; il n'est pas nécessaire
-pour qualifier le travail depuis la conversation. Le prochain essai doit
-isoler le démarrage de Shizuku depuis le téléphone, puis la reprise du projet
-sans commande de préparation envoyée par le PC.
+pour qualifier le travail depuis la conversation. La [revue des alternatives](docs/research/phone-only-options-20260908.md)
+retrouve un résultat Python Bionic sous application ordinaire : Shizuku est
+une dépendance de r25, pas une nécessité générale démontrée. Qualifier le
+lancement direct du propriétaire actuel avant d'investir dans un démarrage
+Shizuku intégré, puis démontrer la reprise sans préparation par le PC.
 
 Le statut technique actuel et les prochaines étapes sont dans
 [recovery/HANDOFF.md](recovery/HANDOFF.md). Les commandes ordinaires depuis

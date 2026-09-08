@@ -2,6 +2,15 @@
 
 ## Dernier état : r25, 16:14 UTC
 
+**Réexamen après la question sur une application Android ordinaire :** la
+[revue des alternatives](../docs/research/phone-only-options-20260908.md)
+distingue le contrat Shizuku/run-as r25 du lancement direct sous l'application.
+Le reçu historique Bionic (34 RPC sous contexte applicatif normal) et ses
+empreintes sont vérifiés. Il motive une qualification du propriétaire actuel
+sans Shizuku, sans prétendre qu'elle a déjà réussi. Préserver r25 ; aucun
+bootstrap/admission n'a été modifié dans cette revue. Le Store, une signature
+OpenAI ou AVF ne sont pas des solutions équivalentes à ce lancement.
+
 **R25/versionCode15 est installé**, APK
 `2618abba092af33ac387906d75b57ecfd7b76ec7aa02d80b6c20fee4f44a28a3`.
 Le terminal du modèle a réussi saisie et Ctrl+C depuis la conversation ;

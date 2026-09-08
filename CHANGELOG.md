@@ -2,6 +2,11 @@
 
 ## Unreleased - 2026-09-08
 
+- Reassess the Shizuku launch dependency using the historical Bionic app-context
+  RPC receipt and verified artifact hashes. Document the unqualified direct-app
+  runner alternative, Store/signature limits, AVF tradeoffs and local/cloud
+  distinction. No runtime, admission policy or device state changes in this review.
+
 - Prioritize opening FoldGPT and working without a PC, as clarified by Julien.
   Defer the manual terminal panel without removing its implementation. Distinguish
   Android-local command execution from Shizuku startup, which the last device
