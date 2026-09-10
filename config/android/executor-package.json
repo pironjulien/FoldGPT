@@ -1,0 +1,15 @@
+{
+  "schema": "foldgpt.executor.package.v1",
+  "abi": "arm64-v8a",
+  "assets": [
+    "foldgpt-executor-deployment.json",
+    "foldgpt-executor-evidence.json",
+    "foldgpt-executor-manifest.json",
+    "foldgpt-executor-qualification.json"
+  ],
+  "deploymentInventory": "foldgpt-executor-deployment.json",
+  "jniExcludedFromPackage": [
+    "libfoldgpt_bionic_cwd.so",
+    "libfoldgpt_shizuku_transport.so"
+  ]
+}
