@@ -1,0 +1,22 @@
+{
+  "schema": "foldgpt.bionic-ripgrep-inputs.v1",
+  "ripgrep": {
+    "version": "15.2.0",
+    "archive": "ripgrep-15.2.0.tar.gz",
+    "directory": "ripgrep-15.2.0",
+    "url": "https://github.com/BurntSushi/ripgrep/archive/refs/tags/15.2.0.tar.gz",
+    "sha256": "7605249d3eb0d5f170e3414498e3344e26b1e7a147aec518b57090b80036a562"
+  },
+  "pcre2": {
+    "version": "10.47",
+    "archive": "pcre2-10.47.tar.bz2",
+    "directory": "pcre2-10.47",
+    "url": "https://github.com/PCRE2Project/pcre2/releases/download/pcre2-10.47/pcre2-10.47.tar.bz2",
+    "sha256": "47fe8c99461250d42f89e6e8fdaeba9da057855d06eb7fc08d9ca03fd08d7bc7"
+  },
+  "rustToolchain": "1.97.0",
+  "target": "aarch64-linux-android",
+  "androidApi": 35,
+  "ndkRevision": "29.0.14206865",
+  "pinProvenance": "Versioned upstream sources; archive SHA256 independently recorded in the reviewed Termux recipes under work/r22-cache-20260908/ripgrep-audit. Preparation verifies the downloaded bytes before extraction."
+}

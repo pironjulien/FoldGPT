@@ -1,0 +1,8 @@
+{
+  "version": "3.14.7",
+  "archive": "python-3.14.7-aarch64-linux-android.tar.gz",
+  "sha256": "6d50cc3aa66e414a439594089bcdfb5f1264358155c70c1f00471c24cfb477fb",
+  "url": "https://www.python.org/ftp/python/3.14.7/python-3.14.7-aarch64-linux-android.tar.gz",
+  "cpythonCommit": "823f0323ee6ec1402088b73bce1a38473cac36dc",
+  "existingAuthentication": "Official binary/source pins independently Sigstore-verified by stage-android-python.py; all uses here recheck the pinned archive hash."
+}

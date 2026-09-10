@@ -1,0 +1,80 @@
+diff --git a/lorie/src/main/cpp/lorie/dmabuf_sync.h b/lorie/src/main/cpp/lorie/dmabuf_sync.h
+--- a/lorie/src/main/cpp/lorie/dmabuf_sync.h
++++ b/lorie/src/main/cpp/lorie/dmabuf_sync.h
+@@ -2,9 +2,13 @@
+ #pragma once
+ 
+ #include <errno.h>
++#include <linux/ashmem.h>
+ #include <linux/dma-buf.h>
++#include <linux/magic.h>
+ #include <stdint.h>
+ #include <sys/ioctl.h>
++#include <sys/stat.h>
++#include <sys/vfs.h>
+ 
+ enum {
+     LORIE_FD_SYNC_UNKNOWN,
+@@ -12,15 +16,46 @@
+     LORIE_FD_SYNC_DMA_BUF,
+ };
+ 
+-/* Bracket CPU mmap accesses, in addition to the existing producer/consumer
+- * fences. Plain ashmem/memfd objects do not implement DMA-BUF ioctls. Cache
+- * that distinction only on ENOTTY; never swallow a DMA-BUF exporter failure.
++/* Bracket CPU mmap accesses, in addition to producer/consumer fences. Identify
++ * ordinary tmpfs/memfd and legacy ashmem positively before the DMA-BUF ioctl:
++ * Android SELinux can deny that ioctl on a memfd with EACCES before the kernel
++ * reaches the usual ENOTTY check. Never interpret an ioctl error as evidence
++ * that a descriptor does not need cache synchronization.
+  * The state belongs to one owned descriptor and must be reset if it changes.
+  * Returns zero or a positive errno, like LorieBuffer_lock/unlock.
+  */
+ static inline int lorieDmaBufCpuSync(int fd, uint64_t flags, int8_t *kind) {
+     if (*kind == LORIE_FD_SYNC_SHARED_MEMORY)
+         return 0;
++
++    if (*kind == LORIE_FD_SYNC_UNKNOWN) {
++        struct stat status;
++        struct statfs filesystem;
++        int haveStatus = fstat(fd, &status) == 0;
++        /* Some Android policies hide DMA-BUF metadata but permit its sync
++         * ioctl. Missing metadata is not evidence of ordinary memory: leave
++         * the descriptor unknown and require the real ioctl to succeed.
++         */
++        if (haveStatus && S_ISREG(status.st_mode) &&
++                fstatfs(fd, &filesystem) == 0 && filesystem.f_type == TMPFS_MAGIC) {
++            *kind = LORIE_FD_SYNC_SHARED_MEMORY;
++            return 0;
++        }
++        /* Older ASharedMemory implementations use the ashmem character device.
++         * Test its own API, not a failed DMA-BUF operation. DMA-BUF descriptors
++         * are not character devices, even when exported by a device driver.
++         */
++        if (haveStatus && S_ISCHR(status.st_mode)) {
++            int size;
++            do {
++                size = ioctl(fd, ASHMEM_GET_SIZE);
++            } while (size < 0 && errno == EINTR);
++            if (size >= 0) {
++                *kind = LORIE_FD_SYNC_SHARED_MEMORY;
++                return 0;
++            }
++        }
++    }
+ 
+     struct dma_buf_sync sync = { .flags = flags };
+     int result;
+@@ -32,11 +67,5 @@
+         *kind = LORIE_FD_SYNC_DMA_BUF;
+         return 0;
+     }
+-
+-    int error = errno;
+-    if (error == ENOTTY && *kind == LORIE_FD_SYNC_UNKNOWN) {
+-        *kind = LORIE_FD_SYNC_SHARED_MEMORY;
+-        return 0;
+-    }
+-    return error;
++    return errno;
+ }

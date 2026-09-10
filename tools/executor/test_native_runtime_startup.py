@@ -1,0 +1,296 @@
+"""Actual nonroot filesystem/socket tests for trusted native startup inputs."""
+import json
+import errno
+import os
+from pathlib import Path
+import socket
+import tempfile
+import unittest
+
+from tools.executor.native_runtime_startup import (
+    LAUNCH_SCHEMA, APP_LAUNCH_SCHEMA, STARTUP_SCHEMA, StartupManifest, canonical_uri,
+    private_directory, read_launch, read_private_json,
+)
+from tools.executor.native_path_uri import path_uri, uri_path
+from tools.executor.native_session_recovery import (
+    APPLICATION_PROCESSES_SCHEMA, APPLICATION_PROCESSES_SOURCE, process_identity,
+)
+
+
+class NativePathUriTests(unittest.TestCase):
+    def test_rust_url_path_segment_spellings_and_round_trips(self):
+        cases = (
+            ("/", "file:///"),
+            ("/data/app/~~token==/app.foldgpt-name==/lib/arm64",
+             "file:///data/app/~~token==/app.foldgpt-name==/lib/arm64"),
+            ("/project/!$&'()*+,-.:;=@[]^_|~", "file:///project/!$&'()*+,-.:;=@[]^_|~"),
+            ('/project/a b%#?"<>`{}\\', 'file:///project/a%20b%25%23%3F%22%3C%3E%60%7B%7D%5C'),
+            ("/project/café-☃", "file:///project/caf%C3%A9-%E2%98%83"),
+        )
+        for path, expected in cases:
+            with self.subTest(path=path):
+                self.assertEqual(path_uri(path), expected)
+                self.assertEqual(uri_path(expected), path)
+
+    def test_aliases_malformed_utf8_and_noncanonical_encodings_are_refused(self):
+        for uri in ("file:///x%3D", "file:///x%3d", "file:///%7Ex", "file:///x%2Fy",
+                    "file:///x%2fy", "file:///x%", "file:///x%GG", "file:///x%FF",
+                    "file:///x%00", "file:///x%0A", "file:///x/..", "file:///x/%2E",
+                    "file:///x/", "file:////x", "file://localhost/x", "FILE:///x",
+                    "file:///x?", "file:///x#", "file:///x\\y", "file:///C:/x"):
+            with self.subTest(uri=uri), self.assertRaises(ValueError):
+                uri_path(uri)
+        for path in ("relative", "/a//b", "/a/../b", "/a/", "/C:/x", "/a\0b", "/a\ud800"):
+            with self.subTest(path=repr(path)), self.assertRaises(ValueError):
+                path_uri(path)
+
+
+class NativeRuntimeStartupTests(unittest.TestCase):
+    def setUp(self):
+        self.assertNotEqual(os.getuid(), 0, "Run startup ownership tests as a real nonroot user")
+        self.temp = tempfile.TemporaryDirectory(prefix="foldgpt-startup-",
+            dir=os.environ.get("FOLDGPT_TEST_TMPDIR", "/var/tmp"))
+        self.root = Path(self.temp.name)
+        self.projects = self.root / "projects"
+        self.broker = self.root / "broker"
+        self.runtime = self.root / "runtime"
+        for directory in (self.projects, self.broker, self.runtime):
+            directory.mkdir(mode=0o700)
+        self.workspace = self.projects / "actual-project"
+        self.workspace.mkdir(mode=0o700)
+        self.launch = self.broker / "launch.json"
+        self.endpoint = self.broker / "owner.sock"
+        self.path = self.broker / "startup.json"
+        self.value = {"schema": LAUNCH_SCHEMA, "workspace": str(self.workspace),
+            "socketPath": str(self.endpoint), "manifestPath": str(self.path),
+            "controllerRoots": ["file:///home/foldgpt", "file:///tmp"]}
+        self.write_launch(self.value)
+        self.listener = socket.socket(socket.AF_UNIX, socket.SOCK_SEQPACKET)
+        self.listener.bind(str(self.endpoint))
+        self.endpoint.chmod(0o600)
+        self.directory = private_directory(self.broker, os.getuid())
+        self.manifest = None
+
+    def tearDown(self):
+        if self.manifest is not None:
+            self.manifest.close()
+        os.close(self.directory)
+        self.listener.close()
+        self.temp.cleanup()
+
+    def write_launch(self, value):
+        self.launch.write_text(json.dumps(value), encoding="utf-8")
+        self.launch.chmod(0o600)
+
+    def admit(self):
+        return read_launch(self.launch, uid=os.getuid(), broker_directory=self.broker,
+                           projects_directory=self.projects)
+
+    def test_application_launch_requires_exact_verified_boot_metadata(self):
+        epoch = {"schema": "foldgpt.android-boot-epoch.v1",
+                 "source": "android.provider.Settings.Global.BOOT_COUNT", "bootCount": 8}
+        population = {"schema": APPLICATION_PROCESSES_SCHEMA, "source": APPLICATION_PROCESSES_SOURCE,
+                      "processes": [{"pid": os.getpid(), "startTimeTicks": process_identity(os.getpid())["startTimeTicks"],
+                                     "processName": "app.foldgpt:runtime"}]}
+        value = {**self.value, "schema": APP_LAUNCH_SCHEMA, "bootEpoch": epoch, "androidProcesses": population}
+        self.write_launch(value)
+        self.assertEqual(read_launch(self.launch, uid=os.getuid(), broker_directory=self.broker,
+                                     projects_directory=self.projects, launch_origin="android-app"), value)
+        with self.assertRaises(ValueError):
+            self.admit()
+        for change in ({"source": "model"}, {"bootCount": -1}, {"bootCount": True},
+                       {"bootCount": "8"}, {"schema": "wrong"}):
+            self.write_launch({**value, "bootEpoch": {**epoch, **change}})
+            with self.subTest(change=change), self.assertRaises(ValueError):
+                read_launch(self.launch, uid=os.getuid(), broker_directory=self.broker,
+                            projects_directory=self.projects, launch_origin="android-app")
+
+    def test_application_population_missing_unknown_and_duplicate_fields_are_rejected(self):
+        epoch = {"schema": "foldgpt.android-boot-epoch.v1",
+                 "source": "android.provider.Settings.Global.BOOT_COUNT", "bootCount": 8}
+        entry = {"pid": os.getpid(), "startTimeTicks": process_identity(os.getpid())["startTimeTicks"],
+                 "processName": "app.foldgpt:runtime"}
+        population = {"schema": APPLICATION_PROCESSES_SCHEMA, "source": APPLICATION_PROCESSES_SOURCE, "processes": [entry]}
+        base = {**self.value, "schema": APP_LAUNCH_SCHEMA, "bootEpoch": epoch}
+        candidates = [base, {**base, "androidProcesses": {**population, "source": "model"}},
+                      {**base, "androidProcesses": {**population, "processes": [entry, entry]}},
+                      {**base, "androidProcesses": {**population, "processes": [{**entry, "pid": True}]}},
+                      {**base, "androidProcesses": {**population, "processes": [{**entry, "processName": "python"}]}}]
+        for value in candidates:
+            self.write_launch(value)
+            with self.subTest(value=value), self.assertRaises(ValueError):
+                read_launch(self.launch, uid=os.getuid(), broker_directory=self.broker,
+                            projects_directory=self.projects, launch_origin="android-app")
+
+    def test_application_launch_never_falls_back_to_missing_boot_metadata(self):
+        with self.assertRaises(ValueError):
+            read_launch(self.launch, uid=os.getuid(), broker_directory=self.broker,
+                        projects_directory=self.projects, launch_origin="android-app")
+        self.write_launch({**self.value, "schema": "foldgpt.native-launch.v2"})
+        with self.assertRaises(ValueError):
+            read_launch(self.launch, uid=os.getuid(), broker_directory=self.broker,
+                        projects_directory=self.projects, launch_origin="android-app")
+
+    def publish(self, **overrides):
+        values = {"socket_path": self.endpoint, "workspace": self.workspace,
+            "shared_paths": [self.workspace, self.runtime],
+            "controller_roots": self.value["controllerRoots"],
+            "parent_environment": {"PATH": str(self.runtime), "HOME": str(self.workspace)},
+            "directory_fd": self.directory}
+        return StartupManifest(self.path, **dict(values, **overrides))
+
+    def test_actual_identity_and_inode_manifest_is_exclusive_and_removable(self):
+        self.assertEqual(self.admit(), self.value)
+        self.manifest = self.publish()
+        actual = read_private_json(self.path, os.getuid())
+        self.assertEqual(actual, {"schema": STARTUP_SCHEMA, "socketPath": str(self.endpoint),
+            "peer": {"pid": os.getpid(), "uid": os.getuid(), "gid": os.getgid()},
+            "workspaceRoot": self.workspace.as_uri(), "controllerRoots": self.value["controllerRoots"],
+            "parentEnvironment": {"PATH": str(self.runtime), "HOME": str(self.workspace)},
+            "sharedPaths": [{"path": path.as_uri(), "device": path.stat().st_dev,
+                              "inode": path.stat().st_ino} for path in (self.workspace, self.runtime)]})
+        before = self.path.stat()
+        with self.assertRaises(FileExistsError):
+            self.publish()
+        self.assertEqual((self.path.stat().st_dev, self.path.stat().st_ino), (before.st_dev, before.st_ino))
+        self.manifest.remove()
+        self.assertFalse(self.path.exists())
+
+    def test_replaced_manifest_is_never_removed(self):
+        self.manifest = self.publish()
+        previous = self.broker / "previous-startup.json"
+        self.path.rename(previous)
+        self.path.write_bytes(b"different-owner")
+        with self.assertRaises(ValueError):
+            self.manifest.remove()
+        self.assertEqual(self.path.read_bytes(), b"different-owner")
+        self.assertTrue(previous.is_file())
+
+    def test_real_android_and_unicode_paths_publish_canonical_engine_uris(self):
+        shared = self.runtime / "~~token==" / "app.foldgpt-name==" / "lib" / "arm64"
+        shared.mkdir(parents=True, mode=0o700)
+        workspace = self.projects / 'café + = % # ? [x] \\'
+        workspace.mkdir(mode=0o700)
+        self.manifest = self.publish(workspace=workspace, shared_paths=[workspace, shared],
+            controller_roots=["file:///home/name=+", "file:///tmp"])
+        actual = read_private_json(self.path, os.getuid())
+        prefix = self.root.as_uri()
+        self.assertEqual(actual["workspaceRoot"], prefix + "/projects/caf%C3%A9%20+%20=%20%25%20%23%20%3F%20[x]%20%5C")
+        self.assertEqual(actual["sharedPaths"][1], {
+            "path": prefix + "/runtime/~~token==/app.foldgpt-name==/lib/arm64",
+            "device": shared.stat().st_dev, "inode": shared.stat().st_ino})
+        self.assertEqual(canonical_uri(actual["workspaceRoot"]), workspace)
+        self.assertNotEqual(shared.as_uri(), actual["sharedPaths"][1]["path"])
+        self.manifest.remove()
+        self.assertFalse(self.path.exists())
+
+    def test_launch_rejects_duplicate_and_unknown_fields(self):
+        self.launch.write_bytes(b'{"schema":"foldgpt.native-launch.v1","schema":"foldgpt.native-launch.v1"}')
+        with self.assertRaisesRegex(ValueError, "Duplicate"):
+            self.admit()
+        self.write_launch(dict(self.value, backendFactory="foreign:factory"))
+        with self.assertRaises(ValueError):
+            self.admit()
+
+    def test_private_input_identity_and_bounds_are_required(self):
+        self.launch.chmod(0o644)
+        with self.assertRaises(PermissionError):
+            self.admit()
+        self.launch.chmod(0o600)
+        self.launch.write_bytes(b" " * 65537)
+        with self.assertRaises(PermissionError):
+            self.admit()
+        self.write_launch(self.value)
+        with self.assertRaises(PermissionError):
+            read_private_json(self.launch, os.getuid() + 1)
+
+    def test_alias_and_hardlinked_inputs_are_refused(self):
+        alias = self.broker / "alias.json"
+        alias.symlink_to(self.launch)
+        with self.assertRaises(ValueError):
+            read_private_json(alias, os.getuid())
+        hard = self.broker / "hard.json"
+        try:
+            os.link(self.launch, hard)
+        except PermissionError as error:
+            # Android may forbid creating a hard link before an input exists
+            # to admit. Keep this actual kernel result separate from proving
+            # our nlink check on Unix hosts that permit hard-link creation.
+            self.assertIn(error.errno, (errno.EACCES, errno.EPERM))
+            self.assertFalse(hard.exists())
+            self.assertEqual(self.launch.stat().st_nlink, 1)
+            self.assertEqual(self.admit(), self.value)
+            print(json.dumps({"observation": "hardlink_creation_denied_by_kernel",
+                "errno": error.errno, "linkedInputAdmissionTested": False}), flush=True)
+        else:
+            self.assertEqual(self.launch.stat().st_nlink, 2)
+            with self.assertRaises(PermissionError):
+                self.admit()
+            print(json.dumps({"observation": "hardlinked_input_refused",
+                "linkedInputAdmissionTested": True}), flush=True)
+
+    def test_workspace_escape_and_controller_overlap_are_refused(self):
+        self.write_launch(dict(self.value, workspace=str(self.root)))
+        with self.assertRaises(ValueError):
+            self.admit()
+        for root in (self.projects.as_uri(), self.workspace.as_uri(), (self.workspace / "child").as_uri()):
+            self.write_launch(dict(self.value, controllerRoots=[root]))
+            with self.assertRaises(ValueError):
+                self.admit()
+        self.write_launch(dict(self.value, controllerRoots=["file:///tmp", "file:///tmp"]))
+        with self.assertRaises(ValueError):
+            self.admit()
+
+    def test_endpoint_and_manifest_are_fixed_outside_workspace(self):
+        for field in ("socketPath", "manifestPath"):
+            self.write_launch(dict(self.value, **{field: str(self.workspace / "input")}))
+            with self.assertRaises(ValueError):
+                self.admit()
+
+    def test_actual_workspace_permissions_are_required(self):
+        self.workspace.chmod(0o755)
+        with self.assertRaises(PermissionError):
+            self.admit()
+
+    def test_shared_identity_must_cover_actual_workspace_without_aliases(self):
+        with self.assertRaises(ValueError):
+            self.publish(shared_paths=[self.runtime])
+        with self.assertRaises(ValueError):
+            self.publish(shared_paths=[self.workspace, self.workspace])
+        alias = self.root / "runtime-alias"
+        alias.symlink_to(self.runtime, target_is_directory=True)
+        with self.assertRaises(ValueError):
+            self.publish(shared_paths=[self.workspace, alias])
+        self.assertFalse(self.path.exists())
+
+    def test_bound_endpoint_requires_private_socket_in_actual_pinned_directory(self):
+        other = self.root / "other"
+        other.mkdir(mode=0o700)
+        foreign = private_directory(other, os.getuid())
+        try:
+            with self.assertRaises(ValueError):
+                self.publish(directory_fd=foreign)
+        finally:
+            os.close(foreign)
+        self.endpoint.chmod(0o666)
+        with self.assertRaises(ValueError):
+            self.publish()
+        self.assertFalse(self.path.exists())
+
+    def test_parent_environment_rejects_invalid_variables_without_publication(self):
+        for invalid in ({"bad=key": "x"}, {"HOME": "bad\0value"}, {"PATH": None},
+                        {str(index): "x" for index in range(129)}):
+            with self.assertRaises(ValueError):
+                self.publish(parent_environment=invalid)
+        self.assertFalse(self.path.exists())
+
+    def test_controller_uri_requires_exact_unambiguous_local_spelling(self):
+        self.assertEqual(str(canonical_uri("file:///home/foldgpt")), "/home/foldgpt")
+        for value in ("file://localhost/tmp", "file:///tmp/../private", "file:///tmp/", "file:///tmp?x",
+                      "file:///%74mp", "file:///", "file:///tmp%2fchild", "file:///tmp%00"):
+            with self.assertRaises(ValueError):
+                canonical_uri(value)
+
+
+if __name__ == "__main__":
+    unittest.main(verbosity=2)

@@ -1,0 +1,9 @@
+pluginManagement { repositories { google(); mavenCentral(); gradlePluginPortal() } }
+dependencyResolutionManagement { repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS); repositories { google(); mavenCentral() } }
+rootProject.name = 'FoldGPTShizukuTransport'
+include ':transport'
+include ':qualification'
+include ':runtimequalification'
+include ':runasqualification'
+include ':runasbrokerqualification'
+include ':runasbrokerqualificationv2'

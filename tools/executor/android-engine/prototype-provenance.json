@@ -1,0 +1,29 @@
+{
+  "upstream_commit": "3d2ee51ca2d5db578f328aa75e20aa22c0197c9a",
+  "upstream_tag": "rust-v0.153.4",
+  "working_checkout_modified": false,
+  "source_sha256": {
+    "codex-rs/utils/pty/BUILD.bazel": "d8ff7e3358ff7e0e1df90274cfa69585231fff351b1efa10b9ba3d4755c9efe8",
+    "codex-rs/utils/pty/Cargo.toml": "3333e26a50a65111ea1c961fa0eec59661196a88e1b2bf51ab647b8cc50ab08f",
+    "codex-rs/utils/pty/README.md": "fc6029dfdeaf712fff69a8c4b48e04ca3370bf814221d0dcbbbad08bebd46f6b",
+    "codex-rs/utils/pty/src/lib.rs": "92475acd26e972bad0f9e0010fe970f19529ed968e12f305393d39082cfe8310",
+    "codex-rs/utils/pty/src/pipe.rs": "eaa4b05fab90c9cc772239cfc9683413e501aa00013cae3984d9f821d8be3bc5",
+    "codex-rs/utils/pty/src/pipe_tests.rs": "f9a8fc8902a869b49687d3b295abf956d7f326569b1058e3fca4d6d125cc47d4",
+    "codex-rs/utils/pty/src/process.rs": "f6dca08eec90266e43c7bebe9d1e651611d8d074614bae9df707c11c1c64d71c",
+    "codex-rs/utils/pty/src/process_group.rs": "4c9c062f990c9bfef8c61641956765379586c4f4bb8fc61db67cf1a515d084d3",
+    "codex-rs/utils/pty/src/process_group_tests.rs": "f28f56e7923869e73adbe30728362b14fcc7cbd5088a52e0a7cf63629879b000",
+    "codex-rs/utils/pty/src/pty.rs": "25d04fce155c670bef1098d26d2940883ad784528dd0c796ef468d3a9a38a5f2",
+    "codex-rs/utils/pty/src/tests.rs": "fee2bb89ffb4345243f6756297c4729d814fb6cee65b32ae700daccb1771bb77",
+    "codex-rs/utils/pty/src/unix_io.rs": "8c5c543f48aca6f231e99ca69d660612c0174a495e0e7fcc11619eacbcdccef8",
+    "codex-rs/utils/pty/src/win/conpty.rs": "0dc2739c7df7f84dafe65658db3802d917dd719afa1dfa40663e5ae9609aa8d0",
+    "codex-rs/utils/pty/src/win/job.rs": "3c904bcd4ac33719bb843639c30be39ca6e9ceda350be311f970aaf3d748a476",
+    "codex-rs/utils/pty/src/win/mod.rs": "4f355ebc286683984158ff5b3cc3994c55e8b4eaea39775da905d91fd1fbbb14",
+    "codex-rs/utils/pty/src/win/procthreadattr.rs": "f143dff9ff9ce080e617e6bae2e1864e7f59b6f83569eae18fd7f02e997a1956",
+    "codex-rs/utils/pty/src/win/psuedocon.rs": "919099dfdc4962c5bd47c58393d9441f034f2a080907d960be6f6a96ed51e60c",
+    "codex-rs/utils/pty/src/windows_input.rs": "bac4b55825fe7becafb532c00d98188cd253a0ce07525f6474f8c76ad3681bad",
+    "codex-rs/utils/pty/src/windows_input_tests.rs": "dca6cc92c081ca7a3bfdaaec13cc7bbf32185e3c0b343e6def76d2039a2a6921",
+    "codex-rs/utils/pty/src/windows_tests.rs": "0a5bd604c03f3ef7149937a61609a7d9e1ffad0aa253549c0a276cdd706be6c0",
+    "codex-rs/utils/pty/tests/conpty_search_path.rs": "d2313cad3570a982a3aab1bba040b2528cda8b93cf228921b74b88e374a437e7"
+  },
+  "purpose": "Compilable native process adapter; not an Android execution backend"
+}

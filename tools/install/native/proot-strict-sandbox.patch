@@ -1,0 +1,333 @@
+--- a/src/cli/proot.c
++++ b/src/cli/proot.c
+@@ -176,6 +176,10 @@
+ {
+ 	void *extension;
+ 
++	if (tracee->strict_sandbox) {
++		note(tracee, ERROR, USER, "--strict-sandbox is incompatible with -i/-0/-S");
++		return -1;
++	}
+ 	extension = get_extension(tracee, fake_id0_callback);
+ 	if (extension != NULL) {
+ 		note(tracee, WARNING, USER, "option -i/-0/-S was already specified");
+@@ -190,6 +194,16 @@
+ static int handle_option_0(Tracee *tracee, const Cli *cli, const char *value UNUSED)
+ {
+ 	return handle_option_i(tracee, cli, "0:0");
++}
++
++static int handle_option_strict_sandbox(Tracee *tracee, const Cli *cli UNUSED, const char *value UNUSED)
++{
++	if (get_extension(tracee, fake_id0_callback) != NULL) {
++		note(tracee, ERROR, USER, "--strict-sandbox is incompatible with -i/-0/-S");
++		return -1;
++	}
++	tracee->strict_sandbox = true;
++	return 0;
+ }
+ 
+ static int handle_option_kill_on_exit(Tracee *tracee, const Cli *cli UNUSED, const char *value UNUSED)
+--- a/src/cli/proot.h
++++ b/src/cli/proot.h
+@@ -65,6 +65,7 @@
+ static int handle_option_ashmem_memfd(Tracee *tracee, const Cli *cli, const char *value);
+ #endif /* defined(__ANDROID__) || defined(__BIONIC__) */
+ static int handle_option_sysvipc(Tracee *tracee, const Cli *cli, const char *value);
++static int handle_option_strict_sandbox(Tracee *tracee, const Cli *cli, const char *value);
+ static int handle_option_kill_on_exit(Tracee *tracee, const Cli *cli, const char *value);
+ static int handle_option_L(Tracee *tracee, const Cli *cli, const char *value);
+ static int handle_option_H(Tracee *tracee, const Cli *cli, const char *value);
+@@ -151,6 +152,17 @@
+ 	  .detail = "\tSome programs expect to be launched from a given directory but do\n\
+ \tnot perform any chdir by themselves.  This option avoids the\n\
+ \tneed for running a shell and then entering the directory manually.",
++	},
++	{ .class = "Regular options",
++	  .arguments = {
++		{ .name = "--strict-sandbox", .separator = '\0', .value = NULL },
++		{ .name = NULL, .separator = '\0', .value = NULL } },
++	  .handler = handle_option_strict_sandbox,
++	  .description = "Preserve real namespace/mount results and security state.",
++	  .detail = "\tOpt in to real namespace flags, proc user mappings and no_new_privs.\n\
++\tSecurity SIGSYS is delivered; unsupported security requests fail explicitly.\n\
++\tIncompatible with -i/-0/-S. GNU path/ABI translation remains enabled.\n\
++\tThis option does not isolate processes: use an actual kernel sandbox.",
+ 	},
+ 	{ .class = "Regular options",
+ 	  .arguments = {
+--- a/src/tracee/tracee.h
++++ b/src/tracee/tracee.h
+@@ -334,6 +334,10 @@
+ 	 * tools like sudo-rs that refuse to run when the flag appears set. */
+ 	bool no_new_privs;
+ 
++	/* Explicit launcher policy, inherited by every tracee.  Do not fake
++	 * sandbox setup or security state.  This is not a security boundary. */
++	bool strict_sandbox;
++
+ 	/* Set once the tracee has gone through its initial execve, i.e. once
+ 	 * the guest program is actually running.  Used to ignore the
+ 	 * PR_SET_NO_NEW_PRIVS that PRoot performs itself in the launch child
+--- a/src/tracee/tracee.c
++++ b/src/tracee/tracee.c
+@@ -436,6 +436,7 @@
+ 	child->execfn_addr = parent->execfn_addr;
+ 	child->auxv_fd = parent->auxv_fd;
+ 	child->no_new_privs = parent->no_new_privs;
++	child->strict_sandbox = parent->strict_sandbox;
+ 	child->seen_execve = parent->seen_execve;
+ #ifdef HAS_POKEDATA_WORKAROUND
+ 	child->pokedata_workaround_stub_addr = parent->pokedata_workaround_stub_addr;
+--- a/src/syscall/enter.c
++++ b/src/syscall/enter.c
+@@ -1801,6 +1801,8 @@
+ {
+ 	char host_path[PATH_MAX];
+ 
++	if (tracee->strict_sandbox)
++		return;
+ 	if (get_sysarg_path(tracee, host_path, reg) < 0)
+ 		return;
+ 	if (!is_proc_userns_file(host_path))
+@@ -2383,6 +2385,8 @@
+ 	 * be able to configure "its" interfaces (see enter.c netlink
+ 	 * helpers).  */
+ 	case PR_unshare:
++		if (tracee->strict_sandbox)
++			break;
+ 		if ((peek_reg(tracee, CURRENT, SYSARG_1) & CLONE_NEWNET) != 0)
+ 			tracee->fake_netns = true;
+ 		poke_reg(tracee, SYSARG_RESULT, 0);
+@@ -2391,6 +2395,8 @@
+ 		break;
+ 
+ 	case PR_setns:
++		if (tracee->strict_sandbox)
++			break;
+ 		poke_reg(tracee, SYSARG_RESULT, 0);
+ 		set_sysnum(tracee, PR_void);
+ 		status = 0;
+@@ -2398,6 +2404,10 @@
+ 
+ 	case PR_umount:
+ 	case PR_umount2:
++		if (tracee->strict_sandbox) {
++			status = translate_sysarg(tracee, SYSARG_1, REGULAR);
++			break;
++		}
+ 		apply_emulated_umount(tracee);
+ 		poke_reg(tracee, SYSARG_RESULT, 0);
+ 		set_sysnum(tracee, PR_void);
+@@ -2415,6 +2425,8 @@
+ 	 * for CLONE_NEWNET, so the child gets rtnetlink answers for the
+ 	 * network namespace it believes it was given.  */
+ 	case PR_clone: {
++		if (tracee->strict_sandbox)
++			break;
+ 		word_t flags = peek_reg(tracee, CURRENT, SYSARG_1);
+ 		if ((flags & CLONE_NS_MASK) != 0) {
+ 			if ((flags & CLONE_NEWNS) != 0)
+@@ -2428,6 +2440,8 @@
+ 	}
+ 
+ 	case PR_clone3: {
++		if (tracee->strict_sandbox)
++			break;
+ 		word_t args_addr = peek_reg(tracee, CURRENT, SYSARG_1);
+ 		word_t flags;
+ 
+@@ -2451,6 +2465,16 @@
+ 	 * into PRoot bindings (see emulate_mount/emulate_pivot_root)
+ 	 * so the resulting paths actually become accessible.  */
+ 	case PR_mount:
++		if (tracee->strict_sandbox) {
++			/* Bind sources are paths; filesystem names and null sources are not. */
++			if ((peek_reg(tracee, CURRENT, SYSARG_4) & MS_BIND) != 0) {
++				status = translate_sysarg(tracee, SYSARG_1, REGULAR);
++				if (status < 0)
++					break;
++			}
++			status = translate_sysarg(tracee, SYSARG_2, REGULAR);
++			break;
++		}
+ 		apply_emulated_mount(tracee);
+ 		poke_reg(tracee, SYSARG_RESULT, 0);
+ 		set_sysnum(tracee, PR_void);
+@@ -2458,6 +2482,12 @@
+ 		break;
+ 
+ 	case PR_pivot_root:
++		if (tracee->strict_sandbox) {
++			status = translate_sysarg(tracee, SYSARG_1, REGULAR);
++			if (status >= 0)
++				status = translate_sysarg(tracee, SYSARG_2, REGULAR);
++			break;
++		}
+ 		apply_emulated_pivot_root(tracee);
+ 		poke_reg(tracee, SYSARG_RESULT, 0);
+ 		set_sysnum(tracee, PR_void);
+@@ -2594,6 +2624,12 @@
+ 		status = read_data(tracee, &how, peek_reg(tracee, CURRENT, SYSARG_3), how_size);
+ 		if (status < 0)
+ 			break;
++		if (tracee->strict_sandbox && how.resolve != 0) {
++			/* Absolute host rewriting cannot preserve openat2 resolution
++			 * constraints. Do not silently drop a caller's protection. */
++			status = -EOPNOTSUPP;
++			break;
++		}
+ 		set_sysnum(tracee, PR_openat);
+ 		poke_reg(tracee, SYSARG_3, how.flags);
+ 		poke_reg(tracee, SYSARG_4, how.mode);
+@@ -2722,6 +2758,14 @@
+ 	case PR_prctl:
+ 		/* Prevent tracees from setting dumpable flag.
+ 		 * (Otherwise it could break tracee memory access)  */
++		if (tracee->strict_sandbox
++		    && peek_reg(tracee, CURRENT, SYSARG_1) == PR_SET_DUMPABLE) {
++			/* Making the tracee inaccessible would break GNU translation.
++			 * Refuse that request explicitly, never claim it succeeded. */
++			if (peek_reg(tracee, CURRENT, SYSARG_2) == 0)
++				status = -EOPNOTSUPP;
++			break;
++		}
+ 		if (peek_reg(tracee, CURRENT, SYSARG_1) == PR_SET_DUMPABLE) {
+ 			poke_reg(tracee, SYSARG_RESULT, 0);
+ 			set_sysnum(tracee, PR_void);
+@@ -2764,7 +2808,8 @@
+ 		 * from tracee->no_new_privs without running the real syscall,
+ 		 * and observe the tracee's own PR_SET_NO_NEW_PRIVS at sysexit.
+ 		 * Tools like sudo-rs refuse to run when the flag appears set. */
+-		if (peek_reg(tracee, CURRENT, SYSARG_1) == PR_GET_NO_NEW_PRIVS) {
++		if (!tracee->strict_sandbox
++		    && peek_reg(tracee, CURRENT, SYSARG_1) == PR_GET_NO_NEW_PRIVS) {
+ 			poke_reg(tracee, SYSARG_RESULT, tracee->no_new_privs ? 1 : 0);
+ 			set_sysnum(tracee, PR_void);
+ 			status = 0;
+--- a/src/syscall/exit.c
++++ b/src/syscall/exit.c
+@@ -238,6 +238,9 @@
+ 
+ 	case PR_fchdir:
+ 	case PR_chdir:
++		status = 0;
++		break;
++
+ 	/* These syscalls are voided in enter.c; make sure the
+ 	 * tracee always sees a 0 return value even on kernels where
+ 	 * the SYSCALL_AVOIDER trick leaks -ENOSYS through.  */
+@@ -247,6 +250,8 @@
+ 	case PR_umount:
+ 	case PR_umount2:
+ 	case PR_pivot_root:
++		if (tracee->strict_sandbox)
++			goto end;
+ 		/* These syscalls are fully emulated, see enter.c for details
+ 		 * (like errors).  */
+ 		status = 0;
+--- a/src/tracee/seccomp.c
++++ b/src/tracee/seccomp.c
+@@ -5,6 +5,7 @@
+ #include <sys/vfs.h>   /* statfs64 */
+ #include <string.h>    /* memset   */
+ #include <linux/net.h> /* SYS_SENDMMSG */
++#include <linux/prctl.h> /* PR_* */
+ #include <assert.h>    /* assert(3), */
+ #include <time.h>      /* time(2), */
+ 
+@@ -137,6 +138,25 @@
+ 	Sysnum sysnum = get_sysnum(tracee, CURRENT);
+ 
+ 	sysnum = get_sysnum(tracee, CURRENT);
++
++	/* Preserve real security traps before compatibility extensions can
++	 * consume them. ABI fallbacks (including set_robust_list) stay enabled. */
++	if (tracee->strict_sandbox) {
++		switch (sysnum) {
++		case PR_mount: case PR_umount: case PR_umount2: case PR_pivot_root:
++		case PR_unshare: case PR_setns: case PR_clone: case PR_clone3:
++		case PR_setgroups: case PR_setgroups32:
++			return SIGSYS;
++		case PR_prctl:
++			if (peek_reg(tracee, CURRENT, SYSARG_1) == PR_GET_NO_NEW_PRIVS
++			    || peek_reg(tracee, CURRENT, SYSARG_1) == PR_SET_NO_NEW_PRIVS
++			    || peek_reg(tracee, CURRENT, SYSARG_1) == PR_SET_DUMPABLE)
++				return SIGSYS;
++			break;
++		default:
++			break;
++		}
++	}
+ 
+ 	status = notify_extensions(tracee, SIGSYS_OCC, 0, 0);
+ 	if (status < 0) {
+@@ -184,6 +204,8 @@
+ 			set_result_after_seccomp(tracee, ret);
+ 			break;
+ 		}
++		if (tracee->strict_sandbox && how.resolve != 0)
++			return SIGSYS;
+ 		set_sysnum(tracee, PR_openat);
+ 		poke_reg(tracee, SYSARG_3, how.flags);
+ 		poke_reg(tracee, SYSARG_4, how.mode);
+--- a/src/tracee/event.c
++++ b/src/tracee/event.c
+@@ -33,6 +33,8 @@
+ #include <stdbool.h>    /* bool, true, false, */
+ #include <assert.h>     /* assert(3), */
+ #include <stdlib.h>     /* atexit(3), getenv(3), */
++#include <sys/prctl.h>  /* PR_SET_NO_NEW_PRIVS */
++#include <sys/syscall.h> /* SYS_landlock_* */
+ #include <talloc.h>     /* talloc_*, */
+ #include <inttypes.h>   /* PRI*, */
+ 
+@@ -61,6 +63,35 @@
+ static bool seccomp_after_ptrace_enter = false;
+ static bool seccomp_ptrace_event_supported = false;
+ 
++/* A new child domain preserves all inherited filesystem/network policy and
++ * puts the immutable PRoot tracer above its guests in Landlock's hierarchy.
++ * The kernel then refuses guest ptrace/process_vm/proc-memory access to the
++ * tracer, while its real parent-to-child tracing remains permitted. Scope-only
++ * rulesets do not add a filesystem layer or change cross-directory REFER.
++ * This is deliberately installed before PTRACE_TRACEME and any guest code. */
++static int restrict_guest_tracer_scope(void)
++{
++	struct { uint64_t fs, net, scoped; } ruleset = { .scoped = 3 };
++	long abi = syscall(SYS_landlock_create_ruleset, NULL, 0, 1U);
++	int fd, status, saved;
++	if (abi < 0)
++		return -1;
++	if (abi < 6) {
++		errno = EOPNOTSUPP;
++		return -1;
++	}
++	fd = syscall(SYS_landlock_create_ruleset, &ruleset, sizeof(ruleset), 0U);
++	if (fd < 0)
++		return -1;
++	status = prctl(PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0);
++	if (status == 0)
++		status = syscall(SYS_landlock_restrict_self, fd, 0U);
++	saved = errno;
++	close(fd);
++	errno = saved;
++	return status;
++}
++
+ /**
+  * Return true if the running kernel is new enough to generate
+  * PTRACE_EVENT_SECCOMP stops (requires Linux >= 3.5).  Old Android
+@@ -133,6 +169,12 @@
+ 		 * system, like container runtimes do.  */
+ 		signal(SIGPIPE, SIG_DFL);
+ 
++		if (tracee->strict_sandbox && restrict_guest_tracer_scope() < 0) {
++			note(tracee, ERROR, SYSTEM, "strict guest Landlock tracer scope");
++			/* No guest runs when this kernel restriction cannot be made. */
++			_exit(125);
++		}
++
+ 		/* Declare myself as ptraceable before executing the
+ 		 * requested program. */
+ 		status = ptrace(PTRACE_TRACEME, 0, NULL, NULL);

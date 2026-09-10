@@ -1,0 +1,21 @@
+{
+  "schema": "foldgpt.runtime-qualification.inputs.v1",
+  "package": "app.foldgpt.runtimequalification.v1",
+  "base": "/data/local/tmp/foldgpt-bionic-runtime-qualification-v1",
+  "frozenName": "foldgpt-bionic-supervisor-N0kMFS8z",
+  "androidExecution": false,
+  "frozenFiles": {
+    "SOURCES.sha256": "b4c5ac2983ce2ce0a663f555fab8883e1bbff26729c522c0052ffd5e13324406",
+    "BINARIES.sha256": "a51dac561fbfec90262fb92a93539536305cb7ec97d5f391f4b8d0d8ad55763d",
+    "libfoldgpt_bionic_supervisor.so": "6bccc77b4f2dff0f78fd22e4f6427263ee159d87b35c740e8be0622319fd4dd4",
+    "libfoldgpt_native_files.so": "20838f707db238213a46db6147a571b71a5f56c0af3dd4ad716e8d0203704cd7",
+    "libfoldgpt_native_file_handle.so": "b11d2559ed85093142edc2a01cf0eb4d99f75baf13b0af84344ccd6c5b9c2c40"
+  },
+  "runtimeManifestSha256": "bc9ddcfc598c875337af9d114fe0314be4dd09920dff27131f8c61278c95a5cc",
+  "pythonCliSha256": "7de6f5ba8d620c3a796810147686c645cf10b2d412b00aea63a8dc7eec5a0f50",
+  "bashSha256": "534ae27932f116448e1d8775a5a145795be2f340526452497575f01f50257ff0",
+  "transportNativeHashes": {
+    "libfoldgpt_bionic_cwd.so": "f65702d47130bf8f3098e7b9a5da5d982bbbc0d20cf50eeb61cc5fd489237157",
+    "libfoldgpt_shizuku_transport.so": "d4bb423a0dbe354485337d947bec486d6012d7b37a2ae0d73d0def8f26fe4ca6"
+  }
+}

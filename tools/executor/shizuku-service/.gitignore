@@ -1,0 +1,10 @@
+.gradle/
+build/
+transport/build/
+transport/.cxx/
+runasqualification/.cxx/
+runasbrokerqualification/.cxx/
+qualification/build/
+local.properties
+__pycache__/
+runasbrokerqualificationv2/.cxx/

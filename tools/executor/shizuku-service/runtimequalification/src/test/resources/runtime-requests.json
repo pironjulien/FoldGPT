@@ -1,0 +1,108 @@
+{
+  "schema": "foldgpt.runtime-qualification.requests.v1",
+  "start": {
+    "id": 2,
+    "method": "process/start",
+    "params": {
+      "processId": "runtime-qualification",
+      "argv": [
+        "bash",
+        "--noprofile",
+        "--norc",
+        "-c",
+        "cd directory && exec \"$FOLDGPT_PYTHON_REAL\" -I -B -c '\nimport base64,errno,fcntl,hashlib,json,os,socket,subprocess,sys,zipapp\nfrom pathlib import Path\n\ndef require(value, message):\n    if not value:\n        raise AssertionError(message)\n\nproofs = {}\ndenials = {}\ndef denied(name, operation):\n    try:\n        value = operation()\n    except OSError as error:\n        require(error.errno in (errno.EACCES, errno.EPERM), (name, error.errno))\n        denials[name] = error.errno\n        proofs[name] = True\n        return\n    if isinstance(value, int):\n        os.close(value)\n    elif hasattr(value, \"close\"):\n        value.close()\n    raise AssertionError(name + \" unexpectedly succeeded\")\n\ndef run(argv, *, input=None, expected=0, env=None):\n    value = subprocess.run(argv, input=input, capture_output=True, timeout=6,\n                           env={} if env is None else env, check=False)\n    require(value.returncode == expected,\n            (argv, value.returncode, value.stdout, value.stderr))\n    return value\n\nworkspace = Path(os.environ[\"FOLDGPT_WORKSPACE\"])\ndirectory = workspace / \"directory\"\nrequire(sys.platform == os.environ[\"FOLDGPT_EXPECTED_PLATFORM\"], \"unexpected platform\")\nrequire(sys.flags.isolated and sys.dont_write_bytecode, \"interpreter isolation flags lost\")\nrequire(sys.executable == os.environ[\"FOLDGPT_PYTHON_REAL\"], \"wrong packaged interpreter\")\nrequire(Path.cwd() == directory, \"Bash cd did not change real cwd\")\nproofs[\"bashCwd\"] = True\nrequire(sys.stdin.buffer.read(13) == b\"native input\\n\", \"real RPC stdin differed\")\nproofs[\"rpcStdin\"] = True\nrequire(list(directory.iterdir()) == [], \"qualification directory was not empty\")\ndenied(\"privateReadDenied\", lambda: os.open(workspace / \"private/secret\", os.O_RDONLY))\ndenied(\"privateWriteDenied\", lambda: os.open(workspace / \"private/secret\", os.O_WRONLY))\ndenied(\"protectedWriteDenied\", lambda: os.open(workspace / \".git/config\", os.O_WRONLY | os.O_CREAT, 0o600))\ndenied(\"networkIpv4Denied\", lambda: socket.socket(socket.AF_INET))\ndenied(\"networkUnixDenied\", lambda: socket.socket(socket.AF_UNIX))\ndenied(\"ioctlDenied\", lambda: fcntl.ioctl(1, 0, 0))\ndenied(\"supervisorSignalDenied\", lambda: os.kill(os.getppid(), 0))\ndenied(\"privateCwdDenied\", lambda: os.chdir(workspace / \"private\"))\nrequire(Path.cwd() == directory, \"refused chdir changed cwd\")\n\nproject = directory / \"project\"\nproject.mkdir(mode=0o700)\nos.chdir(project)\nrequire(Path.cwd() == project, \"Python chdir did not change real cwd\")\nproofs[\"pythonCwd\"] = True\nsource = Path(\"calculator.py\")\nsource.write_text(\"def add(a, b):\\n    return a + b\\n\\ndef answer():\\n    return 41\\n\", encoding=\"utf-8\")\nbefore = source.read_bytes()\nrequire(before.count(b\"return 41\") == 1, \"initial source differs\")\nproofs[\"projectCreated\"] = True\nsource.write_bytes(before.replace(b\"return 41\", b\"return 42\"))\nrequire(b\"return 42\" in source.read_bytes() and b\"return 41\" not in source.read_bytes(), \"source edit failed\")\nproofs[\"sourceEdited\"] = True\nPath(\"test_calculator.py\").write_text(\n    \"import unittest\\nfrom calculator import add, answer\\n\"\n    \"class CalculatorTests(unittest.TestCase):\\n\"\n    \"    def test_edited_answer(self):\\n        self.assertEqual(answer(), 42)\\n\"\n    \"    def test_signed_addition(self):\\n        self.assertEqual(add(-13, 55), 42)\\n\"\n    \"    def test_invalid_operand(self):\\n\"\n    \"        with self.assertRaises(TypeError):\\n            add(1, None)\\n\", encoding=\"utf-8\")\nPath(\"__main__.py\").write_text(\"from calculator import answer\\nprint(answer())\\n\", encoding=\"utf-8\")\ntests = run([sys.executable, \"-I\", \"-B\", \"-m\", \"unittest\", \"discover\", \"-s\", str(project), \"-v\"])\nrequire(tests.stdout == b\"\" and b\"Ran 3 tests in \" in tests.stderr\n        and tests.stderr.endswith(b\"\\nOK\\n\"), \"three unittest passes missing\")\nproofs[\"unittestPassed\"] = True\ndistribution = directory / \"dist\"\ndistribution.mkdir(mode=0o700)\narchive = distribution / \"calculator.pyz\"\nzipapp.create_archive(project, archive, compressed=True)\narchive_bytes = archive.read_bytes()\nrequire(len(archive_bytes) > 0, \"build did not produce an archive\")\nproofs[\"zipappBuilt\"] = True\npackage = run([sys.executable, \"-B\", str(archive)])\nrequire(package.stdout == b\"42\\n\" and package.stderr == b\"\", \"built zipapp output differs\")\nproofs[\"zipappExecuted\"] = True\nchild_code = (\n    \"import os,sys; \"\n    \"assert '\"'\"'FOLDGPT_WORKSPACE'\"'\"' not in os.environ; \"\n    \"assert '\"'\"'LD_PRELOAD'\"'\"' not in os.environ; \"\n    \"assert sys.stdin.buffer.read() == b'\"'\"'\\\\x00\\\\xffABC'\"'\"'; \"\n    \"sys.stdout.buffer.write(b'\"'\"'\\\\x00\\\\xffABC'\"'\"'); \"\n    \"sys.stderr.write('\"'\"'native stderr\\\\n'\"'\"'); sys.exit(23)\"\n)\nchild = run([sys.executable, \"-I\", \"-B\", \"-c\", child_code], input=b\"\\x00\\xffABC\", expected=23)\nrequire(child.stdout == b\"\\x00\\xffABC\" and child.stderr == b\"native stderr\\n\", \"child streams differ\")\nproofs[\"childStreams\"] = proofs[\"childEnvironment\"] = True\nsource_hashes = {name: hashlib.sha256(Path(name).read_bytes()).hexdigest()\n                 for name in (\"calculator.py\", \"test_calculator.py\", \"__main__.py\")}\nreport = {\"type\": \"runtime-qualification\", \"success\": True, \"platform\": sys.platform,\n          \"python\": sys.version.split()[0], \"executable\": sys.executable,\n          \"workspace\": str(workspace), \"bashCwd\": str(directory), \"pythonCwd\": str(project),\n          \"proofs\": proofs, \"denials\": denials, \"unittestCount\": 3,\n          \"unittestStderr\": tests.stderr.decode(\"utf-8\"), \"sourceSha256\": source_hashes,\n          \"initialSourceSha256\": hashlib.sha256(before).hexdigest(),\n          \"zipappBytes\": len(archive_bytes), \"zipappSha256\": hashlib.sha256(archive_bytes).hexdigest(),\n          \"zipappStdout\": package.stdout.decode(\"ascii\"), \"childExitCode\": child.returncode,\n          \"childStdoutBase64\": base64.b64encode(child.stdout).decode(\"ascii\"),\n          \"childStderr\": child.stderr.decode(\"ascii\")}\nencoded = json.dumps(report, sort_keys=True, separators=(\",\", \":\")) + \"\\n\"\n(workspace / \"qualification-result.json\").write_text(encoded, encoding=\"utf-8\")\nprint(encoded, end=\"\", flush=True)\n'"
+      ],
+      "cwd": "file:///data/local/tmp/foldgpt-bionic-runtime-qualification-v1/workspace",
+      "env": {
+        "FOLDGPT_WORKSPACE": "/data/local/tmp/foldgpt-bionic-runtime-qualification-v1/workspace",
+        "FOLDGPT_PYTHON_REAL": "@nativeLibraryDir/libfoldgpt_python_cli.so",
+        "FOLDGPT_EXPECTED_PLATFORM": "android"
+      },
+      "pipeStdin": true,
+      "tty": false,
+      "sandbox": {
+        "permissions": {
+          "type": "managed",
+          "file_system": {
+            "type": "restricted",
+            "entries": [
+              {
+                "path": {
+                  "type": "path",
+                  "path": "file:///data/local/tmp/foldgpt-bionic-runtime-qualification-v1/workspace"
+                },
+                "access": "write"
+              },
+              {
+                "path": {
+                  "type": "path",
+                  "path": "file:///data/local/tmp/foldgpt-bionic-runtime-qualification-v1/workspace/private"
+                },
+                "access": "deny"
+              }
+            ]
+          },
+          "network": "restricted"
+        },
+        "cwd": "file:///data/local/tmp/foldgpt-bionic-runtime-qualification-v1/workspace",
+        "workspaceRoots": [
+          "file:///data/local/tmp/foldgpt-bionic-runtime-qualification-v1/workspace"
+        ],
+        "windowsSandboxLevel": "disabled"
+      }
+    }
+  },
+  "write": {
+    "id": 3,
+    "method": "process/write",
+    "params": {
+      "processId": "runtime-qualification",
+      "writeId": "qualification-input-v1",
+      "chunk": "bmF0aXZlIGlucHV0Cg=="
+    }
+  },
+  "read": {
+    "id": 4,
+    "method": "process/read",
+    "params": {
+      "processId": "runtime-qualification"
+    }
+  },
+  "file": {
+    "id": 5,
+    "method": "fs/readFile",
+    "params": {
+      "path": "file:///data/local/tmp/foldgpt-bionic-runtime-qualification-v1/workspace/qualification-result.json",
+      "sandbox": {
+        "permissions": {
+          "type": "managed",
+          "file_system": {
+            "type": "restricted",
+            "entries": [
+              {
+                "path": {
+                  "type": "path",
+                  "path": "file:///data/local/tmp/foldgpt-bionic-runtime-qualification-v1/workspace"
+                },
+                "access": "write"
+              },
+              {
+                "path": {
+                  "type": "path",
+                  "path": "file:///data/local/tmp/foldgpt-bionic-runtime-qualification-v1/workspace/private"
+                },
+                "access": "deny"
+              }
+            ]
+          },
+          "network": "restricted"
+        },
+        "cwd": "file:///data/local/tmp/foldgpt-bionic-runtime-qualification-v1/workspace",
+        "workspaceRoots": [
+          "file:///data/local/tmp/foldgpt-bionic-runtime-qualification-v1/workspace"
+        ],
+        "windowsSandboxLevel": "disabled"
+      }
+    }
+  }
+}

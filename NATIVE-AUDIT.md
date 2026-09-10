@@ -1,0 +1,307 @@
+# Audit du démarrage natif — 5 septembre 2026
+
+## Point de contrôle du 6 septembre 2026
+
+Les sections suivantes conservent les observations historiques. La recherche
+actuelle sur le noyau réel et les documentations Samsung/Qualcomm/Android/Knox
+est dans [contraintes natives](docs/research/android-native-constraints-2026-09-06.md).
+Le noyau ne compile ni USER_NS ni PID_NS : réinstaller Bubblewrap ne suffit pas.
+
+La [preuve GNU indépendante](tools/executor/gnu-runtime/collection.md) passe
+désormais sur le Fold sous UID applicatif : Bash et Python ARM64 créent,
+modifient, testent et empaquettent un petit projet sous Landlock/seccomp posés
+avant PRoot strict. La collecte vérifie dix artefacts, trois tests, huit refus,
+le paquet exécuté et les 6 200 fichiers du client officiel face au paquet de
+référence. Les indicateurs lus restent Knox 0, Verified Boot green, verrouillage
+actif et SELinux Enforcing. Cette mesure ne constitue pas une promesse de
+garantie contractuelle.
+
+Le transport composite natif passe également neuf cas Android avec collecte
+indépendante. La correction des commandes ordinaires reste en cours : ces tests
+fixes ne prouvent ni le routage normal du modèle ni la disparition de l'erreur
+`bwrap` dans l'interface. Le travail utilise l'interface d'environnement du
+client officiel ; aucun MCP/plugin n'est activé pour le remplacer.
+
+## Résultat
+
+Le client ChatGPT s'affiche réellement sous PRoot sur le Fold, avec la bibliothèque `libfake_userns.so` chargée dans le processus principal et un renderer inspectés. Aucun processus QEMU n'était présent lors de cet audit. Ce résultat confirme un démarrage ARM64 sans émulation CPU ; il ne mesure pas les performances et ne valide pas les tâches, le navigateur ou Remote.
+
+Le contrôle `dpkg -V chatgpt` s'est terminé sans différence signalée. Cela vérifie les fichiers couverts par les sommes du paquet installé, pas l'absence de modifications de comportement : `/etc/ld.so.preload` charge la bibliothèque dans les programmes dynamiques du conteneur.
+
+## Isolation
+
+Le fichier `fake_userns.c`, ajouté par l'autre outil et conservé sans modification, retire les flags de namespaces de `clone` et `unshare`, retourne un succès pour `chroot` et `setns`, fournit des identifiants de namespaces constants et redirige les fichiers de mapping vers `/dev/null`.
+
+Le diagnostic `audit-shim.c` crée uniquement un répertoire vide et son propre fichier témoin. Exécuté sous l'utilisateur julien dans le conteneur :
+
+```text
+libc_unshare=0 errno=0; raw_unshare=0
+chroot_empty=0 errno=0; outside_marker_accessible=YES
+```
+
+La réussite d'un appel à `unshare`, même par instruction SVC, n'est pas probante sous PRoot, qui intercepte lui-même les appels système. Depuis Termux hors PRoot, les namespaces user et pid n'apparaissent pas dans `/proc/self/ns`.
+
+Le test du fichier démontre que le succès de chroot fourni par cette couche ne crée pas le confinement annoncé. Il ne constitue pas un test d'évasion d'un renderer Chromium : les restrictions supplémentaires propres à Chromium n'ont pas été évaluées. Les statuts inspectés montrent encore UID Android 10409, CapEff nul, NoNewPrivs 1 et Seccomp 2 ; Seccomp 2 seul n'identifie pas les filtres ni leur efficacité.
+
+## État du téléphone
+
+Vérifications ADB actuelles : warranty_bit 0, verifiedbootstate green, flash.locked 1, SELinux Enforcing. Ces indicateurs ne constituent pas une garantie contractuelle sur Samsung Care+.
+
+## Suite retenue
+
+Conserver ce résultat comme preuve de compatibilité native. Une solution répondant aux contraintes doit fournir un confinement réellement appliqué, puis passer une tâche personnalisée avec vérification du fichier, un test Remote et des mesures de latence. Le shim actuel n'est pas validé comme moteur de production. Aucun nouveau compte ni secret n'a été introduit dans cette instance pendant cet audit. Les fichiers de l'autre outil et son processus ont été préservés.
+
+## Mesures complémentaires — 6 septembre 2026
+
+`tools/probe-android-isolation.c` a été compilé avec le NDK puis exécuté hors PRoot, depuis ADB shell et `run-as app.foldgpt`. Chaque appel modifiant un état reste dans un processus enfant jetable. Dans les deux contextes :
+
+```text
+/proc/self/ns/user: ENOENT
+/proc/self/ns/pid: ENOENT
+unshare(CLONE_NEWUSER): EINVAL
+unshare(CLONE_NEWNS): EPERM
+unshare(CLONE_NEWPID): EPERM
+landlock_create_ruleset(VERSION): 6
+seccomp(GET_ACTION_AVAIL, USER_NOTIF): 0
+```
+
+Les processus lancés par `run-as` n'héritent pas nécessairement des filtres seccomp d'un processus créé par Zygote. Ce relevé prouve la présence de ces interfaces dans le noyau, pas leur utilisabilité complète depuis un futur service isolé Android.
+
+Le PRoot épinglé supprime lui-même les flags de namespaces dans `src/syscall/enter.c`, indépendamment du preload. Retirer uniquement le shim ne suffit donc pas pour tester leur disponibilité.
+
+Bubblewrap 0.12 lit les identifiants overflow avant d'analyser `--help`. Corriger cet ordre rendrait la détection du binaire possible, mais ne fournirait pas les namespaces nécessaires à l'exécution.
+
+Le binaire officiel Codex 0.153.4 contient encore `features.use_legacy_landlock`, une option dépréciée. Les diagnostics hors compte, avec un répertoire de configuration séparé et sans requête modèle, ont refusé `:workspace` et une politique explicite lecture globale/écriture projet : `permission profiles requiring direct runtime enforcement are incompatible with --use-legacy-landlock`. Les protections de métadonnées du projet ne doivent pas être supprimées pour forcer cette voie. Aucune configuration du compte n'a été modifiée et aucun fichier témoin créé par Codex n'a été obtenu.
+
+Le service de virtualisation Android annonce uniquement les VM protégées avec Gunyah, sans `/dev/kvm`, et seulement l'OS Microdroid. Le noyau Microdroid présent sur le téléphone désactive namespaces et seccomp. Cette image ne remplace donc pas un noyau Linux offrant les primitives requises. L'installation presque en un clic d'un noyau personnalisé accepté par l'hyperviseur n'est pas démontrée.
+
+## Application réelle des restrictions — 6 septembre 2026
+
+Les nouveaux programmes sont des expériences autonomes, absentes de la variante
+release. Le receiver debug requiert la permission signature `android.permission.DUMP`
+et ne lance que des programmes et arguments fixes. Chaque essai utilise son propre
+répertoire temporaire ; aucun profil ChatGPT ni fichier personnel ne sert de cible.
+
+Contrairement à `run-as`, les essais suivants sont partis du contexte de l'APK
+créé par Zygote : UID 10412, filtre seccomp hérité actif, Landlock ABI 6.
+
+| Programme | Résultat vérifié |
+| --- | --- |
+| `probe-landlock-enforcement.c` | Écriture autorisée réussie ; écriture hors périmètre, lien symbolique et écriture par enfant refusés ; création de socket refusée ; exécution native d'un shell réussie. Le parent vérifie les fichiers. |
+| `probe-landlock-broker.c` | Quatre ouvertures accordées et neuf refus attendus. Les fichiers `.git/config` existants, y compris dans un sous-dossier, restent intacts ; `.codex` et `.agents` interdits ne sont pas créés ; les cibles extérieures restent intactes. |
+| `probe-landlock-shell.c` | Un vrai `/system/bin/sh` exécute le script fixe après installation des restrictions. Création et ajout de texte autorisés réussissent. Les huit redirections interdites échouent ; la tentative supplémentaire de mksh d'ouvrir `/dev/tty` est également refusée. Contenus vérifiés indépendamment. |
+| `probe-landlock-proot.c` | Un vrai `/bin/sh` Debian s'exécute sous PRoot avec une restriction de fichiers installée avant PRoot. Son écriture dans le workspace de test est refusée. Seul le répertoire temporaire privé de PRoot est inscriptible. Le preload hérité est remplacé par un fichier vide pour ce seul diagnostic. |
+| `probe-landlock-linux-shell.c` | La combinaison fonctionne : le shell Debian sous PRoot crée trois fichiers et ajoute du texte à l'un d'eux par quatre ouvertures accordées à ses descendants. Huit redirections interdites et deux changements de permissions hors scratch sont refusés. Le parent vérifie les contenus, les absences attendues et les permissions des deux témoins protégés. |
+
+Le premier programme démontre aussi une limite de Landlock : une règle de lecture
+sur `.git` ne retire pas une autorisation d'écriture héritée de son parent. Le
+marqueur `metadata_protected=NO` est donc un résultat attendu, pas une protection
+validée. Le broker évite cette autorisation récursive : son enfant reste en
+lecture seule et reçoit uniquement les descripteurs validés par le parent.
+
+Les brokers copient le chemin une seule fois, valident les composants, ouvrent
+depuis un descripteur fixe avec `openat2` et les contraintes `RESOLVE_BENEATH`,
+`RESOLVE_NO_SYMLINKS`, `RESOLVE_NO_XDEV`, puis transfèrent le descripteur avec
+`SECCOMP_ADDFD_FLAG_SEND`. Ils n'utilisent pas `CONTINUE`. Le transfert initial du
+listener emploie directement l'appel système `sendmsg` : le wrapper réseau Android
+peut initialiser des bibliothèques en ouvrant des fichiers avant que le parent ait
+reçu le listener.
+
+Ces essais ne forment pas un moteur général. Ils ne couvrent pas les commandes
+arbitraires, toutes les opérations POSIX, les changements de politique, la
+confidentialité des lectures ou l'ensemble du processus Chromium. Une annulation
+tardive peut encore laisser une création ou troncature autorisée dans le dossier
+de test : la validation d'identifiant et le transfert atomique ne rendent pas
+l'opération de fichier transactionnelle. Le parent utilise les droits ordinaires
+de l'application. Aucun `externalSandbox` ni succès de sandbox n'est déclaré à
+Codex sur la base de ces seuls résultats.
+
+### Preuve combinée : shell Debian, PRoot et broker
+
+Le journal `cache/linux-shell-probe.log`, relu sur le Fold le 6 septembre 2026,
+contient le résultat suivant depuis le contexte réel de l'APK :
+
+```text
+uid=10412 landlock_abi=6 inherited_seccomp=2
+worker parent_ptrace_baseline_read=ALLOWED errno=0
+worker parent_ptrace_access_denied=PASS errno=1
+worker landlock_direct_write_denied=PASS errno=13
+worker notification_filter_installed=PASS errno=0
+worker notification_listener_sent=PASS errno=0
+worker workspace_chmod_denied=PASS errno=1
+worker outside_chmod_denied=PASS errno=1
+worker direct_openat2_filtered=PASS errno=1
+linux_shell_started=PASS
+shell_allowed_redirections=PASS
+shell_denied_redirections=PASS
+workspace_grants=4 descendant_workspace_grants=4 scratch_grants=3 broker_denials=10
+scratch_mode_changes=1
+independent_parent_verification=PASS
+scope=fixed Linux shell via PRoot; not Codex or an arbitrary-command sandbox
+```
+
+Le parent natif applique Landlock et son filtre seccomp avant de lancer le PRoot
+épinglé. Les restrictions sont donc héritées par le traceur et le shell Debian ;
+elles ne reposent pas sur les réponses émulées par PRoot. Avant le filtre de
+notification, une création directe dans le projet est déjà refusée par Landlock.
+La lecture d'un marqueur public dans la mémoire du parent, autorisée avant
+Landlock sur ce téléphone, est refusée ensuite par son contrôle d'accès ptrace.
+Cela vérifie ce chemin précis de séparation du parent, sans constituer un audit
+exhaustif des interactions entre processus.
+
+`PROOT_NO_SECCOMP=1` désactive seulement l'optimisation `RET_TRACE` interne de
+PRoot. Le filtre Android et le filtre FoldGPT restent actifs. PRoot utilise alors
+ses arrêts `PTRACE_SYSCALL` pour traduire les chemins avant la notification : le
+broker accepte uniquement des chemins hôtes absolus rattachés à ses descripteurs
+de projet ou de scratch. Les quatre ouvertures du projet proviennent des
+descendants du traceur, et non du parent chargé des vérifications.
+
+Le shell exécute exclusivement le script compilé dans le diagnostic, avec une
+entrée standard vide, un environnement fixe et sans lecture de fichier de
+démarrage. Le binding `/dev/null:/etc/ld.so.preload` écarte le shim pour ce seul
+essai, sans modifier le fichier du système Debian. Trois fichiers ordinaires
+sont créés, dont `.gitignore` ; un ajout de texte est ensuite vérifié. Les cibles
+`.git/config`, `src/.git/config`, `.git/new-file`, `.codex/config.toml`,
+`.agents/settings`, les chemins extérieurs relatifs et absolus ainsi qu'un lien
+symbolique vers l'extérieur restent protégés dans cet arbre de test.
+
+Landlock ne contrôle pas `chmod`. Le filtre intercepte donc `fchmodat` et, sur les
+architectures qui l'exposent, `chmod`. Le parent ne réalise cette opération que
+sur un fichier ordinaire ou répertoire du scratch ouvert sans lien symbolique ni
+franchissement de montage, avec un mode limité à `0777`. Les autres variantes
+non autorisées sont refusées par défaut. Le test observe un changement de mode
+nécessaire au scratch de PRoot ; les tentatives sur les témoins du projet et de
+l'extérieur échouent, et le parent vérifie que leurs modes restent `0600`.
+
+Limites supplémentaires de cette combinaison :
+
+- Les lectures et exécutions sont globalement autorisées selon les droits Android
+  de l'application. Le script fixe ne consulte pas le compte, mais le mécanisme
+  ne protège pas la confidentialité des fichiers lisibles par cet UID.
+- La règle de métadonnées reconnaît les composants `.git`, `.codex` et `.agents` ;
+  elle ne traduit pas encore une politique Codex complète ou des exceptions
+  propres à un projet.
+- `RESOLVE_NO_SYMLINKS` ne bloque pas les liens physiques. L'arbre neuf et contrôlé
+  de cette expérience n'en contient pas. Réutiliser ce broker tel quel sur un
+  projet arbitraire pourrait accorder un descripteur d'écriture vers un inode
+  également accessible par un nom extérieur ou protégé. Cette situation doit
+  être traitée avant toute exécution de commandes non bornées.
+- Les changements de nom, suppressions et autres mutations directes restent
+  limités au scratch ; les écritures du projet passent par les descripteurs
+  accordés. Cela ne fournit pas encore la sémantique de travail de tous les
+  outils Linux. La concurrence, les ressources, les descendants persistants et
+  l'arrêt d'un arbre de processus hostile ne sont pas validés par ce script.
+  Le filtre autorise notamment `prlimit64` sans borner son PID cible ; le test
+  ptrace réussi ne démontre donc pas une séparation complète des processus.
+- Les sorties standard et d'erreur conservent leurs descripteurs vers le journal
+  du diagnostic. Cette écriture de rapport est extérieure au dossier de témoins
+  créé par `mkdtemp` ; le test ne promet pas l'absence de toute écriture extérieure
+  par un descripteur volontairement hérité.
+- La création, troncature ou modification de mode réalisée avant une annulation
+  tardive n'est pas annulée automatiquement. Les descripteurs accordés conservent
+  leurs droits jusqu'à leur fermeture ; aucun changement dynamique de politique
+  n'est implémenté.
+
+Cette preuve autorise à annoncer une commande shell Linux réelle avec écritures
+sélectives et refus vérifiés sur le Fold. Elle n'autorise pas à annoncer que Codex
+exécute déjà ses outils avec une isolation de production.
+
+### Reproduire le diagnostic combiné
+
+Prérequis : installation debug FoldGPT déjà initialisée avec son Debian, ses
+bibliothèques natives et PRoot épinglé ; JDK, SDK et Gradle décrits dans le README ;
+NDK `29.0.14206865` pour le script de compilation. Les expériences sont intégrées
+uniquement à la variante debug. L'installation de l'APK ferme sa session courante.
+
+```powershell
+& .\tools\build-landlock-probe.ps1
+gradle -p android :app:assembleDebug --console=plain
+```
+
+Après réussite des deux compilations, installer cet APK debug sur le périphérique
+de test, puis déclencher le receiver protégé :
+
+```powershell
+adb -s YOUR_ADB_SERIAL install -r android/app/build/outputs/apk/debug/app-debug.apk
+adb -s YOUR_ADB_SERIAL shell am broadcast -a app.foldgpt.PROBE_LINUX_SHELL -n app.foldgpt/.LandlockProbeReceiver
+adb -s YOUR_ADB_SERIAL logcat -d -s FoldGPT-Probe:I
+adb -s YOUR_ADB_SERIAL shell run-as app.foldgpt cat cache/linux-shell-probe.log
+```
+
+Le receiver est asynchrone : le retour du broadcast n'indique pas la fin du test.
+Vérifier une nouvelle ligne `linux-shell experiment exit=0` correspondant à cet
+essai et le marqueur final `independent_parent_verification=PASS` dans le journal
+avant de conclure. Chaque invocation crée un nouveau dossier de témoins sous le
+cache privé de l'application, dont le chemin figure dans ce journal. Aucun appel
+modèle ni accès au compte n'est nécessaire à cette reproduction.
+
+## Point de raccordement à Codex
+
+Inspection du tag officiel `rust-v0.153.4`, commit
+`042fb41b7c813ac7999105e886b2b7aa715b5081` : l'app-server lit
+`CODEX_HOME/environments.toml`, qui peut déclarer un transport d'exécution stdio
+ou WebSocket. Le contrat `ExecParams.sandbox` transporte la politique de fichiers.
+Ce mécanisme permet d'étudier un moteur FoldGPT distinct sans modifier les
+binaires officiels.
+
+La sélection doit encore être vérifiée avec l'interface Desktop. La liste des
+environnements par défaut comprend tous les environnements configurés, et pas
+seulement celui nommé `default`. En outre, `command/exec`, `process/spawn`,
+`thread/shellCommand` et les RPC `fs/*` restent locaux. Supprimer l'environnement
+local rendrait ces fonctions indisponibles ; le conserver ne prouve pas que tous
+les outils passent par notre futur moteur. Aucun fichier `environments.toml` du
+compte n'a été changé. La preuve de commande protégée exécutée par Codex reste à
+obtenir.
+
+## Sonde Codex officielle hors ligne en préparation
+
+`tools/probe-landlock-codex.c` et `tools/probe-codex-offline.py` prolongent le
+script fixe avec le vrai binaire Codex 0.153.4, contrôlé par son SHA-256. Le
+parent applique Landlock/seccomp avant PRoot et crée un profil temporaire sans
+identifiants. Le protocole émet seulement `initialize` et `command/exec` ; aucun
+thread, tour modèle ni connexion au compte n'est nécessaire. La déclaration
+`externalSandbox` décrit uniquement les restrictions extérieures réelles de ce
+test, avec lectures globales et écritures sélectives dans ses témoins.
+
+Le service `CodexProbeService` est limité à la variante debug et protégé par
+`android.permission.DUMP`. Il permet un diagnostic borné de 90 secondes dans
+un processus issu du Zygote Android. Les essais `run-as` ont une provenance
+seccomp différente et ne peuvent pas remplacer cette validation finale.
+
+Le binaire officiel a démarré dans le service, puis le test a révélé des besoins
+précis de SQLite et des pipes Rust. Le filtre conserve les refus de création de
+socket réseau, de connexion, de montage et de namespaces ; il autorise seulement
+les paires de flux Unix anonymes et les opérations nécessaires sur les FDs déjà
+accordés. Les opérations ioctl permises sont nommées, pas accordées globalement.
+Les dernières corrections compilent, mais la liaison USB s'est interrompue avant
+une réponse réussie complète de `initialize` puis `command/exec`. **Cette nouvelle
+preuve reste à obtenir.** Le client et son profil existants n'ont pas été changés.
+
+Après installation coordonnée de l'APK debug compilé :
+
+```powershell
+adb -s YOUR_ADB_SERIAL shell am start-foreground-service -n app.foldgpt/.CodexProbeService
+adb -s YOUR_ADB_SERIAL shell run-as app.foldgpt cat cache/codex-probe.log
+```
+
+La seule création du service n'est pas une réussite. Exiger les marqueurs de
+vérification du binaire, d'initialisation, de réponse `command/exec` et de
+vérification indépendante des fichiers par le parent. Les limitations de cette
+sonde restent celles d'un arbre neuf contrôlé, pas d'une politique générale.
+
+## Rendu graphique mesuré
+
+`tools/inspect-gpu.py` interroge uniquement `SystemInfo.getInfo` sur le endpoint
+local du client, sans lire de page ni de conversation. Le premier relevé indiquait
+ANGLE sur `llvmpipe (LLVM 19.1.7)` avec Mesa 25.0.7, composition et rasterisation
+logicielles. Le relevé du 6 septembre à 02:05 UTC confirme désormais ANGLE sur
+Zink/Turnip, `Adreno (TM) 840`, Mesa 26.2.2, avec composition et rasterisation GPU
+activées dans le client officiel. Les sondes Vulkan, GLX, présentation X11 et
+texture-from-pixmap passent également. Le compositeur `xfwm4` est conservé.
+
+Le test visuel reste incomplet : l'écran initial est propre, mais les transitions
+de menus produisent des corruptions intermittentes. L'horloge GPU et la requête
+de fréquence GLX ont encore des erreurs. Les corrections suivantes sont
+préparées séparément ; la déconnexion USB a interrompu leur validation.
+Voir [GPU-PROBE.md](GPU-PROBE.md). Ni une faible charge CPU au repos ni les modes
+d'écran observés à 59,95 ou 119,98 Hz ne mesurent les images réellement rendues.

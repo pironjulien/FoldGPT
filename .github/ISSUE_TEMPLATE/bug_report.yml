@@ -1,0 +1,16 @@
+name: Bug report
+description: Report a reproducible FoldGPT problem
+body:
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Reproduction
+      description: Include steps, expected result, and actual result. Do not include private logs or credentials.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Commit or version
+    validations:
+      required: true

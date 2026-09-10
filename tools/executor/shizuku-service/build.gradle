@@ -1,0 +1,23 @@
+plugins {
+    id 'com.android.library' version '9.3.1' apply false
+    id 'com.android.application' version '9.3.1' apply false
+}
+
+def qualificationVersion = providers.gradleProperty('foldgptQualificationVersion').getOrElse('11')
+if (!(qualificationVersion in ['11', '12'])) {
+    throw new GradleException('Only reviewed independent qualification versions 11 and 12 are admitted')
+}
+// Keep V11 outputs intact while compiling a new fixed application identity.
+def runtimeQualification = providers.gradleProperty('foldgptRuntimeQualification').getOrElse('false')
+if (!(runtimeQualification in ['false', 'true'])) {
+    throw new GradleException('foldgptRuntimeQualification must be true or false')
+}
+def runtimeVersion = providers.gradleProperty('foldgptRuntimeQualificationVersion').getOrElse('1')
+if (!(runtimeVersion in ['1', '2'])) {
+    throw new GradleException('Only reviewed runtime qualification versions 1 and 2 are admitted')
+}
+if (runtimeQualification == 'true') {
+    layout.buildDirectory = layout.projectDirectory.dir('build/runtimequalification-v' + runtimeVersion)
+} else if (qualificationVersion != '11') {
+    layout.buildDirectory = layout.projectDirectory.dir('build/qualification-v' + qualificationVersion)
+}

@@ -1,0 +1,6 @@
+{
+  "base": "tools/probe-landlock-codex.c",
+  "baseSha256": "6f9ea3840a51a0e3ecf8487cd08e324eea139bcf686733634c6eca10cc202d73",
+  "launcherSha256": "e904efd89ebeb03316c07d9b482736336eb7fa95f50c4164028bf87783844cfd",
+  "projectSha256": "d57214ecdfb9d75b2f8ba0fb1c473a858548a307158724de81a49578dc14ebd1"
+}

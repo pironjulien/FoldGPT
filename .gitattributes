@@ -1,0 +1,59 @@
+*.sh text eol=lf
+*.gdb text eol=lf
+*.patch text eol=lf
+# Application-origin build admission compares these sources with frozen bytes.
+tools/executor/runas-runtime/native-bootstrap.c text eol=lf
+tools/executor/runas-runtime/build-bootstrap-windows.py text eol=lf
+tools/executor/runas-runtime/app-launch-admission.py text eol=lf
+tools/executor/runas-runtime/stage-production-package.py text eol=lf
+tools/executor/private_exec_broker.py text eol=lf
+tools/executor/native_runtime_startup.py text eol=lf
+tools/executor/shizuku-service/build-app-transport-windows.py text eol=lf
+tools/executor/shizuku-service/transport/src/main/cpp/app-spawn.c text eol=lf
+tools/executor/shizuku-service/transport/src/main/assets/foldgpt-executor/foldgpt_app_bootstrap.py text eol=lf
+tools/executor/shizuku-service/transport/src/main/assets/foldgpt-executor/foldgpt_native_bootstrap.py text eol=lf
+# These candidate sources are matched byte-for-byte to the reviewed Android build.
+tools/executor/bionic-supervisor/tty-runner.c text eol=lf
+tools/executor/bionic-supervisor/tty_wire.py text eol=lf
+tools/executor/bionic-supervisor/tty_processes.py text eol=lf
+# Keep the qualified PTY import closure stable when checking out on another OS.
+tools/executor/bionic-supervisor/__init__.py text eol=lf
+tools/executor/bionic-supervisor/direct_processes.py text eol=lf
+tools/executor/bionic-supervisor/direct_wire.py text eol=lf
+tools/executor/bionic-supervisor/wire.py text eol=lf
+tools/executor/exec_server.py text eol=lf
+tools/executor/native_environment.py text eol=lf
+tools/executor/native_process_policy.py text eol=lf
+tools/executor/native_processes.py text eol=lf
+tools/executor/ordinary_uid_files.py text eol=lf
+tools/executor/policy_intent.py text eol=lf
+tools/policy/managed_policy.py text eol=lf
+# These two qualified sources contain recorded CRLF/mixed endings; retain bytes.
+tools/executor/native_environment_unicode.py -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+tools/executor/native_files.py -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+# Preserve recorded bytes, including Windows CRLF, while retaining whitespace checks.
+recovery/verification/native-v11-20260907/*.json -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+recovery/verification/engine-arm64-static-compatibility-20260907.json -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+recovery/verification/native-executable-metadata-20260907/* -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+recovery/verification/native-v12-20260907/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+recovery/verification/native-runtime-pc-20260907/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+recovery/verification/native-runtime-v1-20260907/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+recovery/verification/native-runtime-v2-20260907/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+recovery/verification/github-supplement-v9-restoration.json -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+recovery/verification/native-bootstrap-files-20260907/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+recovery/verification/native-bootstrap-channel-20260907/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+recovery/verification/native-java-startup-20260908/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+recovery/verification/native-production-python-20260908/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+recovery/verification/native-startup-parent-environment-20260908/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+recovery/verification/native-host-production-20260908/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+recovery/verification/native-model-python-cli-20260908/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+recovery/verification/app-context-20260908/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+recovery/verification/r26b-20260908/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+recovery/verification/r28-20260908/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+recovery/verification/legacy-projects-20260908/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+# JUnit emits a final blank line; preserve its recorded output exactly.
+recovery/verification/r26b-20260908/**/*.log -text whitespace=-blank-at-eof,cr-at-eol
+recovery/verification/r28-20260908/**/*.log -text whitespace=-blank-at-eof,cr-at-eol
+# Preserve delivery receipts and the exact downloaded v17 manifest.
+recovery/verification/*v17*.json -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+recovery/verification/recovery-paths-20260908.json -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol

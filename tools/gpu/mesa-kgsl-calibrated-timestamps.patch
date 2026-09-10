@@ -1,0 +1,23 @@
+diff --git a/src/freedreno/vulkan/tu_knl_kgsl.cc b/src/freedreno/vulkan/tu_knl_kgsl.cc
+--- a/src/freedreno/vulkan/tu_knl_kgsl.cc
++++ b/src/freedreno/vulkan/tu_knl_kgsl.cc
+@@ -1706,7 +1706,17 @@ static int
+ kgsl_device_get_gpu_timestamp(struct tu_device *dev, uint64_t *ts)
+ {
+-   UNREACHABLE("");
+-   return 0;
++   /* This ioctl reads the same persistent hardware counter as timestamp
++    * queries, without requiring privileged performance-counter access.
++    * The Vulkan runtime brackets this callback to determine maxDeviation.
++    */
++   uint32_t domain = KGSL_CALIBRATED_TIME_DOMAIN_DEVICE;
++   struct kgsl_read_calibrated_timestamps req = {
++      .sources = (uintptr_t) &domain,
++      .ts = (uintptr_t) ts,
++      .count = 1,
++   };
++
++   return safe_ioctl(dev->fd, IOCTL_KGSL_READ_CALIBRATED_TIMESTAMPS, &req);
+ }
+ 
+ static int

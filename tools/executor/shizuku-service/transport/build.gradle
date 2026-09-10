@@ -1,0 +1,57 @@
+plugins { id 'com.android.library' }
+// This module is included by several independent Gradle roots. Its task
+// identity differs between them, so incremental merger state must not share
+// the source directory's build folder across those roots.
+layout.buildDirectory = rootProject.layout.buildDirectory.dir('modules/' + project.name)
+def frozenTransportNative = providers.gradleProperty('foldgptFrozenTransportJni')
+android {
+    namespace 'app.foldgpt.shizukuexec'
+    compileSdk 37
+    ndkVersion '29.0.14206865'
+    defaultConfig {
+        minSdk 30
+        targetSdk 37
+        ndk { abiFilters 'arm64-v8a' }
+        externalNativeBuild { cmake { arguments '-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON' } }
+        consumerProguardFiles 'consumer-rules.pro'
+    }
+    if (frozenTransportNative.isPresent()) {
+        sourceSets.main.jniLibs.srcDir(file(frozenTransportNative.get()))
+    } else {
+        externalNativeBuild { cmake { path 'src/main/cpp/CMakeLists.txt'; version '3.22.1' } }
+    }
+    buildFeatures { aidl true }
+    sourceSets.main.assets.exclude '**/__pycache__/**'
+    // Production supplies this entry only through its explicit pinned package;
+    // adding it to legacy qualification APKs would invalidate their inventories.
+    sourceSets.main.assets.exclude 'foldgpt-executor/foldgpt_native_bootstrap.py'
+    sourceSets.main.assets.exclude 'foldgpt-executor/foldgpt_app_bootstrap.py'
+    compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
+}
+if (frozenTransportNative.isPresent()) {
+    tasks.named('preBuild').configure {
+        doFirst {
+            def directory = file(frozenTransportNative.get()).canonicalFile
+            def expected = [
+                'arm64-v8a/libfoldgpt_shizuku_transport.so': 'd4bb423a0dbe354485337d947bec486d6012d7b37a2ae0d73d0def8f26fe4ca6',
+                'arm64-v8a/libfoldgpt_bionic_cwd.so': 'f65702d47130bf8f3098e7b9a5da5d982bbbc0d20cf50eeb61cc5fd489237157'
+            ]
+            def actual = fileTree(directory).files.collect {
+                directory.toPath().relativize(it.toPath()).toString().replace('\\', '/')
+            }.toSet()
+            if (actual != expected.keySet()) throw new GradleException('Frozen JNI inputs have unexpected or missing files')
+            expected.each { relative, digest ->
+                def source = new File(directory, relative)
+                def sha = java.security.MessageDigest.getInstance('SHA-256').digest(source.bytes).encodeHex().toString()
+                if (sha != digest) throw new GradleException('Frozen JNI input differs from reviewed standalone APK: ' + relative)
+            }
+        }
+    }
+}
+dependencies {
+    compileOnly 'androidx.annotation:annotation:1.3.0'
+    api 'dev.rikka.shizuku:api:13.1.5'
+    api 'dev.rikka.shizuku:provider:13.1.5'
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation 'org.json:json:20260719'
+}

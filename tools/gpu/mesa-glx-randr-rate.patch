@@ -1,0 +1,119 @@
+--- a/src/glx/glxcmds.c
++++ b/src/glx/glxcmds.c
+@@ -31,6 +31,9 @@
+ #include <X11/Xlib-xcb.h>
+ #include <xcb/xcb.h>
+ #include <xcb/glx.h>
++#ifdef HAVE_X11_DRM
++#include <xcb/randr.h>
++#endif
+ #include "GL/mesa_glinterop.h"
+ #include "dri_util.h"
+ 
+@@ -1834,6 +1837,74 @@
+ }
+ 
+ #if defined(GLX_DIRECT_RENDERING) && !defined(GLX_USE_APPLEGL)
++#ifdef HAVE_X11_DRM
++/* Android surface servers expose RandR modes but need not implement legacy
++ * XF86VidMode. The screen-only API cannot choose between differing rates.
++ */
++static GLboolean
++glx_get_randr_msc_rate(struct glx_screen *psc, int32_t *numerator,
++                      int32_t *denominator)
++{
++   xcb_connection_t *conn = XGetXCBConnection(psc->dpy);
++   xcb_randr_get_screen_resources_current_reply_t *resources =
++      xcb_randr_get_screen_resources_current_reply(conn,
++         xcb_randr_get_screen_resources_current(conn,
++            RootWindow(psc->dpy, psc->scr)), NULL);
++   if (!resources)
++      return False;
++   xcb_randr_crtc_t *crtcs =
++      xcb_randr_get_screen_resources_current_crtcs(resources);
++   xcb_randr_mode_info_t *modes =
++      xcb_randr_get_screen_resources_current_modes(resources);
++   uint64_t rate_n = 0, rate_d = 0;
++   bool valid = true;
++   for (unsigned c = 0; c < resources->num_crtcs && valid; c++) {
++      xcb_randr_get_crtc_info_reply_t *crtc = xcb_randr_get_crtc_info_reply(
++         conn, xcb_randr_get_crtc_info(conn, crtcs[c], resources->config_timestamp), NULL);
++      if (!crtc || crtc->status != XCB_RANDR_SET_CONFIG_SUCCESS) {
++         free(crtc);
++         valid = false;
++         break;
++      }
++      if (crtc->mode != XCB_NONE) {
++         bool found = false;
++         for (unsigned m = 0; m < resources->num_modes; m++) {
++            if (modes[m].id != crtc->mode)
++               continue;
++            uint64_t n = modes[m].dot_clock;
++            uint64_t d = (uint64_t)modes[m].htotal * modes[m].vtotal;
++            if (modes[m].mode_flags & XCB_RANDR_MODE_FLAG_INTERLACE)
++               n *= 2;
++            if (modes[m].mode_flags & XCB_RANDR_MODE_FLAG_DOUBLE_SCAN)
++               d *= 2;
++            if (!n || !d) break;
++            uint64_t a = n, b = d;
++            while (b) {
++               uint64_t remainder = a % b;
++               a = b;
++               b = remainder;
++            }
++            n /= a;
++            d /= a;
++            found = n <= INT32_MAX && d <= INT32_MAX &&
++                    (!rate_n || (n == rate_n && d == rate_d));
++            rate_n = n;
++            rate_d = d;
++            break;
++         }
++         valid = found;
++      }
++      free(crtc);
++   }
++   free(resources);
++   if (!valid || !rate_n)
++      return False;
++   *numerator = rate_n;
++   *denominator = rate_d;
++   return True;
++}
++#endif
++
+ GLboolean
+ __glxGetMscRate(struct glx_screen *psc,
+       int32_t * numerator, int32_t * denominator)
+@@ -1887,7 +1958,11 @@
+    }
+ #endif
+ 
++#ifdef HAVE_X11_DRM
++   return glx_get_randr_msc_rate(psc, numerator, denominator);
++#else
+    return False;
++#endif
+ }
+ #endif
+ 
+--- a/src/glx/meson.build
++++ b/src/glx/meson.build
+@@ -120,7 +120,7 @@
+   ],
+   dependencies : [
+     idep_mesautil, idep_xmlconfig,
+-    dep_libdrm, dep_glproto, dep_x11, dep_xext, dep_glvnd, dep_xxf86vm, dep_xshmfence,
++    dep_libdrm, dep_glproto, dep_x11, dep_xext, dep_xcb_xrandr, dep_glvnd, dep_xxf86vm, dep_xshmfence,
+   ],
+ )
+ 
+@@ -135,7 +135,7 @@
+   link_args : [ld_args_bsymbolic, ld_args_gc_sections, extra_ld_args_libgl],
+   dependencies : [
+     dep_libdrm, dep_dl, dep_m, dep_thread, dep_x11, dep_xcb_glx, dep_xcb,
+-    dep_x11_xcb, dep_xext, dep_xxf86vm, dep_xcb_shm, extra_deps_libgl,
++    dep_x11_xcb, dep_xext, dep_xxf86vm, dep_xcb_xrandr, dep_xcb_shm, extra_deps_libgl,
+   ],
+   version : gl_lib_version,
+   darwin_versions : '4.0.0',
