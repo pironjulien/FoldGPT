@@ -1,5 +1,7 @@
 # FoldGPT
 
+**Live showcase:** https://foldgpt.julienpironfr.chatgpt.site
+
 FoldGPT is an experimental Android host for the official ChatGPT Linux ARM64 desktop client on a Galaxy Z Fold. It keeps the Android app in its own UID and launches the Linux desktop surface locally through the Android runtime.
 
 ## Current status
