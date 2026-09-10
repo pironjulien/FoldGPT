@@ -48,9 +48,17 @@ class ObservationTest(unittest.TestCase):
                 self.check(state=changed)
 
     def test_other_version_and_uid_refuse(self):
-        for key, value in (("version", 2), ("uid", self.uid + 1)):
+        for key, value in (("version", 3), ("uid", self.uid + 1)):
             with self.subTest(key=key), self.assertRaises(ValueError):
                 self.check(marker={**self.marker, key: value})
+
+    def test_valid_and_invalid_v2_marker(self):
+        valid_epoch = {"schema": "foldgpt.android-boot-epoch.v1", "source": "android.provider.Settings.Global.BOOT_COUNT", "bootCount": 9}
+        v2_marker = {"version": 2, "uid": self.uid, "brokerPid": 29060, "bootEpoch": valid_epoch}
+        self.check(marker=v2_marker)
+        for bad_epoch in (None, {}, {"bootCount": "9"}, {"schema": "other", "bootCount": 9}):
+            with self.subTest(bad_epoch=bad_epoch), self.assertRaises(ValueError):
+                self.check(marker={**v2_marker, "bootEpoch": bad_epoch})
 
     def test_original_unavailable_contract_preserved(self):
         self.check(state={"state": "unavailable"}, allow=False)

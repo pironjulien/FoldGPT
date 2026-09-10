@@ -15,6 +15,16 @@ if [[ -n "${CODEX_HOME:-}" ]]; then
     context_args+=(--codex-home "$CODEX_HOME")
 fi
 python3 -B /usr/local/lib/foldgpt/foldgpt_agent_context.py "${context_args[@]}"
+
+# A local, explicitly branded ARM64 distribution owns acquisition and repair.
+# The adapter is applied only to fingerprint-reviewed official client bytes;
+# the original ASAR remains in the provider's backup directory.
+if [[ -f /usr/local/share/foldgpt/workspace-runtime/provider.json ]]; then
+    python3 -B /usr/local/lib/foldgpt/install-workspace-provider.py \
+        --asar /usr/lib/chatgpt/resources/app.asar \
+        --state /usr/local/share/foldgpt/workspace-runtime/client-backup
+    export FOLDGPT_WORKSPACE_PROVIDER=1
+fi
 timeout 20s python3 /usr/local/lib/foldgpt/foldgpt_keyring.py
 # Keep our driver separate from both Debian Mesa and the official client. This
 # selects libraries; inspect-gpu.py must still verify the client's actual use.
@@ -34,13 +44,22 @@ if [[ -d "$gpu_prefix" ]]; then
 else
     echo "FoldGPT GPU driver not installed; using Debian graphics libraries" >&2
 fi
+if [[ -f /usr/local/lib/foldgpt/libquiet_xext.so ]]; then
+    export LD_PRELOAD="/usr/local/lib/foldgpt/libquiet_xext.so${LD_PRELOAD:+:$LD_PRELOAD}"
+fi
 python3 -u /usr/local/lib/foldgpt/foldgpt_ime.py > "$HOME/.local/state/foldgpt-ime.log" 2>&1 &
 ime_pid=$!
 # A window manager implements maximize, modal dialogs and display-size changes.
 # Starting the application alone leaves these X11 requests unhandled.
 xfwm4 > "$HOME/.local/state/foldgpt-wm.log" 2>&1 &
 wm_pid=$!
-trap 'kill "$ime_pid" "$wm_pid" 2>/dev/null || true' EXIT
+# Start user-space PulseAudio server for native microphone and speaker bridging
+export PULSE_SERVER=127.0.0.1:4713
+if [[ -f /usr/local/share/foldgpt/pulseaudio.pa ]]; then
+    pulseaudio -k 2>/dev/null || true
+    pulseaudio -n -F /usr/local/share/foldgpt/pulseaudio.pa --daemonize=true || true
+fi
+trap 'kill "$ime_pid" "$wm_pid" 2>/dev/null || true; pulseaudio -k 2>/dev/null || true' EXIT
 chatgpt --ozone-platform=x11 --force-device-scale-factor="${FOLDGPT_SCALE:-1}" --start-maximized --remote-debugging-address=127.0.0.1 --remote-debugging-port="$FOLDGPT_CDP_PORT" &
 client_pid=$!
 # Ask the window manager for fullscreen using the application's actual window ID.
@@ -53,6 +72,10 @@ while kill -0 "$client_pid" 2>/dev/null; do
     fi
     if [[ -n "$window" ]]; then
         wmctrl -i -r "$window" -b add,fullscreen
+        # Actual client window discovered; bind the signal to this Android launch.
+        if [[ -n "${FOLDGPT_SESSION_TOKEN:-}" ]]; then
+            printf '%s\n' "$FOLDGPT_SESSION_TOKEN" > /tmp/foldgpt-client-ready
+        fi
         break
     fi
     sleep 0.1

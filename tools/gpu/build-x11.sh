@@ -10,7 +10,7 @@ ndk=${ANDROID_NDK_HOME:-/opt/foldgpt/android-ndk-r29}
 version=29.0.14206865
 archive_sha256=4abbbcdc842f3d4879206e9695d52709603e52dd68d3c1fff04b3b5e7a308ecf
 archive_url=https://dl.google.com/android/repository/android-ndk-r29-linux.zip
-archive=${FOLDGPT_NDK_ARCHIVE:-/mnt/c/Dev/AndroidSdk-Linux/downloads/android-ndk-r29-linux.zip}
+archive=${FOLDGPT_NDK_ARCHIVE:-/mnt/c/Dev/ChatgptFold/work/AndroidSdk-Linux/downloads/android-ndk-r29-linux.zip}
 build_parent="$repo/downloads/gpu/x11"
 for program in cmake ninja python3 bison flex gcc patch git sha256sum tar; do
     command -v "$program" >/dev/null || { echo "Missing host tool: $program" >&2; exit 1; }

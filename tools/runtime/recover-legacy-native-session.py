@@ -49,8 +49,17 @@ data=os.read(marker,4097)
 if len(data)!=mi.st_size or hashlib.sha256(data).hexdigest()!=expected:
     raise ValueError('Legacy marker changed since quiescence evidence')
 value=json.loads(data)
-if set(value)!={'version','brokerPid','uid','workspaceDevice','workspaceInode'} or value['version']!=1 or value['uid']!=uid:
-    raise ValueError('This maintenance is only for the observed legacy v1 marker')
+allowed_v1={'version','brokerPid','uid','workspaceDevice','workspaceInode'}
+allowed_v2={'version','brokerPid','uid','workspaceDevice','workspaceInode','bootEpoch'}
+if value.get('version')==1 and set(value)==allowed_v1 and value['uid']==uid:
+    archive_prefix='recovered-v1-'
+elif value.get('version')==2 and set(value)==allowed_v2 and value['uid']==uid:
+    epoch=value.get('bootEpoch')
+    if not isinstance(epoch, dict) or epoch.get('schema')!='foldgpt.android-boot-epoch.v1' or epoch.get('source')!='android.provider.Settings.Global.BOOT_COUNT' or type(epoch.get('bootCount')) is not int:
+        raise ValueError('Invalid legacy v2 bootEpoch')
+    archive_prefix='recovered-v2-'
+else:
+    raise ValueError('This maintenance is only for an observed legacy v1 or v2 marker')
 workspace=os.stat('/data/user/0/app.foldgpt/files/projects',follow_symlinks=False)
 if (workspace.st_dev,workspace.st_ino)!=(value['workspaceDevice'],value['workspaceInode']):
     raise ValueError('Legacy workspace identity differs')
@@ -62,7 +71,7 @@ if sys.stdin.readline().strip()!=nonce:
     raise RuntimeError('Independent locked UID census was not confirmed')
 if Path('/proc/sys/kernel/random/boot_id').read_text().strip()!=boot:
     raise RuntimeError('Boot changed before archival')
-archive='recovered-v1-'+nonce
+archive=archive_prefix+nonce
 os.mkdir(archive,0o700,dir_fd=fd)
 archive_fd=os.open(archive,os.O_RDONLY|os.O_DIRECTORY|os.O_NOFOLLOW|os.O_CLOEXEC,dir_fd=fd)
 named=os.stat('process-session.json',dir_fd=fd,follow_symlinks=False)
@@ -92,8 +101,13 @@ def app_processes(text, uid):
 
 def validate_legacy_observation(state, marker, owned, uid, allow_stale_stopping=False):
     """Admit maintenance only; whole-UID quiescence and flock are still required."""
-    if marker.get("version") != 1 or marker.get("uid") != uid:
-        raise ValueError("This recovery requires an observed legacy v1 marker for this UID")
+    version = marker.get("version")
+    if version not in (1, 2) or marker.get("uid") != uid:
+        raise ValueError("This recovery requires an observed legacy v1 or v2 marker for this UID")
+    if version == 2:
+        epoch = marker.get("bootEpoch")
+        if not isinstance(epoch, dict) or epoch.get("schema") != "foldgpt.android-boot-epoch.v1" or epoch.get("source") != "android.provider.Settings.Global.BOOT_COUNT" or type(epoch.get("bootCount")) is not int:
+            raise ValueError("This recovery requires a valid bootEpoch for v2 marker")
     if state.get("state") == "unavailable":
         return
     if not allow_stale_stopping or state.get("state") != "stopping":
@@ -117,6 +131,7 @@ def validate_legacy_observation(state, marker, owned, uid, allow_stale_stopping=
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--serial", default="R3GL808JN4A", help="ADB transport for the FoldGPT phone")
     parser.add_argument("--installed-apk-sha256", required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--previous-observation", type=Path)
@@ -129,7 +144,7 @@ def main():
     output.relative_to(ROOT)
     output.mkdir(parents=True, exist_ok=False)
     (output / "recovery-helper.py").write_text(RECOVER)
-    adb = [str(Path(os.environ["LOCALAPPDATA"]) / "Android/Sdk/platform-tools/adb.exe"), "-s", "R3GL808JN4A"]
+    adb = [str(Path(os.environ["LOCALAPPDATA"]) / "Android/Sdk/platform-tools/adb.exe"), "-s", args.serial]
     records = []
     def call(argv, *, required=True):
         result = subprocess.run(adb + ["shell", "-T", shlex.join(argv)], capture_output=True, timeout=30)

@@ -24,6 +24,9 @@ if __package__ in (None, ""):
 from tools.executor.exec_server import ExecServer, ProtocolClosed, RpcError, local_environment_info, serve_stdio
 from tools.executor.native_files import NativeFilesBackend
 from tools.executor.native_runtime_startup import android_boot_epoch, strict_json
+from tools.executor.native_session_recovery import (
+    application_processes as validate_application_processes, application_quiescence,
+)
 
 SOCKET_NAME = "exec.sock"
 PROCESS_SESSION = "process-session.json"
@@ -57,7 +60,8 @@ class PrivateSessionOwner:
     persistent process marker. Stdio does not need a filesystem socket, but must
     still refuse one left by a previous listener with unverified cleanup.
     """
-    def __init__(self, directory, *, boot_epoch=None):
+    def __init__(self, directory, *, boot_epoch=None, application_processes=None,
+                 parent_pid=None, workspace=None):
         self.directory = Path(directory).absolute()
         self.fd = self.lock = None
         self.process_identity = None
@@ -65,6 +69,15 @@ class PrivateSessionOwner:
         self.retained_backend = None
         self.boot_epoch = None if boot_epoch is None else MappingProxyType(android_boot_epoch(boot_epoch))
         self.recovered_session = None
+        self.recovery_processes = self.recovery_parent = self.recovery_workspace = None
+        if application_processes is not None:
+            if self.boot_epoch is None or type(parent_pid) is not int or parent_pid != os.getppid() or workspace is None:
+                raise ValueError("Same-boot recovery requires the actual application parent and workspace")
+            self.recovery_processes = validate_application_processes(application_processes)
+            self.recovery_parent = parent_pid
+            self.recovery_workspace = Path(workspace)
+        elif parent_pid is not None or workspace is not None:
+            raise ValueError("Recovery inputs require an explicit Android process inventory")
         try:
             if os.getuid() == 0 or os.getuid() != os.geteuid():
                 raise PermissionError("Broker requires an ordinary non-root application UID")
@@ -106,11 +119,12 @@ class PrivateSessionOwner:
         return (info.st_dev, info.st_ino, info.st_size, info.st_mtime_ns, info.st_ctime_ns)
 
     def _recover_previous_boot(self):
-        """Archive a valid older-boot marker while holding the real broker lock.
+        """Archive a validated marker while holding the real broker lock.
 
         A strictly advanced Android counter proves the previous boot ended.
-        Same-boot crashes, counter regression and legacy markers stay blocked.
-        No PID probe authorizes this operation and no cleanup success is claimed.
+        Same-boot recovery additionally requires an OS-selected Java population
+        and the absence of any other application process. Counter regression and
+        legacy markers stay blocked. No old cleanup success is ever claimed.
         """
         # The new application owner uses per-session sockets. An unqualified
         # legacy fixed socket remains an independent condition, never removed.
@@ -149,9 +163,22 @@ class PrivateSessionOwner:
                     or type(value["workspaceInode"]) is not int or value["workspaceInode"] <= 0):
                 raise FileExistsError("A previous native process session lacks verified boot evidence")
             previous = android_boot_epoch(value["bootEpoch"])
-            if self.boot_epoch["bootCount"] <= previous["bootCount"]:
+            same_boot = self.boot_epoch["bootCount"] == previous["bootCount"]
+            observation = None
+            if same_boot and self.recovery_processes is not None:
+                workspace = self.recovery_workspace
+                if workspace != workspace.resolve(strict=True):
+                    raise ValueError("Recovery workspace must have its actual canonical spelling")
+                current_workspace = os.stat(workspace, follow_symlinks=False)
+                if (not stat.S_ISDIR(current_workspace.st_mode)
+                        or current_workspace.st_uid != os.getuid() or current_workspace.st_mode & 0o077
+                        or (current_workspace.st_dev, current_workspace.st_ino)
+                           != (value["workspaceDevice"], value["workspaceInode"])):
+                    raise PermissionError("Previous session workspace identity differs")
+                observation = application_quiescence(self.recovery_processes, self.recovery_parent)
+            elif self.boot_epoch["bootCount"] <= previous["bootCount"]:
                 raise FileExistsError("A previous native process session is not from an earlier boot")
-            archive_name = "recovered-boot-" + os.urandom(16).hex()
+            archive_name = ("recovered-same-boot-" if same_boot else "recovered-boot-") + os.urandom(16).hex()
             os.mkdir(archive_name, mode=0o700, dir_fd=self.fd)
             archive = os.open(archive_name, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW | os.O_CLOEXEC,
                               dir_fd=self.fd)
@@ -161,11 +188,13 @@ class PrivateSessionOwner:
                     or stat.S_IMODE(archive_info.st_mode) & 0o077
                     or (archive_info.st_dev, archive_info.st_ino) != (named_archive.st_dev, named_archive.st_ino)):
                 raise PermissionError("Previous boot archive directory identity differs")
-            receipt = {"schema": "foldgpt.native-boot-recovery.v1", "previousBootEpoch": previous,
+            receipt = {"schema": "foldgpt.native-same-boot-recovery.v1" if same_boot else "foldgpt.native-boot-recovery.v1", "previousBootEpoch": previous,
                 "currentBootEpoch": dict(self.boot_epoch), "uid": os.getuid(),
                 "markerSha256": hashlib.sha256(data).hexdigest(),
                 "markerDevice": before.st_dev, "markerInode": before.st_ino,
-                "previousBootEnded": True, "previousCleanupClaimed": False}
+                "previousBootEnded": not same_boot, "previousCleanupClaimed": False}
+            if observation is not None:
+                receipt["quiescenceObservation"] = observation
             record = os.open("recovery.json", os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW | os.O_CLOEXEC,
                              0o600, dir_fd=archive)
             try:

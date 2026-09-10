@@ -1,6 +1,6 @@
 {
   "schema": "foldgpt.agent-environment.v1",
-  "revision": "2026-09-06.2",
+  "revision": "2026-09-09.7",
   "clientHost": {
     "applicationId": "app.foldgpt",
     "platform": "Android",
@@ -39,13 +39,13 @@
     {
       "id": "keyring",
       "status": "verified-bounded",
-      "description": "Le pont /usr/local/lib/foldgpt/foldgpt_keyring.py déverrouille la collection GNOME existante au lancement. Son secret est protégé par Android Keystore ; le lancement demande Android déverrouillé. Ne pas recréer une collection existante ni exporter un mot de passe ou un profil pour diagnostiquer le contexte.",
+      "description": "Le pont /usr/local/lib/foldgpt/foldgpt_keyring.py déverrouille la collection GNOME existante au lancement. Son secret est protégé par Android Keystore ; le lancement demande Android déverrouillé. Ne pas recréer une collection existante ni exporter un mot de passe ou un profil pour diagnostiquer le contexte. Ce coffre Linux ne partage pas les mots de passe/cookies de Chrome Android, Google Password Manager ou Samsung Pass.",
       "evidence": "docs/install/end-to-end-architecture.md"
     },
     {
       "id": "integrated-browser",
       "status": "verified-bounded",
-      "description": "Le navigateur intégré de Codex a été piloté par mcp__cua_repl.js sur le Fold : création iab, lecture, clic et retour. N'utiliser cet outil que s'il est réellement exposé dans la tâche ; téléchargements, téléversements et authentification ne sont pas certifiés par ce test.",
+      "description": "Le navigateur intégré a été revalidé le 9 septembre dans la conversation : cua_repl, création iab, lecture, clic IANA et retour. Seul iab est exposé ; la bannière de réglages Plugin indisponible ne représente pas ce test runtime. Téléchargements, téléversements et authentification restent à qualifier.",
       "evidence": "tools/browser/README.md"
     },
     {
@@ -56,9 +56,9 @@
     },
     {
       "id": "native-files-processes",
-      "status": "diagnostic-only",
-      "description": "Des backends natifs de fichiers, flux et processus statiques ont leurs diagnostics. Leur présence dans les sources ne les rend pas disponibles dans cette tâche et ne qualifie pas un shell arbitraire, un TTY ou tout le sandbox. Utiliser seulement les outils exposés et leur contrat effectif.",
-      "evidence": "tools/executor/native-process-lifecycle.md"
+      "status": "verified-bounded",
+      "description": "Le shell de l'agent utilise Bash et Python natifs Android. Les commandes git, make, node, npm, npx, gcc, g++, diff, tar, gzip et xz sont raccordées par files/foldgpt-tools/bin aux exécutables GNU/Linux ARM64 déjà présents dans Debian ou dans le client. Ce sont de vrais outils sous PRoot, pas des binaires Bionic ni le primary-runtime officiel. Aucun serveur permanent supplémentaire. Le PATH est raccordé aux profils du HOME natif ; une commande lancée sans profil doit recevoir ce PATH ou le chemin absolu du lanceur. Exécuter ces commandes dans le cwd physique de la tâche sous le stockage privé de FoldGPT ; leurs sous-commandes voient le même dossier. Git utilise core.createObject=rename, adapté au refus des hardlinks Android, sans les alias artificiels link2symlink. Attention : le contrôle de reprise du moteur refuse encore les liens symboliques dans les projets ; les installations de dépendances ou projets qui en créent ne sont pas qualifiés. Relever les codes de sortie et vérifier l'opération réelle, une version seule ne prouve pas toutes les fonctions.",
+      "evidence": "tools/runtime/foldgpt_tools.py"
     },
     {
       "id": "installation-updates",
@@ -69,23 +69,37 @@
     {
       "id": "diagnostics",
       "status": "verified-bounded",
-      "description": "Le diagnostic Configuration signale encore un manifeste primary-runtime HTTP 404 pour Linux ARM64. Python Bionic appartient au superviseur natif de diagnostic ; il ne répare pas le runtime officiel. Les journaux du prototype comprennent HOME/.local/state/foldgpt-ime.log et foldgpt-wm.log dans l'invité, et Context.getFilesDir()/runtime.log côté Android. Les erreurs récentes incluent ps incapable de lire l'heure de démarrage système ; aucun état sans erreur n'est revendiqué.",
-      "evidence": "docs/publication-readiness-fr.md"
+      "description": "foldgpt status --logs donne l'état enregistré du propriétaire natif, sa présence actuelle, les processus lisibles de l'UID de FoldGPT, les chemins et un décompte borné des erreurs connues du journal. Ce nombre de processus n'est pas le compteur global des phantom processes Android. foldgpt logs ne recopie pas le contenu brut des journaux. foldgpt path /home/julien ou un autre chemin invité donne son emplacement physique accessible à Python natif. Les sources invitées sont sous /usr/local/lib/foldgpt et /usr/local/bin/foldgpt-session ; les logs clavier/fenêtres sont dans HOME/.local/state, runtime.log sous filesDir donné par status. Lire uniquement les éléments utiles au défaut reproduit, en masquant secrets et conversations privées. Les occurrences HTTP 404 dans les anciens journaux sont historiques : vérifier l'état actuel dans Configuration > dépendances de l'espace de travail. Le fournisseur FoldGPT ARM64 distribue les bibliothèques portables OpenAI avec des moteurs et modules natifs Linux ARM64. Il porte son propre numéro FoldGPT-ARM64 et adapte un module ASAR identifié par empreinte, avec sauvegarde de l'original. Diagnostiquer doit réellement exécuter les vérifications ; consulter HOME/.local/state/foldgpt-workspace/last-validation.json et le résultat courant. Ne jamais fabriquer une réussite ou attribuer cette distribution au service officiel.",
+      "evidence": "tools/runtime/foldgpt_tools.py"
+    },
+    {
+      "id": "workspace-dependencies",
+      "status": "diagnostic-only",
+      "description": "Les dépendances de documents utilisent une distribution FoldGPT Linux ARM64 sous HOME/.cache/codex-runtimes/codex-primary-runtime. load_workspace_dependencies donne les chemins effectivement configurés. Dans le shell natif Android, utiliser files/foldgpt-tools/bin/workspace-python3 pour les bibliothèques Python (pandas, openpyxl, python-docx, python-pptx, PDF, artifact_tool_v2), workspace-node pour Node et @oai/artifact-tool, pnpm pour le gestionnaire de paquets. Les lanceurs pdftoppm, pdftotext, pdfinfo, libreoffice, soffice, heif-convert et JxrDecApp entrent aussi dans l'invité. Le Python par défaut reste Bionic ; ne pas lui injecter les modules GNU. Dans du JavaScript ESM, importer les modules par leur chemin physique fourni ou par createRequire, sans créer un lien node_modules dans le projet. Relever les résultats réels de chaque opération ; l'installation des modules Playwright ne prouve pas tous les scénarios de navigation. Les protections Android et la limite de prise en charge des liens symboliques des projets restent applicables.",
+      "evidence": "tools/runtime/foldgpt-workspace-provider.cjs"
     },
     {
       "id": "android-private-apis",
+      "status": "diagnostic-only",
+      "description": "Le plugin FoldGPT Android ajoute un pont sous le même UID pour contrôle visuel global et recherche SMS, brouillons et envoi explicitement demandé. Il utilise les permissions Android normales sans interrupteur local supplémentaire. android_request_access présente le consentement système au moment utile, sans se l accorder ni rejouer une action. Recherche/lecture demandées et brouillons ne nécessitent pas de confirmation redondante ; envoi seulement sur demande précise. Le contrôle reprend observation, action puis vérification, avec capture, gestes et saisie/clavier de la surface Linux visible. Les entrées Linux renvoient inputId : consulter ui_input_status puis vérifier l écran ; ui_cancel_input interrompt sans rejouer. L accord de Julien pour le contrôle écran est reçu et l accessibilité activée le 9 septembre ; cela ne donne pas la permission de lire/envoyer des SMS. Utiliser android_status et les outils réellement exposés : la présence du code ne prouve pas activation ni réussite. RCS, archives et rangement Google Messages utilisent son interface, pas la base SMS publique. Ne pas activer ses propres permissions ni changer le gestionnaire SMS par défaut. Contacts, capteurs et autres API ne sont pas implémentés.",
+      "evidence": "docs/android-tools.md"
+    },
+    {
+      "id": "official-computer-use",
       "status": "unavailable",
-      "description": "Aucun outil FoldGPT pour SMS, contacts, journal d'appels, notifications privées, localisation, caméra, microphone ou capteurs n'est fourni par ce manifeste. Une future intégration devra être implémentée, exposée, vérifiée et autorisée avant emploi. Ne pas lire ces données ni demander de nouvelles permissions pour établir ce contexte.",
-      "evidence": "docs/agent-environment.md"
+      "description": "Le Computer Use natif officiel est absent de la version Linux actuelle. Le plugin Chrome desktop ne contrôle pas Chrome Android. Le plugin FoldGPT Android est une intégration propre distincte, à vérifier avec android_status. Ne jamais déduire une compatibilité Windows/macOS de sa présence.",
+      "evidence": "https://learn.chatgpt.com/docs/linux/linux-app#compatibility-and-limitations"
     }
   ],
   "rules": [
     "Distinguer l'hôte Android de l'interface, l'invité Linux et l'environnement effectivement ciblé par chaque outil. Un projet ou un outil distant peut s'exécuter sur un autre hôte.",
     "Un uname Linux ou un chemin /home ne suffit pas à conclure que l'interface s'exécute sur PC. Inversement, cette description Android ne transforme pas les chemins Windows du poste de développement en chemins du téléphone.",
-    "Les droits root éventuellement simulés par PRoot ne sont pas des droits root Android. Ne jamais rooter le téléphone, déverrouiller son bootloader ou affaiblir ses protections.",
+    "Julien autorise l'exécution autonome du travail demandé dans les projets FoldGPT et le diagnostic de l'intégration, sous l'UID ordinaire de l'application. Appliquer les corrections utiles et vérifier leur résultat sans lui déléguer les manipulations réalisables avec les outils disponibles. Cette portée ne donne pas accès aux autres applications ni une autorisation générale de modifier Android.",
+    "Limites demandées par Julien : ne jamais obtenir le root Android, déverrouiller le bootloader, flasher un firmware ou une partition, modifier Knox/eFuse ni affaiblir SELinux, seccomp, Verified Boot ou les protections Android, y compris les mécanismes de gestion des processus. Le root simulé par PRoot ne donne aucun droit Android. Ne jamais promettre un statut de garantie : ces limites évitent ces modifications mais ne constituent pas une garantie du constructeur.",
+    "Préserver les projets, historiques, compte et coffre de clés. Ne pas effacer les données de l'application, exporter des identifiants ni tuer aveuglément ses processus pour cacher une panne. Une relance nécessaire passe par le cycle de vie normal de FoldGPT après préservation du travail. Corriger la cause reproduite ; ni faux état sain, ni suppression du diagnostic ou d'une fonction utile.",
     "Les chemins /system, /proc et /sys visibles dans l'invité ne prouvent ni une permission Android ni l'existence d'un outil pour les modifier.",
     "Cette carte est un contexte descriptif versionné, pas une autorisation et pas une déclaration d'outils. Les outils exposés, leurs résultats et les instructions applicables déterminent les actions possibles.",
-    "Les preuves datées décrivent le développement observé le 6 septembre 2026. Revalider les faits susceptibles de changer ; ne pas annoncer ce contexte reçu par le modèle sans preuve de chargement dans la tâche.",
+    "Les preuves datées décrivent uniquement les versions et opérations observées. Revalider les faits susceptibles de changer ; ne pas annoncer ce contexte reçu par le modèle sans preuve de chargement ou de lecture dans la tâche.",
     "Le raccordement AGENTS.md concerne une session Codex qui charge ce profil local. Il ne prouve pas que les conversations ChatGPT cloud de l'application reçoivent ce texte."
   ]
 }

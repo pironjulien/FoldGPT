@@ -44,6 +44,7 @@ public final class FoldExecutorRuntime {
     private final java.util.concurrent.ExecutorService work = java.util.concurrent.Executors.newSingleThreadExecutor(
         task -> new Thread(task, "FoldGPT-executor-owner"));
     private final CompletableFuture<Void> closed = new CompletableFuture<>();
+    private final CompletableFuture<Throwable> failure = new CompletableFuture<>();
     private CompletableFuture<Endpoint> preparing;
     private Shizuku.UserServiceArgs args;
     private IExecutorService remote;
@@ -265,6 +266,9 @@ public final class FoldExecutorRuntime {
         } catch (Exception | LinkageError error) { fail("shizuku_authorization_or_binding_unavailable", error); }
     }
 
+    /** First observed owner failure, including failures after successful startup. */
+    public CompletableFuture<Throwable> failure() { return failure; }
+
     /** Stop admission immediately; the completion future is native cleanup, not a deadline. */
     public synchronized CompletableFuture<Void> requestStop() {
         if (!closing) {
@@ -352,6 +356,7 @@ public final class FoldExecutorRuntime {
         Log.e("FoldGPT-executor", reason, cause);
         persist("unavailable", reason, null);
         if (preparing != null && !preparing.isDone()) preparing.completeExceptionally(new IllegalStateException(reason, cause));
+        failure.complete(new IllegalStateException(reason, cause));
         if (closing) work.execute(this::finishWhenClean);
     }
 

@@ -12,7 +12,7 @@ from tools.executor.native_path_uri import path_uri, uri_path
 
 MAX_MANIFEST_BYTES = 65536
 LAUNCH_SCHEMA = "foldgpt.native-launch.v1"
-APP_LAUNCH_SCHEMA = "foldgpt.native-launch.v2"
+APP_LAUNCH_SCHEMA = "foldgpt.native-launch.v3"
 STARTUP_SCHEMA = "foldgpt.native-startup.v1"
 BOOT_EPOCH_SCHEMA = "foldgpt.android-boot-epoch.v1"
 BOOT_EPOCH_SOURCE = "android.provider.Settings.Global.BOOT_COUNT"
@@ -111,12 +111,14 @@ def read_launch(path, *, uid, broker_directory, projects_directory, launch_origi
     fields = {"schema", "workspace", "socketPath", "manifestPath", "controllerRoots"}
     schema = LAUNCH_SCHEMA
     if launch_origin == "android-app":
-        fields.add("bootEpoch")
+        fields.update(("bootEpoch", "androidProcesses"))
         schema = APP_LAUNCH_SCHEMA
     if type(value) is not dict or set(value) != fields or value["schema"] != schema:
         raise ValueError("Native launch input differs from its exact installed contract")
     if launch_origin == "android-app":
         android_boot_epoch(value["bootEpoch"])
+        from tools.executor.native_session_recovery import application_processes
+        application_processes(value["androidProcesses"])
     broker = canonical_path(str(broker_directory))
     projects = canonical_path(str(projects_directory))
     workspace = canonical_path(value["workspace"])

@@ -35,8 +35,11 @@ def main():
     with tarfile.open(args.package) as archive:
         members = archive.getmembers()
         expected = {"codex", "codex-code-mode-host", "manifest.json"}
-        if len(members) != len(expected) or {m.name for m in members} != expected:
+        provenance = {"SOURCES.json", "recovery-manifest.json", "engine.patch", "static-compatibility.json"}
+        actual = {m.name for m in members}
+        if len(members) != len(actual) or actual not in (expected, expected | provenance):
             raise ValueError("Unexpected engine package inventory")
+        expected = actual
         if any(not m.isfile() or m.size > 512 * 1024 * 1024 for m in members):
             raise ValueError("Engine package requires bounded regular files")
         payload = {m.name: archive.extractfile(m).read() for m in members}
@@ -44,16 +47,18 @@ def main():
     if manifest.get("target") != "aarch64-unknown-linux-gnu" or manifest.get("patchSha256") != args.patch_sha256:
         raise ValueError("Engine source or target differs")
     inventory = manifest["files"]
-    if len(inventory) != 2 or {item["path"] for item in inventory} != expected - {"manifest.json"}:
+    if len(inventory) != len(expected) - 1 or {item["path"] for item in inventory} != expected - {"manifest.json"}:
         raise ValueError("Engine manifest inventory differs")
     for item in inventory:
         data = payload[item["path"]]
         if digest(data) != item["sha256"] or len(data) != item["bytes"]:
             raise ValueError("Engine payload hash differs")
+    if "engine.patch" in payload and digest(payload["engine.patch"]) != args.patch_sha256:
+        raise ValueError("Engine recovery patch differs from the packaged source identity")
     compatibility = json.loads(args.compatibility.read_text())
     checked = compatibility.get("binaries", [])
     if (compatibility.get("passed") is not True or len(checked) != 2
-            or {item["binary"] for item in checked} != expected - {"manifest.json"}):
+            or {item["binary"] for item in checked} != {"codex", "codex-code-mode-host"}):
         raise ValueError("Missing static compatibility result")
     for item in checked:
         if item.get("passed") is not True or digest(payload[item["binary"]]) != item["sha256"]:
@@ -99,13 +104,19 @@ def main():
         status = json.loads(app("cat", "files/native-executor-status.json"))
         session, remote = (status.get(key) or {} for key in ("lastNativeSessionStatus", "lastRemoteStatus"))
         pid = session.get("bootstrapPid")
+        direct = status.get("directNative") is True
+        if direct and (status.get("launchOrigin") != "android-app"
+                       or session.get("directNative") is not True
+                       or session.get("launchOrigin") != "android-app" or remote):
+            raise ValueError("Ordinary-UID owner identity differs")
+        owners = [session] if direct else [session, remote]
         if (status.get("state") != "closed" or not isinstance(pid, int) or pid <= 0
-                or remote.get("bootstrapPid") != pid
+                or (not direct and remote.get("bootstrapPid") != pid)
                 or any(item.get("cleanupComplete") is not True or item.get("bootstrapReaped") is not True
                        or item.get("ownerRetained") is not False or item.get("waitStatus") != 0
-                       or item.get("setupError") is not None
+                       or item.get("setupError") is not None or item.get("cleanupError") is not None
                        or any(item.get(key) is not False for key in ("transportFailed", "quarantined", "refusedBeforeFork"))
-                       for item in (session, remote))):
+                       for item in owners)):
             raise ValueError("Native owner must be closed with completed cleanup")
         if run(["sh", "-c", 'if [ -d "$1" ]; then printf present; fi', "foldgpt-install", "/proc/" + str(pid)]):
             raise ValueError("Previous native owner is still present")
@@ -135,11 +146,12 @@ def main():
         app("mkdir", "-m", "700", staging)
         files = {"codex-native": payload["codex"], "codex-code-mode-host": payload["codex-code-mode-host"],
                  "engine-manifest.json": payload["manifest.json"]}
+        files.update({name: payload[name] for name in provenance if name in payload})
         bundle = io.BytesIO()
         with tarfile.open(fileobj=bundle, mode="w") as archive:
             for name, data in files.items():
                 entry = tarfile.TarInfo(name)
-                entry.size, entry.mode, entry.uid, entry.gid = len(data), 0o755 if name != "engine-manifest.json" else 0o644, int(uid), int(uid)
+                entry.size, entry.mode, entry.uid, entry.gid = len(data), 0o755 if name in ("codex-native", "codex-code-mode-host") else 0o644, int(uid), int(uid)
                 archive.addfile(entry, io.BytesIO(data))
         app("tar", "-xf", "-", "-C", staging, data=bundle.getvalue(), timeout=120)
         for name, data in files.items():

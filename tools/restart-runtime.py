@@ -42,7 +42,7 @@ def main():
     run("shell", "am", "start", "-n", "app.foldgpt/.FoldActivity")
     # If the Activity was already top-most, onResume is not called again.
     run("shell", "run-as", "app.foldgpt", "am", "start-foreground-service",
-        "--user", "0", "-n", service)
+        "--user", "0", "-a", "app.foldgpt.START_RUNTIME", "-n", service)
     deadline = time.monotonic() + 15
     while not (after := runtime_pid()):
         if time.monotonic() >= deadline:

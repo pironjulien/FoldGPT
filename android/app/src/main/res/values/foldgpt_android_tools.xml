@@ -1,0 +1,4 @@
+<resources>
+    <string name="foldgpt_android_tools_shortcut">Outils Android</string>
+    <item type="id" name="android_tools_consent" />
+</resources>

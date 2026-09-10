@@ -8,10 +8,13 @@ import tempfile
 import unittest
 
 from tools.executor.native_runtime_startup import (
-    LAUNCH_SCHEMA, STARTUP_SCHEMA, StartupManifest, canonical_uri,
+    LAUNCH_SCHEMA, APP_LAUNCH_SCHEMA, STARTUP_SCHEMA, StartupManifest, canonical_uri,
     private_directory, read_launch, read_private_json,
 )
 from tools.executor.native_path_uri import path_uri, uri_path
+from tools.executor.native_session_recovery import (
+    APPLICATION_PROCESSES_SCHEMA, APPLICATION_PROCESSES_SOURCE, process_identity,
+)
 
 
 class NativePathUriTests(unittest.TestCase):
@@ -86,7 +89,10 @@ class NativeRuntimeStartupTests(unittest.TestCase):
     def test_application_launch_requires_exact_verified_boot_metadata(self):
         epoch = {"schema": "foldgpt.android-boot-epoch.v1",
                  "source": "android.provider.Settings.Global.BOOT_COUNT", "bootCount": 8}
-        value = {**self.value, "schema": "foldgpt.native-launch.v2", "bootEpoch": epoch}
+        population = {"schema": APPLICATION_PROCESSES_SCHEMA, "source": APPLICATION_PROCESSES_SOURCE,
+                      "processes": [{"pid": os.getpid(), "startTimeTicks": process_identity(os.getpid())["startTimeTicks"],
+                                     "processName": "app.foldgpt:runtime"}]}
+        value = {**self.value, "schema": APP_LAUNCH_SCHEMA, "bootEpoch": epoch, "androidProcesses": population}
         self.write_launch(value)
         self.assertEqual(read_launch(self.launch, uid=os.getuid(), broker_directory=self.broker,
                                      projects_directory=self.projects, launch_origin="android-app"), value)
@@ -96,6 +102,23 @@ class NativeRuntimeStartupTests(unittest.TestCase):
                        {"bootCount": "8"}, {"schema": "wrong"}):
             self.write_launch({**value, "bootEpoch": {**epoch, **change}})
             with self.subTest(change=change), self.assertRaises(ValueError):
+                read_launch(self.launch, uid=os.getuid(), broker_directory=self.broker,
+                            projects_directory=self.projects, launch_origin="android-app")
+
+    def test_application_population_missing_unknown_and_duplicate_fields_are_rejected(self):
+        epoch = {"schema": "foldgpt.android-boot-epoch.v1",
+                 "source": "android.provider.Settings.Global.BOOT_COUNT", "bootCount": 8}
+        entry = {"pid": os.getpid(), "startTimeTicks": process_identity(os.getpid())["startTimeTicks"],
+                 "processName": "app.foldgpt:runtime"}
+        population = {"schema": APPLICATION_PROCESSES_SCHEMA, "source": APPLICATION_PROCESSES_SOURCE, "processes": [entry]}
+        base = {**self.value, "schema": APP_LAUNCH_SCHEMA, "bootEpoch": epoch}
+        candidates = [base, {**base, "androidProcesses": {**population, "source": "model"}},
+                      {**base, "androidProcesses": {**population, "processes": [entry, entry]}},
+                      {**base, "androidProcesses": {**population, "processes": [{**entry, "pid": True}]}},
+                      {**base, "androidProcesses": {**population, "processes": [{**entry, "processName": "python"}]}}]
+        for value in candidates:
+            self.write_launch(value)
+            with self.subTest(value=value), self.assertRaises(ValueError):
                 read_launch(self.launch, uid=os.getuid(), broker_directory=self.broker,
                             projects_directory=self.projects, launch_origin="android-app")
 

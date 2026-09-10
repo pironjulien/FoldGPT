@@ -178,7 +178,7 @@ def main():
     source_paths = {entry["path"][len("package/"):] for entry in snapshot["files"]
                     if entry["path"].startswith("package/") and entry["path"].endswith(".py")}
     source_paths.update("tools/executor/" + name + ".py" for name in (
-        "native_runtime_startup", "native_runtime_acquisition", "native_path_uri", "native_host_files", "native_host_files_channel",
+        "native_runtime_startup", "native_session_recovery", "native_runtime_acquisition", "native_path_uri", "native_host_files", "native_host_files_channel",
         "native_host_bootstrap_v2"))
     source_paths.add("tools/executor/native_host_channel_v2.py")
     source_paths.update("tools/executor/bionic-supervisor/" + name + ".py" for name in (

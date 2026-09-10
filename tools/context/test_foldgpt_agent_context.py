@@ -14,7 +14,7 @@ MANIFEST = Path(__file__).resolve().parents[2] / "config/agent-context/foldgpt.v
 
 class ContextTest(unittest.TestCase):
     def setUp(self):
-        self.temporary = tempfile.TemporaryDirectory(prefix="foldgpt-context-", dir="/var/tmp")
+        self.temporary = tempfile.TemporaryDirectory(prefix="foldgpt-context-", dir=os.environ.get("FOLDGPT_TEST_TMPDIR", "/var/tmp"))
         self.root = Path(self.temporary.name)
         (self.root / "etc").mkdir()
         (self.root / "etc/foldgpt-user").write_text("julien\n")

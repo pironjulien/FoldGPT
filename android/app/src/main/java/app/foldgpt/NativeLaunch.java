@@ -68,10 +68,13 @@ final class NativeLaunch {
                 || controllerHome.equals("/") || controllerHome.startsWith(data.getPath() + "/")) {
             throw new SecurityException("Invalid controller HOME");
         }
-        JSONObject launch = new JSONObject().put("schema", applicationLaunch ? "foldgpt.native-launch.v2" : "foldgpt.native-launch.v1")
+        JSONObject launch = new JSONObject().put("schema", applicationLaunch ? "foldgpt.native-launch.v3" : "foldgpt.native-launch.v1")
             .put("workspace", workspace).put("socketPath", socketPath).put("manifestPath", manifestPath)
             .put("controllerRoots", new JSONArray().put(uri(controllerHome)).put("file:///tmp"));
-        if (applicationLaunch) launch.put("bootEpoch", app.foldgpt.shizukuexec.AndroidBootEpoch.capture(context));
+        if (applicationLaunch) {
+            launch.put("bootEpoch", app.foldgpt.shizukuexec.AndroidBootEpoch.capture(context));
+            launch.put("androidProcesses", app.foldgpt.shizukuexec.AndroidProcessPopulation.capture(context));
+        }
         writeNew(new File(launchPath), (launch.toString() + "\n").getBytes(StandardCharsets.UTF_8));
     }
 

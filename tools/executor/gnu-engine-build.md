@@ -36,6 +36,16 @@ Les absences d'imports faibles sont listées séparément dans ce rapport.
 
 ## Commandes reproductibles
 
+Le stockage de compilation est une exception locale prévue au dossier Windows
+du projet : sources figées et sorties Cargo restent sur le disque Linux de WSL.
+Le dépôt, les exports de récupération et les preuves livrables restent dans
+`C:\Dev\ChatgptFold`. À l'installation du poste, créer le sous-dossier dédié
+au compte de compilation, sans changer le propriétaire du préfixe `/opt` :
+
+```sh
+sudo install -d -o foldgpt-build -g foldgpt-build -m 0755 /opt/foldgpt/engine-gnu-arm64/builds
+```
+
 Depuis WSL Ubuntu-24.04, utilisateur `foldgpt-build`, après l'export moteur
 canonique et lorsque les sources à livrer sont arrêtées :
 
@@ -45,11 +55,25 @@ python3 -B tools/executor/build-gnu-engine.py prepare
 ```
 
 `prepare` ne compile pas Rust. Il crée un dossier neuf sous
-`/opt/foldgpt/engine-gnu-arm64`, reconstitue `git archive BASE` plus le patch
+`/opt/foldgpt/engine-gnu-arm64/builds`, reconstitue `git archive BASE` plus le patch
 exporté, vérifie les dépendances et conserve les sources/empreintes/outils sous
 `downloads/engine-gnu-arm64/<date>-<patch>/`. Il imprime le chemin exact du
 `build-state.json`. Le worktree et son index ne sont jamais modifiés. Aucun
 script n'utilise les anciens emplacements Windows hors du dossier projet.
+
+Le builder vérifie le montage réel avec `findmnt`, après résolution des liens,
+avant de préparer les sources puis avant de compiler. Il refuse les répertoires
+de sources/cache sur les montages Windows ou partagés, même avec une option
+`--build-root` ou `--target-dir` explicite. Il vérifie aussi les droits d'écriture
+du compte et enregistre le système de fichiers dans `build-state.json`.
+Ne pas déplacer les sources d'une compilation en cours : préparer un nouvel
+état sur Linux après sa fin ou son interruption, en conservant le cache Cargo.
+
+Régression sur les vrais montages WSL, avec un dossier temporaire Linux :
+
+```sh
+TMPDIR=/opt/foldgpt/engine-gnu-arm64/builds python3 -B -m unittest discover -s tests -p 'test_gnu_engine_storage.py' -v
+```
 
 Puis, avec le chemin exact imprimé :
 

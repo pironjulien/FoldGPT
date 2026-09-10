@@ -38,6 +38,29 @@ def run(argv, **kwargs) -> str:
     return subprocess.check_output(list(map(str, argv)), text=True, **kwargs).strip()
 
 
+def native_storage(path: Path, label: str, *, writable: bool = False) -> dict:
+    """Check the actual mount, including symlinks and not-yet-created paths."""
+    path = path.expanduser().resolve()
+    existing = path
+    while not existing.exists():
+        existing = existing.parent
+    if not existing.is_dir():
+        raise RuntimeError(f"{label} is not a directory: {existing}")
+    mounts = json.loads(run(["findmnt", "--json", "--target", existing,
+                            "--output", "FSTYPE,SOURCE,TARGET"]))["filesystems"]
+    mount = mounts[0]
+    if mount["fstype"].lower() in {"9p", "drvfs", "virtiofs", "ntfs", "ntfs3",
+                                   "fuseblk", "fuse.ntfs-3g", "cifs", "smb3"}:
+        raise RuntimeError(
+            f"{label} uses Windows/shared storage ({mount['fstype']}): {path}. "
+            "Use the native Linux build directory /opt/foldgpt/engine-gnu-arm64/builds "
+            "and keep the Cargo target on Linux.")
+    if writable and not os.access(existing, os.W_OK | os.X_OK):
+        raise RuntimeError(f"{label} is not writable by the build user: {existing}")
+    return {"path": str(path), "filesystem": mount["fstype"],
+            "device": mount["source"], "mountpoint": mount["target"]}
+
+
 def files(root: Path) -> list[dict]:
     entries = []
     for path in sorted(root.rglob("*")):
@@ -75,6 +98,12 @@ def environment(state: dict) -> dict:
 
 def prepare(args) -> None:
     sys.dont_write_bytecode = True
+    storage = {
+        "buildRoot": native_storage(args.build_root, "--build-root", writable=True),
+        "targetDirectory": native_storage(args.target_dir, "--target-dir", writable=True),
+    }
+    args.build_root = Path(storage["buildRoot"]["path"])
+    args.target_dir = Path(storage["targetDirectory"]["path"])
     export = PROJECT / "recovery/engine"
     manifest = json.loads((export / "manifest.json").read_text())
     patch = export / manifest["patch"]
@@ -91,15 +120,20 @@ def prepare(args) -> None:
     source.mkdir()
     archive = build / "upstream.tar"
     with archive.open("wb") as stream:
-        subprocess.run(["git", "-C", str(args.engine), "archive", BASE], stdout=stream, check=True)
+        subprocess.run(["git", "-C", str(args.engine), "-c", "core.autocrlf=false",
+                        "-c", "core.eol=lf", "archive", BASE], stdout=stream, check=True)
     with tarfile.open(archive) as stream:
         stream.extractall(source, filter="data")
     # A source snapshot deliberately has no Git index and never modifies the
     # live worktree's index. Apply exactly the full-index binary recovery patch.
     shutil.copyfile(patch, evidence / "engine.patch")
+    # A snapshot under this project's work/ directory has no Git repository of
+    # its own. Stop parent discovery so git apply uses the snapshot, rather
+    # than interpreting paths relative to ChatgptFold's enclosing checkout.
+    patch_environment = dict(os.environ, GIT_CEILING_DIRECTORIES=str(source.parent))
     for options in (["--check"], []):
         subprocess.run(["git", "apply", *options, str(evidence / "engine.patch")],
-                       cwd=source, check=True)
+                       cwd=source, env=patch_environment, check=True)
     save(evidence / "recovery-manifest.json", manifest)
     save(evidence / "SOURCES.json", files(source))
 
@@ -129,6 +163,7 @@ def prepare(args) -> None:
         "upstreamArchiveSha256": sha(archive),
         "builderSha256": sha(Path(__file__)), "androidExecution": False,
         "buildCompleted": False, "packageCompleted": False,
+        "storage": storage,
     }
     env = environment(state)
     cwd = source / "codex-rs"
@@ -170,6 +205,10 @@ def validate(state: dict) -> Path:
 
 
 def build(args, state: dict) -> None:
+    # Check again: a mount or symlink can change after source preparation.
+    native_storage(Path(state["source"]), "Build source")
+    native_storage(Path(state["build"]), "Build directory", writable=True)
+    native_storage(Path(state["targetDirectory"]), "Cargo target", writable=True)
     evidence = validate(state)
     # A unique log retains each attempt, including interrupted or failed builds.
     with tempfile.NamedTemporaryFile(prefix="build-", suffix=".log", dir=evidence, delete=False) as log:
@@ -253,7 +292,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("action", choices=("prepare", "build", "package"))
     parser.add_argument("--engine", type=Path, default=PROJECT / "work/worktrees/FoldgptEngine")
-    parser.add_argument("--build-root", type=Path, default=Path("/opt/foldgpt/engine-gnu-arm64"))
+    parser.add_argument("--build-root", type=Path, default=Path("/opt/foldgpt/engine-gnu-arm64/builds"))
     parser.add_argument("--dependencies", type=Path, default=Path("/opt/foldgpt/engine-gnu-arm64/deps"))
     parser.add_argument("--target-dir", type=Path, default=Path("/opt/foldgpt/engine-gnu-arm64/target"))
     parser.add_argument("--libraries", type=Path, default=PROJECT / "downloads/engine-arm64-device-libs-20260907")

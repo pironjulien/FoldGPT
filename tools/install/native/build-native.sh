@@ -3,7 +3,7 @@
 set -euo pipefail
 repo=$(cd "$(dirname "$0")/../../.." && pwd)
 ndk=${ANDROID_NDK_HOME:-/opt/foldgpt/android-ndk-r29}
-ndk_archive=${FOLDGPT_NDK_ARCHIVE:-/mnt/c/Dev/AndroidSdk-Linux/downloads/android-ndk-r29-linux.zip}
+ndk_archive=${FOLDGPT_NDK_ARCHIVE:-/mnt/c/Dev/ChatgptFold/work/AndroidSdk-Linux/downloads/android-ndk-r29-linux.zip}
 ndk_hash=4abbbcdc842f3d4879206e9695d52709603e52dd68d3c1fff04b3b5e7a308ecf
 toolchain="$ndk/toolchains/llvm/prebuilt/linux-x86_64/bin"
 proot_commit=7266fb3e8516535682f5a9c8f3a7e70f6506eddb

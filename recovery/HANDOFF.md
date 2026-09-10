@@ -1,6 +1,67 @@
-# Reprise technique du 8 septembre 2026
+# Reprise technique du 9 septembre 2026
 
-## Dernier état : r28/versionCode18
+## Dernier état installé : r45/versionCode35
+
+R45 ajoute la reprise du service interrompu et l'archivage sûr d'un marqueur
+orphelin du même démarrage Android. Le crash dur natif + Java, provoqué sous
+UID 10412 par une APK de test séparée puis désinstallée, rend le client prêt en
+18 286 ms sans relance ni réparation externe. Le bouton Fermer persiste l'arrêt
+avant nettoyage. Voir [les preuves et limites](../docs/session-recovery.md).
+APK `c60f842d07706f45c83357e69845eefe2e9f6d1dae75a4baaa1755a82b966da3`.
+Sources runtime régénérées dans `work/android-extension-20260909/executor-r45`.
+Les binaires natifs du paquet restent identiques. La commande de build courante
+pointe sur ce paquet ; ne pas reprendre le paquet r27 avec le lancement Java v3.
+
+## Clavier livré : r44/versionCode34
+
+Le [point de reprise courant](../HANDOFF.md) et les
+[preuves des outils Android](../docs/android-tools.md) décrivent r44, l'accès
+écran autorisé et le parcours calculatrice réalisé par ChatGPT sur le téléphone.
+Les SMS restent sans permission. Le navigateur reçoit maintenant la phrase
+Unicode exacte au premier essai après redémarrage ; le composeur reçoit 4 096
+caractères sans perte et l'annulation reste stable. La nouvelle notification XKB
+fait recharger le cache Chromium. Les corrections de transport r43 sont incluses.
+L'échange 24 sur le téléphone a saisi/vérifié/effacé un autre échantillon
+Unicode avec ses propres MCP, sans difficulté signalée. APK SHA256
+`ed9d1a68d63ebd33f53ead3cf3842c001b30229fd769107b28ed447cf28b69f9`.
+Le build natif se trouve dans `downloads/gpu/x11/build-AfibPN40/artifact`.
+La récupération
+du marqueur orphelin r41 est archivée dans `r41-absence-owner-recovery` ; les
+355 fichiers de projets et le préfixe de la conversation sont préservés.
+
+## Livraison des dépendances : r34/versionCode24
+
+La [livraison des dépendances](../docs/workspace-dependencies.md) donne les
+empreintes de l'APK, du bundle FoldGPT ARM64 et du moteur. L'installation des
+cinq plugins, le diagnostic d'un fichier absent, sa réparation et le diagnostic
+après redémarrage sont vérifiés sur le téléphone. Les preuves sont dans
+`work/dependencies-fix-20260909`; le moteur et ses symboles archivés sont dans
+`downloads/engine-gnu-arm64/20260909T111218Z-612a64d2960d`.
+
+Le build utilise désormais les sources et le cache sur le stockage natif WSL,
+sous `/opt/foldgpt/engine-gnu-arm64`. Les exports de reprise restent dans le
+projet Windows. Le rapport d'installation `downloads/native-engine-device-20260908/527caeb3`
+conserve le moteur précédent et vérifie les octets du client déjà adapté.
+La sauvegarde ASAR officielle et le fournisseur de dépendances doivent être
+conservés avec l'APK et le moteur ; voir le document de livraison pour les
+contrats de version. Aucun nouveau complément distant n'est publié pour r34.
+
+## Référence précédente : r31/versionCode21
+
+Le [rapport r31](../docs/research/r31-startup-notifications-20260909.md) décrit
+le démarrage automatique et les notifications réellement testés sur le téléphone.
+APK installé : `29de65e696af8b6144cb478ecfd049470ecf3293fb25db42ddfb4f95bbbe5154`.
+Les preuves et le paquet sont dans `work/startup-notifications-20260909`.
+Le lanceur invité doit inclure le signal `FOLDGPT_SESSION_TOKEN`, en complément
+de l'APK : préserver ces deux composants ensemble. Aucun nouveau complément
+de récupération distant n'a été publié pour r31.
+
+Le [diagnostic des dépendances](../docs/research/workspace-dependencies-20260909.md)
+reproduit le bouton Configuration et la réparation : bundle absent, aucune
+cible Linux ARM64 dans le catalogue reçu, puis HTTP 404 sur le manifeste de
+secours. Aucun APK ou runtime n'a été changé pour ce diagnostic.
+
+## Référence précédente : r28/versionCode18
 
 Voir le [rapport r28](../docs/research/r28-device-validation-20260908.md) pour
 le paquet réellement installé et les preuves. Démarrage direct sous l'UID

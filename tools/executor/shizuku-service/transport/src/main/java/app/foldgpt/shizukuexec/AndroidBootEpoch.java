@@ -66,11 +66,13 @@ public final class AndroidBootEpoch {
                     || before.st_dev != stillNamed.st_dev || before.st_ino != stillNamed.st_ino)
                 throw new SecurityException("Private boot metadata changed during admission");
             JSONObject value = new JSONObject(new String(bytes, StandardCharsets.UTF_8));
-            if (value.length() != 6 || !LAUNCH_SCHEMA.equals(value.get("schema"))
+            boolean recovery = "foldgpt.native-launch.v3".equals(value.get("schema"));
+            if (value.length() != (recovery ? 7 : 6) || !(recovery || LAUNCH_SCHEMA.equals(value.get("schema")))
                     || !value.has("workspace") || !value.has("socketPath") || !value.has("manifestPath")
                     || !value.has("controllerRoots"))
                 throw new SecurityException("Application boot metadata requires the versioned app launch contract");
             requireCurrent(value.getJSONObject("bootEpoch"), current);
+            if (recovery) AndroidProcessPopulation.requireCurrent(context, value.getJSONObject("androidProcesses"));
         }
     }
 }

@@ -14,11 +14,19 @@ parser.add_argument("--guest-root", action="store_true", help="Emulate Debian UI
 parser.add_argument("command", nargs=argparse.REMAINDER)
 args = parser.parse_args()
 adb = ["adb", "-s", args.serial]
-package = subprocess.check_output(adb + ["shell", "dumpsys", "package", "app.foldgpt"], text=True, stdin=subprocess.DEVNULL)
-match = re.search(r"^\s*codePath=(.+)$", package, re.M)
-if match is None:
-    raise RuntimeError("FoldGPT package has no installed code path")
-code = match.group(1).strip()
+try:
+    package = subprocess.check_output(adb + ["shell", "dumpsys", "package", "app.foldgpt"], text=True, stdin=subprocess.DEVNULL)
+    match = re.search(r"^\s*codePath=(.+)$", package, re.M)
+    code = match.group(1).strip() if match else None
+except subprocess.CalledProcessError:
+    code = None
+if not code:
+    pm_path = subprocess.check_output(adb + ["shell", "pm", "path", "app.foldgpt"], text=True, stdin=subprocess.DEVNULL).strip()
+    match = re.search(r"^package:(.+)/[^/]+\.apk$", pm_path)
+    if match:
+        code = match.group(1).strip()
+    else:
+        raise RuntimeError("FoldGPT package has no installed code path")
 native = code + "/lib/arm64"
 def app_read(*command):
     return subprocess.check_output(adb + ["shell", "run-as app.foldgpt " + shlex.join(command)],

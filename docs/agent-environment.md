@@ -12,6 +12,60 @@ projet distant peut exécuter ses outils sur un autre hôte ; `uname=Linux` déc
 le noyau/invité et ne suffit pas à déduire un PC. Les chemins du poste Windows
 de développement ne sont pas présentés comme des chemins du téléphone.
 
+## Commandes locales du téléphone
+
+L'APK r34 installe `foldgpt status --logs`, `foldgpt logs` et
+`foldgpt path /home/julien` dans son stockage privé. Le premier distingue
+l'état enregistré du moteur de la présence actuelle de son processus ; les
+compteurs portent sur les processus lisibles de l'UID de FoldGPT et sur une
+fin de journal bornée. Ils ne prouvent ni une santé complète ni la marge
+disponible dans le mécanisme global des phantom processes Android.
+
+Le même raccordement expose Git, Make, Node et npm existants aux commandes
+du modèle. Bash/Python restent natifs Android ; les outils GNU/Linux utilisent
+PRoot et le même UID Android, avec le dossier physique du projet conservé.
+Les lanceurs sont dans `files/foldgpt-tools/bin`, distincts du runtime natif
+vérifié. Le service raccorde leur PATH
+aux profils `.profile` et `.bashrc` du HOME natif sélectionné : l'environnement
+de l'exécuteur est distinct de celui de l'interface. Le bloc géré préserve les
+réglages existants et refuse les fichiers ambigus. Aucun démon n'est ajouté.
+Le service rafraîchit les liens vers l'APK à chaque démarrage. Un processus
+lancé sans charger de profil doit recevoir ce PATH ou le chemin absolu de la
+commande ; le contexte décrit explicitement cet emplacement.
+
+Le pont utilise `core.createObject=rename` via l'environnement Git : Android
+refuse la création de liens physiques dans ce stockage. PRoot ne reçoit pas
+`--link2symlink` pour ces outils, car les alias artificiels ainsi produits dans
+les objets Git empêchent la validation native du workspace à la relance. Cette
+configuration ne change aucun fichier Git personnel et ne relâche pas le
+contrôle des liens du moteur. Les projets comportant volontairement des liens
+symboliques restent soumis aux limites de ce contrôle ; cette livraison ne
+qualifie pas tous les gestionnaires de paquets ou structures de projets.
+
+La révision `2026-09-09.4` inclut les limites demandées par Julien : travail
+autonome dans le périmètre demandé, préservation des projets/historiques/accès,
+aucun root Android, déverrouillage, flash, changement de Knox/eFuse ou
+affaiblissement des protections Android. Les instructions guident le modèle ;
+l'UID ordinaire et les protections Android restent les limites techniques.
+Elles ne certifient pas les conditions de garantie du constructeur.
+
+Les dépendances de documents utilisent désormais le fournisseur
+[FoldGPT Linux ARM64](workspace-dependencies.md), identifié séparément du
+catalogue officiel. `load_workspace_dependencies` publie les chemins Android
+des lanceurs `workspace-node`, `workspace-python3` et des bibliothèques. Les
+scripts invités reçoivent leurs chemins GNU via `RUNTIME_NODE`,
+`RUNTIME_PYTHON`, `RUNTIME_NODE_MODULES` et `RUNTIME_BIN_DIR` ; les valeurs
+explicites étrangères à FoldGPT restent conservées. Le Python par défaut
+reste Bionic, sans injection de modules GNU dans cet interpréteur.
+
+Le paquet `FoldGPT-ARM64-2026.09.09.2` exécute ses contrôles Node/Python,
+LibreOffice/Poppler et scripts de rendu Word/PowerPoint sur le Fold. Le
+manifeste de contexte conserve un statut prudent `diagnostic-only` pour la
+capacité entière : les résultats datés ne qualifient pas tous les usages des
+bibliothèques. Le diagnostic des fichiers et l'installation complète des
+plugins sont des contrôles distincts ; consulter les preuves de livraison
+dans le document lié, et le résultat de la réinstallation réelle.
+
 ## Point de raccordement officiel
 
 La [documentation officielle AGENTS.md](https://learn.chatgpt.com/docs/agent-configuration/agents-md)

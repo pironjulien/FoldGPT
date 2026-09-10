@@ -54,6 +54,8 @@ def verify(apk, debug):
                 "tools/executor/policy_intent.py", "tools/policy/managed_policy.py",
                 "tools/executor/native_files_rpc_fixture.py", "tools/executor/private_exec_broker.py",
                 "tools/executor/native_file_streams.py",
+                "tools/executor/native_runtime_startup.py", "tools/executor/native_path_uri.py",
+                "tools/executor/native_session_recovery.py",
                 "tools/executor/private_exec_fixture.py")}
             if private_assets != (expected_private if debug else set()):
                 raise ValueError("Wrong private executor probe asset separation")
@@ -93,6 +95,8 @@ def verify(apk, debug):
                 'tools/executor/native_processes.py', 'tools/executor/native_file_streams.py',
                 'tools/executor/native_environment.py', 'tools/executor/native_environment_unicode.py',
                 'tools/executor/native_executor_backend.py', 'tools/executor/private_exec_broker.py',
+                'tools/executor/native_runtime_startup.py', 'tools/executor/native_path_uri.py',
+                'tools/executor/native_session_recovery.py',
                 'tools/executor/test_native_processes_live.py', 'tools/executor/test_native_executor_transport.py',
                 'tools/executor/native_executor_android_fixture.py')}
             if composite_assets != (expected_composite if debug else set()):
@@ -120,6 +124,8 @@ def verify(apk, debug):
                 'tools/executor/native_file_streams.py', 'tools/executor/native_environment.py',
                 'tools/executor/native_environment_unicode.py', 'tools/executor/native_executor_backend.py',
                 'tools/executor/private_exec_broker.py', 'tools/executor/gnu-runtime/gnu_process_adapter.py',
+                'tools/executor/native_runtime_startup.py', 'tools/executor/native_path_uri.py',
+                'tools/executor/native_session_recovery.py',
                 'tools/executor/gnu-runtime/gnu_runtime_capacity.py',
                 'tools/executor/gnu-runtime/gnu_runtime_address.py',
                 'tools/executor/gnu-runtime/gnu_executor_broker.py')}

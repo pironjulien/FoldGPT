@@ -1,6 +1,231 @@
 # Changelog
 
+## Unreleased - 2026-09-10
+
+- Require the reviewed native executor assets and JNI libraries when packaging
+  the main APK/AAB. A plain debug rebuild of the microphone integration had
+  silently restored the legacy client without its projects bind, causing
+  `EACCES` when creating a conversation. Keep compilation and unit tests
+  independent of packaging and document the verified candidate build command.
+  Install r46/versionCode36 with the microphone bridge and the reviewed r45
+  executor together. On-device checks reproduce errno 13 when the projects
+  bind is omitted, then verify desktop/native Python read-write round trips
+  with identical inodes, a live non-silent WebRTC microphone stream, and all
+  355 pre-existing project files unchanged. See docs/research/audio-eacces-20260910.md.
+- Record the installed native-package EACCES repair and a live Android process
+  snapshot, distinguishing the shared phantom-process limit from the app UID
+  count. Document the remaining source-publication and installable-beta gates
+  in docs/research/publication-status-20260910.md. Refresh the unpublished X
+  draft to reflect verified local tools and the remaining reliability limits.
+- Deliver non-root native audio and microphone bridge (FoldAudioBridge) for
+  ChatGPT Desktop on Samsung Galaxy Z Fold. Route physical microphone capture
+  via AudioRecord (VOICE_COMMUNICATION with Samsung hardware echo cancellation
+  and beamforming) and speaker playback via AudioTrack to a user-space PulseAudio
+  server running in PRoot on 127.0.0.1:4713/4714/4715. Enumerate devices in
+  Chromium WebRTC (Samsung Galaxy Fold Microphone & Speaker) without runtime
+  permission dialogs via pre-granted RECORD_AUDIO. Knox remains 100% intact.
+
+## Unreleased - 2026-09-09
+
+- Deliver r45/versionCode35 with durable user run/stop intent and bounded
+  Android sticky-service recovery. Do not replay conversations, tool calls or
+  OAuth callbacks. Admit same-boot orphan markers only under the exclusive
+  owner lock, with pinned Java PID/start-time identities, unchanged workspace,
+  and complete process/thread checks that also detect hidden nondumpable
+  survivors. Preserve the marker inode/bytes and an honest archival receipt.
+  A real on-phone SIGKILL of native owner plus runtime returns a ready client
+  in 18.286 seconds without a PC repair or another Start. The separate test APK
+  is removed afterwards. See docs/session-recovery.md for evidence and limits.
+
+- Deliver r44/versionCode34 with dynamic XKB keymap replacement notifications.
+  Chromium subscribes to NewKeyboardNotify rather than the incremental map
+  changes previously sent by Lorie; notify after updating master/source maps
+  and before typing a newly mapped character. The first integrated-browser
+  test after restart receives exact French accents, em dash, Greek, Chinese
+  and emoji. Preserve r42/r43 failures as evidence of the earlier omissions.
+  The desktop composer receives 4,096 exact characters in 21.53 seconds;
+  cancellation leaves a stable 40-character prefix. Restore the empty draft
+  without submitting. Phone exchange 24 types another Unicode sample through
+  its own MCP, verifies the screenshot and restores the empty composer.
+- Frame Lorie server input incrementally with bounded nonblocking reads,
+  validated SCM_RIGHTS ownership, EOF/reconnect cleanup and ordered dispatch.
+  Serialize all client/GPU producers across complete frames; checked input
+  retains nonblocking trylock and explicit backpressure. Read exactly the
+  advertised return-clipboard length, reject oversized transfers, preserve
+  empty text and remove clipboard contents from Java/native logs. Socketpair
+  ASan/UBSan suites cover fragmentation, malformed descriptors, 1,280 concurrent
+  frames, dispatcher ordering, saturation, reconnect and keymap lifetimes.
+  Legacy return reads/writes remain synchronous; simultaneous large
+  bidirectional clipboard transfers are not qualified.
+
+- Build r41/versionCode31 with semantic accessibility revalidation. Unchanged
+  content notifications retain the observation candidate; compare source-node
+  identities, hierarchy, text, bounds, states and actions before acting or
+  returning a capture. Reject incomplete or changed trees, retain password
+  redaction, window/display/rotation checks and the original 30-second expiry.
+  Click events and issued actions still invalidate old IDs. Nine JVM tests,
+  API 37 compilation and APK verification pass. Installed r41 is read back and
+  matches the APK. Phone conversation exchange 22 completes 7 + 8 = 15, confirms
+  the tree and screenshot, rejects an old node and observes the return to FoldGPT.
+- Install r42/versionCode32: dispatch the Lorie socket on the X server thread,
+  serializing Unicode XKB mapping changes and client requests. Remove symbol
+  content logs and retain checked JNI backpressure. R41's real integrated-browser
+  fixture receives a synthetic gesture but loses one accented character despite
+  complete transport; preserve that failure. Native and APK builds, ABI/JNI/16K
+  checks and 25 transport tests pass. Phone exchange 23 types and visually checks
+  accented text in the composer, then restores its empty draft. The separate
+  integrated-browser fixture still loses the first e-acute and em dash despite
+  accepting all 44 frames; retain the negative evidence. Recover the absent
+  r41 owner with the existing quiescence/lock procedure, preserving projects and
+  history; unattended recovery is not fixed by this maintenance operation.
+- Verify r39's real desktop composer with exact Unicode and 4,096-character
+  input, followed by cancellation leaving a stable 41-character prefix. Submit
+  no message and restore the initially empty draft. Retain checked native
+  socket backpressure and asynchronous progress; transport acceptance alone
+  does not prove another application's resulting text. Obtain coherent
+  display-0 metrics and capture at 2,448 by 1,848 display pixels, and verify
+  that a real notification focus transition after Stop leaves the native owner
+  closed. Subsequent r41 calculator and Linux gesture results are recorded
+  separately above. See docs/android-tools.md for the evidence boundaries.
+- R38/versionCode28: consume explicit launch requests once, so focus, posture
+  and display restoration cannot restart a stopped workspace. Query status
+  without starting the runtime; preserve explicit reopening and retry during
+  shutdown. Require the named start action for maintenance commands.
+- Activate Android accessibility only after Julien's explicit consent. The first
+  real calculator test exposed overbroad observation invalidation from unrelated
+  Android windows; scope events to the observed window and verify actual window
+  changes. Add a nonblocking, checked native X11 input frame method, paced and
+  cancellable text/chord progress without replay or UI-thread sleeping. Remove
+  inherited native input-content logs; retain transport error diagnostics.
+- Simplify Android tools in r36/versionCode26: remove redundant local access
+  switches and present Android consent on demand through android_request_access.
+  Separate read/send/system screen scope, deduplicate pending requests, retain
+  denial without prompt loops, and never grant access or replay an action.
+  Add visual Linux text and released key chords using the existing foreground
+  X11 input. Validate snapshot rotation and block mutations on permission flows.
+  Retain official browser/plugins; this adds the Android-specific backend.
+- Add the FoldGPT Android plugin source and app-owned bridge for global Android
+  UI control and filtered SMS search/read, immutable drafts, explicit sends and
+  actual telephony result tracking. Access switches default off and require
+  normal Android permissions. Keep Google Messages as default; RCS, archive
+  membership and organization require its UI. No root, incoming interception,
+  SMS database writes or automatic sending. Permission/secure/password surfaces
+  are protected. Device activation and end-to-end behavior require verification.
+- Fix the new plugin's actual MCP launch: native legacy plugin manifests do not
+  expand PLUGIN_ROOT in arguments. Resolve cwd from the installed plugin root
+  and launch its relative script. Reinstall 0.1.0+codex.20260909125234 in r35;
+  the existing phone conversation calls android_status successfully, then
+  receives global_control_disabled and sms_disabled from the actual MCP tools.
+  This verifies transport and disabled-access guards, not enabled UI/SMS actions.
+- Receive only the official `codex://connector/oauth_callback` Android return
+  route and forward its validated URI to the existing Linux client, without
+  logging secrets or retrying uncertain handoffs. Sixteen callback/SMS parser,
+  concurrency and send-state regression tests pass. Revalidate the actual iab
+  read/click/back workflow from the phone conversation and xdg-open to Android
+  Chrome. Native official Computer Use remains unavailable on Linux.
+
+- Keep GNU ARM64 build snapshots on WSL's native filesystem under the dedicated
+  writable `/opt/foldgpt/engine-gnu-arm64/builds` directory. Check actual mounts
+  and symlink destinations before preparation and compilation, rejecting
+  Windows/shared source and Cargo target directories. Preserve the existing
+  native Cargo cache and keep recovery exports and evidence in the project.
+  Seven real-mount WSL regression tests pass; native preparation and locked
+  offline Cargo metadata succeed with all 7,006 frozen source contents matching
+  the preceding Windows snapshot. This check does not run Rust compilation.
+- Add an explicitly branded FoldGPT Linux ARM64 dependency distribution after
+  Julien authorizes completing the compatibility port. Preserve the client's
+  download/checksum/staging/activation/repair flow through a fingerprint-gated
+  ASAR adapter and retain the original archive. Node/Python native modules,
+  document roundtrips, Artifact Tool RPC and LibreOffice/Poppler rendering run
+  on the Fold. Correct the separate native configuration-authority error for
+  controller-owned local marketplaces, retaining native project boundaries;
+  all five targeted regression tests pass. The optimized ARM64 engine builds,
+  packages with symbols and passes linking checks against the phone's libraries.
+  The provider supports later migration to the official catalog or an official
+  HTTPS manifest, subject to matching architecture, format and execution checks.
+- Install r34/versionCode24 and the corrected engine on the Fold. The actual
+  Reinstall button completes in 44.918 seconds with five plugins installed.
+  Move one owned soffice wrapper into a retained backup: Diagnose reports its
+  absence; Reinstall restores the original hash in 34.515 seconds, preserving
+  all five installed plugins. Reopen normally and pass the visible Diagnose
+  action again. APK verification and 31 JVM lifecycle tests pass. The installed
+  provider is FoldGPT-ARM64-2026.09.09.2; see docs/workspace-dependencies.md.
+- After the restart, the existing phone conversation receives the five skills,
+  loads the real dependency paths, renders DOCX and PPTX with the supplied
+  helpers and reopens two XLSX files with the expected sum 12. Both PNGs are
+  read back and visually verified. Preserve all 251 original project files and
+  the 2,495,298-byte conversation prefix; the completed turn leaves 355 project
+  files and 4,281,221 history bytes, with the ordinary-UID owner ready.
+- Add the r32 app-owned local tool bridge: `foldgpt status --logs`, `logs`
+  and guest-to-Android `path` mapping, plus Git/Make/Node/npm launchers using
+  the existing GNU ARM64 tools under ordinary-UID PRoot. Preserve argument
+  boundaries, the physical project cwd and command exit codes without adding
+  a daemon or changing the attested native executor/runtime inventory.
+- Refresh the tool links and native HOME shell-profile block on application
+  startup, preserving existing profile text. The phone conversation exposed
+  the missing PATH connection; setting the GUI PATH or a CLI override alone
+  did not fix its shell. Keep those failed checks distinct from the working
+  profile integration.
+- Deliver agent context `2026-09-09.3` with real diagnostic commands and Julien's
+  scope: preserve projects/history/credentials, no Android root, bootloader
+  unlock, firmware/partition flash, Knox changes or weakened Android protections.
+  Observe the new instructions inside the existing phone conversation. The
+  official Linux ARM64 dependency-manifest 404 remains unresolved, and the
+  context states the current native workspace restriction on project symlinks.
+- In that conversation, create a real Node project in a path containing spaces;
+  Node, npm test and Make all verify sum 12, Git creates local commit `694beb1`
+  with a clean worktree, and Node exit 7 propagates unchanged. The subsequent
+  restart exposes PRoot link2symlink objects rejected by native workspace
+  admission. Remove that option from the tool bridge and select Git's supported
+  `core.createObject=rename` for Android's hardlink restriction, retaining the
+  startup checks and the original commit's contents. Preserve the
+  earlier 1,376,202-byte history prefix and existing project data; only the two
+  native shell profiles gain the managed block. Context tests (8), lifecycle
+  tests (31), Android build and native APK verification pass.
+- Verify the final r32/versionCode22 APK (SHA-256
+  `917e6ad23cd2eaa36c6796afb0fe60e0c17775f29cec938c3cfe51d7d67b7132`)
+  on the phone after creating commit `0b38acc`: reopen the same conversation,
+  repeat npm/Make, retain the commit and clean worktree, and pass Git fsck
+  without warnings. Keep the first trial's 12 duplicate object files outside
+  the repository with their contents verified. A real PTY Ctrl-C stops Node;
+  PRoot reports signal 2/exit255 and a subsequent native /proc read confirms
+  the process is gone. This does not qualify prolonged sleep/folding or
+  arbitrary symlink-containing projects.
+- Reproduce the workspace dependency diagnostic and repair failure on r31.
+  Confirm that the live stable, alpha and 50 historical runtime manifests omit
+  Linux ARM64, causing the client's fallback manifest request to fail with 404.
+  Record the exact service response and source hashes; this is a diagnosed
+  distribution blocker, with no runtime repair or replacement delivered.
+  Cross-check the official Linux/developer docs and authenticate the newer
+  26.903.61454 ARM64 client; its static installer still selects the same missing
+  target and fallback URL. Preserve the running client pending a proven fix.
+- Install r31/versionCode21 on the Fold: replace the inherited disconnected
+  desktop menu with automatic ChatGPT loading, real window readiness, and
+  recoverable startup errors. Preserve display settings through a launcher shortcut.
+- Replace the duplicate display/runtime notifications with one ChatGPT foreground
+  notification. Observe real local conversation events in Android, without an
+  extra Linux process; show activity and completion/interruption with the client's
+  actual conversation title. A completion tap opens the existing conversation.
+- Verify actual background response transitions, notification navigation,
+  notification-driven graceful shutdown, restart, and a real missing-launcher
+  failure followed by Retry. Preserve all 197 project file hashes and the
+  1,207,161-byte prior conversation prefix. The 31 JVM tests and APK/native
+  package verification pass. See the r31 startup/notification report.
+
 ## Unreleased - 2026-09-08
+
+- Build and qualify candidate r30 (versionCode 20, SHA-256 `ba1dc06815d291eb2616d6204e0dd80dd40482a2110a2943512e384144124fc7`) on physical Samsung Galaxy Z Fold (`SM_F971B`):
+  - `McpStartupPolicy::LazyWhenCached` enabled under FoldGPT environment in `codex-rs/core/src/session/mcp_runtime.rs` via `FOLDGPT_LAZY_MCP=1`.
+  - Accelerated idle thread unloading via `resolve_thread_unloading_delay()` in `codex-rs/app-server/src/request_processors/thread_lifecycle.rs`, defaulting to 180s on FoldGPT instead of 30 minutes (`FOLDGPT_THREAD_UNLOAD_SECS=180`).
+  - Native process pressure verified live on device: 22-27 processes under app UID `10412` (well below Android Phantom Process Killer 32-process limit).
+  - Physical Galaxy Z Fold deployment verified: native owner bootstrap PID `24050` with status `ready`, admission `complete`.
+  - Session marker recovery tool `recover-legacy-native-session.py` upgraded to support `version: 2` bootEpoch markers (`recovered-v2-...`), unit tests expanded (8/8 passing).
+  - Autonomous execution verified: 6/6 Python unit tests passing in 0.001s, `stats-cli.pyz` executing successfully on phone (count 3, min 2, max 6, sum 12, average 4).
+  - Interactive UI verified via CDP inspection and screenshots: authenticated session "Piron Julien", GPT-6 Astra Maximum, responsive chat conversation.
+  - Samsung DeX and desktop mode detection added to `FoldActivity.java` (`semDesktopModeEnabled == 1` and `UI_MODE_TYPE_DESK`) to prevent spurious activity termination on external displays.
+  - Bypass posture intent extra `app.foldgpt.BYPASS_POSTURE` added for headless and emulator testing.
+  - Windows JVM lifecycle test suite expanded to 28 tests including `FoldWebUriTest`.
+  - Full Samsung foldable emulation validated on 7.6" AVD (API 36 / Extension v9) across OPENED, HALF_OPENED, and CLOSED hinge transitions.
 
 - Deliver encrypted recovery supplement v17 privately, redownload and authenticate
   it, and verify 20,008 restored files plus 1,433 Git source files. Reverify

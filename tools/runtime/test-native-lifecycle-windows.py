@@ -28,7 +28,7 @@ def main():
         if len(found) != 1:
             raise ValueError("Required local JVM test dependency differs: " + name)
         jars.append(str(found[0]))
-    names = ("RuntimeExitGate", "NativeSessionObservation", "RuntimeShutdownGate")
+    names = ("RuntimeExitGate", "NativeSessionObservation", "RuntimeShutdownGate", "RuntimeRecoveryPolicy", "FoldWebUri", "ConversationActivity")
     sources = [ROOT / ("android/app/src/" + tree + "/java/app/foldgpt/" + name + suffix + ".java")
                for name in names for tree, suffix in (("main", ""), ("test", "Test"))]
     cp = os.pathsep.join(jars)

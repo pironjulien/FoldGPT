@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="foldgpt_accessibility_label">FoldGPT — contrôle Android</string>
+    <string name="foldgpt_accessibility_summary">Permettre à ChatGPT de lire et de contrôler la fenêtre Android visible, sur demande.</string>
+    <string name="foldgpt_accessibility_description">Cette autorisation permet à FoldGPT de lire le texte affiché, de prendre une capture de la fenêtre active et de toucher, faire défiler ou remplir ses champs lorsque vous le demandez à ChatGPT. Les captures et textes peuvent être transmis au modèle pour réaliser votre tâche. Les champs signalés comme mots de passe par Android sont masqués. Le contrôle est bloqué lorsque le téléphone est verrouillé ; les réglages Android et les autorisations restent sous votre contrôle. Ce service ne déverrouille pas le téléphone, ne fournit aucun accès root et ne modifie ni le chargeur de démarrage ni Knox. Vous pouvez désactiver cet accès dans les paramètres Android.</string>
+</resources>

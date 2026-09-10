@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:orientation="vertical" android:gravity="center" android:padding="24dp" android:background="#171717">
+    <ImageView android:layout_width="72dp" android:layout_height="72dp" android:src="@drawable/foldgpt_icon" android:contentDescription="FoldGPT" />
+    <TextView android:id="@+id/startup_title" android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:layout_marginTop="24dp" android:gravity="center" android:text="Ouverture de ChatGPT…"
+        android:textSize="20sp" android:textColor="#FFFFFF" android:accessibilityLiveRegion="polite" />
+    <ProgressBar android:id="@+id/startup_progress" android:layout_width="32dp" android:layout_height="32dp"
+        android:layout_marginTop="24dp" android:indeterminateTint="#FFFFFF" />
+    <Button android:id="@+id/retry_chatgpt" android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:layout_marginTop="24dp" android:text="Réessayer" android:visibility="gone" />
+    <Button android:id="@+id/startup_details" android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:text="Voir le diagnostic" android:visibility="gone" />
+</LinearLayout>

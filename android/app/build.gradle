@@ -8,8 +8,9 @@ android {
         applicationId 'app.foldgpt'
         minSdk 30
         targetSdk 37
-        versionCode 18
+        versionCode 36
         versionName '0.2.0-dev'
+        testInstrumentationRunner 'app.foldgpt.recovery.HardCrashInstrumentation'
         ndk { abiFilters 'arm64-v8a' }
     }
     compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
@@ -32,6 +33,10 @@ dependencies {
 // Explicit reviewed deployment only. Merely linking the transport must never
 // select it or embed an obsolete local staging directory by accident.
 def qualifiedExecutorAssets = providers.gradleProperty('foldgptExecutorAssets')
+def requireExecutor = providers.gradleProperty('foldgptRequireExecutor').map { it.toBoolean() }.orElse(false)
+if (requireExecutor.get() && !qualifiedExecutorAssets.isPresent()) {
+    throw new GradleException('Production candidate builds require -PfoldgptExecutorAssets and -PfoldgptExecutorJni')
+}
 if (qualifiedExecutorAssets.isPresent()) {
     def supplied = file(qualifiedExecutorAssets.get()).canonicalFile
     if (!supplied.isDirectory() || !new File(supplied, 'foldgpt-executor-deployment.json').isFile()
@@ -49,6 +54,9 @@ if (qualifiedExecutorAssets.isPresent()) {
 // A separately selected, manifest-pinned native executor payload. Preserve ELF
 // bytes because both Java and the pre-interpreter admission verify its hashes.
 def executorJni = providers.gradleProperty('foldgptExecutorJni')
+if (requireExecutor.get() && !executorJni.isPresent()) {
+    throw new GradleException('Production candidate builds require -PfoldgptExecutorJni')
+}
 if (executorJni.isPresent()) {
     if (!qualifiedExecutorAssets.isPresent()) throw new GradleException('Executor JNI requires explicit deployment assets')
     def supplied = file(executorJni.get()).canonicalFile
@@ -64,6 +72,30 @@ if (executorJni.isPresent()) {
     android.sourceSets.main.jniLibs.srcDir(supplied)
     expected.each { name -> android.sourceSets.debug.jniLibs.exclude('**/' + name) }
     android.packaging.jniLibs.keepDebugSymbols.add('**/lib*.so')
+}
+
+// The main APK is an update of the installed native workspace. Omitting its
+// executor silently launches the legacy client without the projects bind and
+// makes new conversations fail with EACCES. Compilation and unit tests may
+// still run without a package; an APK/AAB must always select both inputs.
+def verifyExecutorPackaging = tasks.register('verifyExecutorPackaging') {
+    def hasAssets = qualifiedExecutorAssets.isPresent()
+    def hasJni = executorJni.isPresent()
+    inputs.property('hasExecutorAssets', hasAssets)
+    inputs.property('hasExecutorJni', hasJni)
+    doLast {
+        if (!hasAssets || !hasJni) {
+            throw new GradleException('FoldGPT APK/AAB packaging requires the reviewed native executor. Use tools/runtime/build-production-candidate.py --candidate <name> --package <reviewed-package>, or supply both -PfoldgptExecutorAssets and -PfoldgptExecutorJni. An incomplete update would break project access (EACCES).')
+        }
+    }
+}
+androidComponents.onVariants(androidComponents.selector().all()) { variant ->
+    def suffix = variant.name.capitalize()
+    tasks.configureEach { task ->
+        if (task.name in ['merge' + suffix + 'Assets', 'package' + suffix, 'package' + suffix + 'Bundle']) {
+            task.dependsOn(verifyExecutorPackaging)
+        }
+    }
 }
 
 // The native file transport fixture executes only these APK-owned public source
@@ -85,6 +117,55 @@ def syncNativeFilesRpcAssets = tasks.register('syncNativeFilesRpcAssets', Native
 androidComponents.onVariants(androidComponents.selector().withBuildType('debug')) { variant ->
     variant.sources.assets.addGeneratedSourceDirectory(syncNativeFilesRpcAssets) { it.outputDir }
 }
+
+def localToolsAssets = layout.buildDirectory.dir('generated/foldgptToolsAssets')
+def syncLocalToolsAssets = tasks.register('syncFoldgptToolsAssets', NativeFilesRpcAssets) {
+    from(rootProject.file('../plugins/foldgpt-android')) { into 'foldgpt-android'; exclude '**/__pycache__/**', '**/*.pyc' }
+    from(rootProject.file('../tools/runtime/foldgpt_tools.py')) { into 'foldgpt-tools' }
+    from(rootProject.file('../tools/runtime/foldgpt-workspace-provider.cjs')) { into 'foldgpt-tools' }
+    from(rootProject.file('../tools/runtime/install-workspace-provider.py')) { into 'foldgpt-tools' }
+    from(rootProject.file('../tools/runtime')) {
+        include 'workspace-node-check.cjs', 'workspace-python-check.py', 'workspace-render-check.py'
+        into 'foldgpt-tools'
+    }
+    from(rootProject.file('../tools/context/foldgpt_agent_context.py')) { into 'foldgpt-tools' }
+    from(rootProject.file('../config/agent-context/foldgpt.v1.json')) {
+        into 'foldgpt-tools'
+        rename { 'agent-environment.v1.json' }
+    }
+    outputDir.set(localToolsAssets)
+    into outputDir
+}
+androidComponents.onVariants(androidComponents.selector().all()) { variant ->
+    variant.sources.assets.addGeneratedSourceDirectory(syncLocalToolsAssets) { it.outputDir }
+}
+
+def localToolsJni = layout.buildDirectory.dir('generated/foldgptToolsJni')
+abstract class FoldgptToolsLauncher extends Exec {
+    @OutputDirectory abstract DirectoryProperty getOutputDir()
+}
+def buildLocalToolsLauncher = tasks.register('buildFoldgptToolsLauncher', FoldgptToolsLauncher) {
+    def source = rootProject.file('../tools/runtime/foldgpt-tools-launcher.c')
+    def host = System.getProperty('os.name').toLowerCase().contains('windows') ? 'windows-x86_64' :
+            System.getProperty('os.name').toLowerCase().contains('mac') ? 'darwin-x86_64' : 'linux-x86_64'
+    def ndk = androidComponents.sdkComponents.ndkDirectory.get().asFile
+    def toolchain = new File(ndk, 'toolchains/llvm/prebuilt/' + host)
+    def compiler = new File(toolchain, 'bin/clang' + (host.startsWith('windows') ? '.exe' : ''))
+    def binary = localToolsJni.map { it.file('arm64-v8a/libfoldgpt_tools_launcher.so').asFile }
+    outputDir.set(localToolsJni)
+    inputs.file(source)
+    inputs.file(new File(ndk, 'source.properties'))
+    outputs.file(binary)
+    doFirst { binary.get().parentFile.mkdirs() }
+    commandLine compiler.absolutePath, '--target=aarch64-linux-android30',
+            '--sysroot=' + new File(toolchain, 'sysroot').absolutePath,
+            '-std=c11', '-O2', '-Wall', '-Wextra', '-Werror', '-fPIE', '-pie', '-fstack-protector-strong',
+            '-Wl,-z,relro,-z,now,-z,noexecstack,-z,max-page-size=16384,-z,common-page-size=16384',
+            source.absolutePath, '-o', binary.get().absolutePath
+}
+androidComponents.onVariants(androidComponents.selector().all()) { variant ->
+    variant.sources.jniLibs.addGeneratedSourceDirectory(buildLocalToolsLauncher) { it.outputDir }
+}
 def privateExecProbeAssets = layout.buildDirectory.dir('generated/privateExecProbeAssets')
 def syncPrivateExecProbeAssets = tasks.register('syncPrivateExecProbeAssets', NativeFilesRpcAssets) {
     from(rootProject.file('..')) {
@@ -92,7 +173,9 @@ def syncPrivateExecProbeAssets = tasks.register('syncPrivateExecProbeAssets', Na
                 'tools/executor/policy_intent.py', 'tools/policy/managed_policy.py',
                 'tools/executor/native_files_rpc_fixture.py',
                 'tools/executor/native_file_streams.py',
-                'tools/executor/private_exec_broker.py', 'tools/executor/private_exec_fixture.py'
+                'tools/executor/private_exec_broker.py', 'tools/executor/private_exec_fixture.py',
+                'tools/executor/native_runtime_startup.py', 'tools/executor/native_path_uri.py',
+                'tools/executor/native_session_recovery.py'
         into 'private-exec-probe'
     }
     outputDir.set(privateExecProbeAssets)
@@ -148,6 +231,8 @@ def syncNativeExecutorProbeAssets = tasks.register('syncNativeExecutorProbeAsset
                 'tools/executor/native_processes.py', 'tools/executor/native_file_streams.py',
                 'tools/executor/native_environment.py', 'tools/executor/native_environment_unicode.py',
                 'tools/executor/native_executor_backend.py', 'tools/executor/private_exec_broker.py',
+                'tools/executor/native_runtime_startup.py', 'tools/executor/native_path_uri.py',
+                'tools/executor/native_session_recovery.py',
                 'tools/executor/test_native_processes_live.py', 'tools/executor/test_native_executor_transport.py',
                 'tools/executor/native_executor_android_fixture.py'
         into 'native-executor-probe'
@@ -190,6 +275,8 @@ def syncGnuExecutorAssets = tasks.register('syncGnuExecutorAssets', NativeFilesR
                 'tools/executor/native_file_streams.py', 'tools/executor/native_environment.py',
                 'tools/executor/native_environment_unicode.py', 'tools/executor/native_executor_backend.py',
                 'tools/executor/private_exec_broker.py', 'tools/executor/gnu-runtime/gnu_process_adapter.py',
+                'tools/executor/native_runtime_startup.py', 'tools/executor/native_path_uri.py',
+                'tools/executor/native_session_recovery.py',
                 'tools/executor/gnu-runtime/gnu_runtime_capacity.py',
                 'tools/executor/gnu-runtime/gnu_runtime_address.py',
                 'tools/executor/gnu-runtime/gnu_executor_broker.py'

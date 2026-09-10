@@ -268,8 +268,14 @@ async def run(apk, uid, parent, nonce, launch_path, control_fd=3, *, launch_orig
         options, environment, native = production_options(config, launch["workspace"], launch_origin=launch_origin)
         host_factory = installed_host_factory(apk, config, options, native)
         stage = "broker_open"
+        recovery = {}
+        if launch_origin == "android-app":
+            from tools.executor.native_session_recovery import verify_application_processes
+            verify_application_processes(launch["androidProcesses"], parent)
+            recovery = {"application_processes": launch["androidProcesses"],
+                        "parent_pid": parent, "workspace": launch["workspace"]}
         owner = PrivateSessionOwner(paths.broker,
-            boot_epoch=launch["bootEpoch"] if launch_origin == "android-app" else None)
+            boot_epoch=launch["bootEpoch"] if launch_origin == "android-app" else None, **recovery)
         stage = "workspace_claim"
         owner.begin_process_session(launch["workspace"])
         stage = "factory_import"

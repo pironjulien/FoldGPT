@@ -1,4 +1,5 @@
 <resources>
+    <string name="foldgpt_settings_shortcut">Réglages de FoldGPT</string>
     <string name="foldgpt_name" translatable="false">FoldGPT</string>
     <string name="lorie_app_name" translatable="false">FoldGPT</string>
     <string name="foldgpt_display_channel">Affichage du bureau</string>

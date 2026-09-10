@@ -1,11 +1,15 @@
 diff --git a/CHANGELOG.md b/CHANGELOG.md
-index 2eb564c560a4c85507169a26637f6bce59f7e1fb..d78e16655ed878c687ad2a4c753d62f46a73fc1e 100644
+index 2eb564c560a4c85507169a26637f6bce59f7e1fb..820a9bdb5745c0d9bb5d3789e1ec5ffa3ab7a5fb 100644
 --- a/CHANGELOG.md
 +++ b/CHANGELOG.md
-@@ -1 +1,51 @@
+@@ -1 +1,55 @@
  The changelog can be found on the [releases page](https://github.com/openai/codex/releases).
 +
 +## FoldGPT auxiliary engine — unreleased
++
++- Load controller-owned local plugin marketplace settings through the controller
++  filesystem for read/install/reload, preserving project configuration discovery
++  boundaries for native execution requests.
 +
 +- Authenticate host descriptors by their kernel peer after Linux SO_PASSCRED
 +  assigns an abstract address on the first send. Keep filesystem socket
@@ -2854,7 +2858,7 @@ index 0000000000000000000000000000000000000000..fbcddd72c2b05b1811e55ae9e7155761
 +    assert!(backend.params.lock().await.is_empty());
 +}
 diff --git a/codex-rs/app-server/src/config_manager.rs b/codex-rs/app-server/src/config_manager.rs
-index f62118d2922ae3e24e6b4a30df0668c056dc4b9d..70739b253e8894873bab6f63a4bc1828ead40fc8 100644
+index f62118d2922ae3e24e6b4a30df0668c056dc4b9d..38cba576886f72bb5f228bda38aa73c2953bb8ee 100644
 --- a/codex-rs/app-server/src/config_manager.rs
 +++ b/codex-rs/app-server/src/config_manager.rs
 @@ -3,15 +3,21 @@ use codex_cloud_config::cloud_config_bundle_loader;
@@ -2988,7 +2992,7 @@ index f62118d2922ae3e24e6b4a30df0668c056dc4b9d..70739b253e8894873bab6f63a4bc1828
              .load_latest_config(Some(thread_config.cwd.to_path_buf()))
              .await?;
          let mut config = thread_config
-@@ -167,6 +247,15 @@ impl ConfigManager {
+@@ -167,6 +247,24 @@ impl ConfigManager {
          Ok(config)
      }
  
@@ -3001,10 +3005,19 @@ index f62118d2922ae3e24e6b4a30df0668c056dc4b9d..70739b253e8894873bab6f63a4bc1828
 +        manager
 +    }
 +
++    /// Selects the controller filesystem for a controller-owned operation, such
++    /// as reading or installing a local plugin marketplace. The caller owns
++    /// this selection; an out-of-bounds project request never falls back here.
++    pub(crate) fn for_controller_paths(&self) -> Self {
++        let mut manager = self.clone();
++        manager.project_config_context = ProjectConfigContext::Thread(None);
++        manager
++    }
++
      pub(crate) async fn load_default_config(&self) -> std::io::Result<Config> {
          let mut loader_overrides = self.loader_overrides.clone();
          loader_overrides.ignore_user_config = true;
-@@ -238,7 +327,32 @@ impl ConfigManager {
+@@ -238,7 +336,32 @@ impl ConfigManager {
                      .map(|(key, value)| (key, json_to_toml(value))),
              )
              .collect::<Vec<_>>();
@@ -3038,7 +3051,7 @@ index f62118d2922ae3e24e6b4a30df0668c056dc4b9d..70739b253e8894873bab6f63a4bc1828
              .codex_home(self.codex_home.clone())
              .cli_overrides(merged_cli_overrides)
              .loader_overrides(self.loader_overrides.clone())
-@@ -246,9 +360,11 @@ impl ConfigManager {
+@@ -246,9 +369,11 @@ impl ConfigManager {
              .harness_overrides(typesafe_overrides)
              .fallback_cwd(fallback_cwd)
              .cloud_config_bundle(self.current_cloud_config_bundle())
@@ -3053,7 +3066,7 @@ index f62118d2922ae3e24e6b4a30df0668c056dc4b9d..70739b253e8894873bab6f63a4bc1828
          self.apply_runtime_feature_enablement(&mut config);
          self.apply_arg0_paths(&mut config);
          Ok(config)
-@@ -265,6 +381,31 @@ impl ConfigManager {
+@@ -265,6 +390,31 @@ impl ConfigManager {
          &self,
          cwd: Option<AbsolutePathBuf>,
      ) -> std::io::Result<ConfigLayerStack> {
@@ -3085,7 +3098,7 @@ index f62118d2922ae3e24e6b4a30df0668c056dc4b9d..70739b253e8894873bab6f63a4bc1828
          load_config_layers_state(
              LOCAL_FS.as_ref(),
              &self.codex_home,
-@@ -291,6 +432,19 @@ impl ConfigManager {
+@@ -291,6 +441,19 @@ impl ConfigManager {
              .unwrap_or_default()
      }
  
@@ -3105,7 +3118,7 @@ index f62118d2922ae3e24e6b4a30df0668c056dc4b9d..70739b253e8894873bab6f63a4bc1828
      fn apply_arg0_paths(&self, config: &mut Config) {
          config.codex_self_exe = self.arg0_paths.codex_self_exe.clone();
          config.codex_linux_sandbox_exe = self.arg0_paths.codex_linux_sandbox_exe.clone();
-@@ -349,7 +503,19 @@ pub(crate) fn apply_runtime_feature_enablement(
+@@ -349,7 +512,19 @@ pub(crate) fn apply_runtime_feature_enablement(
      config: &mut Config,
      runtime_feature_enablement: &BTreeMap<String, bool>,
  ) {
@@ -3126,7 +3139,7 @@ index f62118d2922ae3e24e6b4a30df0668c056dc4b9d..70739b253e8894873bab6f63a4bc1828
      for (name, enabled) in runtime_feature_enablement {
          if protected_features.contains(name) {
              continue;
-@@ -357,7 +523,7 @@ pub(crate) fn apply_runtime_feature_enablement(
+@@ -357,7 +532,7 @@ pub(crate) fn apply_runtime_feature_enablement(
          let Some(feature) = feature_for_key(name) else {
              continue;
          };
@@ -3135,7 +3148,7 @@ index f62118d2922ae3e24e6b4a30df0668c056dc4b9d..70739b253e8894873bab6f63a4bc1828
              warn!(
                  feature = name,
                  error = %err,
-@@ -366,3 +532,7 @@ pub(crate) fn apply_runtime_feature_enablement(
+@@ -366,3 +541,7 @@ pub(crate) fn apply_runtime_feature_enablement(
          }
      }
  }
@@ -3145,10 +3158,10 @@ index f62118d2922ae3e24e6b4a30df0668c056dc4b9d..70739b253e8894873bab6f63a4bc1828
 +mod project_tests;
 diff --git a/codex-rs/app-server/src/config_manager_project_tests.rs b/codex-rs/app-server/src/config_manager_project_tests.rs
 new file mode 100644
-index 0000000000000000000000000000000000000000..c1a8d8f6b03a2d71222ff0699c69c4a80f2ff634
+index 0000000000000000000000000000000000000000..63408e057601e64da4a07ba458065d8d950aaff8
 --- /dev/null
 +++ b/codex-rs/app-server/src/config_manager_project_tests.rs
-@@ -0,0 +1,215 @@
+@@ -0,0 +1,260 @@
 +use super::*;
 +use anyhow::Result;
 +use codex_exec_server::ControllerPathAccess;
@@ -3362,6 +3375,51 @@ index 0000000000000000000000000000000000000000..c1a8d8f6b03a2d71222ff0699c69c4a8
 +        .err()
 +        .expect("missing selection must not fall back to controller");
 +    assert_eq!(error.kind(), std::io::ErrorKind::NotFound);
++    Ok(())
++}
++
++#[tokio::test]
++async fn controller_marketplace_config_preserves_layers_without_expanding_project_authority()
++-> Result<()> {
++    let home = TempDir::new()?;
++    let (root, project) = project_fixture(home.path())?;
++    let marketplace = home.path().join("runtime-plugins");
++    std::fs::create_dir_all(marketplace.join(".codex"))?;
++    std::fs::write(
++        marketplace.join(".codex/config.toml"),
++        "model = 'plugin-source-model'\n",
++    )?;
++    let key = toml::Value::String(marketplace.to_string_lossy().into_owned());
++    let mut user_config = std::fs::read_to_string(home.path().join("config.toml"))?;
++    user_config.push_str(&format!("[projects.{key}]\ntrust_level = 'trusted'\n"));
++    std::fs::write(home.path().join("config.toml"), user_config)?;
++    let mut service = ConfigManager::without_managed_config_for_tests(home.path().to_path_buf());
++    service.project_config_context = ProjectConfigContext::Thread(Some(project.clone()));
++    let controller = service.for_controller_paths();
++    for model in ["plugin-source-model", "plugin-source-refreshed"] {
++        std::fs::write(
++            marketplace.join(".codex/config.toml"),
++            format!("model = {model:?}\n"),
++        )?;
++        let loaded = controller
++            .load_latest_config(Some(marketplace.clone()))
++            .await?;
++        assert_eq!(
++            (loaded.project_filesystem, loaded.model.as_deref()),
++            (None, Some(model))
++        );
++        let rejected = service
++            .load_latest_config(Some(marketplace.clone()))
++            .await
++            .err()
++            .expect("project boundary remains enforced");
++        assert_eq!(rejected.kind(), std::io::ErrorKind::InvalidInput);
++    }
++    let loaded = service.load_latest_config(Some(root.to_path_buf())).await?;
++    assert_eq!(
++        (loaded.project_filesystem, loaded.model.as_deref()),
++        (Some(project), Some("project-original"))
++    );
 +    Ok(())
 +}
 diff --git a/codex-rs/app-server/src/config_manager_service.rs b/codex-rs/app-server/src/config_manager_service.rs
@@ -4536,6 +4594,51 @@ index 5767af6124a0aec799f854aeb0d0daff1c7387e1..aa357f0184250e9eee695e6de76ac66e
          self.fs_watch_manager.unwatch(connection_id, params).await
      }
  }
+diff --git a/codex-rs/app-server/src/request_processors/plugins.rs b/codex-rs/app-server/src/request_processors/plugins.rs
+index bf3afd7bb9280e213ec4e032a29254a0cd83b205..b8ad77bf6f5aa0b1b982ee9894b835d748f52dda 100644
+--- a/codex-rs/app-server/src/request_processors/plugins.rs
++++ b/codex-rs/app-server/src/request_processors/plugins.rs
+@@ -1022,7 +1022,15 @@ impl PluginRequestProcessor {
+             marketplace_path.as_path().parent().map(Path::to_path_buf)
+         });
+ 
+-        let config = self.load_latest_config(config_cwd).await?;
++        let config = if config_cwd.is_some() {
++            self.config_manager
++                .for_controller_paths()
++                .load_latest_config(config_cwd)
++                .await
++                .map_err(|err| internal_error(format!("failed to reload config: {err}")))?
++        } else {
++            self.load_latest_config(/*fallback_cwd*/ None).await?
++        };
+         let plugins_input = config.plugins_config_input();
+         let auth = self.auth_manager.auth().await;
+ 
+@@ -1479,7 +1487,13 @@ impl PluginRequestProcessor {
+             }
+         };
+         let config_cwd = marketplace_path.as_path().parent().map(Path::to_path_buf);
+-        let config = self.load_latest_config(config_cwd.clone()).await?;
++        // Local marketplace paths belong to the controller's plugin manager.
++        // They are not execution cwd values from the injected native runtime.
++        let config_manager = self.config_manager.for_controller_paths();
++        let config = config_manager
++            .load_latest_config(config_cwd.clone())
++            .await
++            .map_err(|err| internal_error(format!("failed to reload config: {err}")))?;
+         let auth = self.auth_manager.auth().await;
+ 
+         let plugins_manager = self.thread_manager.plugins_manager();
+@@ -1504,7 +1518,7 @@ impl PluginRequestProcessor {
+                 return Err(Self::plugin_install_error(err));
+             }
+         };
+-        let config = match self.load_latest_config(config_cwd).await {
++        let config = match config_manager.load_latest_config(config_cwd).await {
+             Ok(config) => config,
+             Err(err) => {
+                 warn!(
 diff --git a/codex-rs/app-server/src/request_processors/process_exec_processor.rs b/codex-rs/app-server/src/request_processors/process_exec_processor.rs
 index e44a75e929e695fb152e3c2d3f4133f2279b95be..2cbadc15f591cb3329e81a890a0b23bea2c54028 100644
 --- a/codex-rs/app-server/src/request_processors/process_exec_processor.rs
@@ -4684,6 +4787,42 @@ index e44a75e929e695fb152e3c2d3f4133f2279b95be..2cbadc15f591cb3329e81a890a0b23be
  
      outgoing
          .send_server_notification_to_connection_and_wait(
+diff --git a/codex-rs/app-server/src/request_processors/thread_lifecycle.rs b/codex-rs/app-server/src/request_processors/thread_lifecycle.rs
+index 8354a4e0d37d0f3b46f10ab0538450c7c258c9f4..3ff0dfe0beed461e10bf85747c2e3b96215242d6 100644
+--- a/codex-rs/app-server/src/request_processors/thread_lifecycle.rs
++++ b/codex-rs/app-server/src/request_processors/thread_lifecycle.rs
+@@ -6,6 +6,22 @@ use codex_protocol::config_types::MultiAgentMode;
+ 
+ pub(super) const THREAD_UNLOADING_DELAY: Duration = Duration::from_secs(30 * 60);
+ 
++pub(super) fn resolve_thread_unloading_delay() -> Duration {
++    if let Ok(custom) = std::env::var("FOLDGPT_THREAD_UNLOAD_SECS") {
++        if let Ok(secs) = custom.trim().parse::<u64>() {
++            return Duration::from_secs(secs);
++        }
++    }
++    if std::env::var("FOLDGPT_LAZY_MCP").is_ok()
++        || std::env::var("FOLDGPT_NATIVE_BOOTSTRAP").is_ok()
++        || std::env::var("FOLDGPT_IME_UID").is_ok()
++    {
++        Duration::from_secs(3 * 60)
++    } else {
++        THREAD_UNLOADING_DELAY
++    }
++}
++
+ #[derive(Clone)]
+ pub(super) struct ListenerTaskContext {
+     pub(super) thread_manager: Arc<ThreadManager>,
+@@ -224,7 +240,7 @@ pub(super) async fn ensure_listener_task_running(
+     let Some(mut unloading_state) = UnloadingState::new(
+         &listener_task_context,
+         conversation_id,
+-        THREAD_UNLOADING_DELAY,
++        resolve_thread_unloading_delay(),
+     )
+     .await
+     else {
 diff --git a/codex-rs/app-server/src/request_processors/thread_processor.rs b/codex-rs/app-server/src/request_processors/thread_processor.rs
 index 56eb6fdc9353b4ec79fe2ee2edcec0f8abd06ac3..85b3e18d32bfb9e6c9d52be5e96c54a1590c4a42 100644
 --- a/codex-rs/app-server/src/request_processors/thread_processor.rs
@@ -10853,6 +10992,24 @@ index 8cadb3b7baac71a35e2835bd40f972caf87aab8c..dc27307e631a8892874a3ee0b320642f
  #[tokio::test]
  async fn resolve_root_git_project_for_trust_detects_worktree_and_returns_main_root() {
      let temp_dir = TempDir::new().expect("Failed to create temp dir");
+diff --git a/codex-rs/core/src/session/mcp_runtime.rs b/codex-rs/core/src/session/mcp_runtime.rs
+index c3c329e89cf7670ae5aac9a73e539d50fdc4e8cc..8a26116ec10d9cd0153cd84895b10c1de1e8865e 100644
+--- a/codex-rs/core/src/session/mcp_runtime.rs
++++ b/codex-rs/core/src/session/mcp_runtime.rs
+@@ -381,7 +381,12 @@ impl Session {
+                 .collect(),
+         );
+         McpRuntimeInput {
+-            startup_policy: if matches!(desired.session_source, SessionSource::SubAgent(_)) {
++            startup_policy: if matches!(desired.session_source, SessionSource::SubAgent(_))
++                || std::env::var("FOLDGPT_LAZY_MCP")
++                    .is_ok_and(|v| v == "1" || v.eq_ignore_ascii_case("true"))
++                || std::env::var("FOLDGPT_NATIVE_BOOTSTRAP").is_ok()
++                || std::env::var("FOLDGPT_IME_UID").is_ok()
++            {
+                 McpStartupPolicy::LazyWhenCached
+             } else {
+                 McpStartupPolicy::Eager
 diff --git a/codex-rs/core/src/shell_snapshot.rs b/codex-rs/core/src/shell_snapshot.rs
 index 2e0d734a9849da07da358a4ddc262990847e0ae2..00580b8627b8b8192f718ec99c6789a817d714fc 100644
 --- a/codex-rs/core/src/shell_snapshot.rs

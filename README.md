@@ -2,7 +2,19 @@
 
 Experimental Android host for the official ChatGPT Linux ARM64 desktop client on a Galaxy Z Fold.
 
-**État courant, 8 septembre : r28/versionCode18 installé.** Le démarrage natif
+**État courant, 9 septembre : r34/versionCode24 installé.** Les dépendances
+de documents utilisent le paquet FoldGPT Linux ARM64. **Réinstaller** termine
+avec les cinq plugins chargés ; **Diagnostiquer** détecte un vrai fichier
+manquant, et la réinstallation le restaure à contenu identique. Le diagnostic
+repasse après redémarrage. Voir la [livraison et le changement futur de source](docs/workspace-dependencies.md).
+
+FoldGPT ouvre directement le client avec une seule notification de
+fonctionnement. Les conversations locales signalent leur activité et leur fin ;
+leur notification rouvre la conversation concernée. Les scénarios de démarrage,
+arrière-plan, arrêt et reprise après erreur sont détaillés dans le
+[bilan r31](docs/research/r31-startup-notifications-20260909.md).
+
+**Référence précédente, r28 :** le démarrage natif
 depuis FoldGPT fonctionne sans Shizuku. L'ancienne conversation qui échouait
 sur bwrap crée maintenant son projet Python, passe six tests, construit et
 exécute son zipapp. Arrêt propre, réouverture et reprise avec exécution après
@@ -54,7 +66,7 @@ historique ; elles ne remplacent pas ce bilan courant.
 ## What works
 
 - Real conversation execution uses the ordinary Android UID route selected for Full access. The r22/r23 addition project passes creation, editor save/reopen and two resumed executions. R24 adds native rg/PCRE2/JIT and a real Packaging 26.3 dependency project with five tests, deterministic zipapp construction and successful execution after application close/reopen. The file collections independently preserve the sources and artifacts; this does not qualify every managed protection profile. See [r24 evidence](docs/research/r24-device-validation-20260908.md).
-- Termux:X11 is embedded in the FoldGPT display Activity. A separate foreground service owns the native ARM64 Linux runtime; Termux is no longer the running application's host. The old Termux applications were removed from the test device with their data retained, and FoldGPT still starts independently. Its display notification and help use FoldGPT's own interface.
+- Termux:X11 is embedded in the FoldGPT display Activity. A separate foreground service owns the native ARM64 Linux runtime; Termux is no longer the running application's host. The old Termux applications were removed from the test device with their data retained, and FoldGPT still starts independently. R31 opens ChatGPT automatically, consolidates runtime status into one notification and adds real local conversation completion notifications.
 - PRoot is built from pinned source in `vendor/proot`. Matching loaders fix the previous Termux-specific loader paths. Shared-memory mapping and `xfwm4` provide the working X11 session.
 - The client fills the tested inner display at 2448 × 1848. XRandR mode reports have ranged from 59.95 to 119.98 Hz; application frame rate has not been measured.
 - The official client reports ANGLE on Zink/Turnip and Adreno 840, with GPU composition and rasterization enabled. The installed Mesa 26.2.2 foldgpt5 corrects two renderpass lifetime bugs without disabling GPU features. All 24 independent GLES pixel cases pass on the Fold, alongside Vulkan/GLX probes, all 20 settings sections and repeated real Plugins/Browser taps after a normal restart. These checks cover the reproduced corruption; broader display reliability and application FPS remain unmeasured. See [the GPU verification](docs/verification-gpu-renderpasses-2026-09-06.md).
@@ -87,8 +99,23 @@ git clone --recurse-submodules https://github.com/pironjulien/FoldGPT.git
 cd FoldGPT
 python tools/prepare-device-runtime.py
 python tools/build-proot-on-device.py
-gradle -p android :app:assembleDebug
 ```
+
+Build an update with an explicitly reviewed native executor package:
+
+```powershell
+python tools/runtime/build-production-candidate.py --candidate <unique-name> --package <reviewed-package-directory>
+```
+
+The package directory must contain its qualified `assets/` and `jniLibs/`
+inventories. The build verifies the actual APK before exposing the candidate.
+On the current development checkout, the reviewed r45 package is
+`work/android-extension-20260909/executor-r45`; it is local and is not included
+in the source repository. Follow the [native executor build notes](tools/executor/shizuku-service/README.md)
+to prepare the inputs on another checkout. Main APK/AAB packaging now refuses
+omitted executor inputs, including for debug updates: installing such an APK
+used to remove the project-directory bind and cause `EACCES` on new tasks.
+Java compilation and unit tests do not require packaging an executor.
 
 This device-assisted development recipe runs the preparation scripts in that order: the second builds PRoot and matching loaders from the pinned source. Its preparation step collects native inputs from the development device and records hashes under ignored `android/native/`. It does not reproduce the independently built library set now adopted in the test APK; use the dedicated build notes below for those sources and checks. The optional `-PbuildX11FromSource` Gradle path has not itself been verified for FoldGPT.
 
@@ -141,7 +168,7 @@ The guest session requires Debian's `python3-websockets`, `python3-secretstorage
 - Integrate and qualify the real interactive PTY through the application's terminal, including input, resizing, interruption and descendant cleanup. The separate backend candidate passes nine real Android tests with clean owner waits and absence; it is not yet installed in r24 or qualified through the terminal UI.
 - Extend qualification beyond the working ordinary UID Python route to the remaining tools and managed protection profiles. The old Debian `bwrap` failure is historical for that path; it no longer blocks the demonstrated conversation Python workflow.
 - Extend the proven r28 restart/project execution after Android reboot to physical cable-disconnected operation and fresh installation without PC setup. Resolve the measured process accumulation and same-boot owner-death recovery. Fully Android/Bionic controller and interface operation remains a separate unproved requirement.
-- Resolve the official workspace-runtime diagnostic failure. The 6 September runtime configuration has no Linux ARM64 entry and manifest retrieval returns HTTP 404. The Android/Bionic fixture interpreter is a separate supervisor component and does not repair that upstream dependency supply.
+- Qualify migration to an official Linux ARM64 workspace bundle when one is available. The observed catalog/404 gap is currently handled by the explicitly branded FoldGPT distribution; real installation, plugin synchronization and missing-file repair now pass. The Android/Bionic interpreter remains a separate component.
 - Verify the remaining browser operations, including file transfer, authentication and local development sites.
 - Broaden keyboard verification to field switching, Unicode, Samsung composition and dictation.
 - Test native Remote, active-task continuity, locking, sustained background operation, inner split-screen and clean shutdown. One physical fold/reopen of the idle desktop session has passed.

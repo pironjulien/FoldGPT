@@ -1,0 +1,171 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>FoldGPT isolated menu effects probe</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; overflow: hidden; background: rgb(246,246,246); }
+  #scene { position: fixed; inset: 0; background: rgb(246,246,246); }
+  /* Nonuniform input makes the blur real. Its right edge stays over 12 blur
+     standard deviations away from the analytically uniform sample strip. */
+  #backdrop-detail { position: absolute; left: 17px; top: 0; bottom: 0; width: 48px;
+    background: repeating-linear-gradient(0deg, #222 0 16px, #ddd 16px 32px); }
+  #anchor { position: absolute; width: 259px; height: 202.42857360839844px; }
+  #menu { width: 100%; height: 100%; padding: 8px; overflow: hidden;
+    color: rgb(26,28,31); font: 14px sans-serif;
+    background: rgba(255,255,255,.9); backdrop-filter: blur(8px);
+    border-radius: 16px;
+    box-shadow: 0 0 0 .5px rgba(26,28,31,.15), 0 8px 32px 8px rgba(0,0,0,.18); }
+  .row { display: flex; align-items: center; gap: 8px;
+    height: 30px; margin-bottom: 1px; padding: 5px 12px;
+    border-radius: 9px; background: transparent; }
+  .row.selected, .row.hovered { background: rgba(26,28,31,.055); }
+  .icon { width: 16px; height: 16px; flex: none; }
+  .text { display: block; width: 88px; white-space: nowrap; overflow: hidden;
+    mask-image: linear-gradient(to right, black 75%, transparent); }
+  #occluder { position: absolute; z-index: 2; background: rgb(26,28,31); }
+  [hidden] { display: none !important; }
+</style>
+<div id="scene">
+  <div id="backdrop-detail"></div>
+  <div id="anchor"><div id="menu"></div></div>
+  <div id="occluder" hidden></div>
+</div>
+<script>
+(() => {
+  'use strict';
+  const elements = () => Object.fromEntries(['scene','anchor','menu','occluder','backdrop-detail']
+    .map(id => [id, document.getElementById(id)]));
+  const settle = () => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+  const properties = ['background-color','background-image','backdrop-filter','filter','box-shadow',
+    'border-radius','opacity','transform','mask-image','display','visibility','overflow','color','font'];
+  const style = element => {
+    const computed = getComputedStyle(element);
+    return Object.fromEntries(properties.map(property => [property, computed.getPropertyValue(property)]));
+  };
+  const rect = element => element.getBoundingClientRect().toJSON();
+  const rgba = value => {
+    const match = /^rgba?\(([^)]+)\)$/.exec(value);
+    if (!match) throw new Error('Unsupported computed CSS color: ' + value);
+    const values = match[1].split(',').map(Number);
+    if (values.length === 3) values.push(1);
+    if (values.length !== 4 || values.some(value => !Number.isFinite(value)) ||
+        values.slice(0,3).some(value => value < 0 || value > 255) || values[3] < 0 || values[3] > 1)
+      throw new Error('Invalid computed CSS color');
+    return values;
+  };
+  const over = (foreground, background) => background.map((v,i) => foreground[i]*foreground[3]+v*(1-foreground[3]));
+  let stimulus = {kind:'initial'};
+  let geometryIndex = 0;
+  function position(index) {
+    const {anchor} = elements();
+    const offsets = [0, .25, .5, .75];
+    const tops = [.6190490722656, .952392578125, .125, .5];
+    const width = index % 2 ? 260.1428680419922 : 259;
+    Object.assign(anchor.style, {left:(9+offsets[index])+'px', width:width+'px',
+      top:(Math.max(24, Math.min(456, innerHeight-266.42857360839844))+tops[index])+'px'});
+    geometryIndex = index;
+  }
+  for (let i=0; i<6; i++) {
+    const row = document.createElement('div');
+    row.className = 'row';
+    row.innerHTML = '<svg class="icon" viewBox="0 0 16 16" aria-hidden="true">'+
+      '<rect x="3" y="3" width="10" height="10" rx="2" fill="none" stroke="currentColor"/>'+
+      '</svg><span class="text">Menu '+i+' — texte masqué</span>';
+    elements().menu.append(row);
+  }
+  position(0);
+  function snapshot(frame, phase) {
+    if (document.visibilityState !== 'visible') throw new Error('Fixture target is not visible');
+    if (visualViewport && (visualViewport.scale !== 1 || visualViewport.offsetLeft || visualViewport.offsetTop))
+      throw new Error('Pinch zoom or visual viewport offset is unsupported');
+    const {scene,anchor,menu,occluder} = elements();
+    if (!occluder.hidden) throw new Error('Temporary occlusion was not removed');
+    if (!CSS.supports('backdrop-filter','blur(8px)') || getComputedStyle(menu).backdropFilter !== 'blur(8px)')
+      throw new Error('Expected backdrop blur is not active');
+    const box = anchor.getBoundingClientRect();
+    if (box.left < 0 || box.top < 0 || box.right+48 > innerWidth || box.bottom+48 > innerHeight)
+      throw new Error('Viewport clips the fixture or its shadow');
+    if (scene.getAnimations({subtree:true}).some(animation => animation.playState === 'running'))
+      throw new Error('Unexpected running animation');
+    const base = rgba(getComputedStyle(scene).backgroundColor);
+    if (base[3] !== 1) throw new Error('The backdrop must be opaque');
+    const menuColor = over(rgba(getComputedStyle(menu).backgroundColor), base.slice(0,3));
+    const rows = [...menu.children];
+    const samples = rows.map((row,index) => {
+      const sample = {row:index, x:box.left+190, y:box.top+8+31*index+8, w:36, h:14,
+        rgb:(menu.hidden ? base.slice(0,3) : over(rgba(getComputedStyle(row).backgroundColor), menuColor)).map(Math.round),
+        background:getComputedStyle(row).backgroundColor};
+      if (!menu.hidden) {
+        const r = row.getBoundingClientRect();
+        if (sample.x < r.left+16 || sample.x+sample.w > r.right-16 || sample.y < r.top+6 || sample.y+sample.h > r.bottom-6)
+          throw new Error('Sample intersects a row edge or rounded corner');
+        for (const child of row.children) {
+          const c = child.getBoundingClientRect();
+          if (c.right+16 > sample.x) throw new Error('Sample is too close to text/icon content');
+        }
+      }
+      // The stripe affects another part of the menu but not this uniform strip.
+      if (sample.x-elements()['backdrop-detail'].getBoundingClientRect().right < 12*8)
+        throw new Error('Blur sample is too close to nonuniform backdrop');
+      return sample;
+    });
+    return {formatVersion:2,mode:'partial',fixture:'menu-effects',frame,phase,dpr:devicePixelRatio,stimulus,samples,
+      state:{html:scene.outerHTML,viewport:[innerWidth,innerHeight],dpr:devicePixelRatio,
+        scroll:[scrollX,scrollY],visualViewport:visualViewport ? [visualViewport.offsetLeft,visualViewport.offsetTop,visualViewport.scale] : null,
+        geometryIndex,open:!menu.hidden,elements:[scene,elements()['backdrop-detail'],anchor,menu,occluder,...rows,...menu.querySelectorAll('.text,.icon')]
+          .map(element => ({rect:rect(element),style:style(element)}))}};
+  }
+  window.foldgptRendererProbe = {
+    mode:'partial', fixture:'menu-effects',
+    async snapshot(frame=-1, phase='baseline') {
+      await document.fonts.ready;
+      await settle();
+      return snapshot(frame,phase);
+    },
+    async step(frame) {
+      if (!Number.isInteger(frame) || frame < 0 || frame >= 128) throw new Error('Invalid bounded step');
+      const {menu,anchor,occluder} = elements();
+      const phase = frame%8;
+      position(Math.floor(frame/8)%4);
+      const rows = [...menu.children];
+      rows.forEach((row,index) => {
+        row.classList.toggle('selected',index === (phase%2 ? 2 : 1));
+        row.classList.toggle('hovered',index === (phase%2 ? 1 : 2));
+      });
+      menu.hidden = phase === 2;
+      await settle();
+      const operations = ['selection','selection','close','open','occlude','close-open','move-return','backdrop-return'];
+      if (phase === 4) {
+        const box = anchor.getBoundingClientRect();
+        Object.assign(occluder.style,{left:(box.left+8)+'px',top:(box.top+39)+'px',width:(box.width-16)+'px',height:'61px'});
+        occluder.hidden = false;
+        await settle();
+        occluder.hidden = true;
+      } else if (phase === 5) {
+        menu.hidden = true;
+        await settle();
+        menu.hidden = false;
+      } else if (phase === 6) {
+        anchor.style.transform = 'translate(31.25px,-15.5px)';
+        await settle();
+        anchor.style.removeProperty('transform');
+      } else if (phase === 7) {
+        elements()['backdrop-detail'].style.backgroundPositionY = '16px';
+        await settle();
+        elements()['backdrop-detail'].style.removeProperty('background-position-y');
+      }
+      stimulus = {kind:operations[phase],phase,geometryIndex,frame,open:!menu.hidden,
+        requestedDpr:null,actualDpr:devicePixelRatio,
+        notes:'Real device DPR; fractional CSS geometry does not emulate another display density'};
+      await settle();
+      return snapshot(frame,'partial');
+    },
+    async repaint(frame) {
+      const {scene} = elements();
+      scene.replaceWith(scene.cloneNode(true));
+      await settle();
+      return snapshot(frame,'full');
+    }
+  };
+})();
+</script>
