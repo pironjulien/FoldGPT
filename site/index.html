@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="FoldGPT — un poste de travail IA qui se replie avec vous.">
+  <title>FoldGPT — Intelligence, en mouvement</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <canvas id="particles" aria-hidden="true"></canvas>
+  <div class="noise" aria-hidden="true"></div>
+  <header class="topbar">
+    <a class="brand" href="#top" aria-label="FoldGPT, accueil"><span class="brand-mark">⌁</span><span>FOLD<span class="brand-accent">GPT</span></span></a>
+    <nav class="nav" aria-label="Navigation principale">
+      <a href="#features">Capacités</a>
+      <a href="#flow">Fonctionnement</a>
+      <a href="#github">Open source</a>
+    </nav>
+    <a class="nav-cta" href="#github">Voir le dépôt <span>↗</span></a>
+  </header>
+
+  <main id="top">
+    <section class="hero shell">
+      <div class="hero-copy">
+        <div class="eyebrow"><span class="pulse"></span> RUNTIME IA NATIF · ANDROID / LINUX</div>
+        <h1>L’intelligence<br><em>se plie</em> à vous.</h1>
+        <p class="hero-lede">FoldGPT transforme votre appareil pliable en espace de travail IA persistant. Une session, deux postures, zéro friction.</p>
+        <div class="hero-actions">
+          <a class="button button-primary" href="#github">Explorer le projet <span>→</span></a>
+          <a class="button button-ghost" href="#codex">Voir l’aperçu Codex <span>⌘</span></a>
+        </div>
+        <div class="hero-meta"><span><b class="dot-green"></b> Session locale</span><span>v0.2.0-dev</span><span>GPL-3.0</span></div>
+      </div>
+      <div class="hero-art" aria-label="Illustration d’un appareil FoldGPT ouvert">
+        <div class="orbit orbit-a"></div><div class="orbit orbit-b"></div>
+        <div class="fold-device">
+          <div class="device-half device-left"><div class="screen-glow"></div><div class="screen-grid"></div><span class="screen-label">FOCUS / 01</span><span class="screen-code">$ foldgpt —resume<br><i>ready_</i></span></div>
+          <div class="hinge"><span></span></div>
+          <div class="device-half device-right"><div class="screen-grid"></div><div class="chat-lines"><span></span><span></span><span></span><span></span></div><span class="screen-label">CONTEXT / 02</span><span class="screen-orb">✦</span></div>
+        </div>
+        <div class="floating-chip chip-top"><span class="chip-dot"></span> runtime actif</div>
+        <div class="floating-chip chip-bottom">latence <strong>12 ms</strong></div>
+      </div>
+    </section>
+
+    <section class="signal-bar shell" aria-label="Caractéristiques principales">
+      <div><strong>01</strong><span>Une session qui<br>survit au pli</span></div>
+      <div><strong>02</strong><span>Exécution locale<br>et réactive</span></div>
+      <div><strong>03</strong><span>Un écran pour<br>chaque intention</span></div>
+      <div class="signal-end">FOLD / THINK / SHIP <span>✦</span></div>
+    </section>
+
+    <section id="features" class="section shell">
+      <div class="section-intro"><div class="eyebrow">POURQUOI FOLDGPT</div><h2>Le contexte reste<br><em>avec vous.</em></h2><p>Conçu pour les moments où l’on passe du mobile au bureau sans perdre son fil.</p></div>
+      <div class="feature-grid">
+        <article class="feature-card feature-highlight"><div class="card-index">01 / 04</div><div class="feature-icon icon-stack">◫</div><h3>Mémoire de session</h3><p>Reprenez une conversation là où vous l’avez laissée. L’état reste vivant pendant les transitions.</p><a href="#flow">Comprendre le cycle <span>↗</span></a></article>
+        <article class="feature-card"><div class="card-index">02 / 04</div><div class="feature-icon">◎</div><h3>Runtime embarqué</h3><p>Un environnement Linux léger, lancé depuis Android, avec vos outils à portée de main.</p><div class="card-tag">LOCAL FIRST</div></article>
+        <article class="feature-card"><div class="card-index">03 / 04</div><div class="feature-icon">⌘</div><h3>Clavier, naturellement</h3><p>Le pont de saisie suit la posture et laisse vos raccourcis travailler sans détour.</p><div class="card-tag">INPUT BRIDGE</div></article>
+        <article class="feature-card"><div class="card-index">04 / 04</div><div class="feature-icon">↗</div><h3>Ouvert par défaut</h3><p>Scripts, documentation, instrumentation : chaque brique est lisible et améliorable.</p><div class="card-tag">MIT LICENSE</div></article>
+      </div>
+    </section>
+
+    <section id="flow" class="section flow-section shell">
+      <div class="section-intro"><div class="eyebrow">LE CYCLE FOLDGPT</div><h2>Du geste à<br><em>l’élan.</em></h2></div>
+      <div class="flow-track">
+        <div class="flow-line"></div>
+        <div class="flow-step"><div class="step-node">01</div><div><h3>Déplier</h3><p>Le runtime détecte la posture et prépare l’espace adapté.</p></div></div>
+        <div class="flow-step"><div class="step-node">02</div><div><h3>Reprendre</h3><p>Votre session, fenêtres et contexte reviennent au premier plan.</p></div></div>
+        <div class="flow-step"><div class="step-node">03</div><div><h3>Construire</h3><p>Discutez, codez, lancez. Le téléphone devient un vrai atelier.</p></div></div>
+      </div>
+    </section>
+
+    <section id="codex" class="section shell codex-section">
+      <div class="codex-copy"><div class="eyebrow"><span class="pulse pulse-violet"></span> APERÇU / DÉMO</div><h2>Un aperçu du<br><em>poste de pilotage.</em></h2><p>Cette fenêtre illustre l’intégration Codex dans FoldGPT : un espace de travail persistant, pensé pour observer, agir et reprendre.</p><div class="demo-note"><span>✦</span><span><strong>Démo statique</strong><br>Interface de présentation — aucune connexion active.</span></div></div>
+      <div class="codex-window" role="img" aria-label="Aperçu statique d’une interface Codex">
+        <div class="window-top"><span class="window-dots"><i></i><i></i><i></i></span><span class="window-title">foldgpt / workspace</span><span class="window-status">● local</span></div>
+        <div class="window-body"><aside class="window-sidebar"><div class="side-logo">⌁</div><div class="side-item active">▦ <span>Sessions</span></div><div class="side-item">◇ <span>Fichiers</span></div><div class="side-item">◌ <span>Runtime</span></div><div class="side-bottom">⚙</div></aside><div class="window-main"><div class="crumb">workspace <span>/</span> product-notes.md</div><div class="code-block"><div class="code-row"><span class="ln">01</span><span><b class="purple">const</b> posture = <b class="blue">"open"</b>;</span></div><div class="code-row"><span class="ln">02</span><span><b class="purple">await</b> foldgpt.<b class="cyan">resume</b>(session);</span></div><div class="code-row"><span class="ln">03</span><span class="muted">// context restored ✓</span></div><div class="code-row"><span class="ln">04</span><span class="cursor"></span></div></div><div class="window-prompt"><span class="prompt-mark">›</span><span>Décris la prochaine étape...</span><span class="prompt-send">↗</span></div></div></div>
+      </div>
+    </section>
+
+    <section id="github" class="section github-section shell"><div class="github-card"><div><div class="eyebrow">OPEN SOURCE / GITHUB</div><h2>Pliez le futur<br>avec nous.</h2><p>FoldGPT évolue en public. Lisez le code, suivez les essais, proposez une amélioration.</p></div><a class="button button-light" href="https://github.com/pironjulien/FoldGPT" target="_blank" rel="noreferrer">Ouvrir GitHub <span>↗</span></a><div class="github-grid" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div></div></section>
+  </main>
+  <footer class="footer shell"><a class="brand" href="#top"><span class="brand-mark">⌁</span><span>FOLD<span class="brand-accent">GPT</span></span></a><span>Intelligence, en mouvement.</span><span>© 2026 FoldGPT</span></footer>
+  <script src="app.js"></script>
+</body>
+</html>
