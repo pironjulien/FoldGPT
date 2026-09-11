@@ -5,6 +5,7 @@ x_post_assets/
 logs/
 *.png
 !site/assets/codex-desktop.png
+!site/assets/codex-desktop-anonymized.png
 !site/assets/android-keyboard.png
 !site/assets/workspace-runtime.png
 !site/assets/foldgpt-social.png

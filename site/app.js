@@ -2,8 +2,8 @@
 const english = document.documentElement.lang === 'en';
 const t = (fr,en) => english ? en : fr;
 const captures = {
-  desktop: {file:'codex-desktop.png',title:t('Le bureau Codex, au complet.','The complete Codex desktop.'),
-    description:t('Navigation, projets et composeur du client Linux ARM64, affichés localement sur l’écran intérieur. Les informations de compte et de session sont masquées.','Navigation, projects and the Linux ARM64 composer, displayed locally on the inner screen. Account and session information is redacted.'),
+  desktop: {file:'codex-desktop-anonymized.png',title:t('Le bureau Codex, au complet.','The complete Codex desktop.'),
+    description:t('Navigation, projets et composeur du client Linux ARM64, affichés localement sur l’écran intérieur. Seuls le nom et l’avatar du compte ont été anonymisés.','Navigation, projects and the Linux ARM64 composer, displayed locally on the inner screen. Only the account name and avatar have been anonymized.'),
     alt:t('Capture de l’accueil Codex sur le Fold, informations de compte masquées.','Codex home captured on the Fold, with account information redacted.')},
   runtime: {file:'workspace-runtime.png',title:t('Le workspace, dans le client.','The workspace, inside the client.'),
     description:t('Capture réelle des dépendances Codex et du bundle FoldGPT ARM64 dans les paramètres de l’application.','A real capture of Codex dependencies and the FoldGPT ARM64 bundle in the application settings.'),
