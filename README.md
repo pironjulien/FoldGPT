@@ -87,7 +87,7 @@ The development Fold has demonstrated the desktop interface, local file and comm
 - **Distribution and updates:** a ready-to-install public APK, automatic client updates, and Remote are not qualified in this release.
 - **Device scope:** development currently targets the Galaxy Z Fold 8; other devices need their own validation.
 
-No root or bootloader unlock is required. The development phone was observed with a locked bootloader, verified boot green, and Knox warranty bit `0`. That observation is not a Samsung Pay certification. Display refresh rate is also distinct from measured application frame rate. The [compatibility guide](docs/compatibility.md) explains these boundaries.
+No root or bootloader unlock is required. The development phone was observed with a locked bootloader, verified boot green, and Knox warranty bit `0`. The maintainer confirms Samsung Pay is working on this Fold. Display refresh rate is also distinct from measured application frame rate. The [compatibility guide](docs/compatibility.md) explains the device scope and remaining limitations.
 
 ## Build it with us
 

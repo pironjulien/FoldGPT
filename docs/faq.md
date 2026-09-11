@@ -18,7 +18,7 @@ No. The host runs under its own ordinary Android application UID. PRoot provides
 
 ## What about Knox and Samsung Pay?
 
-The development phone reported verified boot `green`, a locked bootloader, and a Knox warranty bit of `0`. The architecture does not require bootloader unlocking. Samsung Pay and other banking or payment apps have not been directly qualified, so the project does not promise their compatibility.
+The development phone reported verified boot `green`, a locked bootloader, and a Knox warranty bit of `0`. The architecture does not require bootloader unlocking. The maintainer confirms Samsung Pay is working on this Fold. Other devices and banking or payment apps need their own validation.
 
 ## Can I download an APK and install it now?
 

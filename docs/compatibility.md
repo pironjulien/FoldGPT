@@ -31,7 +31,8 @@ The development target is the Galaxy Z Fold 8 (`SM-F971B`), using ARM64, Android
 | Root | Not required by the FoldGPT execution model |
 | Bootloader | Unlocking is not required; the development phone was observed locked |
 | Verified boot and Knox | The development phone reported verified boot `green` and Knox warranty bit `0` |
-| Payment and banking apps | Not directly qualified; observed boot state does not guarantee their compatibility |
+| Samsung Pay | Working on the development Fold, as confirmed by the maintainer |
+| Other payment and banking apps | Not directly qualified; observed boot state does not guarantee their compatibility |
 | Display refresh | The development display reports approximately 120 Hz; application frame rate has not been benchmarked |
 | Network | Required for OpenAI account services and model requests |
 | Desktop host computer | Not used as a streamed desktop in the demonstrated runtime; source preparation still uses development tooling |
