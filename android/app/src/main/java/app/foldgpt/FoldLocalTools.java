@@ -61,6 +61,12 @@ public final class FoldLocalTools {
         writeAsset(context, contextDir, "foldgpt_agent_context.py", "foldgpt-tools/foldgpt_agent_context.py", uid);
         writeAsset(context, contextDir, "foldgpt-workspace-provider.cjs", "foldgpt-tools/foldgpt-workspace-provider.cjs", uid);
         writeAsset(context, contextDir, "install-workspace-provider.py", "foldgpt-tools/install-workspace-provider.py", uid);
+        // Ship the admission-before-context ordering together with its adapter.
+        // Updating Python alone would leave the previous guest launch order.
+        File guestBin = directory(files, "debian/usr/local/bin", uid);
+        writeAsset(context, guestBin, "foldgpt-session", "foldgpt-tools/foldgpt-session.sh", uid);
+        // dbus-run-session re-executes this script, so it must be executable.
+        Os.chmod(new File(guestBin, "foldgpt-session").getPath(), 0700);
         for (String name : new String[]{"workspace-node-check.cjs", "workspace-python-check.py", "workspace-render-check.py"})
             writeAsset(context, contextDir, name, "foldgpt-tools/" + name, uid);
         writeAsset(context, share, "agent-environment.v1.json", "foldgpt-tools/agent-environment.v1.json", uid);

@@ -41,8 +41,7 @@ public final class FoldExecutorRuntime {
     private final long generation;
     private final Context context;
     private final Handler main = new Handler(Looper.getMainLooper());
-    private final java.util.concurrent.ExecutorService work = java.util.concurrent.Executors.newSingleThreadExecutor(
-        task -> new Thread(task, "FoldGPT-executor-owner"));
+    private final RuntimeOwnerWorker work = new RuntimeOwnerWorker("FoldGPT-executor-owner");
     private final CompletableFuture<Void> closed = new CompletableFuture<>();
     private final CompletableFuture<Throwable> failure = new CompletableFuture<>();
     private CompletableFuture<Endpoint> preparing;
@@ -271,6 +270,7 @@ public final class FoldExecutorRuntime {
 
     /** Stop admission immediately; the completion future is native cleanup, not a deadline. */
     public synchronized CompletableFuture<Void> requestStop() {
+        if (closed.isDone()) return closed;
         if (!closing) {
             closing = true;
             if (preparing != null && !preparing.isDone()) preparing.completeExceptionally(new IllegalStateException("Native executor stop requested"));
@@ -344,8 +344,11 @@ public final class FoldExecutorRuntime {
             Shizuku.removeBinderReceivedListener(binderReceived);
         }
         persist(failed ? "unavailable" : "closed", failureReason, null);
-        closed.complete(null);
+        // Native cleanup is now proven. Drain accepted callbacks and retire this
+        // generation's worker; already posted observer ticks become harmless.
+        work.close();
         EXIT_GATE.markClean(generation);
+        closed.complete(null);
         scheduleProcessExitIfClean();
     }
     private synchronized void fail(String reason, Throwable cause) {

@@ -16,6 +16,7 @@ import app.foldgpt.FoldExecutorRuntime;
 import app.foldgpt.RuntimeShutdownGate;
 import app.foldgpt.RuntimeRecoveryPolicy;
 import app.foldgpt.RuntimeRecoveryStore;
+import app.foldgpt.RuntimeActivations;
 import app.foldgpt.KeyringVault;
 import app.foldgpt.FoldConversationMonitor;
 import app.foldgpt.FoldLocalTools;
@@ -43,8 +44,7 @@ public final class FoldRuntimeService extends Service {
     private Map<String, String> conversationEnvironment;
     private String pendingThread;
     private final PendingConnectorCallback connectorCallbacks = new PendingConnectorCallback();
-    private Thread connectorWorker;
-    private java.lang.Process connectorProcess;
+    private RuntimeActivations activations;
     private final Object lifecycleLock = new Object();
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
     private java.lang.Process linux;
@@ -271,21 +271,21 @@ public final class FoldRuntimeService extends Service {
             .setPublicVersion(publicVersion).setCategory(Notification.CATEGORY_STATUS).build());
     }
     private void openPendingConversation() {
-        if (!"ready".equals(phase) || stopping || pendingThread == null || conversationCommand == null) return;
+        if (!"ready".equals(phase) || stopping || destroyed || pendingThread == null
+                || conversationCommand == null || conversationEnvironment == null || activations == null) return;
         String thread = pendingThread; pendingThread = null;
         List<String> args = new ArrayList<>(conversationCommand);
         args.add("/usr/bin/chatgpt"); args.add("codex://threads/" + thread);
         Map<String, String> environment = new HashMap<>(conversationEnvironment);
-        new Thread(() -> {
-            try {
+        activations.launch("FoldGPT-open-conversation", () -> {
                 ProcessBuilder command = new ProcessBuilder(args);
                 command.environment().putAll(environment);
                 command.redirectOutput(new File("/dev/null")).redirectError(new File("/dev/null"));
-                java.lang.Process process = command.start();
-                if (!process.waitFor(15, java.util.concurrent.TimeUnit.SECONDS)) { process.destroy(); throw new IOException("Conversation activation timed out"); }
-                if (process.exitValue() != 0) throw new IOException("Conversation activation failed: " + process.exitValue());
-            } catch (Exception error) { Log.e("FoldGPT", "Could not open the notified conversation", error); }
-        }, "FoldGPT-open-conversation").start();
+                return command.start();
+            }, (delivered, error) -> {
+                if (!delivered && !(error instanceof InterruptedException))
+                    Log.e("FoldGPT", "Could not open the notified conversation", error);
+            });
     }
     private void connectorHandoffFailed() {
         // A transport failure does not say anything about OAuth authorization.
@@ -295,68 +295,34 @@ public final class FoldRuntimeService extends Service {
     }
     private void openPendingConnectorCallback() {
         String callback = connectorCallbacks.take("ready".equals(phase) && !stopping
-                && !destroyed && conversationCommand != null && conversationEnvironment != null);
+                && !destroyed && conversationCommand != null && conversationEnvironment != null && activations != null);
         if (callback == null) return;
         List<String> args = new ArrayList<>(conversationCommand);
         // Fixed executable and one strictly validated URI argument, never a shell
         // command, option, project path, or generic codex deep-link dispatcher.
         args.add("/usr/bin/chatgpt"); args.add(callback);
         Map<String, String> environment = new HashMap<>(conversationEnvironment);
-        String token = sessionToken;
-        Thread launch = new Thread(() -> {
-            java.lang.Process process = null;
-            boolean handedOff = false;
-            try {
+        boolean launched = activations.launch("FoldGPT-connector-callback", () -> {
                 ProcessBuilder command = new ProcessBuilder(args);
                 command.environment().putAll(environment);
                 command.redirectOutput(new File("/dev/null")).redirectError(new File("/dev/null"));
-                synchronized (lifecycleLock) {
-                    if (destroyed || stopping || !sessionToken.equals(token) || linux == null || !linux.isAlive()) throw new InterruptedException();
-                    process = command.start();
-                    connectorProcess = process;
-                }
-                process.getOutputStream().close();
-                if (!process.waitFor(15, java.util.concurrent.TimeUnit.SECONDS)) throw new IOException();
-                handedOff = process.exitValue() == 0;
-            } catch (Exception error) {
-                // No automatic retry: a timed-out invocation may already have
-                // submitted the one-time callback to the official client.
-                Thread.interrupted();
-            } finally {
-                stopLinux(process); // Wait for this transient PRoot child, even on timeout.
-                synchronized (lifecycleLock) {
-                    if (connectorProcess == process) connectorProcess = null;
-                    if (connectorWorker == Thread.currentThread()) connectorWorker = null;
-                }
+                return command.start();
+            }, (delivered, error) -> {
+                // No automatic retry or exception logging: the invocation may
+                // already have submitted this one-time callback to the client.
                 connectorCallbacks.completed();
-                boolean delivered = handedOff;
                 mainHandler.post(() -> {
                     if (delivered) Log.i("FoldGPT-Connector", "Connector callback invocation completed; authorization result belongs to the client");
                     else if (!destroyed) connectorHandoffFailed();
                 });
-            }
-        }, "FoldGPT-connector-callback");
-        synchronized (lifecycleLock) { connectorWorker = launch; }
-        launch.start();
-    }
-    private void interruptConnectorCallback() {
-        synchronized (lifecycleLock) {
-            if (connectorProcess != null) connectorProcess.destroy();
-            if (connectorWorker != null) connectorWorker.interrupt();
+            });
+        if (!launched) {
+            connectorCallbacks.completed();
+            connectorHandoffFailed();
         }
     }
-    /** Workspace worker joins the transient handoff before reporting cleanup. */
-    private void joinConnectorCallback() {
-        Thread joining;
-        synchronized (lifecycleLock) { joining = connectorWorker; }
-        if (joining == null) return;
-        joining.interrupt();
-        boolean interrupted = false;
-        while (joining.isAlive()) {
-            try { joining.join(); }
-            catch (InterruptedException error) { interrupted = true; joining.interrupt(); }
-        }
-        if (interrupted) Thread.currentThread().interrupt();
+    private void interruptActivations() {
+        synchronized (lifecycleLock) { if (activations != null) activations.cancel(); }
     }
     private void startObservers(File root, String guestHome, File temporary, String token,
             java.util.concurrent.CompletableFuture<Void> clientReady) throws Exception {
@@ -413,9 +379,13 @@ public final class FoldRuntimeService extends Service {
             stopping = false;
             restartWorkspace = false;
             FoldExecutorRuntime runtime = executorRuntime;
+            // Both the group and native owner identify this workspace generation.
+            RuntimeActivations generationActivations = new RuntimeActivations(lifecycleLock,
+                    () -> runtime == executorRuntime && !destroyed && !stopping && linux != null && linux.isAlive());
+            activations = generationActivations;
             workspaceClosed = new java.util.concurrent.CompletableFuture<>();
             java.util.concurrent.CompletableFuture<Void> completion = workspaceClosed;
-            worker = new Thread(() -> startWorkspace(runtime, completion), "FoldGPT-runtime");
+            worker = new Thread(() -> startWorkspace(runtime, completion, generationActivations), "FoldGPT-runtime");
             worker.start();
         }
     }
@@ -454,7 +424,7 @@ public final class FoldRuntimeService extends Service {
             shutdownComplete = false;
             shutdownGeneration = shutdownGate.begin(worker != null);
         }
-        interruptConnectorCallback();
+        interruptActivations();
         long generation = shutdownGeneration;
         FoldExecutorRuntime runtime = executorRuntime;
         try {
@@ -561,7 +531,8 @@ public final class FoldRuntimeService extends Service {
         } catch (Exception ignored) { }
         return -1;
     }
-    private void startWorkspace(FoldExecutorRuntime runtime, java.util.concurrent.CompletableFuture<Void> completion) {
+    private void startWorkspace(FoldExecutorRuntime runtime, java.util.concurrent.CompletableFuture<Void> completion,
+            RuntimeActivations generationActivations) {
         java.lang.Process started = null;
         byte[] keyringPassword = null;
         String failureDetail = "ChatGPT s’est interrompu.";
@@ -691,13 +662,17 @@ public final class FoldRuntimeService extends Service {
             Log.e("FoldGPT", "Workspace failed", e);
             failureDetail = e.toString();
         } finally {
+            // Close this generation before waiting for Linux. Every transient
+            // activation must also finish before workspaceClosed is published.
+            generationActivations.cancel();
             if (audioBridge != null) audioBridge.stop();
             if (keyringPassword != null) Arrays.fill(keyringPassword, (byte) 0);
             stopLinux(started);
-            joinConnectorCallback();
+            generationActivations.closeAndJoin();
             stopObservers();
             synchronized (lifecycleLock) {
                 if (linux == started) linux = null;
+                if (activations == generationActivations) activations = null;
                 if (wakeLock != null && wakeLock.isHeld()) wakeLock.release();
                 wakeLock = null;
             }
@@ -756,7 +731,7 @@ public final class FoldRuntimeService extends Service {
         cancelPendingLaunch();
         unregisterReceiver(statusQuery);
         connectorCallbacks.cancelPending();
-        interruptConnectorCallback();
+        interruptActivations();
         stopObservers();
         stopForeground(STOP_FOREGROUND_REMOVE);
         if (!"error".equals(phase)) {

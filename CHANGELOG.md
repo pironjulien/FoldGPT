@@ -1,5 +1,19 @@
 # Changelog
 
+## Unreleased — Daily-use stabilization
+
+- Retire Java executor workers after native cleanup and bind conversation/connector
+  activations to their workspace generation, waiting for actual child exits.
+- Refuse unknown official-client bytes and forged adapter receipts; recover
+  interrupted ASAR publication. Deliver the admission-first guest launcher with
+  the adapter in the APK.
+- Build versionCode37 qualification candidates from explicit, inventoried native
+  and toolchain inputs with APK content, source-closure and signing checks.
+- Add concurrency and failure regressions to CI, an identity-bound read-only
+  device baseline, and measurable daily-use/system-preservation gates.
+- Prioritize dependable sessions, reproducible installation and safe client
+  updates. Fresh installation and extended device qualification remain pending.
+
 ## 2026-09-11 — Showcase graphics recovery
 
 - Preserve the static capture and disable unavailable 3D controls after graphics initialization or restoration failures.

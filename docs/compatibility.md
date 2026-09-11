@@ -45,4 +45,9 @@ A foreground service does not exempt its Linux subprocesses from this policy. Cr
 
 ## What unlocks a beta
 
-A beta needs a reproducible installation on a clean device, tested update and recovery flows, and measured behavior through concurrent work, folding, and background use. Follow the [roadmap](roadmap.md) for the acceptance criteria.
+A beta first needs dependable sessions: two independent conversations, ten-minute
+background intervals, extended work, repeatable recovery and keyboard/focus.
+Then it needs a reproducible installation on a clean device and qualified update
+flows. The [daily-use matrix](daily-use-qualification.md) records the acceptance
+criteria and the [roadmap](roadmap.md) sets their order. An APK built from declared
+inputs remains a qualification candidate until those device gates pass.

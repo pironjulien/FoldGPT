@@ -8,15 +8,15 @@ android {
         applicationId 'app.foldgpt'
         minSdk 30
         targetSdk 37
-        versionCode 36
+        versionCode 37
         versionName '0.2.0-dev'
         testInstrumentationRunner 'app.foldgpt.recovery.HardCrashInstrumentation'
         ndk { abiFilters 'arm64-v8a' }
     }
     compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
     packaging { jniLibs { useLegacyPackaging true } }
-    sourceSets.main.jniLibs.srcDirs = ['../native/runtime']
-    sourceSets.debug.jniLibs.srcDirs = ['../native/debug']
+    sourceSets.main.jniLibs.srcDirs = [providers.gradleProperty('foldgptRuntimeJni').getOrElse('../native/runtime')]
+    sourceSets.debug.jniLibs.srcDirs = [providers.gradleProperty('foldgptDebugJni').getOrElse('../native/debug')]
     externalNativeBuild { cmake { path '../install-native/CMakeLists.txt'; version '3.22.1' } }
     buildTypes { debug { debuggable true } }
 }
@@ -85,7 +85,7 @@ def verifyExecutorPackaging = tasks.register('verifyExecutorPackaging') {
     inputs.property('hasExecutorJni', hasJni)
     doLast {
         if (!hasAssets || !hasJni) {
-            throw new GradleException('FoldGPT APK/AAB packaging requires the reviewed native executor. Use tools/runtime/build-production-candidate.py --candidate <name> --package <reviewed-package>, or supply both -PfoldgptExecutorAssets and -PfoldgptExecutorJni. An incomplete update would break project access (EACCES).')
+            throw new GradleException('FoldGPT APK/AAB packaging requires the reviewed native executor. Use tools/runtime/build-production-candidate.py build --help, or supply both -PfoldgptExecutorAssets and -PfoldgptExecutorJni. An incomplete update would break project access (EACCES).')
         }
     }
 }
@@ -124,6 +124,7 @@ def syncLocalToolsAssets = tasks.register('syncFoldgptToolsAssets', NativeFilesR
     from(rootProject.file('../tools/runtime/foldgpt_tools.py')) { into 'foldgpt-tools' }
     from(rootProject.file('../tools/runtime/foldgpt-workspace-provider.cjs')) { into 'foldgpt-tools' }
     from(rootProject.file('../tools/runtime/install-workspace-provider.py')) { into 'foldgpt-tools' }
+    from(rootProject.file('../runtime/guest/foldgpt-session.sh')) { into 'foldgpt-tools' }
     from(rootProject.file('../tools/runtime')) {
         include 'workspace-node-check.cjs', 'workspace-python-check.py', 'workspace-render-check.py'
         into 'foldgpt-tools'
@@ -186,7 +187,7 @@ androidComponents.onVariants(androidComponents.selector().withBuildType('debug')
 }
 // An explicit local staging directory from the authenticated Android CPython
 // recipe. APK signature covers the embedded libraries and standard library.
-android.sourceSets.debug.assets.srcDir(rootProject.file('../android/native/python-debug-assets'))
+android.sourceSets.debug.assets.srcDir(file(providers.gradleProperty('foldgptDebugAssets').getOrElse('../native/python-debug-assets')))
 
 def managedProcessProbeAssets = layout.buildDirectory.dir('generated/managedProcessProbeAssets')
 def syncManagedProcessProbeAssets = tasks.register('syncManagedProcessProbeAssets', NativeFilesRpcAssets) {
@@ -293,7 +294,7 @@ androidComponents.onVariants(androidComponents.selector().withBuildType('debug')
 // production merely because it was left in the runtime build directory.
 tasks.register('verifyRuntimeLibraries') {
     doLast {
-        def runtime = file('../native/runtime')
+        def runtime = file(providers.gradleProperty('foldgptRuntimeJni').getOrElse('../native/runtime'))
         def allowed = ['libproot.so', 'libproot-loader.so', 'libproot-loader32.so',
                        'libtalloc.so', 'libandroid-shmem.so']
             .collect { 'arm64-v8a/' + it }.toSet()

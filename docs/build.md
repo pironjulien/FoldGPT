@@ -1,5 +1,9 @@
 # Build and validate FoldGPT
 
+For an explicit, fingerprinted Android update candidate, follow
+[Build a qualification candidate](build-candidate.md). The current development
+priority is [stable daily use](daily-use-qualification.md), then fresh installation.
+
 `v0.2.0-alpha.1` is a **source preview for contributors**. You can inspect the
 Android host, run host regressions and work on the integration today. A complete
 APK additionally needs native libraries, a reviewed executor package and Linux
@@ -81,10 +85,16 @@ it remains release engineering work on the [roadmap](roadmap.md). Two concrete
 assembly gaps remain: the Python guest bundle now includes the native Codex
 launcher, while the Android inactive-integration v2 reader still uses its older
 exact file list; and the experimental audio bridge requires guest PulseAudio
-setup that the source bundle does not yet assemble. They need versioned format
+setup that the source bundle does not yet assemble. The guest launcher's mandatory
+client preflight also needs its adapter in the versioned fresh bundle; the update
+APK delivers that pair together. These need versioned format
 integration and package/device verification before a fresh-install APK release.
 
 ## Compile or package
+
+The maintained candidate builder accepts all native/toolchain inputs explicitly,
+checks their inventories and signing identity, and runs app/transport tests before
+exposing an APK. Use the [candidate recipe](build-candidate.md) for that path.
 
 After the native runtime inputs have been prepared, Android source checks use the
 normal Gradle tasks from `android/`, for example:

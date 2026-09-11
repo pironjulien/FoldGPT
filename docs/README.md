@@ -1,5 +1,8 @@
 # Explore FoldGPT
 
+Current priority: [daily-use qualification](daily-use-qualification.md),
+[candidate builds](build-candidate.md), then safe official-client updates.
+
 FoldGPT brings a desktop ChatGPT and Codex workspace to the inner screen of a Galaxy Z Fold. Start with the product, then explore how the Android host makes it possible.
 
 Visit the [FoldGPT showcase on julienpiron.fr](https://julienpiron.fr/foldgpt/) for the interactive handset, authentic development-device captures, and a visual explanation of the architecture.

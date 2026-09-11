@@ -1,5 +1,10 @@
 #!/bin/bash
 set -euo pipefail
+# Admission is read-only and precedes DBus, runtime directories, AGENTS and
+# integration. An unknown client must not start or alter the user's context.
+workspace_adapter_args=(--asar /usr/lib/chatgpt/resources/app.asar
+    --state /usr/local/share/foldgpt/workspace-runtime/client-backup)
+python3 -B /usr/local/lib/foldgpt/install-workspace-provider.py --check "${workspace_adapter_args[@]}"
 if [[ -z "${DBUS_SESSION_BUS_ADDRESS:-}" ]]; then
     exec dbus-run-session -- "$0"
 fi
@@ -21,8 +26,7 @@ python3 -B /usr/local/lib/foldgpt/foldgpt_agent_context.py "${context_args[@]}"
 # the original ASAR remains in the provider's backup directory.
 if [[ -f /usr/local/share/foldgpt/workspace-runtime/provider.json ]]; then
     python3 -B /usr/local/lib/foldgpt/install-workspace-provider.py \
-        --asar /usr/lib/chatgpt/resources/app.asar \
-        --state /usr/local/share/foldgpt/workspace-runtime/client-backup
+        "${workspace_adapter_args[@]}"
     export FOLDGPT_WORKSPACE_PROVIDER=1
 fi
 timeout 20s python3 /usr/local/lib/foldgpt/foldgpt_keyring.py
@@ -53,7 +57,13 @@ ime_pid=$!
 # Starting the application alone leaves these X11 requests unhandled.
 xfwm4 > "$HOME/.local/state/foldgpt-wm.log" 2>&1 &
 wm_pid=$!
-trap 'kill "$ime_pid" "$wm_pid" 2>/dev/null || true' EXIT
+# Start user-space PulseAudio server for native microphone and speaker bridging
+export PULSE_SERVER=127.0.0.1:4713
+if [[ -f /usr/local/share/foldgpt/pulseaudio.pa ]]; then
+    pulseaudio -k 2>/dev/null || true
+    pulseaudio -n -F /usr/local/share/foldgpt/pulseaudio.pa --daemonize=true || true
+fi
+trap 'kill "$ime_pid" "$wm_pid" 2>/dev/null || true; pulseaudio -k 2>/dev/null || true' EXIT
 chatgpt --ozone-platform=x11 --force-device-scale-factor="${FOLDGPT_SCALE:-1}" --start-maximized --remote-debugging-address=127.0.0.1 --remote-debugging-port="$FOLDGPT_CDP_PORT" &
 client_pid=$!
 # Ask the window manager for fullscreen using the application's actual window ID.
