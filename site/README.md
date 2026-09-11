@@ -11,9 +11,9 @@ The mirror follows the portfolio's FoldGPT source, including the julienpiron.fr 
 - `scene.js`: WebGL handset and particle interaction, including folding, rotation, dispersion, and reassembly.
 - `app.js`: gallery and accessible interface controls.
 - `locale.js`: early automatic language routing: French when it is the browser's preferred language, English otherwise, without a visible selector, cookies or geolocation.
-- `assets/`: the canonical application icon, three reviewed historical device captures, and the banner export for social previews. Read [media notices](assets/MEDIA-NOTICES.md) before reusing them.
+- `assets/`: the canonical application icon, three reviewed historical device captures, OpenAI's official Remote preview, and the banner export for social previews. Read [media notices](assets/MEDIA-NOTICES.md) before reusing them.
 
-The handset is a 3D visualization using an authentic capture as its screen texture. Gallery screenshots are historical evidence, not a live remote session, video recording, or claim that every workflow is qualified.
+The handset is a 3D visualization using an authentic Fold capture on the inner display and OpenAI's official Remote illustration on the cover display. The Remote visual is not an Android device capture or evidence of a live connection on the Fold. Gallery screenshots are historical evidence, not a live remote session, video recording, or claim that every workflow is qualified.
 
 ## Portfolio integration
 

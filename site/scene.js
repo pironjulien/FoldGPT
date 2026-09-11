@@ -45,6 +45,7 @@ function startScene(gl, canvas) {
   const pauseButton = document.querySelector('[data-scene-action="pause"]');
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
   const TAU = Math.PI * 2;
+  const FOLD_ANGLE = Math.PI / 2;
   const FOV = 35 * Math.PI / 180;
   const W = 2.13;
   const H = 1.63;
@@ -59,11 +60,12 @@ function startScene(gl, canvas) {
     pointerX: 0, pointerY: 0, pointerActive: 0, pointerTarget: 0,
     pointerDown: false, pointerId: null, previousX: 0, previousY: 0, travel: 0,
     paused: reducedMotion.matches, visible: true, lost: false, lastTime: 0,
-    request: 0, time: 0, scatter: 0, screenLoaded: false, iconLoaded: false,
+    request: 0, time: 0, scatter: 0, screenLoaded: false, coverLoaded: false,
     scroll: 0, scrollTarget: 0, explicitFold: false,
   };
   const rotation = new Float32Array(3);
   const projection = new Float32Array(16);
+  const coverScale = new Float32Array([1, 1]);
   const transformed = new Float32Array(3);
   const trig = new Float32Array(10);
 
@@ -115,7 +117,7 @@ function startScene(gl, canvas) {
     for (let i = 0; i < outline.length; i++) {
       const a = outline[i];
       const b = outline[(i + 1) % outline.length];
-      add(cx, cy); add(...a); add(...b);
+      add(cx, cy); add(...(n > 0 ? a : b)); add(...(n > 0 ? b : a));
     }
   }
   function shell(x0, x1, side) {
@@ -142,14 +144,45 @@ function startScene(gl, canvas) {
     }
   }
   function disc(x, y, z, radius, material, side) {
+    const n = z >= 0 ? 1 : -1;
     for (let i = 0; i < 40; i++) {
-      const a = i / 40 * TAU;
-      const b = (i + 1) / 40 * TAU;
-      vertex(x, y, z, 0, 0, -1, .5, .5, material, side);
-      vertex(x + Math.cos(a) * radius, y + Math.sin(a) * radius, z, 0, 0, -1, 0, 0, material, side);
-      vertex(x + Math.cos(b) * radius, y + Math.sin(b) * radius, z, 0, 0, -1, 1, 1, material, side);
-      point(x + Math.cos(a) * radius, y + Math.sin(a) * radius, z - .002, side, 0, 0, 0, .75);
+      const a = n * i / 40 * TAU;
+      const b = n * (i + 1) / 40 * TAU;
+      vertex(x, y, z, 0, 0, n, .5, .5, material, side);
+      vertex(x + Math.cos(a) * radius, y + Math.sin(a) * radius, z, 0, 0, n, 0, 0, material, side);
+      vertex(x + Math.cos(b) * radius, y + Math.sin(b) * radius, z, 0, 0, n, 1, 1, material, side);
+      point(x + Math.cos(a) * radius, y + Math.sin(a) * radius, z + n * .002, side, 0, 0, 0, .75);
     }
+  }
+  function walls(outline, z0, z1, material, side, center = null) {
+    const low = Math.min(z0, z1), high = Math.max(z0, z1);
+    for (let i = 0; i < outline.length; i++) {
+      const a = outline[i], b = outline[(i + 1) % outline.length];
+      const dx = b[0] - a[0], dy = b[1] - a[1];
+      const distance = Math.hypot(dx, dy);
+      const emit = (p, z) => {
+        const nx = center ? p[0] - center[0] : dy;
+        const ny = center ? p[1] - center[1] : -dx;
+        const length = center ? Math.hypot(nx, ny) : distance;
+        vertex(p[0], p[1], z, nx / length, ny / length, 0, 0, 0, material, side);
+      };
+      // The outline is counterclockwise; these quads face away from its interior.
+      emit(a, low); emit(b, low); emit(b, high);
+      emit(a, low); emit(b, high); emit(a, high);
+    }
+  }
+  function raisedFace(x0, x1, y0, y1, baseZ, faceZ, radius, material, side) {
+    face(x0, x1, y0, y1, faceZ, radius, material, side, 'local');
+    walls(roundedOutline(x0, x1, y0, y1, radius), baseZ, faceZ, material, side);
+  }
+  function raisedDisc(x, y, baseZ, faceZ, radius, material, side) {
+    disc(x, y, faceZ, radius, material, side);
+    const outline = [];
+    for (let i = 0; i < 40; i++) {
+      const angle = i / 40 * TAU;
+      outline.push([x + Math.cos(angle) * radius, y + Math.sin(angle) * radius]);
+    }
+    walls(outline, baseZ, faceZ, material, side, [x, y]);
   }
 
   for (const side of [-1, 1]) {
@@ -185,18 +218,21 @@ function startScene(gl, canvas) {
       }
     }
   }
-  // Triple rear camera assembly and the external cover glass are deliberately
-  // visible on the reverse, instead of drawing a second invented desktop UI.
-  face(-1.98, -1.59, -.16, 1.43, -.097, .185, 1, -1, 'local');
-  for (const y of [1.13, .64, .15]) {
-    disc(-1.785, y, -.135, .151, 1, -1);
-    disc(-1.785, y, -.143, .117, 3, -1);
-    disc(-1.785, y, -.149, .067, 4, -1);
-    disc(-1.805, y + .026, -.151, .021, 5, -1);
+  // Galaxy Z Fold8: two rear cameras on the left when viewed from behind;
+  // the cover display is on the right. Local X reverses when viewing -Z.
+  // Reference: samsung.com/fr/smartphones/galaxy-z-fold8/ (September 2026).
+  // Connect the island to the rear shell and each lens tier to the tier below it.
+  raisedFace(1.59, 1.98, .55, 1.43, -.085, -.097, .185, 1, 1);
+  for (const y of [1.19, .80]) {
+    raisedDisc(1.785, y, -.097, -.135, .151, 1, 1);
+    raisedDisc(1.785, y, -.135, -.143, .117, 3, 1);
+    raisedDisc(1.785, y, -.143, -.149, .067, 4, 1);
+    disc(1.805, y + .026, -.151, .021, 5, 1);
   }
-  disc(-1.38, 1.10, -.102, .036, 5, -1);
-  face(.07, W - .07, -H + .07, H - .07, -.095, .115, 3, 1, 'local');
-  if (canvas.dataset.sceneIcon) face(.73, 1.39, -.33, .33, -.099, .125, 7, 1, 'local');
+  disc(1.785, .60, -.102, .026, 5, 1);
+  face(-W + .07, -.07, -H + .07, H - .07, -.095, .115, 7, -1, 'local');
+  // The external selfie camera sits above the native Android interface.
+  disc(-W / 2, H - .16, -.099, .035, 3, -1);
   for (let y = -H + .12; y <= H - .12; y += .018) {
     point(0, y, -.10, 0, 0, 0, 0, .08);
   }
@@ -218,12 +254,13 @@ function startScene(gl, canvas) {
     vec3 turnX(vec3 p, float a) { float c=cos(a),s=sin(a); return vec3(p.x,c*p.y-s*p.z,s*p.y+c*p.z); }
     vec3 turnZ(vec3 p, float a) { float c=cos(a),s=sin(a); return vec3(c*p.x-s*p.y,s*p.x+c*p.y,p.z); }
     vec3 orient(vec3 p, float side) {
-      p=turnY(p,-side*uFold*1.5584);
+      p=turnY(p,-side*uFold*${FOLD_ANGLE});
       return turnZ(turnX(turnY(p,uRotation.y),uRotation.x),uRotation.z);
     }
     vec3 transform(vec3 p, float side) {
-      p=turnY(p,-side*uFold*1.5584);
-      p.x+=side*.094*sin(uFold*1.5584);
+      p=turnY(p,-side*uFold*${FOLD_ANGLE});
+      p.x+=side*.094*sin(uFold*${FOLD_ANGLE});
+      p.z-=${W * .5}*sin(uFold*${FOLD_ANGLE});
       return turnZ(turnX(turnY(p,uRotation.y),uRotation.x),uRotation.z);
     }
   `;
@@ -245,8 +282,9 @@ function startScene(gl, canvas) {
   const meshFS = `
     precision mediump float;
     varying mediump vec3 vNormal; varying mediump vec3 vWorld; varying mediump vec2 vUV; varying mediump float vMaterial; varying mediump vec2 vScreen;
-    uniform sampler2D uScreen; uniform sampler2D uIcon;
-    uniform float uScreenLoaded; uniform float uIconLoaded; uniform float uAssembled;
+    uniform sampler2D uScreen; uniform sampler2D uCover;
+    uniform float uScreenLoaded; uniform float uCoverLoaded; uniform float uAssembled;
+    uniform vec2 uCoverScale;
     uniform mediump float uCamera; uniform vec3 uPointer; uniform float uAspect;
     void main() {
       vec3 n=normalize(vNormal), light=normalize(vec3(-.5,.8,1.));
@@ -254,9 +292,9 @@ function startScene(gl, canvas) {
       float diffuse=max(dot(n,light),0.);
       float rim=pow(1.-abs(dot(n,view)),3.);
       float spec=pow(max(dot(n,normalize(light+view)),0.),42.);
-      vec3 color=vec3(.070,.078,.092)*(.65+diffuse*.7)+vec3(.78,.71,.56)*spec*.8+rim*vec3(.23,.24,.25);
+      vec3 color=vec3(.055,.061,.072)*(.7+diffuse*.5)+vec3(.72,.75,.79)*spec*.16+rim*vec3(.10,.11,.12);
       float alpha=uAssembled;
-      if(vMaterial>.5 && vMaterial<1.5) color=vec3(.19,.20,.21)*(.45+diffuse*.7)+spec*vec3(.93,.84,.66)+rim*.12;
+      if(vMaterial>.5 && vMaterial<1.5) color=vec3(.105,.115,.13)*(.55+diffuse*.5)+spec*vec3(.72,.75,.79)*.26+rim*.08;
       if(vMaterial>1.5 && vMaterial<2.5) {
         vec3 capture=texture2D(uScreen,clamp(vUV,0.,1.)).rgb;
         color=mix(vec3(.066,.075,.084),capture,uScreenLoaded);
@@ -266,8 +304,13 @@ function startScene(gl, canvas) {
       if(vMaterial>3.5 && vMaterial<4.5) color=vec3(.025,.055,.078)+spec*.23+rim*.1;
       if(vMaterial>4.5 && vMaterial<5.5) color=vec3(.61,.68,.69)*(.5+diffuse*.5);
       if(vMaterial>6.5) {
-        vec4 icon=texture2D(uIcon,vec2(1.-vUV.x,vUV.y));
-        color=mix(vec3(.025,.03,.04),icon.rgb,uIconLoaded*icon.a);
+        // Reverse U for a readable outward-facing screen and contain the
+        // reference image without further cropping or stretching its interface.
+        vec2 uv=(vec2(1.-vUV.x,vUV.y)-.5)/uCoverScale+.5;
+        float inside=step(0.,uv.x)*step(uv.x,1.)*step(0.,uv.y)*step(uv.y,1.);
+        vec3 cover=texture2D(uCover,clamp(uv,0.,1.)).rgb;
+        vec3 margin=texture2D(uCover,vec2(0.,.5)).rgb;
+        color=mix(vec3(.025,.03,.04),mix(margin,cover,inside),uCoverLoaded);
       }
       float d=length((vScreen-uPointer.xy)*vec2(uAspect,1.));
       alpha*=1.-uPointer.z*(1.-smoothstep(.045,.22,d))*.98;
@@ -337,7 +380,7 @@ function startScene(gl, canvas) {
     return {
       mesh: program(meshVS, meshFS), points: program(pointVS, pointFS),
       meshBuffer: buffer(meshData, gl.STATIC_DRAW), positionBuffer: buffer(positions, gl.DYNAMIC_DRAW),
-      attributeBuffer: buffer(attributes, gl.STATIC_DRAW), screen: texture(), icon: texture(),
+      attributeBuffer: buffer(attributes, gl.STATIC_DRAW), screen: texture(), cover: texture(),
     };
   }
   let gpu;
@@ -353,11 +396,16 @@ function startScene(gl, canvas) {
     const picture = new Image(); picture.decoding = 'async';
     picture.onload = () => {
       if (state.lost) return;
-      // Rasterize SVG icons and fit large captures within the GPU's texture
-      // budget. This also avoids SVG intrinsic-size differences across browsers.
+      // Fit reviewed imagery within the GPU's texture budget.
       const textureLimit = Math.min(2048, gl.getParameter(gl.MAX_TEXTURE_SIZE));
-      const width = name === 'icon' ? 256 : picture.naturalWidth;
-      const height = name === 'icon' ? 256 : picture.naturalHeight;
+      const width = picture.naturalWidth;
+      const height = picture.naturalHeight;
+      if (name === 'cover') {
+        const screenAspect = (W - .14) / (2 * H - .14);
+        const captureAspect = width / height;
+        coverScale[0] = Math.min(1, captureAspect / screenAspect);
+        coverScale[1] = Math.min(1, screenAspect / captureAspect);
+      }
       const scale = Math.min(1, textureLimit / Math.max(width, height, 1));
       const raster = document.createElement('canvas');
       raster.width = Math.max(1, Math.round(width * scale));
@@ -365,18 +413,18 @@ function startScene(gl, canvas) {
       raster.getContext('2d').drawImage(picture, 0, 0, raster.width, raster.height);
       gl.bindTexture(gl.TEXTURE_2D, gpu[name]); gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
       gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, raster);
-      state[name === 'screen' ? 'screenLoaded' : 'iconLoaded'] = true;
+      state[name + 'Loaded'] = true;
       draw();
     };
     picture.onerror = () => {
-      if (name === 'screen') announce('Capture indisponible dans la scène. Les médias documentés restent accessibles plus bas.', true);
+      announce('Capture indisponible dans la scène. Les médias documentés restent accessibles plus bas.', true);
     };
     picture.src = url;
   }
 
   function transformPoint(x, y, z, side, out) {
     let c = side === 0 ? 1 : trig[0], s = -side * trig[1];
-    let a = c * x + s * z, b = -s * x + c * z; x = a + side * .094 * trig[1]; z = b;
+    let a = c * x + s * z, b = -s * x + c * z; x = a + side * .094 * trig[1]; z = b - W * .5 * trig[1];
     c = trig[2]; s = trig[3];
     a = c * x + s * z; b = -s * x + c * z; x = a; z = b;
     c = trig[4]; s = trig[5];
@@ -386,9 +434,9 @@ function startScene(gl, canvas) {
   }
   function updateRotation() {
     rotation[0] = state.pitch;
-    rotation[1] = state.yaw - state.fold * 1.07 + state.scroll * .18;
+    rotation[1] = state.yaw + state.fold * Math.PI / 2 + state.scroll * .18;
     rotation[2] = -.035 + state.scroll * .04;
-    trig[0] = Math.cos(state.fold * 1.5584); trig[1] = Math.sin(state.fold * 1.5584);
+    trig[0] = Math.cos(state.fold * FOLD_ANGLE); trig[1] = Math.sin(state.fold * FOLD_ANGLE);
     trig[2] = Math.cos(rotation[1]); trig[3] = Math.sin(rotation[1]);
     trig[4] = Math.cos(rotation[0]); trig[5] = Math.sin(rotation[0]);
     trig[6] = Math.cos(rotation[2]); trig[7] = Math.sin(rotation[2]);
@@ -468,7 +516,7 @@ function startScene(gl, canvas) {
     if (state.lost || !gpu || state.width < 2) return;
     gl.viewport(0, 0, canvas.width, canvas.height);
     gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-    gl.enable(gl.DEPTH_TEST); gl.depthFunc(gl.LEQUAL); gl.disable(gl.CULL_FACE);
+    gl.enable(gl.DEPTH_TEST); gl.depthFunc(gl.LEQUAL); gl.enable(gl.CULL_FACE); gl.cullFace(gl.BACK);
     gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
     gl.depthMask(true);
     common(gpu.mesh);
@@ -477,8 +525,8 @@ function startScene(gl, canvas) {
     gl.uniform1f(u.uAssembled, 1 - clamp(state.scatter * 1.85, 0, 1));
     gl.uniform3f(u.uPointer, state.pointerX, state.pointerY, state.paused ? 0 : state.pointerActive);
     gl.uniform1f(u.uAspect, state.aspect);
-    gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, gpu.icon); gl.uniform1i(u.uIcon, 1);
-    gl.uniform1f(u.uIconLoaded, Number(state.iconLoaded));
+    gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, gpu.cover); gl.uniform1i(u.uCover, 1);
+    gl.uniform1f(u.uCoverLoaded, Number(state.coverLoaded)); gl.uniform2fv(u.uCoverScale, coverScale);
     gl.bindBuffer(gl.ARRAY_BUFFER, gpu.meshBuffer);
     attribute(gpu.mesh, 'aPosition', 3, 40, 0); attribute(gpu.mesh, 'aNormal', 3, 40, 12);
     attribute(gpu.mesh, 'aUV', 2, 40, 24); attribute(gpu.mesh, 'aMaterial', 1, 40, 32); attribute(gpu.mesh, 'aSide', 1, 40, 36);
@@ -653,14 +701,14 @@ function startScene(gl, canvas) {
   });
   canvas.addEventListener('webglcontextrestored', () => {
     state.lost = false; gpu = createGPU();
-    state.screenLoaded = false; state.iconLoaded = false;
-    loadTexture(canvas.dataset.sceneScreen, 'screen'); loadTexture(canvas.dataset.sceneIcon, 'icon');
+    state.screenLoaded = false; state.coverLoaded = false;
+    loadTexture(canvas.dataset.sceneScreen, 'screen'); loadTexture(canvas.dataset.sceneCover, 'cover');
     resize(); snap(); draw(); wake(); stage.dataset.ready = 'true'; announce('Scène restaurée.', false);
   });
 
   snap(); resize(); setPaused(state.paused);
   if (!state.paused) { assembleEntrance(); draw(); }
-  loadTexture(canvas.dataset.sceneScreen, 'screen'); loadTexture(canvas.dataset.sceneIcon, 'icon');
+  loadTexture(canvas.dataset.sceneScreen, 'screen'); loadTexture(canvas.dataset.sceneCover, 'cover');
   canvas.dataset.sceneReady = 'true';
   stage.dataset.ready = 'true';
   canvas.dataset.particleCount = String(count);

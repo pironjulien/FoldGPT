@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-09-11 — Fold8 handset and Remote cover display
+
+- Correct the showcase model to Samsung's standard Galaxy Z Fold8 rear layout, with two cameras behind the right half of the inner display and the cover display behind the other half.
+- Fix outward surface orientation and centered folding; add solid sidewalls to the camera island and lens rings.
+- Show OpenAI's official Remote preview on the cover display, with readable text and preserved image proportions; document its provenance separately from the authentic Fold captures.
+
 ## 2026-09-11 — Repository maintenance
 
 - Remove superseded Termux/QEMU launchers, one-off live-CDP experiments, the old launcher app and outdated publication drafts.
