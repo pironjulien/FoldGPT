@@ -10,13 +10,14 @@ The mirror follows the portfolio's FoldGPT source, including the julienpiron.fr 
 - `style.css`: graphite/gold visual identity, responsive layout, and accessibility styles.
 - `scene.js`: WebGL handset and particle interaction, including folding, rotation, dispersion, and reassembly.
 - `app.js`: gallery and accessible interface controls.
+- `locale.js`: early automatic language routing: French when it is the browser's preferred language, English otherwise, without a visible selector, cookies or geolocation.
 - `assets/`: the canonical application icon, three reviewed historical device captures, and the banner export for social previews. Read [media notices](assets/MEDIA-NOTICES.md) before reusing them.
 
 The handset is a 3D visualization using an authentic capture as its screen texture. Gallery screenshots are historical evidence, not a live remote session, video recording, or claim that every workflow is qualified.
 
 ## Portfolio integration
 
-The page is served under `/foldgpt/`. Absolute asset paths deliberately target that route. The portfolio supplies `/js/locale.js` and its shared fonts under `/fonts/`; its localization process produces the English route at `/en/foldgpt/`.
+The page is served under `/foldgpt/`. Absolute asset paths deliberately target that route. The portfolio supplies `/js/locale.js` and its shared fonts under `/fonts/`; its localization process produces the English route at `/en/foldgpt/`. Both routes select the visitor's preferred browser language automatically and preserve query strings and section links. English is the fallback and the `x-default` search language.
 
 To integrate changes, place these page files at the portfolio's `foldgpt/` route and run the portfolio's own localization, validation, and deployment workflow. This source mirror does not contain portfolio credentials, a separate hosting project, or an independent deployment pipeline. The portfolio remains the deployment source of truth.
 

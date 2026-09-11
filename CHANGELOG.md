@@ -6,6 +6,8 @@ Notable changes to FoldGPT are recorded here. Source preview versions describe t
 
 ### Showcase and documentation
 
+- Select the showcase language automatically from the browser's preferred language: French for French preferences, English otherwise, with no visible selector.
+
 - Move the showcase into the Julien Piron portfolio at `https://julienpiron.fr/foldgpt/` and publish its static source under `site/`.
 - Use the application's exact vector icon and graphite/gold identity in the website and repository artwork.
 - Replace simulated demonstrations with historical device captures and explicit media provenance. The interactive handset remains clearly identified as a WebGL visualization.
