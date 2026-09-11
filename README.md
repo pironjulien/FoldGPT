@@ -99,7 +99,7 @@ Read [contributing](CONTRIBUTING.md) before a change and use [private vulnerabil
 
 ## Credits & licensing
 
-Created by **[Julien Piron](https://github.com/pironjulien)**. Built on work from the Termux:X11, PRoot, Debian, Mesa, and Android communities. Upstream code retains its own license and notices.
+A project by **[julienpiron.fr](https://julienpiron.fr/)**. Built on work from the Termux:X11, PRoot, Debian, Mesa, and Android communities. Upstream code retains its own license and notices.
 
 FoldGPT’s host and integration code are **GPL-3.0-or-later**. The ChatGPT client is a separate proprietary dependency, obtained from OpenAI. FoldGPT is an independent interoperability project and is not affiliated with, endorsed by, or distributed by OpenAI or Samsung. See [LICENSE](LICENSE), [LEGAL](LEGAL.md), and [third-party notices](THIRD_PARTY_NOTICES.md).
 

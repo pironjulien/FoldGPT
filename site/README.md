@@ -1,8 +1,8 @@
 # FoldGPT showcase
 
-The public product page lives at **[julienpiron.fr/foldgpt/](https://julienpiron.fr/foldgpt/)** as part of Julien Piron's portfolio. This directory mirrors that page's static source so contributors can inspect and improve it alongside FoldGPT.
+The public product page lives at **[julienpiron.fr/foldgpt/](https://julienpiron.fr/foldgpt/)** as part of the julienpiron.fr portfolio. This directory mirrors that page's static source so contributors can inspect and improve it alongside FoldGPT.
 
-Source snapshot: portfolio commit `08771fde096ce710afdd798b37d795a583e3a975`. The mirror removes a trailing empty line from `app.js`; executable content is unchanged.
+The mirror follows the portfolio's FoldGPT source, including the julienpiron.fr branding and social preview metadata. It removes a trailing empty line from `app.js`; executable content is unchanged.
 
 ## Contents
 
@@ -10,7 +10,7 @@ Source snapshot: portfolio commit `08771fde096ce710afdd798b37d795a583e3a975`. Th
 - `style.css`: graphite/gold visual identity, responsive layout, and accessibility styles.
 - `scene.js`: WebGL handset and particle interaction, including folding, rotation, dispersion, and reassembly.
 - `app.js`: gallery and accessible interface controls.
-- `assets/`: the canonical application icon and three reviewed historical device captures. Read [media notices](assets/MEDIA-NOTICES.md) before reusing them.
+- `assets/`: the canonical application icon, three reviewed historical device captures, and the banner export for social previews. Read [media notices](assets/MEDIA-NOTICES.md) before reusing them.
 
 The handset is a 3D visualization using an authentic capture as its screen texture. Gallery screenshots are historical evidence, not a live remote session, video recording, or claim that every workflow is qualified.
 

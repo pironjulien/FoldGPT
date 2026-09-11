@@ -11,6 +11,7 @@ Notable changes to FoldGPT are recorded here. Source preview versions describe t
 - Replace simulated demonstrations with historical device captures and explicit media provenance. The interactive handset remains clearly identified as a WebGL visualization.
 - Introduce a particle handset with rotation, fold controls, dispersion and reassembly, plus accessible controls and reduced-motion support.
 - Link the README and product documentation to the canonical portfolio page and its authentic capture gallery.
+- Align public credits with the julienpiron.fr brand and add the faithful banner export used for Open Graph and X link previews, with localized alternative text.
 
 ## [0.2.0-alpha.1] — 2026-09-11
 

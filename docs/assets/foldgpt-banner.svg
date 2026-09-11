@@ -39,7 +39,7 @@
       <circle cx="804" cy="331" r="2.2"/><circle cx="810" cy="151" r="2.2"/><circle cx="1174" cy="151" r="2.2"/><circle cx="1174" cy="331" r="2.2"/>
       <circle cx="781" cy="244" r="1.5" opacity=".25"/><circle cx="1205" cy="226" r="1.5" opacity=".25"/><circle cx="1168" cy="389" r="1.5" opacity=".4"/><circle cx="827" cy="391" r="1.5" opacity=".4"/>
     </g>
-    <text x="993" y="415" text-anchor="middle" fill="#8B8578" font-family="Arial,Helvetica,sans-serif" font-size="11" letter-spacing="2.4">OPEN SOURCE · BY JULIEN PIRON</text>
+    <text x="993" y="415" text-anchor="middle" fill="#8B8578" font-family="Arial,Helvetica,sans-serif" font-size="11" letter-spacing="2.4">OPEN SOURCE · BY JULIENPIRON.FR</text>
     <path d="M0 479.5H1280" stroke="#D7B56D" stroke-opacity=".12"/>
   </g>
 </svg>

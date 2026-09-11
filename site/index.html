@@ -12,6 +12,14 @@
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://julienpiron.fr/foldgpt/">
   <meta property="og:locale" content="fr_FR">
+  <meta property="og:image" content="https://julienpiron.fr/foldgpt/assets/foldgpt-social.png">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:width" content="1280">
+  <meta property="og:image:height" content="480">
+  <meta property="og:image:alt" content="FoldGPT : le bureau qui se déplie. Icône de l’application en graphite et or, une marque julienpiron.fr.">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://julienpiron.fr/foldgpt/assets/foldgpt-social.png">
+  <meta name="twitter:image:alt" content="FoldGPT : le bureau qui se déplie. Icône de l’application en graphite et or, une marque julienpiron.fr.">
   <link rel="icon" href="/foldgpt/assets/foldgpt-icon.svg" type="image/svg+xml">
   <link rel="preload" href="/fonts/GoogleSansFlex-Regular-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="/foldgpt/style.css">
@@ -28,7 +36,7 @@
 <body>
   <a class="skip-link" href="#main">Aller au contenu</a>
   <header class="site-header">
-    <a class="brand" href="#top" aria-label="FoldGPT, accueil"><img src="/foldgpt/assets/foldgpt-icon.svg" width="44" height="44" alt=""><span>FoldGPT<span class="brand-slash"> / </span><small>by Julien Piron</small></span></a>
+    <a class="brand" href="#top" aria-label="FoldGPT, accueil"><img src="/foldgpt/assets/foldgpt-icon.svg" width="44" height="44" alt=""><span>FoldGPT<span class="brand-slash"> / </span><small>by julienpiron.fr</small></span></a>
     <nav aria-label="Navigation principale"><a href="#captures">Captures réelles</a><a href="#architecture">Architecture</a><a href="#source">Code source</a></nav>
     <div class="header-end"><a class="parent-link" href="/">julienpiron.fr ↗</a><div class="language-nav" role="group" aria-label="Langue" data-language-nav><a href="/foldgpt/" lang="fr" hreflang="fr" aria-current="page">FR</a><a href="/en/foldgpt/" lang="en" hreflang="en">EN</a></div></div>
   </header>
@@ -87,11 +95,11 @@
     </section>
     <section class="section limits-section" id="etat">
       <div class="limits-heading"><p class="eyebrow">05 / EXPERIMENTAL, BY DESIGN</p><h2>Le code est ouvert.<br><span>Les limites aussi.</span></h2><p>La source alpha permet d’explorer l’intégration et de contribuer. La distribution d’une APK grand public demande encore du travail sur le packaging et la fiabilité.</p></div>
-      <div class="questions"><details><summary>Sans root. Et Knox ?<span aria-hidden="true">+</span></summary><p>Aucun root ni déverrouillage du bootloader n’est requis. Le téléphone de développement a été observé avec un bootloader verrouillé, un démarrage vérifié « green » et un bit Knox à 0. Samsung Pay n’a pas été testé séparément.</p></details><details><summary>Pourquoi une source alpha ?<span aria-hidden="true">+</span></summary><p>L’installation neuve et l’assemblage complet du runtime restent à qualifier. Le client propriétaire s’obtient séparément et l’adaptateur cible une version précise. La release actuelle ne contient pas d’APK grand public.</p></details><details><summary>Les sessions et les processus Android<span aria-hidden="true">+</span></summary><p>Android partage son budget de processus fantômes entre les processus surveillés. Créer plusieurs APK ne multiplie pas ce budget. Le nettoyage des processus, les conversations actives simultanées et les longues sessions en arrière-plan restent des axes de qualification.</p></details><details><summary>Est-ce une application OpenAI ou Samsung ?<span aria-hidden="true">+</span></summary><p>FoldGPT est un projet indépendant de Julien Piron. Il intègre le client obtenu auprès d’OpenAI, avec des adaptations de compatibilité. Il n’est ni affilié, ni approuvé, ni distribué par OpenAI ou Samsung.</p></details></div>
+      <div class="questions"><details><summary>Sans root. Et Knox ?<span aria-hidden="true">+</span></summary><p>Aucun root ni déverrouillage du bootloader n’est requis. Le téléphone de développement a été observé avec un bootloader verrouillé, un démarrage vérifié « green » et un bit Knox à 0. Samsung Pay n’a pas été testé séparément.</p></details><details><summary>Pourquoi une source alpha ?<span aria-hidden="true">+</span></summary><p>L’installation neuve et l’assemblage complet du runtime restent à qualifier. Le client propriétaire s’obtient séparément et l’adaptateur cible une version précise. La release actuelle ne contient pas d’APK grand public.</p></details><details><summary>Les sessions et les processus Android<span aria-hidden="true">+</span></summary><p>Android partage son budget de processus fantômes entre les processus surveillés. Créer plusieurs APK ne multiplie pas ce budget. Le nettoyage des processus, les conversations actives simultanées et les longues sessions en arrière-plan restent des axes de qualification.</p></details><details><summary>Est-ce une application OpenAI ou Samsung ?<span aria-hidden="true">+</span></summary><p>FoldGPT est un projet indépendant de julienpiron.fr. Il intègre le client obtenu auprès d’OpenAI, avec des adaptations de compatibilité. Il n’est ni affilié, ni approuvé, ni distribué par OpenAI ou Samsung.</p></details></div>
     </section>
     <section class="source-section" id="source"><div class="source-heading"><img src="/foldgpt/assets/foldgpt-icon.svg" width="72" height="72" alt="Icône officielle de l’application FoldGPT"><p class="eyebrow">06 / BUILD WHAT’S NEXT</p></div><h2>La prochaine étape<br><span>peut être la vôtre.</span></h2><p>Android, Linux, graphisme, packaging, accessibilité.<br>Un seul dépôt. Des idées, des issues, des pull requests.</p><div class="actions"><a class="button primary" href="https://github.com/pironjulien/FoldGPT">Ouvrir le dépôt GitHub ↗</a><a class="button secondary" href="https://github.com/pironjulien/FoldGPT/blob/main/CONTRIBUTING.md">Contribuer au projet</a></div><div class="source-links"><a href="https://github.com/pironjulien/FoldGPT/releases/tag/v0.2.0-alpha.1">v0.2.0-alpha.1 ↗</a><a href="https://github.com/pironjulien/FoldGPT/blob/main/docs/README.md">Documentation ↗</a><a href="https://github.com/pironjulien/FoldGPT/blob/main/docs/roadmap.md">Roadmap ↗</a><a href="https://github.com/pironjulien/FoldGPT/discussions">Discussions ↗</a></div></section>
   </main>
-  <footer><a class="brand" href="#top"><img src="/foldgpt/assets/foldgpt-icon.svg" width="36" height="36" alt=""><span>FoldGPT</span></a><span>Conçu par <a href="/">Julien Piron</a> · Hébergé sur julienpiron.fr</span><a href="https://github.com/pironjulien/FoldGPT/blob/main/LEGAL.md">GPL-3.0-or-later · Licences & crédits ↗</a></footer>
+  <footer><a class="brand" href="#top"><img src="/foldgpt/assets/foldgpt-icon.svg" width="36" height="36" alt=""><span>FoldGPT</span></a><span>Un projet <a href="/">julienpiron.fr</a> · Hébergé sur julienpiron.fr</span><a href="https://github.com/pironjulien/FoldGPT/blob/main/LEGAL.md">GPL-3.0-or-later · Licences & crédits ↗</a></footer>
   <dialog id="capture-dialog" aria-labelledby="dialog-title"><div class="dialog-toolbar"><h2 id="dialog-title">Capture FoldGPT anonymisée</h2><button type="button" id="close-dialog" aria-label="Fermer la capture">Fermer ×</button></div><img id="dialog-image" src="/foldgpt/assets/codex-desktop.png" width="2448" height="1848" alt="Capture FoldGPT anonymisée"></dialog>
 </body>
 </html>

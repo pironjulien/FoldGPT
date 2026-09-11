@@ -7,6 +7,7 @@ logs/
 !site/assets/codex-desktop.png
 !site/assets/android-keyboard.png
 !site/assets/workspace-runtime.png
+!site/assets/foldgpt-social.png
 __pycache__/
 *.pyc
 android/.gradle/
