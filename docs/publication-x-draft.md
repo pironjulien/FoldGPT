@@ -1,12 +1,14 @@
 # Brouillon X — 6 septembre 2026
 
+> **Brouillon historique, conservé pour référence.** Ce document n'est ni le texte du post finalement publié, ni une présentation actuelle de FoldGPT. Voir la [présentation produit](overview.md) et la [matrice de compatibilité](compatibility.md).
+
 Brouillon uniquement ; aucune publication effectuée.
 
 ## Aperçu publiable du prototype
 
 > FoldGPT : le client officiel ChatGPT/Codex tourne sur mon Fold sans root, en ARM64 avec GPU Adreno. Menus corrigés et navigation de base testée. 17 tests de commandes natives passent. Prototype : tâches protégées et installation autonome restent à terminer.
 
-Les preuves qualifient le téléphone testé : [foldgpt5](verification-gpu-renderpasses-2026-09-06.md)
+Les preuves qualifient le téléphone testé : `foldgpt5` (rapport GPU de développement non inclus dans ce dépôt)
 passe 24 cas pixels et le parcours des 20 paramètres ; le [navigateur intégré](../tools/browser/README.md)
 a réellement ouvert/lu Example Domain, cliqué vers IANA puis effectué le retour ;
 la [fixture RPC Android](../tools/executor/native-files-android-rpc.md) passe
@@ -32,8 +34,8 @@ Android en restant inactive ; la v3 ajoutant l’intégration GPU a également
 réussi ses deux appels sur le Fold après correction d’un conflit de permissions.
 La collecte indépendante retrouve les 345 entrées et les mêmes identités/hashes.
 L’APK `f6f5...` a produit ce rapport ; la collecte ultérieure sous `b47b...` a
-inspecté le même état conservé sans réexécuter la préparation. Les [preuves v3](install/inactive-native-integration.md)
-précisent les deux APK et leurs hashes complets.
+inspecté le même état conservé sans réexécuter la préparation. Le rapport v3
+d'intégration inactive, non inclus dans ce dépôt, précise les deux APK et leurs hashes complets.
 Aucun APK autonome ou exécuteur complet n’est annoncé.
 
 ## Conditions avant une annonce « APK prêt »
@@ -57,6 +59,6 @@ Aucun APK autonome ou exécuteur complet n’est annoncé.
   authentifié, l’inventaire exact des composants, leurs sources correspondantes
   et les notices requises, sans client propriétaire ni données de compte inclus.
 
-Ces critères reprennent le [contrat d’acceptation](install/end-to-end-architecture.md#acceptance-and-publication-evidence).
+Les critères publics actuels sont regroupés dans la [feuille de route](roadmap.md).
 Les tests actuels n’établissent ni 120 FPS, ni fiabilité universelle, ni sécurité
 de production, ni garantie de compatibilité Knox/paiement/garantie constructeur.

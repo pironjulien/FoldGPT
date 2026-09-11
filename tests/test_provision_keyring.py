@@ -39,6 +39,14 @@ class ProvisionTests(unittest.TestCase):
             with self.subTest(token=token), self.assertRaises(ValueError):
                 provision.staging_command(token)
 
+    def test_secret_source_must_be_selected_explicitly(self):
+        with patch.object(provision.sys, "argv", ["provision", "--serial", "test-phone"]), \
+             patch.object(provision.subprocess, "run") as run, \
+             contextlib.redirect_stderr(io.StringIO()), self.assertRaises(SystemExit) as error:
+            provision.main()
+        self.assertEqual(error.exception.code, 2)
+        run.assert_not_called()
+
     def test_secret_only_goes_to_stdin_and_device_is_explicit(self):
         with tempfile.TemporaryDirectory() as temporary:
             source = Path(temporary) / "test-only-password.txt"

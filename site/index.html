@@ -1,87 +1,34 @@
 <!doctype html>
 <html lang="fr">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="FoldGPT — un poste de travail IA qui se replie avec vous.">
-  <title>FoldGPT — Intelligence, en mouvement</title>
-  <link rel="stylesheet" href="styles.css">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#090b0f">
+<meta name="description" content="ChatGPT Desktop et Codex sur Galaxy Z Fold. Un espace de travail Linux ARM64 local sur Android, sans root. Découvrez le projet open source FoldGPT.">
+<meta property="og:title" content="FoldGPT — Dépliez votre espace de travail."><meta property="og:description" content="ChatGPT Desktop. Codex. Vos fichiers et vos outils, sur votre Fold."><meta property="og:type" content="website">
+<title>FoldGPT — Dépliez votre espace de travail.</title><link rel="icon" href="favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="styles.css"><script src="app.js" defer></script>
 </head>
 <body>
-  <canvas id="particles" aria-hidden="true"></canvas>
-  <div class="noise" aria-hidden="true"></div>
-  <header class="topbar">
-    <a class="brand" href="#top" aria-label="FoldGPT, accueil"><span class="brand-mark">⌁</span><span>FOLD<span class="brand-accent">GPT</span></span></a>
-    <nav class="nav" aria-label="Navigation principale">
-      <a href="#features">Capacités</a>
-      <a href="#flow">Fonctionnement</a>
-      <a href="#github">Open source</a>
-    </nav>
-    <a class="nav-cta" href="#github">Voir le dépôt <span>↗</span></a>
-  </header>
-
-  <main id="top">
-    <section class="hero shell">
-      <div class="hero-copy">
-        <div class="eyebrow"><span class="pulse"></span> RUNTIME IA NATIF · ANDROID / LINUX</div>
-        <h1>L’intelligence<br><em>se plie</em> à vous.</h1>
-        <p class="hero-lede">FoldGPT transforme votre appareil pliable en espace de travail IA persistant. Une session, deux postures, zéro friction.</p>
-        <div class="hero-actions">
-          <a class="button button-primary" href="#github">Explorer le projet <span>→</span></a>
-          <a class="button button-ghost" href="#codex">Voir l’aperçu Codex <span>⌘</span></a>
-        </div>
-        <div class="hero-meta"><span><b class="dot-green"></b> Session locale</span><span>v0.2.0-dev</span><span>GPL-3.0</span></div>
-      </div>
-      <div class="hero-art" aria-label="Illustration d’un appareil FoldGPT ouvert">
-        <div class="orbit orbit-a"></div><div class="orbit orbit-b"></div>
-        <div class="fold-device">
-          <div class="device-half device-left"><div class="screen-glow"></div><div class="screen-grid"></div><span class="screen-label">FOCUS / 01</span><span class="screen-code">$ foldgpt —resume<br><i>ready_</i></span></div>
-          <div class="hinge"><span></span></div>
-          <div class="device-half device-right"><div class="screen-grid"></div><div class="chat-lines"><span></span><span></span><span></span><span></span></div><span class="screen-label">CONTEXT / 02</span><span class="screen-orb">✦</span></div>
-        </div>
-        <div class="floating-chip chip-top"><span class="chip-dot"></span> runtime actif</div>
-        <div class="floating-chip chip-bottom">latence <strong>12 ms</strong></div>
-      </div>
-    </section>
-
-    <section class="signal-bar shell" aria-label="Caractéristiques principales">
-      <div><strong>01</strong><span>Une session qui<br>survit au pli</span></div>
-      <div><strong>02</strong><span>Exécution locale<br>et réactive</span></div>
-      <div><strong>03</strong><span>Un écran pour<br>chaque intention</span></div>
-      <div class="signal-end">FOLD / THINK / SHIP <span>✦</span></div>
-    </section>
-
-    <section id="features" class="section shell">
-      <div class="section-intro"><div class="eyebrow">POURQUOI FOLDGPT</div><h2>Le contexte reste<br><em>avec vous.</em></h2><p>Conçu pour les moments où l’on passe du mobile au bureau sans perdre son fil.</p></div>
-      <div class="feature-grid">
-        <article class="feature-card feature-highlight"><div class="card-index">01 / 04</div><div class="feature-icon icon-stack">◫</div><h3>Mémoire de session</h3><p>Reprenez une conversation là où vous l’avez laissée. L’état reste vivant pendant les transitions.</p><a href="#flow">Comprendre le cycle <span>↗</span></a></article>
-        <article class="feature-card"><div class="card-index">02 / 04</div><div class="feature-icon">◎</div><h3>Runtime embarqué</h3><p>Un environnement Linux léger, lancé depuis Android, avec vos outils à portée de main.</p><div class="card-tag">LOCAL FIRST</div></article>
-        <article class="feature-card"><div class="card-index">03 / 04</div><div class="feature-icon">⌘</div><h3>Clavier, naturellement</h3><p>Le pont de saisie suit la posture et laisse vos raccourcis travailler sans détour.</p><div class="card-tag">INPUT BRIDGE</div></article>
-        <article class="feature-card"><div class="card-index">04 / 04</div><div class="feature-icon">↗</div><h3>Ouvert par défaut</h3><p>Scripts, documentation, instrumentation : chaque brique est lisible et améliorable.</p><div class="card-tag">MIT LICENSE</div></article>
-      </div>
-    </section>
-
-    <section id="flow" class="section flow-section shell">
-      <div class="section-intro"><div class="eyebrow">LE CYCLE FOLDGPT</div><h2>Du geste à<br><em>l’élan.</em></h2></div>
-      <div class="flow-track">
-        <div class="flow-line"></div>
-        <div class="flow-step"><div class="step-node">01</div><div><h3>Déplier</h3><p>Le runtime détecte la posture et prépare l’espace adapté.</p></div></div>
-        <div class="flow-step"><div class="step-node">02</div><div><h3>Reprendre</h3><p>Votre session, fenêtres et contexte reviennent au premier plan.</p></div></div>
-        <div class="flow-step"><div class="step-node">03</div><div><h3>Construire</h3><p>Discutez, codez, lancez. Le téléphone devient un vrai atelier.</p></div></div>
-      </div>
-    </section>
-
-    <section id="codex" class="section shell codex-section">
-      <div class="codex-copy"><div class="eyebrow"><span class="pulse pulse-violet"></span> APERÇU / DÉMO</div><h2>Un aperçu du<br><em>poste de pilotage.</em></h2><p>Cette fenêtre illustre l’intégration Codex dans FoldGPT : un espace de travail persistant, pensé pour observer, agir et reprendre.</p><div class="demo-note"><span>✦</span><span><strong>Démo statique</strong><br>Interface de présentation — aucune connexion active.</span></div><a class="button button-ghost" href="https://chatgpt.com/codex" target="_blank" rel="noreferrer">Ouvrir Codex <span>↗</span></a></div>
-      <div class="codex-window" role="img" aria-label="Aperçu statique d’une interface Codex">
-        <div class="window-top"><span class="window-dots"><i></i><i></i><i></i></span><span class="window-title">foldgpt / workspace</span><span class="window-status">● local</span></div>
-        <div class="window-body"><aside class="window-sidebar"><div class="side-logo">⌁</div><div class="side-item active">▦ <span>Sessions</span></div><div class="side-item">◇ <span>Fichiers</span></div><div class="side-item">◌ <span>Runtime</span></div><div class="side-bottom">⚙</div></aside><div class="window-main"><div class="crumb">workspace <span>/</span> product-notes.md</div><div class="code-block"><div class="code-row"><span class="ln">01</span><span><b class="purple">const</b> posture = <b class="blue">"open"</b>;</span></div><div class="code-row"><span class="ln">02</span><span><b class="purple">await</b> foldgpt.<b class="cyan">resume</b>(session);</span></div><div class="code-row"><span class="ln">03</span><span class="muted">// context restored ✓</span></div><div class="code-row"><span class="ln">04</span><span class="cursor"></span></div></div><div class="window-prompt"><span class="prompt-mark">›</span><span>Décris la prochaine étape...</span><span class="prompt-send">↗</span></div></div></div>
-      </div>
-    </section>
-
-    <section id="github" class="section github-section shell"><div class="github-card"><div><div class="eyebrow">OPEN SOURCE / GITHUB</div><h2>Pliez le futur<br>avec nous.</h2><p>FoldGPT évolue en public. Lisez le code, suivez les essais, proposez une amélioration.</p></div><a class="button button-light" href="https://github.com/pironjulien/FoldGPT" target="_blank" rel="noreferrer">Ouvrir GitHub <span>↗</span></a><div class="github-grid" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div></div></section>
-  </main>
-  <footer class="footer shell"><a class="brand" href="#top"><span class="brand-mark">⌁</span><span>FOLD<span class="brand-accent">GPT</span></span></a><span>Intelligence, en mouvement.</span><span>© 2026 FoldGPT</span></footer>
-  <script src="app.js"></script>
-</body>
-</html>
+<a class="skip-link" href="#main">Aller au contenu</a>
+<header class="topbar shell"><a class="brand" href="#top" aria-label="FoldGPT, accueil"><span class="brand-mark" aria-hidden="true">◫</span>Fold<span>GPT</span></a><nav aria-label="Navigation principale"><a href="#experience">L’expérience</a><a href="#architecture">Sous le capot</a><a href="#opensource">Open source</a></nav><a class="nav-link" href="https://github.com/pironjulien/FoldGPT">GitHub <span aria-hidden="true">↗</span></a></header>
+<main id="main">
+<section class="hero shell" id="top">
+<div class="hero-copy"><a class="release-label" href="https://github.com/pironjulien/FoldGPT/releases/tag/v0.2.0-alpha.1"><span>SOURCE ALPHA</span> v0.2.0-alpha.1 <span aria-hidden="true">↗</span></a><h1>Dépliez votre<br>espace de <em>travail.</em></h1><p class="hero-lede">ChatGPT Desktop. Codex. Vos fichiers.<br>Un véritable environnement de bureau, exécuté sur votre Galaxy Z Fold.</p><div class="hero-actions"><a class="button primary" href="https://github.com/pironjulien/FoldGPT">Explorer le projet <span aria-hidden="true">↗</span></a><a class="button secondary" href="#experience">Découvrir l’expérience <span aria-hidden="true">↓</span></a></div><p class="hero-footnote">Linux ARM64 sur Android · Sans root · Projet indépendant</p></div>
+<div class="hero-visual"><div class="visual-caption"><span>FOLDGPT / INTERACTIVE STUDY</span><span aria-hidden="true">01 — ∞</span></div>
+<div class="fold-stage" id="fold-stage"><canvas id="fold-particles" role="img" aria-label="Illustration interactive : des particules dessinent un téléphone pliable autour d’un espace ChatGPT et Codex."></canvas>
+<div class="fold-workspace" aria-hidden="true"><div class="mini-header"><span>◫ FoldGPT</span><span>ChatGPT Desktop</span></div><div class="mini-layout"><div class="mini-sidebar"><b>Codex</b><span>Projet</span><span>Fichiers</span><span>Terminal</span><span class="mini-bottom">workspace /</span></div><div class="mini-main"><span class="mini-kicker">VOTRE ESPACE DE TRAVAIL</span><strong>Une idée.<br>Un projet.<br>Où vous voulez.</strong><div class="mini-file">⌘ &nbsp; project / README.md</div><div class="mini-prompt">Que voulez-vous construire ? <span>↑</span></div></div></div></div><span class="art-label">Illustration d’interface</span></div>
+<div class="fold-controls"><button id="fold-toggle" type="button" aria-pressed="false">Replier ◧</button><label for="fold-angle">Ouverture</label><input id="fold-angle" type="range" min="18" max="100" value="100" aria-label="Ouverture du Fold illustré"><button id="motion-toggle" type="button" aria-pressed="false" aria-label="Mettre les particules en pause">Pause</button></div><p class="interaction-hint">Approchez le pointeur. Touchez les particules. Jouez avec le pli.</p></div>
+</section>
+<div class="principles shell"><span><b>Sur le téléphone</b>Interface, fichiers et outils</span><span><b>Sur grand écran</b>Le bureau, une fois déplié</span><span><b>À ciel ouvert</b>Code source et contributions</span></div>
+<section class="section shell" id="experience"><div class="section-heading"><div><p class="eyebrow">01 / L’EXPÉRIENCE</p><h2>Un téléphone.<br><em>De vraies possibilités.</em></h2></div><p>Le confort du client desktop, avec un espace de travail qui tient dans votre poche.</p></div>
+<div class="capability-grid">
+<article class="capability featured"><span class="card-number">01</span><div class="glyph" aria-hidden="true">⌘</div><h3>Construire avec Codex</h3><p>Explorez un projet, modifiez ses fichiers et lancez des commandes depuis l’interface desktop. Python, Git et Node ont été exercés sur le Fold de développement.</p><span class="card-label">CODE & OUTILS LOCAUX</span></article>
+<article class="capability"><span class="card-number">02</span><div class="glyph" aria-hidden="true">▤</div><h3>Passer de l’idée au document</h3><p>Documents Word, présentations, tableaux et PDF : les outils du workspace produisent des fichiers sur le téléphone, avec des parcours de création et de relecture testés.</p><span class="card-label">DOCX · PPTX · XLSX · PDF</span></article>
+<article class="capability"><span class="card-number">03</span><div class="glyph" aria-hidden="true">◫</div><h3>Profiter de l’écran intérieur</h3><p>Le bureau s’affiche localement dans l’application Android. Le tactile et le clavier Android relient le téléphone à l’environnement de travail.</p><span class="card-label">BUREAU & SAISIE ANDROID</span></article></div><p class="context-note">Les outils et le bureau tournent sur l’appareil. Les modèles et les services de compte utilisent une connexion à OpenAI.</p></section>
+<section class="workspace-section section shell" id="codex"><div class="workspace-copy"><p class="eyebrow">LE PROJET AU CENTRE</p><h2>Discutez.<br>Créez.<br><em>Faites avancer.</em></h2><p>Un fichier source, une présentation à préparer, un dossier à comprendre. Le workspace relie la conversation à des fichiers concrets.</p><a class="text-link" href="https://github.com/pironjulien/FoldGPT/blob/main/docs/overview.md">Explorer les usages ↗</a></div>
+<div class="workbench"><div class="workbench-top"><span>◫ &nbsp; FoldGPT / Codex</span><span>EXEMPLES D’USAGE</span></div><div class="usecase-buttons" role="group" aria-label="Choisir un exemple d’usage"><button type="button" data-usecase="code" aria-pressed="true">Coder</button><button type="button" data-usecase="docs" aria-pressed="false">Documents</button><button type="button" data-usecase="explore" aria-pressed="false">Explorer</button></div><div class="example-content" aria-live="polite" aria-atomic="true"><div class="example-path" id="example-path">workspace / mon-projet</div><h3 id="example-title">Une idée devient du code.</h3><p class="example-prompt" id="example-prompt">« Lis le projet, explique son architecture et prépare une amélioration ciblée. »</p><div class="example-files" id="example-files"><span>src/</span><span>README.md</span><span>tests/</span></div><p id="example-detail">Une conversation, les fichiers du projet et les outils de développement réunis sur le téléphone.</p></div><div class="example-note">Illustration d’un usage — aucune session connectée sur ce site.</div></div></section>
+<section class="section shell" id="architecture"><div class="section-heading"><div><p class="eyebrow">02 / SOUS LE CAPOT</p><h2>Le bureau Linux.<br><em>L’hôte Android.</em></h2></div><p>Une chaîne d’intégration locale qui réunit les deux environnements.</p></div><ol class="architecture-flow"><li><span>01 / ACCUEILLIR</span><h3>FoldGPT pour Android</h3><p>L’application, son service et les ponts d’affichage et de saisie.</p></li><li><span>02 / AFFICHER</span><h3>Linux ARM64 & X11</h3><p>Debian / PRoot et Termux:X11 embarqué accueillent le client desktop.</p></li><li><span>03 / AGIR</span><h3>Exécuteur & workspace</h3><p>Les commandes et les outils travaillent sur les fichiers de l’appareil.</p></li></ol><div class="architecture-bottom"><p>Le client officiel est obtenu séparément auprès d’OpenAI. FoldGPT lui associe un adaptateur compatible avec une version précise.</p><a class="text-link" href="https://github.com/pironjulien/FoldGPT/blob/main/docs/architecture.md">Lire l’architecture ↗</a></div></section>
+<section class="section shell" id="status"><div class="status-panel"><div class="status-intro"><p class="eyebrow">UNE ALPHA OUVERTE</p><h2>Du concret.<br><em>Et une suite à construire.</em></h2><p>Cette première version publique s’adresse aux contributeurs Android, Linux et outils de développement.</p><a class="text-link" href="https://github.com/pironjulien/FoldGPT/blob/main/docs/compatibility.md">Toute la matrice de compatibilité ↗</a></div><div class="status-lists"><div><h3>Démontré sur le Fold de développement</h3><ul><li>Interface desktop, tactile et clavier</li><li>Fichiers locaux et exécution de commandes</li><li>Parcours de création de documents</li></ul></div><div><h3>Prochaines étapes</h3><ul><li>Installation neuve et packaging reproductible</li><li>Sessions prolongées, pliage et conversations actives</li><li>Pression des processus Android et mises à jour</li></ul></div></div></div>
+<div class="faq"><details><summary>Faut-il rooter le téléphone ? Et Knox ?</summary><p>FoldGPT ne nécessite ni root ni déverrouillage du bootloader. Le téléphone de développement a été observé avec un bootloader verrouillé, un démarrage vérifié « green » et un bit Knox à 0. Samsung Pay n’a pas été qualifié séparément. <a href="https://github.com/pironjulien/FoldGPT/blob/main/docs/compatibility.md">Voir le périmètre vérifié.</a></p></details><details><summary>Peut-on déjà installer une APK publique ?</summary><p>Cette alpha est une publication du code source. Elle ne contient ni APK grand public, ni image Linux, ni client ChatGPT propriétaire. Le guide de compilation décrit les prérequis et les composants à préparer. <a href="https://github.com/pironjulien/FoldGPT/blob/main/docs/build.md">Lire le guide.</a></p></details><details><summary>Qu’en est-il de la limite des processus Android ?</summary><p>Le budget de processus fantômes observé sur le téléphone est partagé entre les processus surveillés du système. Plusieurs applications ne le multiplient pas. L’efficacité du runtime et le nettoyage de ses processus sont des axes de travail ; les conversations indépendantes restent un objectif du produit.</p></details></div></section>
+<section class="section shell" id="opensource"><div class="open-source-panel"><p class="eyebrow">03 / CONSTRUISONS LA SUITE</p><h2>Une idée d’amélioration ?<br><em>Le dépôt est ouvert.</em></h2><p>Explorez le code. Proposez une idée. Ouvrez une pull request.<br>Un seul dépôt réunit le projet, sa documentation et la vitrine.</p><div class="hero-actions"><a class="button primary" href="https://github.com/pironjulien/FoldGPT">Voir FoldGPT sur GitHub ↗</a><a class="button secondary" href="https://github.com/pironjulien/FoldGPT/blob/main/CONTRIBUTING.md">Contribuer</a></div><div class="project-links"><a href="https://github.com/pironjulien/FoldGPT/releases/tag/v0.2.0-alpha.1">Version alpha</a><a href="https://github.com/pironjulien/FoldGPT/blob/main/docs/README.md">Documentation</a><a href="https://github.com/pironjulien/FoldGPT/blob/main/docs/roadmap.md">Roadmap</a><a href="https://github.com/pironjulien/FoldGPT/discussions">Discussions</a></div></div></section>
+</main>
+<footer class="footer shell"><div><a class="brand" href="#top"><span class="brand-mark" aria-hidden="true">◫</span>Fold<span>GPT</span></a><p>Un projet de <a href="https://github.com/pironjulien">Julien Piron</a>.</p></div><p>Hôte et intégration : GPL-3.0-or-later.<br>Projet indépendant, sans affiliation à OpenAI ou Samsung.</p><a href="https://github.com/pironjulien/FoldGPT/blob/main/LEGAL.md">Licences & crédits ↗</a></footer>
+</body></html>

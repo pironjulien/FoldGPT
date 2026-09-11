@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Questions and ideas
+    url: https://github.com/pironjulien/FoldGPT/discussions
+    about: Discuss the project, ask questions, and shape broader ideas.
+  - name: Report a security vulnerability
+    url: https://github.com/pironjulien/FoldGPT/security/policy
+    about: Read the private reporting instructions before sharing a security issue.

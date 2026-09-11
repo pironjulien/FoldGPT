@@ -15,7 +15,6 @@ export LC_ALL=C TZ=UTC
 grep -qx 'Pkg.Revision = 29.0.14206865' "$ndk/source.properties"
 for command in git make python3 curl tar sha256sum patch; do command -v "$command" >/dev/null; done
 printf '%s  %s\n' "$ndk_hash" "$ndk_archive" | sha256sum -c -
-[ "$(git -C "$repo/vendor/proot" rev-parse HEAD)" = "$proot_commit" ]
 work=$(mktemp -d /var/tmp/foldgpt-native-XXXXXXXX)
 artifact="$work/artifact"
 mkdir -p "$artifact/runtime/arm64-v8a" "$artifact/sources" "$artifact/notices" "$artifact/build" "$work/deps/include/sys" "$work/deps/lib"
@@ -26,8 +25,15 @@ printf '%s  android-ndk-r29-linux.zip\n' "$ndk_hash" > "$artifact/build/ndk-arch
 "$toolchain/clang" --version > "$artifact/build/compiler-version.txt"
 sha256sum "$toolchain/clang" > "$artifact/build/compiler.sha256"
 export SOURCE_DATE_EPOCH
-SOURCE_DATE_EPOCH=$(git -C "$repo/vendor/proot" show -s --format=%ct "$proot_commit")
-git -C "$repo/vendor/proot" archive "$proot_commit" > "$artifact/sources/proot-$proot_commit.tar"
+# Public releases vendor source files, not the upstream Git object database.
+# Fetch the exact upstream commit into the new build directory; never mutate
+# vendor/proot or silently archive the enclosing FoldGPT repository.
+git init -q "$work/proot-upstream"
+git -C "$work/proot-upstream" remote add origin https://github.com/termux/proot.git
+git -C "$work/proot-upstream" fetch --depth 1 origin "$proot_commit"
+[ "$(git -C "$work/proot-upstream" rev-parse FETCH_HEAD)" = "$proot_commit" ]
+SOURCE_DATE_EPOCH=$(git -C "$work/proot-upstream" show -s --format=%ct FETCH_HEAD)
+git -C "$work/proot-upstream" archive FETCH_HEAD > "$artifact/sources/proot-$proot_commit.tar"
 curl -fL --retry 2 https://www.samba.org/ftp/talloc/talloc-2.4.3.tar.gz -o "$artifact/sources/talloc-2.4.3.tar.gz"
 curl -fL --retry 2 https://codeload.github.com/termux/libandroid-shmem/tar.gz/refs/tags/v0.7 -o "$artifact/sources/android-shmem-0.7.tar.gz"
 printf '%s  %s\n' "$talloc_hash" "$artifact/sources/talloc-2.4.3.tar.gz" "$shmem_hash" "$artifact/sources/android-shmem-0.7.tar.gz" | sha256sum -c -

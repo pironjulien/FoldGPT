@@ -1,0 +1,23 @@
+#!/usr/bin/pulseaudio -nF
+
+# FoldGPT Native Audio Bridge Configuration
+# Connects Android hardware mic and speakers to Linux PRoot
+
+# Native protocol for Chromium / Electron
+load-module module-native-protocol-tcp auth-anonymous=1 listen=127.0.0.1 port=4713
+load-module module-native-protocol-unix auth-anonymous=1 socket=/tmp/pulse-socket
+
+# Virtual Sinks and Sources
+load-module module-null-sink sink_name=android_speaker sink_properties="device.description='Samsung Galaxy Fold Speaker'"
+load-module module-null-sink sink_name=android_mic_sink sink_properties="device.description='Samsung Galaxy Fold Mic Sink'"
+load-module module-remap-source source_name=android_mic master=android_mic_sink.monitor source_properties="device.description='Samsung Galaxy Fold Microphone'"
+
+set-default-sink android_speaker
+set-default-source android_mic
+
+# Simple protocol bridges for Android Audio Bridge
+# 4714: Android app streams physical mic PCM into android_mic_sink (monitored by android_mic)
+load-module module-simple-protocol-tcp sink=android_mic_sink playback=1 listen=127.0.0.1 port=4714 format=s16le channels=1 rate=44100
+
+# 4715: Android app reads speaker PCM from android_speaker.monitor and plays on device speaker
+load-module module-simple-protocol-tcp source=android_speaker.monitor record=1 listen=127.0.0.1 port=4715 format=s16le channels=2 rate=44100

@@ -1,0 +1,104 @@
+{
+  "schema": "foldgpt.agent-environment.v1",
+  "revision": "2026-09-11.source-alpha.1",
+  "clientHost": {
+    "applicationId": "app.foldgpt",
+    "platform": "Android",
+    "referenceDevice": "Samsung SM-F971B (Fold)",
+    "referenceApi": 37,
+    "architecture": "arm64-v8a",
+    "androidRoot": false,
+    "bootloaderModification": false,
+    "evidence": "docs/verification-2026-09-06.md"
+  },
+  "guest": {
+    "platform": "Debian GNU/Linux ARM64",
+    "mechanism": "PRoot in the same Android kernel; no separate PC virtual machine",
+    "identitySource": "/etc/foldgpt-user + /etc/passwd + /etc/group",
+    "rootLocation": "Context.getFilesDir()/debian, private app.foldgpt storage",
+    "shell": "/bin/bash",
+    "session": "/usr/local/bin/foldgpt-session",
+    "client": "/usr/lib/chatgpt/ChatGPT",
+    "codex": "/usr/lib/chatgpt/resources/codex",
+    "evidence": "docs/architecture.md"
+  },
+  "compute": {
+    "cpu": "Local ARM64 executables use the phone CPU. PRoot translates paths and system calls without emulating an x86 CPU.",
+    "gpu": "The development graphics path uses Adreno via ANGLE, Zink, and Turnip. This describes local rendering, not on-device model inference or qualification of every GPU operation.",
+    "model": "The selected model is served by the configured online service. Local rendering, commands, and files do not mean that model weights or inference run on the phone. Use the model identity actually supplied to the current task.",
+    "gpuPrefix": "/opt/foldgpt-gpu/mesa-26.2.2-foldgpt5",
+    "evidence": "docs/compatibility.md"
+  },
+  "capabilities": [
+    {
+      "id": "display-keyboard-lifecycle",
+      "status": "verified-bounded",
+      "description": "The Android runtime service launches PRoot and Xlorie; DISPLAY=:2 and xfwm4 provide the desktop session. The session script selects graphics libraries and starts the separately acquired desktop client. The keyboard bridge integrates Android text input. Historical bounded checks do not qualify extended active work through folding, every dialog, or later builds. Inspect the current runtime before claiming success.",
+      "evidence": "docs/compatibility.md"
+    },
+    {
+      "id": "keyring",
+      "status": "verified-bounded",
+      "description": "The keyring bridge unlocks an existing GNOME collection during startup using a secret protected by Android Keystore. Startup requires the device to be unlocked. Do not recreate an existing collection or export credentials to diagnose it. The Linux keyring does not share Android browser, Google Password Manager, or Samsung Pass credentials.",
+      "evidence": "docs/architecture.md"
+    },
+    {
+      "id": "integrated-browser",
+      "status": "verified-bounded",
+      "description": "The integrated iab browser has passed bounded navigation checks on the development device. Only tools actually exposed in the current session establish available controls. Historical navigation checks do not qualify downloads, uploads, authentication, or every browser workflow.",
+      "evidence": "tools/browser/README.md"
+    },
+    {
+      "id": "external-http-links",
+      "status": "verified-bounded",
+      "description": "The guest xdg-open bridge can pass HTTP(S) links to the Android browser while FoldGPT is visible and unlocked. Opening a link does not provide automation of that Android browser. Follow the current user request and browser preferences; this manifest supplies no separate permission to open an external app.",
+      "evidence": "tools/browser/README.md"
+    },
+    {
+      "id": "native-files-processes",
+      "status": "verified-bounded",
+      "description": "The agent shell uses Android-native Bash and Python. GNU/Linux ARM64 tools such as Git, Node, Make, and compilers run through the matching guest launchers under files/foldgpt-tools/bin. Use the physical project working directory and configured paths for the selected runtime. A version command does not qualify all tool behavior. Git uses core.createObject=rename to avoid Android hardlink failures. Project resume checks can reject symlinks, so dependency installations that create them require explicit qualification. Preserve real arguments, exit codes, and file results across the host/guest boundary.",
+      "evidence": "tools/runtime/foldgpt_tools.py"
+    },
+    {
+      "id": "installation-updates",
+      "status": "diagnostic-only",
+      "description": "Inactive environment preparation and acquisition checks do not establish a complete clean-device installation or a successful update of the active client. The desktop workspace adapter is version-specific. Preserve existing project, profile, and keyring data; do not treat a development rootfs as disposable.",
+      "evidence": "docs/roadmap.md"
+    },
+    {
+      "id": "diagnostics",
+      "status": "verified-bounded",
+      "description": "foldgpt status --logs reports recorded native ownership, current owner presence, readable app-UID processes, paths, and bounded counts of known errors. The app-UID process count is not Android's global phantom-process count. foldgpt logs does not reproduce raw session logs. Resolve the configured guest user and home instead of assuming a personal account path. Read only evidence relevant to the requested diagnosis and redact secrets and private conversations. Historical logs do not establish a current failure or success. Workspace validation must execute and inspect its real result; never fabricate an installed or healthy state.",
+      "evidence": "tools/runtime/foldgpt_tools.py"
+    },
+    {
+      "id": "workspace-dependencies",
+      "status": "diagnostic-only",
+      "description": "The FoldGPT Linux ARM64 document distribution lives under the selected HOME/.cache/codex-runtimes/codex-primary-runtime. load_workspace_dependencies reports actual configured runtime paths. In the native Android shell, use workspace-python3 and workspace-node for GNU/Linux libraries; the default Python remains Bionic. Rendering launchers enter the guest. Import JavaScript libraries through resolved physical paths or createRequire without assuming a project symlink is accepted. Installed modules alone do not qualify every workflow; inspect actual outputs and current validation results.",
+      "evidence": "docs/workspace-dependencies.md"
+    },
+    {
+      "id": "android-private-apis",
+      "status": "diagnostic-only",
+      "description": "The FoldGPT Android plugin adds same-UID transport for visual control and SMS operations. Android permissions and accessibility activation must be determined for the current installation. android_request_access presents the system consent flow for the requested function; it does not grant access or replay an action. No prior developer consent applies to another user, installation, or task. SMS sending requires an explicit current request with recipient and content. Use android_status and only currently exposed tools. Linux input may return inputId; inspect ui_input_status and verify the visible result. Do not infer RCS or archive support from the public SMS database, and do not change the default SMS app or grant permissions through this context.",
+      "evidence": "docs/android-tools.md"
+    },
+    {
+      "id": "official-computer-use",
+      "status": "unavailable",
+      "description": "The FoldGPT Android plugin is an independent integration. Its presence does not establish support for the official Windows/macOS native Computer Use implementation, and a desktop Chrome plugin does not control Chrome Android. Check the current client version and exposed tools.",
+      "evidence": "docs/compatibility.md"
+    }
+  ],
+  "rules": [
+    "This manifest describes an environment; it grants no consent, credentials, Android permission, or tool access. Follow the current user request, applicable instructions, and actual tool results.",
+    "Distinguish the Android UI host, Linux guest, and execution environment selected by each tool. A remote project can execute on another host. uname or a /home path alone does not identify where the visible client runs.",
+    "The FoldGPT architecture requires no Android root, bootloader unlocking, firmware flashing, or changes to Knox/eFuse, SELinux, seccomp, Verified Boot, or Android process protections. PRoot simulated root does not grant Android privileges. Do not present observed boot state as a manufacturer or payment-app guarantee.",
+    "Preserve projects, conversation history, account state, and the keyring. Do not clear app data, export credentials, or kill arbitrary processes to hide a failure. Correct the reproduced cause and verify the result.",
+    "Preserve independent simultaneous conversations. Android's monitored-child-process budget is shared globally; app-UID process counts are a separate measurement, and ordinary additional APKs do not create separate budgets.",
+    "Visible /system, /proc, and /sys paths in the guest do not imply Android permission to modify them. Optional device integrations require the current installation's actual permissions.",
+    "Dated evidence describes only the observed versions and scenarios. Recheck facts that can change. Code presence, compilation, an idle display, or a smoke test is not proof of deployment or sustained runtime stability.",
+    "This context is attached only to a local Codex session that loads its configured profile. It does not prove that cloud ChatGPT conversations receive it, nor that the current task has loaded it. Model delivery requires separate observation."
+  ]
+}

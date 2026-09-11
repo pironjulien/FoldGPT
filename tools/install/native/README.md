@@ -9,8 +9,10 @@ review candidates until a separate Android runtime validation and packaging step
 
 Prerequisites: Linux x86_64 (WSL Ubuntu 24.04 is supported), Git, Make, Python 3,
 curl, tar, patch, sha256sum and the GPL-3 text in `/usr/share/common-licenses`.
-The checked-out `vendor/proot` must have the pinned HEAD below. Local vendor
-changes are not built: the source snapshot comes from `git archive` of that commit.
+The recipe fetches the exact upstream PRoot commit below into a new build
+directory and verifies it before `git archive`. The public `vendor/proot` is a
+plain source tree; no submodule metadata or private Git objects are required.
+Local vendor changes are not built by this pinned-upstream recipe.
 
 Install and verify the official Linux NDK r29 before running. The recipe checks
 the installation revision, verifies the downloaded NDK archive SHA-256 again,

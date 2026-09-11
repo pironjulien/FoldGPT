@@ -12,15 +12,19 @@ archive and recorded in `source-manifest.json`; no source code patch is applied.
 
 ## Build
 
+Set `ANDROID_HOME` to your Android SDK, and `VCToolsInstallDir` to the installed
+MSVC toolchain directory (a Visual Studio developer shell sets the latter).
+The paths below use those installation settings rather than a maintainer's home directory.
+
 ```powershell
 python -B tools/executor/bionic-runtime/prepare-ripgrep.py `
   --output work/native-ripgrep-20260908/prepared-v2
 python -B tools/executor/bionic-runtime/build-ripgrep-windows.py `
   --prepared work/native-ripgrep-20260908/prepared-v2 `
   --output work/native-ripgrep-20260908/build-v4 `
-  --ndk C:/Users/julie/AppData/Local/Android/Sdk/ndk/29.0.14206865 `
-  --ninja C:/Users/julie/AppData/Local/Android/Sdk/cmake/3.22.1/bin/ninja.exe `
-  --msvc 'C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/VC/Tools/MSVC/14.44.35207'
+  --ndk "$env:ANDROID_HOME/ndk/29.0.14206865" `
+  --ninja "$env:ANDROID_HOME/cmake/3.22.1/bin/ninja.exe" `
+  --msvc "$env:VCToolsInstallDir"
 python -B tools/executor/bionic-runtime/verify-ripgrep-build.py `
   work/native-ripgrep-20260908/build-v4
 python -B tools/executor/bionic-runtime/test-ripgrep-admission.py `

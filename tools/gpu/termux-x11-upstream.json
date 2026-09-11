@@ -1,0 +1,24 @@
+{
+  "upstream": "https://github.com/termux/termux-x11.git",
+  "base": "9df8b767645aa0d0a2f2576767449df55b41962f",
+  "sourceDateEpoch": 1788475405,
+  "representation": "Vendored source trees with FoldGPT modifications; dependency revisions below record upstream bases.",
+  "dependencies": {
+    "lorie/src/main/cpp/bzip2": "6a8690fc8d26c815e798c588f796eabe9d684cf0",
+    "lorie/src/main/cpp/libepoxy": "c84bc9459357a40e46e2fec0408d04fbdde2c973",
+    "lorie/src/main/cpp/libfontenc": "780d1f6f192a331de7b298a96e23ebc44d2a884b",
+    "lorie/src/main/cpp/libtirpc": "5ca4ca92f629d9d83e83544b9239abaaacf0a527",
+    "lorie/src/main/cpp/libx11": "6c75545a1deb51f5903992c52af6bc35cc9bc103",
+    "lorie/src/main/cpp/libxau": "a9c65683e68b3a4349afee5d7673b393fb924d2e",
+    "lorie/src/main/cpp/libxcvt": "dd8631c61465cc0de5e476c7a98e56528d62b163",
+    "lorie/src/main/cpp/libxdmcp": "1192d3bc407348ff316bd3bffc791b3ac73f591b",
+    "lorie/src/main/cpp/libxfont": "88b9df882c0ea91d7bb468aa4792ef1b6f13aa9d",
+    "lorie/src/main/cpp/libxkbfile": "42e5dedd7fd3c7c73f3870a8751893c03c1afc69",
+    "lorie/src/main/cpp/libxshmfence": "89f064748554e11832a3ec783945e1f4c7fe846e",
+    "lorie/src/main/cpp/libxtrans": "cf05ba4a10c90da2c63805a5375e983b174e28b0",
+    "lorie/src/main/cpp/pixman": "9cc163c9da0fb4da430641715313d95a6ec466d9",
+    "lorie/src/main/cpp/xkbcomp": "2c7789785981ad1fce3858c726615b49293f7de0",
+    "lorie/src/main/cpp/xorgproto": "fcb7e9a1a0b593a44740d83b0babddd331fea830",
+    "lorie/src/main/cpp/xserver": "65d790bd208ec380b196eb98f144abb0b32e334d"
+  }
+}

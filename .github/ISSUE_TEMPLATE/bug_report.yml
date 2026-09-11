@@ -1,16 +1,47 @@
 name: Bug report
-description: Report a reproducible FoldGPT problem
+description: Report a reproducible problem in the host, runtime, tools, or documentation.
 body:
-  - type: textarea
-    id: reproduce
+  - type: markdown
     attributes:
-      label: Reproduction
-      description: Include steps, expected result, and actual result. Do not include private logs or credentials.
-    validations:
-      required: true
+      value: |
+        Thanks for helping improve FoldGPT. This is a source alpha; please describe the setup you actually tested.
+        For a vulnerability, use the private reporting route in SECURITY.md. Remove credentials, account data, device serials, and private file paths from evidence.
   - type: input
     id: version
     attributes:
-      label: Commit or version
+      label: Source revision or release
+      placeholder: v0.2.0-alpha.1 or a full commit SHA
     validations:
       required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Device model, Android version, desktop client version, and relevant build/runtime choices. For a host build issue, include the host OS and tool versions.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      description: Give the smallest repeatable sequence. Mention folding, background use, or concurrent conversations if relevant.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Observed behavior
+      description: Describe what happened and whether it occurs every time. Distinguish command output from what the interface displayed.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Minimal evidence
+      description: Include relevant error text or a small redacted log excerpt. Do not upload full account sessions, proprietary client files, or private recovery archives.

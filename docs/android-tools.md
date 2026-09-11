@@ -1,14 +1,13 @@
 # Outils Android FoldGPT
 
-R45 ajoute la [reprise après crash](session-recovery.md), testée sur le téléphone
-avec conservation des projets et de la conversation. Les outils ci-dessous et
-le plugin gardent leur version ; cette reprise ne prouve pas une compatibilité
-universelle des plugins.
+Le plugin Android relie l'espace de travail Linux à des fonctions du téléphone
+sous les permissions Android normales. Ce document décrit son intégration et
+conserve les observations bornées du 9 septembre 2026. Pour le périmètre produit,
+consulter la [matrice de compatibilité](compatibility.md).
 
-Objectif demandé par Julien le 9 septembre 2026 : retrouver les usages du PC
-et ajouter les fonctions du téléphone. Un contrôle global des applications
-complète des outils spécialisés, en commençant par les SMS. Les envois exigent
-une demande explicite de Julien avec le destinataire et le contenu voulu.
+Un contrôle global des applications complète des outils spécialisés, en
+commençant par les SMS. Les envois exigent une demande explicite de l'utilisateur
+avec le destinataire et le contenu voulu.
 
 Le plugin `plugins/foldgpt-android` est propre à FoldGPT. Le client officiel Linux
 n'inclut pas encore le Computer Use natif macOS/Windows ; le navigateur `iab`
@@ -72,8 +71,9 @@ chaque application tierce n'est certifiée par la compilation.
 Les brouillons et états d'envoi sont conservés en mémoire, au maximum 24 heures.
 Après perte du processus, leur état est inconnu et le token ne doit jamais être
 reconstruit pour renvoyer. Préparation valable 30 minutes. Le plugin ne peut pas
-s'autoaccorder ses permissions. Julien a autorisé le contrôle écran, activé sur
-le téléphone le 9 septembre. READ_SMS et SEND_SMS restent non accordées.
+s'autoaccorder ses permissions. Les observations sur le téléphone de développement
+ne valent pas consentement sur une autre installation : chaque utilisateur garde
+le contrôle de ses accès Android.
 
 ## Navigateur et connexions
 

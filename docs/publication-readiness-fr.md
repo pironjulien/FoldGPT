@@ -1,5 +1,7 @@
 # FoldGPT : état avant publication
 
+> **Archive technique du 6 septembre 2026.** Ce point décrit un état antérieur du prototype. La [présentation produit](overview.md), la [matrice de compatibilité](compatibility.md) et le [changelog](../CHANGELOG.md) définissent désormais le périmètre public. Les blocages rapportés ci-dessous ne constituent pas un bilan du code actuel.
+
 Point du 6 septembre 2026. Ce document décrit le prototype et les conditions de
 publication ; il ne constitue pas une validation d'APK ou une promesse de garantie.
 
@@ -79,7 +81,7 @@ inférée de ces seules valeurs.
 ## Références
 
 - [Périmètre public et résultats détaillés](../PUBLICATION.md)
-- [Architecture, installation et mises à jour](install/end-to-end-architecture.md)
+- [Architecture publique](architecture.md) et [jalons d'installation/mise à jour](roadmap.md)
 - [Acquisition HTTPS réelle](../tools/install/https-acquisition/README.md)
 - [Cycle de vie des commandes natives](../tools/executor/native-process-lifecycle.md)
 - [Chargement officiel des instructions Codex](https://learn.chatgpt.com/docs/agent-configuration/agents-md)

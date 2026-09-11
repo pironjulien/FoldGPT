@@ -1,23 +1,33 @@
+"""Build the optional GNU/Linux ARM64 X11 diagnostic helper from source."""
+import argparse
 import os
 from pathlib import Path
 import subprocess
-import sys
 
 ROOT = Path(__file__).resolve().parents[2]
-CLANG = Path(os.environ.get('ANDROID_NDK_CLANG', r'C:\Users\julie\AppData\Local\Android\Sdk\ndk\29.0.14206865\toolchains\llvm\prebuilt\windows-x86_64\bin\clang.exe'))
-SYSROOT = ROOT / 'downloads' / 'gpu' / 'sysroot'
 
 def build():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--clang', type=Path, default=os.environ.get('ANDROID_NDK_CLANG'),
+                        help='Path to LLVM Clang; defaults to ANDROID_NDK_CLANG')
+    parser.add_argument('--output', type=Path, default=ROOT / 'work' / 'quiet-xext' / 'libquiet_xext.so')
+    args = parser.parse_args()
+    if args.clang is None or not args.clang.is_file():
+        parser.error('Provide an existing LLVM Clang executable with --clang or ANDROID_NDK_CLANG')
     src = Path(__file__).with_name('quiet_xext.c')
-    out = Path(__file__).with_name('libquiet_xext.so')
+    out = args.output.resolve()
+    if out.exists():
+        parser.error('Output already exists; select a new output path')
+    out.parent.mkdir(parents=True, exist_ok=True)
+    # The helper has no headers or libc references, so it needs no guest sysroot.
     cmd = [
-        str(CLANG),
+        str(args.clang.resolve()),
         '--target=aarch64-linux-gnu',
-        f'--sysroot={SYSROOT}',
         '-shared',
         '-fPIC',
         '-O2',
         '-nostdlib',
+        '-Wl,--no-undefined',
         '-Wl,-soname,libquiet_xext.so',
         str(src),
         '-o', str(out)

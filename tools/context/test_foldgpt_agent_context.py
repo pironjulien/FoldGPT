@@ -17,10 +17,10 @@ class ContextTest(unittest.TestCase):
         self.temporary = tempfile.TemporaryDirectory(prefix="foldgpt-context-", dir=os.environ.get("FOLDGPT_TEST_TMPDIR", "/var/tmp"))
         self.root = Path(self.temporary.name)
         (self.root / "etc").mkdir()
-        (self.root / "etc/foldgpt-user").write_text("julien\n")
-        (self.root / "etc/passwd").write_text("root:x:0:0::/root:/bin/bash\njulien:x:10410:10410::/home/foldgpt:/bin/bash\n")
-        (self.root / "etc/group").write_text("root:x:0:\njulien:x:10410:\n")
-        self.home = self.root / "home/julien"
+        (self.root / "etc/foldgpt-user").write_text("foldgpt\n")
+        (self.root / "etc/passwd").write_text("root:x:0:0::/root:/bin/bash\nfoldgpt:x:10410:10410::/home/foldgpt:/bin/bash\n")
+        (self.root / "etc/group").write_text("root:x:0:\nfoldgpt:x:10410:\n")
+        self.home = self.root / "home/foldgpt"
         self.home.mkdir(parents=True)
 
     def tearDown(self):
@@ -102,7 +102,7 @@ class ContextTest(unittest.TestCase):
         (self.root / "etc/foldgpt-user").write_text("root\n")
         with self.assertRaises(ValueError):
             self.sync()
-        (self.root / "etc/foldgpt-user").write_text("julien\n")
+        (self.root / "etc/foldgpt-user").write_text("foldgpt\n")
         codex = self.home / ".codex"
         codex.mkdir()
         agents = codex / "AGENTS.md"

@@ -1,0 +1,47 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools">
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.READ_SMS" />
+    <uses-permission android:name="android.permission.SEND_SMS" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+    <queries>
+        <intent><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LAUNCHER" /></intent>
+        <intent><action android:name="android.intent.action.SENDTO" /><data android:scheme="smsto" /></intent>
+    </queries>
+    <uses-permission android:name="moe.shizuku.manager.permission.API_V23" />
+    <application android:label="FoldGPT" android:icon="@drawable/foldgpt_icon" android:roundIcon="@drawable/foldgpt_icon" android:allowBackup="false" android:extractNativeLibs="true" tools:replace="android:label,android:icon,android:roundIcon">
+        <meta-data android:name="moe.shizuku.client.V3_SUPPORT" android:value="true" />
+        <!-- Binder provider stays in the main app process. :runtime explicitly
+             requests its Binder through the official multi-process SDK API. -->
+        <provider android:name="app.foldgpt.shizukuexec.ExecutorProvider"
+            android:process="${applicationId}" tools:node="merge" />
+        <activity android:name="com.termux.x11.MainActivity" tools:node="remove" />
+        <activity android:name="app.foldgpt.AndroidToolsActivity" android:exported="true" android:label="Outils Android FoldGPT" android:theme="@style/Theme.AppCompat.DayNight.NoActionBar" />
+        <activity android:name="app.foldgpt.FoldAndroidPermissionActivity" android:exported="false" android:label="Autorisation Android FoldGPT" android:theme="@style/Theme.AppCompat.DayNight.NoActionBar" />
+        <service android:name="app.foldgpt.FoldAccessibilityService" android:exported="true" android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE" android:label="Contrôle Android FoldGPT">
+            <intent-filter><action android:name="android.accessibilityservice.AccessibilityService" /></intent-filter>
+            <meta-data android:name="android.accessibilityservice" android:resource="@xml/foldgpt_accessibility" />
+        </service>
+        <activity android:name="com.termux.x11.LoriePreferences" android:label="@string/lorie_pref_main" />
+        <service android:name="com.termux.x11.utils.KeyInterceptor" android:label="@string/foldgpt_key_interceptor" tools:replace="android:label" />
+        <activity android:name="app.foldgpt.FoldActivity" android:exported="true" android:launchMode="singleTask" android:theme="@style/Theme.AppCompat.DayNight.NoActionBar"
+            android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|keyboard|keyboardHidden|density|uiMode"
+            android:resizeableActivity="true" android:windowSoftInputMode="stateHidden|adjustNothing">
+            <intent-filter><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LAUNCHER" /></intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="codex" android:host="connector" android:path="/oauth_callback" />
+            </intent-filter>
+            <meta-data android:name="android.app.shortcuts" android:resource="@xml/foldgpt_shortcuts" />
+        </activity>
+        <service android:name="com.termux.x11.FoldRuntimeService" android:process=":runtime" android:exported="false" android:foregroundServiceType="specialUse">
+            <property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE" android:value="Local Linux desktop workspace and active user tasks" />
+        </service>
+    </application>
+</manifest>

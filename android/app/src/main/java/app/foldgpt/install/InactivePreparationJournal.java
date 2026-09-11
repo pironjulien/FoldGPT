@@ -1,0 +1,213 @@
+package app.foldgpt.install;
+
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.*;
+import java.nio.file.attribute.PosixFilePermissions;
+import java.nio.file.attribute.UserPrincipal;
+import java.security.MessageDigest;
+import java.security.SecureRandom;
+import java.util.*;
+
+/** Durable progress for the bounded INACTIVE base/account/client/vault/collection flow.
+ * Call only while holding the enclosing RootfsTransaction lease. This journal
+ * neither edits that transaction nor contains an activation or readiness state.
+ * Bindings are the coordinator's independently verified component descriptors.
+ */
+public final class InactivePreparationJournal {
+    public enum Step { ROOT_PREPARED, ACCOUNT_PREPARED, INTEGRATION_PREPARED, CLIENT_PREPARED, VAULT_PREPARED, COLLECTION_PREPARED }
+    interface Checkpoint { void at(String name) throws IOException; }
+    private static final String SCHEMA="foldgpt.inactive-preparation.v1";
+    private static final String CLIENT_SCHEMA="foldgpt.inactive-preparation.v2";
+    private static final String INTEGRATION_SCHEMA="foldgpt.inactive-preparation.v3";
+    private final Path file;
+    private final GuestAccountProvisioner.Storage storage;
+    private final UserPrincipal owner;
+    private final Checkpoint checkpoint;
+    private final boolean requiresClient,requiresIntegration;
+    private Map<String,String> values;
+
+    public static InactivePreparationJournal open(Path file,Map<String,String> bindings,GuestAccountProvisioner.Storage storage) throws IOException {
+        return open(file,bindings,storage,name -> {});
+    }
+    static InactivePreparationJournal open(Path file,Map<String,String> bindings,GuestAccountProvisioner.Storage storage,Checkpoint checkpoint) throws IOException {
+        return new InactivePreparationJournal(file,bindings,storage,checkpoint,false,false);
+    }
+    /** Client-enabled preparation cannot adopt a legacy keyring-only journal. */
+    public static InactivePreparationJournal openWithClient(Path file,Map<String,String> bindings,GuestAccountProvisioner.Storage storage) throws IOException {
+        return openWithClient(file,bindings,storage,name -> {});
+    }
+    static InactivePreparationJournal openWithClient(Path file,Map<String,String> bindings,GuestAccountProvisioner.Storage storage,Checkpoint checkpoint) throws IOException {
+        return new InactivePreparationJournal(file,bindings,storage,checkpoint,true,false);
+    }
+    /** Complete input scope cannot adopt either earlier diagnostic journal. */
+    public static InactivePreparationJournal openWithIntegration(Path file,Map<String,String> bindings,GuestAccountProvisioner.Storage storage) throws IOException {
+        return openWithIntegration(file,bindings,storage,name -> {});
+    }
+    static InactivePreparationJournal openWithIntegration(Path file,Map<String,String> bindings,GuestAccountProvisioner.Storage storage,Checkpoint checkpoint) throws IOException {
+        return new InactivePreparationJournal(file,bindings,storage,checkpoint,true,true);
+    }
+    private InactivePreparationJournal(Path file,Map<String,String> bindings,GuestAccountProvisioner.Storage storage,Checkpoint checkpoint,
+            boolean requiresClient,boolean requiresIntegration) throws IOException {
+        this.file=file; this.storage=storage; this.checkpoint=checkpoint; this.requiresClient=requiresClient; this.requiresIntegration=requiresIntegration;
+        for(String key:Set.of("client","clientVerifier","clientInstaller")) {
+            if(requiresClient ? !digest(bindings.get(key)) : bindings.containsKey(key))
+                throw new IOException("Inactive preparation client bindings differ from its required scope");
+        }
+        for(String key:Set.of("integration","integrationManifest")) {
+            if(requiresIntegration ? !digest(bindings.get(key)) : bindings.containsKey(key))
+                throw new IOException("Inactive integration binding differs from its required scope");
+        }
+        String integrationBytes=bindings.get("integrationBytes");
+        if(requiresIntegration) {
+            if(integrationBytes==null || !integrationBytes.matches("[1-9][0-9]{0,7}") || Long.parseLong(integrationBytes)>64*1024*1024)
+                throw new IOException("Inactive integration needs an authenticated bounded byte count");
+        } else if(bindings.containsKey("integrationBytes")) throw new IOException("Diagnostic scope cannot contain integration byte binding");
+        if(!Files.isDirectory(file.getParent(),LinkOption.NOFOLLOW_LINKS)
+                || !Files.getPosixFilePermissions(file.getParent(),LinkOption.NOFOLLOW_LINKS).equals(PosixFilePermissions.fromString("rwx------")))
+            throw new IOException("Inactive preparation journal needs a real private directory");
+        owner=Files.getOwner(file.getParent(),LinkOption.NOFOLLOW_LINKS);
+        Map<String,String> expected=new TreeMap<>();
+        expected.put("schema",requiresIntegration?INTEGRATION_SCHEMA:requiresClient?CLIENT_SCHEMA:SCHEMA);
+        for(Map.Entry<String,String> item:bindings.entrySet()) {
+            if(!item.getKey().matches("[a-z][a-zA-Z0-9]{0,31}") || !safe(item.getValue())) throw new IOException("Invalid inactive preparation binding");
+            expected.put("bind."+item.getKey(),item.getValue());
+        }
+        if(bindings.isEmpty()) throw new IOException("Inactive preparation requires component bindings");
+        if(exists(file)) {
+            regular(file);
+            byte[] bytes;
+            try(FileChannel input=FileChannel.open(file,StandardOpenOption.READ,LinkOption.NOFOLLOW_LINKS)) {
+                ByteBuffer buffer=ByteBuffer.allocate(8193);
+                while(buffer.hasRemaining() && input.read(buffer)!=-1) {}
+                bytes=new byte[buffer.position()]; buffer.flip(); buffer.get(bytes);
+            }
+            if(bytes.length>8192) throw new IOException("Oversized inactive preparation journal");
+            String text=StandardCharsets.US_ASCII.newDecoder().decode(ByteBuffer.wrap(bytes)).toString();
+            int checksumAt=text.lastIndexOf("checksum=");
+            if(checksumAt<0 || !text.substring(checksumAt).equals("checksum="+sha256(text.substring(0,checksumAt).getBytes(StandardCharsets.US_ASCII))+"\n"))
+                throw new IOException("Inactive preparation journal checksum differs");
+            values=new TreeMap<>();
+            for(String line:text.substring(0,checksumAt).split("\n")) {
+                int delimiter=line.indexOf('=');
+                if(delimiter<=0 || !safe(line.substring(delimiter+1)) || values.put(line.substring(0,delimiter),line.substring(delimiter+1))!=null)
+                    throw new IOException("Malformed inactive preparation journal");
+            }
+            for(Map.Entry<String,String> entry:expected.entrySet()) if(!entry.getValue().equals(values.get(entry.getKey())))
+                throw new IOException("Inactive preparation component or root binding differs: "+entry.getKey());
+            Set<String> keys=new HashSet<>(expected.keySet());
+            keys.addAll(Set.of("installationId","step","vaultSha256","collectionIntentSha256","collectionInstallationId","collectionPath","dataIdentity"));
+            if(requiresClient) keys.add("clientReportSha256");
+            if(requiresIntegration) keys.add("integrationReportSha256");
+            if(!values.keySet().equals(keys) || !values.get("installationId").matches("[0-9a-f]{64}"))
+                throw new IOException("Unknown inactive preparation journal fields");
+            validateState(values);
+            storage.syncDirectory(file.getParent());
+        } else {
+            values=expected;
+            byte[] random=new byte[32]; new SecureRandom().nextBytes(random);
+            values.put("installationId",hex(random)); values.put("step",Step.ROOT_PREPARED.name());
+            for(String key:Set.of("vaultSha256","collectionIntentSha256","collectionInstallationId","collectionPath","dataIdentity")) values.put(key,"-");
+            if(requiresClient) values.put("clientReportSha256","-");
+            if(requiresIntegration) values.put("integrationReportSha256","-");
+            write(values);
+        }
+    }
+    public Step step() throws IOException {
+        try { return Step.valueOf(values.get("step")); }
+        catch(IllegalArgumentException invalid) { throw new IOException("Unknown inactive preparation step",invalid); }
+    }
+    public String value(String key) { return values.get(key); }
+    public void accountPrepared() throws IOException {
+        if(step()!=Step.ROOT_PREPARED) throw new IOException("Inactive account step is out of order");
+        Map<String,String> next=new TreeMap<>(values); next.put("step",Step.ACCOUNT_PREPARED.name()); write(next);
+    }
+    public void vaultPrepared(String ciphertextSha256) throws IOException {
+        if(step()!=(requiresClient?Step.CLIENT_PREPARED:Step.ACCOUNT_PREPARED) || !digest(ciphertextSha256))
+            throw new IOException("Inactive vault step is out of order or unverified");
+        Map<String,String> next=new TreeMap<>(values); next.put("step",Step.VAULT_PREPARED.name()); next.put("vaultSha256",ciphertextSha256); write(next);
+    }
+    public void clientPrepared(String reportSha256) throws IOException {
+        if(!requiresClient || step()!=(requiresIntegration?Step.INTEGRATION_PREPARED:Step.ACCOUNT_PREPARED) || !digest(reportSha256))
+            throw new IOException("Inactive client step is out of order or unverified");
+        Map<String,String> next=new TreeMap<>(values); next.put("step",Step.CLIENT_PREPARED.name());
+        next.put("clientReportSha256",reportSha256); write(next);
+    }
+    public void integrationPrepared(String reportSha256) throws IOException {
+        if(!requiresIntegration || step()!=Step.ACCOUNT_PREPARED || !digest(reportSha256))
+            throw new IOException("Inactive integration step is out of order or unverified");
+        Map<String,String> next=new TreeMap<>(values); next.put("step",Step.INTEGRATION_PREPARED.name());
+        next.put("integrationReportSha256",reportSha256); write(next);
+    }
+    public void collectionPrepared(String intentSha256,String installationId,String path,String dataIdentity) throws IOException {
+        if(step()!=Step.VAULT_PREPARED) throw new IOException("Inactive collection step is out of order");
+        Map<String,String> next=new TreeMap<>(values); next.put("step",Step.COLLECTION_PREPARED.name());
+        next.put("collectionIntentSha256",intentSha256); next.put("collectionInstallationId",installationId);
+        next.put("collectionPath",path); next.put("dataIdentity",dataIdentity); write(next);
+    }
+    private void write(Map<String,String> next) throws IOException {
+        validateState(next);
+        StringBuilder text=new StringBuilder();
+        for(Map.Entry<String,String> item:new TreeMap<>(next).entrySet()) text.append(item.getKey()).append('=').append(item.getValue()).append('\n');
+        String checksum=sha256(text.toString().getBytes(StandardCharsets.US_ASCII));
+        text.append("checksum=").append(checksum).append('\n');
+        Path pending=file.resolveSibling(file.getFileName()+".next");
+        if(exists(pending)) { regular(pending); Files.delete(pending); }
+        try(FileChannel output=FileChannel.open(pending,Set.of(StandardOpenOption.CREATE_NEW,StandardOpenOption.WRITE,LinkOption.NOFOLLOW_LINKS),
+                PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rw-------")))) {
+            ByteBuffer bytes=ByteBuffer.wrap(text.toString().getBytes(StandardCharsets.US_ASCII));
+            while(bytes.hasRemaining()) output.write(bytes);
+            output.force(true);
+        }
+        checkpoint.at("ready-"+next.get("step"));
+        if(exists(file)) regular(file);
+        Files.move(pending,file,StandardCopyOption.ATOMIC_MOVE,StandardCopyOption.REPLACE_EXISTING);
+        storage.syncDirectory(file.getParent()); values=new TreeMap<>(next);
+        checkpoint.at("written-"+next.get("step"));
+    }
+    private void validateState(Map<String,String> values) throws IOException {
+        Step step;
+        try { step=Step.valueOf(values.get("step")); }
+        catch(RuntimeException invalid) { throw new IOException("Invalid inactive preparation step",invalid); }
+        if(requiresIntegration) {
+            if(step.ordinal()>=Step.INTEGRATION_PREPARED.ordinal() ? !digest(values.get("integrationReportSha256")) : !"-".equals(values.get("integrationReportSha256")))
+                throw new IOException("Inactive preparation integration evidence differs");
+        } else if(step==Step.INTEGRATION_PREPARED || values.containsKey("integrationReportSha256"))
+            throw new IOException("Earlier diagnostic scopes cannot contain integration evidence");
+        if(requiresClient) {
+            if(step.ordinal()>=Step.CLIENT_PREPARED.ordinal() ? !digest(values.get("clientReportSha256")) : !"-".equals(values.get("clientReportSha256")))
+                throw new IOException("Inactive preparation client evidence differs");
+        } else if(step==Step.CLIENT_PREPARED || values.containsKey("clientReportSha256"))
+            throw new IOException("Legacy keyring-only preparation cannot contain client evidence");
+        if(step.ordinal()>=Step.VAULT_PREPARED.ordinal() ? !digest(values.get("vaultSha256")) : !"-".equals(values.get("vaultSha256")))
+            throw new IOException("Inactive preparation vault evidence differs");
+        if(step==Step.COLLECTION_PREPARED) {
+            if(!digest(values.get("collectionIntentSha256")) || !digest(values.get("collectionInstallationId"))
+                    || !values.get("collectionPath").matches("/org/freedesktop/secrets/collection/[A-Za-z0-9_]+")
+                    || values.get("collectionPath").endsWith("/session") || !values.get("dataIdentity").matches("[0-9]+:[0-9]+"))
+                throw new IOException("Inactive preparation collection evidence differs");
+        } else for(String key:Set.of("collectionIntentSha256","collectionInstallationId","collectionPath","dataIdentity"))
+            if(!"-".equals(values.get(key))) throw new IOException("Unexpected collection evidence before preparation");
+    }
+    private void regular(Path path) throws IOException {
+        if(!Files.isRegularFile(path,LinkOption.NOFOLLOW_LINKS) || storage.linkCount(path)!=1
+                || !Files.getOwner(path,LinkOption.NOFOLLOW_LINKS).equals(owner)
+                || !Files.getPosixFilePermissions(path,LinkOption.NOFOLLOW_LINKS).equals(PosixFilePermissions.fromString("rw-------"))
+                || Files.size(path)>8192) throw new IOException("Unsafe inactive preparation journal");
+    }
+    static boolean exists(Path path) throws IOException {
+        try { Files.readAttributes(path,java.nio.file.attribute.BasicFileAttributes.class,LinkOption.NOFOLLOW_LINKS); return true; }
+        catch(NoSuchFileException absent) { return false; }
+    }
+    private static boolean safe(String value) { return value!=null && value.matches("[A-Za-z0-9_./:+ -]{1,1024}"); }
+    private static boolean digest(String value) { return value!=null && value.matches("[0-9a-f]{64}"); }
+    static String sha256(byte[] bytes) {
+        try { return hex(MessageDigest.getInstance("SHA-256").digest(bytes)); }
+        catch(java.security.NoSuchAlgorithmException impossible) { throw new IllegalStateException(impossible); }
+    }
+    private static String hex(byte[] bytes) {
+        StringBuilder result=new StringBuilder(); for(byte b:bytes) result.append(String.format(Locale.ROOT,"%02x",b&255)); return result.toString();
+    }
+}

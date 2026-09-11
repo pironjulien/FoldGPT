@@ -2,9 +2,9 @@
 
 `FoldActivity` now extends the application-owned
 `com.termux.x11.FoldDisplayActivity`, which inherits the embedded X11 activity.
-No upstream/vendor file is replaced or patched. The Java superclass and normal
-Android resource overlays make the change reproducible in a clean application
-build while preserving existing vendor changes.
+This application-side UI extension uses the Java superclass and normal Android
+resource overlays without adding a replacement upstream file. It builds on the
+existing FoldGPT changes already present in the committed vendor tree.
 
 The intermediary uses the same Java package to override the upstream
 package-private `buildNotification()` method. Its `@Override` intentionally

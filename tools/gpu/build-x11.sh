@@ -22,7 +22,10 @@ toolchain="$ndk/toolchains/llvm/prebuilt/linux-x86_64/bin"
 "$toolchain/clang" --version
 export LC_ALL=C TZ=UTC
 export SOURCE_DATE_EPOCH
-SOURCE_DATE_EPOCH=$(git -C "$repo/vendor/termux-x11" show -s --format=%ct HEAD)
+# The public source tree includes vendor contents without their Git databases.
+# Use the recorded upstream revision for provenance; snapshot hashes below
+# identify the exact FoldGPT-modified inputs actually compiled.
+SOURCE_DATE_EPOCH=$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["sourceDateEpoch"])' "$repo/tools/gpu/termux-x11-upstream.json")
 mkdir -p "$build_parent"
 work=$(mktemp -d "$build_parent/build-XXXXXXXX")
 mkdir "$work/source" "$work/artifact"
@@ -45,7 +48,7 @@ fi
 "$snapshot_python" --version > "$artifact/snapshot-python-version.txt"
 
 # Snapshot and hash the exact current C sources, including untracked correction
-# headers. Reject concurrent source changes; never change the submodule checkout.
+# headers. Reject concurrent source changes; never change the vendored sources.
 "$snapshot_python" - "$source_arg" "$work_arg" <<'PY'
 import hashlib, json, pathlib, shutil, sys
 origin, work = map(pathlib.Path, sys.argv[1:])
@@ -86,34 +89,35 @@ for name in before:
 (work / 'artifact/normalized-text-files.json').write_text(json.dumps(normalized, indent=2) + '\n')
 (work / 'artifact/source-normalized.json').write_text(json.dumps(manifest(work / 'source'), sort_keys=True, indent=2) + '\n')
 PY
-git -C "$repo/vendor/termux-x11" rev-parse HEAD > "$artifact/upstream-commit.txt"
-git -C "$repo/vendor/termux-x11" submodule status --recursive > "$artifact/submodule-commits.txt"
-git -C "$repo/vendor/termux-x11" diff --binary -- lorie/src/main/cpp > "$artifact/tracked-source.patch"
+cp "$repo/tools/gpu/termux-x11-upstream.json" "$artifact/upstream-provenance.json"
+python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["base"])' "$artifact/upstream-provenance.json" > "$artifact/upstream-commit.txt"
 cp "$ndk/source.properties" "$artifact/ndk-source.properties"
 cp "$repo/vendor/termux-x11/LICENSE" "$artifact/Termux-X11-LICENSE"
 sha256sum "$toolchain/clang" > "$artifact/compiler.sha256"
 printf '%s\n' "$archive_url" > "$artifact/ndk-archive-url.txt"
 printf '%s\n' "$archive_sha256" > "$artifact/ndk-archive.sha256"
 
-# A clean public clone has no dirty vendor changes. Apply the versioned FoldGPT
-# patch, or verify it is already present, only in our normalized source copy.
+# The public vendor tree already includes FoldGPT changes. Apply each versioned
+# patch only when absent, verifying its state in our normalized source copy.
 cp "$repo/tools/gpu/termux-x11-dmabuf-sync.patch" "$artifact/foldgpt-source.patch"
 sha256sum "$artifact/foldgpt-source.patch" > "$artifact/foldgpt-source.patch.sha256"
 cp "$repo/tools/gpu/termux-x11-dmabuf-memfd.patch" "$artifact/foldgpt-memfd.patch"
 sha256sum "$artifact/foldgpt-memfd.patch" > "$artifact/foldgpt-memfd.patch.sha256"
 # Normalize a snapshot that already has the incremental correction back to the
 # base before verifying its complete new-file hunk. The vendor stays untouched.
-if patch --fuzz=0 -p5 -R --dry-run -d "$work/source" -i "$artifact/foldgpt-memfd.patch" >/dev/null 2>&1; then
-    patch --fuzz=0 -p5 -R -d "$work/source" -i "$artifact/foldgpt-memfd.patch"
+# --force keeps a reverse probe reverse: GNU patch must not silently choose the
+# forward direction when the incremental change is absent.
+if patch --force --fuzz=0 -p5 -R --dry-run -d "$work/source" -i "$artifact/foldgpt-memfd.patch" >/dev/null 2>&1; then
+    patch --force --fuzz=0 -p5 -R -d "$work/source" -i "$artifact/foldgpt-memfd.patch"
 fi
-if ! patch -p5 -R --dry-run -d "$work/source" -i "$artifact/foldgpt-source.patch" >/dev/null 2>&1; then
-    patch -p5 --dry-run -d "$work/source" -i "$artifact/foldgpt-source.patch" >/dev/null
-    patch -p5 -d "$work/source" -i "$artifact/foldgpt-source.patch"
+if ! patch --force --fuzz=0 -p5 -R --dry-run -d "$work/source" -i "$artifact/foldgpt-source.patch" >/dev/null 2>&1; then
+    patch --force --fuzz=0 -p5 --dry-run -d "$work/source" -i "$artifact/foldgpt-source.patch" >/dev/null
+    patch --force --fuzz=0 -p5 -d "$work/source" -i "$artifact/foldgpt-source.patch"
 fi
-patch -p5 -R --dry-run -d "$work/source" -i "$artifact/foldgpt-source.patch" >/dev/null
-patch --fuzz=0 -p5 --dry-run -d "$work/source" -i "$artifact/foldgpt-memfd.patch" >/dev/null
-patch --fuzz=0 -p5 -d "$work/source" -i "$artifact/foldgpt-memfd.patch"
-patch --fuzz=0 -p5 -R --dry-run -d "$work/source" -i "$artifact/foldgpt-memfd.patch" >/dev/null
+patch --force --fuzz=0 -p5 -R --dry-run -d "$work/source" -i "$artifact/foldgpt-source.patch" >/dev/null
+patch --force --fuzz=0 -p5 --dry-run -d "$work/source" -i "$artifact/foldgpt-memfd.patch" >/dev/null
+patch --force --fuzz=0 -p5 -d "$work/source" -i "$artifact/foldgpt-memfd.patch"
+patch --force --fuzz=0 -p5 -R --dry-run -d "$work/source" -i "$artifact/foldgpt-memfd.patch" >/dev/null
 
 # Native source compilation also needs POSIX case semantics: on NTFS, Bionic's
 # <xlocale.h> incorrectly resolves to libX11's Xlocale.h through its -I path.
@@ -196,8 +200,7 @@ manifest = {
     'foldgptPatchSha256': hashlib.sha256((artifact / 'foldgpt-source.patch').read_bytes()).hexdigest(),
     'foldgptMemfdPatchSha256': hashlib.sha256((artifact / 'foldgpt-memfd.patch').read_bytes()).hexdigest(),
     'sourceInputSha256': hashlib.sha256((artifact / 'source-input.json').read_bytes()).hexdigest(),
-    'sourceDateEpoch': int(subprocess.check_output(['git', '-C', str(repo / 'vendor/termux-x11'),
-                                                 'show', '-s', '--format=%ct', 'HEAD'])),
+    'sourceDateEpoch': json.loads((artifact / 'upstream-provenance.json').read_text())['sourceDateEpoch'],
     'deviceTested': False, 'installedIntoApk': False,
 }
 (artifact / 'build-manifest.json').write_text(json.dumps(manifest, indent=2) + '\n')

@@ -1,0 +1,2 @@
+# CDP transport imported by the offline IME regression suite.
+websockets==15.0.1

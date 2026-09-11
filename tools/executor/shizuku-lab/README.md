@@ -4,8 +4,8 @@ Separate diagnostic APK, package `app.foldgpt.shizukuprobe`. It neither patches
 FoldGPT nor the official client. This is a qualification instrument, not the
 production command executor and not a sandbox claim.
 
-The [7 September device trial](../../../docs/research/shizuku-bionic-trial-2026-09-07.md)
-now passes in the frozen `build/fixed-v5-7fa4f638/app-debug.apk`: native
+The 7 September development trial (its full report and APK are not distributed
+in this source release) passed in the frozen `build/fixed-v5-7fa4f638/app-debug.apk`: native
 Bash/Bionic Python, three tests, actual zipapp build/run, six interpreter
 denials and complete cleanup. Its pinned guard is
 `7fa4f638c431866e69dcda8618a3e8872b19861941d5d7bd1dbc8ec92352893b`.
@@ -43,14 +43,13 @@ This context-only APK does not address the later worker confinement contract.
 
 ## Build on the PC
 
-Prerequisites already present in this workspace: Java 21, Android SDK API 37,
+Prerequisites to install on the contributor's machine: Java 21, Android SDK API 37,
 Android Gradle Plugin 9.3.1, Gradle 9.7.1. The project is independent of the
-existing FoldGPT Android build.
+existing FoldGPT Android build. Configure `JAVA_HOME` and `ANDROID_HOME` for your
+installation and put the Gradle 9.7.1 `bin` directory on `PATH`.
 
 ```powershell
-$env:JAVA_HOME = 'C:\Program Files\Microsoft\jdk-21.0.12.8-hotspot'
-$env:ANDROID_HOME = "$env:LOCALAPPDATA\Android\Sdk"
-& 'C:\Users\julie\.gradle\wrapper\dists\gradle-9.7.1-bin\1w1c7tv4s851m17nbqdsro2tv\gradle-9.7.1\bin\gradle.bat' --no-daemon :app:assembleDebug
+gradle --no-daemon :app:assembleDebug
 ```
 
 Run from this directory. The first build generated dependency verification

@@ -1,8 +1,40 @@
 # Changelog
 
-## Unreleased — 2026-09-10
+Notable changes to FoldGPT are recorded here. Source preview versions describe the published implementation and its documentation; they do not certify a consumer installation or every device workflow.
 
-- Require an explicit reviewed native executor package for candidate Android builds.
-- Verify executor assets, JNI inventory, and the final APK before publication.
-- Repair the native workspace admission path that previously fell back to a guest path and produced `EACCES`.
-- Document Android process-pressure limits, publication scope, and contribution rules.
+## [0.2.0-alpha.1] — 2026-09-11
+
+The first named source preview opens FoldGPT to contributors: an Android host for the Linux ARM64 ChatGPT desktop client, with desktop Codex and local project tools on a Galaxy Z Fold.
+
+### Experience and implementation
+
+- Android host, embedded Termux:X11 display, touch and keyboard integration, and a separate runtime service with recovery and explicit-stop handling.
+- Debian/PRoot compatibility environment and a native execution layer for local commands, project files, Git, Python, and Node workflows.
+- ARM64 workspace integration for document creation and rendering, including demonstrated DOCX, PPTX, XLSX, and PDF workflows.
+- Version-specific desktop workspace adaptation and source recovery records for the open-source Codex execution engine.
+- Android bridge plugin and supporting source for permission-based device integrations.
+
+### Source distribution
+
+- Restore Android application, installer, shell-loader configuration, native execution helpers, and build inputs omitted from the earlier public snapshot.
+- Record vendored Termux:X11 and PRoot source provenance and explain dependency licenses and proprietary-client acquisition.
+- Require a complete, explicitly selected native executor package for production-candidate builds; verify its assets and JNI inventory before assembling the final APK.
+
+### Fixes
+
+- Repair the native workspace admission path whose fallback to a guest path produced `EACCES` during local command execution.
+
+### Documentation and collaboration
+
+- Add a product overview, architecture diagram, compatibility matrix, FAQ, roadmap, and a documentation entry point.
+- Add contribution and security-reporting guidance, structured issue forms, and a pull-request template.
+- Separate product support statements from dated development evidence and publication drafts.
+
+### Release boundaries
+
+- Source only: no consumer APK, preconfigured Linux image, proprietary client package, or account data is included.
+- The demonstrated target is the development Galaxy Z Fold 8. Clean-device installation, updates, Remote, and sustained simultaneous/background sessions remain under qualification.
+- Android's shared phantom-process budget still applies. Multiple ordinary APKs do not create separate budgets; reducing process pressure must preserve independent conversations.
+- Desktop runtime, files, and tools run locally. Model inference uses OpenAI's online services.
+
+[0.2.0-alpha.1]: https://github.com/pironjulien/FoldGPT/releases/tag/v0.2.0-alpha.1

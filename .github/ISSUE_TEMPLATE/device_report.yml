@@ -1,0 +1,30 @@
+name: Device compatibility report
+description: Share a bounded, reproducible result from a device you tested.
+body:
+  - type: input
+    id: revision
+    attributes:
+      label: Source revision or release
+    validations:
+      required: true
+  - type: textarea
+    id: hardware
+    attributes:
+      label: Device and runtime
+      description: Device model, Android version, GPU, desktop client version, and build/runtime setup. Do not include a device serial or other personal identifiers.
+    validations:
+      required: true
+  - type: textarea
+    id: procedure
+    attributes:
+      label: Exact workflow tested
+      description: Describe steps, duration, relevant permissions, and whether folding, background use, or concurrent conversations were involved.
+    validations:
+      required: true
+  - type: textarea
+    id: result
+    attributes:
+      label: Results and limits
+      description: What passed, what failed, and what was not tested? Include minimal redacted evidence and repeatability.
+    validations:
+      required: true

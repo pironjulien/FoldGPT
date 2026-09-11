@@ -1,0 +1,40 @@
+// Contributors use Android Gradle Plugin's ordinary local debug keystore.
+// An update of an existing installation must use its original signing key.
+// Supply it explicitly; this public checkout never searches a private vault.
+def configuredKey = System.getenv('FOLDGPT_SIGNING_KEYSTORE')
+def expectedFingerprint = System.getenv('FOLDGPT_SIGNING_CERT_SHA256')
+def storeSecret = System.getenv('FOLDGPT_SIGNING_STORE_PASSWORD') ?: 'android'
+def entryAlias = System.getenv('FOLDGPT_SIGNING_KEY_ALIAS') ?: 'androiddebugkey'
+def entrySecret = System.getenv('FOLDGPT_SIGNING_KEY_PASSWORD') ?: storeSecret
+
+if (expectedFingerprint && !configuredKey) {
+    throw new GradleException('FOLDGPT_SIGNING_CERT_SHA256 requires FOLDGPT_SIGNING_KEYSTORE.')
+}
+if (configuredKey) {
+    android.signingConfigs.debug {
+        storeFile new File(configuredKey)
+        storePassword storeSecret
+        keyAlias entryAlias
+        keyPassword entrySecret
+    }
+    tasks.matching { it.name == 'validateSigningDebug' }.configureEach {
+        doFirst {
+            if (!new File(configuredKey).isFile()) {
+                throw new GradleException('The explicitly selected FoldGPT signing keystore does not exist.')
+            }
+            if (expectedFingerprint) {
+                def expected = expectedFingerprint.replace(':', '').toLowerCase(java.util.Locale.ROOT)
+                if (!(expected ==~ /[0-9a-f]{64}/)) {
+                    throw new GradleException('FOLDGPT_SIGNING_CERT_SHA256 must be a SHA-256 certificate fingerprint.')
+                }
+                def keyStore = java.security.KeyStore.getInstance(new File(configuredKey), storeSecret.toCharArray())
+                def certificate = keyStore.getCertificate(entryAlias)
+                def fingerprint = certificate == null ? null : java.security.MessageDigest.getInstance('SHA-256')
+                    .digest(certificate.encoded).encodeHex().toString()
+                if (fingerprint != expected) {
+                    throw new GradleException('The selected FoldGPT signing certificate differs from the required update identity.')
+                }
+            }
+        }
+    }
+}

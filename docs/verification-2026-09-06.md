@@ -1,5 +1,7 @@
 # Device checkpoint: 6 September 2026
 
+> **Historical device checkpoint.** This report applies to the setup and tests described below. For the source release's current scope, use the [compatibility matrix](compatibility.md) and [changelog](../CHANGELOG.md).
+
 This is development evidence, not a public APK release qualification.
 Tests used the connected Samsung SM-F971B, Android API 37, app UID 10412,
 without Android root or bootloader changes.

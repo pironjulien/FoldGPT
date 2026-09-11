@@ -4,8 +4,9 @@ FoldGPT fournit une distribution Linux ARM64 identifiée `FoldGPT-ARM64-*`.
 Elle réutilise les bibliothèques et plugins portables OpenAI avec des moteurs
 Node/Python et des extensions natives Linux ARM64. Ce bundle est une adaptation
 FoldGPT ; il ne se présente pas comme un téléchargement officiel Linux ARM64.
-Le [constat de distribution initial](research/workspace-dependencies-20260909.md)
-décrit précisément le catalogue et le 404 observés.
+Les sections suivantes décrivent l'intégration et les observations réalisées
+sur le téléphone de développement. La [matrice de compatibilité](compatibility.md)
+définit les limites de la version source publique.
 
 ## Livraison vérifiée sur le Fold, 9 septembre 2026
 

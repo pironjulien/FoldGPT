@@ -1,0 +1,27 @@
+name: Feature proposal
+description: Propose a focused improvement to the FoldGPT experience or implementation.
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What would this help you do?
+      description: Describe a real workflow and the limitation you encounter.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behavior
+      description: Explain the experience you want. Implementation ideas are welcome, but optional.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives and tradeoffs
+      description: Include relevant impact on process usage, permissions, compatibility, or accessibility.
+  - type: textarea
+    id: verification
+    attributes:
+      label: How could we verify it?
+      description: A concrete scenario or measurable outcome helps define completion.
