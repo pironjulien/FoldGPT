@@ -1,0 +1,19 @@
+{
+  "name": "foldgpt-android",
+  "version": "0.1.0+codex.20260909132129",
+  "description": "Contr\u00f4le des applications Android et recherche SMS avec les permissions FoldGPT.",
+  "author": {
+    "name": "FoldGPT"
+  },
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "FoldGPT Android",
+    "shortDescription": "Applications Android et SMS sur le t\u00e9l\u00e9phone.",
+    "longDescription": "Contr\u00f4le visuel Android, recherche SMS et pr\u00e9paration de r\u00e9ponses. Acc\u00e8s s\u00e9par\u00e9s et r\u00e9vocables ; envoi seulement sur demande explicite. Les fonctions Google Messages comme les archives passent par son interface.",
+    "developerName": "FoldGPT",
+    "category": "Productivity",
+    "capabilities": [],
+    "defaultPrompt": "V\u00e9rifie les capacit\u00e9s Android disponibles sur mon Fold."
+  },
+  "mcpServers": "./.mcp.json"
+}
