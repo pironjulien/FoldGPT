@@ -2,6 +2,16 @@
 
 Notable changes to FoldGPT are recorded here. Source preview versions describe the published implementation and its documentation; they do not certify a consumer installation or every device workflow.
 
+## [Unreleased]
+
+### Showcase and documentation
+
+- Move the showcase into the Julien Piron portfolio at `https://julienpiron.fr/foldgpt/` and publish its static source under `site/`.
+- Use the application's exact vector icon and graphite/gold identity in the website and repository artwork.
+- Replace simulated demonstrations with historical device captures and explicit media provenance. The interactive handset remains clearly identified as a WebGL visualization.
+- Introduce a particle handset with rotation, fold controls, dispersion and reassembly, plus accessible controls and reduced-motion support.
+- Link the README and product documentation to the canonical portfolio page and its authentic capture gallery.
+
 ## [0.2.0-alpha.1] — 2026-09-11
 
 The first named source preview opens FoldGPT to contributors: an Android host for the Linux ARM64 ChatGPT desktop client, with desktop Codex and local project tools on a Galaxy Z Fold.

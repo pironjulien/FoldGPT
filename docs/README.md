@@ -2,6 +2,8 @@
 
 FoldGPT brings a desktop ChatGPT and Codex workspace to the inner screen of a Galaxy Z Fold. Start with the product, then explore how the Android host makes it possible.
 
+Visit the [FoldGPT showcase on julienpiron.fr](https://julienpiron.fr/foldgpt/) for the interactive handset, authentic development-device captures, and a visual explanation of the architecture.
+
 | Guide | What you will find |
 | --- | --- |
 | [Product overview](overview.md) | The experience, practical uses, and scope of the source release |

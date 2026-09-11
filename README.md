@@ -7,12 +7,12 @@
 The Linux ARM64 desktop client, running locally on Android.<br>
 Your projects and tools on the phone. No root or bootloader unlock required.
 
-[![Source alpha](https://img.shields.io/badge/release-v0.2.0--alpha.1-f2a65a?style=flat-square)](https://github.com/pironjulien/FoldGPT/releases/tag/v0.2.0-alpha.1)
+[![Source alpha](https://img.shields.io/badge/release-v0.2.0--alpha.1-D7B56D?style=flat-square)](https://github.com/pironjulien/FoldGPT/releases/tag/v0.2.0-alpha.1)
 [![Public checks](https://github.com/pironjulien/FoldGPT/actions/workflows/public-checks.yml/badge.svg)](https://github.com/pironjulien/FoldGPT/actions/workflows/public-checks.yml)
-[![License](https://img.shields.io/badge/license-GPL--3.0--or--later-70d9df?style=flat-square)](LICENSE)
-[![Contributions welcome](https://img.shields.io/badge/contributions-welcome-a889ff?style=flat-square)](CONTRIBUTING.md)
+[![License](https://img.shields.io/badge/license-GPL--3.0--or--later-D7B56D?style=flat-square)](LICENSE)
+[![Contributions welcome](https://img.shields.io/badge/contributions-welcome-58616E?style=flat-square)](CONTRIBUTING.md)
 
-**[Explore the website](https://foldgpt.julienpiron.fr)** · **[Documentation](docs/README.md)** · **[Release](https://github.com/pironjulien/FoldGPT/releases/tag/v0.2.0-alpha.1)** · **[Discussions](https://github.com/pironjulien/FoldGPT/discussions)**
+**[Explore the website](https://julienpiron.fr/foldgpt/)** · **[Documentation](docs/README.md)** · **[Release](https://github.com/pironjulien/FoldGPT/releases/tag/v0.2.0-alpha.1)** · **[Discussions](https://github.com/pironjulien/FoldGPT/discussions)**
 
 </div>
 
@@ -36,6 +36,12 @@ The Android app combines an embedded display, a Linux compatibility environment,
 | **06** | **An open foundation** | Source, compatibility adapters, checks, and engineering documentation that contributors can inspect and improve. |
 
 Read the [product overview](docs/overview.md) for the experience and the [workspace tools guide](docs/workspace-dependencies.md) for supported document workflows.
+
+## See the real interface
+
+[![Real Codex desktop capture from the development Fold; account details and session controls masked](site/assets/codex-desktop.png)](https://julienpiron.fr/foldgpt/#captures)
+
+*A historical capture from the development Fold, with account details and session controls masked. The [showcase gallery](https://julienpiron.fr/foldgpt/#captures) also includes the real Android keyboard and ARM64 workspace settings. The interactive handset is a 3D visualization; the screen images are authentic captures, not a live session or recorded video. [Media provenance](site/assets/MEDIA-NOTICES.md).*
 
 ## How it works
 
@@ -70,7 +76,7 @@ The repository includes vendored Termux:X11 and PRoot sources. No recursive subm
 | Runtime packaging and validation | [`tools/runtime`](tools/runtime) |
 | Client compatibility patches | [`recovery/engine`](recovery/engine) |
 | Product and engineering guides | [`docs`](docs/README.md) |
-| Public showcase | [`site`](site) |
+| Public showcase on julienpiron.fr | [`site`](site/README.md) |
 
 ## Where the alpha stands
 
@@ -100,6 +106,6 @@ FoldGPT’s host and integration code are **GPL-3.0-or-later**. The ChatGPT clie
 <div align="center">
 
 **Unfold your workspace.**<br>
-[Website](https://foldgpt.julienpiron.fr) · [Roadmap](docs/roadmap.md) · [Changelog](CHANGELOG.md) · [FAQ](docs/faq.md)
+[Website](https://julienpiron.fr/foldgpt/) · [Roadmap](docs/roadmap.md) · [Changelog](CHANGELOG.md) · [FAQ](docs/faq.md)
 
 </div>

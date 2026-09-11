@@ -4,6 +4,9 @@ HANDOFF.md
 x_post_assets/
 logs/
 *.png
+!site/assets/codex-desktop.png
+!site/assets/android-keyboard.png
+!site/assets/workspace-runtime.png
 __pycache__/
 *.pyc
 android/.gradle/

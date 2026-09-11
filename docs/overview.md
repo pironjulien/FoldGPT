@@ -4,6 +4,8 @@ FoldGPT turns the inner screen of a Galaxy Z Fold into a local desktop workspace
 
 The desktop session runs on the Fold. It is not a video stream from another computer. Model requests still use OpenAI's online services.
 
+The [product showcase](https://julienpiron.fr/foldgpt/) includes authentic captures of the development build. Its interactive handset is an illustration of the experience, not a live connection or recorded phone session.
+
 ## What you can explore
 
 ### Work on real projects
