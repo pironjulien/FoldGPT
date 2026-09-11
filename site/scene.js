@@ -26,16 +26,21 @@ const sceneTranslations = {
 };
 const sceneText = value => sceneEnglish ? (sceneTranslations[value] || value) : value;
 
+function sceneUnavailable(canvas, message) {
+  canvas.dataset.sceneReady = 'fallback';
+  canvas.setAttribute('aria-disabled', 'true');
+  const stage = document.querySelector('#device-stage') || canvas.parentElement;
+  if (stage) stage.dataset.ready = 'false';
+  const status = document.querySelector('#scene-status');
+  if (status) { status.textContent = sceneText(message); status.dataset.visible = 'true'; }
+  document.querySelectorAll('[data-scene-action], #fold-hinge').forEach(control => { control.disabled = true; });
+  canvas.dispatchEvent(new CustomEvent('foldscene:unavailable', { bubbles: true }));
+}
+
 if (canvas) {
   const gl = canvas.getContext('webgl', { alpha: true, antialias: true, premultipliedAlpha: false, powerPreference: 'low-power' });
   if (gl) startScene(gl, canvas);
-  else {
-    canvas.dataset.sceneReady = 'fallback';
-    const status = document.querySelector('#scene-status');
-    if (status) { status.textContent = sceneText('La scène 3D nécessite WebGL. Les captures réelles sont disponibles plus bas.'); status.dataset.visible = 'true'; }
-    document.querySelectorAll('[data-scene-action], #fold-hinge').forEach(control => { control.disabled = true; });
-    canvas.dispatchEvent(new CustomEvent('foldscene:unavailable', { bubbles: true }));
-  }
+  else sceneUnavailable(canvas, 'La scène 3D nécessite WebGL. Les captures réelles sont disponibles plus bas.');
 }
 
 function startScene(gl, canvas) {
@@ -59,7 +64,7 @@ function startScene(gl, canvas) {
     yaw: -.27, pitch: .12, yawTarget: -.27, pitchTarget: .12,
     pointerX: 0, pointerY: 0, pointerActive: 0, pointerTarget: 0,
     pointerDown: false, pointerId: null, previousX: 0, previousY: 0, travel: 0,
-    paused: reducedMotion.matches, visible: true, lost: false, lastTime: 0,
+    paused: reducedMotion.matches, visible: true, lost: true, lastTime: 0,
     request: 0, time: 0, scatter: 0, screenLoaded: false, coverLoaded: false,
     scroll: 0, scrollTarget: 0, explicitFold: false,
   };
@@ -347,55 +352,116 @@ function startScene(gl, canvas) {
 
   function compile(type, source) {
     const shader = gl.createShader(type);
-    gl.shaderSource(shader, source); gl.compileShader(shader);
-    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-      const message = gl.getShaderInfoLog(shader); gl.deleteShader(shader); throw new Error(message);
+    if (!shader) throw new Error('Unable to allocate a WebGL shader');
+    try {
+      gl.shaderSource(shader, source); gl.compileShader(shader);
+      if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(shader));
+      return shader;
+    } catch (error) {
+      gl.deleteShader(shader); throw error;
     }
-    return shader;
   }
   function program(vs, fs) {
     const result = gl.createProgram();
-    const vertexShader = compile(gl.VERTEX_SHADER, vs);
-    const fragmentShader = compile(gl.FRAGMENT_SHADER, fs);
-    gl.attachShader(result, vertexShader); gl.attachShader(result, fragmentShader); gl.linkProgram(result);
-    gl.deleteShader(vertexShader); gl.deleteShader(fragmentShader);
-    if (!gl.getProgramParameter(result, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(result));
-    const uniforms = {};
-    for (let i = 0; i < gl.getProgramParameter(result, gl.ACTIVE_UNIFORMS); i++) {
-      const name = gl.getActiveUniform(result, i).name; uniforms[name] = gl.getUniformLocation(result, name);
+    if (!result) throw new Error('Unable to allocate a WebGL program');
+    let vertexShader, fragmentShader;
+    try {
+      vertexShader = compile(gl.VERTEX_SHADER, vs);
+      fragmentShader = compile(gl.FRAGMENT_SHADER, fs);
+      gl.attachShader(result, vertexShader); gl.attachShader(result, fragmentShader); gl.linkProgram(result);
+      if (!gl.getProgramParameter(result, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(result));
+      const uniforms = {};
+      for (let i = 0; i < gl.getProgramParameter(result, gl.ACTIVE_UNIFORMS); i++) {
+        const name = gl.getActiveUniform(result, i).name; uniforms[name] = gl.getUniformLocation(result, name);
+      }
+      return { id: result, uniforms };
+    } catch (error) {
+      gl.deleteProgram(result); throw error;
+    } finally {
+      if (vertexShader) gl.deleteShader(vertexShader);
+      if (fragmentShader) gl.deleteShader(fragmentShader);
     }
-    return { id: result, uniforms };
   }
   function buffer(data, usage) {
-    const result = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, result); gl.bufferData(gl.ARRAY_BUFFER, data, usage); return result;
+    const result = gl.createBuffer();
+    if (!result) throw new Error('Unable to allocate a WebGL buffer');
+    try {
+      gl.bindBuffer(gl.ARRAY_BUFFER, result); gl.bufferData(gl.ARRAY_BUFFER, data, usage); return result;
+    } catch (error) {
+      gl.deleteBuffer(result); throw error;
+    }
   }
   function texture() {
-    const result = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, result);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([21, 24, 30, 255]));
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-    return result;
+    const result = gl.createTexture();
+    if (!result) throw new Error('Unable to allocate a WebGL texture');
+    try {
+      gl.bindTexture(gl.TEXTURE_2D, result);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([21, 24, 30, 255]));
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+      return result;
+    } catch (error) {
+      gl.deleteTexture(result); throw error;
+    }
+  }
+  function disposeGPU(resources) {
+    if (!resources) return;
+    for (const name of ['mesh', 'points']) if (resources[name]) gl.deleteProgram(resources[name].id);
+    for (const name of ['meshBuffer', 'positionBuffer', 'attributeBuffer']) if (resources[name]) gl.deleteBuffer(resources[name]);
+    for (const name of ['screen', 'cover']) if (resources[name]) gl.deleteTexture(resources[name]);
   }
   function createGPU() {
-    return {
-      mesh: program(meshVS, meshFS), points: program(pointVS, pointFS),
-      meshBuffer: buffer(meshData, gl.STATIC_DRAW), positionBuffer: buffer(positions, gl.DYNAMIC_DRAW),
-      attributeBuffer: buffer(attributes, gl.STATIC_DRAW), screen: texture(), cover: texture(),
-    };
+    const resources = {};
+    try {
+      resources.mesh = program(meshVS, meshFS); resources.points = program(pointVS, pointFS);
+      resources.meshBuffer = buffer(meshData, gl.STATIC_DRAW);
+      resources.positionBuffer = buffer(positions, gl.DYNAMIC_DRAW);
+      resources.attributeBuffer = buffer(attributes, gl.STATIC_DRAW);
+      resources.screen = texture(); resources.cover = texture();
+      if (gl.isContextLost() || gl.getError() !== gl.NO_ERROR) throw new Error('WebGL resource initialization failed');
+      return resources;
+    } catch (error) {
+      disposeGPU(resources); throw error;
+    }
   }
-  let gpu;
-  try { gpu = createGPU(); }
-  catch (error) {
-    canvas.dataset.sceneReady = 'fallback';
-    announce('La scène 3D est indisponible dans ce navigateur. Retrouvez les captures réelles plus bas.', true);
-    console.warn('FoldGPT scene initialization failed:', error.message);
-    return;
+  let gpu = null, gpuGeneration = 0;
+  function suspendGraphics(message, error) {
+    state.lost = true; ++gpuGeneration; stop();
+    const previous = gpu; gpu = null; disposeGPU(previous);
+    state.screenLoaded = false; state.coverLoaded = false;
+    if (state.pointerId !== null && canvas.hasPointerCapture(state.pointerId)) canvas.releasePointerCapture(state.pointerId);
+    state.pointerDown = false; state.pointerId = null; state.pointerTarget = 0; state.pointerActive = 0;
+    canvas.dataset.dragging = 'false';
+    sceneUnavailable(canvas, message);
+    if (error) console.warn('FoldGPT scene initialization failed:', error.message);
+  }
+  function initializeGraphics(restoring = false) {
+    stop(); ++gpuGeneration; state.lost = true;
+    const previous = gpu; gpu = null; disposeGPU(previous);
+    state.screenLoaded = false; state.coverLoaded = false;
+    try { gpu = createGPU(); }
+    catch (error) {
+      suspendGraphics('La scène 3D est indisponible dans ce navigateur. Retrouvez les captures réelles plus bas.', error);
+      return;
+    }
+    state.lost = false;
+    document.querySelectorAll('[data-scene-action], #fold-hinge').forEach(control => { control.disabled = false; });
+    canvas.removeAttribute('aria-disabled');
+    snap(); resize(); setPaused(state.paused);
+    if (!restoring && !state.paused) { assembleEntrance(); draw(); }
+    loadTexture(canvas.dataset.sceneScreen, 'screen'); loadTexture(canvas.dataset.sceneCover, 'cover');
+    canvas.dataset.sceneReady = 'true'; stage.dataset.ready = 'true';
+    canvas.dataset.particleCount = String(count);
+    announce(restoring ? 'Scène restaurée.' : state.paused ? 'Animation désactivée selon vos préférences. Vous pouvez l’activer ou manipuler le Fold au clavier.' : 'Survolez pour déplacer les particules. Glissez pour pivoter. Cliquez pour disperser le Fold.', false);
+    canvas.dispatchEvent(new CustomEvent('foldscene:ready', { bubbles: true, detail: { particles: count } }));
   }
   function loadTexture(url, name) {
-    if (!url) return;
+    if (!url || !gpu || state.lost) return;
+    const resources = gpu, generation = gpuGeneration;
+    const current = () => !state.lost && gpu === resources && gpuGeneration === generation;
     const picture = new Image(); picture.decoding = 'async';
     picture.onload = () => {
-      if (state.lost) return;
+      if (!current()) return;
       // Fit reviewed imagery within the GPU's texture budget.
       const textureLimit = Math.min(2048, gl.getParameter(gl.MAX_TEXTURE_SIZE));
       const width = picture.naturalWidth;
@@ -411,13 +477,13 @@ function startScene(gl, canvas) {
       raster.width = Math.max(1, Math.round(width * scale));
       raster.height = Math.max(1, Math.round(height * scale));
       raster.getContext('2d').drawImage(picture, 0, 0, raster.width, raster.height);
-      gl.bindTexture(gl.TEXTURE_2D, gpu[name]); gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+      gl.bindTexture(gl.TEXTURE_2D, resources[name]); gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
       gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, raster);
       state[name + 'Loaded'] = true;
       draw();
     };
     picture.onerror = () => {
-      announce('Capture indisponible dans la scène. Les médias documentés restent accessibles plus bas.', true);
+      if (current()) announce('Capture indisponible dans la scène. Les médias documentés restent accessibles plus bas.', true);
     };
     picture.src = url;
   }
@@ -583,6 +649,7 @@ function startScene(gl, canvas) {
     announce(state.foldTarget > .8 ? 'Fold replié. Faites-le pivoter pour voir l’écran externe et les caméras.' : 'Charnière articulée. Faites glisser le Fold pour le faire pivoter.');
   }
   function explode() {
+    if (state.lost || !gpu) return;
     if (state.paused) setPaused(false); // An explicit request to animate.
     for (let i = 0; i < count; i++) {
       const p = i * 3, b = i * 9;
@@ -625,7 +692,7 @@ function startScene(gl, canvas) {
     state.pointerY = 1 - (event.clientY - rect.top) / Math.max(1, rect.height) * 2;
   }
   canvas.addEventListener('pointerdown', event => {
-    if (event.button !== 0 || state.pointerDown) return;
+    if (state.lost || !gpu || event.button !== 0 || state.pointerDown) return;
     state.pointerDown = true; state.pointerId = event.pointerId; state.travel = 0;
     state.previousX = event.clientX; state.previousY = event.clientY;
     canvas.setPointerCapture(event.pointerId); pointer(event);
@@ -633,6 +700,7 @@ function startScene(gl, canvas) {
     canvas.dataset.dragging = 'true'; wake();
   });
   canvas.addEventListener('pointermove', event => {
+    if (state.lost || !gpu) return;
     pointer(event);
     state.pointerTarget = state.paused ? 0 : 1;
     if (state.pointerDown && event.pointerId === state.pointerId) {
@@ -657,6 +725,7 @@ function startScene(gl, canvas) {
   canvas.addEventListener('pointercancel', endPointer);
   canvas.addEventListener('pointerleave', () => { if (!state.pointerDown) state.pointerTarget = 0; });
   canvas.addEventListener('keydown', event => {
+    if (state.lost || !gpu) return;
     if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', ' ', 'Escape'].includes(event.key)) event.preventDefault();
     switch (event.key) {
       case 'ArrowLeft': state.yawTarget -= .18; break;
@@ -697,21 +766,9 @@ function startScene(gl, canvas) {
     if (state.visible) wake(); else stop();
   }, { rootMargin: '100px', threshold: 0 }).observe(stage);
   canvas.addEventListener('webglcontextlost', event => {
-    event.preventDefault(); state.lost = true; stage.dataset.ready = 'false'; stop(); announce('Scène suspendue pendant la restauration graphique.', true);
+    event.preventDefault(); suspendGraphics('Scène suspendue pendant la restauration graphique.');
   });
-  canvas.addEventListener('webglcontextrestored', () => {
-    state.lost = false; gpu = createGPU();
-    state.screenLoaded = false; state.coverLoaded = false;
-    loadTexture(canvas.dataset.sceneScreen, 'screen'); loadTexture(canvas.dataset.sceneCover, 'cover');
-    resize(); snap(); draw(); wake(); stage.dataset.ready = 'true'; announce('Scène restaurée.', false);
-  });
+  canvas.addEventListener('webglcontextrestored', () => initializeGraphics(true));
 
-  snap(); resize(); setPaused(state.paused);
-  if (!state.paused) { assembleEntrance(); draw(); }
-  loadTexture(canvas.dataset.sceneScreen, 'screen'); loadTexture(canvas.dataset.sceneCover, 'cover');
-  canvas.dataset.sceneReady = 'true';
-  stage.dataset.ready = 'true';
-  canvas.dataset.particleCount = String(count);
-  announce(state.paused ? 'Animation désactivée selon vos préférences. Vous pouvez l’activer ou manipuler le Fold au clavier.' : 'Survolez pour déplacer les particules. Glissez pour pivoter. Cliquez pour disperser le Fold.');
-  canvas.dispatchEvent(new CustomEvent('foldscene:ready', { bubbles: true, detail: { particles: count } }));
+  initializeGraphics();
 }

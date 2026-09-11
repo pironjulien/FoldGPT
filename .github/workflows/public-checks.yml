@@ -23,6 +23,11 @@ jobs:
         run: python tools/ci/check-source-integrity.py
       - name: Python syntax
         run: python -m compileall -q runtime tools config tests
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with:
+          node-version: 22
+      - name: Showcase graphics recovery
+        run: node site/test-scene.mjs
       - name: Linux host regression suites
         run: |
           python tools/ci/run-host-tests.py

@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-09-11 — Showcase graphics recovery
+
+- Preserve the static capture and disable unavailable 3D controls after graphics initialization or restoration failures.
+- Clean up partial GPU resources, ignore stale texture callbacks and restore controls after successful recovery.
+- Add seven scene lifecycle regression tests to public CI.
+
 ## 2026-09-11 — Fold8 handset and Remote cover display
 
 - Correct the showcase model to Samsung's standard Galaxy Z Fold8 rear layout, with two cameras behind the right half of the inner display and the cover display behind the other half.

@@ -9,6 +9,7 @@ The mirror follows the portfolio's FoldGPT source, including the julienpiron.fr 
 - `index.html`: French product page, real capture gallery, architecture explorer, and source-release links.
 - `style.css`: graphite/gold visual identity, responsive layout, and accessibility styles.
 - `scene.js`: WebGL handset and particle interaction, including folding, rotation, dispersion, and reassembly.
+- `test-scene.mjs`: graphics lifecycle regression tests; run with `node site/test-scene.mjs` from the repository root. They exercise the real scene with an instrumented WebGL fixture; visual GPU rendering still needs browser verification.
 - `app.js`: gallery and accessible interface controls.
 - `locale.js`: early automatic language routing: French when it is the browser's preferred language, English otherwise, without a visible selector, cookies or geolocation.
 - `assets/`: the canonical application icon, three reviewed historical device captures, OpenAI's official Remote preview, and the banner export for social previews. Read [media notices](assets/MEDIA-NOTICES.md) before reusing them.
