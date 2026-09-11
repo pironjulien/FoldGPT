@@ -26,4 +26,4 @@ The experimental shim leaves packaged OpenAI files unchanged but modifies behavi
 
 This document is an attribution and distribution policy, not a legal clearance. Interoperability exceptions depend on jurisdiction and facts; this project has not obtained a legal determination that all proposed distribution or reverse-engineering activities qualify.
 
-Observed bootloader, verified-boot, SELinux and Knox states are recorded in [PUBLICATION.md](PUBLICATION.md). They do not guarantee Samsung Care+, payment-app compatibility, future firmware behavior, OpenAI update compatibility or suitability for sensitive data.
+Observed bootloader, verified-boot, SELinux and Knox states are recorded in [PUBLICATION.md](docs/releases/source-alpha.md). They do not guarantee Samsung Care+, payment-app compatibility, future firmware behavior, OpenAI update compatibility or suitability for sensitive data.

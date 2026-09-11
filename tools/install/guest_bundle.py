@@ -27,11 +27,11 @@ MAX_BUNDLE_BYTES = 8 * 1024 * 1024
 # Positive source/destination list: never collect a rootfs, account or binary.
 SOURCES = {
     "LICENSE": ("LICENSE", 0o644),
-    "foldgpt-session.sh": ("payload/usr/local/bin/foldgpt-session", 0o700),
+    "runtime/guest/foldgpt-session.sh": ("payload/usr/local/bin/foldgpt-session", 0o700),
     "tools/executor/foldgpt-codex-native.sh": ("payload/usr/local/bin/foldgpt-codex-native", 0o755),
-    "foldgpt_keyring.py": ("payload/usr/local/lib/foldgpt/foldgpt_keyring.py", 0o644),
-    "foldgpt_ime.py": ("payload/usr/local/lib/foldgpt/foldgpt_ime.py", 0o644),
-    "keyboard-focus.js": ("payload/usr/local/lib/foldgpt/keyboard-focus.js", 0o644),
+    "runtime/guest/foldgpt_keyring.py": ("payload/usr/local/lib/foldgpt/foldgpt_keyring.py", 0o644),
+    "runtime/guest/foldgpt_ime.py": ("payload/usr/local/lib/foldgpt/foldgpt_ime.py", 0o644),
+    "runtime/guest/keyboard-focus.js": ("payload/usr/local/lib/foldgpt/keyboard-focus.js", 0o644),
     "tools/context/foldgpt_agent_context.py": ("payload/usr/local/lib/foldgpt/foldgpt_agent_context.py", 0o644),
     "config/agent-context/foldgpt.v1.json": ("payload/usr/local/share/foldgpt/agent-environment.v1.json", 0o644),
     "tools/browser/foldgpt-open.py": ("payload/usr/local/bin/xdg-open", 0o755),

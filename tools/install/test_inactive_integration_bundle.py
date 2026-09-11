@@ -79,7 +79,20 @@ class InactiveBundleTests(unittest.TestCase):
                 installed[path] = (mode, payload)
                 cursor += int(size)
         self.assertEqual(cursor, len(data))
-        self.assertEqual(len(installed), 22)
+        expected_guest = {
+            "usr/local/share/doc/foldgpt/LICENSE",
+            "usr/local/bin/foldgpt-session", "usr/local/bin/foldgpt-codex-native",
+            "usr/local/bin/xdg-open",
+            "usr/local/lib/foldgpt/foldgpt_keyring.py",
+            "usr/local/lib/foldgpt/foldgpt_ime.py",
+            "usr/local/lib/foldgpt/keyboard-focus.js",
+            "usr/local/lib/foldgpt/foldgpt_agent_context.py",
+            "usr/local/share/foldgpt/agent-environment.v1.json",
+            "usr/local/lib/foldgpt/install/initialize_keyring.py",
+            "usr/local/lib/foldgpt/install/supervise_keyring.py",
+        }
+        self.assertEqual(set(installed), expected_guest | {bundle.CONTRACT_PATH}
+                         | {bundle.GPU_PREFIX + "/" + name for name in bundle.GPU_FILES})
         for path in (bundle.CONTEXT_HELPER, bundle.CONTEXT_MANIFEST):
             self.assertEqual(installed[path], ("0644", sources["payload/" + path]))
         self.assertEqual(installed[bundle.CONTRACT_PATH], ("0644", bundle.CONTRACT))

@@ -90,7 +90,7 @@ Sources détaillées, révisions, licences et limites de lecture :
 [test applicatif](survey-20260908-app-context.md).
 
 La même exigence s'applique à notre propre réalisation :
-[NATIVE-AUDIT.md](../../NATIVE-AUDIT.md) documente un ancien shim
+[NATIVE-AUDIT.md](../history/native-startup-2026-09-05.md) documente un ancien shim
 `libfake_userns` dans l'hôte GNU. Les essais des outils Bionic ne prouvent ni
 son retrait de l'interface ni le confinement de Chromium. Les fichiers officiels
 intacts et les protections Android conservées ne suffisent pas à qualifier

@@ -6,7 +6,7 @@ import sys
 import unittest
 from unittest.mock import AsyncMock
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "runtime" / "guest"))
 from foldgpt_ime import HOOK, Keyboard, Page
 
 

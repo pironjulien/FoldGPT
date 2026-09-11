@@ -125,9 +125,9 @@ def migrate():
                        ["files/debian/" + d for d in EXCLUDE] +
                        ["files/debian/usr/local/lib/foldgpt", "files/debian/usr/local/bin"], check=True)
         for source_name, target in {
-            "foldgpt_ime.py": "usr/local/lib/foldgpt/foldgpt_ime.py",
-            "keyboard-focus.js": "usr/local/lib/foldgpt/keyboard-focus.js",
-            "foldgpt-session.sh": "usr/local/bin/foldgpt-session",
+            "runtime/guest/foldgpt_ime.py": "usr/local/lib/foldgpt/foldgpt_ime.py",
+            "runtime/guest/keyboard-focus.js": "usr/local/lib/foldgpt/keyboard-focus.js",
+            "runtime/guest/foldgpt-session.sh": "usr/local/bin/foldgpt-session",
         }.items():
             data = (ROOT / source_name).read_bytes().replace(b"\r\n", b"\n")
             app_shell(f"cat > files/debian/{target}", input=data)

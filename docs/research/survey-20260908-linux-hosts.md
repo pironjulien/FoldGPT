@@ -36,7 +36,7 @@ après reboot sans préparation depuis le PC.
 
 **Comparaison honnête de la sécurité de l'interface :** le
 [README FoldGPT](../../README.md) décrit encore `fake_userns.c` comme un
-contournement de compatibilité, et [l'audit historique](../../NATIVE-AUDIT.md)
+contournement de compatibilité, et [l'audit historique](../history/native-startup-2026-09-05.md)
 a constaté `libfake_userns.so` dans le processus principal et un renderer.
 Ce preload supprime les demandes de namespaces et simule certains succès.
 Le test de chroot a confirmé l'absence du confinement annoncé par ce shim,
@@ -51,7 +51,7 @@ pas l'hôte Chromium dans son ensemble. Le refus de reprendre un faux bwrap
 pour la nouvelle autorité d'exécution reste justifié ; il ne clôt pas cette
 dette existante de l'interface.
 
-Dans [NATIVE-AUDIT.md](../../NATIVE-AUDIT.md), les mesures hors PRoot ont donné
+Dans [NATIVE-AUDIT.md](../history/native-startup-2026-09-05.md), les mesures hors PRoot ont donné
 `CLONE_NEWUSER=EINVAL`, `CLONE_NEWNS=EPERM`, `/proc/self/ns/user` et `pid` absents,
 Landlock ABI 6 et présence de seccomp USER_NOTIF. La [configuration récupérée](android-native-constraints-2026-09-06.md)
 indique `CONFIG_USER_NS` et `CONFIG_PID_NS` désactivés. Un errno de permission

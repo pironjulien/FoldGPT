@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-09-11 — Repository maintenance
+
+- Remove superseded Termux/QEMU launchers, one-off live-CDP experiments, the old launcher app and outdated publication drafts.
+- Group maintained guest sources under `runtime/guest/` with byte-identical generated bundles; retain the compatibility shim and diagnostics under `compat/desktop-sandbox/`.
+- Separate historical audits and release records from the root documentation; retain meaningful regression tests and document their prerequisites.
+- Repair native PRoot regression runners for source-only checkouts and include additional existing host regression suites in the standard runner.
+- Refresh the showcase screenshot in the README, ignore disposable test caches and document the source layout.
+
 ## Unreleased - 2026-09-10
 
 - Require the reviewed native executor assets and JNI libraries when packaging

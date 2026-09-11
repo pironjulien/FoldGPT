@@ -18,7 +18,7 @@ and records the actual compiler version and digest. The installed compiler is
 trusted to come from that archive; the recipe does not reinstall the toolchain.
 
 ```powershell
-wsl --distribution Ubuntu-24.04 --exec bash /mnt/c/Dev/ChatgptFold/tools/install/native/build-native.sh
+wsl --distribution Ubuntu-24.04 --exec bash /mnt/c/Dev/FoldGPT/tools/install/native/build-native.sh
 ```
 
 Defaults are `/opt/foldgpt/android-ndk-r29` for `ANDROID_NDK_HOME` and
@@ -212,3 +212,30 @@ The client package's separate interrupted same-root recovery passed on the
 host, as documented in `docs/install/inactive-client-install.md`. Android
 installation recovery still needs its own integrated test. None of these
 checks establishes a sandbox or covers unrelated untraced runtime helpers.
+
+## Host regression tests
+
+Run these from the repository root as a nonroot Linux x86_64 user:
+
+```sh
+bash tools/install/native/test-proot-sigterm.sh
+bash tools/install/native/test-proot-strict.sh
+```
+
+They require the host C compiler, talloc development headers/library, Git,
+GNU Make, Python 3, patch and tar. The strict suite additionally exercises
+seccomp and Landlock support in the host kernel; it reports a failure when the
+required behavior is unavailable rather than claiming Android support.
+
+Each runner fetches the exact PRoot commit
+`7266fb3e8516535682f5a9c8f3a7e70f6506eddb` from `termux/proot` into a new
+`/var/tmp` directory and verifies `FETCH_HEAD` before creating the source
+archive. Network access is required. Both baseline and patched binaries use
+that same archive; local `vendor/proot` files and enclosing Git history cannot
+silently become the baseline. The working vendor, APK and phone are untouched.
+
+Source archives, upstream identity, recipe snapshots, compiled binaries,
+observations and hashes stay in the printed regression directory. The SIGTERM
+suite checks actual descendant termination and reaping. The strict suite checks
+native syscall results, mappings, inherited restrictions, lifecycle behavior and
+tracer protection. Run the device qualification separately for Android changes.

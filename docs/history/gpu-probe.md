@@ -13,7 +13,7 @@ Vulkan/timestamps, GLX/Present/pixmap tests and a visible File-menu check passed
 on 6 September. The targeted calibrated-timestamp and GLX refresh errors are
 absent in the new session log. The memfd helper uses positive tmpfs/ashmem
 identification; ENOTTY is no longer treated as proof of ordinary memory.
-See [the device evidence and limits](docs/verification-2026-09-06.md).
+See [the device evidence and limits](../verification-2026-09-06.md).
 
 ## Earlier checkpoints and diagnosis
 
@@ -301,7 +301,7 @@ with an ext4 source tree to preserve case-sensitive header lookup. Its 1,986
 exports match the earlier library and its LOAD segments have 16 KiB alignment.
 The candidate APK compiles and its packaged library hash matches the built
 library. On-device cache, rendering and JNI/lifecycle tests are still required.
-See [the native build notes](tools/gpu/X11-BUILD.md).
+See [the native build notes](../../tools/gpu/X11-BUILD.md).
 
 ```powershell
 & tools/gpu/build-dmabuf-sync-probe.ps1

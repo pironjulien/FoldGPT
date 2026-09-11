@@ -20,7 +20,7 @@ PREVIOUS_LAUNCHER = "4648f7dc896c6612ea498810540518be7904b9cde4ae6507c1c59282212
 PAYLOAD = (
     ("tools/context/foldgpt_agent_context.py", "usr/local/lib/foldgpt/foldgpt_agent_context.py", "644"),
     ("config/agent-context/foldgpt.v1.json", "usr/local/share/foldgpt/agent-environment.v1.json", "644"),
-    ("foldgpt-session.sh", "usr/local/bin/foldgpt-session", "700"),
+    ("runtime/guest/foldgpt-session.sh", "usr/local/bin/foldgpt-session", "700"),
 )
 
 

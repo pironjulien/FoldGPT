@@ -5,7 +5,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { chromium } = require('playwright');
 
-const hook = fs.readFileSync(path.join(__dirname, '..', 'keyboard-focus.js'), 'utf8');
+const hook = fs.readFileSync(path.join(__dirname, '..', 'runtime', 'guest', 'keyboard-focus.js'), 'utf8');
 const fixture = `
   <style>input,textarea,button,label,div[contenteditable],iframe {display:block;margin:8px;min-height:28px}</style>
   <input id="prompt" value="PRIVATE_TEST_VALUE">

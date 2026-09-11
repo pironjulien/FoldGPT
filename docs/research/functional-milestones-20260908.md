@@ -150,7 +150,7 @@ relie ces décisions aux sources vérifiées.
 
 Le [README](../../README.md), le [point d'entrée de reprise](../../HANDOFF.md),
 le [handoff technique](../../recovery/HANDOFF.md), la
-[portée de publication](../../PUBLICATION.md) et le
+[portée de publication](../releases/source-alpha.md) et le
 [changelog](../../CHANGELOG.md) ont été actualisés avec les preuves r24.
 Ils distinguent la route UID ordinaire réellement utilisée des anciennes
 fixtures protégées. Le [complément v16](../../recovery/supplement-v16.md) est

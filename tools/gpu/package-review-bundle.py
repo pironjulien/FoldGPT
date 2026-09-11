@@ -130,7 +130,7 @@ def collect():
         "The manifest lists ELF dependencies and symbol versions. Resolve them\n"
         "from the guest distribution; Ubuntu build-sysroot libraries are omitted.\n"
         "Native Android libraries, Debian, OpenAI binaries and private data are\n"
-        "not in this bundle. Build details are in the FoldGPT GPU-PROBE.md.\n"
+        "not in this bundle. Build details are in FoldGPT docs/history/gpu-probe.md.\n"
         "Source presence alone does not establish a bit-for-bit reproducible build.\n"
     ).encode()
     return files, manifest

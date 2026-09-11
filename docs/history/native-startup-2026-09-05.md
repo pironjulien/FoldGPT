@@ -1,13 +1,15 @@
 # Audit du démarrage natif — 5 septembre 2026
 
+> Historical development record. For the current product and release scope, see [compatibility](https://github.com/pironjulien/FoldGPT/blob/main/docs/compatibility.md) and the [build guide](https://github.com/pironjulien/FoldGPT/blob/main/docs/build.md).
+
 ## Point de contrôle du 6 septembre 2026
 
 Les sections suivantes conservent les observations historiques. La recherche
 actuelle sur le noyau réel et les documentations Samsung/Qualcomm/Android/Knox
-est dans [contraintes natives](docs/research/android-native-constraints-2026-09-06.md).
+est dans [contraintes natives](../research/android-native-constraints-2026-09-06.md).
 Le noyau ne compile ni USER_NS ni PID_NS : réinstaller Bubblewrap ne suffit pas.
 
-La [preuve GNU indépendante](tools/executor/gnu-runtime/collection.md) passe
+La [preuve GNU indépendante](../../tools/executor/gnu-runtime/collection.md) passe
 désormais sur le Fold sous UID applicatif : Bash et Python ARM64 créent,
 modifient, testent et empaquettent un petit projet sous Landlock/seccomp posés
 avant PRoot strict. La collecte vérifie dix artefacts, trois tests, huit refus,
@@ -303,5 +305,5 @@ Le test visuel reste incomplet : l'écran initial est propre, mais les transitio
 de menus produisent des corruptions intermittentes. L'horloge GPU et la requête
 de fréquence GLX ont encore des erreurs. Les corrections suivantes sont
 préparées séparément ; la déconnexion USB a interrompu leur validation.
-Voir [GPU-PROBE.md](GPU-PROBE.md). Ni une faible charge CPU au repos ni les modes
+Voir [GPU-PROBE.md](gpu-probe.md). Ni une faible charge CPU au repos ni les modes
 d'écran observés à 59,95 ou 119,98 Hz ne mesurent les images réellement rendues.

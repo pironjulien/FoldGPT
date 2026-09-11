@@ -17,6 +17,7 @@ android/local.properties
 *.dex
 launcher_apk/bin/
 launcher_apk/obj/
-logs/
 *.log
-downloads/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/

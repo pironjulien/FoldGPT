@@ -245,7 +245,7 @@ extension l'addon `node-pty`, tous les plugins ou le renderer Chromium.
 Le raccordement d'un autre exécuteur de commandes ne remplace pas les
 bibliothèques et services dont le client se sert lui-même.
 
-L'[audit historique](../../NATIVE-AUDIT.md) et le
+L'[audit historique](../history/native-startup-2026-09-05.md) et le
 [relevé des hôtes Linux](survey-20260908-linux-hosts.md) signalent le shim
 `fake_userns`/preload utilisé par l'hôte GNU. Ce mécanisme ne constitue pas
 une preuve de confinement Chromium. Le présent audit ne démontre ni son
