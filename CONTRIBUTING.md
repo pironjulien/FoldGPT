@@ -25,6 +25,8 @@ Share a minimal redacted log or reproduction. Remove device serials, conversatio
 
 Maintainers review every contribution and retain merge and release control. Opening a pull request proposes a change; it does not grant direct access to the default branch. Changes to runtime permissions, lifecycle ownership, packaging, or execution boundaries receive particular scrutiny.
 
+See the [test guide](tests/README.md) for commands and platform requirements, and the [repository layout](docs/project-layout.md) before adding source files.
+
 ## Make validation meaningful
 
 Use a regression test when it can demonstrate a real behavior or failure boundary. Documentation and visual changes need appropriate review rather than tests that merely repeat their contents.

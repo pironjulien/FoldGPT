@@ -1,5 +1,7 @@
 # Fixed Android supervisor qualification
 
+> Development evidence referenced by private paths below is not part of the public source release. Use the documented test recipes to verify your own build.
+
 ## V12 preparation, PC only
 
 Use `-PfoldgptQualificationVersion=12` to select the new independent V12
@@ -11,7 +13,7 @@ supervisor and the Python CLI built for the v4 home. The shared verifier is
 `verify-qualification.py --version 12 --output <new directory>`; the historical
 V11 entry point still accepts only V11.
 
-The [V12 preparation record](../../../../docs/research/native-v12-isolated-preparation-2026-09-07.md)
+The V12 preparation record (`../../../../docs/research/native-v12-isolated-preparation-2026-09-07.md`)
 contains exact inputs, completed PC checks, build commands and pending loader
 review. No V12 APK or Android worker result is claimed by this preparation.
 
@@ -26,7 +28,7 @@ that retained V10 session's V2 base. The Java namespace remains
 `app.foldgpt.kernelqualification`; the manifest uses the full Activity name.
 
 This is prepared source, not an Android qualification result. The complete
-[PC build and independent fixture plan](../../../../docs/research/native-independent-fixture-plan-2026-09-07.md)
+PC build and independent fixture plan (`../../../../docs/research/native-independent-fixture-plan-2026-09-07.md`)
 records the inputs, checks and pending validation. The shared Activity preserves
 the existing laboratory V10 profile when compiled for `app.foldgpt.shizukuprobe`;
 the laboratory Gradle project and every frozen APK remain unchanged.

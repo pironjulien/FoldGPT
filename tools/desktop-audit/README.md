@@ -1,5 +1,7 @@
 # Inspection statique du client de bureau
 
+> Development evidence referenced by private paths below is not part of the public source release. Use the documented test recipes to verify your own build.
+
 Ces outils lisent des copies identifiées par empreinte. Ils n’importent pas les
 modules du client et n’exécutent aucun de ses scripts, builds ou installateurs.
 Les sources propriétaires et les résultats détaillés restent sous `work` ; le
@@ -100,7 +102,7 @@ peut être conservé avec le rapport ; les preuves complètes restent sous `work
 `compare-native.py` rapproche les chemins des deux versions et distingue les
 hashes identiques des exigences natives identiques. Les commandes des passes
 vérifiées et leurs limites figurent dans
-[le rapport natif](../../docs/research/desktop-native-requirements-20260908.md).
+le rapport natif (`../../docs/research/desktop-native-requirements-20260908.md`).
 
 ```powershell
 python -B -m unittest discover -s tools/desktop-audit -p test_inventory_native.py -v

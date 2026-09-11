@@ -6,10 +6,16 @@ commit=7266fb3e8516535682f5a9c8f3a7e70f6506eddb
 export LC_ALL=C TZ=UTC
 [ "$(uname -s)" = Linux ] && [ "$(uname -m)" = x86_64 ]
 [ "$(id -u)" != 0 ] || { printf 'Run this regression as a nonroot user.\n' >&2; exit 1; }
-[ "$(git -c safe.directory="$repo/vendor/proot" -C "$repo/vendor/proot" rev-parse HEAD)" = "$commit" ]
 work=$(mktemp -d /var/tmp/foldgpt-proot-strict-XXXXXXXX)
 printf 'Regression directory: %s\n' "$work"
-git -c safe.directory="$repo/vendor/proot" -C "$repo/vendor/proot" archive "$commit" > "$work/source.tar"
+# The public vendor tree has no upstream Git metadata and may contain patches.
+# Build both variants from the same exact upstream object in a fresh directory.
+git init -q "$work/upstream"
+git -C "$work/upstream" remote add origin https://github.com/termux/proot.git
+git -C "$work/upstream" fetch --depth 1 origin "$commit"
+[ "$(git -C "$work/upstream" rev-parse FETCH_HEAD)" = "$commit" ]
+git -C "$work/upstream" archive FETCH_HEAD > "$work/source.tar"
+printf '%s\n' "$commit" > "$work/upstream-commit.txt"
 cp -a "$repo/tools/install/native" "$work/recipe"
 for variant in baseline patched; do
   mkdir "$work/$variant"

@@ -1,5 +1,7 @@
 # FoldGPT Shizuku qualification
 
+> Development evidence referenced by private paths below is not part of the public source release. Use the documented test recipes to verify your own build.
+
 Separate diagnostic APK, package `app.foldgpt.shizukuprobe`. It neither patches
 FoldGPT nor the official client. This is a qualification instrument, not the
 production command executor and not a sandbox claim.
@@ -106,8 +108,8 @@ Required result checks:
    be investigated; the report alone does not prove cleanup.
 
 The main task subsequently ran this frozen context-only APK on the Fold. The
-retained [context report](../../../downloads/shizuku-lab/attempt-20260907/context-report.json)
-and [brief](../../../downloads/shizuku-lab/attempt-20260907/context-brief.json)
+retained context report (`../../../downloads/shizuku-lab/attempt-20260907/context-report.json`)
+and brief (`../../../downloads/shizuku-lab/attempt-20260907/context-brief.json`)
 show the real UserService PID 32106, UID/GID 2000, SELinux `u:r:shell:s0`, process
 and Binder-thread `Seccomp: 0`/filters 0, effective capabilities 0, and authorized
 client UID 10350. This is now a UserService measurement, not an inference from

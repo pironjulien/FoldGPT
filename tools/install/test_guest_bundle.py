@@ -194,7 +194,7 @@ class BundleTests(unittest.TestCase):
     def test_rejects_source_and_destination_symlinks_without_following(self):
         source = self.root / "LICENSE"
         source.unlink()
-        source.symlink_to(self.root / "foldgpt-session.sh")
+        source.symlink_to(self.root / "runtime/guest/foldgpt-session.sh")
         with self.assertRaises(ValueError):
             BUNDLE.build(self.root)
         outside = self.root / "outside"

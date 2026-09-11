@@ -1,96 +1,77 @@
 # Development checks
 
-## Filesystem policy and GPU deployment
+Keep regression tests with the code they protect. They cover input, credentials,
+installation, files, process ownership and recovery; they are not application
+features or generated build output. Retired one-off inspection scripts are not
+part of the maintained test suite.
 
-```powershell
-python -m unittest discover -s tests -p 'test_managed_policy.py' -v
-python -m unittest discover -s tests -p 'test_gpu_archive.py' -v
-```
+## Linux host tests — the CI entry point
 
-The 23 policy tests validate the preparatory resolver's immutable lexical
-decisions and explicit rejection of unsupported input. They do not enforce
-native filesystem permissions; see `tools/policy/README.md`.
-
-GPU deployment tests use an ADB stand-in to reproduce archive replacement and
-transfer tampering, without touching a device. On Linux, a sixth test also runs
-the real extraction shell with a truncated archive, retries successfully and
-checks that an existing revision is preserved. That test is skipped on Windows;
-run it with Python inside WSL to obtain all six results. These host tests do not
-replace GPU pixel tests or Android deployment verification.
-
-## Focus bridge
-
-Run from the repository root:
-
-```powershell
-python -m unittest discover -s tests -p 'test_foldgpt_ime.py' -v
-node tests/keyboard-focus.test.cjs
-```
-
-The Python checks require `websockets` and use an in-memory CDP transport. The
-DOM checks require Node.js, Playwright and its bundled Chromium. They launch a
-temporary headless browser, block network requests and use an inline fixture.
-They do not use a personal browser profile, contact ChatGPT, run paid tasks or
-control the phone.
-
-The checks cover deliberate touch/re-tap signals, same-process frame handover,
-open shadow DOM, CDP response matching, navigation context cleanup and concurrent
-intent ordering. A Send-button regression verifies that the application's later
-programmatic prompt focus cannot reopen the keyboard, while a new deliberate tap
-can. Initialization, reconnection, window focus and visibility resume never open
-the keyboard. Disposal and replacement leave one listener with increasing
-sequence IDs. The hook transmits only boolean visibility, a fixed reason and a
-sequence number.
-
-Hook V5 supports `globalThis.__foldgptImeHook.dispose()` for live replacement.
-V4 lacked removable listener handles and requires one document reload when
-upgrading; replacing its global guard alone cannot remove its old listeners.
-
-They do **not** establish that Android actually showed its keyboard, that Samsung
-composition/autocorrect works, or that all official client windows are supported.
-Cross-origin frames running in a separate renderer require CDP target attachment;
-closed shadow roots cannot be inspected by this DOM hook. These remain device and
-integration coverage limits, not claims of universal support.
-
-## Android kernel experiments
-
-The offline Codex probe also has a native host test for its listener deadline.
-First generate the embedded script/header and Android binary from PowerShell:
-
-```powershell
-./tools/build-codex-offline-probe.ps1 -OutputDirectory downloads/codex-offline-deadline-check
-```
-
-Then, from the repository root in WSL/Linux:
+Run from the repository root with Python 3.12 and an ordinary nonroot Linux
+account. Windows contributors can use Python inside WSL.
 
 ```sh
-gcc -O2 -Wall -Wextra -Werror -I downloads/codex-offline-deadline-check tools/test-codex-probe-deadline.c -o downloads/codex-offline-deadline-check/test-codex-probe-deadline
-timeout 5s downloads/codex-offline-deadline-check/test-codex-probe-deadline
+python3 -m venv work/host-venv
+work/host-venv/bin/python -m pip install -r tools/ci/requirements-host.txt
+work/host-venv/bin/python tools/ci/run-host-tests.py
 ```
 
-This uses real local sockets to check timeout with a silent peer, an expired
-deadline, descriptor transfer and peer closure. It does not start Codex, PRoot
-or the Android service, nor exercise kernel isolation.
+The runner selects 26 suites, prints the actual collection count for each and
+rejects empty collections. Each suite runs in a fresh process to isolate local
+imports. To run one suite:
 
-Build the fixed experiments with Android NDK 29, then rebuild/install the debug
-APK. They are excluded from release builds. Open FoldGPT before broadcasting so
-Android's stopped-package handling cannot skip the receiver.
-
-```powershell
-./tools/build-landlock-probe.ps1
-gradle -p android :app:assembleDebug
-adb -s YOUR_SERIAL install -r android/app/build/outputs/apk/debug/app-debug.apk
-adb -s YOUR_SERIAL shell am start -n app.foldgpt/.FoldActivity
-adb -s YOUR_SERIAL shell am broadcast -n app.foldgpt/.LandlockProbeReceiver
-adb -s YOUR_SERIAL shell am broadcast -a app.foldgpt.PROBE_BROKER -n app.foldgpt/.LandlockProbeReceiver
-adb -s YOUR_SERIAL shell am broadcast -a app.foldgpt.PROBE_SHELL -n app.foldgpt/.LandlockProbeReceiver
-adb -s YOUR_SERIAL shell am broadcast -a app.foldgpt.PROBE_PROOT -n app.foldgpt/.LandlockProbeReceiver
+```sh
+work/host-venv/bin/python tools/ci/run-host-tests.py --suite tests/test_foldgpt_ime.py
 ```
 
-Read each result from `cache/landlock-probe.log`, `cache/broker-probe.log`,
-`cache/shell-probe.log` or `cache/proot-probe.log` with `adb shell run-as
-app.foldgpt cat ...`. The receiver executes asynchronously; a broadcast result
-of zero alone is not a passing test. Require the native process's final independent
-verification and the corresponding `FoldGPT-Probe` completion in logcat. See
-`NATIVE-AUDIT.md` for the exact scope and deliberate metadata limitation in the
-first experiment. These tests do not invoke a model or demonstrate Codex integration.
+These checks exercise archive integrity, client installation, keyring and IME
+protocols, execution messages, runtime identity and ownership. Filesystem and
+process checks use real local fixtures; the IME transport is offline. Some rootfs
+cases require a separate privileged/static-compiler fixture and report a skip
+when unavailable. A successful host run does not qualify an Android package.
+
+Do not run a recursive discovery over every `test*.py`: specialized integration
+scripts require explicit native binaries, APKs, dedicated UIDs or an Android
+device. Python on Windows also lacks the POSIX descriptors, permissions and
+process behavior required by the complete host selection.
+
+## Input and Android
+
+| Check | Command and prerequisites |
+| --- | --- |
+| Offline focus bridge | `python tools/ci/run-host-tests.py --suite tests/test_foldgpt_ime.py`; Python dependencies above. |
+| DOM focus behavior | `node tests/keyboard-focus.test.cjs`; a development installation of Node.js, Playwright and its matching Chromium. This optional test is not installed or run by the Python CI job. |
+| Android unit tests | From `android/`: `gradle --no-daemon :app:compileDebugJavaWithJavac :app:testDebugUnitTest`; configure the Android/JDK toolchain and prepare the five native runtime libraries required by `preBuild`. |
+
+The DOM fixture blocks network access and uses a temporary headless browser
+without a personal profile. It covers taps, the Send button, frame/shadow-DOM
+focus and listener replacement. It does not prove Samsung keyboard composition
+or cross-process frame support on a phone.
+
+Android unit tests stay in the standard `android/app/src/test` tree. They cover
+launch/stop generations, recovery, concurrent conversations, callbacks, URLs,
+SMS, accessibility and installation. Tests under `src/androidTest` require a
+separately prepared device. APK packaging additionally requires the reviewed
+executor inputs; see the [build guide](https://github.com/pironjulien/FoldGPT/blob/main/docs/build.md).
+
+## Native and integration checks
+
+These suites remain next to their runtime or build recipe so their fixtures,
+imports and source snapshots stay together. Select the recipe for the code being
+changed rather than treating every experiment as a release check.
+
+| Area | Entry point | Required environment |
+| --- | --- | --- |
+| PRoot cancellation and strict behavior | [Native regression recipes](../tools/install/native/README.md#host-regression-tests) | Nonroot Linux x86_64, host C toolchain, talloc headers/library, Git, Make, Python and network access to the pinned upstream source. |
+| Native files and processes | `tools/executor/native-host-files-test.sh` / `native-bootstrap-files-test.sh` | Linux toolchain and an explicitly supplied compiled host supervisor. See the [supervisor recipe](../tools/executor/bionic-supervisor/README.md). |
+| Installation transactions | `bash tools/install/transaction/run-jvm-tests.sh` | Linux, JDK, curl; checksum-pinned JVM dependencies are downloaded into ignored project storage. |
+| Integration bundle installation | `bash tools/install/integration-native/run-jvm-tests.sh` | Linux/JDK and the dependencies prepared by the transaction runner. |
+| HTTPS acquisition | [HTTPS test recipe](../tools/install/https-acquisition/README.md) | Linux/JDK, transaction test dependencies and the configured Android SDK jar. Uses a test-only truststore. |
+| Native recovery | `python -B -m tools.executor.test_native_session_recovery` | A dedicated nonroot Linux UID with no other workload; run alone because recovery checks the complete UID process population. |
+| Package and device qualification | Explicit drivers under `tools/executor/runas-runtime/` and `tools/runtime/` | The exact reviewed libraries, APK and/or device requested by each driver. Host tests cannot replace this evidence. |
+
+Keep real qualification results separate from synthetic protocol fixtures.
+Retain source revisions and artifact identities when reporting device behavior.
+Historical kernel experiments and their limits are recorded in the
+[native startup audit](../docs/history/native-startup-2026-09-05.md); they do not
+establish that a current package or a different phone has passed those checks.

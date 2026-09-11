@@ -1,7 +1,9 @@
 # App-context feasibility probe
 
+> Development evidence referenced by private paths below is not part of the public source release. Use the documented test recipes to verify your own build.
+
 **Executed on the Fold on 8 September 2026: both cases passed without Shizuku.**
-See the [device report](../../../docs/research/app-context-device-validation-20260908.md)
+See the device report (`../../../docs/research/app-context-device-validation-20260908.md`)
 for independently verified receipts and the production integration boundary.
 The current source is this directory. Compiled candidates, keys and captured output remain
 under `work/feasibility-survey-20260908/app-context/`. Earlier work-only build

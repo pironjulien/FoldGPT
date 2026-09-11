@@ -17,7 +17,7 @@ cd FoldGPT
 python3 -m venv work/host-venv
 work/host-venv/bin/python -m pip install -r tools/ci/requirements-host.txt
 work/host-venv/bin/python tools/ci/check-source-integrity.py
-work/host-venv/bin/python -m compileall -q tools config tests
+work/host-venv/bin/python -m compileall -q runtime tools config tests
 work/host-venv/bin/python tools/ci/run-host-tests.py
 ```
 

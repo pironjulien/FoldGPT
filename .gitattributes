@@ -31,29 +31,3 @@ tools/policy/managed_policy.py text eol=lf
 # These two qualified sources contain recorded CRLF/mixed endings; retain bytes.
 tools/executor/native_environment_unicode.py -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 tools/executor/native_files.py -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
-# Preserve recorded bytes, including Windows CRLF, while retaining whitespace checks.
-recovery/verification/native-v11-20260907/*.json -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
-recovery/verification/engine-arm64-static-compatibility-20260907.json -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
-recovery/verification/native-executable-metadata-20260907/* -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
-recovery/verification/native-v12-20260907/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
-recovery/verification/native-runtime-pc-20260907/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
-recovery/verification/native-runtime-v1-20260907/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
-recovery/verification/native-runtime-v2-20260907/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
-recovery/verification/github-supplement-v9-restoration.json -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
-recovery/verification/native-bootstrap-files-20260907/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
-recovery/verification/native-bootstrap-channel-20260907/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
-recovery/verification/native-java-startup-20260908/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
-recovery/verification/native-production-python-20260908/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
-recovery/verification/native-startup-parent-environment-20260908/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
-recovery/verification/native-host-production-20260908/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
-recovery/verification/native-model-python-cli-20260908/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
-recovery/verification/app-context-20260908/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
-recovery/verification/r26b-20260908/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
-recovery/verification/r28-20260908/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
-recovery/verification/legacy-projects-20260908/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
-# JUnit emits a final blank line; preserve its recorded output exactly.
-recovery/verification/r26b-20260908/**/*.log -text whitespace=-blank-at-eof,cr-at-eol
-recovery/verification/r28-20260908/**/*.log -text whitespace=-blank-at-eof,cr-at-eol
-# Preserve delivery receipts and the exact downloaded v17 manifest.
-recovery/verification/*v17*.json -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
-recovery/verification/recovery-paths-20260908.json -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol

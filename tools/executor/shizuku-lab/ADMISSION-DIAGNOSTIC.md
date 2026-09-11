@@ -1,8 +1,10 @@
 # Laboratory v9 admission and explicit-launch diagnostic
 
+> Development evidence referenced by private paths below is not part of the public source release. Use the documented test recipes to verify your own build.
+
 **Historical v9 procedure.** The installed v10 trial now retains quarantine
 after a real `/linkerconfig` refusal. Read the
-[v10 report](../../../docs/research/native-v10-retained-session-2026-09-07.md)
+v10 report (`../../../docs/research/native-v10-retained-session-2026-09-07.md`)
 before any device action; do not replay this earlier procedure.
 
 This separate signed update makes real UserService admission failures observable.

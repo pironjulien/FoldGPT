@@ -1,7 +1,9 @@
 # Small Python project through the native executor
 
+> Development evidence referenced by private paths below is not part of the public source release. Use the documented test recipes to verify your own build.
+
 Current Android result: **V2 passes all 20 independent checks on the real Fold**.
-See [the device report](../../../docs/research/native-runtime-v2-device-result-2026-09-07.md).
+See the device report (`../../../docs/research/native-runtime-v2-device-result-2026-09-07.md`).
 Frozen qKM94iHA and the Python CLI with deployment-prefix RUNPATH are qualified
 for this fixed project. Failed V1 remains preserved. Ordinary UI execution is
 still an integration requirement. The preparation history below does not
@@ -127,7 +129,7 @@ supervisor SHA256 is
 The current compiled runtime CLI SHA256 is
 `7de6f5ba8d620c3a796810147686c645cf10b2d412b00aea63a8dc7eec5a0f50`.
 
-The [PC evidence inventory](../../../recovery/verification/native-runtime-pc-20260907/manifest.json)
+The PC evidence inventory (`../../../recovery/verification/native-runtime-pc-20260907/manifest.json`)
 preserves actual results plus two failed host invocations. A rebuild under the
 same host UID as concurrent Rust work hit process/thread failures (`EAGAIN`);
 its sources/output are retained and it was not frozen for deployment. The

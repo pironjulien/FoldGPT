@@ -9,10 +9,10 @@ args = parser.parse_args()
 root = Path(__file__).resolve().parents[1]
 adb = ["adb", "-s", args.serial]
 for name, target in {
-    "foldgpt_keyring.py": "usr/local/lib/foldgpt/foldgpt_keyring.py",
-    "foldgpt_ime.py": "usr/local/lib/foldgpt/foldgpt_ime.py",
-    "keyboard-focus.js": "usr/local/lib/foldgpt/keyboard-focus.js",
-    "foldgpt-session.sh": "usr/local/bin/foldgpt-session",
+    "runtime/guest/foldgpt_keyring.py": "usr/local/lib/foldgpt/foldgpt_keyring.py",
+    "runtime/guest/foldgpt_ime.py": "usr/local/lib/foldgpt/foldgpt_ime.py",
+    "runtime/guest/keyboard-focus.js": "usr/local/lib/foldgpt/keyboard-focus.js",
+    "runtime/guest/foldgpt-session.sh": "usr/local/bin/foldgpt-session",
 }.items():
     data = (root / name).read_bytes().replace(b"\r\n", b"\n")
     subprocess.run(adb + ["shell", "run-as", "app.foldgpt", "sh", "-c",

@@ -1,5 +1,7 @@
 # Copie vérifiée d’un ancien projet
 
+> Development evidence referenced by private paths below is not part of the public source release. Use the documented test recipes to verify your own build.
+
 `relocate.py` inventorie puis copie un seul répertoire de projet. Il conserve
 l’original, refuse une destination existante et ne modifie ni les conversations,
 ni SQLite, ni les réglages de l’application. Aucun accès réseau n’est utilisé.
@@ -154,7 +156,7 @@ une interruption entre elles doit rester signalée comme migration incomplète.
 
 Source : `app-server-protocol/src/protocol/v2/project.rs` (`ProjectUpdateParams`),
 `app-server/src/request_processors/projects.rs` (`project_update`), et
-[étude de réparation](../../../docs/research/legacy-path-repair-design-20260908.md)
+étude de réparation (`../../../docs/research/legacy-path-repair-design-20260908.md`)
 pour les mécanismes de reprise et de persistance.
 
 ## Vérification
@@ -180,8 +182,8 @@ preuve de reprise d’une vraie conversation via l’interface.
 Le 8 septembre 2026, **20 tests ont réussi** sous WSL Ubuntu 24.04, uid 1000,
 sur une image ext4 de 64 Mio créée dans `work/legacy-projects-tests`, montée
 uniquement dans ce même dossier puis démontée. Résultat, commande et empreintes
-des sources : [preuve Linux](../../../recovery/verification/legacy-projects-20260908/linux-tests.json)
-et [sortie complète](../../../recovery/verification/legacy-projects-20260908/linux-tests.log).
+des sources : preuve Linux (`../../../recovery/verification/legacy-projects-20260908/linux-tests.json`)
+et sortie complète (`../../../recovery/verification/legacy-projects-20260908/linux-tests.log`).
 Les originaux restent sous `work/legacy-projects-tests`. Ces tests
 incluent les erreurs natives, l’échec de synchronisation après publication et une
 modification concurrente du contenu publié. Aucun test téléphone n’a été réalisé

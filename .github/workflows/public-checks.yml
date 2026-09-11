@@ -22,7 +22,7 @@ jobs:
       - name: Source export integrity
         run: python tools/ci/check-source-integrity.py
       - name: Python syntax
-        run: python -m compileall -q tools config tests
+        run: python -m compileall -q runtime tools config tests
       - name: Linux host regression suites
         run: |
           python tools/ci/run-host-tests.py

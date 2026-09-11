@@ -39,9 +39,9 @@ Read the [product overview](docs/overview.md) for the experience and the [worksp
 
 ## See the real interface
 
-[![Real Codex desktop capture from the development Fold; account details and session controls masked](site/assets/codex-desktop.png)](https://julienpiron.fr/foldgpt/#captures)
+[![Codex on FoldGPT, with account details anonymized](site/assets/codex-desktop-anonymized.png)](https://julienpiron.fr/foldgpt/#captures)
 
-*A historical capture from the development Fold, with account details and session controls masked. The [showcase gallery](https://julienpiron.fr/foldgpt/#captures) also includes the real Android keyboard and ARM64 workspace settings. The interactive handset is a 3D visualization; the screen images are authentic captures, not a live session or recorded video. [Media provenance](site/assets/MEDIA-NOTICES.md).*
+*Codex on the Fold, with account details anonymized. [Explore the gallery](https://julienpiron.fr/foldgpt/#captures) · [Image credits](site/assets/MEDIA-NOTICES.md).*
 
 ## How it works
 
@@ -73,10 +73,14 @@ The repository includes vendored Termux:X11 and PRoot sources. No recursive subm
 | :--- | :--- |
 | Android host, service, and input | [`android/app`](android/app) |
 | Native execution and Android bridge | [`tools/executor`](tools/executor) |
+| Guest session and keyboard bridge | [`runtime/guest`](runtime/guest) |
+| Tests and validation guide | [`tests`](tests/README.md) |
 | Runtime packaging and validation | [`tools/runtime`](tools/runtime) |
 | Client compatibility patches | [`recovery/engine`](recovery/engine) |
 | Product and engineering guides | [`docs`](docs/README.md) |
 | Public showcase on julienpiron.fr | [`site`](site/README.md) |
+
+See the [repository layout](docs/project-layout.md) for source organization and local build outputs.
 
 ## Where the alpha stands
 
