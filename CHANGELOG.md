@@ -6,6 +6,8 @@ Notable changes to FoldGPT are recorded here. Source preview versions describe t
 
 ### Showcase and documentation
 
+- Focus showcase copy on Codex, local projects, workspace tools and Android input; remove visible animation narration and capture-production notes while preserving image credits, accessible controls and alpha limitations.
+
 - Restore the authentic Codex composer and session controls in the gallery and 3D screen; anonymize only the account name as `you@gmail.com` and its avatar. Document the two direct pixel edits and unchanged original interface.
 
 - Select the showcase language automatically from the browser's preferred language: French for French preferences, English otherwise, with no visible selector.

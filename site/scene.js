@@ -32,7 +32,7 @@ if (canvas) {
   else {
     canvas.dataset.sceneReady = 'fallback';
     const status = document.querySelector('#scene-status');
-    if (status) status.textContent = sceneText('La scène 3D nécessite WebGL. Les captures réelles sont disponibles plus bas.');
+    if (status) { status.textContent = sceneText('La scène 3D nécessite WebGL. Les captures réelles sont disponibles plus bas.'); status.dataset.visible = 'true'; }
     document.querySelectorAll('[data-scene-action], #fold-hinge').forEach(control => { control.disabled = true; });
     canvas.dispatchEvent(new CustomEvent('foldscene:unavailable', { bubbles: true }));
   }
@@ -67,7 +67,12 @@ function startScene(gl, canvas) {
   const transformed = new Float32Array(3);
   const trig = new Float32Array(10);
 
-  function announce(text) { if (status) status.textContent = sceneText(text); }
+  function announce(text, visible) {
+    if (!status) return;
+    if (visible === undefined && status.dataset.visible === 'true') return;
+    status.textContent = sceneText(text);
+    if (visible !== undefined) status.dataset.visible = String(visible);
+  }
 
   // Every half carries its own screen UV range. Folding changes the geometry,
   // never the source image: the application shown is the supplied real capture.
@@ -339,7 +344,7 @@ function startScene(gl, canvas) {
   try { gpu = createGPU(); }
   catch (error) {
     canvas.dataset.sceneReady = 'fallback';
-    announce('La scène 3D est indisponible dans ce navigateur. Retrouvez les captures réelles plus bas.');
+    announce('La scène 3D est indisponible dans ce navigateur. Retrouvez les captures réelles plus bas.', true);
     console.warn('FoldGPT scene initialization failed:', error.message);
     return;
   }
@@ -364,7 +369,7 @@ function startScene(gl, canvas) {
       draw();
     };
     picture.onerror = () => {
-      if (name === 'screen') announce('Capture indisponible dans la scène. Les médias documentés restent accessibles plus bas.');
+      if (name === 'screen') announce('Capture indisponible dans la scène. Les médias documentés restent accessibles plus bas.', true);
     };
     picture.src = url;
   }
@@ -644,13 +649,13 @@ function startScene(gl, canvas) {
     if (state.visible) wake(); else stop();
   }, { rootMargin: '100px', threshold: 0 }).observe(stage);
   canvas.addEventListener('webglcontextlost', event => {
-    event.preventDefault(); state.lost = true; stage.dataset.ready = 'false'; stop(); announce('Scène suspendue pendant la restauration graphique.');
+    event.preventDefault(); state.lost = true; stage.dataset.ready = 'false'; stop(); announce('Scène suspendue pendant la restauration graphique.', true);
   });
   canvas.addEventListener('webglcontextrestored', () => {
     state.lost = false; gpu = createGPU();
     state.screenLoaded = false; state.iconLoaded = false;
     loadTexture(canvas.dataset.sceneScreen, 'screen'); loadTexture(canvas.dataset.sceneIcon, 'icon');
-    resize(); snap(); draw(); wake(); stage.dataset.ready = 'true'; announce('Scène restaurée.');
+    resize(); snap(); draw(); wake(); stage.dataset.ready = 'true'; announce('Scène restaurée.', false);
   });
 
   snap(); resize(); setPaused(state.paused);

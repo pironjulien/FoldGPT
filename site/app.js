@@ -2,14 +2,14 @@
 const english = document.documentElement.lang === 'en';
 const t = (fr,en) => english ? en : fr;
 const captures = {
-  desktop: {file:'codex-desktop-anonymized.png',title:t('Le bureau Codex, au complet.','The complete Codex desktop.'),
-    description:t('Navigation, projets et composeur du client Linux ARM64, affichés localement sur l’écran intérieur. Seuls le nom et l’avatar du compte ont été anonymisés.','Navigation, projects and the Linux ARM64 composer, displayed locally on the inner screen. Only the account name and avatar have been anonymized.'),
+  desktop: {label:'CODEX',file:'codex-desktop-anonymized.png',title:t('Le bureau Codex, au complet.','The complete Codex desktop.'),
+    description:t('Vos projets et vos conversations, avec toute l’interface Codex sur l’écran intérieur.','Your projects and conversations, with the full Codex interface on the inner screen.'),
     alt:t('Capture de l’accueil Codex sur le Fold, informations de compte masquées.','Codex home captured on the Fold, with account information redacted.')},
-  runtime: {file:'workspace-runtime.png',title:t('Le workspace, dans le client.','The workspace, inside the client.'),
-    description:t('Capture réelle des dépendances Codex et du bundle FoldGPT ARM64 dans les paramètres de l’application.','A real capture of Codex dependencies and the FoldGPT ARM64 bundle in the application settings.'),
+  runtime: {label:'WORKSPACE ARM64',file:'workspace-runtime.png',title:t('Le workspace, dans le client.','The workspace, inside the client.'),
+    description:t('Retrouvez les outils du workspace ARM64 dans les paramètres Codex.','Access your ARM64 workspace tools in Codex settings.'),
     alt:t('Paramètres réels des dépendances de l’espace de travail FoldGPT ARM64.','Real FoldGPT ARM64 workspace dependency settings.')},
-  keyboard: {file:'android-keyboard.png',title:t('Le clavier Samsung, dans Codex.','The Samsung keyboard, inside Codex.'),
-    description:t('Capture d’un essai de saisie réelle avec le clavier Android partagé, le composeur Codex et le navigateur intégré.','A real typing test with the split Android keyboard, Codex composer and integrated browser.'),
+  keyboard: {label:'ANDROID',file:'android-keyboard.png',title:t('Le clavier Samsung, dans Codex.','The Samsung keyboard, inside Codex.'),
+    description:t('Écrivez dans Codex avec le clavier Android partagé.','Type in Codex with the split Android keyboard.'),
     alt:t('Clavier Samsung partagé et texte saisi dans le composeur Codex.','Samsung split keyboard and text entered in the Codex composer.')}
 };
 const layers = {
@@ -32,7 +32,7 @@ function selectCapture(key) {
   const c = captures[key];
   image.src = '/foldgpt/assets/' + c.file;
   image.alt = c.alt;
-  document.getElementById('capture-file').textContent = String(Object.keys(captures).indexOf(key) + 1).padStart(2,'0') + ' — ' + c.file;
+  document.getElementById('capture-label').textContent = c.label;
   document.getElementById('capture-title').textContent = c.title;
   document.getElementById('capture-description').textContent = c.description;
   document.getElementById('capture-source').href = image.src;
