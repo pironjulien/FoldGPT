@@ -9,6 +9,7 @@ public final class NativeSessionObservationTest {
     private JSONObject active() throws Exception {
         return new JSONObject().put("transportFailed", false).put("quarantined", false)
                 .put("refusedBeforeFork", false).put("setupError", JSONObject.NULL)
+                .put("bootstrapPid", 123)
                 .put("bootstrapReaped", false).put("cleanupComplete", false)
                 .put("ownerRetained", true).put("waitStatus", -1);
     }
@@ -44,5 +45,33 @@ public final class NativeSessionObservationTest {
                 NativeSessionObservation.outcome(active().put("cleanupError", diagnostic)));
         assertEquals(NativeSessionObservation.Outcome.FAILED,
                 NativeSessionObservation.outcome(closed().put("cleanupError", diagnostic)));
+    }
+    @Test public void killedOwnerRequiresAndroidRetirementWithoutClaimingCleanup() throws Exception {
+        JSONObject status = active().put("bootstrapReaped", true).put("waitStatus", 9);
+        assertTrue(NativeSessionObservation.requiresProcessRetirement(status));
+        assertFalse(status.getBoolean("cleanupComplete"));
+        assertTrue(status.getBoolean("ownerRetained"));
+        assertEquals(NativeSessionObservation.Outcome.FAILED, NativeSessionObservation.outcome(status));
+    }
+    @Test public void ownerExitWithoutReportAlsoRequiresRetirement() throws Exception {
+        assertTrue(NativeSessionObservation.requiresProcessRetirement(
+                active().put("bootstrapReaped", true).put("waitStatus", 0)));
+    }
+    @Test public void liveOrCleanOrNeverForkedOwnerCannotAuthoriseRetirement() throws Exception {
+        assertFalse(NativeSessionObservation.requiresProcessRetirement(active()));
+        assertFalse(NativeSessionObservation.requiresProcessRetirement(closed()));
+        JSONObject died = active().put("bootstrapReaped", true).put("waitStatus", 9);
+        for (JSONObject refused : new JSONObject[] {
+                new JSONObject(died.toString()).put("bootstrapPid", -1),
+                new JSONObject(died.toString()).put("refusedBeforeFork", true),
+                new JSONObject(died.toString()).put("waitStatus", -1),
+                new JSONObject(died.toString()).put("ownerRetained", false)}) {
+            assertFalse(NativeSessionObservation.requiresProcessRetirement(refused));
+        }
+    }
+    @Test public void missingWaitEvidenceCannotAuthoriseRetirement() throws Exception {
+        JSONObject incomplete = active().put("bootstrapReaped", true);
+        incomplete.remove("waitStatus");
+        assertThrows(Exception.class, () -> NativeSessionObservation.requiresProcessRetirement(incomplete));
     }
 }

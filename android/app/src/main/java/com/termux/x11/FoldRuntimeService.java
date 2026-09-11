@@ -171,7 +171,34 @@ public final class FoldRuntimeService extends Service {
             if (!destroyed && runtime == executorRuntime && worker != null && !stopping)
                 recoverWorkspace("L’exécution locale de ChatGPT s’est interrompue.");
         }));
+        runtime.ownerDeath().thenRun(() -> mainHandler.post(() -> retireDeadOwner(runtime)));
         return runtime;
+    }
+    private void retireDeadOwner(FoldExecutorRuntime runtime) {
+        if (destroyed || runtime != executorRuntime) return;
+        // Reuse a retry already charged by the Linux exit callback. Persist it
+        // BEFORE losing this VM; sticky recreation must not reset the budget.
+        long delay = recovery.serviceRecreated(SystemClock.elapsedRealtime());
+        if (!saveRecovery()) return;
+        cancelPendingLaunch();
+        if (delay < 0 && recovery.desiredRunning()) publishRecoveryExhausted();
+        else if (delay >= 0) publishPhase("recovering", "Le moteur local s’est interrompu. Reprise de ChatGPT…");
+        synchronized (lifecycleLock) { stopping = true; restartWorkspace = false; }
+        interruptActivations();
+        connectorCallbacks.cancelPending();
+        if (audioBridge != null) audioBridge.stop();
+        // A reaped owner cannot acknowledge cancellation. Keep its marker and
+        // unclean receipt, end only this Java process, and let Android reap its
+        // process group. The recreated owner refuses any surviving process.
+        try {
+            if (!runtime.retireProcessAfterOwnerDeath(() -> {
+                Log.w("FoldGPT", "Native owner exited without cleanup; retiring Android runtime process group");
+                android.os.Process.killProcess(android.os.Process.myPid());
+            })) publishPhase("error", "La reprise n’a pas pu isoler l’ancienne session.");
+        } catch (Exception | LinkageError error) {
+            Log.e("FoldGPT", "Cannot retire dead native owner", error);
+            publishPhase("error", "L’arrêt de l’ancienne session n’a pas pu être confirmé.");
+        }
     }
     private void cancelPendingLaunch() {
         if (pendingLaunch != null) mainHandler.removeCallbacks(pendingLaunch);

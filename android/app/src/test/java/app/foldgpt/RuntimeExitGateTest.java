@@ -46,4 +46,33 @@ public final class RuntimeExitGateTest {
         gate.markClean(owner);
         assertThrows(IllegalStateException.class, () -> gate.markClean(owner));
     }
+    @Test public void ownerDeathRetiresExactlyOnceWithoutFabricatingCleanExit() {
+        RuntimeExitGate gate = new RuntimeExitGate();
+        long owner = gate.register();
+        AtomicInteger retired = new AtomicInteger();
+        assertTrue(gate.runExitAfterOwnerDeath(owner, retired::incrementAndGet));
+        assertFalse(gate.runExitAfterOwnerDeath(owner, retired::incrementAndGet));
+        assertFalse(gate.runExitIfClean());
+        assertEquals(1, retired.get());
+        assertThrows(IllegalStateException.class, gate::register);
+        // The dead owner's cleanup was never claimed; its registration remains.
+        gate.markClean(owner);
+    }
+    @Test public void delayedOwnerDeathCannotRetireAnotherGeneration() {
+        RuntimeExitGate gate = new RuntimeExitGate();
+        long older = gate.register(), newer = gate.register();
+        AtomicInteger retired = new AtomicInteger();
+        assertFalse(gate.runExitAfterOwnerDeath(older, retired::incrementAndGet));
+        assertFalse(gate.runExitAfterOwnerDeath(newer, retired::incrementAndGet));
+        gate.markClean(older);
+        assertFalse(gate.runExitAfterOwnerDeath(older, retired::incrementAndGet));
+        assertTrue(gate.runExitAfterOwnerDeath(newer, retired::incrementAndGet));
+        assertEquals(1, retired.get());
+    }
+    @Test public void cleanGenerationDoesNotAuthoriseUncleanRetirement() {
+        RuntimeExitGate gate = new RuntimeExitGate();
+        long owner = gate.register();
+        gate.markClean(owner);
+        assertFalse(gate.runExitAfterOwnerDeath(owner, () -> fail("Clean owner cannot authorise retirement")));
+    }
 }

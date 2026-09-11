@@ -80,6 +80,25 @@ public final class RuntimeRecoveryPolicyTest {
         assertEquals(1, recreated.consecutiveFailures());
         assertEquals(0, recreated.serviceRecreated(1000 + delay));
     }
+    @Test public void deadOwnerDuringCleanupAndVmRecreationConsumeOnlyOneRetry() throws Exception {
+        RuntimeRecoveryPolicy policy = started();
+        policy.ready(200);
+        long delay = policy.failed(1000); // The Linux child exits first.
+        assertEquals(delay - 50, policy.serviceRecreated(1050)); // The owner wait arrives during cleanup.
+        RuntimeRecoveryPolicy recreated = reload(policy);
+        assertEquals(delay - 500, recreated.serviceRecreated(1500)); // Android recreated the retired VM.
+        assertEquals(1, recreated.consecutiveFailures());
+        assertEquals(-1, reload(recreated).serviceRecreated(1000 + RuntimeRecoveryPolicy.STABLE_WINDOW_MS));
+        assertTrue(recreated.desiredRunning());
+    }
+    @Test public void stoppedOwnerDeathCannotRestartTheRetiredVm() throws Exception {
+        RuntimeRecoveryPolicy policy = started();
+        policy.failed(1000);
+        policy.userStopped();
+        assertEquals(-1, policy.serviceRecreated(1100));
+        assertEquals(-1, reload(policy).serviceRecreated(1200));
+        assertFalse(reload(policy).desiredRunning());
+    }
 
     @Test public void repeatedFastCrashesShareTheActualStartupTimeBudget() throws Exception {
         RuntimeRecoveryPolicy policy = started();

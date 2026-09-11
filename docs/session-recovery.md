@@ -1,4 +1,20 @@
-# Reprise de session — r45, 9 septembre 2026
+# Reprise de session
+
+## R48 — propriétaire natif tué, 11 septembre 2026
+
+La reprise attendait indéfiniment lorsque le propriétaire natif était tué mais
+que son service Java survivait. R48 observe sa terminaison même pendant le
+nettoyage, persiste le budget de reprise puis termine son propre processus
+Android. Le nouveau propriétaire exige toujours le verrou et la preuve complète
+d'absence de survivants ; aucun reçu de nettoyage n'est inventé.
+
+Sur le Fold, tuer uniquement le propriétaire natif déclenche maintenant cette
+reprise sans commande de relance depuis le PC. Client prêt observé en moins de
+45 secondes, fichiers et historique conservés, clavier vérifié après reprise.
+Voir [le diagnostic, les preuves et leurs limites](research/recovery-loop-20260911.md).
+La limite globale de processus Android n'est pas modifiée.
+
+## R45 — 9 septembre 2026
 
 R45/versionCode35 conserve l'intention de démarrage dans
 `runtime-user-intent.json`. Un arrêt explicite l'enregistre avant le nettoyage.

@@ -44,6 +44,7 @@ public final class FoldExecutorRuntime {
     private final RuntimeOwnerWorker work = new RuntimeOwnerWorker("FoldGPT-executor-owner");
     private final CompletableFuture<Void> closed = new CompletableFuture<>();
     private final CompletableFuture<Throwable> failure = new CompletableFuture<>();
+    private final CompletableFuture<Void> ownerDeath = new CompletableFuture<>();
     private CompletableFuture<Endpoint> preparing;
     private Shizuku.UserServiceArgs args;
     private IExecutorService remote;
@@ -215,6 +216,12 @@ public final class FoldExecutorRuntime {
             lastNativeSessionStatus = new JSONObject(AppNativeSession.cleanupStatus(context, nativeLaunch.nonce));
         }
         if (remote != null) lastRemoteStatus = new JSONObject(remote.status());
+        if (applicationLaunch && nativeSession != null
+                && NativeSessionObservation.requiresProcessRetirement(lastNativeSessionStatus)) {
+            // Also observed during closing: the workspace may exit before this
+            // owner is reaped, so the normal readiness observer is insufficient.
+            ownerDeath.complete(null);
+        }
     }
 
     private synchronized void attachBinder() {
@@ -267,6 +274,18 @@ public final class FoldExecutorRuntime {
 
     /** First observed owner failure, including failures after successful startup. */
     public CompletableFuture<Throwable> failure() { return failure; }
+
+    /** Owner wait without cleanup, distinct from successful session closure. */
+    public CompletableFuture<Void> ownerDeath() { return ownerDeath; }
+
+    /** Called on the main thread after durable recovery/stop intent is saved. */
+    public synchronized boolean retireProcessAfterOwnerDeath(Runnable exit) throws Exception {
+        if (!applicationLaunch || nativeSession == null || closed.isDone()) return false;
+        refreshEvidence();
+        if (!NativeSessionObservation.requiresProcessRetirement(lastNativeSessionStatus)) return false;
+        persist("owner-exited-unclean", "android_process_group_retirement", null);
+        return EXIT_GATE.runExitAfterOwnerDeath(generation, exit);
+    }
 
     /** Stop admission immediately; the completion future is native cleanup, not a deadline. */
     public synchronized CompletableFuture<Void> requestStop() {

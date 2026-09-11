@@ -6,6 +6,16 @@ import org.json.JSONObject;
 final class NativeSessionObservation {
     enum Outcome { ACTIVE, CLOSED, FAILED }
 
+    /** An actual wait proves the owner cannot ever send a missing clean-close
+     * receipt. It does not prove its descendants exited. Retire the containing
+     * Android runtime process and let Android dispose of that process group;
+     * the next native admission must still prove same-UID quiescence. */
+    static boolean requiresProcessRetirement(JSONObject status) throws Exception {
+        return status.getInt("bootstrapPid") > 0 && !status.getBoolean("refusedBeforeFork")
+                && status.getBoolean("bootstrapReaped") && status.getInt("waitStatus") >= 0
+                && !status.getBoolean("cleanupComplete") && status.getBoolean("ownerRetained");
+    }
+
     static Outcome outcome(JSONObject status) throws Exception {
         if (status.getBoolean("transportFailed") || status.getBoolean("quarantined")
                 || status.getBoolean("refusedBeforeFork") || !status.isNull("setupError")

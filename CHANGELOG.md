@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-09-11 — Recovery after Android terminates the native owner
+
+- Fix an indefinite “Reprise de ChatGPT” state after Android kills the native
+  owner while its Java service survives. Persist recovery intent, retire that
+  Android runtime process and require complete quiescence before the next owner.
+- Qualify r48/versionCode38 on the Fold with an owner-only SIGKILL: automatic
+  recovery observed within 45 seconds, original marker and project/history bytes
+  preserved, and real Android keyboard input verified after recovery.
+- Add nine lifecycle regressions; 67 JVM lifecycle tests pass. Android's global
+  process limit is unchanged, and peak process use remains a release requirement.
+
 ## Unreleased — Daily-use stabilization
 
 - Retire Java executor workers after native cleanup and bind conversation/connector
