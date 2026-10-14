@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-14 — OpenAI Codex upstream alignment & documentation badges
+
+- Add OpenAI Codex Desktop and repository stargazer badges to primary documentation.
+- Establish active Q4 2026 engineering track focusing on upstream OpenAI runtime compatibility and automated ARM64 PRoot verification.
+- Open public issue tracker roadmap items for upstream client synchronization and Android 15/16 test automation.
+
 ## 2026-09-11 — Recovery after Android terminates the native owner
 
 - Fix an indefinite “Reprise de ChatGPT” state after Android kills the native

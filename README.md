@@ -9,6 +9,8 @@ Your projects and tools on the phone. No root or bootloader unlock required.
 
 [![Source alpha](https://img.shields.io/badge/release-v0.2.0--alpha.1-D7B56D?style=flat-square)](https://github.com/pironjulien/FoldGPT/releases/tag/v0.2.0-alpha.1)
 [![Public checks](https://github.com/pironjulien/FoldGPT/actions/workflows/public-checks.yml/badge.svg)](https://github.com/pironjulien/FoldGPT/actions/workflows/public-checks.yml)
+[![Stars](https://img.shields.io/github/stars/pironjulien/FoldGPT?style=flat-square&color=D7B56D)](https://github.com/pironjulien/FoldGPT/stargazers)
+[![OpenAI Codex](https://img.shields.io/badge/OpenAI-Codex%20Desktop-412991?style=flat-square&logo=openai&logoColor=white)](https://github.com/pironjulien/FoldGPT)
 [![License](https://img.shields.io/badge/license-GPL--3.0--or--later-D7B56D?style=flat-square)](LICENSE)
 [![Contributions welcome](https://img.shields.io/badge/contributions-welcome-58616E?style=flat-square)](CONTRIBUTING.md)
 

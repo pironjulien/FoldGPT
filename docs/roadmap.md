@@ -44,6 +44,12 @@ environment and proprietary desktop client as separate transitions.
 **Exit:** the update matrix records supported transitions, preserved projects and
 recoverable failures. The fresh-install transaction is not reused as an updater.
 
+## Active track (Q4 2026): OpenAI Codex upstream alignment & automated verification
+
+- **Codex API & Desktop integration**: Validate session bridge and tokens against latest OpenAI runtime releases.
+- **Automated test matrix**: GitHub Actions runner qualification for ARM64 Linux PRoot syscall emulation under Android 15/16.
+- **Security & sandbox evaluation**: Ongoing checks with Codex Security guidelines for local command executor boundaries.
+
 ## Later: wider experience
 
 Remote, DeX, additional screens/devices and advanced integrations resume once the
