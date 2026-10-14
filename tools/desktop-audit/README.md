@@ -1,17 +1,17 @@
-# Inspection statique du client de bureau
+# Static inspection of the desktop client
 
 > Development evidence referenced by private paths below is not part of the public source release. Use the documented test recipes to verify your own build.
 
-Ces outils lisent des copies identifiées par empreinte. Ils n’importent pas les
-modules du client et n’exécutent aucun de ses scripts, builds ou installateurs.
-Les sources propriétaires et les résultats détaillés restent sous `work` ; le
-rapport de compatibilité et les catalogues dérivés sont dans `docs/research`.
+These tools read fingerprinted copies. They do not import the client's modules
+and run none of its scripts, builds or installers. Proprietary sources and
+detailed results stay under `work`; the compatibility report and derived
+catalogs are in `docs/research`.
 
 ## Extraction
 
-`extract-client.py` extrait un paquet Debian décrit par un manifeste attendu.
-`extract-asar.py` extrait une copie exacte de l’ASAR installé, dont l’empreinte doit
-être fournie. Les sorties doivent être de nouveaux dossiers sous `work` :
+`extract-client.py` extracts a Debian package described by an expected manifest.
+`extract-asar.py` extracts an exact copy of the installed ASAR, whose fingerprint
+must be supplied. Outputs must be new folders under `work`:
 
 ```powershell
 python tools/desktop-audit/extract-asar.py `
@@ -20,16 +20,16 @@ python tools/desktop-audit/extract-asar.py `
   --output work/desktop-audit-20260908/installed-extracted
 ```
 
-Les entrées externes `unpacked` et les liens sont inventoriés, jamais remplacés
-par un fichier fictif. Leur absence de la copie ASAR ne prouve pas leur absence
-du téléphone. Les fichiers JavaScript, JSON, HTML, CSS, source maps éventuelles,
-modules `.node` et WebAssembly intégrés sont extraits pour analyse ; les autres
-octets restent conservés dans l’archive d’entrée. Les empreintes internes SHA-256
-présentes sont vérifiées et l’archive est recontrôlée après extraction.
+External `unpacked` entries and links are inventoried, never replaced with a
+placeholder file. Their absence from the ASAR copy does not prove their absence
+from the phone. JavaScript, JSON, HTML, CSS, any source maps, `.node` modules
+and embedded WebAssembly are extracted for analysis; all other bytes stay in
+the input archive. Any embedded SHA-256 fingerprints are verified and the
+archive is rechecked after extraction.
 
-## Analyse syntaxique
+## Syntax analysis
 
-Installer le parseur **dans le projet** sans scripts de dépendance :
+Install the parser **inside the project** without dependency scripts:
 
 ```powershell
 npm install --prefix work/desktop-audit-parser `
@@ -38,8 +38,8 @@ npm install --prefix work/desktop-audit-parser `
 node --test tools/desktop-audit/test-inventory.mjs
 ```
 
-L’inventaire accepte plusieurs corpus indépendants. Il vérifie les octets des
-sources avant et après leur analyse. Aucune erreur de parsing n’est masquée.
+The inventory accepts several independent corpora. It verifies the source bytes
+before and after analysis. No parsing error is hidden.
 
 ```powershell
 node --max-old-space-size=3072 tools/desktop-audit/inventory-surfaces.mjs `
@@ -52,23 +52,23 @@ node --max-old-space-size=3072 tools/desktop-audit/inventory-surfaces.mjs `
   --output work/desktop-audit-20260908/surfaces-r4
 ```
 
-Les exports/imports, handlers, services app-host, méthodes RpcTarget, messages,
-réglages, routes, appels de protocole, processus, dépendances et gardes de
-plateforme sont catalogués avec fichier, empreinte et position UTF-16. Les
-catégories `Candidate` conservent explicitement les ambiguïtés : un nom trouvé
-dans une table ou un appel n’établit pas à lui seul qu’il s’agit d’une commande.
-Une branche `not supported` n’établit pas qu’elle est atteinte sur le Fold.
+Exports/imports, handlers, app-host services, RpcTarget methods, messages,
+settings, routes, protocol calls, processes, dependencies and platform guards
+are cataloged with file, fingerprint and UTF-16 position. `Candidate`
+categories keep ambiguities explicit: a name found in a table or a call does
+not by itself establish that it is a command. A `not supported` branch does not
+establish that it is reached on the Fold.
 
-Le parseur enregistre aussi les occurrences dynamiques non résolues et les routes
-dont le chemin est une expression. Il n’effectue ni analyse complète de flux, ni
-résolution de toutes les valeurs calculées, ni désassemblage natif.
+The parser also records unresolved dynamic occurrences and routes whose path is
+an expression. It performs no full data-flow analysis, no resolution of all
+computed values and no native disassembly.
 
-## Rapport pour le dépôt
+## Report for the repository
 
-`summarize-surfaces.py` dérive le catalogue installé à partir des preuves brutes et
-d’une comparaison d’archives. Les emplacements et nombres du main et du registre
-de commandes revus sont vérifiés explicitement. Un changement de version demande
-une nouvelle inspection ; ces contrôles ne doivent pas être ajustés à l’aveugle.
+`summarize-surfaces.py` derives the installed catalog from the raw evidence and
+an archive comparison. The locations and counts of the reviewed main and command
+registry are checked explicitly. A version change requires a new inspection;
+these checks must not be adjusted blindly.
 
 ```powershell
 python tools/desktop-audit/summarize-surfaces.py `
@@ -79,30 +79,30 @@ python tools/desktop-audit/summarize-surfaces.py `
   --output work/desktop-audit-20260908/summary-r5
 ```
 
-Conserver les sorties existantes lors des reprises et choisir un nouveau dossier
-de sortie. L’analyse de syntaxe est distincte d’une qualification des opérations
-sur Android ou d’une preuve de fonctionnement complet de FoldGPT.
+Keep existing outputs when resuming and choose a new output folder. Syntax
+analysis is separate from qualifying operations on Android and from proving that
+FoldGPT works end to end.
 
-Le corpus externe installé provient de la collecte séparée du programme complet.
-Le résumé rapproche chaque membre ASAR `unpacked` du manifeste de cette collecte,
-conserve son empreinte réelle et refuse une taille différente. Les corpus restent
-distincts dans la couverture et sont réunis uniquement pour le catalogue de leur
-version respective.
+The installed external corpus comes from the separate collection of the full
+program. The summary matches each `unpacked` ASAR member against that
+collection's manifest, keeps its actual fingerprint and rejects a size mismatch.
+The corpora stay separate in coverage and are combined only for the catalog of
+their respective version.
 
-## Inventaire ELF
+## ELF inventory
 
-`inventory-native.py` lit les ELF avec LLVM readelf, sans les charger. Il
-contrôle les 57 fichiers de chaque inventaire avant et après lecture, conserve
-les chemins Windows étendus et relève architecture, interpréteur, dépendances,
-versions de symboles, ABI des addons et fonctions système structurantes. Le mode
-`--layout installed` accepte la collecte du téléphone et son ASAR séparé.
-`native-metadata.json` exclut les dumps et extraits de chaînes propriétaires et
-peut être conservé avec le rapport ; les preuves complètes restent sous `work`.
+`inventory-native.py` reads ELF files with LLVM readelf, without loading them. It
+checks the 57 files of each inventory before and after reading, preserves
+extended Windows paths and records architecture, interpreter, dependencies,
+symbol versions, addon ABI and key system functions. The
+`--layout installed` mode accepts the phone collection and its separate ASAR.
+`native-metadata.json` excludes dumps and proprietary string extracts and can be
+kept with the report; the full evidence stays under `work`.
 
-`compare-native.py` rapproche les chemins des deux versions et distingue les
-hashes identiques des exigences natives identiques. Les commandes des passes
-vérifiées et leurs limites figurent dans
-le rapport natif (`../../docs/research/desktop-native-requirements-20260908.md`).
+`compare-native.py` matches paths across the two versions and distinguishes
+identical hashes from identical native requirements. The commands for the
+verified passes and their limits are listed in
+the native report (`../../docs/research/desktop-native-requirements-20260908.md`).
 
 ```powershell
 python -B -m unittest discover -s tools/desktop-audit -p test_inventory_native.py -v

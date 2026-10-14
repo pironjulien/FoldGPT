@@ -1,55 +1,58 @@
-# Qualification run-as V1 : identité et quatre FD
+# Run-as V1 qualification: identity and four FDs
 
-APK séparé `app.foldgpt.runasqualification.v1`. Il ne met pas à jour FoldGPT
-ou ChatGPT. Son UserService Shizuku shell2000 lance exclusivement
-`/system/bin/run-as app.foldgpt <son ELF Bionic signé> --identity-fds-v1 …`
-par le `NativeSpawn` de production inchangé. Le paquet cible doit porter la
-signature FoldGPT préservée et être debuggable. Les identités PackageManager,
-chemins d'installation, empreintes APK et bibliothèques sont explicitement
-recoupés côté Activity et UserService avant lancement, puis après le vrai waitpid.
+Separate APK `app.foldgpt.runasqualification.v1`. It does not update FoldGPT
+or ChatGPT. Its shell2000 Shizuku UserService exclusively launches
+`/system/bin/run-as app.foldgpt <its signed Bionic ELF> --identity-fds-v1 …`
+through the unchanged production `NativeSpawn`. The target package must carry
+the preserved FoldGPT signature and be debuggable. PackageManager identities,
+install paths, APK fingerprints and libraries are explicitly cross-checked on
+the Activity and UserService sides before launch, then again after the real
+waitpid.
 
-L'ELF vérifie UID/GID réels/effectifs/sauvegardés, capabilities, contexte,
-NoNewPrivs/Seccomp, parent réel, propriétaire/résolution du répertoire privé,
-quatre pipes et fermeture de tous les autres FD. Deux challenges nonce exacts
-suivis d'EOF arrivent sur FD0/FD3 ; des reçus indépendants sortent sur FD1/FD2.
-Le programme n'a aucun enfant. Une alarme borne sa vie à20secondes. Il ne lance
-aucun ancien probe et ne modifie aucune politique, identité ou protection.
+The ELF checks real/effective/saved UID/GID, capabilities, context,
+NoNewPrivs/Seccomp, the real parent, the owner/resolution of the private
+directory, four pipes and that every other FD is closed. Two exact nonce
+challenges followed by EOF arrive on FD0/FD3; independent receipts go out on
+FD1/FD2. The program has no children. An alarm caps its lifetime at 20 seconds.
+It launches no earlier probe and changes no policy, identity or protection.
 
-Cette phase ne qualifie **ni le broker, ni Python, ni le partage PRoot**.
-Le succès Android reste à démontrer avec le vrai APK, pas avec une fixture PC.
+This phase qualifies **neither the broker, nor Python, nor PRoot sharing**.
+Success on Android remains to be demonstrated with the real APK, not with a PC
+fixture.
 
-## Actions explicites
+## Explicit actions
 
-Composant :
+Component:
 `app.foldgpt.runasqualification.v1/app.foldgpt.runasqualification.RunAsQualificationActivity`
 
-Actions exactes, réservées par la permission Android DUMP au lanceur shell :
+Exact actions, restricted to the shell launcher by the Android DUMP permission:
 
-- `app.foldgpt.runasqualification.v1.COLLECT_INFO` : identité installée locale, sans UserService.
-- `app.foldgpt.runasqualification.v1.AUTHORIZE` : demande officielle Shizuku, sans lancement natif.
-- `app.foldgpt.runasqualification.v1.PREFLIGHT` : comparaison identité Activity/service, sans lancement natif.
-- `app.foldgpt.runasqualification.v1.RUN_IDENTITY_FDS_V1` : unique essai ; réserve `files/runas-identity-v1/attempt-started-v1` avant bind.
+- `app.foldgpt.runasqualification.v1.COLLECT_INFO`: local installed identity, no UserService.
+- `app.foldgpt.runasqualification.v1.AUTHORIZE`: official Shizuku request, no native launch.
+- `app.foldgpt.runasqualification.v1.PREFLIGHT`: Activity/service identity comparison, no native launch.
+- `app.foldgpt.runasqualification.v1.RUN_IDENTITY_FDS_V1`: single attempt; reserves `files/runas-identity-v1/attempt-started-v1` before bind.
 
-Ne jamais effacer le marker, nettoyer les données ou rejouer l'essai consommé.
-Un refus garde les vraies sorties et le statut waitpid ; aucun succès n'est déduit
-d'une échéance. Un propriétaire non reaped reste en quarantaine.
+Never delete the marker, clean the data or replay the consumed attempt.
+A rejection keeps the real outputs and the waitpid status; no success is
+inferred from a timeout. An owner that was not reaped stays in quarantine.
 
-Le rapport final se collecte par `run-as app.foldgpt.runasqualification.v1 cat
-files/runas-identity-v1/run_identity_fds_v1.json`. Les autres actions ont des
-fichiers `collect_info.json`, `authorize.json`, `preflight.json` voisins.
-Le vérificateur indépendant est `python -B runasqualification/verify-identity.py <rapport>`.
-Recouper aussi boot ID, PID absent après wait et APK cible inchangé depuis le PC.
+The final report is collected with `run-as app.foldgpt.runasqualification.v1 cat
+files/runas-identity-v1/run_identity_fds_v1.json`. The other actions write
+sibling `collect_info.json`, `authorize.json` and `preflight.json` files.
+The independent verifier is `python -B runasqualification/verify-identity.py <report>`.
+Also cross-check from the PC the boot ID, the PID being gone after wait and the
+target APK being unchanged.
 
-## Construction Windows
+## Windows build
 
-Java21, Android SDK37/NDK29.0.14206865, Gradle9.7.1, clé préservée fournie
-par `tools/recovery/android-signing.gradle`.
+Java 21, Android SDK 37/NDK 29.0.14206865, Gradle 9.7.1, preserved key provided
+by `tools/recovery/android-signing.gradle`.
 
 ```powershell
-# Depuis tools/executor/shizuku-service
+# From tools/executor/shizuku-service
 gradle :runasqualification:assembleDebug -PfoldgptFrozenTransportJni=C:/Dev/FoldGPT/tools/executor/shizuku-lab/build/frozen-transport-jni --no-daemon --console=plain
 ```
 
-L'APK est sous `build/runasqualification-v1/modules/runasqualification/outputs/apk/debug/`.
-Les builds/artefacts restent dans le projet. L'essai téléphone est séparé de la
-compilation et doit attendre la revue de cet APK et de ses empreintes.
+The APK is under `build/runasqualification-v1/modules/runasqualification/outputs/apk/debug/`.
+Builds/artifacts stay inside the project. The phone attempt is separate from the
+build and must wait for review of this APK and its fingerprints.

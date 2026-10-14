@@ -1,22 +1,22 @@
-# Copie vérifiée d’un ancien projet
+# Verified copy of a legacy project
 
 > Development evidence referenced by private paths below is not part of the public source release. Use the documented test recipes to verify your own build.
 
-`relocate.py` inventorie puis copie un seul répertoire de projet. Il conserve
-l’original, refuse une destination existante et ne modifie ni les conversations,
-ni SQLite, ni les réglages de l’application. Aucun accès réseau n’est utilisé.
-La reprise des conversations constitue une étape distincte, décrite plus bas.
+`relocate.py` inventories, then copies, a single project directory. It keeps
+the original, refuses an existing destination and changes neither the
+conversations, nor SQLite, nor the app settings. No network access is used.
+Resuming the conversations is a separate step, described below.
 
-## Utilisation
+## Usage
 
-Python 3.9 ou ultérieur sous Linux/Android, en utilisateur ordinaire. Les
-opérations relatives aux descripteurs de répertoire, `O_NOFOLLOW` et le véritable
-`renameat2(RENAME_NOREPLACE)` de la libc et du système de fichiers sont requis.
-L’outil refuse l’exécution en root. Il n’émule pas une primitive indisponible.
+Python 3.9 or later on Linux/Android, as an ordinary user. Directory-descriptor
+relative operations, `O_NOFOLLOW` and a genuine `renameat2(RENAME_NOREPLACE)`
+from both libc and the filesystem are required. The tool refuses to run as
+root. It does not emulate an unavailable primitive.
 
-Depuis le compte propriétaire de FoldGPT, inventorier un chemin **préalablement
-observé** dans les fichiers de l’ancien environnement. Les valeurs ci-dessous
-illustrent la syntaxe ; elles ne prouvent pas l’existence du projet `exemple`.
+From the FoldGPT owner account, inventory a path **previously observed** in the
+files of the old environment. The values below illustrate the syntax; they do
+not prove that the `exemple` project exists.
 
 ```sh
 python3 relocate.py inventory \
@@ -24,9 +24,9 @@ python3 relocate.py inventory \
   --source-boundary /data/data/app.foldgpt/files/debian/home/foldgpt/Documents/Codex
 ```
 
-Vérifier l’inventaire réel, notamment ses chemins, fichiers et tailles. Retenir
-son champ `inventorySha256`. Avec la source au repos et la racine native
-préalablement vérifiée, lancer :
+Check the actual inventory, especially its paths, files and sizes. Note its
+`inventorySha256` field. With the source at rest and the native root verified
+beforehand, run:
 
 ```sh
 python3 relocate.py copy \
@@ -37,134 +37,134 @@ python3 relocate.py copy \
   --expected-inventory-sha256 EMPREINTE_REELLE_DE_L_INVENTAIRE
 ```
 
-Le dernier argument doit être une empreinte SHA-256 hexadécimale minuscule de
-64 caractères issue de l’inventaire vérifié. Les chemins absolus canoniques sont
-obligatoires ; les composants `..`, `.`, les doubles séparateurs et les liens
-symboliques dans les ancêtres sont refusés. Le nom de destination est un seul
-composant. Les arbres source et destination doivent être distincts et disjoints.
+The last argument must be a 64-character lowercase hexadecimal SHA-256
+fingerprint taken from the verified inventory. Canonical absolute paths are
+mandatory; `..` and `.` components, double separators and symbolic links in
+ancestors are rejected. The destination name is a single component. The source
+and destination trees must be distinct and disjoint.
 
-La collecte Java du 8 septembre a canonicalisé `/data/user/0/app.foldgpt` en
-`/data/data/app.foldgpt`. Ces exemples utilisent cette seconde forme ; vérifier
-la racine actuellement fournie par l’application avant toute opération. Un alias
-symbolique n’est pas suivi automatiquement par le copieur.
+The Java collection of 8 September canonicalized `/data/user/0/app.foldgpt` to
+`/data/data/app.foldgpt`. These examples use the latter form; check the root
+currently provided by the app before any operation. A symbolic alias is not
+followed automatically by the copier.
 
-L’inventaire inclut chaque répertoire, les tailles, les empreintes SHA-256 des
-fichiers et les métadonnées observées. Deux passages complets doivent concorder.
-La copie utilise un nouveau dossier `.foldgpt-import-…`, vérifie à nouveau source
-et destination, puis publie sans remplacement. Le contenu et l’identité du
-dossier publié sont encore vérifiés avant le reçu de réussite.
+The inventory includes every directory, sizes, SHA-256 fingerprints of files
+and the observed metadata. Two full passes must agree. The copy uses a new
+`.foldgpt-import-…` folder, re-verifies source and destination, then publishes
+without replacement. The content and identity of the published folder are
+verified once more before the success receipt.
 
-Chaque résultat est du JSON sur stdout. Le code de sortie vaut `0` uniquement
-pour une réussite ; une opération refusée retourne `1`. L’outil n’écrit pas de
-journal automatique : conserver l’inventaire et le reçu dans les preuves du
-projet, sans les confondre avec les fichiers importés.
+Every result is JSON on stdout. The exit code is `0` only on success; a refused
+operation returns `1`. The tool writes no automatic log: keep the inventory and
+the receipt in the project's evidence, without mixing them up with the imported
+files.
 
-## Préservation et limites
+## Preservation and limits
 
-- Les fichiers ordinaires et répertoires vides sont copiés. Les liens symboliques,
-  liens physiques de fichiers, fichiers spéciaux et entrées d’un autre propriétaire
-  ou système de fichiers sont refusés, sans omission silencieuse.
-- Les octets et la présence de bits exécutables sont conservés. Les modes demandés
-  sont privés (`0600` ou `0700` pour les fichiers, `0700` pour les dossiers), soumis
-  à l’umask. Propriétaire, groupe, horodatages, attributs étendus et ACL ne sont pas
-  reproduits. Un projet qui en dépend nécessite une analyse avant import.
-- Un `.jsonl` présent parmi les fichiers est copié octet pour octet comme toute
-  autre donnée. L’outil ne réécrit aucun chemin dans les messages ou configurations.
-  Les chemins absolus opérationnels du projet peuvent nécessiter une correction
-  distincte après inspection ; les chemins historiques restent historiques.
-- Les contrôles répétés détectent les changements qu’ils observent. Ils ne figent
-  pas un autre processus du même utilisateur et ne garantissent pas que la source
-  restera inchangée après le contrôle. Arrêter les écritures concurrentes pendant
-  la migration. Cet outil n’est pas une frontière d’isolation contre un processus
-  hostile du même utilisateur.
-- La source n’est jamais supprimée. Une erreur après création du dossier
-  intermédiaire le conserve. `retainedStage` donne le dernier chemin connu ;
-  `published: true` précise que le renommage a déjà réussi, même si une vérification
-  ou un `fsync` ultérieur échoue. Dans ce cas le chemin est celui de la destination
-  publiée. `errno` conserve le code natif lorsqu’il existe. Une substitution de
-  chemin par un autre processus peut rendre ce dernier chemin obsolète : vérifier
-  les identités avant toute intervention. Aucun nettoyage ou retour arrière
-  destructif n’est automatique.
-- Une nouvelle tentative refuse une destination existante, même identique.
-  La reprise d’une migration interrompue exige d’examiner le reçu et les fichiers
-  réels ; ne pas créer une seconde copie et modifier les conversations à l’aveugle.
+- Regular files and empty directories are copied. Symbolic links, file hard
+  links, special files and entries belonging to another owner or filesystem are
+  rejected, with no silent omission.
+- Bytes and the presence of executable bits are preserved. The requested modes
+  are private (`0600` or `0700` for files, `0700` for folders), subject to the
+  umask. Owner, group, timestamps, extended attributes and ACLs are not
+  reproduced. A project that depends on them needs analysis before import.
+- A `.jsonl` among the files is copied byte for byte like any other data. The
+  tool rewrites no path in messages or configuration. The project's operational
+  absolute paths may need a separate fix after inspection; historical paths stay
+  historical.
+- The repeated checks detect the changes they observe. They do not freeze
+  another process of the same user and do not guarantee that the source will
+  stay unchanged after the check. Stop concurrent writes during the migration.
+  This tool is not an isolation boundary against a hostile process of the same
+  user.
+- The source is never deleted. An error after the intermediate folder is created
+  keeps it. `retainedStage` gives the last known path; `published: true` states
+  that the rename has already succeeded, even if a later verification or
+  `fsync` fails. In that case the path is that of the published destination.
+  `errno` keeps the native code when there is one. Another process substituting
+  the path can make this last path stale: check identities before any
+  intervention. No cleanup or destructive rollback is automatic.
+- A new attempt refuses an existing destination, even an identical one.
+  Resuming an interrupted migration requires examining the receipt and the
+  actual files; do not create a second copy and modify the conversations
+  blindly.
 
-## Raccordement à la conversation existante
+## Reconnecting to the existing conversation
 
-Il existe deux cas distincts. Un ancien projet `/home/foldgpt/Documents/Codex/…`
-nécessite l’inventaire et la copie réels de son dossier sous `files/debian`. Un
-projet **déjà natif** enregistré sous `/data/user/0/app.foldgpt/files/projects/…`
-peut désigner le même répertoire que `/data/data/app.foldgpt/files/projects/…`.
-Vérifier dans l’autorité actuelle leur canonicalisation et leur identité
-`(device, inode)`, puis inventorier le chemin canonique. Si l’identité concorde,
-ne rien copier ou déplacer : réconcilier uniquement les références du projet et
-du thread via les API ci-dessous. Des chaînes ressemblantes ne prouvent pas cette
-identité. Un répertoire absent, distinct ou refusé impose un arrêt de cette
-réconciliation, sans élargir la racine admise.
+There are two distinct cases. A legacy project `/home/foldgpt/Documents/Codex/…`
+needs the actual inventory and copy of its folder under `files/debian`. An
+**already native** project registered under `/data/user/0/app.foldgpt/files/projects/…`
+may refer to the same directory as `/data/data/app.foldgpt/files/projects/…`.
+Check their canonicalization and `(device, inode)` identity in the current
+authority, then inventory the canonical path. If the identity matches, copy or
+move nothing: only reconcile the project and thread references through the APIs
+below. Similar-looking strings do not prove this identity. A missing, distinct
+or refused directory requires stopping this reconciliation, without widening
+the admitted root.
 
-Références lues : arbre canonique `work/worktrees/FoldgptEngine`, base
-`3d2ee51ca2d5db578f328aa75e20aa22c0197c9a` (`rust-v0.153.4`) avec les adaptations
-FoldGPT. Les appels ci-dessous sont du protocole app-server existant, pas des
-commandes de `relocate.py`. Aucun accès au transport UI n’est supposé découvert.
+References read: canonical tree `work/worktrees/FoldgptEngine`, base
+`3d2ee51ca2d5db578f328aa75e20aa22c0197c9a` (`rust-v0.153.4`) with the FoldGPT
+adaptations. The calls below belong to the existing app-server protocol; they
+are not `relocate.py` commands. No access to the UI transport is assumed to
+have been discovered.
 
-1. Lire `thread/read` et `project/read`/`project/list` par le transport existant
-   afin d’obtenir les véritables identifiants, associations et racines. Garder
-   les preuves antérieures, le préfixe du rollout et le projet au repos. Ne pas
-   déduire un `projectId` du titre affiché.
-2. Pour un projet legacy réel, copier les fichiers observés avec l’outil ; pour
-   l’alias d’un projet déjà natif, conserver son dossier après preuve d’identité.
-   Vérifier l’admission du chemin canonique par l’autorité native existante. Ne pas
-   élargir `discoveryRoot` ou les permissions.
-3. Effectuer une reprise froide du même `threadId` avec `thread/resume` et le
-   `cwd` vérifié. Vérifier le cwd retourné ; un thread déjà chargé peut ignorer
-   cet override. Ne pas utiliser les options `history`/`path` ou créer un fork.
-4. Envoyer `thread/settings/update` avec le même `threadId` et le nouveau `cwd`.
-   Attendre `thread/settings/updated`, puis vérifier la persistance ; l’accusé RPC
-   seul ne prouve pas que le changement asynchrone a été appliqué. Inventorier
-   séparément les éventuelles racines runtime additionnelles.
-5. Pour un véritable projet app-server déjà identifié, `project/update` accepte
-   une nouvelle liste `roots` sous le **même** `projectId`. Omettre `name` et
-   `metadata` pour les préserver. La liste remplace toutes les racines : conserver
-   les autres racines observées et ne retargeter que celles effectivement migrées.
-   Cet appel ne change pas à lui seul le cwd des conversations. Le serveur retourne
-   le projet mis à jour et émet `project/changed` si un changement a eu lieu.
-6. Relire le projet, fermer normalement la conversation puis la reprendre sans
-   override. Vérifier même `threadId`, historique conservé, nouveau cwd et accès
-   réel à un fichier. Vérifier également l’éditeur et les lectures de configuration
-   de l’interface habituelle. Les préférences UI supplémentaires doivent être
-   identifiées explicitement avant modification.
+1. Read `thread/read` and `project/read`/`project/list` through the existing
+   transport to obtain the actual IDs, associations and roots. Keep the earlier
+   evidence, the rollout prefix and the project at rest. Do not infer a
+   `projectId` from the displayed title.
+2. For a real legacy project, copy the observed files with the tool; for the
+   alias of an already native project, keep its folder after proving identity.
+   Check that the existing native authority admits the canonical path. Do not
+   widen `discoveryRoot` or the permissions.
+3. Perform a cold resume of the same `threadId` with `thread/resume` and the
+   verified `cwd`. Check the returned cwd; an already loaded thread may ignore
+   this override. Do not use the `history`/`path` options or create a fork.
+4. Send `thread/settings/update` with the same `threadId` and the new `cwd`.
+   Wait for `thread/settings/updated`, then check persistence; the RPC
+   acknowledgement alone does not prove that the asynchronous change was
+   applied. Inventory any additional runtime roots separately.
+5. For a genuine, already identified app-server project, `project/update`
+   accepts a new `roots` list under the **same** `projectId`. Omit `name` and
+   `metadata` to preserve them. The list replaces all roots: keep the other
+   observed roots and retarget only those actually migrated. This call alone
+   does not change the conversations' cwd. The server returns the updated
+   project and emits `project/changed` if a change occurred.
+6. Re-read the project, close the conversation normally, then resume it without
+   override. Check the same `threadId`, preserved history, new cwd and real
+   access to a file. Also check the editor and the configuration reads of the
+   usual interface. Additional UI preferences must be identified explicitly
+   before modification.
 
-Exemples de corps `params`, à remplir avec les valeurs vérifiées :
+Example `params` bodies, to be filled with verified values:
 
 ```json
 {"threadId":"ID_EXISTANT","cwd":"/data/data/app.foldgpt/files/projects/exemple-importe"}
 ```
 
-Ce même corps convient à `thread/resume` et `thread/settings/update`, avec des
-identifiants RPC distincts et une vérification propre à chaque opération.
+This same body works for `thread/resume` and `thread/settings/update`, with
+distinct RPC IDs and a separate verification for each operation.
 
 ```json
 {"projectId":"ID_PROJET_OBSERVE","roots":[{"path":"/data/data/app.foldgpt/files/projects/exemple-importe"}]}
 ```
 
-Cet exemple `project/update` n’est correct que pour un projet ayant cette unique
-racine. `ProjectUpdateParams` ne propose pas de version attendue ou compare-and-swap.
-Une lecture suivie d’une écriture n’est donc pas atomique contre un autre client :
-coordonner l’absence de modification concurrente et relire immédiatement avant et
-après. Les mises à jour du projet et du thread sont des opérations distinctes ;
-une interruption entre elles doit rester signalée comme migration incomplète.
+This `project/update` example is only correct for a project with that single
+root. `ProjectUpdateParams` offers no expected version or compare-and-swap.
+A read followed by a write is therefore not atomic against another client:
+ensure there is no concurrent modification and re-read immediately before and
+after. Project and thread updates are separate operations; an interruption
+between them must remain reported as an incomplete migration.
 
-Source : `app-server-protocol/src/protocol/v2/project.rs` (`ProjectUpdateParams`),
-`app-server/src/request_processors/projects.rs` (`project_update`), et
-étude de réparation (`../../../docs/research/legacy-path-repair-design-20260908.md`)
-pour les mécanismes de reprise et de persistance.
+Source: `app-server-protocol/src/protocol/v2/project.rs` (`ProjectUpdateParams`),
+`app-server/src/request_processors/projects.rs` (`project_update`), and the
+repair study (`../../../docs/research/legacy-path-repair-design-20260908.md`)
+for the resume and persistence mechanisms.
 
-## Vérification
+## Verification
 
-Les tests créent uniquement des fixtures sous une racine explicite du projet et
-utilisent les vraies opérations du système de fichiers, notamment le renommage
-sans remplacement. Ils contrôlent les octets, les liens, les collisions, les
-écritures concurrentes injectées et la fermeture des descripteurs.
+The tests create fixtures only under an explicit project root and use real
+filesystem operations, including no-replace renaming. They check bytes, links,
+collisions, injected concurrent writes and descriptor closing.
 
 ```sh
 PYTHONDONTWRITEBYTECODE=1 \
@@ -172,19 +172,18 @@ FOLDGPT_LEGACY_TEST_ROOT=/chemin/absolu/FoldGPT/work/legacy-projects-tests \
 python3 /chemin/absolu/FoldGPT/tools/runtime/legacy-projects/test_relocate.py
 ```
 
-Le dossier de test doit déjà exister, se trouver sous le projet et être sur un
-système de fichiers Linux offrant les primitives requises. WSL `/mnt/c` (DrvFS)
-a refusé `renameat2(NOREPLACE)` avec `EINVAL` et `mkfifo` avec `EOPNOTSUPP` dans le
-premier essai : ces erreurs ne sont pas converties en succès. La qualification
-Linux PC ne vaut pas qualification Android ; celle-ci reste distincte de la
-preuve de reprise d’une vraie conversation via l’interface.
+The test folder must already exist, be inside the project and be on a Linux
+filesystem that offers the required primitives. WSL `/mnt/c` (DrvFS) rejected
+`renameat2(NOREPLACE)` with `EINVAL` and `mkfifo` with `EOPNOTSUPP` in the
+first attempt: these errors are not turned into success. Linux PC qualification
+is not Android qualification; the latter remains separate from proving that a
+real conversation resumes through the interface.
 
-Le 8 septembre 2026, **20 tests ont réussi** sous WSL Ubuntu 24.04, uid 1000,
-sur une image ext4 de 64 Mio créée dans `work/legacy-projects-tests`, montée
-uniquement dans ce même dossier puis démontée. Résultat, commande et empreintes
-des sources : preuve Linux (`../../../recovery/verification/legacy-projects-20260908/linux-tests.json`)
-et sortie complète (`../../../recovery/verification/legacy-projects-20260908/linux-tests.log`).
-Les originaux restent sous `work/legacy-projects-tests`. Ces tests
-incluent les erreurs natives, l’échec de synchronisation après publication et une
-modification concurrente du contenu publié. Aucun test téléphone n’a été réalisé
-par cet outil à ce stade.
+On 8 September 2026, **20 tests passed** under WSL Ubuntu 24.04, uid 1000, on a
+64 MiB ext4 image created in `work/legacy-projects-tests`, mounted only inside
+that same folder and then unmounted. Result, command and source fingerprints:
+Linux proof (`../../../recovery/verification/legacy-projects-20260908/linux-tests.json`)
+and full output (`../../../recovery/verification/legacy-projects-20260908/linux-tests.log`).
+The originals stay under `work/legacy-projects-tests`. These tests include
+native errors, sync failure after publication and a concurrent modification of
+the published content. No phone test has been run with this tool at this stage.
