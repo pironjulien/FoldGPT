@@ -12,6 +12,7 @@ Your projects and tools on the phone. No root or bootloader unlock required.
 [![Stars](https://img.shields.io/github/stars/pironjulien/FoldGPT?style=flat-square&color=D7B56D)](https://github.com/pironjulien/FoldGPT/stargazers)
 [![OpenAI Codex](https://img.shields.io/badge/OpenAI-Codex%20Desktop-412991?style=flat-square&logo=openai&logoColor=white)](https://github.com/pironjulien/FoldGPT)
 [![License](https://img.shields.io/badge/license-GPL--3.0--or--later-D7B56D?style=flat-square)](LICENSE)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/pironjulien/FoldGPT/badge)](https://scorecard.dev/viewer/?uri=github.com/pironjulien/FoldGPT)
 [![Contributions welcome](https://img.shields.io/badge/contributions-welcome-58616E?style=flat-square)](CONTRIBUTING.md)
 
 **[Explore the website](https://julienpiron.fr/foldgpt/)** · **[Documentation](docs/README.md)** · **[Release](https://github.com/pironjulien/FoldGPT/releases/tag/v0.2.0-alpha.1)** · **[Discussions](https://github.com/pironjulien/FoldGPT/discussions)**

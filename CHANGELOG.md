@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-20 — Supply-chain hardening
+
+- Checkout without persisted credentials; GitHub Actions stay pinned by commit SHA; zizmor clean
+  (vendored upstream workflows, which never run here, are ignored in `.github/zizmor.yml`).
+- Dependabot for GitHub Actions with a 7-day cooldown; OpenSSF Scorecard workflow and README badge.
+
 ## 2026-10-14 — OpenAI Codex upstream alignment & documentation badges
 
 - Add OpenAI Codex Desktop and repository stargazer badges to primary documentation.

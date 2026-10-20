@@ -1,0 +1,13 @@
+# Dependabot: weekly updates of the pinned GitHub Actions (SHA + version comment) and of the project's dependencies.
+# A 7-day cooldown lets a compromised release be caught before it is proposed (zizmor dependabot-cooldown).
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+    groups:
+      actions:
+        patterns: ["*"]

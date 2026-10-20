@@ -1,0 +1,12 @@
+# zizmor: findings in vendored upstream sources (vendor/termux-x11 and its libepoxy submodule) are ignored.
+# GitHub only runs the workflows of this repository's root .github/; these copies never run here.
+# Root files have other names, except dependabot.yml, which is ignored only at the vendored lines.
+rules:
+  unpinned-uses:
+    ignore: [debug_build.yml, update-wrapper.yml, linux.yml, macos.yml, msvc-env.yml, msys2.yml]
+  excessive-permissions:
+    ignore: [debug_build.yml, update-wrapper.yml, linux.yml, macos.yml, msvc-env.yml, msys2.yml]
+  artipacked:
+    ignore: [debug_build.yml, update-wrapper.yml, linux.yml, macos.yml, msvc-env.yml, msys2.yml]
+  dependabot-cooldown:
+    ignore: ["dependabot.yml:3", "dependabot.yml:8"]
