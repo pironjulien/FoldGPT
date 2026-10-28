@@ -19,7 +19,7 @@ jobs:
         with:
           python-version: '3.12'
       - name: Install host test dependencies
-        run: python -m pip install -r tools/ci/requirements-host.txt
+        run: python -m pip install --require-hashes -r tools/ci/requirements-host.txt
       - name: Source export integrity
         run: python tools/ci/check-source-integrity.py
       - name: Python syntax

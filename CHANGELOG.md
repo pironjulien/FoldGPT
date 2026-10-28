@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-10-28 — CI dependency pinning
+
+- Host test dependency `websockets` pinned by SHA-256 hashes; CI and docs install with `pip --require-hashes`.
+
 ## 2026-10-20 — Supply-chain hardening
 
 - Checkout without persisted credentials; GitHub Actions stay pinned by commit SHA; zizmor clean

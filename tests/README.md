@@ -12,7 +12,7 @@ account. Windows contributors can use Python inside WSL.
 
 ```sh
 python3 -m venv work/host-venv
-work/host-venv/bin/python -m pip install -r tools/ci/requirements-host.txt
+work/host-venv/bin/python -m pip install --require-hashes -r tools/ci/requirements-host.txt
 work/host-venv/bin/python tools/ci/run-host-tests.py
 ```
 
