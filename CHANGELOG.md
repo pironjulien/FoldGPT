@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-10-31 — Scorecard and CodeQL removed
+
+- OpenSSF Scorecard (workflow and README badge) and GitHub CodeQL analysis removed; the CI checks and Dependabot remain.
+
 ## 2026-10-28 — CI dependency pinning
 
 - Host test dependency `websockets` pinned by SHA-256 hashes; CI and docs install with `pip --require-hashes`.
