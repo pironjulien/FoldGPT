@@ -1,0 +1,48 @@
+// Security floors for transitive build-tool dependencies (AGP, its Unified Test
+// Platform and the Kotlin Gradle plugin it brings). Applied from settings.gradle
+// so build-script classpaths and project configurations are both covered.
+// Substitution happens before resolution: the vulnerable versions are never
+// fetched, so they never enter gradle/verification-metadata.xml either.
+def floors = [
+    'io.netty'                     : '4.1.140.Final',
+    'org.bouncycastle'             : '1.86',
+    'org.jetbrains.kotlin'         : '2.4.21',
+    'com.google.guava:guava'       : '33.8.0-jre',
+    'org.bitbucket.b_c:jose4j'     : '0.9.7',
+    'org.jdom:jdom2'               : '2.0.6.1',
+    'org.apache.commons:commons-lang3'      : '3.21.0',
+    'org.apache.httpcomponents:httpclient'  : '4.5.14',
+]
+
+def floorFor = { ModuleVersionSelector requested ->
+    def floor = floors["${requested.group}:${requested.name}"] ?: floors[requested.group]
+    if (floor == null || requested.version == null) return null
+    // Only the 4.1 line of Netty is floored; tcnative and other lines are versioned apart.
+    if (requested.group == 'io.netty' && !requested.version.startsWith('4.1.')) return null
+    def numbers = { String version -> version.findAll(/\d+/)*.toInteger() }
+    def have = numbers(requested.version)
+    def want = numbers(floor)
+    for (int i = 0; i < Math.max(have.size(), want.size()); i++) {
+        int a = i < have.size() ? have[i] : 0
+        int b = i < want.size() ? want[i] : 0
+        if (a != b) return a < b ? floor : null
+    }
+    null
+}
+
+def applyFloors = { ConfigurationContainer configurations ->
+    configurations.configureEach {
+        resolutionStrategy.eachDependency { DependencyResolveDetails details ->
+            def floor = floorFor(details.requested)
+            if (floor != null) {
+                details.useVersion(floor)
+                details.because('Security floor (tools/executor/dependency-floors.gradle)')
+            }
+        }
+    }
+}
+
+gradle.allprojects { project ->
+    applyFloors(project.buildscript.configurations)
+    applyFloors(project.configurations)
+}

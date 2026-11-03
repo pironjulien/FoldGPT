@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-11-03
+
+- `prototype-Cargo.lock`: tokio 1.53.1 → 1.53.3 (RUSTSEC-2026-0386). Upstream
+  source hashes and patch unchanged; both `--locked` validations pass.
+
 ## 2026-09-07
 
 - Documented the real local Android backend integration boundary at Codex

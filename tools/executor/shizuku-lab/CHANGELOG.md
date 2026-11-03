@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-11-03
+
+- Build-tool dependency security floors applied from `../dependency-floors.gradle`;
+  `gradle/verification-metadata.xml` regenerated without the vulnerable Netty,
+  Bouncy Castle, Kotlin Gradle plugin, Guava, jose4j, jdom2, commons-lang3 and
+  httpclient versions. Builds pass with strict verification.
+
 ## 2026-09-07
 
 - Version10 hosts the authenticated stdio bootstrap with PrivateSessionOwner.

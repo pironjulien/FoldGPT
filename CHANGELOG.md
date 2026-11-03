@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-11-03 — Vulnerable build-tool dependencies removed
+
+- Shizuku lab/service Gradle builds: security floors in `tools/executor/dependency-floors.gradle`
+  lift AGP's transitive build-tool dependencies before resolution (Netty 4.1.140, Bouncy Castle 1.86,
+  Kotlin Gradle plugin 2.4.21, Guava 33.8.0, jose4j 0.9.7, jdom2 2.0.6.1, commons-lang3 3.21.0,
+  httpclient 4.5.14); both `gradle/verification-metadata.xml` files regenerated. OSV-Scanner: 0 known
+  vulnerabilities (was 51 advisories).
+- PTY prototype lock: tokio 1.53.1 → 1.53.3 (RUSTSEC-2026-0386); upstream provenance at codex
+  rust-v0.153.4 unchanged, owned-driver tests and Android ARM64 check pass with `--locked`.
+
 ## 2026-10-31 — Scorecard and CodeQL removed
 
 - OpenSSF Scorecard (workflow and README badge) and GitHub CodeQL analysis removed; the CI checks and Dependabot remain.
