@@ -10,6 +10,10 @@
 - PTY prototype lock: tokio 1.53.1 → 1.53.3 (RUSTSEC-2026-0386); upstream provenance at codex
   rust-v0.153.4 unchanged, owned-driver tests and Android ARM64 check pass with `--locked`.
 
+## 2026-10-31 — Scorecard and CodeQL restored
+
+- The same evening, OpenSSF Scorecard (workflow and README badge) and GitHub CodeQL analysis (default setup) are back and stay on.
+
 ## 2026-10-31 — Scorecard and CodeQL removed
 
 - OpenSSF Scorecard (workflow and README badge) and GitHub CodeQL analysis removed; the CI checks and Dependabot remain.
