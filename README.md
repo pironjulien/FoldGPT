@@ -1,51 +1,73 @@
 <div align="center">
 
-![FoldGPT — The desktop workspace that unfolds.](docs/assets/foldgpt-banner.svg)
+<a href="https://julienpiron.fr/foldgpt/"><img src="docs/assets/foldgpt-banner.svg" alt="FoldGPT — The desktop workspace that unfolds."></a>
 
-### ChatGPT Desktop. Codex. A real workspace. On your Fold.
+# FoldGPT
 
-The Linux ARM64 desktop client, running locally on Android.<br>
+**The desktop. Pocket-sized.**
+
+ChatGPT Desktop and Codex on your Galaxy Z Fold: the Linux ARM64 desktop client, running locally on Android.<br>
 Your projects and tools on the phone. No root or bootloader unlock required.
 
 [![Source alpha](https://img.shields.io/badge/release-v0.2.0--alpha.1-D7B56D?style=flat-square)](https://github.com/pironjulien/FoldGPT/releases/tag/v0.2.0-alpha.1)
-[![Public checks](https://github.com/pironjulien/FoldGPT/actions/workflows/public-checks.yml/badge.svg)](https://github.com/pironjulien/FoldGPT/actions/workflows/public-checks.yml)
+[![Public checks](https://img.shields.io/github/actions/workflow/status/pironjulien/FoldGPT/public-checks.yml?branch=main&style=flat-square&label=public%20checks)](https://github.com/pironjulien/FoldGPT/actions/workflows/public-checks.yml)
+[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/pironjulien/FoldGPT/badge)](https://scorecard.dev/viewer/?uri=github.com/pironjulien/FoldGPT)
 [![Stars](https://img.shields.io/github/stars/pironjulien/FoldGPT?style=flat-square&color=D7B56D)](https://github.com/pironjulien/FoldGPT/stargazers)
 [![OpenAI Codex](https://img.shields.io/badge/OpenAI-Codex%20Desktop-412991?style=flat-square&logo=openai&logoColor=white)](https://github.com/pironjulien/FoldGPT)
 [![License](https://img.shields.io/badge/license-GPL--3.0--or--later-D7B56D?style=flat-square)](LICENSE)
 [![Contributions welcome](https://img.shields.io/badge/contributions-welcome-58616E?style=flat-square)](CONTRIBUTING.md)
 
-**[Explore the website](https://julienpiron.fr/foldgpt/)** · **[Documentation](docs/README.md)** · **[Release](https://github.com/pironjulien/FoldGPT/releases/tag/v0.2.0-alpha.1)** · **[Discussions](https://github.com/pironjulien/FoldGPT/discussions)**
+**[🌐 Website](https://julienpiron.fr/foldgpt/)** · **[📖 Documentation](docs/README.md)** · **[📦 Release](https://github.com/pironjulien/FoldGPT/releases/tag/v0.2.0-alpha.1)** · **[💬 Discussions](https://github.com/pironjulien/FoldGPT/discussions)** · **[📝 Changelog](CHANGELOG.md)**
 
 </div>
 
-## A desktop workspace that fits in your pocket
+<div align="center">
+<a href="https://julienpiron.fr/foldgpt/#captures"><img src="site/assets/codex-desktop-anonymized.png" width="820" alt="Codex on FoldGPT, with account details anonymized"></a>
+<br><sub>Codex on the Fold, with account details anonymized · <a href="https://julienpiron.fr/foldgpt/#captures">explore the gallery</a> · <a href="site/assets/MEDIA-NOTICES.md">image credits</a></sub>
+</div>
 
-FoldGPT brings the ChatGPT desktop experience and Codex to the inner screen of a Galaxy Z Fold. Open a project, work with real files, run development tools, and create documents from the same desktop workspace — hosted on the phone.
+## ✨ Why FoldGPT
 
-The Android app combines an embedded display, a Linux compatibility environment, and a native command executor. The desktop runs locally; **model requests still use OpenAI’s online services**. No streamed desktop or separate remote computer is needed for the demonstrated runtime.
+FoldGPT brings the ChatGPT desktop experience and Codex to the inner screen of a Galaxy Z Fold. Open a project, work
+with real files, run development tools, and create documents from the same desktop workspace — hosted on the phone.
 
-> **Source alpha for contributors.** This release opens the host and integration code for inspection and development. It does not include a consumer APK, a Linux image, or the proprietary ChatGPT client. Start with the [compatibility matrix](docs/compatibility.md) and [build guide](docs/build.md).
+<table>
+<tr>
+<td width="33%">🖥️ <b>Desktop ChatGPT & Codex</b><br>A desktop surface rendered locally on the inner display, with touch and Android keyboard integration.</td>
+<td width="33%">📁 <b>Real project files</b><br>Conversations that inspect, create, and edit files in a workspace stored on the device.</td>
+<td width="33%">🧰 <b>Developer tools</b><br>ARM64 command execution, with selected Python, Node, and Git workflows demonstrated on the development Fold.</td>
+</tr>
+<tr>
+<td width="33%">📄 <b>Document production</b><br>Local tools for Word, PowerPoint, spreadsheets, and PDFs, including exercised creation and readback workflows.</td>
+<td width="33%">📱 <b>Android integration</b><br>A host service, input bridge, and display lifecycle designed around Android and folding posture.</td>
+<td width="33%">🔓 <b>An open foundation</b><br>Source, compatibility adapters, checks, and engineering documentation that contributors can inspect and improve.</td>
+</tr>
+</table>
 
-## What it brings to the Fold
+The desktop runs locally; **model requests still use OpenAI’s online services**. No streamed desktop or separate remote
+computer is needed for the demonstrated runtime. Read the [product overview](docs/overview.md) for the experience and
+the [workspace tools guide](docs/workspace-dependencies.md) for supported document workflows.
 
-| | Capability | What it enables |
-| :--- | :--- | :--- |
-| **01** | **Desktop ChatGPT & Codex** | A desktop surface rendered locally on the inner display, with touch and Android keyboard integration. |
-| **02** | **Real project files** | Conversations that inspect, create, and edit files in a workspace stored on the device. |
-| **03** | **Developer tools** | ARM64 command execution, with selected Python, Node, and Git workflows demonstrated on the development Fold. |
-| **04** | **Document production** | Local tools for Word, PowerPoint, spreadsheets, and PDFs, including exercised creation and readback workflows. |
-| **05** | **Android integration** | A host service, input bridge, and display lifecycle designed around Android and folding posture. |
-| **06** | **An open foundation** | Source, compatibility adapters, checks, and engineering documentation that contributors can inspect and improve. |
+## 🚀 Quick start
 
-Read the [product overview](docs/overview.md) for the experience and the [workspace tools guide](docs/workspace-dependencies.md) for supported document workflows.
+> [!IMPORTANT]
+> **Source alpha for contributors.** This release opens the host and integration code for inspection and development.
+> It does not include a consumer APK, a Linux image, or the proprietary ChatGPT client. Start with the
+> [compatibility matrix](docs/compatibility.md) and [build guide](docs/build.md).
 
-## See the real interface
+```sh
+git clone https://github.com/pironjulien/FoldGPT.git
+cd FoldGPT
+```
 
-[![Codex on FoldGPT, with account details anonymized](site/assets/codex-desktop-anonymized.png)](https://julienpiron.fr/foldgpt/#captures)
+The repository includes vendored Termux:X11 and PRoot sources. No recursive submodule initialization is required for
+this source release.
 
-*Codex on the Fold, with account details anonymized. [Explore the gallery](https://julienpiron.fr/foldgpt/#captures) · [Image credits](site/assets/MEDIA-NOTICES.md).*
+1. **Understand the scope:** read [overview](docs/overview.md) and [compatibility](docs/compatibility.md).
+2. **Prepare a development build:** follow [build prerequisites, runtime inputs, and signing](docs/build.md). Runtime packages and the official client are separate inputs.
+3. **Choose a contribution:** consult the [roadmap](docs/roadmap.md), open an [issue](https://github.com/pironjulien/FoldGPT/issues), or join a [discussion](https://github.com/pironjulien/FoldGPT/discussions).
 
-## How it works
+## ⚙️ How it works
 
 ```mermaid
 flowchart LR
@@ -56,20 +78,16 @@ flowchart LR
     D --> F["On-device workspace<br>Code · documents · outputs"]
 ```
 
-FoldGPT runs under its own Android application UID. PRoot provides the Linux userspace compatibility; it does not provide full desktop Linux sandbox isolation. The integration includes a **version-specific client adapter**, so compatibility must be checked when the upstream client changes. See [architecture](docs/architecture.md) and [security](SECURITY.md).
+The Android app combines an embedded display, a Linux compatibility environment, and a native command executor.
 
-## Start exploring
+> [!NOTE]
+> FoldGPT runs under its own Android application UID. PRoot provides the Linux userspace compatibility; it does not
+> provide full desktop Linux sandbox isolation. The integration includes a **version-specific client adapter**, so
+> compatibility must be checked when the upstream client changes. See [architecture](docs/architecture.md) and
+> [security](SECURITY.md).
 
-```sh
-git clone https://github.com/pironjulien/FoldGPT.git
-cd FoldGPT
-```
-
-The repository includes vendored Termux:X11 and PRoot sources. No recursive submodule initialization is required for this source release.
-
-1. **Understand the scope:** read [overview](docs/overview.md) and [compatibility](docs/compatibility.md).
-2. **Prepare a development build:** follow [build prerequisites, runtime inputs, and signing](docs/build.md). Runtime packages and the official client are separate inputs.
-3. **Choose a contribution:** consult the [roadmap](docs/roadmap.md), open an [issue](https://github.com/pironjulien/FoldGPT/issues), or join a [discussion](https://github.com/pironjulien/FoldGPT/discussions).
+<details>
+<summary><b>Repository map</b></summary>
 
 | Explore | Start here |
 | :--- | :--- |
@@ -84,34 +102,61 @@ The repository includes vendored Termux:X11 and PRoot sources. No recursive subm
 
 See the [repository layout](docs/project-layout.md) for source organization and local build outputs.
 
-## Where the alpha stands
+</details>
 
-The development Fold has demonstrated the desktop interface, local file and command operations, touch and keyboard input, and selected document workflows. The next milestones focus on **reproducible packaging, clean installation, and sustained runtime reliability**.
+## 🧪 Where the alpha stands
 
-- **Android process pressure:** the observed phantom-process budget is shared across monitored child processes. Additional app packages do not multiply it. Process lifecycle and resource use remain active engineering work.
-- **Session continuity:** extended background use, folding during active work, and several active conversations still need sustained qualification.
-- **Distribution and updates:** a ready-to-install public APK, automatic client updates, and Remote are not qualified in this release.
-- **Device scope:** development currently targets the Galaxy Z Fold 8; other devices need their own validation.
+The development Fold has demonstrated the desktop interface, local file and command operations, touch and keyboard
+input, and selected document workflows. The next milestones focus on **reproducible packaging, clean installation, and
+sustained runtime reliability**.
 
-No root or bootloader unlock is required. The development phone was observed with a locked bootloader, verified boot green, and Knox warranty bit `0`. The maintainer confirms Samsung Pay is working on this Fold. Display refresh rate is also distinct from measured application frame rate. The [compatibility guide](docs/compatibility.md) explains the device scope and remaining limitations.
+> [!WARNING]
+> - **Android process pressure:** the observed phantom-process budget is shared across monitored child processes. Additional app packages do not multiply it. Process lifecycle and resource use remain active engineering work.
+> - **Session continuity:** extended background use, folding during active work, and several active conversations still need sustained qualification.
+> - **Distribution and updates:** a ready-to-install public APK, automatic client updates, and Remote are not qualified in this release.
+> - **Device scope:** development currently targets the Galaxy Z Fold 8; other devices need their own validation.
 
-## Build it with us
+No root or bootloader unlock is required. The development phone was observed with a locked bootloader, verified boot
+green, and Knox warranty bit `0`. The maintainer confirms Samsung Pay is working on this Fold. Display refresh rate is
+also distinct from measured application frame rate. The [compatibility guide](docs/compatibility.md) explains the
+device scope and remaining limitations.
 
-**Yes — anyone can propose improvements.** Fork the repository, open a focused pull request, or share an idea in Discussions. Maintainers review and merge contributions; you do not need write access to participate.
+## 🤝 Build it with us
 
-Useful areas include Android lifecycle, process efficiency, packaging, graphics, input, accessibility, documentation, and reproducible device testing. Independent simultaneous conversations remain a product requirement.
+**Yes — anyone can propose improvements.** Fork the repository, open a focused pull request, or share an idea in
+Discussions. Maintainers review and merge contributions; you do not need write access to participate.
 
-Read [contributing](CONTRIBUTING.md) before a change and use [private vulnerability reporting](SECURITY.md) for security issues.
+Useful areas include Android lifecycle, process efficiency, packaging, graphics, input, accessibility, documentation,
+and reproducible device testing. Independent simultaneous conversations remain a product requirement.
+
+Read [contributing](CONTRIBUTING.md) before a change. More answers in the [FAQ](docs/faq.md).
+
+## 🔒 Privacy & security
+
+Commands, rendering, and documents run on the device; account and model requests go to OpenAI's online services. Use a
+controlled test workspace with non-sensitive data while evaluating the alpha, and use
+[private vulnerability reporting](SECURITY.md) for security issues.
 
 ## Credits & licensing
 
-A project by **[julienpiron.fr](https://julienpiron.fr/)**. Built on work from the Termux:X11, PRoot, Debian, Mesa, and Android communities. Upstream code retains its own license and notices.
+A project by **[julienpiron.fr](https://julienpiron.fr/)**. Built on work from the Termux:X11, PRoot, Debian, Mesa, and
+Android communities. Upstream code retains its own license and notices.
 
-FoldGPT’s host and integration code are **GPL-3.0-or-later**. The ChatGPT client is a separate proprietary dependency, obtained from OpenAI. FoldGPT is an independent interoperability project and is not affiliated with, endorsed by, or distributed by OpenAI or Samsung. See [LICENSE](LICENSE), [LEGAL](LEGAL.md), and [third-party notices](THIRD_PARTY_NOTICES.md).
+FoldGPT’s host and integration code are **GPL-3.0-or-later**. The ChatGPT client is a separate proprietary dependency,
+obtained from OpenAI. FoldGPT is an independent interoperability project and is not affiliated with, endorsed by, or
+distributed by OpenAI or Samsung. See [LICENSE](LICENSE), [LEGAL](LEGAL.md), and
+[third-party notices](THIRD_PARTY_NOTICES.md).
+
+---
 
 <div align="center">
 
-**Unfold your workspace.**<br>
-[Website](https://julienpiron.fr/foldgpt/) · [Roadmap](docs/roadmap.md) · [Changelog](CHANGELOG.md) · [FAQ](docs/faq.md)
+### More from Julien Piron
+
+**[NexusSystem](https://github.com/pironjulien/NexusSystem)** · [julienpiron.fr](https://julienpiron.fr/) · [GitHub](https://github.com/pironjulien)
+
+<sub>Built in France 🇫🇷 by <a href="https://github.com/pironjulien">Julien Piron</a></sub>
 
 </div>
+
+License: [GPL-3.0-or-later](LICENSE).
